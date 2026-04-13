@@ -75,12 +75,15 @@ class OmniAutoAgent:
         t = text.lower()
         if any(k in t for k in ("状态", "结果", "怎么样", "失败了吗", "完成了吗", "队列")):
             return "query_status"
-        if any(k in t for k in ("定时", "每天", "每周", "每隔", "schedule", "cron")):
-            return "schedule"
         if any(k in t for k in ("列出定时任务", "有哪些定时", "list scheduled")):
             return "list_schedules"
         if any(k in t for k in ("有哪些步骤", "支持什么操作", "list steps", "list available")):
             return "list_steps"
+        if any(k in t for k in ("每天", "每周", "每隔", "schedule", "cron")):
+            return "schedule"
+        # "定时任务"单独出现时若无创建关键词，则视为查询（已在上面 list_schedules 处理）
+        if any(k in t for k in ("创建定时", "新建定时", "添加定时", "安排定时")):
+            return "schedule"
         return "task"
 
     # ------------------------------------------------------------------
