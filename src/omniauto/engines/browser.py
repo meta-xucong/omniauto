@@ -79,12 +79,18 @@ class StealthBrowser:
         await self._page.goto(url, wait_until=wait_until)
 
     async def click(self, selector: str, delay: Optional[tuple[float, float]] = None) -> None:
-        """点击元素，支持随机延迟."""
+        """点击元素，支持随机延迟。若标准 API 因可见性失败，降级到 DOM 操作."""
         if self._page is None:
             raise RuntimeError("浏览器未启动")
         if delay:
             await asyncio.sleep(random.uniform(*delay))
-        await self._page.click(selector)
+        try:
+            await self._page.click(selector)
+        except Exception:
+            await self._page.evaluate(f'''
+                const el = document.querySelector("{selector.replace('"', '\\"')}");
+                if (el) el.click();
+            ''')
 
     async def type_text(
         self,
@@ -93,14 +99,20 @@ class StealthBrowser:
         interval: tuple[float, float] = (0.05, 0.15),
         clear: bool = True,
     ) -> None:
-        """在元素中输入文本，模拟人类打字节奏."""
+        """在元素中输入文本，模拟人类打字节奏。若标准 API 因可见性失败，降级到 DOM 操作."""
         if self._page is None:
             raise RuntimeError("浏览器未启动")
-        if clear:
-            await self._page.fill(selector, "")
-        # browser-use / playwright 的 type 支持 delay 参数，取平均值
-        avg_delay = (interval[0] + interval[1]) * 1000 / 2
-        await self._page.type(selector, text, delay=avg_delay)
+        try:
+            if clear:
+                await self._page.fill(selector, "")
+            avg_delay = (interval[0] + interval[1]) * 1000 / 2
+            await self._page.type(selector, text, delay=avg_delay)
+        except Exception:
+            safe_text = text.replace('\\', '\\\\').replace('"', '\\"').replace("\n", '\\n')
+            await self._page.evaluate(f'''
+                const el = document.querySelector("{selector.replace('"', '\\"')}");
+                if (el) {{ el.value = "{safe_text}"; el.dispatchEvent(new Event('input', {{ bubbles: true }})); }}
+            ''')
 
     async def extract_text(self, selector: str) -> str:
         """提取元素的文本内容."""

@@ -71,6 +71,11 @@ class ScriptGenerator:
                 lines.append(f'    await browser.goto("{step.get("url")}")')
             elif stype == "click":
                 lines.append(f'    await browser.click("{step.get("selector")}")')
+            elif stype == "hotkey":
+                keys = step.get("keys", [])
+                key_args = ', '.join(f'"{k}"' for k in keys)
+                lines.append(f'    page = browser.page')
+                lines.append(f'    await page.keyboard.press({key_args})')
             elif stype == "type":
                 lines.append(
                     f'    await browser.type_text("{step.get("selector")}", '

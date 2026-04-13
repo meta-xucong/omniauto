@@ -30,7 +30,7 @@ class TaskPlanner:
         urls = re.findall(r'https?://[^\s\u3002\uff0c]+', description)
         if urls:
             steps.append({"type": "navigate", "url": urls[0]})
-        elif any(k in desc for k in ("百度", "淘宝", "京东", "打开浏览器", "登录", "访问")):
+        elif any(k in desc for k in ("百度", "淘宝", "京东", "谷歌", "google", "打开浏览器", "登录", "访问")):
             # 常见站点兜底
             if "百度" in desc:
                 steps.append({"type": "navigate", "url": "https://www.baidu.com"})
@@ -38,14 +38,19 @@ class TaskPlanner:
                 steps.append({"type": "navigate", "url": "https://www.taobao.com"})
             elif "京东" in desc:
                 steps.append({"type": "navigate", "url": "https://www.jd.com"})
+            elif "谷歌" in desc or "google" in desc:
+                steps.append({"type": "navigate", "url": "https://www.google.com"})
 
         # 2. 输入操作
         if any(k in desc for k in ("输入", "填写", "搜索")):
             steps.append({"type": "type", "selector": "input", "text": "sample"})
 
-        # 3. 点击操作
+        # 3. 点击操作 / 提交操作
         if any(k in desc for k in ("点击", "提交", "登录", "搜索", "确定")):
-            steps.append({"type": "click", "selector": "button"})
+            if "google" in desc or "谷歌" in desc:
+                steps.append({"type": "hotkey", "keys": ["Enter"]})
+            else:
+                steps.append({"type": "click", "selector": "button"})
 
         # 4. 截图
         if "截图" in desc or "保存" in desc:

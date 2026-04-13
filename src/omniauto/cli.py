@@ -14,6 +14,7 @@ from .orchestration.generator import ScriptGenerator
 from .orchestration.validator import ScriptValidator
 from .orchestration.guardian import GuardianNode
 from .utils.logger import get_logger
+from .agent_runtime import OmniAutoAgent
 
 logger = get_logger("omniauto.cli")
 
@@ -53,7 +54,7 @@ def validate(script_path: str) -> None:
 
 @cli.command()
 @click.option("--script", "-s", required=True, help="要执行的脚本路径")
-@click.option("--headless", is_flag=True, help="无头模式运行浏览器")
+@click.option("--headless/--no-headless", default=True, help="是否使用无头模式（默认开启）")
 @click.option("--task-id", help="指定任务 ID（用于断点续传）")
 @click.option("--notify", help="任务完成后发送通知（预留）")
 def run(script: str, headless: bool, task_id: str, notify: str) -> None:
@@ -113,6 +114,33 @@ def demo(headless: bool) -> None:
             await browser.close()
 
     asyncio.run(_demo())
+
+
+@cli.command()
+@click.option("--host", default="127.0.0.1", help="绑定地址")
+@click.option("--port", default=8000, help="端口")
+def api(host: str, port: int) -> None:
+    """启动 FastAPI REST API 服务."""
+    import uvicorn
+    from .api import app
+    uvicorn.run(app, host=host, port=port)
+
+
+@cli.command()
+@click.argument("description")
+@click.option("--headless/--no-headless", default=True, help="是否使用无头模式（默认开启）")
+def agent(description: str, headless: bool) -> None:
+    """通过 Agent Runtime 直接执行自然语言指令."""
+    async def _agent():
+        omni_agent = OmniAutoAgent(headless=headless)
+        result = await omni_agent.process(description)
+        click.echo(f"[RESULT] {'成功' if result.success else '失败'}: {result.message}")
+        if result.data:
+            click.echo("[DATA] 输出数据:")
+            for k, v in result.data.items():
+                click.echo(f"  {k}: {v}")
+
+    asyncio.run(_agent())
 
 
 async def _run_script(script_path: str, headless: bool, task_id: Optional[str] = None) -> None:
