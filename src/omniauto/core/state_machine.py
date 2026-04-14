@@ -5,13 +5,14 @@
 
 import asyncio
 import json
+import random
 import sqlite3
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum, auto
 from pathlib import Path
-from typing import Any, Awaitable, Callable, Dict, List, Optional, Set, Tuple
+from typing import Any, Awaitable, Callable, Dict, List, Optional, Set, Tuple, Union
 
 from .context import StepResult, TaskContext
 from .exceptions import GuardianBlockedError, ValidationError
@@ -212,12 +213,17 @@ class Workflow:
         guardian_points: Optional[Set[int]] = None,
         store: Optional[StateStore] = None,
         auto_reset_on_completed: bool = True,
+        inter_step_delay: Union[Tuple[float, float], float] = 0.0,
     ) -> None:
         self.task_id = task_id or str(uuid.uuid4())
         self.steps = steps or []
         self.guardian_points = set(guardian_points or [])
         self.store = store or StateStore()
         self.auto_reset_on_completed = auto_reset_on_completed
+        if isinstance(inter_step_delay, (int, float)):
+            self.inter_step_delay = (float(inter_step_delay), float(inter_step_delay))
+        else:
+            self.inter_step_delay = inter_step_delay
 
     def add_step(self, step: AtomicStep) -> "Workflow":
         """链式添加原子步骤."""
@@ -297,6 +303,10 @@ class Workflow:
                 # 理论上 AtomicStep 内部重试后应返回 ESCALATED，不会走到这里
                 final_state = TaskState.FAILED
                 break
+
+            # 步骤间随机冷却（默认 0，不影响现有行为）
+            if self.inter_step_delay[1] > 0 and idx < len(self.steps) - 1:
+                await asyncio.sleep(random.uniform(self.inter_step_delay[0], self.inter_step_delay[1]))
 
         if final_state == TaskState.COMPLETED and self.auto_reset_on_completed:
             self.store.save_workflow(self.task_id, TaskState.COMPLETED, len(self.steps), context.outputs.copy())

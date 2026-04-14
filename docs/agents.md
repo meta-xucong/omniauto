@@ -229,6 +229,28 @@ steps = [
 workflow = Workflow(steps, guardian_points=[4])  # 第4步前人工确认
 ```
 
+### 6.1 复杂任务执行策略（Deterministic RPA）
+
+对于需要浏览器操作的多步骤复杂任务（如"抓取某电商前 N 页并生成报告"），**禁止**在运行时让 AI 做视觉决策或实时思考。必须遵循以下固定模式：
+
+1. **URL 优先**：分析目标网站是否支持通过 URL 参数完成搜索、排序、翻页；能拼 URL 的绝不点击按钮。
+2. **模板生成**：使用 `omniauto.templating.generator.TemplateGenerator` 生成确定性 Workflow 脚本，而非手写 ad-hoc 代码。
+   - 电商商品调研 → `task_type="ecom_product_research"`
+   - 通用浏览器抓取 → `task_type="generic_browser_scrape"`
+3. **步骤拆分固定 4 步**：
+   - Step 1: 导航搜索页
+   - Step 2: 翻页抓取列表（每页后调用 `browser.throttle_request(4.0, 8.0)`）
+   - Step 3: 抽样详情页增强（间隔调用 `browser.cooldown(5.0, 10.0)`）
+   - Step 4: 数据清洗与报告生成
+4. **行为约束**：
+   - `Workflow.inter_step_delay` 必须设置为 `(2.0, 4.0)` 或更高
+   - 所有 DOM 选择器必须在脚本中硬编码
+   - 报告由 Jinja2 模板填充，禁止调用 LLM 生成文案
+
+相关资源：
+- 模板目录：`src/omniauto/templates/workflows/`
+- Skill 约定：`.agents/skills/deterministic-rpa-workflow/SKILL.md`
+
 ---
 
 ## 7. 安全审查清单

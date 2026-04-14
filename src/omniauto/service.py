@@ -110,6 +110,10 @@ class OmniAutoService:
         if task_id:
             workflow.task_id = task_id
 
+        # 默认启用步骤间冷却，降低电商平台连续操作被风控的概率
+        if workflow.inter_step_delay == (0.0, 0.0):
+            workflow.inter_step_delay = (1.5, 3.5)
+
         # 启动浏览器
         browser = await StealthBrowser(headless=headless).start()
         self._active_browser = browser

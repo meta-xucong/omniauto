@@ -1,0 +1,61 @@
+"""由 TemplateGenerator 生成的确定性 Workflow 脚本骨架.
+
+请在生成后填充具体的 URL 构造逻辑和 DOM 选择器。
+"""
+
+import asyncio
+import json
+from pathlib import Path
+from urllib.parse import quote
+
+from omniauto.core.state_machine import Workflow, AtomicStep
+from omniauto.core.context import TaskContext
+from omniauto.engines.browser import StealthBrowser
+
+
+def _safe_print(text: str) -> None:
+    try:
+        print(text)
+    except UnicodeEncodeError:
+        print(text.encode("gbk", "ignore").decode("gbk"))
+
+
+OUTPUT_DIR = Path("data/reports/{{ task_name }}")
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+
+async def step_navigate(ctx: TaskContext):
+    browser: StealthBrowser = ctx.browser_state["browser"]
+    # TODO: 构造确定性 URL
+    url = "https://example.com"
+    await browser.goto(url, wait_until="domcontentloaded")
+    return {"success": True}
+
+
+async def step_scrape(ctx: TaskContext):
+    browser: StealthBrowser = ctx.browser_state["browser"]
+    # TODO: 硬编码选择器提取数据
+    data = await browser.page.evaluate("""() => { return []; }""")
+    return {"success": True, "data": data}
+
+
+async def step_enrich(ctx: TaskContext):
+    browser: StealthBrowser = ctx.browser_state["browser"]
+    # TODO: 抽样进入详情页
+    return {"success": True}
+
+
+async def step_report(ctx: TaskContext):
+    # TODO: 生成报告
+    return {"success": True}
+
+
+workflow = Workflow(
+    steps=[
+        AtomicStep("s1_navigate", step_navigate, lambda r: r.get("success"), retry=3),
+        AtomicStep("s2_scrape", step_scrape, lambda r: r.get("success"), retry=2),
+        AtomicStep("s3_enrich", step_enrich, lambda r: r.get("success"), retry=2),
+        AtomicStep("s4_report", step_report, lambda r: r.get("success"), retry=2),
+    ],
+    inter_step_delay=(2.0, 4.0),
+)

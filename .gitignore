@@ -8,3 +8,18 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Data & outputs
+data/chrome_profile_1688/
+data/auth/
+data/logs/
+data/reports/
+data/no_captcha.png
+outputs/
+screenshots/
+
+# Cache / misc
+.pytest_cache/
+node_modules/
+*.tmp
+*.log
