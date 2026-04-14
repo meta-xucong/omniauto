@@ -94,15 +94,29 @@
 
 ```
 D:\AI\AI_RPA
-├── agents.md                 # 本文件
-├── requirements.md           # 需求规格说明书
-├── development.md            # 开发架构与实施指南
 ├── README.md                 # 项目说明（面向人类贡献者）
 ├── pyproject.toml            # 项目配置与依赖
+├── .gitignore
+├── .agents/                  # Agent Skill 上下文与模板资源
+│   └── skills/
+│       └── deterministic-rpa-workflow/
+│           ├── SKILL.md
+│           ├── assets/
+│           │   └── workflow-template.py.j2
+│           └── references/
+├── docs/                     # 项目文档
+│   ├── agents.md             # 本文件（AI 开发助手行为规范）
+│   ├── requirements.md       # 需求规格说明书
+│   ├── development.md        # 开发架构与实施指南
+│   ├── AI_AGENT_INTEGRATION.md
+│   └── USER_GUIDE_AI_MODE.md
 ├── src/
 │   └── omniauto/
 │       ├── __init__.py
 │       ├── cli.py            # CLI 入口
+│       ├── api.py            # FastAPI REST API
+│       ├── mcp_server.py     # MCP Server
+│       ├── service.py        # 核心业务服务
 │       ├── core/
 │       │   ├── __init__.py
 │       │   ├── state_machine.py   # 状态机核心
@@ -111,8 +125,10 @@ D:\AI\AI_RPA
 │       ├── engines/
 │       │   ├── __init__.py
 │       │   ├── browser.py         # Stealth Browser Engine
-│       │   ├── cdp.py             # CDP Connector
 │       │   └── visual.py          # Visual Fallback Engine
+│       ├── high_level/
+│       │   ├── browser_agent.py
+│       │   └── task_planner.py
 │       ├── orchestration/
 │       │   ├── __init__.py
 │       │   ├── generator.py       # AI 脚本生成器
@@ -124,18 +140,43 @@ D:\AI\AI_RPA
 │       │   ├── click.py
 │       │   ├── type.py
 │       │   ├── extract.py
-│       │   └── screenshot.py
+│       │   ├── screenshot.py
+│       │   ├── scroll.py
+│       │   ├── wait.py
+│       │   ├── hotkey.py
+│       │   └── visual_click.py
+│       ├── templates/          # Jinja2 工作流模板
+│       │   ├── workflows/
+│       │   │   └── ecom_product_research.py.j2
+│       │   └── reports/
+│       │       └── ecom_report.html.j2
+│       ├── templating/         # 模板渲染与注册
+│       │   ├── __init__.py
+│       │   ├── generator.py
+│       │   └── registry.py
 │       └── utils/
 │           ├── __init__.py
-│           ├── stealth.py      # 反检测配置与脚本
-│           ├── mouse.py        # 人类化鼠标移动
-│           └── logger.py       # 结构化日志
+│           ├── auth_manager.py  # 登录/验证码检测与人工介入
+│           ├── fingerprint.py   # 浏览器指纹与 Profile 轮换
+│           ├── stealth.py       # 反检测配置与脚本
+│           ├── mouse.py         # 人类化鼠标移动
+│           └── logger.py        # 结构化日志
 ├── tests/
 │   ├── unit/
 │   ├── integration/
 │   └── e2e/
-└── scripts/                    # 生成的原子脚本存储目录
-    └── .gitkeep
+├── scripts/                    # 脚本目录（已分类）
+│   ├── examples/               # 演示与场景脚本
+│   ├── tests/                  # 测试脚本
+│   ├── generated/              # 由模板生成的工作流脚本
+│   └── archive/                # 旧脚本归档
+├── data/
+│   ├── auth/                   # 认证凭据（如 taobao.com_auth.json）
+│   ├── chrome_profile_1688/    # 已登录的 1688 Chrome Profile
+│   ├── logs/                   # 运行日志
+│   └── reports/                # 任务报告产出
+├── outputs/                    # 运行时输出（Excel/Word/截图）
+└── tools/                      # 维护与诊断工具
 ```
 
 ---
