@@ -1,4 +1,4 @@
-﻿"""妗岄潰鑷姩鍖栵紙HardInput 鍏滃簳锛夛細鎵撳紑 WPS 鏂囧瓧锛岃緭鍏ュ叆鍏氱敵璇蜂功锛屼繚瀛樺埌妗岄潰骞跺叧闂?"""
+﻿"""桌面自动化（HardInput 兜底）：打开 WPS 文字，输入入党申请书，保存到桌面并关闭。"""
 
 import asyncio
 import ctypes
@@ -14,24 +14,24 @@ from omniauto.core.state_machine import AtomicStep, Workflow
 from omniauto.hard_input import HardInputEngine
 
 
-WPS_EXE = r"C:\Users\鍏拌惤钀界殑鏈湰\AppData\Local\Kingsoft\WPS Office\12.1.0.25865\office6\wps.exe"
+WPS_EXE = r"C:\Users\兰落落的本本\AppData\Local\Kingsoft\WPS Office\12.1.0.25865\office6\wps.exe"
 TEST_ARTIFACT_DIR = Path("test_artifacts/manual_wps")
 TEMP_DOCX = TEST_ARTIFACT_DIR / f"temp_party_app_{int(time.time())}.docx"
-SAVE_PATH = r"C:\Users\鍏拌惤钀界殑鏈湰\Desktop\鍏ュ厷鐢宠涔?docx"
+SAVE_PATH = r"C:\Users\兰落落的本本\Desktop\入党申请书.docx"
 
 APPLICATION_TEXT = (
-    "鍏ュ厷鐢宠涔n\n"
-    "鏁埍鐨勫厷缁勭粐锛歕n\n"
-    "    鎴戝織鎰垮姞鍏ヤ腑鍥藉叡浜у厷锛屾効鎰忎负鍏变骇涓讳箟浜嬩笟濂嬫枟缁堣韩銆?
-    "涓浗鍏变骇鍏氭槸涓浗宸ヤ汉闃剁骇鐨勫厛閿嬮槦锛屽悓鏃舵槸涓浗浜烘皯鍜屼腑鍗庢皯鏃忕殑鍏堥攱闃燂紝"
-    "鏄腑鍥界壒鑹茬ぞ浼氫富涔変簨涓氱殑棰嗗鏍稿績銆俓n\n"
-    "    鎴戜箣鎵€浠ヨ鍔犲叆涓浗鍏变骇鍏氾紝鏄洜涓烘垜娣变俊鍏变骇涓讳箟浜嬩笟鐨勫繀鐒舵垚鍔燂紝"
-    "娣变俊鍙湁绀句細涓讳箟鎵嶈兘鏁戜腑鍥斤紝鍙湁绀句細涓讳箟鎵嶈兘鍙戝睍涓浗銆俓n\n"
-    "    璇峰厷缁勭粐鍦ㄥ疄璺典腑鑰冮獙鎴戯紒\n\n"
-    "姝よ嚧\n"
-    "鏁ぜ锛乗n\n"
-    "鐢宠浜猴細XXX\n"
-    "2026骞?鏈?3鏃n"
+    "入党申请书\n\n"
+    "敬爱的党组织：\n\n"
+    "    我志愿加入中国共产党，愿意为共产主义事业奋斗终身。"
+    "中国共产党是中国工人阶级的先锋队，同时是中国人民和中华民族的先锋队，"
+    "是中国特色社会主义事业的领导核心。\n\n"
+    "    我之所以要加入中国共产党，是因为我深信共产主义事业的必然成功，"
+    "深信只有社会主义才能救中国，只有社会主义才能发展中国。\n\n"
+    "    请党组织在实践中考验我！\n\n"
+    "此致\n"
+    "敬礼！\n\n"
+    "申请人：XXX\n"
+    "2026年4月3日\n"
 )
 
 
@@ -43,7 +43,9 @@ def _create_blank_docx(path: str) -> None:
 
 def _find_wps_window() -> int:
     from ctypes import wintypes
+
     hwnd = None
+
     def foreach_window(h, lParam):
         nonlocal hwnd
         length = ctypes.windll.user32.GetWindowTextLengthW(h)
@@ -52,13 +54,13 @@ def _find_wps_window() -> int:
         if "docx" in buff.value.lower() and "wps" in buff.value.lower():
             hwnd = h
         return True
+
     EnumWindowsProc = ctypes.WINFUNCTYPE(ctypes.c_bool, wintypes.HWND, wintypes.LPARAM)
     ctypes.windll.user32.EnumWindows(EnumWindowsProc(foreach_window), 0)
     return hwnd
 
 
 def _focus_hwnd(hwnd: int) -> None:
-    from ctypes import wintypes
     user32 = ctypes.windll.user32
     kernel32 = ctypes.windll.kernel32
     current_thread = kernel32.GetCurrentThreadId()
@@ -75,7 +77,7 @@ def _focus_hwnd(hwnd: int) -> None:
 
 async def step_open_wps(ctx: TaskContext) -> StepResult:
     if not Path(WPS_EXE).exists():
-        return StepResult(success=False, error=f"WPS 鏈壘鍒? {WPS_EXE}")
+        return StepResult(success=False, error=f"WPS 未找到: {WPS_EXE}")
 
     TEST_ARTIFACT_DIR.mkdir(parents=True, exist_ok=True)
     temp_path = TEMP_DOCX
@@ -86,7 +88,7 @@ async def step_open_wps(ctx: TaskContext) -> StepResult:
         except PermissionError:
             temp_path = temp_path.parent / f"temp_party_app_{uuid.uuid4().hex[:8]}.docx"
     else:
-        return StepResult(success=False, error=f"鏃犳硶鍒涘缓涓存椂鏂囨。锛堟枃浠惰閿佸畾锛? {temp_path}")
+        return StepResult(success=False, error=f"无法创建临时文档（文件被锁定）: {temp_path}")
 
     subprocess.Popen([WPS_EXE, str(temp_path)])
     time.sleep(6)
@@ -99,21 +101,22 @@ async def step_open_wps(ctx: TaskContext) -> StepResult:
     ctx.visual_state["engine"] = engine
     hwnd = _find_wps_window()
     if not hwnd:
-        return StepResult(success=False, error="WPS 绐楀彛鏈壘鍒?)
+        return StepResult(success=False, error="WPS 窗口未找到")
     _focus_hwnd(hwnd)
     ctx.visual_state["hwnd"] = hwnd
-    return StepResult(success=True, data="WPS 鏂囧瓧宸插惎鍔?)
+    return StepResult(success=True, data="WPS 文字已启动")
 
 
 async def step_type_application(ctx: TaskContext) -> StepResult:
     engine = ctx.visual_state.get("engine")
     if engine is None:
-        return StepResult(success=False, error="HardInputEngine 鏈垵濮嬪寲")
+        return StepResult(success=False, error="HardInputEngine 未初始化")
     hwnd = ctx.visual_state.get("hwnd")
     if hwnd:
         _focus_hwnd(hwnd)
 
     from ctypes import wintypes
+
     rect = wintypes.RECT()
     ctypes.windll.user32.GetWindowRect(hwnd, ctypes.byref(rect))
     cx = (rect.left + rect.right) // 2
@@ -134,13 +137,13 @@ async def step_type_application(ctx: TaskContext) -> StepResult:
         use_clipboard=True,
     )
     time.sleep(0.5)
-    return StepResult(success=True, data="宸茶緭鍏ュ叆鍏氱敵璇蜂功")
+    return StepResult(success=True, data="已输入入党申请书")
 
 
 async def step_save_file(ctx: TaskContext) -> StepResult:
     engine = ctx.visual_state.get("engine")
     if engine is None:
-        return StepResult(success=False, error="HardInputEngine 鏈垵濮嬪寲")
+        return StepResult(success=False, error="HardInputEngine 未初始化")
     hwnd = ctx.visual_state.get("hwnd")
     if hwnd:
         _focus_hwnd(hwnd)
@@ -148,13 +151,14 @@ async def step_save_file(ctx: TaskContext) -> StepResult:
     if Path(SAVE_PATH).exists():
         Path(SAVE_PATH).unlink()
 
-    # 浣跨敤 F12 鍙﹀瓨涓猴紙WPS 鏂囧瓧瀵瑰唴鏍哥骇 F12 搴旇鏁忔劅锛?    engine.press("f12")
+    # 使用 F12 另存为（WPS 文字对内核级 F12 应该敏感）
+    engine.press("f12")
     time.sleep(3)
 
     engine.hotkey("ctrl", "a")
     time.sleep(0.3)
     engine.type_text(
-        "鍏ュ厷鐢宠涔?docx",
+        "入党申请书.docx",
         interval=(0.01, 0.03),
         ensure_english=True,
         use_clipboard=True,
@@ -164,19 +168,19 @@ async def step_save_file(ctx: TaskContext) -> StepResult:
     time.sleep(4)
 
     if Path(SAVE_PATH).exists():
-        return StepResult(success=True, data=f"宸蹭繚瀛樺埌 {SAVE_PATH}")
-    return StepResult(success=False, error="淇濆瓨鍚庢湭妫€娴嬪埌鏂囦欢")
+        return StepResult(success=True, data=f"已保存到 {SAVE_PATH}")
+    return StepResult(success=False, error="保存后未检测到文件")
 
 
 async def step_close_wps(ctx: TaskContext) -> StepResult:
     engine = ctx.visual_state.get("engine")
     if engine is None:
-        return StepResult(success=False, error="HardInputEngine 鏈垵濮嬪寲")
+        return StepResult(success=False, error="HardInputEngine 未初始化")
     hwnd = ctx.visual_state.get("hwnd")
     if hwnd:
         _focus_hwnd(hwnd)
     engine.hotkey("alt", "f4")
-    return StepResult(success=True, data="宸插彂閫佸叧闂寚浠?)
+    return StepResult(success=True, data="已发送关闭指令")
 
 
 workflow = Workflow(task_id="desktop_wps_word_hardinput")
@@ -192,5 +196,3 @@ if __name__ == "__main__":
     print(f"Workflow result: {result}")
     for sid, out in ctx.outputs.items():
         print(f"  {sid}: {out}")
-
-

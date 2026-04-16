@@ -1,6 +1,6 @@
-﻿"""瑙嗚鑷姩鍖栧紩鎿?
+﻿"""视觉自动化引擎.
 
-鍩轰簬 pyauto-desktop锛圥yAutoGUI 澧炲己鏇夸唬锛夊皝瑁咃紝鎻愪緵璺ㄥ垎杈ㄧ巼鍥惧儚璇嗗埆涓庣墿鐞嗙骇鎿嶄綔.
+基于 pyauto-desktop（PyAutoGUI 增强替代）封装，提供跨分辨率图像识别与物理级操作.
 """
 
 import ctypes
@@ -16,9 +16,9 @@ from ..utils.mouse import bezier_curve
 
 
 class VisualEngine:
-    """瑙嗚鑷姩鍖栧紩鎿庯紝鐢ㄤ簬妗岄潰杞欢鑷姩鍖栦笌娴忚鍣ㄩ檷绾у厹搴?
+    """视觉自动化引擎，用于桌面软件自动化与浏览器降级兜底.
 
-    鍩轰簬 pyauto-desktop 瀹炵幇璺ㄥ垎杈ㄧ巼鑷姩缂╂斁銆佸浘鍍忓畾浣嶃€佷汉绫诲寲榧犳爣绉诲姩.
+    基于 pyauto-desktop 实现跨分辨率自动缩放、图像定位和人类化鼠标移动.
     """
 
     def __init__(
@@ -33,7 +33,7 @@ class VisualEngine:
         self._session: Optional[pyauto_desktop.Session] = None
 
     def start(self) -> "VisualEngine":
-        """鍒濆鍖栬瑙変細璇?"""
+        """初始化视觉会话."""
         kwargs: dict = {"screen": self.screen}
         if self.source_resolution:
             kwargs["source_resolution"] = self.source_resolution
@@ -43,18 +43,18 @@ class VisualEngine:
         return self
 
     def _locate(self, image_path: str, confidence: float = 0.9) -> Optional[Tuple[int, int, int, int]]:
-        """鍐呴儴鏂规硶锛氬畾浣嶅浘鍍忓苟杩斿洖杈圭晫妗?(left, top, width, height)."""
+        """内部方法：定位图像并返回边界框 `(left, top, width, height)`。"""
         if not Path(image_path).exists():
             return None
         if self._session is None:
-            raise RuntimeError("VisualEngine 灏氭湭鍚姩锛岃鍏堣皟鐢?start()")
+            raise RuntimeError("VisualEngine 尚未启动，请先调用 start()")
         result = self._session.locateOnScreen(image_path, grayscale=True, confidence=confidence)
         if result is not None:
             return (result.left, result.top, result.width, result.height)
         return None
 
     def locate_center(self, image_path: str, confidence: float = 0.9) -> Optional[Tuple[int, int]]:
-        """瀹氫綅鍥惧儚涓績鍧愭爣."""
+        """定位图像中心坐标."""
         box = self._locate(image_path, confidence)
         if box is None:
             return None
@@ -70,20 +70,20 @@ class VisualEngine:
         pre_delay: Tuple[float, float] = (0.1, 0.3),
         duration: float = 0.5,
     ) -> bool:
-        """鐐瑰嚮鍥惧儚鎴栨寚瀹氬潗鏍?
+        """点击图像或指定坐标.
 
         Args:
-            image_path: 妯℃澘鍥惧儚璺緞.
-            x, y: 鐩存帴鎸囧畾鐨勫睆骞曞潗鏍囷紙涓?image_path 浜岄€変竴锛?
-            confidence: 鍥惧儚鍖归厤缃俊搴?
-            pre_delay: 鐐瑰嚮鍓嶉殢鏈哄欢杩熻寖鍥?
-            duration: 榧犳爣绉诲姩鑰楁椂.
+            image_path: 模板图像路径.
+            x, y: 直接指定的屏幕坐标（与 `image_path` 二选一）。
+            confidence: 图像匹配置信度.
+            pre_delay: 点击前随机延迟范围.
+            duration: 鼠标移动耗时.
 
         Returns:
-            鏄惁鎴愬姛鐐瑰嚮.
+            是否成功点击.
         """
         if self._session is None:
-            raise RuntimeError("VisualEngine 灏氭湭鍚姩锛岃鍏堣皟鐢?start()")
+            raise RuntimeError("VisualEngine 尚未启动，请先调用 start()")
 
         if pre_delay:
             time.sleep(random.uniform(*pre_delay))
@@ -107,26 +107,27 @@ class VisualEngine:
         interval: Tuple[float, float] = (0.05, 0.15),
         ensure_english: bool = False,
     ) -> None:
-        """妯℃嫙閿洏杈撳叆锛屾敮鎸侀殢鏈洪棿闅?
+        """模拟键盘输入，支持随机间隔.
 
         Args:
-            text: 瑕佽緭鍏ョ殑鏂囨湰.
-            interval: 姣忎釜瀛楃涔嬮棿鐨勯殢鏈哄欢杩熻寖鍥?
-            ensure_english: 鏄惁鍦ㄨ緭鍏ュ墠寮哄埗鍒囨崲鍒拌嫳鏂囪緭鍏ユ硶鐘舵€侊紝
-                閬垮厤涓枃杈撳叆娉曟嫤鎴?ASCII 瀛楃.
+            text: 要输入的文本.
+            interval: 每个字符之间的随机延迟范围.
+            ensure_english: 是否在输入前强制切换到英文输入法状态，
+                避免中文输入法拦截 ASCII 字符.
         """
         if self._session is None:
-            raise RuntimeError("VisualEngine 灏氭湭鍚姩锛岃鍏堣皟鐢?start()")
+            raise RuntimeError("VisualEngine 尚未启动，请先调用 start()")
         if ensure_english:
             InputMethodController.ensure_english_input()
-        # pyauto-desktop Session.write 鏀寔 interval锛屼絾涓轰簡鏇寸簿缁嗙殑闅忔満闂撮殧锛岄€愬瓧绗﹀啓鍏?        for char in text:
+        # pyauto-desktop Session.write 支持 interval，但为了更精细的随机间隔，这里逐字符写入
+        for char in text:
             self._session.write(char, interval=0)
             time.sleep(random.uniform(*interval))
 
     def screenshot(self, path: Optional[str] = None) -> str:
-        """鎴彇鍏ㄥ睆骞朵繚瀛?"""
+        """截取全屏并保存."""
         if self._session is None:
-            raise RuntimeError("VisualEngine 灏氭湭鍚姩锛岃鍏堣皟鐢?start()")
+            raise RuntimeError("VisualEngine 尚未启动，请先调用 start()")
         if path is None:
             artifact_dir = Path("test_artifacts/screenshots/visual")
             artifact_dir.mkdir(parents=True, exist_ok=True)
@@ -136,9 +137,9 @@ class VisualEngine:
         return path
 
     def _human_like_move(self, x: int, y: int, duration: float = 0.5) -> None:
-        """浣跨敤璐濆灏旀洸绾跨Щ鍔ㄩ紶鏍?"""
+        """使用贝塞尔曲线移动鼠标."""
         if self._session is None:
-            raise RuntimeError("VisualEngine 灏氭湭鍚姩锛岃鍏堣皟鐢?start()")
+            raise RuntimeError("VisualEngine 尚未启动，请先调用 start()")
         current_x, current_y = _get_cursor_pos()
         points = bezier_curve((current_x, current_y), (x, y), num_points=20)
         step_duration = duration / len(points)
@@ -147,15 +148,15 @@ class VisualEngine:
             time.sleep(step_duration)
 
     def press(self, key: str) -> None:
-        """鎸変笅鍗曚釜鎸夐敭."""
+        """按下单个按键."""
         if self._session is None:
-            raise RuntimeError("VisualEngine 灏氭湭鍚姩锛岃鍏堣皟鐢?start()")
+            raise RuntimeError("VisualEngine 尚未启动，请先调用 start()")
         self._session.press(key)
 
     def hotkey(self, *keys: str) -> None:
-        """鎸変笅缁勫悎閿?"""
+        """按下组合键."""
         if self._session is None:
-            raise RuntimeError("VisualEngine 灏氭湭鍚姩锛岃鍏堣皟鐢?start()")
+            raise RuntimeError("VisualEngine 尚未启动，请先调用 start()")
         for k in keys:
             self._session.keyDown(k)
         for k in reversed(keys):
@@ -163,7 +164,7 @@ class VisualEngine:
 
     @staticmethod
     def inspector() -> None:
-        """鎵撳紑 pyauto-desktop 鍐呯疆 GUI Inspector锛堢敤浜庡綍鍒?鐢熸垚浠ｇ爜锛?"""
+        """打开 pyauto-desktop 内置 GUI Inspector（用于录制或生成代码）。"""
         pyauto_desktop.inspector()
 
     @staticmethod
@@ -173,18 +174,19 @@ class VisualEngine:
         use_ctrl_space: bool = False,
         cooldown: float = 0.3,
     ) -> bool:
-        """纭繚褰撳墠杈撳叆娉曞浜庤嫳鏂囪緭鍏ョ姸鎬?
+        """确保当前输入法处于英文输入状态.
 
-        鍦ㄨ緭鍏ヨ嫳鏂囨垨 ASCII 鍐呭鍓嶈皟鐢紝鍙伩鍏嶄腑鏂囪緭鍏ユ硶锛堝寰蒋鎷奸煶锛?        鎷︽埅鎸夐敭瀵艰嚧涔辩爜鎴栬緭鍏ュけ璐?
+        在输入英文或 ASCII 内容前调用，可避免中文输入法（如微软拼音）
+        拦截按键导致乱码或输入失败。
 
         Args:
-            detection_method: 妫€娴嬫柟寮忥紝"auto" | "layout" | "ime".
-            use_shift: 妫€娴嬪埌涓枃妯″紡鏃舵槸鍚﹀彂閫?Shift 閿垏鎹?
-            use_ctrl_space: Shift 鏃犳晥鏃舵槸鍚﹁繘涓€姝ュ彂閫?Ctrl+Space.
-            cooldown: 姣忔鎸夐敭鍚庣殑鍐峰嵈鏃堕棿锛堢锛?
+            detection_method: 检测方式，`"auto"`、`"layout"` 或 `"ime"`。
+            use_shift: 检测到中文模式时是否发送 Shift 键切换。
+            use_ctrl_space: Shift 无效时是否进一步发送 Ctrl+Space。
+            cooldown: 每次按键后的冷却时间（秒）。
 
         Returns:
-            True 琛ㄧず宸茬‘淇濊嫳鏂囩姸鎬侊紙鎴栨墽琛屼簡鍒囨崲鍔ㄤ綔锛?
+            True 表示已确保英文状态，或已执行切换动作。
         """
         return InputMethodController.ensure_english_input(
             detection_method=detection_method,
@@ -195,9 +197,9 @@ class VisualEngine:
 
 
 def _get_cursor_pos() -> Tuple[int, int]:
-    """閫氳繃 Windows API 鑾峰彇褰撳墠榧犳爣鍧愭爣."""
+    """通过 Windows API 获取当前鼠标坐标."""
     from ctypes import wintypes
+
     pt = wintypes.POINT()
     ctypes.windll.user32.GetCursorPos(ctypes.byref(pt))
     return pt.x, pt.y
-

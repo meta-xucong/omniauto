@@ -1,6 +1,6 @@
 """由 TemplateGenerator 自动生成的电商商品调研 Workflow.
 
-任务: ?? | 站点: 1688 | 页数: 5 | 排序: price_asc
+任务: 女装 | 站点: 1688 | 页数: 5 | 排序: price_asc
 """
 
 import asyncio
@@ -29,7 +29,7 @@ def _safe_print(text: str) -> None:
 # ------------------------------------------------------------------
 # 配置常量
 # ------------------------------------------------------------------
-KEYWORD_GBK = quote("??", encoding="gbk")
+KEYWORD_GBK = quote("女装", encoding="gbk")
 BASE_URL = (
     "https://s.1688.com/selloffer/offer_search.htm"
     f"?keywords={KEYWORD_GBK}"
@@ -408,7 +408,7 @@ async def step_generate_report(ctx: TaskContext):
     _safe_print("[Step 4] 生成报告...")
 
     report_data = {
-        "keyword": "??",
+        "keyword": "女装",
         "site": "1688",
         "total_items": len(_all_items),
         "sample_size": len(_enriched_items),
@@ -434,7 +434,7 @@ async def step_generate_report(ctx: TaskContext):
         # fallback 简单 HTML
         lines = [
             "<html><head><meta charset='utf-8'><title>Report</title></head><body>",
-            f"<h1>?? — 1688 调研报告</h1>",
+            f"<h1>女装 — 1688 调研报告</h1>",
             f"<p>总商品数: {len(_all_items)} | 抽样详情数: {len(_enriched_items)} | 跳过: {_skip_count}</p>",
             "<table border='1' cellpadding='6'><tr><th>标题</th><th>价格</th><th>店铺</th></tr>",
         ]
