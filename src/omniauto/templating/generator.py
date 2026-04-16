@@ -15,7 +15,7 @@ class TemplateGenerator:
     def __init__(
         self,
         template_dir: Optional[Path] = None,
-        output_dir: str = "scripts/generated",
+        output_dir: str = "workflows/generated",
     ) -> None:
         self.registry = TemplateRegistry(template_dir)
         self.output_dir = Path(output_dir)
@@ -61,7 +61,9 @@ class TemplateGenerator:
         rendered = template.render(**ctx)
 
         safe_name = config.get("task_name", task_type).replace(" ", "_").replace("-", "_")
-        out_path = self.output_dir / f"{safe_name}.py"
+        target_dir = self._resolve_workflow_output_dir(task_type)
+        target_dir.mkdir(parents=True, exist_ok=True)
+        out_path = target_dir / f"{safe_name}.py"
         out_path.write_text(rendered, encoding="utf-8")
         return out_path
 
@@ -91,3 +93,10 @@ class TemplateGenerator:
         out_path = self.output_dir / f"{safe_name}.html"
         out_path.write_text(rendered, encoding="utf-8")
         return out_path
+
+    def _resolve_workflow_output_dir(self, task_type: str) -> Path:
+        """根据任务类型返回更易理解的生成目录."""
+        marketplace_types = {"ecom_product_research"}
+        if task_type in marketplace_types:
+            return self.output_dir / "marketplaces"
+        return self.output_dir / "browser"

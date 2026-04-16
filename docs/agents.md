@@ -165,11 +165,15 @@ D:\AI\AI_RPA
 │   ├── unit/
 │   ├── integration/
 │   └── e2e/
-├── scripts/                    # 脚本目录（已分类）
-│   ├── examples/               # 演示与场景脚本
-│   ├── tests/                  # 测试脚本
-│   ├── generated/              # 由模板生成的工作流脚本
+├── workflows/                  # 用户可见的任务脚本目录
+│   ├── examples/               # 演示与参考场景脚本
+│   ├── verification/           # 手动验收/场景测试脚本
+│   ├── generated/              # 自动生成的工作流脚本
+│   │   ├── browser/            # 通用浏览器任务
+│   │   ├── desktop/            # 桌面/RPA 任务
+│   │   └── marketplaces/       # 电商平台任务
 │   └── archive/                # 旧脚本归档
+├── skills/                     # 用户可读的 AI Skill 导航说明
 ├── data/
 │   ├── auth/                   # 认证凭据（如 taobao.com_auth.json）
 │   ├── chrome_profile_1688/    # 已登录的 1688 Chrome Profile
@@ -224,7 +228,7 @@ except Exception as e:
 1. **理解需求**: 仔细阅读用户的自然语言描述，识别关键动作和目标系统。
 2. **调研开源方案**: 检查是否有现成的开源库或 Skill 可直接复用（如 browser-use 的 Agent、Stagehand 的 act/extract、pyauto-desktop 的 Inspector 生成代码）。
 3. **设计原子步骤**: 将任务拆分为 `AtomicStep` 序列，标注需要的 `Guardian` 节点。
-4. **生成代码**: 编写符合本规范的原子脚本，保存在 `scripts/` 目录下。
+4. **生成代码**: 编写符合本规范的原子脚本，保存在 `workflows/` 目录下。
 5. **静态自检**: 使用 AST 或正则扫描生成的代码，确认无安全违规项。
 6. **注册工作流**: 提供将脚本注册到状态机的示例代码。
 7. **编写测试**: 为关键步骤编写 pytest 单元测试。
@@ -232,7 +236,7 @@ except Exception as e:
 ### 示例：创建淘宝价格监控任务
 
 ```python
-# scripts/taobao_monitor.py
+# workflows/generated/taobao_monitor.py
 from omniauto.core.context import TaskContext
 from omniauto.core.state_machine import AtomicStep, StepResult, TaskState
 from omniauto.engines.browser import StealthBrowser
@@ -290,7 +294,8 @@ workflow = Workflow(steps, guardian_points=[4])  # 第4步前人工确认
 
 相关资源：
 - 模板目录：`src/omniauto/templates/workflows/`
-- Skill 约定：`.agents/skills/deterministic-rpa-workflow/SKILL.md`
+- Skill 运行时目录约定：`.agents/skills/deterministic-rpa-workflow/SKILL.md`
+- Skill 用户可读导航目录：`skills/deterministic-rpa-workflow/README.md`
 
 ---
 
@@ -327,4 +332,3 @@ workflow = Workflow(steps, guardian_points=[4])  # 第4步前人工确认
 - [Smolagents](https://github.com/huggingface/smolagents) — HuggingFace 代码生成 Agent
 - [Robocorp](https://github.com/robocorp) — 成熟 Python RPA 生态
 - [BotCity](https://github.com/botcity-dev) — 开源 RPA 框架
-

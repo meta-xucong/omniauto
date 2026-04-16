@@ -45,6 +45,15 @@ async def random_delay(min_sec: float = 0.1, max_sec: float = 0.5) -> None:
     await asyncio.sleep(random.uniform(min_sec, max_sec))
 
 
+def _get_cursor_pos() -> Tuple[int, int]:
+    """通过 Windows API 获取当前鼠标坐标."""
+    import ctypes
+    from ctypes import wintypes
+    pt = wintypes.POINT()
+    ctypes.windll.user32.GetCursorPos(ctypes.byref(pt))
+    return pt.x, pt.y
+
+
 def human_like_move(
     x: int,
     y: int,
@@ -53,8 +62,8 @@ def human_like_move(
 ) -> None:
     """使用贝塞尔曲线将鼠标移动到目标坐标.
 
-    该函数直接调用 pyauto-desktop / pyautogui 的 moveTo.
-    在 VisualEngine 中应优先使用 Session 封装的移动方法.
+    基于 pyauto-desktop Session 实现.
+    在 VisualEngine 中应优先使用其内部的 _human_like_move 方法.
 
     Args:
         x: 目标屏幕 X 坐标.
@@ -62,20 +71,13 @@ def human_like_move(
         duration: 移动耗时（秒）.
         spread: 贝塞尔曲线控制点偏移幅度.
     """
-    try:
-        import pyauto_desktop
-        current_x, current_y = pyauto_desktop.position()
-        points = bezier_curve((current_x, current_y), (x, y), num_points=20, spread=spread)
-        step_duration = duration / len(points)
-        for px, py in points:
-            pyauto_desktop.moveTo(px, py)
-            time.sleep(step_duration)
-    except Exception:
-        # 若 pyauto-desktop 不可用，降级到 pyautogui
-        import pyautogui
-        current_x, current_y = pyautogui.position()
-        points = bezier_curve((current_x, current_y), (x, y), num_points=20, spread=spread)
-        step_duration = duration / len(points)
-        for px, py in points:
-            pyautogui.moveTo(px, py)
-            time.sleep(step_duration)
+    import pyauto_desktop
+
+    current_x, current_y = _get_cursor_pos()
+    points = bezier_curve((current_x, current_y), (x, y), num_points=20, spread=spread)
+    step_duration = duration / len(points)
+
+    session = pyauto_desktop.Session()
+    for px, py in points:
+        session.moveTo(px, py, duration=0)
+        time.sleep(step_duration)

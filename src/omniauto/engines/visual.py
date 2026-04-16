@@ -1,21 +1,24 @@
-"""视觉自动化引擎.
+﻿"""瑙嗚鑷姩鍖栧紩鎿?
 
-基于 pyauto-desktop（PyAutoGUI 增强替代）封装，提供跨分辨率图像识别与物理级操作.
+鍩轰簬 pyauto-desktop锛圥yAutoGUI 澧炲己鏇夸唬锛夊皝瑁咃紝鎻愪緵璺ㄥ垎杈ㄧ巼鍥惧儚璇嗗埆涓庣墿鐞嗙骇鎿嶄綔.
 """
 
+import ctypes
 import random
+import time
 from pathlib import Path
 from typing import Optional, Tuple
 
 import pyauto_desktop
 
+from ..utils.input_method import InputMethodController
 from ..utils.mouse import bezier_curve
 
 
 class VisualEngine:
-    """视觉自动化引擎，用于桌面软件自动化与浏览器降级兜底.
+    """瑙嗚鑷姩鍖栧紩鎿庯紝鐢ㄤ簬妗岄潰杞欢鑷姩鍖栦笌娴忚鍣ㄩ檷绾у厹搴?
 
-    基于 pyauto-desktop 实现跨分辨率自动缩放、图像定位、人类化鼠标移动.
+    鍩轰簬 pyauto-desktop 瀹炵幇璺ㄥ垎杈ㄧ巼鑷姩缂╂斁銆佸浘鍍忓畾浣嶃€佷汉绫诲寲榧犳爣绉诲姩.
     """
 
     def __init__(
@@ -30,36 +33,28 @@ class VisualEngine:
         self._session: Optional[pyauto_desktop.Session] = None
 
     def start(self) -> "VisualEngine":
-        """初始化视觉会话."""
+        """鍒濆鍖栬瑙変細璇?"""
+        kwargs: dict = {"screen": self.screen}
         if self.source_resolution:
-            self._session = pyauto_desktop.Session(
-                screen=self.screen,
-                source_resolution=self.source_resolution,
-                source_dpr=self.source_dpr,
-                scaling_type="dpr",
-            )
-        else:
-            # 若未指定源分辨率，则直接使用当前屏幕（不启用自动缩放）
-            self._session = None
+            kwargs["source_resolution"] = self.source_resolution
+            kwargs["source_dpr"] = self.source_dpr
+            kwargs["scaling_type"] = "dpr"
+        self._session = pyauto_desktop.Session(**kwargs)
         return self
 
     def _locate(self, image_path: str, confidence: float = 0.9) -> Optional[Tuple[int, int, int, int]]:
-        """内部方法：定位图像并返回边界框 (left, top, width, height)."""
+        """鍐呴儴鏂规硶锛氬畾浣嶅浘鍍忓苟杩斿洖杈圭晫妗?(left, top, width, height)."""
         if not Path(image_path).exists():
             return None
-        if self._session is not None:
-            result = self._session.locateOnScreen(image_path, grayscale=True, confidence=confidence)
-            if result is not None:
-                return (result.left, result.top, result.width, result.height)
-            return None
-        # 降级到标准 pyauto-desktop API
-        result = pyauto_desktop.locateOnScreen(image_path, grayscale=True, confidence=confidence)
+        if self._session is None:
+            raise RuntimeError("VisualEngine 灏氭湭鍚姩锛岃鍏堣皟鐢?start()")
+        result = self._session.locateOnScreen(image_path, grayscale=True, confidence=confidence)
         if result is not None:
             return (result.left, result.top, result.width, result.height)
         return None
 
     def locate_center(self, image_path: str, confidence: float = 0.9) -> Optional[Tuple[int, int]]:
-        """定位图像中心坐标."""
+        """瀹氫綅鍥惧儚涓績鍧愭爣."""
         box = self._locate(image_path, confidence)
         if box is None:
             return None
@@ -75,20 +70,22 @@ class VisualEngine:
         pre_delay: Tuple[float, float] = (0.1, 0.3),
         duration: float = 0.5,
     ) -> bool:
-        """点击图像或指定坐标.
+        """鐐瑰嚮鍥惧儚鎴栨寚瀹氬潗鏍?
 
         Args:
-            image_path: 模板图像路径.
-            x, y: 直接指定的屏幕坐标（与 image_path 二选一）.
-            confidence: 图像匹配置信度.
-            pre_delay: 点击前随机延迟范围.
-            duration: 鼠标移动耗时.
+            image_path: 妯℃澘鍥惧儚璺緞.
+            x, y: 鐩存帴鎸囧畾鐨勫睆骞曞潗鏍囷紙涓?image_path 浜岄€変竴锛?
+            confidence: 鍥惧儚鍖归厤缃俊搴?
+            pre_delay: 鐐瑰嚮鍓嶉殢鏈哄欢杩熻寖鍥?
+            duration: 榧犳爣绉诲姩鑰楁椂.
 
         Returns:
-            是否成功点击.
+            鏄惁鎴愬姛鐐瑰嚮.
         """
+        if self._session is None:
+            raise RuntimeError("VisualEngine 灏氭湭鍚姩锛岃鍏堣皟鐢?start()")
+
         if pre_delay:
-            import time
             time.sleep(random.uniform(*pre_delay))
 
         if image_path is not None:
@@ -100,61 +97,107 @@ class VisualEngine:
         if x is None or y is None:
             return False
 
-        if self._session is not None:
-            self._session.moveTo(x, y, duration=duration)
-            self._session.click()
-        else:
-            self._human_like_move(x, y, duration=duration)
-            pyauto_desktop.click()
+        self._human_like_move(x, y, duration=duration)
+        self._session.click()
         return True
 
     def type_text(
         self,
         text: str,
         interval: Tuple[float, float] = (0.05, 0.15),
+        ensure_english: bool = False,
     ) -> None:
-        """模拟键盘输入，支持随机间隔."""
-        for char in text:
-            pyauto_desktop.typewrite(char, interval=0)
-            import time
+        """妯℃嫙閿洏杈撳叆锛屾敮鎸侀殢鏈洪棿闅?
+
+        Args:
+            text: 瑕佽緭鍏ョ殑鏂囨湰.
+            interval: 姣忎釜瀛楃涔嬮棿鐨勯殢鏈哄欢杩熻寖鍥?
+            ensure_english: 鏄惁鍦ㄨ緭鍏ュ墠寮哄埗鍒囨崲鍒拌嫳鏂囪緭鍏ユ硶鐘舵€侊紝
+                閬垮厤涓枃杈撳叆娉曟嫤鎴?ASCII 瀛楃.
+        """
+        if self._session is None:
+            raise RuntimeError("VisualEngine 灏氭湭鍚姩锛岃鍏堣皟鐢?start()")
+        if ensure_english:
+            InputMethodController.ensure_english_input()
+        # pyauto-desktop Session.write 鏀寔 interval锛屼絾涓轰簡鏇寸簿缁嗙殑闅忔満闂撮殧锛岄€愬瓧绗﹀啓鍏?        for char in text:
+            self._session.write(char, interval=0)
             time.sleep(random.uniform(*interval))
 
     def screenshot(self, path: Optional[str] = None) -> str:
-        """截取全屏并保存."""
-        import time
+        """鎴彇鍏ㄥ睆骞朵繚瀛?"""
+        if self._session is None:
+            raise RuntimeError("VisualEngine 灏氭湭鍚姩锛岃鍏堣皟鐢?start()")
         if path is None:
-            path = f"visual_screenshot_{int(time.time()*1000)}.png"
-        if self._session is not None:
-            img = self._session.screenshot()
-        else:
-            # 降级到 mss + Pillow
-            from mss import mss
-            from PIL import Image
-            with mss() as sct:
-                monitor = sct.monitors[1] if len(sct.monitors) > 1 else sct.monitors[0]
-                img = Image.frombytes("RGB", (monitor["width"], monitor["height"]), sct.grab(monitor).rgb)
+            artifact_dir = Path("test_artifacts/screenshots/visual")
+            artifact_dir.mkdir(parents=True, exist_ok=True)
+            path = str(artifact_dir / f"visual_screenshot_{int(time.time()*1000)}.png")
+        img = self._session.screenshot()
         img.save(path)
         return path
 
     def _human_like_move(self, x: int, y: int, duration: float = 0.5) -> None:
-        """使用贝塞尔曲线移动鼠标（无 Session 时的降级方案）."""
-        import time
-        current_x, current_y = pyauto_desktop.position()
+        """浣跨敤璐濆灏旀洸绾跨Щ鍔ㄩ紶鏍?"""
+        if self._session is None:
+            raise RuntimeError("VisualEngine 灏氭湭鍚姩锛岃鍏堣皟鐢?start()")
+        current_x, current_y = _get_cursor_pos()
         points = bezier_curve((current_x, current_y), (x, y), num_points=20)
         step_duration = duration / len(points)
         for px, py in points:
-            pyauto_desktop.moveTo(px, py)
+            self._session.moveTo(px, py, duration=0)
             time.sleep(step_duration)
 
     def press(self, key: str) -> None:
-        """按下单个按键."""
-        pyauto_desktop.press(key)
+        """鎸変笅鍗曚釜鎸夐敭."""
+        if self._session is None:
+            raise RuntimeError("VisualEngine 灏氭湭鍚姩锛岃鍏堣皟鐢?start()")
+        self._session.press(key)
 
     def hotkey(self, *keys: str) -> None:
-        """按下组合键."""
-        pyauto_desktop.hotkey(*keys)
+        """鎸変笅缁勫悎閿?"""
+        if self._session is None:
+            raise RuntimeError("VisualEngine 灏氭湭鍚姩锛岃鍏堣皟鐢?start()")
+        for k in keys:
+            self._session.keyDown(k)
+        for k in reversed(keys):
+            self._session.keyUp(k)
 
     @staticmethod
     def inspector() -> None:
-        """打开 pyauto-desktop 内置 GUI Inspector（用于录制/生成代码）."""
+        """鎵撳紑 pyauto-desktop 鍐呯疆 GUI Inspector锛堢敤浜庡綍鍒?鐢熸垚浠ｇ爜锛?"""
         pyauto_desktop.inspector()
+
+    @staticmethod
+    def ensure_english_input(
+        detection_method: str = "auto",
+        use_shift: bool = True,
+        use_ctrl_space: bool = False,
+        cooldown: float = 0.3,
+    ) -> bool:
+        """纭繚褰撳墠杈撳叆娉曞浜庤嫳鏂囪緭鍏ョ姸鎬?
+
+        鍦ㄨ緭鍏ヨ嫳鏂囨垨 ASCII 鍐呭鍓嶈皟鐢紝鍙伩鍏嶄腑鏂囪緭鍏ユ硶锛堝寰蒋鎷奸煶锛?        鎷︽埅鎸夐敭瀵艰嚧涔辩爜鎴栬緭鍏ュけ璐?
+
+        Args:
+            detection_method: 妫€娴嬫柟寮忥紝"auto" | "layout" | "ime".
+            use_shift: 妫€娴嬪埌涓枃妯″紡鏃舵槸鍚﹀彂閫?Shift 閿垏鎹?
+            use_ctrl_space: Shift 鏃犳晥鏃舵槸鍚﹁繘涓€姝ュ彂閫?Ctrl+Space.
+            cooldown: 姣忔鎸夐敭鍚庣殑鍐峰嵈鏃堕棿锛堢锛?
+
+        Returns:
+            True 琛ㄧず宸茬‘淇濊嫳鏂囩姸鎬侊紙鎴栨墽琛屼簡鍒囨崲鍔ㄤ綔锛?
+        """
+        return InputMethodController.ensure_english_input(
+            detection_method=detection_method,
+            use_shift=use_shift,
+            use_ctrl_space=use_ctrl_space,
+            cooldown=cooldown,
+        )
+
+
+def _get_cursor_pos() -> Tuple[int, int]:
+    """閫氳繃 Windows API 鑾峰彇褰撳墠榧犳爣鍧愭爣."""
+    from ctypes import wintypes
+    pt = wintypes.POINT()
+    ctypes.windll.user32.GetCursorPos(ctypes.byref(pt))
+    return pt.x, pt.y
+

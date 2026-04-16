@@ -138,6 +138,49 @@ async def _is_normal_page(browser: StealthBrowser) -> bool:
         return False
 
 
+async def _goto_search_page_with_recovery(
+    browser: StealthBrowser,
+    url: str,
+    selector: str = ".search-offer-item, .offer-item",
+    max_attempts: int = 3,
+) -> bool:
+    """访问搜索结果页，并在遇到验证码/惩罚页时尝试自动恢复."""
+    for attempt in range(1, max_attempts + 1):
+        await browser.goto(url, wait_until="domcontentloaded", timeout=20000)
+        await asyncio.sleep(random.uniform(2.0, 4.0))
+
+        blocked = (
+            _is_bad_url(browser.page.url)
+            or await is_login_page(browser.page)
+            or await is_captcha_page(browser.page)
+        )
+        if blocked:
+            _safe_print(f"  [Recover] 第 {attempt} 次命中验证/惩罚页，尝试自动过滑块...")
+            solved = await browser.try_solve_slider()
+            await asyncio.sleep(random.uniform(2.0, 4.0))
+            blocked = (
+                _is_bad_url(browser.page.url)
+                or await is_login_page(browser.page)
+                or await is_captcha_page(browser.page)
+            )
+            if solved and not blocked:
+                _safe_print("  [Recover] 滑块疑似通过，继续检查结果页。")
+            elif blocked:
+                _safe_print("  [Recover] 自动处理后仍被拦截。")
+
+        if not blocked:
+            try:
+                await browser.wait_for_selector(selector, timeout=15000)
+                return True
+            except Exception:
+                pass
+
+        if attempt < max_attempts:
+            await browser.cooldown(6.0, 10.0)
+
+    return False
+
+
 # ------------------------------------------------------------------
 # Step 0: 预热——先访问 1688 首页建立真实浏览会话，降低风控概率
 # ------------------------------------------------------------------
@@ -149,9 +192,15 @@ async def step_warmup(ctx: TaskContext):
 
     # 若被拦截（登录/验证码），auto_handle_login 会自动弹窗等待用户处理
     if await is_login_page(browser.page) or await is_captcha_page(browser.page):
-        _safe_print("[Step 0] 首页触发验证/登录，等待手动处理...")
-        # 给 auto_handle_login 留出处理时间（它会自己轮询），这里简单多等一会儿
-        await asyncio.sleep(5)
+        _safe_print("[Step 0] 首页触发验证/登录，先尝试自动过滑块...")
+        solved = await browser.try_solve_slider()
+        await asyncio.sleep(random.uniform(2.0, 4.0))
+        if solved and not (await is_login_page(browser.page) or await is_captcha_page(browser.page)):
+            _safe_print("[Step 0] 自动验证通过，继续执行。")
+        else:
+            _safe_print("[Step 0] 自动处理未完全通过，等待手动处理...")
+            # 给 auto_handle_login 留出处理时间（它会自己轮询），这里简单多等一会儿
+            await asyncio.sleep(5)
     else:
         await browser.simulate_human_viewing()
         _safe_print("[Step 0] 预热完成")
@@ -164,9 +213,11 @@ async def step_warmup(ctx: TaskContext):
 # ------------------------------------------------------------------
 async def step_search(ctx: TaskContext):
     browser: StealthBrowser = ctx.browser_state["browser"]
-    _safe_print(f"[Step 1] 访问搜索页: {BASE_URL}&beginPage=1")
-    await browser.goto(f"{BASE_URL}&beginPage=1", wait_until="domcontentloaded", timeout=20000)
-    await browser.wait_for_selector(".search-offer-item, .offer-item", timeout=15000)
+    url = f"{BASE_URL}&beginPage=1"
+    _safe_print(f"[Step 1] 访问搜索页: {url}")
+    ok = await _goto_search_page_with_recovery(browser, url)
+    if not ok:
+        raise RuntimeError("1688 搜索结果页加载失败或仍被风控拦截")
     await browser.simulate_human_viewing()
     return {"success": True, "url": browser.page.url}
 
@@ -183,12 +234,13 @@ async def step_scrape_pages(ctx: TaskContext):
         url = f"{BASE_URL}&beginPage={page_num}"
         if browser.page.url != url:
             _safe_print(f"[Step 2] 翻页 -> {url}")
-            await browser.goto(url, wait_until="domcontentloaded", timeout=20000)
+            ok = await _goto_search_page_with_recovery(browser, url)
+            if not ok:
+                raise RuntimeError(f"第 {page_num} 页结果加载失败或仍被风控拦截")
             # 若被重定向（如超出总页数），提前结束
             if f"beginPage={page_num}" not in browser.page.url:
                 _safe_print(f"  检测到重定向，实际已到达最后一页，提前结束翻页。")
                 break
-            await browser.wait_for_selector(".search-offer-item, .offer-item", timeout=15000)
 
         await asyncio.sleep(1.5)
         items = await browser.page.evaluate(
@@ -452,6 +504,7 @@ async def step_generate_report(ctx: TaskContext):
 # 组装 Workflow
 # ------------------------------------------------------------------
 workflow = Workflow(
+    task_id="{{ task_name }}",
     steps=[
         AtomicStep("s0_warmup", step_warmup, lambda r: r.get("success"), retry=2, description="1688 首页预热"),
         AtomicStep("s1_search", step_search, lambda r: r.get("success"), retry=3, description="访问 1688 搜索页"),

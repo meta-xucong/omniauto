@@ -1,6 +1,6 @@
 """人工审核节点."""
 
-from typing import Callable, Awaitable
+from typing import Awaitable, Callable
 
 from ..core.state_machine import AtomicStep
 from ..core.context import TaskContext
@@ -14,7 +14,7 @@ class GuardianNode:
 
     def __init__(
         self,
-        callback: Callable[[AtomicStep, TaskContext], Awaitable[bool]] = None,
+        callback: Callable[[AtomicStep, TaskContext], Awaitable[bool] | bool] = None,
     ) -> None:
         """初始化 Guardian.
 
@@ -40,4 +40,7 @@ class GuardianNode:
                 "当前为自动放行模式，生产环境请配置 callback。\n"
             )
             return True
-        return await self.callback(step, context)
+        result = self.callback(step, context)
+        if hasattr(result, "__await__"):
+            return await result
+        return bool(result)

@@ -1,7 +1,7 @@
 """示例：访问 httpbin 表单页面，输入并提交.
 
 运行方式:
-    omni run --script scripts/example_httpbin_form.py --headless
+omni run --script workflows/examples/browser/httpbin_form.py --headless
 """
 
 from omniauto.core.state_machine import Workflow
