@@ -6,6 +6,7 @@
 import asyncio
 import base64
 import sys
+import uuid
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -98,15 +99,19 @@ class OmniAutoService:
 
         # 动态加载脚本模块
         import importlib.util
-        spec = importlib.util.spec_from_file_location("atomic_script", script_path_resolved)
+        module_name = f"atomic_script_{uuid.uuid4().hex}"
+        spec = importlib.util.spec_from_file_location(module_name, script_path_resolved)
+        if spec is None or spec.loader is None:
+            raise RuntimeError(f"无法加载脚本模块: {script_path_resolved}")
         module = importlib.util.module_from_spec(spec)
-        sys.modules["atomic_script"] = module
+        sys.modules[module_name] = module
         spec.loader.exec_module(module)
 
         if not hasattr(module, "workflow"):
             raise RuntimeError("脚本中未找到 'workflow' 变量")
 
         workflow: Workflow = module.workflow
+        requires_browser = getattr(module, "requires_browser", True)
         if task_id:
             workflow.task_id = task_id
 
@@ -114,15 +119,21 @@ class OmniAutoService:
         if workflow.inter_step_delay == (0.0, 0.0):
             workflow.inter_step_delay = (1.5, 3.5)
 
-        # 启动浏览器
-        browser = await StealthBrowser(headless=headless).start()
-        self._active_browser = browser
-        context = TaskContext(task_id=workflow.task_id, browser_state={"browser": browser})
-
         guardian = GuardianNode(callback=guardian_callback)
         start = asyncio.get_event_loop().time()
+        browser = None
+        context = TaskContext(
+            task_id=workflow.task_id,
+            browser_state={},
+            visual_state={},
+        )
 
         try:
+            if requires_browser:
+                browser = await StealthBrowser(headless=headless).start()
+                self._active_browser = browser
+                context.browser_state["browser"] = browser
+
             final_state = await workflow.run(
                 context=context,
                 guardian_callback=guardian.check,
@@ -150,8 +161,10 @@ class OmniAutoService:
                 "duration_seconds": round(duration, 2),
             }
         finally:
-            await browser.close()
+            if browser is not None:
+                await browser.close()
             self._active_browser = None
+            sys.modules.pop(module_name, None)
 
     # ------------------------------------------------------------------
     # 5. 截图

@@ -1,7 +1,7 @@
 """示例：自动访问百度、输入关键词、搜索、截图.
 
 运行方式:
-    omni run --script scripts/example_baidu_search.py
+omni run --script workflows/examples/browser/baidu_search.py
 """
 
 import asyncio

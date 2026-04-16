@@ -18,13 +18,17 @@ class ScriptValidator:
         "compile",
         "__import__",
         "os.system",
+        "os.popen",
         "subprocess.run",
         "subprocess.call",
+        "subprocess.check_call",
+        "subprocess.check_output",
         "subprocess.Popen",
     }
 
     def __init__(self) -> None:
         self.issues: List[str] = []
+        self._import_aliases: dict[str, str] = {}
 
     def validate(self, script_path: str) -> bool:
         """校验脚本文件.
@@ -36,6 +40,7 @@ class ScriptValidator:
             是否通过校验.
         """
         self.issues = []
+        self._import_aliases = {}
         code = Path(script_path).read_text(encoding="utf-8")
 
         # 1. AST 遍历检查危险调用
@@ -44,6 +49,16 @@ class ScriptValidator:
         except SyntaxError as exc:
             self.issues.append(f"语法错误: {exc}")
             return False
+
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                for alias in node.names:
+                    self._import_aliases[alias.asname or alias.name] = alias.name
+            elif isinstance(node, ast.ImportFrom):
+                module = node.module or ""
+                for alias in node.names:
+                    target = f"{module}.{alias.name}" if module else alias.name
+                    self._import_aliases[alias.asname or alias.name] = target
 
         for node in ast.walk(tree):
             if isinstance(node, ast.Call):
@@ -62,9 +77,10 @@ class ScriptValidator:
     def _get_call_name(self, node: ast.AST) -> str:
         """从 AST 节点中提取调用名称."""
         if isinstance(node, ast.Name):
-            return node.id
+            return self._import_aliases.get(node.id, node.id)
         if isinstance(node, ast.Attribute):
-            return self._get_call_name(node.value) + "." + node.attr
+            base = self._get_call_name(node.value)
+            return f"{base}.{node.attr}" if base else node.attr
         return ""
 
     def report(self) -> str:

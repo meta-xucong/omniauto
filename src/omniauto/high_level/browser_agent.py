@@ -65,7 +65,8 @@ class BrowserAgent:
             state = await wf.run(ctx)
             summary = f"任务完成，状态: {state.name}"
             if ctx.outputs:
-                summary += f" | 输出: {list(ctx.outputs.values())[0][:200]}"
+                preview = str(list(ctx.outputs.values())[0])[:200]
+                summary += f" | 输出: {preview}"
             return summary
         finally:
             await self.browser.close()

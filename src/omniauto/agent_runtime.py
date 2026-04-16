@@ -86,43 +86,50 @@ class OmniAutoAgent:
             return "schedule"
         return "task"
 
-    # ------------------------------------------------------------------
-    # 任务执行主循环
-    # ------------------------------------------------------------------
-    async def _handle_task(self, description: str) -> AgentResult:
-        # 步骤1: 规划
+    def _prepare_script(self, description: str) -> tuple[Optional[Dict[str, Any]], Optional[str], Optional[AgentResult]]:
+        """完成任务规划、脚本生成与静态校验."""
         plan = self.service.plan_task(description)
         if not plan.get("steps"):
-            return AgentResult(success=False, message="无法理解任务，请尝试更具体的描述")
+            return None, None, AgentResult(success=False, message="无法理解任务，请尝试更具体的描述")
 
-        # 步骤2: 生成脚本
-        script_dir = Path("./scripts")
+        script_dir = Path("./workflows/generated/browser")
         script_dir.mkdir(parents=True, exist_ok=True)
         safe_name = re.sub(r"[^\w\u4e00-\u9fa5]+", "_", description)[:30]
-        script_path = str(script_dir / f"agent_{safe_name}.py")
-        gen_info = self.service.generate_script(description, script_path)
+        default_script_path = str(script_dir / f"agent_{safe_name}.py")
+        gen_info = self.service.generate_script(description, default_script_path)
+        script_path = gen_info.get("script_path", default_script_path)
 
-        # 步骤3: 校验
         validation = self.service.validate_script(script_path)
         if not validation["valid"]:
-            return AgentResult(
-                success=False,
-                message=f"脚本校验未通过: {validation['report']}",
-                data={"issues": validation["issues"]},
+            return (
+                plan,
+                None,
+                AgentResult(
+                    success=False,
+                    message=f"脚本校验未通过: {validation['report']}",
+                    data={"issues": validation["issues"]},
+                ),
             )
 
-        # 步骤4: Guardian 预确认（非高信任模式）
         if plan.get("needs_guardian") and self.trust_mode != "high":
-            # 在纯 Agent 运行时中，若无人机交互通道，默认放行并记录日志
             logger.warning(
                 "guardian_auto_passed",
                 description=description,
                 reason="AgentRuntime 无交互通道，默认放行",
             )
 
+        return plan, script_path, None
+
+    # ------------------------------------------------------------------
+    # 任务执行主循环
+    # ------------------------------------------------------------------
+    async def _handle_task(self, description: str) -> AgentResult:
+        plan, current_script, prep_result = self._prepare_script(description)
+        if prep_result is not None:
+            return prep_result
+
         # 步骤5: 执行 + 自修复循环
         round_num = 0
-        current_script = script_path
         last_result: Optional[Dict[str, Any]] = None
         screenshots: List[str] = []
 
@@ -190,23 +197,32 @@ class OmniAutoAgent:
         if "timeout" in error_lower or "未找到" in error or "not found" in error_lower:
             original = Path(script_path).read_text(encoding="utf-8")
             # 简单启发：在 navigate 后插入 WaitStep
+            updated = self._ensure_import(
+                original, "from omniauto.steps.wait import WaitStep"
+            )
             if "WaitStep" not in original:
-                lines = original.splitlines()
+                lines = updated.splitlines()
                 new_lines = []
+                inserted = False
                 for line in lines:
                     new_lines.append(line)
-                    if "workflow.add_step(NavigateStep" in line:
-                        indent = len(line) - len(line.lstrip())
-                        new_lines.append(" " * indent + "workflow.add_step(WaitStep(3.0))")
-                fixed_path = script_path.replace(".py", "_fix_wait.py")
-                Path(fixed_path).write_text("\n".join(new_lines), encoding="utf-8")
-                return fixed_path
+                    if not inserted and "workflow.add_step(NavigateStep" in line:
+                        indent = line[: len(line) - len(line.lstrip())]
+                        new_lines.append(f"{indent}workflow.add_step(WaitStep(3.0))")
+                        inserted = True
+                if inserted:
+                    fixed_path = script_path.replace(".py", "_fix_wait.py")
+                    Path(fixed_path).write_text("\n".join(new_lines), encoding="utf-8")
+                    return fixed_path
 
         # 规则化修复：导航后无数据 -> 修改提取选择器
         if "validationerror" in error_lower:
             original = Path(script_path).read_text(encoding="utf-8")
-            if "ExtractTextStep" in original and "body" not in original:
-                fixed = original.replace("ExtractTextStep(\"h1\")", "ExtractTextStep(\"body\")")
+            fixed = (
+                original.replace('ExtractTextStep("h1")', 'ExtractTextStep("body")')
+                .replace("ExtractTextStep('h1')", "ExtractTextStep('body')")
+            )
+            if fixed != original and "body" not in original:
                 fixed_path = script_path.replace(".py", "_fix_selector.py")
                 Path(fixed_path).write_text(fixed, encoding="utf-8")
                 return fixed_path
@@ -243,14 +259,6 @@ class OmniAutoAgent:
     # 定时任务处理
     # ------------------------------------------------------------------
     async def _handle_schedule(self, text: str) -> AgentResult:
-        # 先当作普通任务预执行一次
-        task_result = await self._handle_task(text)
-        if not task_result.success:
-            return AgentResult(
-                success=False,
-                message=f"预执行失败，无法创建定时任务: {task_result.message}",
-            )
-
         # 提取 cron 表达式（简单规则解析）
         cron = self._extract_cron(text)
         if not cron:
@@ -259,13 +267,14 @@ class OmniAutoAgent:
                 message="未能从指令中解析出定时规则，请使用'每天X点'或'每周一X点'等明确描述",
             )
 
-        # 复用最近一次生成的脚本
-        script_dir = Path("./scripts")
-        scripts = sorted(script_dir.glob("agent_*.py"), key=lambda p: p.stat().st_mtime, reverse=True)
-        if not scripts:
-            return AgentResult(success=False, message="未找到可定时执行的脚本")
+        _, script_path, prep_result = self._prepare_script(text)
+        if prep_result is not None or script_path is None:
+            reason = prep_result.message if prep_result is not None else "脚本准备失败"
+            return AgentResult(
+                success=False,
+                message=f"无法创建定时任务: {reason}",
+            )
 
-        script_path = str(scripts[0])
         task_name = re.sub(r"[^\w\u4e00-\u9fa5]+", "_", text)[:30]
         sched = self.service.schedule_task(script_path, task_name, cron, self.headless)
         return AgentResult(
@@ -273,6 +282,19 @@ class OmniAutoAgent:
             message=f"定时任务已创建: {task_name}，执行规则: {cron}，下次执行: {sched.get('next_run', '')}",
             data=sched,
         )
+
+    def _ensure_import(self, source: str, import_line: str) -> str:
+        """确保修复后的脚本具备所需导入."""
+        if import_line in source:
+            return source
+
+        lines = source.splitlines()
+        insert_at = 0
+        for idx, line in enumerate(lines):
+            if line.startswith("import ") or line.startswith("from "):
+                insert_at = idx + 1
+        lines.insert(insert_at, import_line)
+        return "\n".join(lines)
 
     def _extract_cron(self, text: str) -> Optional[str]:
         """从中文描述中提取简化版 Cron 表达式."""

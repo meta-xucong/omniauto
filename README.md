@@ -64,16 +64,16 @@ uv run omni demo --headless
 ### 3.2 用自然语言生成脚本
 
 ```bash
-uv run omni generate "访问百度并搜索关键词" --output scripts/generated/my_task.py
+uv run omni generate "访问百度并搜索关键词" --output workflows/generated/browser/my_task.py
 ```
 
-生成的脚本位于 `scripts/generated/my_task.py`，可直接查看和修改。
-示例脚本（如百度、Hacker News、豆瓣等）存放在 `scripts/examples/`。
+生成的脚本位于 `workflows/generated/browser/my_task.py`，可直接查看和修改。
+示例脚本（如百度、Hacker News、豆瓣等）存放在 `workflows/examples/`。
 
 ### 3.3 校验脚本安全性
 
 ```bash
-uv run omni validate scripts/generated/my_task.py
+uv run omni validate workflows/generated/browser/my_task.py
 ```
 
 校验器会扫描 `eval`、`exec`、`subprocess` 等危险操作，以及硬编码密码/API Key。
@@ -81,7 +81,7 @@ uv run omni validate scripts/generated/my_task.py
 ### 3.4 执行脚本
 
 ```bash
-uv run omni run --script scripts/generated/my_task.py --headless
+uv run omni run --script workflows/generated/browser/my_task.py --headless
 ```
 
 执行完成后，你会看到工作流的最终状态和输出数据。
@@ -201,13 +201,13 @@ uv run omni run --script my_workflow.py --headless
 
 ```bash
 # 生成脚本
-omni generate "任务描述" --output ./scripts/generated/task.py
+omni generate "任务描述" --output ./workflows/generated/browser/task.py
 
 # 校验脚本
-omni validate ./scripts/generated/task.py
+omni validate ./workflows/generated/browser/task.py
 
 # 执行脚本（支持断点续传）
-omni run --script ./scripts/generated/task.py --headless --task-id my_task_001
+omni run --script ./workflows/generated/browser/task.py --headless --task-id my_task_001
 
 # 运行内置 Demo
 omni demo --headless
