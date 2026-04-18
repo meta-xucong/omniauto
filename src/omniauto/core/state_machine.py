@@ -266,6 +266,8 @@ class Workflow:
             step = self.steps[idx]
             step.reset()
 
+            await self._attempt_recovery(step, context, trigger="before_step")
+
             # Guardian 检查
             if idx in self.guardian_points:
                 self.store.save_workflow(self.task_id, TaskState.PAUSED, idx, context.outputs.copy())
@@ -304,6 +306,8 @@ class Workflow:
                 final_state = TaskState.FAILED
                 break
 
+            await self._attempt_recovery(step, context, trigger="after_step")
+
             # 步骤间随机冷却（默认 0，不影响现有行为）
             if self.inter_step_delay[1] > 0 and idx < len(self.steps) - 1:
                 await asyncio.sleep(random.uniform(self.inter_step_delay[0], self.inter_step_delay[1]))
@@ -319,7 +323,58 @@ class Workflow:
         """执行步骤，支持内置重试循环."""
         while True:
             state, result = await step.execute(context)
-            if state in (TaskState.COMPLETED, TaskState.ESCALATED):
+            if state == TaskState.COMPLETED:
                 return state, result
+
+            if state == TaskState.ESCALATED:
+                recovered = await self._attempt_recovery(
+                    step,
+                    context,
+                    trigger="on_error",
+                    error=result.error,
+                )
+                if recovered:
+                    step.current_retry = max(0, step.current_retry - 1)
+                    await asyncio.sleep(0.2)
+                    continue
+                return state, result
+
+            recovered = await self._attempt_recovery(
+                step,
+                context,
+                trigger="on_error",
+                error=result.error,
+            )
+            if recovered:
+                await asyncio.sleep(0.2)
+                continue
             # FAILED 表示还可以重试
             await asyncio.sleep(0.5)
+
+    async def _attempt_recovery(
+        self,
+        step: AtomicStep,
+        context: TaskContext,
+        trigger: str,
+        error: Optional[str] = None,
+    ) -> bool:
+        browser = (context.browser_state or {}).get("browser")
+        if browser is None or not hasattr(browser, "recover_from_interruptions"):
+            return False
+
+        try:
+            result = await browser.recover_from_interruptions(
+                trigger=trigger,
+                error=error,
+                step_id=step.step_id,
+            )
+        except Exception:
+            return False
+
+        if not getattr(result, "handled", False):
+            if getattr(result, "handoff_requested", False):
+                context.metadata.setdefault("handoff_events", []).append(result.to_dict())
+            return False
+
+        context.metadata.setdefault("recovery_events", []).append(result.to_dict())
+        return True

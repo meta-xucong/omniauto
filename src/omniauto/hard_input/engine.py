@@ -113,9 +113,10 @@ class HardInputEngine:
             pass
 
         pyperclip.copy(text)
-        time.sleep(0.1)
-        self.hotkey("ctrl", "v")
         time.sleep(0.2)
+        self.hotkey("ctrl", "v")
+        paste_settle = min(2.0, max(0.8, len(text) / 200.0))
+        time.sleep(paste_settle)
 
         # 恢复剪贴板
         try:

@@ -1,0 +1,22 @@
+{
+  "phone": "13813809690",
+  "keyword": "汉服",
+  "force_sms_login": false,
+  "keep_browser_seconds": 600,
+  "result_rank": 1,
+  "scan_limit": 20,
+  "preferred_platform": "any",
+  "enter_mode": "auto",
+  "title_include": [
+    "汉服"
+  ],
+  "title_exclude": [
+    "儿童"
+  ],
+  "shop_include": [
+    "旗舰店"
+  ],
+  "shop_exclude": [
+    "二手"
+  ]
+}

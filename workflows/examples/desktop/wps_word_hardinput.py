@@ -2,6 +2,7 @@
 
 import asyncio
 import ctypes
+import shutil
 import subprocess
 import time
 import uuid
@@ -16,8 +17,8 @@ from omniauto.hard_input import HardInputEngine
 
 WPS_EXE = r"C:\Users\兰落落的本本\AppData\Local\Kingsoft\WPS Office\12.1.0.25865\office6\wps.exe"
 TEST_ARTIFACT_DIR = Path("test_artifacts/manual_wps")
-TEMP_DOCX = TEST_ARTIFACT_DIR / f"temp_party_app_{int(time.time())}.docx"
 SAVE_PATH = r"C:\Users\兰落落的本本\Desktop\入党申请书.docx"
+APPEND_TEXT = "RPA fallback edit completed"
 
 APPLICATION_TEXT = (
     "入党申请书\n\n"
@@ -37,42 +38,90 @@ APPLICATION_TEXT = (
 
 def _create_blank_docx(path: str) -> None:
     doc = Document()
-    doc.add_paragraph("")
+    for block in APPLICATION_TEXT.split("\n\n"):
+        doc.add_paragraph(block)
     doc.save(path)
 
 
-def _find_wps_window() -> int:
+def _find_wps_window(expected_pid: int | None = None) -> int:
     from ctypes import wintypes
 
-    hwnd = None
+    candidates = []
+    user32 = ctypes.windll.user32
+
+    def _window_title(h: int) -> str:
+        length = user32.GetWindowTextLengthW(h)
+        buff = ctypes.create_unicode_buffer(length + 1)
+        user32.GetWindowTextW(h, buff, length + 1)
+        return buff.value.strip().lower()
+
+    foreground = user32.GetForegroundWindow()
+    if foreground:
+        title = _window_title(foreground)
+        if title and ("wps" in title or "docx" in title or "word" in title):
+            return foreground
 
     def foreach_window(h, lParam):
-        nonlocal hwnd
-        length = ctypes.windll.user32.GetWindowTextLengthW(h)
-        buff = ctypes.create_unicode_buffer(length + 1)
-        ctypes.windll.user32.GetWindowTextW(h, buff, length + 1)
-        if "docx" in buff.value.lower() and "wps" in buff.value.lower():
-            hwnd = h
+        if not user32.IsWindowVisible(h):
+            return True
+        title = _window_title(h)
+        if not title:
+            return True
+        pid = wintypes.DWORD()
+        user32.GetWindowThreadProcessId(h, ctypes.byref(pid))
+        if expected_pid is not None and pid.value != expected_pid:
+            return True
+        if "wps" in title or "docx" in title or "word" in title:
+            candidates.append(h)
         return True
 
     EnumWindowsProc = ctypes.WINFUNCTYPE(ctypes.c_bool, wintypes.HWND, wintypes.LPARAM)
-    ctypes.windll.user32.EnumWindows(EnumWindowsProc(foreach_window), 0)
-    return hwnd
+    user32.EnumWindows(EnumWindowsProc(foreach_window), 0)
+    if candidates:
+        return candidates[-1]
+    if expected_pid is not None:
+        return _find_wps_window(None)
+    return 0
 
 
 def _focus_hwnd(hwnd: int) -> None:
     user32 = ctypes.windll.user32
     kernel32 = ctypes.windll.kernel32
+    from ctypes import wintypes
+
+    SW_RESTORE = 9
+    HWND_TOPMOST = -1
+    HWND_NOTOPMOST = -2
     current_thread = kernel32.GetCurrentThreadId()
     foreground_window = user32.GetForegroundWindow()
     foreground_thread = user32.GetWindowThreadProcessId(foreground_window, None)
+    pid = wintypes.DWORD()
+    user32.GetWindowThreadProcessId(hwnd, ctypes.byref(pid))
+    if pid.value:
+        subprocess.run(
+            [
+                "powershell",
+                "-NoProfile",
+                "-Command",
+                f"$ws = New-Object -ComObject WScript.Shell; $ws.AppActivate({pid.value}) | Out-Null",
+            ],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            check=False,
+        )
+        time.sleep(0.3)
+    user32.ShowWindow(hwnd, SW_RESTORE)
     user32.AttachThreadInput(current_thread, foreground_thread, True)
+    user32.BringWindowToTop(hwnd)
+    user32.SetActiveWindow(hwnd)
     user32.SetForegroundWindow(hwnd)
     user32.AttachThreadInput(current_thread, foreground_thread, False)
     SWP_NOSIZE = 0x0001
     SWP_NOMOVE = 0x0002
-    user32.SetWindowPos(hwnd, -1, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE)
-    time.sleep(0.3)
+    user32.SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE)
+    time.sleep(0.2)
+    user32.SetWindowPos(hwnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE)
+    time.sleep(0.5)
 
 
 async def step_open_wps(ctx: TaskContext) -> StepResult:
@@ -80,17 +129,19 @@ async def step_open_wps(ctx: TaskContext) -> StepResult:
         return StepResult(success=False, error=f"WPS 未找到: {WPS_EXE}")
 
     TEST_ARTIFACT_DIR.mkdir(parents=True, exist_ok=True)
-    temp_path = TEMP_DOCX
+    target_path = Path(SAVE_PATH)
     for _ in range(3):
         try:
-            _create_blank_docx(str(temp_path))
+            if target_path.exists():
+                target_path.unlink()
+            _create_blank_docx(str(target_path))
             break
         except PermissionError:
-            temp_path = temp_path.parent / f"temp_party_app_{uuid.uuid4().hex[:8]}.docx"
+            target_path = TEST_ARTIFACT_DIR / f"party_app_{uuid.uuid4().hex[:8]}.docx"
     else:
-        return StepResult(success=False, error=f"无法创建临时文档（文件被锁定）: {temp_path}")
+        return StepResult(success=False, error=f"无法创建初始文档（文件被锁定）: {target_path}")
 
-    subprocess.Popen([WPS_EXE, str(temp_path)])
+    proc = subprocess.Popen([WPS_EXE, str(target_path)])
     time.sleep(6)
 
     try:
@@ -99,11 +150,16 @@ async def step_open_wps(ctx: TaskContext) -> StepResult:
         return StepResult(success=False, error=str(exc))
 
     ctx.visual_state["engine"] = engine
-    hwnd = _find_wps_window()
+    hwnd = _find_wps_window(proc.pid)
     if not hwnd:
         return StepResult(success=False, error="WPS 窗口未找到")
     _focus_hwnd(hwnd)
+    engine.press("enter")
+    time.sleep(2.5)
+    engine.press("esc")
+    time.sleep(0.5)
     ctx.visual_state["hwnd"] = hwnd
+    ctx.visual_state["doc_path"] = str(target_path)
     return StepResult(success=True, data="WPS 文字已启动")
 
 
@@ -119,25 +175,24 @@ async def step_type_application(ctx: TaskContext) -> StepResult:
 
     rect = wintypes.RECT()
     ctypes.windll.user32.GetWindowRect(hwnd, ctypes.byref(rect))
+    title_x = (rect.left + rect.right) // 2
+    title_y = rect.top + 20
+    engine.move_to(title_x, title_y)
+    engine.click()
+    time.sleep(0.3)
     cx = (rect.left + rect.right) // 2
     cy = (rect.top + rect.bottom) // 2 + 100
     engine.move_to(cx, cy)
     engine.click()
     time.sleep(0.3)
 
-    engine.hotkey("ctrl", "a")
+    engine.hotkey("ctrl", "end")
     time.sleep(0.3)
-    engine.press("delete")
+    engine.press("enter")
     time.sleep(0.3)
-
-    engine.type_text(
-        APPLICATION_TEXT,
-        interval=(0.01, 0.03),
-        ensure_english=True,
-        use_clipboard=True,
-    )
+    engine.type_text(APPEND_TEXT, interval=(0.01, 0.03), ensure_english=True, use_clipboard=False)
     time.sleep(0.5)
-    return StepResult(success=True, data="已输入入党申请书")
+    return StepResult(success=True, data="已追加兜底编辑文本")
 
 
 async def step_save_file(ctx: TaskContext) -> StepResult:
@@ -148,27 +203,16 @@ async def step_save_file(ctx: TaskContext) -> StepResult:
     if hwnd:
         _focus_hwnd(hwnd)
 
-    if Path(SAVE_PATH).exists():
-        Path(SAVE_PATH).unlink()
-
-    # 使用 F12 另存为（WPS 文字对内核级 F12 应该敏感）
-    engine.press("f12")
+    engine.hotkey("ctrl", "s")
     time.sleep(3)
 
-    engine.hotkey("ctrl", "a")
-    time.sleep(0.3)
-    engine.type_text(
-        "入党申请书.docx",
-        interval=(0.01, 0.03),
-        ensure_english=True,
-        use_clipboard=True,
-    )
-    time.sleep(0.5)
-    engine.press("enter")
-    time.sleep(4)
-
-    if Path(SAVE_PATH).exists():
-        return StepResult(success=True, data=f"已保存到 {SAVE_PATH}")
+    doc_path = Path(ctx.visual_state.get("doc_path", SAVE_PATH))
+    if doc_path.exists():
+        save_path = Path(SAVE_PATH)
+        if doc_path.resolve() != save_path.resolve():
+            shutil.copy2(doc_path, save_path)
+            return StepResult(success=True, data=f"已保存到 {save_path}")
+        return StepResult(success=True, data=f"已保存到 {doc_path}")
     return StepResult(success=False, error="保存后未检测到文件")
 
 

@@ -39,3 +39,5 @@ packages = ["src/omniauto"]
 asyncio_mode = "auto"
 testpaths = ["tests"]
 pythonpath = ["src"]
+addopts = "--basetemp=test_artifacts/pytest-tmp"
+cache_dir = "test_artifacts/.pytest_cache"

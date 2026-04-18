@@ -1,11 +1,11 @@
-﻿"""Low-disturbance ecommerce research workflow for 1688 女装."""
+﻿"""Low-disturbance ecommerce research workflow for 1688 汽车轮胎255."""
 
 import asyncio
 import json
 import random
 from datetime import datetime
 from pathlib import Path
-from urllib.parse import quote
+from urllib.parse import parse_qs, quote, urlencode, urlparse
 
 from omniauto.core.context import TaskContext
 from omniauto.core.state_machine import AtomicStep, Workflow
@@ -13,9 +13,9 @@ from omniauto.engines.browser import StealthBrowser
 from omniauto.recovery import RecoveryPolicy
 from omniauto.utils.auth_manager import is_captcha_page, is_login_page
 
-KEYWORD = "女装"
+KEYWORD = "汽车轮胎255"
 SITE_NAME = "1688"
-TASK_NAME = "1688_nvzhuang_5_retry"
+TASK_NAME = "1688_tire_255_5"
 SITE_HOME_URL = "https://www.1688.com"
 KEYWORD_GBK = quote(KEYWORD, encoding="gbk")
 BASE_URL = (
@@ -24,9 +24,9 @@ BASE_URL = (
     "&sortType=price_sort-asc"
 )
 MAX_PAGES = 5
-LIST_PAGE_LIMIT = 20
-DETAIL_SAMPLE_SIZE = 2
-OUTPUT_DIR = Path("data/reports/1688_nvzhuang_5_retry")
+LIST_PAGE_LIMIT = 30
+DETAIL_SAMPLE_SIZE = 10
+OUTPUT_DIR = Path("data/reports/1688_tire_255_5")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 ARTIFACT_DIR = OUTPUT_DIR / "browser_artifacts"
 ARTIFACT_DIR.mkdir(parents=True, exist_ok=True)
@@ -56,6 +56,7 @@ RISK_TEXT_TOKENS = (
 RESULT_SELECTOR = ".search-offer-item, .offer-item"
 
 _all_items: list[dict] = []
+_top_cheapest: list[dict] = []
 _enriched_items: list[dict] = []
 _skip_count = 0
 
@@ -75,6 +76,21 @@ def _write_status(state: str, **extra: object) -> None:
     payload = {"task_id": TASK_NAME, "state": state, "updated_at": datetime.now().isoformat()}
     payload.update(extra)
     _write_json(STATUS_PATH, payload)
+
+
+def _canonical_1688_link(url: str) -> str:
+    if not url:
+        return ""
+    parsed = urlparse(url)
+    query = parse_qs(parsed.query)
+    offer_id = query.get("offerId", [""])[0]
+    sku_id = query.get("skuId", [""])[0] or query.get("hotSaleSkuId", [""])[0]
+    if offer_id:
+        clean_query = {"offerId": offer_id}
+        if sku_id:
+            clean_query["skuId"] = sku_id
+        return f"http://detail.m.1688.com/page/index.html?{urlencode(clean_query)}"
+    return f"{parsed.scheme}://{parsed.netloc}{parsed.path}"
 
 
 async def _write_manual_handoff(browser: StealthBrowser, reason: str, ctx: TaskContext) -> None:
@@ -116,7 +132,7 @@ async def _create_browser(user_data_dir: str) -> StealthBrowser:
 
 async def _page_text(browser: StealthBrowser) -> str:
     try:
-        return await browser.page.evaluate("() => document.body ? document.body.innerText.slice(0, 2000) : ''")
+        return await browser.page.evaluate("() => document.body ? document.body.innerText.slice(0, 3000) : ''")
     except Exception:
         return ""
 
@@ -142,14 +158,7 @@ async def _post_verify_settle(browser: StealthBrowser) -> None:
         await asyncio.sleep(random.uniform(4.0, 6.0))
 
 
-async def _goto_once(
-    browser: StealthBrowser,
-    url: str,
-    *,
-    selector: str | None,
-    ctx: TaskContext,
-    risk_reason: str,
-) -> bool:
+async def _goto_once(browser: StealthBrowser, url: str, *, selector: str | None, ctx: TaskContext, risk_reason: str) -> bool:
     await browser.goto(url, wait_until="domcontentloaded", timeout=20000)
     await asyncio.sleep(random.uniform(2.5, 4.0))
     if await _is_risk_page(browser):
@@ -239,7 +248,8 @@ async def _extract_list_items(browser: StealthBrowser) -> list[dict]:
     valid = []
     seen_links: set[str] = set()
     for item in items:
-        link = item.get("link", "")
+        link = _canonical_1688_link(item.get("link", ""))
+        item["link"] = link
         if not item.get("title"):
             continue
         if "/offer/" not in link and "detail." not in link:
@@ -249,6 +259,26 @@ async def _extract_list_items(browser: StealthBrowser) -> list[dict]:
         seen_links.add(link)
         valid.append(item)
     return valid
+
+
+def _pick_top_cheapest(items: list[dict], limit: int) -> list[dict]:
+    deduped: dict[str, dict] = {}
+    for item in items:
+        link = _canonical_1688_link(item.get("link", ""))
+        if not link:
+            continue
+        item["link"] = link
+        existing = deduped.get(link)
+        if existing is None:
+            deduped[link] = item
+            continue
+        old_price = existing.get("price_num")
+        new_price = item.get("price_num")
+        if old_price is None or (new_price is not None and new_price < old_price):
+            deduped[link] = item
+    candidates = [item for item in deduped.values() if item.get("price_num") is not None]
+    candidates.sort(key=lambda item: (item.get("price_num") is None, item.get("price_num"), item.get("title", "")))
+    return candidates[:limit]
 
 
 async def _extract_detail(browser: StealthBrowser) -> dict:
@@ -268,7 +298,7 @@ async def _extract_detail(browser: StealthBrowser) -> dict:
                 if (!els.length) continue;
                 els.forEach((el) => {
                     const text = (el.innerText || '').trim();
-                    if (text && text.length < 100) params.push(text);
+                    if (text && text.length < 120) params.push(text);
                 });
                 if (params.length) break;
             }
@@ -276,7 +306,7 @@ async def _extract_detail(browser: StealthBrowser) -> dict:
                 shop_name: shop ? shop.innerText.trim() : '',
                 location: location ? location.innerText.trim() : '',
                 business_model: model ? model.innerText.trim() : '',
-                params: params.slice(0, 20),
+                params: params.slice(0, 30),
             };
         }
         """
@@ -305,7 +335,7 @@ async def step_search(ctx: TaskContext):
 
 
 async def step_scrape_pages(ctx: TaskContext):
-    global _all_items
+    global _all_items, _top_cheapest
     browser: StealthBrowser = ctx.browser_state["browser"]
     actual_pages = 0
 
@@ -326,32 +356,22 @@ async def step_scrape_pages(ctx: TaskContext):
             await browser.simulate_human_viewing()
             await browser.cooldown(12.0, 18.0)
 
+    _top_cheapest = _pick_top_cheapest(_all_items, DETAIL_SAMPLE_SIZE)
     ctx.metadata["list_pages_completed"] = actual_pages
     ctx.metadata["list_items_total"] = len(_all_items)
-    return {"success": actual_pages > 0 and len(_all_items) > 0, "pages": actual_pages, "total": len(_all_items)}
+    ctx.metadata["top_cheapest_count"] = len(_top_cheapest)
+    return {"success": actual_pages > 0 and len(_all_items) > 0 and len(_top_cheapest) > 0, "pages": actual_pages, "total": len(_all_items), "top_count": len(_top_cheapest)}
 
 
 async def step_enrich_details(ctx: TaskContext):
     global _enriched_items, _skip_count
     browser: StealthBrowser = ctx.browser_state["browser"]
 
-    if not _all_items:
+    if not _top_cheapest:
         return {"success": True, "sample_size": 0, "target": 0}
 
-    sorted_items = sorted(_all_items, key=lambda item: (item.get("price_num") is None, item.get("price_num")))
-    sample = []
-    seen_links: set[str] = set()
-    for item in sorted_items:
-        link = item.get("link", "")
-        if not link or link in seen_links:
-            continue
-        seen_links.add(link)
-        sample.append(item)
-        if len(sample) >= DETAIL_SAMPLE_SIZE:
-            break
-
-    _safe_print(f"[Step 3] Enrich up to {len(sample)} detail pages")
-    for index, item in enumerate(sample, 1):
+    _safe_print(f"[Step 3] Enrich top {len(_top_cheapest)} cheapest detail pages")
+    for index, item in enumerate(_top_cheapest, 1):
         detail_url = item.get("link")
         if not detail_url:
             continue
@@ -374,9 +394,9 @@ async def step_enrich_details(ctx: TaskContext):
         item["screenshot"] = screenshot_name
         _enriched_items.append(item)
 
-    ctx.metadata["detail_sample_target"] = len(sample)
+    ctx.metadata["detail_sample_target"] = len(_top_cheapest)
     ctx.metadata["detail_sample_completed"] = len([item for item in _enriched_items if item.get("detail")])
-    return {"success": True, "sample_size": len(_enriched_items), "target": len(sample)}
+    return {"success": True, "sample_size": len(_enriched_items), "target": len(_top_cheapest)}
 
 
 async def step_generate_report(ctx: TaskContext):
@@ -386,6 +406,7 @@ async def step_generate_report(ctx: TaskContext):
         "site": SITE_NAME,
         "safe_mode": True,
         "total_items": len(_all_items),
+        "top_cheapest_count": len(_top_cheapest),
         "sample_size": len(_enriched_items),
         "skip_count": _skip_count,
         "list_pages_completed": ctx.metadata.get("list_pages_completed", 0),
@@ -393,6 +414,7 @@ async def step_generate_report(ctx: TaskContext):
         "detail_sample_completed": ctx.metadata.get("detail_sample_completed", 0),
         "stopped_reason": ctx.metadata.get("stopped_reason"),
         "all_items": _all_items,
+        "top_cheapest_items": _top_cheapest,
         "items": _enriched_items,
         "generated_at": datetime.now().isoformat(),
     }
@@ -410,13 +432,14 @@ async def step_generate_report(ctx: TaskContext):
         lines = [
             "<html><head><meta charset='utf-8'><title>Report</title></head><body>",
             f"<h1>{KEYWORD} - {SITE_NAME} report</h1>",
-            f"<p>List items: {len(_all_items)} | Detail enriched: {len(_enriched_items)} | Skipped: {_skip_count}</p>",
+            f"<p>List items: {len(_all_items)} | Top cheapest: {len(_top_cheapest)} | Detail enriched: {len(_enriched_items)} | Skipped: {_skip_count}</p>",
             f"<p>Stopped reason: {ctx.metadata.get('stopped_reason') or 'none'}</p>",
-            "<table border='1' cellpadding='6'><tr><th>Title</th><th>Price</th><th>Shop</th><th>Page</th></tr>",
+            "<h2>Top 10 cheapest</h2>",
+            "<table border='1' cellpadding='6'><tr><th>Title</th><th>Price</th><th>Page</th><th>Link</th></tr>",
         ]
-        for item in _all_items:
+        for item in _top_cheapest:
             lines.append(
-                f"<tr><td>{item.get('title','')}</td><td>{item.get('price_text','')}</td><td>{item.get('shop_name','')}</td><td>{item.get('source_page','')}</td></tr>"
+                f"<tr><td>{item.get('title','')}</td><td>{item.get('price_text','')}</td><td>{item.get('source_page','')}</td><td>{item.get('link','')}</td></tr>"
             )
         lines.append("</table></body></html>")
         html_path.write_text("\n".join(lines), encoding="utf-8")
@@ -425,6 +448,7 @@ async def step_generate_report(ctx: TaskContext):
         "report_ready",
         final_state="report_ready",
         total_items=len(_all_items),
+        top_cheapest_count=len(_top_cheapest),
         detail_sample_completed=ctx.metadata.get("detail_sample_completed", 0),
         stopped_reason=ctx.metadata.get("stopped_reason"),
     )
