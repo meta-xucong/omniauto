@@ -26,7 +26,10 @@
 8. [skills/README.md](/D:/AI/AI_RPA/skills/README.md)
 这里看给 AI 的 Skill 有哪些、分别负责什么。
 
-9. [docs/development.md](/D:/AI/AI_RPA/docs/development.md)
+9. [CAPABILITIES_AND_WORKFLOW.md](/D:/AI/AI_RPA/docs/CAPABILITIES_AND_WORKFLOW.md)
+这里看系统当前已经具备什么能力、默认采用什么工作方式、哪里是能力边界。
+
+10. [docs/development.md](/D:/AI/AI_RPA/docs/development.md)
 如果要继续开发、扩展模板、补测试，从这里开始。
 
 ## 一句话理解这套结构
@@ -38,6 +41,18 @@
 - 测试产物统一放在 `test_artifacts/`
 - 用户可读 Skill 导航在 [skills](/D:/AI/AI_RPA/skills)
 - AI 运行时 Skill 在 `.agents/skills/`
+
+## 这套系统以后默认怎么工作
+
+默认采用：
+
+`自然语言 -> AI 识别任务 -> 映射到程序已有能力 -> 生成确定性脚本/工作流 -> 程序执行`
+
+而不是：
+
+`直接调用 AI 本身代做`
+
+如果任务超出当前程序能力边界，就明确返回“当前处理不了”，再通过新增模块、补模板、扩展步骤库或 Recovery 能力，把这类任务正式补进系统。
 
 ## 如果你只想快速试一下
 

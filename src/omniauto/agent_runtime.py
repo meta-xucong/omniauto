@@ -72,18 +72,44 @@ class OmniAutoAgent:
     # 意图分类
     # ------------------------------------------------------------------
     def _classify_intent(self, text: str) -> str:
-        t = text.lower()
-        if any(k in t for k in ("状态", "结果", "怎么样", "失败了吗", "完成了吗", "队列")):
-            return "query_status"
-        if any(k in t for k in ("列出定时任务", "有哪些定时", "list scheduled")):
+        normalized = text.lower().strip()
+
+        explicit_schedule_keywords = (
+            "????",
+            "????",
+            "????",
+            "????",
+            "schedule",
+            "cron",
+        )
+        if any(keyword in normalized for keyword in explicit_schedule_keywords):
+            return "schedule"
+
+        relative_schedule_keywords = ("??", "??", "??")
+        if any(keyword in normalized for keyword in relative_schedule_keywords):
+            return "schedule"
+
+        list_schedule_keywords = ("??????", "?????", "list scheduled")
+        if any(keyword in normalized for keyword in list_schedule_keywords):
             return "list_schedules"
-        if any(k in t for k in ("有哪些步骤", "支持什么操作", "list steps", "list available")):
+
+        list_step_keywords = ("?????", "??????", "list steps", "list available")
+        if any(keyword in normalized for keyword in list_step_keywords):
             return "list_steps"
-        if any(k in t for k in ("每天", "每周", "每隔", "schedule", "cron")):
-            return "schedule"
-        # "定时任务"单独出现时若无创建关键词，则视为查询（已在上面 list_schedules 处理）
-        if any(k in t for k in ("创建定时", "新建定时", "添加定时", "安排定时")):
-            return "schedule"
+
+        query_keywords = (
+            "????",
+            "????",
+            "????",
+            "????",
+            "????",
+            "????",
+            "pending tasks",
+            "workflow status",
+        )
+        if any(keyword in normalized for keyword in query_keywords):
+            return "query_status"
+
         return "task"
 
     def _prepare_script(self, description: str) -> tuple[Optional[Dict[str, Any]], Optional[str], Optional[AgentResult]]:
