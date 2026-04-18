@@ -390,8 +390,7 @@ OmniAuto 以后默认采用这条工作方式：
 
 如果你要快速理解 OmniAuto 的当前工作方式，建议按这个顺序看：
 
-1. [START_HERE.md](/D:/AI/AI_RPA/START_HERE.md)
-2. [PROJECT_STRUCTURE.md](/D:/AI/AI_RPA/PROJECT_STRUCTURE.md)
-3. [CAPABILITIES_AND_WORKFLOW.md](/D:/AI/AI_RPA/docs/CAPABILITIES_AND_WORKFLOW.md)
-4. [development.md](/D:/AI/AI_RPA/docs/development.md)
-
+1. [START_HERE.md](../START_HERE.md)
+2. [PROJECT_STRUCTURE.md](../PROJECT_STRUCTURE.md)
+3. [CAPABILITIES_AND_WORKFLOW.md](CAPABILITIES_AND_WORKFLOW.md)
+4. [development.md](development.md)

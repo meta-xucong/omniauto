@@ -30,8 +30,8 @@
 
 如果你是第一次了解项目，优先看：
 
-1. [README.md](/D:/AI/AI_RPA/README.md)
-2. [START_HERE.md](/D:/AI/AI_RPA/START_HERE.md)
-3. [workflows/examples/README.md](/D:/AI/AI_RPA/workflows/examples/README.md)
+1. [README.md](../../README.md)
+2. [START_HERE.md](../../START_HERE.md)
+3. [workflows/examples/README.md](../examples/README.md)
 
 只有在需要查看历史实现、迁移旧任务、或排查兼容问题时，再进入这个目录。
