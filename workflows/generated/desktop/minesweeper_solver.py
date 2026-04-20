@@ -1,10 +1,11 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import ctypes
 from ctypes import wintypes
 import math
 import os
 import random
+import subprocess
 import time
 from collections import defaultdict
 from dataclasses import dataclass
@@ -16,13 +17,29 @@ from PIL import Image
 from omniauto.engines.visual import VisualEngine
 
 
+def _enable_dpi_awareness() -> None:
+    """Best-effort DPI awareness so window rect, screenshot, and mouse coords use one scale."""
+    try:
+        ctypes.windll.shcore.SetProcessDpiAwareness(2)
+        return
+    except Exception:
+        pass
+    try:
+        ctypes.windll.user32.SetProcessDPIAware()
+    except Exception:
+        pass
+
+
+_enable_dpi_awareness()
+
+
 EXE_PATH = Path("D:/Program Files (x86)/\u626b\u96f7/Minesweeper.exe")
 ARTIFACT_DIR = Path("D:/AI/AI_RPA/test_artifacts/verification/minesweeper")
 ARTIFACT_DIR.mkdir(parents=True, exist_ok=True)
 
 PROCESS_NAME = "Minesweeper.exe"
 TOTAL_MINES = 99
-MAX_ATTEMPTS = 12
+MAX_ATTEMPTS = 50
 MAX_REPEAT_FAILURE_SECONDS = 180
 MAX_STAGNATION_SECONDS = 12
 MAX_NO_PROGRESS_SECONDS = 20
@@ -30,18 +47,18 @@ STOP_ON_FAILURE = os.getenv("OMNIAUTO_MINESWEEPER_STOP_ON_FAILURE", "0") == "1"
 SINGLE_ATTEMPT_MODE = os.getenv("OMNIAUTO_MINESWEEPER_SINGLE_ATTEMPT", "0") == "1"
 ENABLE_CSP_FLAGS = os.getenv("OMNIAUTO_MINESWEEPER_ENABLE_CSP_FLAGS", "0") == "1"
 MAX_CSP_OPEN_BATCH = 1
-MAX_DET_OPEN_BATCH = 3
-MAX_DET_FLAG_BATCH = 2
+MAX_DET_OPEN_BATCH = 5
+MAX_DET_FLAG_BATCH = 6
 OPENING_BOOST_OPENED_THRESHOLD = 18
-MAX_OPENING_BOOST_CLICKS = 0
+MAX_OPENING_BOOST_CLICKS = 4
 BOARD_CONSENSUS_FRAMES = 3
 MIN_GOOD_OPENING_OPENED = 12
 MAX_EXACT_COMPONENT_CELLS = 22
 MAX_GROUPED_COMPONENT_AREAS = 26
-DET_FLAG_CONFIRM_FRAMES = 4
-DET_OPEN_CONFIRM_FRAMES = 2
+DET_FLAG_CONFIRM_FRAMES = 1
+DET_OPEN_CONFIRM_FRAMES = 1
 CSP_FLAG_CONFIRM_FRAMES = 2
-CSP_OPEN_CONFIRM_FRAMES = 2
+CSP_OPEN_CONFIRM_FRAMES = 1
 
 STATE_HIDDEN = -1
 STATE_FLAG = -2
@@ -114,14 +131,66 @@ class BoardGeometry:
     cell: int
     cols: int
     rows: int
+    x_edges: list[int] | None = None
+    y_edges: list[int] | None = None
 
     def center_local(self, row: int, col: int) -> tuple[int, int]:
+        if self.x_edges and self.y_edges and len(self.x_edges) >= self.cols + 1 and len(self.y_edges) >= self.rows + 1:
+            return (
+                int(round((self.x_edges[col] + self.x_edges[col + 1]) / 2)),
+                int(round((self.y_edges[row] + self.y_edges[row + 1]) / 2)),
+            )
         return (
             int(self.left + col * self.cell + self.cell / 2),
             int(self.top + row * self.cell + self.cell / 2),
         )
 
+    def cell_rect_local(self, row: int, col: int) -> tuple[int, int, int, int]:
+        if self.x_edges and self.y_edges and len(self.x_edges) >= self.cols + 1 and len(self.y_edges) >= self.rows + 1:
+            return (
+                int(self.x_edges[col]),
+                int(self.y_edges[row]),
+                int(self.x_edges[col + 1]),
+                int(self.y_edges[row + 1]),
+            )
+        return (
+            int(self.left + col * self.cell),
+            int(self.top + row * self.cell),
+            int(self.left + (col + 1) * self.cell),
+            int(self.top + (row + 1) * self.cell),
+        )
+
+    def click_points_local(self, row: int, col: int) -> list[tuple[int, int]]:
+        left, top, right, bottom = self.cell_rect_local(row, col)
+        width = max(1, right - left)
+        height = max(1, bottom - top)
+        center_x = int(round((left + right) / 2))
+        center_y = int(round((top + bottom) / 2))
+        board_left, board_top, board_right, board_bottom = self.board_rect_local()
+        board_center_x = (board_left + board_right) / 2
+        board_center_y = (board_top + board_bottom) / 2
+        inward_x = center_x + int(round((board_center_x - center_x) * 0.18))
+        inward_y = center_y + int(round((board_center_y - center_y) * 0.18))
+        inset_left = left + max(3, int(round(width * 0.25)))
+        inset_right = right - max(3, int(round(width * 0.25)))
+        inset_top = top + max(3, int(round(height * 0.25)))
+        inset_bottom = bottom - max(3, int(round(height * 0.25)))
+        inward_x = min(max(inward_x, inset_left), inset_right)
+        inward_y = min(max(inward_y, inset_top), inset_bottom)
+        inward = (inward_x, inward_y)
+        points = [inward]
+        if (center_x, center_y) != inward:
+            points.append((center_x, center_y))
+        return points
+
     def board_rect_local(self) -> tuple[int, int, int, int]:
+        if self.x_edges and self.y_edges:
+            return (
+                int(self.x_edges[0]),
+                int(self.y_edges[0]),
+                int(self.x_edges[-1]),
+                int(self.y_edges[-1]),
+            )
         return (
             self.left,
             self.top,
@@ -248,6 +317,19 @@ class MinesweeperSolver:
         os.system(f'taskkill /IM "{PROCESS_NAME}" /F >nul 2>nul')
         time.sleep(0.4)
 
+    def is_session_locked(self) -> bool:
+        try:
+            result = subprocess.run(
+                ["tasklist", "/FI", "IMAGENAME eq LogonUI.exe"],
+                capture_output=True,
+                text=True,
+                timeout=3,
+                check=False,
+            )
+        except Exception:
+            return False
+        return "LogonUI.exe" in (result.stdout or "")
+
     def launch_fresh_game(self) -> None:
         self.kill_existing_game()
         os.startfile(str(EXE_PATH))
@@ -263,18 +345,21 @@ class MinesweeperSolver:
     def click_absolute_raw(self, x: int, y: int) -> None:
         self.ensure_window()
         self.user32.SetCursorPos(x, y)
-        time.sleep(0.03)
+        time.sleep(0.02)
         self.user32.mouse_event(0x0002, 0, 0, 0, 0)
-        time.sleep(0.03)
+        time.sleep(0.02)
         self.user32.mouse_event(0x0004, 0, 0, 0, 0)
-        time.sleep(0.12)
+        time.sleep(0.09)
 
-    def left_click(self, row: int, col: int) -> None:
+    def left_click(self, row: int, col: int, variant: int = 0) -> None:
         self.ensure_window()
-        local_x, local_y = self.geometry.center_local(row, col)  # type: ignore[union-attr]
+        points = self.geometry.click_points_local(row, col)  # type: ignore[union-attr]
+        local_x, local_y = points[min(variant, len(points) - 1)]
         x = self.window_rect[0] + local_x
         y = self.window_rect[1] + local_y
-        self.click_absolute(x, y)
+        # Use the same raw Win32 path as right_click to avoid pyauto_desktop
+        # introducing button-state ambiguity or coordinate drift.
+        self.click_absolute_raw(x, y)
 
     def right_click(self, row: int, col: int) -> None:
         self.ensure_window()
@@ -286,7 +371,7 @@ class MinesweeperSolver:
         self.user32.mouse_event(0x0008, 0, 0, 0, 0)
         time.sleep(0.02)
         self.user32.mouse_event(0x0010, 0, 0, 0, 0)
-        time.sleep(0.08)
+        time.sleep(0.06)
 
     def capture(self, name: str) -> tuple[Image.Image, np.ndarray]:
         self.ensure_window()
@@ -327,21 +412,75 @@ class MinesweeperSolver:
         row_min = max(40, int(arr.shape[0] * 0.18))
         row_max = max(row_min + 40, int(arr.shape[0] * 0.9))
 
-        col_starts = [g[0] for g in col_groups if col_margin <= g[0] <= arr.shape[1] - col_margin]
+        selected_col_groups = [g for g in col_groups if col_margin <= g[0] <= arr.shape[1] - col_margin]
+        col_starts = [g[0] for g in selected_col_groups]
         if len(col_starts) < 10:
             raise RuntimeError("\u65e0\u6cd5\u8bc6\u522b\u626b\u96f7\u68cb\u76d8\u5217\u8fb9\u754c")
         cell = int(round(float(np.median(np.diff(col_starts)))))
         left = col_starts[0]
         cols = int(round((col_starts[-1] - left) / cell))
 
-        row_starts = [g[0] for g in row_groups if row_min <= g[0] <= row_max]
+        selected_row_groups = [g for g in row_groups if row_min <= g[0] <= row_max]
+        row_starts = [g[0] for g in selected_row_groups]
         if len(row_starts) < 8:
             raise RuntimeError("\u65e0\u6cd5\u8bc6\u522b\u626b\u96f7\u68cb\u76d8\u884c\u8fb9\u754c")
         row_cell = int(round(float(np.median(np.diff(row_starts[: min(6, len(row_starts) - 1)])))))
         cell = int(round((cell + row_cell) / 2))
         top = row_starts[0] - cell
         rows = int(round((row_starts[-1] - top) / cell))
-        return BoardGeometry(left=left, top=top, cell=cell, cols=cols, rows=rows)
+        x_edges = [int(round((g[0] + g[1]) / 2)) for g in selected_col_groups[: cols + 1]]
+        y_edges = [int(round((g[0] + g[1]) / 2)) for g in selected_row_groups[: rows + 1]]
+        if len(x_edges) < cols + 1:
+            x_edges = [int(round(left + i * cell)) for i in range(cols + 1)]
+        if len(y_edges) < rows + 1:
+            y_edges = [int(round(top + i * cell)) for i in range(rows + 1)]
+        return BoardGeometry(left=left, top=top, cell=cell, cols=cols, rows=rows, x_edges=x_edges, y_edges=y_edges)
+
+    def geometry_alignment_score(self, arr: np.ndarray, geometry: BoardGeometry) -> float:
+        board_left, board_top, board_right, board_bottom = geometry.board_rect_local()
+        if (
+            geometry.cell < 12
+            or board_left < 2
+            or board_top < 2
+            or board_right > arr.shape[1] - 2
+            or board_bottom > arr.shape[0] - 2
+        ):
+            return float("-inf")
+        dark = (arr[:, :, 0] < 90) & (arr[:, :, 1] < 90) & (arr[:, :, 2] < 120)
+        line_scores: list[float] = []
+        for index in range(geometry.cols + 1):
+            x = int(round(geometry.left + index * geometry.cell))
+            strip = dark[board_top:board_bottom, x - 1 : x + 2]
+            line_scores.append(float(strip.mean()))
+        for index in range(geometry.rows + 1):
+            y = int(round(geometry.top + index * geometry.cell))
+            strip = dark[y - 1 : y + 2, board_left:board_right]
+            line_scores.append(float(strip.mean()))
+        if not line_scores:
+            return float("-inf")
+        return float(np.mean(line_scores))
+
+    def refine_geometry(self, arr: np.ndarray, geometry: BoardGeometry) -> BoardGeometry:
+        best = geometry
+        best_score = self.geometry_alignment_score(arr, geometry)
+        for cell_delta in (-1, 0, 1):
+            candidate_cell = geometry.cell + cell_delta
+            if candidate_cell < 12:
+                continue
+            for dx in range(-4, 5):
+                for dy in range(-4, 5):
+                    candidate = BoardGeometry(
+                        left=geometry.left + dx,
+                        top=geometry.top + dy,
+                        cell=candidate_cell,
+                        cols=geometry.cols,
+                        rows=geometry.rows,
+                    )
+                    score = self.geometry_alignment_score(arr, candidate)
+                    if score > best_score:
+                        best = candidate
+                        best_score = score
+        return best
 
     def normalize_cell_patch(self, crop: np.ndarray) -> np.ndarray:
         inner = crop[8:-8, 8:-8]
@@ -358,35 +497,52 @@ class MinesweeperSolver:
                     continue
                 arr = np.array(Image.open(path).convert("RGB"))
                 geometry = self.detect_geometry(arr)
-                x0 = geometry.left + col * geometry.cell
-                y0 = geometry.top + row * geometry.cell
-                crop = arr[y0:y0 + geometry.cell, x0:x0 + geometry.cell]
+                x0, y0, x1, y1 = geometry.cell_rect_local(row, col)
+                crop = arr[y0:y1, x0:x1]
                 templates[label].append(self.normalize_cell_patch(crop))
         self.reference_templates = dict(templates)
         return self.reference_templates
 
     def classify_cell(self, arr: np.ndarray, row: int, col: int) -> int:
-        x0 = self.geometry.left + col * self.geometry.cell  # type: ignore[union-attr]
-        y0 = self.geometry.top + row * self.geometry.cell  # type: ignore[union-attr]
-        crop = arr[y0 : y0 + self.geometry.cell, x0 : x0 + self.geometry.cell]  # type: ignore[union-attr]
-        center = crop[12:-12, 12:-12]
-        channel_diff = np.max(center, axis=2) - np.min(center, axis=2)
-        dark_pixels = np.sum(np.mean(center, axis=2) < 70)
-        bright_pixels = np.sum(np.mean(center, axis=2) > 215)
-        red_pixels = np.sum((center[:, :, 0] > 160) & (center[:, :, 1] < 110) & (center[:, :, 2] < 110))
-        colorful = center[channel_diff > 40]
-        mean_rgb = center.mean(axis=(0, 1))
-        std_rgb = center.std(axis=(0, 1))
-        blue_dominant = float(np.mean((center[:, :, 2] > center[:, :, 1] + 10) & (center[:, :, 1] > center[:, :, 0] + 5)))
+        x0, y0, x1, y1 = self.geometry.cell_rect_local(row, col)  # type: ignore[union-attr]
+        crop = arr[y0:y1, x0:x1]
+        core = crop[20:-20, 20:-20]
+        channel_diff = np.max(core, axis=2) - np.min(core, axis=2)
+        dark_pixels = np.sum(np.mean(core, axis=2) < 70)
+        bright_pixels = np.sum(np.mean(core, axis=2) > 215)
+        red_pixels = np.sum((core[:, :, 0] > 160) & (core[:, :, 1] < 110) & (core[:, :, 2] < 110))
+        colorful = core[channel_diff > 40]
+        mean_rgb = core.mean(axis=(0, 1))
+        std_rgb = core.std(axis=(0, 1))
 
+        if red_pixels > 450 and dark_pixels > 220 and bright_pixels < 180:
+            return STATE_FLAG
+        if red_pixels > 220 and bright_pixels > 340 and dark_pixels < 120:
+            return STATE_FLAG
+        if red_pixels > 170 and len(colorful) > 420 and dark_pixels < 50:
+            return STATE_FLAG
         if (
-            blue_dominant > 0.98
-            and mean_rgb[2] > 245
-            and mean_rgb[1] > 210
-            and mean_rgb[0] > 150
-            and std_rgb[0] > 8
+            red_pixels == 0
+            and dark_pixels < 40
+            and bright_pixels < 40
+            and len(colorful) > 500
+            and std_rgb[0] < 18
+            and std_rgb[1] < 18
+            and std_rgb[2] < 12
         ):
             return STATE_HIDDEN
+        if (
+            red_pixels == 0
+            and len(colorful) < 20
+            and dark_pixels < 40
+            and mean_rgb[0] > 185
+            and mean_rgb[1] > 195
+            and mean_rgb[2] > 215
+            and std_rgb[0] < 8
+            and std_rgb[1] < 8
+            and std_rgb[2] < 8
+        ):
+            return STATE_EMPTY
 
         patch = self.normalize_cell_patch(crop)
         templates = self.get_reference_templates()
@@ -419,11 +575,11 @@ class MinesweeperSolver:
                 if best_label.isdigit():
                     return int(best_label)
 
-        if red_pixels > 200 and dark_pixels < 80 and bright_pixels < 220:
+        if red_pixels > 120 and dark_pixels < 120 and bright_pixels < 260:
             return STATE_FLAG
-        if bright_pixels > 520 and len(colorful) < 80:
+        if bright_pixels > 150 and len(colorful) < 80:
             return STATE_EMPTY
-        if bright_pixels < 180 and len(colorful) > 1200:
+        if bright_pixels < 40 and len(colorful) > 500:
             return STATE_HIDDEN
         if len(colorful) < 20:
             return STATE_EMPTY
@@ -448,7 +604,7 @@ class MinesweeperSolver:
         first_board = self.read_board(arr)
         boards = [first_board]
         latest_arr = arr
-        time.sleep(0.05)
+        time.sleep(0.03)
         _, latest_arr = self.capture(f"{tag}_consensus_01.png")
         second_board = self.read_board(latest_arr)
         boards.append(second_board)
@@ -457,7 +613,7 @@ class MinesweeperSolver:
             return second_board, latest_arr
 
         for frame_idx in range(2, BOARD_CONSENSUS_FRAMES):
-            time.sleep(0.06)
+            time.sleep(0.04)
             _, latest_arr = self.capture(f"{tag}_consensus_{frame_idx:02d}.png")
             boards.append(self.read_board(latest_arr))
 
@@ -535,6 +691,18 @@ class MinesweeperSolver:
             (rows // 4, (3 * cols) // 4),
             ((3 * rows) // 4, cols // 4),
             ((3 * rows) // 4, (3 * cols) // 4),
+            (rows // 3, cols // 2),
+            ((2 * rows) // 3, cols // 2),
+            (rows // 2, cols // 3),
+            (rows // 2, (2 * cols) // 3),
+            (0, 0),
+            (0, cols - 1),
+            (rows - 1, 0),
+            (rows - 1, cols - 1),
+            (1, 1),
+            (1, cols - 2),
+            (rows - 2, 1),
+            (rows - 2, cols - 2),
         ]
         seen = set()
         unique: list[tuple[int, int]] = []
@@ -545,8 +713,87 @@ class MinesweeperSolver:
             if cell not in seen:
                 unique.append(cell)
                 seen.add(cell)
-        unique.sort(key=lambda cell: (self.failed_openers[cell], random.random()))
+        preference = {cell: idx for idx, cell in enumerate(unique)}
+        unique.sort(key=lambda cell: (self.failed_openers[cell], preference[cell], random.random()))
         return unique
+
+    @staticmethod
+    def forbidden_open_cells(
+        clicked_open_cells: set[tuple[int, int]],
+        ever_open_cells: set[tuple[int, int]],
+        confirmed_open_values: dict[tuple[int, int], int],
+        excluded_cells: set[tuple[int, int]] | None = None,
+    ) -> set[tuple[int, int]]:
+        blocked = set(clicked_open_cells) | set(ever_open_cells) | set(confirmed_open_values)
+        if excluded_cells:
+            blocked |= set(excluded_cells)
+        return blocked
+
+    def can_open_cell(
+        self,
+        cell: tuple[int, int],
+        board: np.ndarray,
+        clicked_open_cells: set[tuple[int, int]],
+        ever_open_cells: set[tuple[int, int]],
+        confirmed_open_values: dict[tuple[int, int], int],
+        excluded_cells: set[tuple[int, int]] | None = None,
+    ) -> bool:
+        if cell in self.forbidden_open_cells(clicked_open_cells, ever_open_cells, confirmed_open_values, excluded_cells):
+            return False
+        row, col = cell
+        return board[row, col] == STATE_HIDDEN
+
+    def try_opening_boost(
+        self,
+        arr: np.ndarray,
+        board: np.ndarray,
+        clicked_open_cells: set[tuple[int, int]],
+        ever_open_cells: set[tuple[int, int]],
+        confirmed_open_values: dict[tuple[int, int], int],
+        excluded_cells: set[tuple[int, int]],
+        opening_boost_clicks: int,
+        step: int,
+    ) -> tuple[np.ndarray | None, int, tuple[int, int] | None]:
+        if opening_boost_clicks >= MAX_OPENING_BOOST_CLICKS:
+            return None, opening_boost_clicks, None
+
+        rows, cols = board.shape
+        preferred = self.opening_candidates()
+        extra_scatter = [
+            (rows // 3, cols // 2),
+            ((2 * rows) // 3, cols // 2),
+            (rows // 2, cols // 3),
+            (rows // 2, (2 * cols) // 3),
+        ]
+        candidates = []
+        seen: set[tuple[int, int]] = set()
+        for cell in preferred + extra_scatter:
+            row, col = cell
+            row = max(0, min(rows - 1, row))
+            col = max(0, min(cols - 1, col))
+            normalized = (row, col)
+            if normalized not in seen:
+                candidates.append(normalized)
+                seen.add(normalized)
+
+        for boost_row, boost_col in candidates:
+            boost_cell = (boost_row, boost_col)
+            if not self.can_open_cell(boost_cell, board, clicked_open_cells, ever_open_cells, confirmed_open_values, excluded_cells):
+                continue
+            arr, _post_open_board, click_result = self.attempt_open_action(
+                arr,
+                board,
+                board_signature=hash(board.tobytes()),
+                cell=boost_cell,
+                tag=f"attempt_{self.attempt:02d}_opening_boost_{step:03d}.png",
+            )
+            if click_result in {"changed", "game_over_dialog", "lost"}:
+                clicked_open_cells.add(boost_cell)
+                opening_boost_clicks += 1
+                self.last_actions.append(f"opening_boost:{boost_row},{boost_col}")
+                return arr, opening_boost_clicks, boost_cell
+
+        return None, MAX_OPENING_BOOST_CLICKS, None
 
     def deterministic_actions(self, board: np.ndarray) -> tuple[list[tuple[int, int]], list[tuple[int, int]]]:
         to_open: set[tuple[int, int]] = set()
@@ -868,6 +1115,20 @@ class MinesweeperSolver:
             combined_risks.setdefault(cell, global_risk)
         return combined_risks, global_risk, exact_safe_open, exact_safe_flag
 
+    def reconfirm_csp_actions(
+        self,
+        arr: np.ndarray,
+        board: np.ndarray,
+        csp_open: set[tuple[int, int]],
+        csp_flag: set[tuple[int, int]],
+        tag: str,
+    ) -> tuple[np.ndarray, np.ndarray, list[tuple[int, int]], list[tuple[int, int]]]:
+        refreshed_board, refreshed_arr = self.read_board_consensus(arr, f"{tag}_reconfirm")
+        _risks, _global_risk, refreshed_open, refreshed_flag = self.frontier_probabilities(refreshed_board)
+        stable_open = sorted(set(csp_open) & set(refreshed_open))
+        stable_flag = sorted(set(csp_flag) & set(refreshed_flag))
+        return refreshed_arr, refreshed_board, stable_open, stable_flag
+
     def heuristic_frontier_risks(
         self,
         frontier: set[tuple[int, int]],
@@ -914,13 +1175,28 @@ class MinesweeperSolver:
                     return candidate
 
         min_risk = min(combined_risks[cell] for cell in hidden_cells)
-        candidates = [cell for cell in hidden_cells if combined_risks[cell] <= min_risk + 0.015]
+        best_safety = 1.0 - min_risk
+        cutoff_safety = best_safety * 0.90
+        candidates = [
+            cell
+            for cell in hidden_cells
+            if (1.0 - combined_risks[cell]) >= cutoff_safety or combined_risks[cell] <= min_risk + 0.02
+        ]
         non_frontier_hidden = [cell for cell in hidden_cells if cell not in frontier]
         opened_cells_set = {
             (r, c)
             for r in range(board.shape[0])
             for c in range(board.shape[1])
             if board[r, c] >= 0
+        }
+        rows, cols = board.shape
+        corner_like_cells = {
+            (0, 0), (0, cols - 1), (rows - 1, 0), (rows - 1, cols - 1),
+            (1, 1), (1, cols - 2), (rows - 2, 1), (rows - 2, cols - 2),
+        }
+        edge_cells = {
+            cell for cell in hidden_cells
+            if cell[0] in {0, 1, rows - 2, rows - 1} or cell[1] in {0, 1, cols - 2, cols - 1}
         }
 
         def zero_probability(cell: tuple[int, int]) -> float:
@@ -939,29 +1215,48 @@ class MinesweeperSolver:
         }
         reference_cells = opened_cells_set or frontier or hidden_cells
 
-        def exploration_score(cell: tuple[int, int]) -> tuple[float, int, int]:
+        def unconstrained_score(cell: tuple[int, int]) -> tuple[int, float, int, int]:
+            corner_bias = 0 if cell in corner_like_cells else (1 if cell in edge_cells else 2)
             nearest_known = min(
                 abs(cell[0] - other[0]) + abs(cell[1] - other[1])
                 for other in reference_cells
                 if other != cell
             )
             center_bias = abs(cell[0] - board.shape[0] // 2) + abs(cell[1] - board.shape[1] // 2)
-            return (-nearest_known, center_bias, self.failed_guess_counts[cell])
+            return (
+                corner_bias,
+                -zero_probability(cell),
+                -nearest_known,
+                center_bias + self.failed_guess_counts[cell],
+            )
 
-        def candidate_score(cell: tuple[int, int]) -> tuple[float, float, float, int, int, int]:
+        def secondary_safety(cell: tuple[int, int]) -> float:
+            safe_neighbors = [
+                1.0 - combined_risks.get(nb, global_risk)
+                for nb in self.neighbors(*cell)
+                if board[nb] == STATE_HIDDEN
+            ]
+            if not safe_neighbors:
+                return 1.0 - combined_risks[cell]
+            return (1.0 - combined_risks[cell]) * (sum(safe_neighbors) / len(safe_neighbors))
+
+        def frontier_influence(cell: tuple[int, int]) -> int:
+            return sum(1 for nb in self.neighbors(*cell) if board[nb] > 0)
+
+        def candidate_score(cell: tuple[int, int]) -> tuple[float, float, float, float, int, int]:
             risk = combined_risks[cell] + self.failed_guess_counts[cell] * 0.08
-            expansion = sum(1 for nb in self.neighbors(*cell) if board[nb] == STATE_HIDDEN)
             zero_chance = zero_probability(cell)
-            support = frontier_support[cell]
+            influence = frontier_influence(cell)
+            secondary = secondary_safety(cell)
             center_bias = abs(cell[0] - board.shape[0] // 2) + abs(cell[1] - board.shape[1] // 2)
-            return (risk, -zero_chance, -support, -expansion, center_bias, cell[0] * 100 + cell[1])
+            return (risk, -zero_chance, -secondary, -influence, center_bias, cell[0] * 100 + cell[1])
 
         if non_frontier_hidden and global_risk <= min_risk + 0.03:
             strategic_non_frontier = [
                 cell for cell in non_frontier_hidden if combined_risks.get(cell, global_risk) <= min_risk + 0.03
             ]
             if strategic_non_frontier:
-                return min(strategic_non_frontier, key=exploration_score)
+                return min(strategic_non_frontier, key=unconstrained_score)
 
         return min(candidates, key=candidate_score)
 
@@ -1008,6 +1303,25 @@ class MinesweeperSolver:
             return
         _, arr = self.capture(f"dialog_probe_attempt_{self.attempt:02d}.png")
 
+        def restart_succeeded(probe: np.ndarray, tag: str) -> bool:
+            if self.find_dialog_hwnd(["\u6e38\u620f\u5931\u8d25"]) is None:
+                time.sleep(0.25)
+                try:
+                    _, confirm = self.capture(f"{tag}_confirm.png")
+                except RuntimeError:
+                    self.reuse_existing_game = False
+                    return False
+                if self.find_dialog_hwnd(["\u6e38\u620f\u5931\u8d25"]) is None:
+                    confirm_dialog = self.dialog_kind(confirm)
+                    if confirm_dialog != "game_over_dialog":
+                        return True
+            dialog = self.dialog_kind(probe)
+            if dialog != "game_over_dialog":
+                interruption = self.interruption_kind(probe)
+                if interruption not in {"game_over_dialog", "lost"}:
+                    return True
+            return False
+
         def try_points(points: list[tuple[int, int]], prefix: str, mode: str) -> bool:
             for idx, (x, y) in enumerate(points):
                 try:
@@ -1021,7 +1335,7 @@ class MinesweeperSolver:
                 except RuntimeError:
                     self.reuse_existing_game = False
                     return False
-                if self.dialog_kind(probe) != "game_over_dialog":
+                if restart_succeeded(probe, f"{prefix}_{self.attempt:02d}_{idx}"):
                     self.log_dialog_restart(mode, idx, (x, y))
                     return True
                 try:
@@ -1035,7 +1349,7 @@ class MinesweeperSolver:
                 except RuntimeError:
                     self.reuse_existing_game = False
                     return False
-                if self.dialog_kind(probe) != "game_over_dialog":
+                if restart_succeeded(probe, f"{prefix}_{self.attempt:02d}_{idx}_raw"):
                     self.log_dialog_restart(mode, idx, (x, y))
                     return True
             return False
@@ -1152,15 +1466,19 @@ class MinesweeperSolver:
                 (left + int(width * 0.60), top + int(height * 0.57)),
             ]
             try_points(generic_points, "dialog_probe_generic", "generic")
+        try:
+            self.launch_fresh_game()
+            self.reuse_existing_game = True
+        except RuntimeError:
+            self.reuse_existing_game = False
 
     def detect_loss(self, arr: np.ndarray) -> bool:
         if self.geometry is None:
             return False
         for row in range(self.geometry.rows):
             for col in range(self.geometry.cols):
-                x0 = self.geometry.left + col * self.geometry.cell
-                y0 = self.geometry.top + row * self.geometry.cell
-                crop = arr[y0:y0 + self.geometry.cell, x0:x0 + self.geometry.cell]
+                x0, y0, x1, y1 = self.geometry.cell_rect_local(row, col)
+                crop = arr[y0:y1, x0:x1]
                 center = crop[10:-10, 10:-10]
                 red = np.sum((center[:, :, 0] > 170) & (center[:, :, 1] < 120) & (center[:, :, 2] < 120))
                 dark = np.sum((center[:, :, 0] < 60) & (center[:, :, 1] < 60) & (center[:, :, 2] < 60))
@@ -1192,6 +1510,134 @@ class MinesweeperSolver:
         flagged = int(np.sum(board == STATE_FLAG))
         opened = int(np.sum(board >= 0))
         return hidden, flagged, opened
+
+    def local_board_signature(self, board: np.ndarray, cell: tuple[int, int]) -> tuple[int, ...]:
+        cells = [cell] + self.neighbors(*cell)
+        return tuple(int(board[row, col]) for row, col in cells)
+
+    def local_visual_signature(self, arr: np.ndarray, cell: tuple[int, int]) -> tuple[int, ...]:
+        assert self.geometry is not None
+        cells = [cell] + self.neighbors(*cell)
+        signature: list[int] = []
+        for row, col in cells:
+            x0, y0, x1, y1 = self.geometry.cell_rect_local(row, col)
+            crop = arr[y0:y1, x0:x1]
+            core = crop[20:-20, 20:-20]
+            mean_rgb = core.mean(axis=(0, 1))
+            std_rgb = core.std(axis=(0, 1))
+            red_pixels = int(np.sum((core[:, :, 0] > 160) & (core[:, :, 1] < 110) & (core[:, :, 2] < 110)))
+            bright_pixels = int(np.sum(np.mean(core, axis=2) > 215))
+            dark_pixels = int(np.sum(np.mean(core, axis=2) < 70))
+            colorful = int(np.sum((np.max(core, axis=2) - np.min(core, axis=2)) > 40))
+            signature.extend(
+                [
+                    int(round(mean_rgb[0])),
+                    int(round(mean_rgb[1])),
+                    int(round(mean_rgb[2])),
+                    int(round(std_rgb[0])),
+                    int(round(std_rgb[1])),
+                    int(round(std_rgb[2])),
+                    red_pixels // 10,
+                    bright_pixels // 10,
+                    dark_pixels // 10,
+                    colorful // 10,
+                ]
+            )
+        return tuple(signature)
+
+    def refresh_geometry_from(self, arr: np.ndarray) -> None:
+        if self.geometry is not None:
+            return
+        try:
+            self.geometry = self.detect_geometry(arr)
+        except RuntimeError:
+            pass
+
+    def assess_board_action_result(
+        self,
+        before_arr: np.ndarray,
+        before_board: np.ndarray,
+        before_signature: int,
+        cell: tuple[int, int],
+        tag: str,
+        expected_state: int | None = None,
+    ) -> tuple[np.ndarray, np.ndarray | None, str]:
+        _, arr = self.capture(tag)
+        interruption = self.interruption_kind(arr)
+        if interruption in {"game_over_dialog", "lost", "new_game", "exit_game", "process_missing"}:
+            return arr, None, interruption
+
+        post_board, arr = self.read_board_consensus(arr, f"{tag}_consensus")
+        interruption = self.interruption_kind(arr)
+        if interruption in {"game_over_dialog", "lost", "new_game", "exit_game", "process_missing"}:
+            return arr, post_board, interruption
+
+        row, col = cell
+        before_visual = self.local_visual_signature(before_arr, cell)
+        after_visual = self.local_visual_signature(arr, cell)
+        visual_changed = before_visual != after_visual
+        if expected_state is not None and post_board[row, col] == expected_state:
+            return arr, post_board, "changed"
+        if hash(post_board.tobytes()) == before_signature:
+            if visual_changed:
+                time.sleep(0.06)
+                _, retry_arr = self.capture(f"{tag}_retry.png")
+                interruption = self.interruption_kind(retry_arr)
+                if interruption in {"game_over_dialog", "lost", "new_game", "exit_game", "process_missing"}:
+                    return retry_arr, None, interruption
+                retry_board, retry_arr = self.read_board_consensus(retry_arr, f"{tag}_retry_consensus")
+                interruption = self.interruption_kind(retry_arr)
+                if interruption in {"game_over_dialog", "lost", "new_game", "exit_game", "process_missing"}:
+                    return retry_arr, retry_board, interruption
+                if expected_state is not None and retry_board[row, col] == expected_state:
+                    return retry_arr, retry_board, "changed"
+                if hash(retry_board.tobytes()) != before_signature:
+                    return retry_arr, retry_board, "changed"
+                if self.local_visual_signature(retry_arr, cell) != before_visual:
+                    return retry_arr, retry_board, "changed"
+            self.refresh_geometry_from(arr)
+            return arr, post_board, "no_effect"
+
+        before_local = self.local_board_signature(before_board, cell)
+        after_local = self.local_board_signature(post_board, cell)
+        if post_board[row, col] == STATE_HIDDEN and before_local == after_local:
+            if visual_changed:
+                return arr, post_board, "changed"
+            self.refresh_geometry_from(arr)
+            return arr, post_board, "blocked"
+
+        return arr, post_board, "changed"
+
+    def attempt_open_action(
+        self,
+        arr: np.ndarray,
+        board: np.ndarray,
+        board_signature: int,
+        cell: tuple[int, int],
+        tag: str,
+    ) -> tuple[np.ndarray, np.ndarray | None, str]:
+        row, col = cell
+        latest_arr = arr
+        latest_board: np.ndarray | None = None
+        latest_result = "no_effect"
+        for variant in range(2):
+            self.left_click(row, col, variant=variant)
+            time.sleep(0.18)
+            if variant == 0:
+                variant_tag = tag
+            else:
+                stem, dot, suffix = tag.rpartition(".")
+                variant_tag = f"{stem}_alt{variant}.{suffix}" if dot else f"{tag}_alt{variant}"
+            latest_arr, latest_board, latest_result = self.assess_board_action_result(
+                latest_arr,
+                board,
+                board_signature,
+                cell,
+                variant_tag,
+            )
+            if latest_result not in {"no_effect", "blocked"}:
+                return latest_arr, latest_board, latest_result
+        return latest_arr, latest_board, latest_result
 
     def board_looks_like_loss_overlay(self, board: np.ndarray) -> bool:
         opened = int(np.sum(board >= 0))
@@ -1238,6 +1684,9 @@ class MinesweeperSolver:
         summary_path.write_text("\n".join(lines), encoding="utf-8")
 
     def start_attempt(self) -> np.ndarray:
+        if self.is_session_locked():
+            self.write_stop_summary("session_locked")
+            raise RuntimeError("绯荤粺褰撳墠澶勪簬閿佸睆/鐧诲綍鐣岄潰锛屾棤娉曠户缁壂闆疯嚜鍔ㄥ寲")
         if self.reuse_existing_game and self.find_minesweeper_hwnd() is not None:
             try:
                 self.ensure_window()
@@ -1287,16 +1736,17 @@ class MinesweeperSolver:
         arr = self.start_attempt()
         last_opened = -1
         guessed_cells: list[tuple[int, int]] = []
-        virtual_flags: set[tuple[int, int]] = set()
         confirmed_open_values: dict[tuple[int, int], int] = {}
         clicked_open_cells: set[tuple[int, int]] = set()
+        ever_open_cells: set[tuple[int, int]] = set()
+        disallowed_open_cells: set[tuple[int, int]] = set()
         if self.current_first_click is not None:
             clicked_open_cells.add(self.current_first_click)
+            ever_open_cells.add(self.current_first_click)
         pending_csp_flags: dict[tuple[int, int], int] = defaultdict(int)
-        pending_csp_opens: dict[tuple[int, int], int] = defaultdict(int)
         pending_det_flags: dict[tuple[int, int], int] = defaultdict(int)
-        pending_det_opens: dict[tuple[int, int], int] = defaultdict(int)
         last_board_signature: int | None = None
+        same_board_turns = 0
         stagnation_started_at = time.time()
         last_progress_at = time.time()
         previous_hidden: int | None = None
@@ -1347,37 +1797,30 @@ class MinesweeperSolver:
                 return False
 
             raw_board, arr = self.read_board_consensus(arr, f"attempt_{self.attempt:02d}_step_{step:03d}")
-            virtual_flags = {
-                cell
-                for cell in virtual_flags
-                if raw_board[cell] in (STATE_HIDDEN, STATE_FLAG)
-            }
             for row in range(raw_board.shape[0]):
                 for col in range(raw_board.shape[1]):
                     value = int(raw_board[row, col])
                     if value >= 0:
                         confirmed_open_values[(row, col)] = value
+                        ever_open_cells.add((row, col))
             board = raw_board.copy()
-            for row, col in virtual_flags:
-                if board[row, col] == STATE_HIDDEN:
-                    board[row, col] = STATE_FLAG
-            virtual_flags = self.prune_conflicting_virtual_flags(board, virtual_flags)
-            board = raw_board.copy()
-            for row, col in virtual_flags:
-                if board[row, col] == STATE_HIDDEN:
-                    board[row, col] = STATE_FLAG
             for (row, col), value in confirmed_open_values.items():
                 if board[row, col] == STATE_HIDDEN:
                     board[row, col] = value
-            if self.board_looks_like_loss_overlay(board):
-                self.capture(f"attempt_{self.attempt:02d}_invalid_overlay_{step:03d}.png")
-                self.last_actions.append("loss_overlay_guard")
-                return False
+            observed_flag_cells = {
+                (row, col)
+                for row in range(board.shape[0])
+                for col in range(board.shape[1])
+                if board[row, col] == STATE_FLAG
+            }
             hidden, flagged, opened = self.board_progress(board)
             board_signature = hash(board.tobytes())
             if board_signature != last_board_signature:
                 last_board_signature = board_signature
                 stagnation_started_at = time.time()
+                same_board_turns = 0
+            else:
+                same_board_turns += 1
             if previous_hidden is None or hidden < previous_hidden or flagged > (previous_flagged or 0):
                 last_progress_at = time.time()
             previous_hidden = hidden
@@ -1386,10 +1829,14 @@ class MinesweeperSolver:
             if time.time() - stagnation_started_at > MAX_STAGNATION_SECONDS:
                 self.capture(f"attempt_{self.attempt:02d}_stagnation_{step:03d}.png")
                 self.last_actions.append("stagnation")
+                if self.current_first_click is not None and step <= 10:
+                    self.failed_openers[self.current_first_click] += 1
                 return False
             if time.time() - last_progress_at > MAX_NO_PROGRESS_SECONDS:
                 self.capture(f"attempt_{self.attempt:02d}_no_progress_{step:03d}.png")
                 self.last_actions.append("no_progress")
+                if self.current_first_click is not None and step <= 10:
+                    self.failed_openers[self.current_first_click] += 1
                 return False
 
             if hidden == 0:
@@ -1415,22 +1862,266 @@ class MinesweeperSolver:
             exact_probabilities, _, exact_safe_open, exact_safe_flag = self.frontier_probabilities(board)
             csp_open = sorted(exact_safe_open)
             csp_flag = sorted(exact_safe_flag)
-            force_guess = flag_only_streak >= 4
+            det_open, det_flag = self.deterministic_actions(board)
+            subset_open, subset_flag = self.subset_inference_actions(board)
+
+            if det_open or subset_open or det_flag or subset_flag:
+                csp_open = []
+                csp_flag = []
+            elif csp_open or csp_flag:
+                arr, board, csp_open, csp_flag = self.reconfirm_csp_actions(
+                    arr,
+                    board,
+                    set(csp_open),
+                    set(csp_flag),
+                    f"attempt_{self.attempt:02d}_step_{step:03d}",
+                )
+                for row in range(board.shape[0]):
+                    for col in range(board.shape[1]):
+                        value = int(board[row, col])
+                        if value >= 0:
+                            confirmed_open_values[(row, col)] = value
+                            ever_open_cells.add((row, col))
+                observed_flag_cells = {
+                    (row, col)
+                    for row in range(board.shape[0])
+                    for col in range(board.shape[1])
+                    if board[row, col] == STATE_FLAG
+                }
+                board_signature = hash(board.tobytes())
 
             if (
                 step <= 1
                 and opened < MIN_GOOD_OPENING_OPENED
                 and not csp_open
                 and not csp_flag
+                and not det_open
+                and not det_flag
+                and not subset_open
+                and not subset_flag
             ):
                 self.capture(f"attempt_{self.attempt:02d}_poor_opening_{step:03d}.png")
+                boosted_arr, opening_boost_clicks, boost_cell = self.try_opening_boost(
+                    arr,
+                    board,
+                    clicked_open_cells,
+                    ever_open_cells,
+                    confirmed_open_values,
+                    disallowed_open_cells,
+                    opening_boost_clicks,
+                    step,
+                )
+                if boosted_arr is not None:
+                    arr = boosted_arr
+                    flag_only_streak = 0
+                    pending_streak = 0
+                    if boost_cell is not None:
+                        guessed_cells.append(boost_cell)
+                    continue
                 self.last_actions.append("poor_opening_restart")
+                if self.current_first_click is not None:
+                    self.failed_openers[self.current_first_click] += 1
                 return False
 
-            if csp_flag and not force_guess:
-                fresh_csp_flags = [(row, col) for row, col in csp_flag if (row, col) not in virtual_flags]
-                fresh_csp_flags = [cell for cell in fresh_csp_flags if cell not in confirmed_open_values and cell not in clicked_open_cells]
-                fresh_csp_flags = [cell for cell in fresh_csp_flags if self.support_count(board, cell) >= 2]
+            if csp_open:
+                csp_open = sorted(
+                    [
+                        cell
+                        for cell in csp_open
+                        if self.can_open_cell(
+                            cell,
+                            board,
+                            clicked_open_cells,
+                            ever_open_cells,
+                            confirmed_open_values,
+                            disallowed_open_cells,
+                        )
+                        and self.support_count(board, cell) >= 1
+                    ],
+                    key=lambda cell: (-self.support_count(board, cell), cell[0], cell[1]),
+                )[:MAX_CSP_OPEN_BATCH]
+                if csp_open:
+                    interrupted = False
+                    for open_index, (row, col) in enumerate(csp_open):
+                        cell = (row, col)
+                        if not self.can_open_cell(
+                            cell,
+                            board,
+                            clicked_open_cells,
+                            ever_open_cells,
+                            confirmed_open_values,
+                            disallowed_open_cells,
+                        ):
+                            disallowed_open_cells.add(cell)
+                            self.last_actions.append("csp_open_blocked")
+                            interrupted = True
+                            break
+                        arr, post_open_board, click_result = self.attempt_open_action(
+                            arr,
+                            board,
+                            board_signature,
+                            cell,
+                            f"attempt_{self.attempt:02d}_csp_opens_{step:03d}_{open_index:02d}.png",
+                        )
+                        clicked_open_cells.add(cell)
+                        if click_result in {"game_over_dialog", "lost"}:
+                            interrupted = True
+                            break
+                        if click_result in {"new_game", "exit_game", "process_missing"}:
+                            self.last_actions.append(f"csp_open_interrupted:{click_result}")
+                            interrupted = True
+                            break
+                        if click_result == "no_effect":
+                            disallowed_open_cells.add(cell)
+                            self.capture(f"attempt_{self.attempt:02d}_csp_open_no_effect_{step:03d}_{open_index:02d}.png")
+                            self.last_actions.append("csp_open_no_effect")
+                            interrupted = True
+                            break
+                        if click_result == "blocked":
+                            disallowed_open_cells.add(cell)
+                            self.capture(f"attempt_{self.attempt:02d}_csp_open_blocked_{step:03d}_{open_index:02d}.png")
+                            self.last_actions.append("csp_open_blocked")
+                            interrupted = True
+                            break
+                    self.last_actions.append(f"csp_opens:{len(csp_open)}")
+                    flag_only_streak = 0
+                    pending_streak = 0
+                    if interrupted:
+                        continue
+                    last_opened = opened
+                    continue
+
+            if det_flag or subset_flag:
+                prioritized_flags: list[tuple[int, int]] = []
+                seen_flag_cells: set[tuple[int, int]] = set()
+                for source in (det_flag, subset_flag):
+                    for cell in source:
+                        if cell in seen_flag_cells:
+                            continue
+                        seen_flag_cells.add(cell)
+                        if (
+                            cell not in observed_flag_cells
+                            and cell not in confirmed_open_values
+                            and board[cell] == STATE_HIDDEN
+                        ):
+                            prioritized_flags.append(cell)
+                prioritized_flags = sorted(
+                    prioritized_flags,
+                    key=lambda cell: (-self.support_count(board, cell), cell[0], cell[1]),
+                )[:MAX_DET_FLAG_BATCH]
+                if prioritized_flags:
+                    interrupted = False
+                    for flag_index, (row, col) in enumerate(prioritized_flags):
+                        cell = (row, col)
+                        self.right_click(row, col)
+                        time.sleep(0.12)
+                        arr, post_flag_board, flag_result = self.assess_board_action_result(
+                            arr,
+                            board,
+                            board_signature,
+                            cell,
+                            f"attempt_{self.attempt:02d}_prioritized_flags_{step:03d}_{flag_index:02d}.png",
+                            expected_state=STATE_FLAG,
+                        )
+                        if flag_result in {"game_over_dialog", "lost"}:
+                            interrupted = True
+                            break
+                        if flag_result in {"new_game", "exit_game", "process_missing"}:
+                            self.last_actions.append(f"prioritized_flag_interrupted:{flag_result}")
+                            interrupted = True
+                            break
+                        if flag_result == "no_effect":
+                            self.capture(f"attempt_{self.attempt:02d}_prioritized_flag_no_effect_{step:03d}_{flag_index:02d}.png")
+                            self.last_actions.append("prioritized_flag_no_effect")
+                            interrupted = True
+                            break
+                        if flag_result == "blocked":
+                            self.capture(f"attempt_{self.attempt:02d}_prioritized_flag_blocked_{step:03d}_{flag_index:02d}.png")
+                            self.last_actions.append("prioritized_flag_blocked")
+                            interrupted = True
+                            break
+                    self.last_actions.append(f"prioritized_flags:{len(prioritized_flags)}")
+                    flag_only_streak += 1
+                    pending_streak = 0
+                    if interrupted:
+                        continue
+                    continue
+
+            if det_open:
+                det_open = sorted(
+                    [
+                        cell
+                        for cell in det_open
+                        if self.can_open_cell(
+                            cell,
+                            board,
+                            clicked_open_cells,
+                            ever_open_cells,
+                            confirmed_open_values,
+                            disallowed_open_cells,
+                        )
+                    ],
+                    key=lambda cell: (-self.support_count(board, cell), cell[0], cell[1]),
+                )[:MAX_DET_OPEN_BATCH]
+                if det_open:
+                    interrupted = False
+                    for open_index, (row, col) in enumerate(det_open):
+                        cell = (row, col)
+                        if not self.can_open_cell(
+                            cell,
+                            board,
+                            clicked_open_cells,
+                            ever_open_cells,
+                            confirmed_open_values,
+                            disallowed_open_cells,
+                        ):
+                            disallowed_open_cells.add(cell)
+                            self.last_actions.append("open_blocked")
+                            interrupted = True
+                            break
+                        arr, post_open_board, click_result = self.attempt_open_action(
+                            arr,
+                            board,
+                            board_signature,
+                            cell,
+                            f"attempt_{self.attempt:02d}_opens_{step:03d}_{open_index:02d}.png",
+                        )
+                        clicked_open_cells.add(cell)
+                        if click_result in {"game_over_dialog", "lost"}:
+                            interrupted = True
+                            break
+                        if click_result in {"new_game", "exit_game", "process_missing"}:
+                            self.last_actions.append(f"open_interrupted:{click_result}")
+                            interrupted = True
+                            break
+                        if click_result == "no_effect":
+                            disallowed_open_cells.add(cell)
+                            self.capture(f"attempt_{self.attempt:02d}_open_no_effect_{step:03d}_{open_index:02d}.png")
+                            self.last_actions.append("open_no_effect")
+                            interrupted = True
+                            break
+                        if click_result == "blocked":
+                            disallowed_open_cells.add(cell)
+                            self.capture(f"attempt_{self.attempt:02d}_open_blocked_{step:03d}_{open_index:02d}.png")
+                            self.last_actions.append("open_blocked")
+                            interrupted = True
+                            break
+                    self.last_actions.append(f"det_opens:{len(det_open)}")
+                    flag_only_streak = 0
+                    pending_streak = 0
+                    if interrupted:
+                        continue
+                    last_opened = opened
+                    continue
+
+            if csp_flag:
+                fresh_csp_flags = [
+                    cell
+                    for cell in csp_flag
+                    if cell not in observed_flag_cells
+                    and cell not in confirmed_open_values
+                    and board[cell] == STATE_HIDDEN
+                ]
                 voted_cells = []
                 current_candidates = set(fresh_csp_flags)
                 pending_csp_flags = {
@@ -1446,80 +2137,56 @@ class MinesweeperSolver:
                     voted_cells,
                     key=lambda cell: (-self.support_count(board, cell), cell[0], cell[1]),
                 )[:MAX_DET_FLAG_BATCH]
-                if fresh_csp_flags:
-                    for row, col in fresh_csp_flags:
-                        virtual_flags.add((row, col))
-                        pending_csp_flags.pop((row, col), None)
-                    _, arr = self.capture(f"attempt_{self.attempt:02d}_csp_virtual_flags_{step:03d}.png")
-                    self.last_actions.append(f"csp_flags:{len(fresh_csp_flags)}")
-                    flag_only_streak += 1
-                    pending_streak = 0
+                if not fresh_csp_flags:
+                    self.last_actions.append("csp_flags_pending")
                     continue
-
-            if csp_open:
-                csp_open = [cell for cell in csp_open if cell not in confirmed_open_values]
-                csp_open = [cell for cell in csp_open if cell not in clicked_open_cells]
-                csp_open = [cell for cell in csp_open if self.support_count(board, cell) >= 1]
-                current_csp_open = set(csp_open)
-                pending_csp_opens = {
-                    cell: count
-                    for cell, count in pending_csp_opens.items()
-                    if cell in current_csp_open
-                }
-                for cell in csp_open:
-                    pending_csp_opens[cell] = pending_csp_opens.get(cell, 0) + 1
-                confirmed_csp_open = [cell for cell in csp_open if pending_csp_opens[cell] >= CSP_OPEN_CONFIRM_FRAMES]
-                csp_open = sorted(
-                    confirmed_csp_open,
-                    key=lambda cell: (-self.support_count(board, cell), cell[0], cell[1]),
-                )[:MAX_CSP_OPEN_BATCH]
-                if not csp_open:
-                    self.last_actions.append("csp_open_pending")
-                    pending_streak += 1
-                else:
-                    pending_streak = 0
-                if not csp_open and pending_streak < 3:
-                    continue
-                if not csp_open:
-                    pending_csp_opens.clear()
-                else:
-                    interrupted = False
-                    for open_index, (row, col) in enumerate(csp_open):
-                        self.left_click(row, col)
-                        clicked_open_cells.add((row, col))
-                        pending_csp_opens.pop((row, col), None)
-                        time.sleep(0.18)
-                        _, arr = self.capture(f"attempt_{self.attempt:02d}_csp_opens_{step:03d}_{open_index:02d}.png")
-                        post_open_board = self.read_board(arr)
-                        if hash(post_open_board.tobytes()) == board_signature:
-                            self.capture(f"attempt_{self.attempt:02d}_csp_open_no_effect_{step:03d}_{open_index:02d}.png")
-                            self.last_actions.append("csp_open_no_effect")
-                            interrupted = True
-                            break
-                        if self.interruption_kind(arr) in {"game_over_dialog", "lost"}:
-                            interrupted = True
-                            break
-                    self.last_actions.append(f"csp_opens:{len(csp_open)}")
-                    flag_only_streak = 0
-                    pending_streak = 0
-                    if interrupted:
+                interrupted = False
+                for flag_index, (row, col) in enumerate(fresh_csp_flags):
+                    cell = (row, col)
+                    if cell in confirmed_open_values or cell in clicked_open_cells:
                         continue
-                    last_opened = opened
+                    self.right_click(row, col)
+                    pending_csp_flags.pop(cell, None)
+                    time.sleep(0.12)
+                    arr, post_flag_board, flag_result = self.assess_board_action_result(
+                        arr,
+                        board,
+                        board_signature,
+                        cell,
+                        f"attempt_{self.attempt:02d}_csp_flags_{step:03d}_{flag_index:02d}.png",
+                        expected_state=STATE_FLAG,
+                    )
+                    if flag_result in {"game_over_dialog", "lost"}:
+                        interrupted = True
+                        break
+                    if flag_result in {"new_game", "exit_game", "process_missing"}:
+                        self.last_actions.append(f"csp_flag_interrupted:{flag_result}")
+                        interrupted = True
+                        break
+                    if flag_result == "no_effect":
+                        self.capture(f"attempt_{self.attempt:02d}_csp_flag_no_effect_{step:03d}_{flag_index:02d}.png")
+                        self.last_actions.append("csp_flag_no_effect")
+                        interrupted = True
+                        break
+                    if flag_result == "blocked":
+                        self.capture(f"attempt_{self.attempt:02d}_csp_flag_blocked_{step:03d}_{flag_index:02d}.png")
+                        self.last_actions.append("csp_flag_blocked")
+                        interrupted = True
+                        break
+                self.last_actions.append(f"csp_flags:{len(fresh_csp_flags)}")
+                flag_only_streak += 1
+                pending_streak = 0
+                if interrupted:
                     continue
+                continue
 
-            to_open, to_flag = self.deterministic_actions(board)
-            subset_open, subset_flag = self.subset_inference_actions(board)
-            subset_flag_set = set(subset_flag)
-            if subset_open:
-                to_open = sorted(set(to_open) | set(subset_open))
-            if subset_flag:
-                to_flag = sorted(set(to_flag) | set(subset_flag))
-            if to_flag and not force_guess:
-                fresh_flags = [(row, col) for row, col in to_flag if (row, col) not in virtual_flags]
+            if det_flag:
                 fresh_flags = [
                     cell
-                    for cell in fresh_flags
-                    if cell in subset_flag_set or self.support_count(board, cell) >= 2
+                    for cell in det_flag
+                    if cell not in observed_flag_cells
+                    and cell not in confirmed_open_values
+                    and board[cell] == STATE_HIDDEN
                 ]
                 current_det_flags = set(fresh_flags)
                 pending_det_flags = {
@@ -1532,72 +2199,111 @@ class MinesweeperSolver:
                 fresh_flags = [cell for cell in fresh_flags if pending_det_flags[cell] >= DET_FLAG_CONFIRM_FRAMES]
                 if not fresh_flags:
                     self.last_actions.append("flags_pending")
-                    pending_streak += 1
-                else:
-                    pending_streak = 0
-                if not fresh_flags and pending_streak < 3:
                     continue
-                if not fresh_flags:
-                    pending_det_flags.clear()
-                else:
-                    fresh_flags = sorted(
-                        fresh_flags,
-                        key=lambda cell: (-self.support_count(board, cell), cell[0], cell[1]),
-                    )[:MAX_DET_FLAG_BATCH]
-                    for row, col in fresh_flags:
-                        if (row, col) in confirmed_open_values or (row, col) in clicked_open_cells:
-                            continue
-                        virtual_flags.add((row, col))
-                        pending_det_flags.pop((row, col), None)
-                    _, arr = self.capture(f"attempt_{self.attempt:02d}_virtual_flags_{step:03d}.png")
-                    self.last_actions.append(f"flags:{len(fresh_flags)}")
-                    flag_only_streak += 1
-                    pending_streak = 0
+                fresh_flags = sorted(
+                    fresh_flags,
+                    key=lambda cell: (-self.support_count(board, cell), cell[0], cell[1]),
+                )[:MAX_DET_FLAG_BATCH]
+                interrupted = False
+                for flag_index, (row, col) in enumerate(fresh_flags):
+                    cell = (row, col)
+                    if cell in confirmed_open_values or cell in clicked_open_cells:
+                        continue
+                    self.right_click(row, col)
+                    pending_det_flags.pop(cell, None)
+                    time.sleep(0.12)
+                    arr, post_flag_board, flag_result = self.assess_board_action_result(
+                        arr,
+                        board,
+                        board_signature,
+                        cell,
+                        f"attempt_{self.attempt:02d}_flags_{step:03d}_{flag_index:02d}.png",
+                        expected_state=STATE_FLAG,
+                    )
+                    if flag_result in {"game_over_dialog", "lost"}:
+                        interrupted = True
+                        break
+                    if flag_result in {"new_game", "exit_game", "process_missing"}:
+                        self.last_actions.append(f"flag_interrupted:{flag_result}")
+                        interrupted = True
+                        break
+                    if flag_result == "no_effect":
+                        self.capture(f"attempt_{self.attempt:02d}_flag_no_effect_{step:03d}_{flag_index:02d}.png")
+                        self.last_actions.append("flag_no_effect")
+                        interrupted = True
+                        break
+                    if flag_result == "blocked":
+                        self.capture(f"attempt_{self.attempt:02d}_flag_blocked_{step:03d}_{flag_index:02d}.png")
+                        self.last_actions.append("flag_blocked")
+                        interrupted = True
+                        break
+                self.last_actions.append(f"flags:{len(fresh_flags)}")
+                flag_only_streak += 1
+                pending_streak = 0
+                if interrupted:
                     continue
+                continue
 
-            if to_open:
-                to_open = [cell for cell in to_open if cell not in confirmed_open_values]
-                to_open = [cell for cell in to_open if cell not in clicked_open_cells]
-                current_det_opens = set(to_open)
-                pending_det_opens = {
-                    cell: count
-                    for cell, count in pending_det_opens.items()
-                    if cell in current_det_opens
-                }
-                for cell in to_open:
-                    pending_det_opens[cell] = pending_det_opens.get(cell, 0) + 1
-                to_open = [cell for cell in to_open if pending_det_opens[cell] >= DET_OPEN_CONFIRM_FRAMES]
-                if not to_open:
-                    self.last_actions.append("opens_pending")
-                    pending_streak += 1
-                else:
-                    pending_streak = 0
-                if not to_open and pending_streak < 3:
-                    continue
-                if not to_open:
-                    pending_det_opens.clear()
-                else:
-                    to_open = sorted(
-                        to_open,
-                        key=lambda cell: (-self.support_count(board, cell), cell[0], cell[1]),
-                    )[:MAX_DET_OPEN_BATCH]
+            if subset_open:
+                subset_open = sorted(
+                    [
+                        cell
+                        for cell in subset_open
+                        if self.can_open_cell(
+                            cell,
+                            board,
+                            clicked_open_cells,
+                            ever_open_cells,
+                            confirmed_open_values,
+                            disallowed_open_cells,
+                        )
+                    ],
+                    key=lambda cell: (-self.support_count(board, cell), cell[0], cell[1]),
+                )[:MAX_DET_OPEN_BATCH]
+                if subset_open:
                     interrupted = False
-                    for open_index, (row, col) in enumerate(to_open):
-                        self.left_click(row, col)
-                        clicked_open_cells.add((row, col))
-                        pending_det_opens.pop((row, col), None)
-                        time.sleep(0.18)
-                        _, arr = self.capture(f"attempt_{self.attempt:02d}_opens_{step:03d}_{open_index:02d}.png")
-                        post_open_board = self.read_board(arr)
-                        if hash(post_open_board.tobytes()) == board_signature:
-                            self.capture(f"attempt_{self.attempt:02d}_open_no_effect_{step:03d}_{open_index:02d}.png")
-                            self.last_actions.append("open_no_effect")
+                    for open_index, (row, col) in enumerate(subset_open):
+                        cell = (row, col)
+                        if not self.can_open_cell(
+                            cell,
+                            board,
+                            clicked_open_cells,
+                            ever_open_cells,
+                            confirmed_open_values,
+                            disallowed_open_cells,
+                        ):
+                            disallowed_open_cells.add(cell)
+                            self.last_actions.append("subset_open_blocked")
                             interrupted = True
                             break
-                        if self.interruption_kind(arr) in {"game_over_dialog", "lost"}:
+                        arr, post_open_board, click_result = self.attempt_open_action(
+                            arr,
+                            board,
+                            board_signature,
+                            cell,
+                            f"attempt_{self.attempt:02d}_subset_opens_{step:03d}_{open_index:02d}.png",
+                        )
+                        clicked_open_cells.add(cell)
+                        if click_result in {"game_over_dialog", "lost"}:
                             interrupted = True
                             break
-                    self.last_actions.append(f"opens:{len(to_open)}")
+                        if click_result in {"new_game", "exit_game", "process_missing"}:
+                            self.last_actions.append(f"subset_open_interrupted:{click_result}")
+                            interrupted = True
+                            break
+                        if click_result == "no_effect":
+                            disallowed_open_cells.add(cell)
+                            self.capture(f"attempt_{self.attempt:02d}_subset_open_no_effect_{step:03d}_{open_index:02d}.png")
+                            self.last_actions.append("subset_open_no_effect")
+                            interrupted = True
+                            break
+                        if click_result == "blocked":
+                            disallowed_open_cells.add(cell)
+                            self.capture(f"attempt_{self.attempt:02d}_subset_open_blocked_{step:03d}_{open_index:02d}.png")
+                            self.last_actions.append("subset_open_blocked")
+                            interrupted = True
+                            break
+                    self.last_actions.append(f"subset_opens:{len(subset_open)}")
                     flag_only_streak = 0
                     pending_streak = 0
                     if interrupted:
@@ -1605,54 +2311,183 @@ class MinesweeperSolver:
                     last_opened = opened
                     continue
 
-            if opened < OPENING_BOOST_OPENED_THRESHOLD and opening_boost_clicks < MAX_OPENING_BOOST_CLICKS:
-                boosted = False
-                for boost_row, boost_col in self.opening_candidates():
-                    boost_cell = (boost_row, boost_col)
-                    if boost_cell in clicked_open_cells or boost_cell in confirmed_open_values:
+            if subset_flag:
+                fresh_subset_flags = [
+                    cell
+                    for cell in subset_flag
+                    if cell not in observed_flag_cells
+                    and cell not in confirmed_open_values
+                    and board[cell] == STATE_HIDDEN
+                ]
+                if fresh_subset_flags:
+                    interrupted = False
+                    for flag_index, (row, col) in enumerate(sorted(fresh_subset_flags)[:MAX_DET_FLAG_BATCH]):
+                        cell = (row, col)
+                        self.right_click(row, col)
+                        time.sleep(0.12)
+                        arr, post_flag_board, flag_result = self.assess_board_action_result(
+                            arr,
+                            board,
+                            board_signature,
+                            cell,
+                            f"attempt_{self.attempt:02d}_subset_flags_{step:03d}_{flag_index:02d}.png",
+                            expected_state=STATE_FLAG,
+                        )
+                        if flag_result in {"game_over_dialog", "lost"}:
+                            interrupted = True
+                            break
+                        if flag_result in {"new_game", "exit_game", "process_missing"}:
+                            self.last_actions.append(f"subset_flag_interrupted:{flag_result}")
+                            interrupted = True
+                            break
+                        if flag_result == "no_effect":
+                            self.capture(f"attempt_{self.attempt:02d}_subset_flag_no_effect_{step:03d}_{flag_index:02d}.png")
+                            self.last_actions.append("subset_flag_no_effect")
+                            interrupted = True
+                            break
+                        if flag_result == "blocked":
+                            self.capture(f"attempt_{self.attempt:02d}_subset_flag_blocked_{step:03d}_{flag_index:02d}.png")
+                            self.last_actions.append("subset_flag_blocked")
+                            interrupted = True
+                            break
+                    self.last_actions.append(f"subset_flags:{min(len(fresh_subset_flags), MAX_DET_FLAG_BATCH)}")
+                    flag_only_streak += 1
+                    pending_streak = 0
+                    if interrupted:
                         continue
-                    if board[boost_cell] != STATE_HIDDEN:
-                        continue
-                    self.left_click(boost_row, boost_col)
-                    clicked_open_cells.add(boost_cell)
-                    opening_boost_clicks += 1
-                    time.sleep(0.25)
-                    _, arr = self.capture(f"attempt_{self.attempt:02d}_opening_boost_{step:03d}.png")
-                    self.last_actions.append(f"opening_boost:{boost_row},{boost_col}")
-                    boosted = True
-                    break
-                else:
-                    opening_boost_clicks = MAX_OPENING_BOOST_CLICKS
-                if boosted:
                     continue
 
-            blocked_guess_cells = set(clicked_open_cells) | set(confirmed_open_values)
+            if opened < OPENING_BOOST_OPENED_THRESHOLD and opening_boost_clicks < MAX_OPENING_BOOST_CLICKS:
+                boosted_arr, opening_boost_clicks, boost_cell = self.try_opening_boost(
+                    arr,
+                    board,
+                    clicked_open_cells,
+                    ever_open_cells,
+                    confirmed_open_values,
+                    disallowed_open_cells,
+                    opening_boost_clicks,
+                    step,
+                )
+                if boosted_arr is not None:
+                    arr = boosted_arr
+                    if boost_cell is not None:
+                        guessed_cells.append(boost_cell)
+                    continue
+
+            rescue_risks, _, rescue_open, rescue_flag = self.frontier_probabilities(board)
+            rescue_open = sorted(
+                [
+                    cell for cell in rescue_open
+                    if self.can_open_cell(
+                        cell,
+                        board,
+                        clicked_open_cells,
+                        ever_open_cells,
+                        confirmed_open_values,
+                        disallowed_open_cells,
+                    )
+                ],
+                key=lambda cell: (-self.support_count(board, cell), cell[0], cell[1]),
+            )[:1]
+            rescue_flag = sorted(
+                [
+                    cell for cell in rescue_flag
+                    if cell not in observed_flag_cells
+                    and cell not in confirmed_open_values
+                    and board[cell] == STATE_HIDDEN
+                ],
+                key=lambda cell: (-self.support_count(board, cell), cell[0], cell[1]),
+            )[:1]
+            if rescue_open:
+                cell = rescue_open[0]
+                arr, _post_open_board, click_result = self.attempt_open_action(
+                    arr,
+                    board,
+                    board_signature,
+                    cell,
+                    f"attempt_{self.attempt:02d}_rescue_open_{step:03d}.png",
+                )
+                clicked_open_cells.add(cell)
+                self.last_actions.append("rescue_open")
+                if click_result in {"changed", "game_over_dialog", "lost"}:
+                    continue
+                if click_result in {"new_game", "exit_game", "process_missing"}:
+                    self.last_actions.append(f"rescue_open_interrupted:{click_result}")
+                    return False
+                disallowed_open_cells.add(cell)
+                continue
+            if rescue_flag:
+                row, col = rescue_flag[0]
+                self.right_click(row, col)
+                time.sleep(0.12)
+                arr, _post_flag_board, flag_result = self.assess_board_action_result(
+                    arr,
+                    board,
+                    board_signature,
+                    (row, col),
+                    f"attempt_{self.attempt:02d}_rescue_flag_{step:03d}.png",
+                    expected_state=STATE_FLAG,
+                )
+                self.last_actions.append("rescue_flag")
+                if flag_result in {"changed", "game_over_dialog", "lost"}:
+                    continue
+                if flag_result in {"new_game", "exit_game", "process_missing"}:
+                    self.last_actions.append(f"rescue_flag_interrupted:{flag_result}")
+                    return False
+                continue
+
+            blocked_guess_cells = self.forbidden_open_cells(
+                clicked_open_cells,
+                ever_open_cells,
+                confirmed_open_values,
+                disallowed_open_cells,
+            )
             guess_row, guess_col = self.guess_cell(board, blocked_guess_cells)
-            if (guess_row, guess_col) in confirmed_open_values or (guess_row, guess_col) in clicked_open_cells:
+            if not self.can_open_cell(
+                (guess_row, guess_col),
+                board,
+                clicked_open_cells,
+                ever_open_cells,
+                confirmed_open_values,
+                disallowed_open_cells,
+            ):
+                disallowed_open_cells.add((guess_row, guess_col))
                 self.capture(f"attempt_{self.attempt:02d}_guess_opened_blocked_{step:03d}.png")
                 self.last_actions.append("guess_opened_blocked")
                 return False
-            self.left_click(guess_row, guess_col)
+            arr, post_guess_board, click_result = self.attempt_open_action(
+                arr,
+                board,
+                board_signature,
+                (guess_row, guess_col),
+                f"attempt_{self.attempt:02d}_guess_{step:03d}.png",
+            )
             clicked_open_cells.add((guess_row, guess_col))
-            time.sleep(0.3)
-            _, arr = self.capture(f"attempt_{self.attempt:02d}_guess_{step:03d}.png")
             self.last_actions.append(f"guess:{guess_row},{guess_col}")
             flag_only_streak = 0
             pending_streak = 0
             guessed_cells.append((guess_row, guess_col))
-            post_guess_board = self.read_board(arr)
-            if hash(post_guess_board.tobytes()) == board_signature:
-                self.capture(f"attempt_{self.attempt:02d}_guess_no_effect_{step:03d}.png")
-                self.last_actions.append("guess_no_effect")
-                self.failed_guess_counts[(guess_row, guess_col)] += 2
-                continue
-
-            if opened == last_opened and self.detect_loss(arr):
+            if click_result in {"game_over_dialog", "lost"}:
                 self.capture(f"attempt_{self.attempt:02d}_lost_guess_{step:03d}.png")
                 if self.current_first_click is not None:
                     self.failed_openers[self.current_first_click] += 1
                 for cell in guessed_cells[-3:]:
                     self.failed_guess_counts[cell] += 1
+                return False
+            if click_result in {"new_game", "exit_game", "process_missing"}:
+                self.last_actions.append(f"guess_interrupted:{click_result}")
+                return False
+            if click_result == "no_effect":
+                disallowed_open_cells.add((guess_row, guess_col))
+                self.capture(f"attempt_{self.attempt:02d}_guess_no_effect_{step:03d}.png")
+                self.last_actions.append("guess_no_effect")
+                self.failed_guess_counts[(guess_row, guess_col)] += 2
+                continue
+            if click_result == "blocked":
+                disallowed_open_cells.add((guess_row, guess_col))
+                self.capture(f"attempt_{self.attempt:02d}_guess_blocked_{step:03d}.png")
+                self.last_actions.append("guess_blocked")
+                self.failed_guess_counts[(guess_row, guess_col)] += 1
                 return False
             last_opened = opened
 
