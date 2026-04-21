@@ -61,7 +61,7 @@ TEXT_TAOBAO = "\u6dd8\u5b9d"
 TEXT_SORT_PRICE = "\u4ef7\u683c"
 TEXT_SORT_COMPREHENSIVE = "\u7efc\u5408\u6392\u5e8f"
 
-ARTIFACT_DIR = Path("test_artifacts/verification/browser/taobao_login_top_shop")
+ARTIFACT_DIR = Path("runtime/test_artifacts/verification/browser/taobao_login_top_shop")
 PROFILE_DIR = ARTIFACT_DIR / "profile"
 STATUS_PATH = ARTIFACT_DIR / "status.json"
 LOGIN_STATE_PATH = ARTIFACT_DIR / "login_state.json"

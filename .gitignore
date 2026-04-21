@@ -17,6 +17,15 @@ data/reports/
 data/no_captcha.png
 outputs/
 screenshots/
+runtime/data/
+runtime/outputs/
+runtime/knowledge_runs/
+runtime/*.db
+runtime/*.sqlite
+runtime/test_artifacts/*
+!runtime/test_artifacts/
+!runtime/test_artifacts/README.md
+!runtime/README.md
 
 # Cache / misc
 .pytest_cache/

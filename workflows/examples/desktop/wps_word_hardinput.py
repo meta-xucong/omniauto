@@ -16,7 +16,7 @@ from omniauto.hard_input import HardInputEngine
 
 
 WPS_EXE = r"C:\Users\兰落落的本本\AppData\Local\Kingsoft\WPS Office\12.1.0.25865\office6\wps.exe"
-TEST_ARTIFACT_DIR = Path("test_artifacts/manual_wps")
+TEST_ARTIFACT_DIR = Path("runtime/test_artifacts/manual_wps")
 SAVE_PATH = r"C:\Users\兰落落的本本\Desktop\入党申请书.docx"
 APPEND_TEXT = "RPA fallback edit completed"
 

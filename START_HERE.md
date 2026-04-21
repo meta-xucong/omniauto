@@ -1,65 +1,62 @@
-﻿# 从哪里开始看
+# 从哪里开始看
 
 如果你是第一次打开这个项目，建议按下面顺序看：
 
 1. [README.md](README.md)
-了解项目目标、核心能力和基础用法。
-
 2. [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md)
-快速看懂每个目录分别放什么内容。
+3. [knowledge/README.md](knowledge/README.md)
+4. [knowledge/index/task_catalog.md](knowledge/index/task_catalog.md)
+5. [knowledge/index/capability_matrix.md](knowledge/index/capability_matrix.md)
+6. [docs/KNOWLEDGE_WORKFLOW.md](docs/KNOWLEDGE_WORKFLOW.md)
+7. [platform/docs/CAPABILITIES_AND_WORKFLOW.md](platform/docs/CAPABILITIES_AND_WORKFLOW.md)
+8. [platform/src/omniauto](platform/src/omniauto/)
+9. [workflows/README.md](workflows/README.md)
+10. [platform/tests/README.md](platform/tests/README.md)
+11. [runtime/test_artifacts/README.md](runtime/test_artifacts/README.md)
+12. [skills/README.md](skills/README.md)
 
-3. [src/omniauto](src/omniauto/)
-这里是核心 RPA 程序本体。
+## 一句话理解现在的结构
 
-4. [workflows/README.md](workflows/README.md)
-这里看用户任务脚本怎么分类、怎么使用。
-
-5. [workflows/examples/README.md](workflows/examples/README.md)
-这里看最容易上手的示例脚本。
-
-6. [workflows/verification/README.md](workflows/verification/README.md)
-这里看真实场景验收脚本，不和自动化代码测试混在一起。
-
-7. [workflows/generated/README.md](workflows/generated/README.md)
-这里看 AI 自动生成的任务脚本默认会落到哪里。
-
-8. [skills/README.md](skills/README.md)
-这里看给 AI 的 Skill 有哪些、分别负责什么。
-
-9. [CAPABILITIES_AND_WORKFLOW.md](docs/CAPABILITIES_AND_WORKFLOW.md)
-这里看系统当前已经具备什么能力、默认采用什么工作方式、哪里是能力边界。
-
-10. [docs/development.md](docs/development.md)
-如果要继续开发、扩展模板、补测试，从这里开始。
-
-## 一句话理解这套结构
-
-- 核心程序在 [src/omniauto](src/omniauto/)
+- 核心程序在 [platform/src/omniauto](platform/src/omniauto/)
+- 平台级自动化测试在 [platform/tests](platform/tests/)
 - 用户任务脚本在 [workflows](workflows/)
-- 自动生成脚本在 [workflows/generated](workflows/generated/)
-- 自动化代码测试在 [tests](tests/)
-- 测试产物统一放在 `test_artifacts/`
-- 用户可读 Skill 导航在 [skills](skills/)
-- AI 运行时 Skill 在 `.agents/skills/`
+- 长期任务记忆和可复用经验在 [knowledge](knowledge/)
+- 面向用户的 Skill 说明在 [skills](skills/)
+- AI 运行时 Skill 资产在 [.agents/skills](.agents/skills/)
+- 运行时数据、输出和测试产物统一收口到 [runtime](runtime/)
 
-## 这套系统以后默认怎么工作
+## 这套系统默认怎么工作
 
-默认采用：
+默认链路是：
 
-`自然语言 -> AI 识别任务 -> 映射到程序已有能力 -> 生成确定性脚本/工作流 -> 程序执行`
+`自然语言任务 -> AI 选择已有能力 -> 生成确定性 workflow -> 程序执行 -> 任务经验沉淀到 knowledge/`
 
-而不是：
+默认不会因为一次任务“看起来挺有用”就自动把内容写进 `skills/` 或 `platform/`。
 
-`直接调用 AI 本身代做`
+## 如果你是新机器上的 AI
 
-如果任务超出当前程序能力边界，就明确返回“当前处理不了”，再通过新增模块、补模板、扩展步骤库或 Recovery 能力，把这类任务正式补进系统。
+推荐最短接管路径：
 
-## 如果你只想快速试一下
+1. [knowledge/README.md](knowledge/README.md)
+2. [knowledge/index/task_catalog.md](knowledge/index/task_catalog.md)
+3. [knowledge/index/capability_matrix.md](knowledge/index/capability_matrix.md)
+4. [knowledge/index/knowledge_registry.json](knowledge/index/knowledge_registry.json)
+5. 再按任务需要读取对应的 `knowledge/tasks/`、`knowledge/patterns/`、`knowledge/lessons/`
 
-1. 先看 [workflows/examples/README.md](workflows/examples/README.md)
-2. 再挑一个示例脚本运行
-3. 需要验收时，再看 [workflows/verification/README.md](workflows/verification/README.md)
+## 当前分层原则
 
-## 测试产物放哪里
+- `knowledge/` 是自动成长的软升级层
+- `skills/` 是用户批准后的正式能力包
+- `platform/` 是用户批准后的长期基础设施层
+- `workflows/temporary/` 用来收口一次性或探索性任务
+- `scripts/` 只是冻结的兼容残留目录，不再放新内容
 
-所有测试、验收、调试阶段产生的截图和临时文件，统一放到 `test_artifacts/`，不再写入项目根目录。
+## 当前结构结论
+
+现在这套仓库已经按统一蓝图收成了：
+
+1. `platform/` 负责稳定基础设施
+2. `workflows/temporary/` 负责一次性任务
+3. `knowledge/` 负责自动成长的项目记忆
+4. `skills/` 只保留用户批准的正式能力包
+5. `runtime/` 负责所有可变运行产物

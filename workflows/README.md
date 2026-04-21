@@ -1,37 +1,34 @@
 # workflows 目录说明
 
-这里是“任务脚本层”，不是框架源码层。
+这里是任务脚本层，不是平台源码层。
 
 ## 子目录
 
-- `examples/`
-  - 参考示例脚本。
-  - 下面再按 `browser/`、`desktop/`、`scenarios/` 分类。
-
-- `verification/`
-  - 手动验收、真实场景测试脚本。
-  - 下面再按 `browser/`、`marketplaces/` 分类。
-
+- `temporary/`
+  - 一次性、探索性、偶尔使用的任务脚本
 - `generated/`
-  - AI 或模板自动生成的脚本默认输出目录。
-  - 下面再按 `browser/`、`desktop/`、`marketplaces/` 分类。
-
+  - AI 或模板生成后，仍值得保留的任务脚本
+- `verification/`
+  - 真实环境验收脚本
+- `examples/`
+  - 给人和 AI 参考的示例
 - `archive/`
-  - 历史脚本归档。
+  - 历史归档脚本
 
-## 使用约定
+## 默认落点
 
-- 新生成的任务脚本：放 `generated/`
-- 通用浏览器任务：优先放 `generated/browser/`
-- 桌面/RPA任务：优先放 `generated/desktop/`
-- 电商平台研究任务：优先放 `generated/marketplaces/`
-- 想给用户演示的脚本：放 `examples/`
-- 用来做真实验收的脚本：放 `verification/`
-- 不再主推但要保留的旧脚本：放 `archive/`
+1. 一次性或探索性任务先放 `temporary/`
+2. 结构较完整、后续还可能复用的生成任务放 `generated/`
+3. 真实环境验收脚本放 `verification/`
+4. 需要演示系统能力时放 `examples/`
+5. 不再推荐但要保留历史痕迹时放 `archive/`
 
-## 推荐阅读顺序
+## 和 knowledge 的关系
 
-1. 先看 `examples/browser/`
-2. 再看 `examples/desktop/`
-3. 需要完整场景时看 `examples/scenarios/`
-4. 做真实验收时看 `verification/`
+- `workflows/` 保存可执行脚本
+- `knowledge/` 保存这些脚本背后的任务记录、模式、经验和能力解释
+
+## 和 platform 的关系
+
+- `platform/` 是长期基础设施
+- `workflows/` 是调用这些基础设施完成具体任务的脚本层

@@ -2,7 +2,7 @@
 
 ## StealthBrowser 启动参数
 
-已内置在项目 `src/omniauto/utils/stealth.py` 中，关键项：
+已内置在项目 `platform/src/omniauto/utils/stealth.py` 中，关键项：
 - `channel='chrome'`：使用系统真实 Chrome，指纹更自然
 - `locale='zh-CN'`, `timezone_id='Asia/Shanghai'`
 - 上海地理位置 `{31.2304, 121.4737}`

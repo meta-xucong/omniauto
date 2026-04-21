@@ -26,7 +26,7 @@ BASE_URL = (
 MAX_PAGES = 5
 LIST_PAGE_LIMIT = 20
 DETAIL_SAMPLE_SIZE = 2
-OUTPUT_DIR = Path("data/reports/1688_nvzhuang_5_retry")
+OUTPUT_DIR = Path("runtime/data/reports/1688_nvzhuang_5_retry")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 ARTIFACT_DIR = OUTPUT_DIR / "browser_artifacts"
 ARTIFACT_DIR.mkdir(parents=True, exist_ok=True)
@@ -98,7 +98,7 @@ async def _create_browser(user_data_dir: str) -> StealthBrowser:
         use_system_chrome=True,
         user_data_dir=user_data_dir,
         auto_handle_login=False,
-        auth_storage_dir="data/auth",
+        auth_storage_dir="runtime/data/auth",
         auto_login_timeout=15.0,
         rotate_fingerprint=False,
         proxy="http://127.0.0.1:7890",
@@ -445,7 +445,7 @@ workflow = Workflow(
 
 
 async def main():
-    browser = await _create_browser("data/chrome_profile_1688")
+    browser = await _create_browser("runtime/data/chrome_profile_1688")
     ctx = TaskContext(task_id=TASK_NAME, browser_state={"browser": browser})
     try:
         final_state = await workflow.run(context=ctx)

@@ -24,7 +24,7 @@ description: |
    - 优先匹配 `task_type`:
      - 电商商品调研 → `ecom_product_research`
      - 通用列表抓取 → `generic_browser_scrape`
-   - 查看 `src/omniauto/templates/workflows/` 下可用模板
+   - 查看 `platform/src/omniauto/templates/workflows/` 下可用模板
 
 3. **步骤拆分（固定 4 步）**
    - Step 1: 导航搜索页（含排序参数）

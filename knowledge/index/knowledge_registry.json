@@ -1,0 +1,289 @@
+{
+  "version": 2,
+  "root": "D:/AI/AI_RPA/knowledge",
+  "tasks": [
+    {
+      "slug": "legacy-agent-browser-tasks",
+      "title": "Legacy agent browser tasks",
+      "domain": "browser",
+      "record": "tasks/browser/legacy_agent_browser_tasks.md",
+      "status": "historical_reference",
+      "evidence": [
+        "workflows/archive/",
+        "workflows/temporary/browser/",
+        "runtime/outputs/"
+      ]
+    },
+    {
+      "slug": "taobao-login-top-shop-verification",
+      "title": "Taobao login and top-shop verification",
+      "domain": "browser",
+      "record": "tasks/browser/taobao_login_top_shop_verification.md",
+      "status": "verification_asset",
+      "evidence": [
+        "workflows/verification/browser/taobao_login_top_shop.py",
+        "runtime/test_artifacts/verification/browser/taobao_login_top_shop/"
+      ]
+    },
+    {
+      "slug": "minesweeper-solver-exploration",
+      "title": "Minesweeper solver exploration",
+      "domain": "desktop",
+      "record": "tasks/desktop/minesweeper_solver_exploration.md",
+      "status": "exploratory",
+      "evidence": [
+        "workflows/temporary/desktop/minesweeper_solver.py",
+        "runtime/test_artifacts/verification/minesweeper/"
+      ]
+    },
+    {
+      "slug": "wps-hardinput-reliability-probes",
+      "title": "WPS hard-input reliability probes",
+      "domain": "desktop",
+      "record": "tasks/desktop/wps_hardinput_reliability_probes.md",
+      "status": "exploratory_useful",
+      "evidence": [
+        "workflows/examples/desktop/wps_word_hardinput.py",
+        "runtime/test_artifacts/manual_wps/"
+      ]
+    },
+    {
+      "slug": "knowledge_growth_probe",
+      "title": "Verify automatic knowledge growth closeout",
+      "domain": "general",
+      "record": "tasks/general/knowledge_growth_probe.md",
+      "status": "completed",
+      "summary": "Latest run via cli.run",
+      "evidence": [
+        "workflows/verification/general/knowledge_growth_probe.py",
+        "tasks/general/knowledge_growth_probe.md",
+        "runtime/knowledge_runs/2026-04-21/20260421_015247_knowledge_growth_probe/task_run.json",
+        "runtime/knowledge_runs/2026-04-21/20260421_030557_knowledge_growth_probe/task_run.json"
+      ],
+      "managed": true,
+      "last_updated": "2026-04-21T03:05:57"
+    },
+    {
+      "slug": "knowledge_growth_heuristic_probe",
+      "title": "Verify heuristic knowledge closeout",
+      "domain": "general",
+      "record": "tasks/general/knowledge_growth_heuristic_probe.md",
+      "status": "completed",
+      "summary": "Latest run via logic.ai_strict_probe",
+      "evidence": [
+        "workflows/verification/general/knowledge_growth_heuristic_probe.py",
+        "tasks/general/knowledge_growth_heuristic_probe.md",
+        "runtime/knowledge_runs/2026-04-21/20260421_021100_knowledge_growth_heuristic_probe/task_run.json",
+        "runtime/knowledge_runs/2026-04-21/20260421_030557_knowledge_growth_heuristic_probe/task_run.json"
+      ],
+      "managed": true,
+      "last_updated": "2026-04-21T03:05:57"
+    },
+    {
+      "slug": "1688-research-family",
+      "title": "1688 research family",
+      "domain": "marketplaces",
+      "record": "tasks/marketplaces/1688_research_family.md",
+      "status": "active_pattern_family",
+      "evidence": [
+        "workflows/generated/marketplaces/",
+        "runtime/data/reports/"
+      ]
+    },
+    {
+      "slug": "single-rocking-chair-local-excel-report",
+      "title": "Single rocking chair local Excel report",
+      "domain": "marketplaces-desktop",
+      "record": "tasks/marketplaces/single_rocking_chair_local_excel_report.md",
+      "status": "completed",
+      "evidence": [
+        "runtime/data/reports/1688_single_rocking_chair_5/",
+        "workflows/temporary/desktop/wps_single_rocking_chair_report_skill_rpa.py"
+      ]
+    },
+    {
+      "slug": "browser-recovery-manual-handoff-upgrade",
+      "title": "Browser recovery and manual handoff upgrade",
+      "domain": "platform",
+      "record": "tasks/platform/browser_recovery_and_manual_handoff_upgrade.md",
+      "status": "capability_building",
+      "evidence": [
+        "platform/src/omniauto/recovery/",
+        "platform/tests/integration/test_browser_recovery.py"
+      ]
+    },
+    {
+      "slug": "repository-knowledge-restructure",
+      "title": "Knowledge-layer introduction and backfill",
+      "domain": "platform",
+      "record": "tasks/platform/repository_knowledge_restructure.md",
+      "status": "completed",
+      "evidence": [
+        "knowledge/",
+        "START_HERE.md",
+        "PROJECT_STRUCTURE.md"
+      ]
+    }
+  ],
+  "patterns": [
+    {
+      "slug": "manual-handoff-and-resume",
+      "title": "Manual handoff and resume",
+      "domain": "browser",
+      "path": "patterns/reusable/browser/manual_handoff_and_resume.md",
+      "stage": "reusable",
+      "maturity": "emerging",
+      "summary": "Pause for a user at verification boundaries, then continue from the same flow."
+    },
+    {
+      "slug": "knowledge_growth_probe_pattern",
+      "title": "Knowledge growth probe pattern",
+      "domain": "general",
+      "path": "patterns/emerging/general/knowledge_growth_probe_pattern.md",
+      "stage": "emerging",
+      "maturity": "medium",
+      "summary": "Controlled workflows can emit structured knowledge observations during execution and let closeout persist them automatically.",
+      "evidence": [
+        "workflows/verification/general/knowledge_growth_probe.py",
+        "runtime/knowledge_runs/2026-04-21/20260421_030557_knowledge_growth_probe/task_run.json"
+      ],
+      "managed": true,
+      "last_updated": "2026-04-21T03:05:57"
+    },
+    {
+      "slug": "local-json-to-excel-report",
+      "title": "Local JSON to Excel report",
+      "domain": "marketplaces",
+      "path": "patterns/reusable/marketplaces/local_json_to_excel_report.md",
+      "stage": "reusable",
+      "maturity": "emerging",
+      "summary": "Convert structured local JSON into spreadsheet output with deterministic formatting."
+    },
+    {
+      "slug": "low-disturbance-risk-flow",
+      "title": "Low-disturbance risk flow",
+      "domain": "marketplaces",
+      "path": "patterns/reusable/marketplaces/low_disturbance_risk_flow.md",
+      "stage": "reusable",
+      "maturity": "emerging",
+      "summary": "Low-disturbance collection pattern for risk-sensitive marketplace tasks."
+    },
+    {
+      "slug": "recovery-pack-authoring",
+      "title": "Recovery pack authoring",
+      "domain": "platform",
+      "path": "patterns/reusable/platform/recovery_pack_authoring.md",
+      "stage": "reusable",
+      "maturity": "emerging",
+      "summary": "Structure browser recovery knowledge into explicit packs instead of free-form handling."
+    }
+  ],
+  "lessons": [
+    {
+      "slug": "desktop-artifact-hygiene",
+      "title": "Desktop artifact hygiene",
+      "domain": "desktop",
+      "path": "lessons/desktop/desktop_artifact_hygiene.md",
+      "trigger": "artifact_sprawl",
+      "summary": "Desktop experiments stay understandable when every run has a task-scoped artifact directory."
+    },
+    {
+      "slug": "knowledge_growth_probe_lesson",
+      "title": "Knowledge growth probe lesson",
+      "domain": "general",
+      "path": "lessons/general/knowledge_growth_probe_lesson.md",
+      "trigger": "verification_probe",
+      "summary": "If a task already knows a reusable conclusion during execution, it should emit a structured observation instead of relying on a post-hoc human reminder.",
+      "evidence": [
+        "workflows/verification/general/knowledge_growth_probe.py",
+        "runtime/knowledge_runs/2026-04-21/20260421_030557_knowledge_growth_probe/task_run.json"
+      ],
+      "managed": true,
+      "last_updated": "2026-04-21T03:05:57"
+    },
+    {
+      "slug": "pytest-temp-and-cache-hygiene",
+      "title": "Pytest temp and cache hygiene",
+      "domain": "platform",
+      "path": "lessons/platform/pytest_temp_and_cache_hygiene.md",
+      "trigger": "windows_temp_permission_warning",
+      "summary": "Point pytest temp and cache files into repo-owned paths to avoid unstable Windows temp ACLs."
+    }
+  ],
+  "capabilities": [
+    {
+      "slug": "automatic_knowledge_closeout",
+      "title": "Automatic knowledge closeout",
+      "domain": "general",
+      "path": "capabilities/observed/general/automatic_knowledge_closeout.md",
+      "maturity": "emerging",
+      "summary": "The platform can close out controlled workflows into the knowledge layer without promoting them into skills or platform code.",
+      "boundaries": "Applies to controlled workflow entrypoints; legacy ad-hoc scripts still need manual closeout.",
+      "evidence": [
+        "workflows/verification/general/knowledge_growth_probe.py",
+        "runtime/knowledge_runs/2026-04-21/20260421_030557_knowledge_growth_probe/task_run.json"
+      ],
+      "managed": true,
+      "last_updated": "2026-04-21T03:05:57"
+    },
+    {
+      "slug": "current-capability-map",
+      "title": "Current capability map",
+      "domain": "general",
+      "path": "capabilities/observed/current_capability_map.md",
+      "maturity": "summary",
+      "summary": "Human-readable overview of the project’s current capability boundaries.",
+      "boundaries": "Use the detailed capability notes and task evidence for concrete limits."
+    },
+    {
+      "slug": "knowledge_growth_probe_verification_path",
+      "title": "Verify automatic knowledge growth closeout verification path",
+      "domain": "general",
+      "path": "capabilities/observed/general/knowledge_growth_probe_verification_path.md",
+      "maturity": "emerging",
+      "summary": "Verification workflow `workflows/verification/general/knowledge_growth_probe.py` completed successfully through `cli.run`, so this verification path remains runnable under controlled execution.",
+      "boundaries": "Represents a runnable verification asset, not a broad guarantee beyond this workflow.",
+      "evidence": [
+        "workflows/verification/general/knowledge_growth_probe.py",
+        "runtime/knowledge_runs/2026-04-21/20260421_030557_knowledge_growth_probe/task_run.json"
+      ],
+      "managed": true,
+      "last_updated": "2026-04-21T03:05:57"
+    },
+    {
+      "slug": "knowledge_growth_heuristic_probe_verification_path",
+      "title": "Verify heuristic knowledge closeout verification path",
+      "domain": "general",
+      "path": "capabilities/observed/general/knowledge_growth_heuristic_probe_verification_path.md",
+      "maturity": "emerging",
+      "summary": "Verification workflow `workflows/verification/general/knowledge_growth_heuristic_probe.py` completed successfully through `logic.ai_strict_probe`, so this verification path remains runnable under controlled execution.",
+      "boundaries": "Represents a runnable verification asset, not a broad guarantee beyond this workflow.",
+      "evidence": [
+        "workflows/verification/general/knowledge_growth_heuristic_probe.py",
+        "runtime/knowledge_runs/2026-04-21/20260421_030557_knowledge_growth_heuristic_probe/task_run.json"
+      ],
+      "managed": true,
+      "last_updated": "2026-04-21T03:05:57"
+    }
+  ],
+  "proposals": [],
+  "ai_candidates": [
+    {
+      "slug": "strict_ai_candidate_verification_boundary",
+      "title": "Strict AI candidate verification boundary",
+      "domain": "general",
+      "kind": "lesson",
+      "path": "review/ai_candidates/lessons/general/strict_ai_candidate_verification_boundary.md",
+      "status": "pending_review",
+      "confidence": "medium",
+      "summary": "Strict AI candidate generation can add evidence-bound review notes without touching formal knowledge files.",
+      "evidence": [
+        "runtime/knowledge_runs/2026-04-21/20260421_030557_knowledge_growth_heuristic_probe/task_run.json",
+        "workflows/verification/general/knowledge_growth_heuristic_probe.py",
+        "tasks/general/knowledge_growth_heuristic_probe.md"
+      ],
+      "managed": true,
+      "last_updated": "2026-04-21T03:05:57"
+    }
+  ]
+}

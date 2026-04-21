@@ -6,7 +6,7 @@ from pathlib import Path
 from omniauto.core.context import TaskContext, StepResult
 from omniauto.core.state_machine import AtomicStep, Workflow
 
-ARTIFACT_DIR = Path("test_artifacts/verification/1688")
+ARTIFACT_DIR = Path("runtime/test_artifacts/verification/1688")
 
 
 async def test_1688(ctx: TaskContext) -> StepResult:
