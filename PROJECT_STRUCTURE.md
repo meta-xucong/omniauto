@@ -1,54 +1,102 @@
-﻿# OmniAuto 项目结构说明
+# OmniAuto 项目结构说明
 
-这个文件只解释目录怎么分，不涉及架构变化。
+这个文件解释每一层目录负责什么，以及新任务默认应该落到哪里。
 
-## 一眼看懂的主分区
+## 顶层分区
 
-- `src/omniauto/`
-  - 核心 RPA 程序。
-  - 包含状态机、浏览器引擎、视觉引擎、服务层、生成器、校验器等真正运行的代码。
+- `platform/`
+  - 稳定基础设施层
+  - 放核心程序、自动化测试、工具和平台技术文档
 - `workflows/`
-  - 用户最常接触的任务脚本目录。
-  - 只放任务工作流脚本，不放框架源码。
-- `tests/`
-  - 自动化代码测试目录。
-  - 只放 `pytest` 这类单元测试、集成测试和 E2E 测试，不和用户任务脚本混放。
-- `test_artifacts/`
-  - 测试、验收、调试过程中产生的截图、临时文档和历史测试残留。
-  - 只放测试产物，不放核心源码和正式工作流。
+  - 任务执行层
+  - 放临时任务、生成任务、验收脚本、示例和归档
+- `knowledge/`
+  - 项目记忆层
+  - 放任务记录、模式、经验、能力说明、候选升级项和索引
 - `skills/`
-  - 面向用户的 AI Skill 导航目录。
-  - 这里放可读说明，方便快速定位。
+  - 正式复用层
+  - 只放用户明确批准升级的 Skill 说明
+- `docs/`
+  - 仓库治理文档层
+  - 放知识流转和目录规则这类仓库级说明
+- `runtime/`
+  - 运行产物层
+  - 放数据、输出、测试与调试痕迹
 - `.agents/skills/`
-  - 运行时真正生效的 Skill 资产目录。
-  - 这是为了兼容 Codex、Kimi、Claude 一类工具的约定，保留不动。
+  - AI 运行时 Skill 资产
+  - 这是工具链约定目录，继续保留在根目录
 
-## workflows 目录约定
+## 兼容残留
 
-- `workflows/examples/`
-  - 参考示例。
-  - 用来展示这套系统可以怎么写、怎么跑。
-  - 当前按 `browser/`、`desktop/`、`scenarios/` 分组。
-- `workflows/verification/`
-  - 手动验收脚本。
-  - 用来做真实场景测试、边界验证和功能验收。
-  - 当前按 `browser/`、`marketplaces/` 分组。
+- `scripts/`
+  - 冻结的兼容保留目录
+  - 只用于兜住历史路径，不再接收新的任务脚本或平台资产
+
+## platform 目录
+
+- `platform/src/omniauto/`
+  - OmniAuto 程序本体
+  - 包含状态机、浏览器引擎、视觉引擎、恢复机制、模板系统、服务层
+- `platform/tests/`
+  - `pytest` 自动化测试
+  - 包含 `unit/`、`integration/`、`e2e/`
+- `platform/tools/`
+  - 平台依赖工具、诊断工具、维护工具
+- `platform/docs/`
+  - 平台技术文档
+  - 例如能力说明、架构说明、开发指南、Agent 约束
+
+## workflows 目录
+
+- `workflows/temporary/`
+  - 一次性、探索性、偶尔使用的任务脚本
 - `workflows/generated/`
-  - AI 或模板自动生成的任务脚本。
-  - 用户下达任务后，默认产物应该落到这里。
-  - 当前再按 `browser/`、`desktop/`、`marketplaces/` 分组。
+  - AI 或模板自动生成的任务脚本
+- `workflows/verification/`
+  - 真实环境验收脚本
+- `workflows/examples/`
+  - 参考示例
 - `workflows/archive/`
-  - 历史脚本归档。
+  - 历史脚本归档
 
-## 这次整理后的区分原则
+## knowledge 目录
 
-- 核心程序看 `src/omniauto/`
-- 自动化代码测试看 `tests/`
-- 测试运行产物看 `test_artifacts/`
-- 用户任务脚本看 `workflows/`
-- AI Skill 说明看 `skills/`
-- AI Skill 运行时资产看 `.agents/skills/`
+- `knowledge/tasks/`
+  - 每个任务或任务族一份记录
+- `knowledge/patterns/emerging/`
+  - 新提炼出的模式，已可参考但还未稳定
+- `knowledge/patterns/reusable/`
+  - 已经比较稳定、建议复用的模式
+- `knowledge/lessons/`
+  - 长期有效的经验与坑点
+- `knowledge/capabilities/observed/`
+  - 已被任务和证据支持的能力说明
+- `knowledge/capabilities/candidate/`
+  - 值得进一步 formalize 的候选能力
+- `knowledge/proposals/skill_candidates/`
+  - 等待用户决定是否升级成 Skill
+- `knowledge/proposals/platform_candidates/`
+  - 等待用户决定是否进入 platform
+- `knowledge/index/`
+  - 任务索引、能力矩阵、知识注册表
+- `knowledge/_templates/`
+  - 任务结项和知识沉淀模板
 
-## 为什么保留 `.agents/skills/`
+## runtime 目录
 
-因为这是 AI 工具链识别 Skill 的实际运行目录。为了保证功能不变，这次只新增了用户可读的 `skills/` 导航层，不改运行时位置。
+- `runtime/data/`
+  - 认证、浏览器 profile、报告、日志
+- `runtime/outputs/`
+  - 任务输出结果
+- `runtime/test_artifacts/`
+  - 测试、验收、调试过程文件
+
+## 新任务的默认落点
+
+按现在的规则：
+
+1. 新任务脚本先放 `workflows/temporary/` 或 `workflows/generated/`
+2. 调试和验证痕迹放 `runtime/test_artifacts/`
+3. 正式输出放 `runtime/data/` 或 `runtime/outputs/`
+4. 任务总结、模式和经验自动沉淀到 `knowledge/`
+5. 只有用户明确要求时，才升级到 `skills/` 或 `platform/`

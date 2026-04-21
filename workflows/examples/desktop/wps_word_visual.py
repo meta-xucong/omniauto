@@ -20,7 +20,7 @@ from omniauto.skills.wps_automation import WPSWordAutomation, _create_blank_docx
 
 WPS_EXE = r"C:\Users\兰落落的本本\AppData\Local\Kingsoft\WPS Office\12.1.0.25865\office6\wps.exe"
 SAVE_PATH = r"C:\Users\兰落落的本本\Desktop\入党申请书.docx"
-TEST_ARTIFACT_DIR = Path("test_artifacts/manual_wps")
+TEST_ARTIFACT_DIR = Path("runtime/test_artifacts/manual_wps")
 TEMP_DOCX = TEST_ARTIFACT_DIR / f"temp_party_app_{int(time.time())}.docx"
 
 APPLICATION_TEXT = (

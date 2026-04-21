@@ -37,13 +37,13 @@ BASE_URL = (
 )
 MAX_PAGES = 5
 SAMPLE_SIZE = 5
-OUTPUT_DIR = Path("data/reports/1688_nvzhuang_5")
+OUTPUT_DIR = Path("runtime/data/reports/1688_nvzhuang_5")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 _all_items: list = []
 _enriched_items: list = []
 _skip_count: int = 0
-_profile_dir: str = "data/chrome_profile_1688"
+_profile_dir: str = "runtime/data/chrome_profile_1688"
 
 
 def _profile_needs_rotate() -> bool:
@@ -58,7 +58,7 @@ async def _create_browser(user_data_dir: str) -> StealthBrowser:
         use_system_chrome=True,
         user_data_dir=user_data_dir,
         auto_handle_login=True,
-        auth_storage_dir="data/auth",
+        auth_storage_dir="runtime/data/auth",
         auto_login_timeout=60.0,
         rotate_fingerprint=False,
         proxy="http://127.0.0.1:7890",

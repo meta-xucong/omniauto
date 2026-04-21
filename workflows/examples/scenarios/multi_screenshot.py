@@ -11,7 +11,7 @@ async def multi_screenshot(ctx: TaskContext) -> StepResult:
     if browser is None:
         raise RuntimeError("浏览器引擎未初始化")
 
-    output_dir = Path("./outputs/screenshots")
+output_dir = Path("./runtime/outputs/screenshots")
     output_dir.mkdir(parents=True, exist_ok=True)
 
     urls = [
