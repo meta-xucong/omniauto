@@ -30,11 +30,16 @@
       "title": "Minesweeper solver exploration",
       "domain": "desktop",
       "record": "tasks/desktop/minesweeper_solver_exploration.md",
-      "status": "exploratory",
+      "status": "failed",
       "evidence": [
         "workflows/temporary/desktop/minesweeper_solver.py",
-        "runtime/test_artifacts/verification/minesweeper/"
-      ]
+        "runtime/test_artifacts/verification/minesweeper/",
+        "runtime/knowledge_runs/2026-04-23/20260423_040423_minesweeper_solver_exploration/task_run.json",
+        "tasks/desktop/minesweeper_solver_exploration.md"
+      ],
+      "summary": "Latest run via service.manual_closeout",
+      "managed": true,
+      "last_updated": "2026-04-23T04:04:23"
     },
     {
       "slug": "wps-hardinput-reliability-probes",
@@ -69,15 +74,16 @@
       "domain": "general",
       "record": "tasks/general/knowledge_growth_heuristic_probe.md",
       "status": "completed",
-      "summary": "Latest run via logic.ai_strict_probe",
+      "summary": "Latest run via logic.auto_threshold_probe",
       "evidence": [
         "workflows/verification/general/knowledge_growth_heuristic_probe.py",
         "tasks/general/knowledge_growth_heuristic_probe.md",
         "runtime/knowledge_runs/2026-04-21/20260421_021100_knowledge_growth_heuristic_probe/task_run.json",
-        "runtime/knowledge_runs/2026-04-21/20260421_030557_knowledge_growth_heuristic_probe/task_run.json"
+        "runtime/knowledge_runs/2026-04-21/20260421_030557_knowledge_growth_heuristic_probe/task_run.json",
+        "runtime/knowledge_runs/2026-04-21/20260421_201843_knowledge_growth_heuristic_probe/task_run.json"
       ],
       "managed": true,
-      "last_updated": "2026-04-21T03:05:57"
+      "last_updated": "2026-04-21T20:18:43"
     },
     {
       "slug": "1688-research-family",
@@ -256,18 +262,35 @@
       "domain": "general",
       "path": "capabilities/observed/general/knowledge_growth_heuristic_probe_verification_path.md",
       "maturity": "emerging",
-      "summary": "Verification workflow `workflows/verification/general/knowledge_growth_heuristic_probe.py` completed successfully through `logic.ai_strict_probe`, so this verification path remains runnable under controlled execution.",
+      "summary": "Verification workflow `workflows/verification/general/knowledge_growth_heuristic_probe.py` completed successfully through `logic.auto_threshold_probe`, so this verification path remains runnable under controlled execution.",
       "boundaries": "Represents a runnable verification asset, not a broad guarantee beyond this workflow.",
       "evidence": [
         "workflows/verification/general/knowledge_growth_heuristic_probe.py",
-        "runtime/knowledge_runs/2026-04-21/20260421_030557_knowledge_growth_heuristic_probe/task_run.json"
+        "runtime/knowledge_runs/2026-04-21/20260421_201843_knowledge_growth_heuristic_probe/task_run.json"
       ],
       "managed": true,
-      "last_updated": "2026-04-21T03:05:57"
+      "last_updated": "2026-04-21T20:18:43"
     }
   ],
   "proposals": [],
   "ai_candidates": [
+    {
+      "slug": "auto_threshold_smoke_candidate",
+      "title": "Auto threshold smoke candidate",
+      "domain": "general",
+      "kind": "lesson",
+      "path": "review/ai_candidates/lessons/general/auto_threshold_smoke_candidate.md",
+      "status": "pending_review",
+      "confidence": "medium",
+      "summary": "Auto mode can open a review-only candidate when a verification run crosses the configured threshold.",
+      "evidence": [
+        "runtime/knowledge_runs/2026-04-21/20260421_201843_knowledge_growth_heuristic_probe/task_run.json",
+        "workflows/verification/general/knowledge_growth_heuristic_probe.py",
+        "tasks/general/knowledge_growth_heuristic_probe.md"
+      ],
+      "managed": true,
+      "last_updated": "2026-04-21T20:18:43"
+    },
     {
       "slug": "strict_ai_candidate_verification_boundary",
       "title": "Strict AI candidate verification boundary",

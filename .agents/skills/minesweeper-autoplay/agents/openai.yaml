@@ -1,0 +1,4 @@
+interface:
+  display_name: "扫雷自动游玩"
+  short_description: "运行、长测、诊断并优化 Windows 扫雷自动游玩流程"
+  default_prompt: "Use this skill to run, test, diagnose, and improve the Windows Minesweeper autoplay workflow."

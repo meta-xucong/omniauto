@@ -234,6 +234,7 @@ class KnowledgeManager:
         )
 
         observations = self._load_observations(context)
+        explicit_observation_count = len(observations)
         observations.extend(
             self._derive_automatic_observations(
                 task_run=task_run,
@@ -258,6 +259,7 @@ class KnowledgeManager:
             result=result,
             task_record=task_entry,
             script_rel=script_rel,
+            explicit_observation_count=explicit_observation_count,
         )
 
         self._write_registry(registry)
@@ -295,6 +297,7 @@ class KnowledgeManager:
         description: str = "",
         note: str = "",
         domain: str = "",
+        duration_seconds: float = 0.0,
     ) -> Dict[str, Any]:
         """Fallback closeout for tasks that did not run through a controlled entrypoint."""
 
@@ -313,7 +316,7 @@ class KnowledgeManager:
                 "task_id": task_id,
                 "final_state": final_state,
                 "outputs": {},
-                "duration_seconds": 0.0,
+                "duration_seconds": max(float(duration_seconds), 0.0),
                 "manual_note": note,
             },
             context=None,
@@ -765,6 +768,7 @@ class KnowledgeManager:
         result: Dict[str, Any],
         task_record: Dict[str, Any],
         script_rel: str,
+        explicit_observation_count: int,
     ) -> Dict[str, Any]:
         try:
             ai_result = self.ai_assistant.maybe_generate(
@@ -775,6 +779,7 @@ class KnowledgeManager:
                     "run_record": self._relative(Path(task_run.run_dir) / "task_run.json") if task_run.run_dir else "",
                 },
                 script_rel=script_rel,
+                explicit_observation_count=explicit_observation_count,
             )
         except Exception as exc:
             fallback = AIAssistResult(

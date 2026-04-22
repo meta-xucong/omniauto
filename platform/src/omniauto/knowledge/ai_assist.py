@@ -36,12 +36,11 @@ class StrictCandidateAIAssist:
         result: Dict[str, Any],
         task_record: Dict[str, Any],
         script_rel: str,
+        explicit_observation_count: int = 0,
     ) -> AIAssistResult:
         mode = self.policy.normalize_ai_mode(self.policy.ai_assist_mode)
-        if mode != "strict_candidate":
+        if mode == "off":
             return AIAssistResult(enabled=False, applied=False, reason="ai_assist_disabled")
-        if self.provider is None:
-            return AIAssistResult(enabled=True, applied=False, reason="ai_provider_unavailable")
 
         error_text = " ".join(
             [
@@ -51,12 +50,21 @@ class StrictCandidateAIAssist:
         )
         duration_seconds = float(result.get("duration_seconds", 0.0) or 0.0)
         final_state = str(result.get("final_state", "") or "")
+        if (
+            mode == "auto_strict_candidate"
+            and self.policy.ai_auto_only_without_explicit_observations
+            and explicit_observation_count > 0
+        ):
+            return AIAssistResult(enabled=True, applied=False, reason="explicit_observations_present")
         if not self.policy.should_trigger_ai_assist(
             final_state=final_state,
             duration_seconds=duration_seconds,
             error_text=error_text,
+            category=str(getattr(task_run, "category", "") or ""),
         ):
             return AIAssistResult(enabled=True, applied=False, reason="trigger_threshold_not_met")
+        if self.provider is None:
+            return AIAssistResult(enabled=True, applied=False, reason="ai_provider_unavailable")
 
         evidence_pack = self._build_evidence_pack(
             task_run=task_run,

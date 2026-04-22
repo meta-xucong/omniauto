@@ -31,3 +31,9 @@ This keeps the project from confusing:
 3. a formally supported skill
 
 Only the third case belongs in `skills/`.
+
+## Operational Guide
+
+For the concrete repository workflow that turns mature task knowledge into an OmniAuto formal skill, follow:
+
+- [OMNIAUTO_SKILL_UPGRADE_GUIDE.md](OMNIAUTO_SKILL_UPGRADE_GUIDE.md)

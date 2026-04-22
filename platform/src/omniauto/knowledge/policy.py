@@ -11,7 +11,7 @@ DEFAULT_PATTERN_STAGES = ("emerging", "reusable")
 DEFAULT_CAPABILITY_STAGES = ("observed", "candidate")
 DEFAULT_PROPOSAL_KINDS = ("skill", "platform")
 DEFAULT_AI_CANDIDATE_KINDS = ("pattern", "lesson", "capability")
-DEFAULT_AI_ASSIST_MODES = ("off", "strict_candidate")
+DEFAULT_AI_ASSIST_MODES = ("off", "strict_candidate", "auto_strict_candidate")
 
 
 @dataclass(frozen=True)
@@ -47,11 +47,13 @@ class KnowledgePolicy:
         "platform/tests",
     )
     review_candidate_root: str = "knowledge/review/ai_candidates"
-    ai_assist_mode: str = "off"
+    ai_assist_mode: str = "auto_strict_candidate"
     ai_candidate_limit: int = 3
     ai_candidate_evidence_limit: int = 5
-    ai_trigger_min_duration_seconds: float = 90.0
-    ai_trigger_error_states: tuple[str, ...] = ("ERROR", "TIMEOUT", "FAILED")
+    ai_trigger_min_duration_seconds: float = 180.0
+    ai_trigger_error_states: tuple[str, ...] = ("ERROR", "TIMEOUT", "FAILED", "VALIDATION_FAILED")
+    ai_auto_categories: tuple[str, ...] = ("verification", "temporary", "generated")
+    ai_auto_only_without_explicit_observations: bool = True
     enable_automatic_derivations: bool = True
     allow_direct_promotion: bool = False
     protect_human_authored_sections: bool = True
@@ -96,17 +98,37 @@ class KnowledgePolicy:
             return "lessons"
         return "capabilities"
 
-    def should_trigger_ai_assist(self, *, final_state: str, duration_seconds: float, error_text: str) -> bool:
+    def should_trigger_ai_assist(
+        self,
+        *,
+        final_state: str,
+        duration_seconds: float,
+        error_text: str,
+        category: str = "",
+    ) -> bool:
         """Apply a conservative trigger gate for AI-assisted summarization."""
 
-        if self.normalize_ai_mode(self.ai_assist_mode) != "strict_candidate":
+        mode = self.normalize_ai_mode(self.ai_assist_mode)
+        if mode == "off":
             return False
-        if duration_seconds >= self.ai_trigger_min_duration_seconds:
+        if mode == "strict_candidate":
             return True
-        if final_state.upper() in self.ai_trigger_error_states:
+        if mode != "auto_strict_candidate":
+            return False
+
+        normalized_state = final_state.upper()
+        if normalized_state in self.ai_trigger_error_states:
             return True
+
         lowered = error_text.lower()
-        return any(token in lowered for token in ("timeout", "not found", "manual_handoff", "verification challenge"))
+        if any(token in lowered for token in ("timeout", "not found", "manual_handoff", "verification challenge")):
+            return True
+
+        return (
+            category in self.ai_auto_categories
+            and normalized_state == "COMPLETED"
+            and duration_seconds >= self.ai_trigger_min_duration_seconds
+        )
 
 
 DEFAULT_KNOWLEDGE_POLICY = KnowledgePolicy()

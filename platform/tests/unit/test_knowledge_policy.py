@@ -57,6 +57,42 @@ def _write_heuristic_verification_probe(repo_root: Path) -> Path:
     return script
 
 
+def _write_explicit_observation_probe(repo_root: Path) -> Path:
+    script = repo_root / "workflows" / "verification" / "general" / "explicit_probe.py"
+    script.write_text(
+        textwrap.dedent(
+            """
+            # Task: Explicit observation policy probe
+
+            from omniauto.core.state_machine import Workflow, AtomicStep
+            from omniauto.knowledge import record_knowledge_observation
+
+            requires_browser = False
+
+
+            def emit(context):
+                record_knowledge_observation(
+                    context,
+                    kind="lesson",
+                    title="Explicit observation already present",
+                    summary="This probe emits an explicit lesson so auto AI should skip.",
+                    domain="general",
+                    trigger="explicit_probe",
+                )
+                return {"status": "ok"}
+
+
+            workflow = Workflow(
+                task_id="explicit_policy_probe",
+                steps=[AtomicStep("emit", emit, lambda result: result.get("status") == "ok", retry=1)],
+            )
+            """
+        ),
+        encoding="utf-8",
+    )
+    return script
+
+
 def _service(repo_root: Path, manager: KnowledgeManager) -> OmniAutoService:
     return OmniAutoService(
         state_store=StateStore(db_path=str(repo_root / "runtime" / "state.db")),
@@ -110,7 +146,7 @@ async def test_ai_assist_off_keeps_existing_closeout_behavior(tmp_path):
 async def test_strict_ai_assist_writes_review_candidate_only(tmp_path):
     repo_root = _make_repo_root(tmp_path)
     script = _write_heuristic_verification_probe(repo_root)
-    policy = KnowledgePolicy(ai_assist_mode="strict_candidate", ai_trigger_min_duration_seconds=0.0)
+    policy = KnowledgePolicy(ai_assist_mode="strict_candidate")
 
     def provider(evidence_pack):
         return [
@@ -148,7 +184,7 @@ async def test_strict_ai_assist_writes_review_candidate_only(tmp_path):
 async def test_invalid_ai_candidate_does_not_break_workflow(tmp_path):
     repo_root = _make_repo_root(tmp_path)
     script = _write_heuristic_verification_probe(repo_root)
-    policy = KnowledgePolicy(ai_assist_mode="strict_candidate", ai_trigger_min_duration_seconds=0.0)
+    policy = KnowledgePolicy(ai_assist_mode="strict_candidate")
     manager = KnowledgeManager(
         repo_root=repo_root,
         policy=policy,
@@ -178,3 +214,80 @@ async def test_invalid_ai_candidate_does_not_break_workflow(tmp_path):
     assert result["knowledge_closeout"]["ai_assist"]["reason"] == "no_valid_candidates"
     assert "missing_evidence" in result["knowledge_closeout"]["ai_assist"]["errors"]
     assert not (repo_root / "knowledge" / "review" / "ai_candidates" / "patterns" / "general" / "broken_ai_candidate.md").exists()
+
+
+@pytest.mark.asyncio
+async def test_auto_ai_assist_triggers_for_long_verification_runs(tmp_path):
+    repo_root = _make_repo_root(tmp_path)
+    script = _write_heuristic_verification_probe(repo_root)
+    policy = KnowledgePolicy(
+        ai_assist_mode="auto_strict_candidate",
+        ai_trigger_min_duration_seconds=0.0,
+    )
+
+    manager = KnowledgeManager(
+        repo_root=repo_root,
+        policy=policy,
+        ai_assistant=StrictCandidateAIAssist(
+            policy=policy,
+            provider=lambda evidence_pack: [
+                {
+                    "kind": "lesson",
+                    "title": "Auto threshold candidate",
+                    "summary": "Auto mode may add a review-only candidate for long verification runs.",
+                    "domain": "general",
+                    "confidence": "medium",
+                    "evidence_refs": [evidence_pack["script"], evidence_pack["task_record"]],
+                }
+            ],
+        ),
+    )
+
+    result = await _service(repo_root, manager).run_workflow(
+        str(script),
+        headless=True,
+        entrypoint="test.policy.auto",
+    )
+
+    assert result["final_state"] == "COMPLETED"
+    assert result["knowledge_closeout"]["ai_assist"]["applied"] is True
+    candidate = repo_root / "knowledge" / "review" / "ai_candidates" / "lessons" / "general" / "auto_threshold_candidate.md"
+    assert candidate.exists()
+
+
+@pytest.mark.asyncio
+async def test_auto_ai_assist_skips_when_explicit_observations_exist(tmp_path):
+    repo_root = _make_repo_root(tmp_path)
+    script = _write_explicit_observation_probe(repo_root)
+    policy = KnowledgePolicy(
+        ai_assist_mode="auto_strict_candidate",
+        ai_trigger_min_duration_seconds=0.0,
+    )
+    manager = KnowledgeManager(
+        repo_root=repo_root,
+        policy=policy,
+        ai_assistant=StrictCandidateAIAssist(
+            policy=policy,
+            provider=lambda evidence_pack: [
+                {
+                    "kind": "lesson",
+                    "title": "Should be skipped by explicit obs",
+                    "summary": "Auto mode should not duplicate explicit observations.",
+                    "domain": "general",
+                    "confidence": "medium",
+                    "evidence_refs": [evidence_pack["script"], evidence_pack["task_record"]],
+                }
+            ],
+        ),
+    )
+
+    result = await _service(repo_root, manager).run_workflow(
+        str(script),
+        headless=True,
+        entrypoint="test.policy.auto.explicit",
+    )
+
+    assert result["final_state"] == "COMPLETED"
+    assert result["knowledge_closeout"]["ai_assist"]["applied"] is False
+    assert result["knowledge_closeout"]["ai_assist"]["reason"] == "explicit_observations_present"
+    assert not (repo_root / "knowledge" / "review" / "ai_candidates" / "lessons" / "general" / "should_be_skipped_by_explicit_obs.md").exists()

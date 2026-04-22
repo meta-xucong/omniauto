@@ -86,3 +86,14 @@ For the landed governance layer, also read:
 - [GUARDED_KNOWLEDGE_CLOSEOUT.md](GUARDED_KNOWLEDGE_CLOSEOUT.md)
 - `platform/src/omniauto/knowledge/policy.py`
 - `.agents/skills/guarded-knowledge-closeout/SKILL.md`
+
+## AI Auto-Enable Threshold
+
+The default AI candidate mode is now `auto_strict_candidate`.
+
+That means:
+
+1. normal controlled closeout still runs by local rules first
+2. AI candidate generation only attempts automatically on higher-signal runs
+3. explicit task observations suppress automatic AI candidates for that run
+4. automatic AI output still stays inside `knowledge/review/ai_candidates/`
