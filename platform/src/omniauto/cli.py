@@ -80,7 +80,16 @@ def run(script: str, headless: bool, task_id: str, notify: str) -> None:
 @click.option("--description", default="", help="任务说明")
 @click.option("--note", default="", help="补充说明")
 @click.option("--domain", default="", help="知识领域覆盖值")
-def closeout(script: str, task_id: str, final_state: str, description: str, note: str, domain: str) -> None:
+@click.option("--duration-seconds", default=0.0, type=float, help="Manual closeout duration in seconds")
+def closeout(
+    script: str,
+    task_id: str,
+    final_state: str,
+    description: str,
+    note: str,
+    domain: str,
+    duration_seconds: float,
+) -> None:
     """手动触发一次兜底结项，适合未走受控入口的任务."""
 
     svc = OmniAutoService()
@@ -91,6 +100,7 @@ def closeout(script: str, task_id: str, final_state: str, description: str, note
         description=description,
         note=note,
         domain=domain,
+        duration_seconds=duration_seconds,
     )
     click.echo(f"[OK] 已生成知识结项: {summary.get('task_record', '')}")
 

@@ -351,6 +351,7 @@ class OmniAutoService:
         description: str = "",
         note: str = "",
         domain: str = "",
+        duration_seconds: float = 0.0,
     ) -> Dict[str, Any]:
         return self.knowledge.manual_closeout(
             script_path=script_path,
@@ -359,6 +360,7 @@ class OmniAutoService:
             description=description,
             note=note,
             domain=domain,
+            duration_seconds=duration_seconds,
         )
 
 

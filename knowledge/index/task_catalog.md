@@ -4,7 +4,7 @@
 | --- | --- | --- | --- | --- |
 | Legacy agent browser tasks | browser | historical_reference | `../tasks/browser/legacy_agent_browser_tasks.md` | `workflows/archive/`, `workflows/temporary/browser/` |
 | Taobao login and top-shop verification | browser | verification_asset | `../tasks/browser/taobao_login_top_shop_verification.md` | `workflows/verification/browser/taobao_login_top_shop.py`, `runtime/test_artifacts/verification/browser/taobao_login_top_shop/` |
-| Minesweeper solver exploration | desktop | exploratory | `../tasks/desktop/minesweeper_solver_exploration.md` | `workflows/temporary/desktop/minesweeper_solver.py`, `runtime/test_artifacts/verification/minesweeper/` |
+| Minesweeper solver exploration | desktop | failed | `../tasks/desktop/minesweeper_solver_exploration.md` | `workflows/temporary/desktop/minesweeper_solver.py`, `runtime/test_artifacts/verification/minesweeper/` |
 | WPS hard-input reliability probes | desktop | exploratory_useful | `../tasks/desktop/wps_hardinput_reliability_probes.md` | `workflows/examples/desktop/wps_word_hardinput.py`, `runtime/test_artifacts/manual_wps/` |
 | Verify automatic knowledge growth closeout | general | completed | `../tasks/general/knowledge_growth_probe.md` | `workflows/verification/general/knowledge_growth_probe.py`, `tasks/general/knowledge_growth_probe.md` |
 | Verify heuristic knowledge closeout | general | completed | `../tasks/general/knowledge_growth_heuristic_probe.md` | `workflows/verification/general/knowledge_growth_heuristic_probe.py`, `tasks/general/knowledge_growth_heuristic_probe.md` |

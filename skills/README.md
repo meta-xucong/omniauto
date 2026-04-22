@@ -11,12 +11,18 @@
 
 ## 当前状态
 
-当前仓库还没有新增任何“项目本地正式 skill”。
+当前仓库已经有正式项目 skill，但仍然坚持“显式批准后才硬落地”的规则。
 
-也就是说：
+当前已批准的项目本地正式 skill 包括：
 
-1. 之前做过的 1688、WPS、扫雷等任务不会在这次重构中自动升级成 skill
+1. `skills/capability_skills/guarded_knowledge_closeout/`
+2. `skills/task_skills/minesweeper_autoplay/`
+
+仍然成立的原则是：
+
+1. 任务经验默认先进入 `knowledge/`
 2. 只有用户明确要求时，才会从 `knowledge/` 正式提升到 `skills/`
+3. 除了已批准项以外，其他任务族不会自动升级成 formal skill
 
 ## 目录分层
 
