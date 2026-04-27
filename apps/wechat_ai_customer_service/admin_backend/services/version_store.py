@@ -13,8 +13,10 @@ from .audit_log import append_audit
 from apps.wechat_ai_customer_service.knowledge_paths import (
     SHARED_KNOWLEDGE_ROOT,
     TENANTS_ROOT,
+    active_tenant_id,
     default_admin_knowledge_base_root,
 )
+from apps.wechat_ai_customer_service.storage import get_postgres_store, load_storage_config
 
 
 APP_ROOT = Path(__file__).resolve().parents[2]
@@ -52,10 +54,18 @@ class VersionStore:
             "tenants_path": str(tenants_target),
         }
         (version_root / "metadata.json").write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+        db = postgres_store()
+        if db:
+            db.upsert_version(active_tenant_id(), payload)
         append_audit("version_created", {"version_id": version_id, "reason": reason})
         return payload
 
     def list_versions(self) -> list[dict[str, Any]]:
+        db = postgres_store()
+        if db:
+            versions = db.list_versions(active_tenant_id())
+            if versions:
+                return versions
         if not VERSIONS_ROOT.exists():
             return []
         versions = []
@@ -68,6 +78,11 @@ class VersionStore:
         return versions
 
     def get_version(self, version_id: str) -> dict[str, Any] | None:
+        db = postgres_store()
+        if db:
+            version = db.get_version(active_tenant_id(), version_id)
+            if version:
+                return version
         metadata_path = VERSIONS_ROOT / version_id / "metadata.json"
         if not metadata_path.exists():
             return None
@@ -101,3 +116,11 @@ def replace_tree(source: Path, target: Path) -> None:
     if target.exists():
         shutil.rmtree(target)
     shutil.copytree(source, target)
+
+
+def postgres_store():
+    config = load_storage_config()
+    if not config.use_postgres or not config.postgres_configured:
+        return None
+    store = get_postgres_store(config=config)
+    return store if store.available() else None

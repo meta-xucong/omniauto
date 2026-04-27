@@ -11,7 +11,8 @@ from typing import Any
 
 from .knowledge_registry import KnowledgeRegistry
 from .knowledge_schema_manager import KnowledgeSchemaManager
-from apps.wechat_ai_customer_service.knowledge_paths import tenant_product_item_knowledge_root
+from apps.wechat_ai_customer_service.knowledge_paths import active_tenant_id, tenant_product_item_knowledge_root
+from apps.wechat_ai_customer_service.storage import get_postgres_store, load_storage_config
 from apps.wechat_ai_customer_service.workflows.knowledge_runtime import (
     PRODUCT_SCOPED_KINDS,
     PRODUCT_SCOPED_RESOLVERS,
@@ -33,6 +34,12 @@ class KnowledgeBaseStore:
         self.schema_manager = schema_manager or KnowledgeSchemaManager(self.registry)
 
     def list_items(self, category_id: str, include_archived: bool = False) -> list[dict[str, Any]]:
+        db = postgres_store()
+        if db:
+            layer = "tenant_product" if category_id in PRODUCT_SCOPED_CATEGORY_TO_KIND else "tenant"
+            items = db.list_knowledge_items(active_tenant_id(), layer=layer, category_id=category_id, include_archived=include_archived)
+            if items:
+                return items
         if category_id in PRODUCT_SCOPED_CATEGORY_TO_KIND:
             return self.list_product_scoped_items(category_id, include_archived=include_archived)
         items_root = self.items_root(category_id)
@@ -47,6 +54,16 @@ class KnowledgeBaseStore:
         return items
 
     def get_item(self, category_id: str, item_id: str) -> dict[str, Any] | None:
+        db = postgres_store()
+        if db:
+            if category_id in PRODUCT_SCOPED_CATEGORY_TO_KIND:
+                for item in db.list_knowledge_items(active_tenant_id(), layer="tenant_product", category_id=category_id, include_archived=True):
+                    if str(item.get("id") or "") == item_id:
+                        return None if item.get("status") == "archived" else item
+            else:
+                item = db.get_knowledge_item(active_tenant_id(), layer="tenant", category_id=category_id, item_id=item_id)
+                if item:
+                    return None if item.get("status") == "archived" else item
         if category_id in PRODUCT_SCOPED_CATEGORY_TO_KIND:
             return self.get_product_scoped_item(category_id, item_id)
         path = self.item_path(category_id, item_id)
@@ -61,6 +78,16 @@ class KnowledgeBaseStore:
         if not validation["ok"]:
             return validation
         normalized = normalize_item(category_id, item)
+        db = postgres_store()
+        config = load_storage_config()
+        if db:
+            layer = "tenant_product" if category_id in PRODUCT_SCOPED_CATEGORY_TO_KIND else "tenant"
+            product_id = ""
+            if category_id in PRODUCT_SCOPED_CATEGORY_TO_KIND:
+                product_id = str((normalized.get("data") or {}).get("product_id") or "")
+            db.upsert_knowledge_item(active_tenant_id(), layer, category_id, normalized, product_id=product_id)
+            if not config.mirror_files:
+                return {"ok": True, "item": normalized}
         path = self.product_scoped_item_path(category_id, normalized) if category_id in PRODUCT_SCOPED_CATEGORY_TO_KIND else self.item_path(category_id, item_id)
         path.parent.mkdir(parents=True, exist_ok=True)
         atomic_write_json(path, normalized)
@@ -205,3 +232,11 @@ def atomic_write_json(path: Path, content: Any) -> None:
     temp_path = path.with_suffix(path.suffix + ".tmp")
     temp_path.write_text(json.dumps(content, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     os.replace(temp_path, path)
+
+
+def postgres_store():
+    config = load_storage_config()
+    if not config.use_postgres or not config.postgres_configured:
+        return None
+    store = get_postgres_store(config=config)
+    return store if store.available() else None

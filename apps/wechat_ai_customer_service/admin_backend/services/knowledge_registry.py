@@ -8,7 +8,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from apps.wechat_ai_customer_service.knowledge_paths import default_admin_knowledge_base_root
+from apps.wechat_ai_customer_service.knowledge_paths import active_tenant_id, default_admin_knowledge_base_root
+from apps.wechat_ai_customer_service.storage import get_postgres_store, load_storage_config
 
 
 APP_ROOT = Path(__file__).resolve().parents[2]
@@ -24,10 +25,22 @@ class KnowledgeRegistry:
         self.registry_path = self.root / "registry.json"
 
     def load(self) -> dict[str, Any]:
+        db = postgres_store()
+        if db:
+            categories = db.list_categories(active_tenant_id(), layer="tenant", enabled_only=False)
+            if categories:
+                return {"schema_version": 1, "categories": categories}
         return json.loads(self.registry_path.read_text(encoding="utf-8"))
 
     def save(self, registry: dict[str, Any]) -> None:
         registry["updated_at"] = datetime.now().isoformat(timespec="seconds")
+        db = postgres_store()
+        config = load_storage_config()
+        if db:
+            for category in registry.get("categories", []) or []:
+                db.upsert_category(active_tenant_id(), "tenant", category)
+            if not config.mirror_files:
+                return
         self.registry_path.write_text(json.dumps(registry, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     def list_categories(self, enabled_only: bool = True) -> list[dict[str, Any]]:
@@ -142,3 +155,11 @@ def write_default_custom_resolver(category_root: Path, category_id: str, partici
         "default_action": "custom_context" if participates_in_reply else "admin_only",
     }
     (category_root / "resolver.json").write_text(json.dumps(resolver, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
+def postgres_store():
+    config = load_storage_config()
+    if not config.use_postgres or not config.postgres_configured:
+        return None
+    store = get_postgres_store(config=config)
+    return store if store.available() else None

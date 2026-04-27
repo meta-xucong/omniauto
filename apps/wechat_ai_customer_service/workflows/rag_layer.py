@@ -29,6 +29,7 @@ from apps.wechat_ai_customer_service.knowledge_paths import (  # noqa: E402
     tenant_rag_index_root,
     tenant_rag_sources_root,
 )
+from apps.wechat_ai_customer_service.storage import get_postgres_store, load_storage_config  # noqa: E402
 
 
 SUPPORTED_SUFFIXES = {".txt", ".md", ".json", ".csv"}
@@ -97,6 +98,12 @@ class RagService:
         return self.index_root / "index.json"
 
     def ensure_dirs(self) -> None:
+        db = postgres_store(self.tenant_id)
+        config = load_storage_config()
+        if db:
+            db.initialize_schema()
+            if not config.mirror_files:
+                return
         for root in (self.sources_root, self.chunks_root, self.index_root, self.cache_root):
             root.mkdir(parents=True, exist_ok=True)
         for name in ("uploads", "chat_logs", "product_docs", "policy_docs", "erp_exports"):
@@ -138,6 +145,22 @@ class RagService:
             text,
             source=source_record,
         )
+        db = postgres_store(self.tenant_id)
+        config = load_storage_config()
+        if db:
+            db.upsert_rag_source(source_record)
+            db.replace_rag_chunks(source_id, chunks)
+            result = {
+                "ok": True,
+                "source": source_record,
+                "source_id": source_id,
+                "chunk_count": len(chunks),
+                "chunks_path": str(self.chunks_root / f"{source_id}.json"),
+            }
+            if rebuild_index:
+                result["index"] = self.rebuild_index()
+            if not config.mirror_files:
+                return result
         self.write_source(source_record)
         chunks_path = self.chunks_root / f"{source_id}.json"
         chunks_path.write_text(json.dumps({"source": source_record, "chunks": chunks}, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -153,6 +176,12 @@ class RagService:
         return result
 
     def write_source(self, source_record: dict[str, Any]) -> None:
+        db = postgres_store(self.tenant_id)
+        config = load_storage_config()
+        if db:
+            db.upsert_rag_source(source_record)
+            if not config.mirror_files:
+                return
         records = self.list_sources()
         records = [item for item in records if item.get("source_id") != source_record.get("source_id")]
         records.append(source_record)
@@ -160,12 +189,24 @@ class RagService:
         self.sources_path.write_text(json.dumps(records, ensure_ascii=False, indent=2), encoding="utf-8")
 
     def list_sources(self) -> list[dict[str, Any]]:
+        db = postgres_store(self.tenant_id)
+        if db:
+            records = db.list_rag_sources(self.tenant_id)
+            if records:
+                return records
         if not self.sources_path.exists():
             return []
         return json.loads(self.sources_path.read_text(encoding="utf-8"))
 
     def delete_source_by_path(self, source_path: Path) -> dict[str, Any]:
         target = str(Path(source_path))
+        db = postgres_store(self.tenant_id)
+        config = load_storage_config()
+        if db:
+            deleted_sources = db.delete_rag_source_by_path(self.tenant_id, target)
+            self.rebuild_index()
+            if not config.mirror_files:
+                return {"ok": True, "deleted_sources": deleted_sources, "deleted_chunks": 0}
         records = self.list_sources()
         matched = [item for item in records if str(item.get("source_path") or "") == target]
         if not matched:
@@ -183,6 +224,12 @@ class RagService:
         return {"ok": True, "deleted_sources": len(matched), "deleted_chunks": deleted_chunks}
 
     def iter_chunks(self) -> list[dict[str, Any]]:
+        db = postgres_store(self.tenant_id)
+        if db:
+            chunks = db.list_rag_chunks(self.tenant_id)
+            chunks.extend(self.iter_experience_chunks())
+            if chunks:
+                return chunks
         chunks: list[dict[str, Any]] = []
         if not self.chunks_root.exists():
             chunks.extend(self.iter_experience_chunks())
@@ -255,10 +302,23 @@ class RagService:
             "entry_count": len(entries),
             "entries": entries,
         }
+        db = postgres_store(self.tenant_id)
+        config = load_storage_config()
+        if db:
+            db.replace_rag_index(self.tenant_id, entries)
+            if not config.mirror_files:
+                return {"ok": True, "index_path": f"postgres://{db.schema}.rag_index_entries", "entry_count": len(entries)}
         self.index_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
         return {"ok": True, "index_path": str(self.index_path), "entry_count": len(entries)}
 
     def load_index(self) -> dict[str, Any]:
+        db = postgres_store(self.tenant_id)
+        if db:
+            entries = db.list_rag_index(self.tenant_id)
+            if not entries:
+                self.rebuild_index()
+                entries = db.list_rag_index(self.tenant_id)
+            return {"schema_version": 1, "tenant_id": self.tenant_id, "entries": entries, "built_at": "postgres"}
         if not self.index_path.exists() or self.index_is_stale():
             self.rebuild_index()
         if not self.index_path.exists():
@@ -266,6 +326,8 @@ class RagService:
         return json.loads(self.index_path.read_text(encoding="utf-8"))
 
     def index_is_stale(self) -> bool:
+        if postgres_store(self.tenant_id):
+            return False
         if not self.index_path.exists():
             return True
         index_mtime = self.index_path.stat().st_mtime
@@ -361,6 +423,27 @@ class RagService:
         }
 
     def status(self) -> dict[str, Any]:
+        db = postgres_store(self.tenant_id)
+        if db:
+            sources = db.list_rag_sources(self.tenant_id)
+            chunks = db.list_rag_chunks(self.tenant_id)
+            index_entries = db.list_rag_index(self.tenant_id)
+            return {
+                "ok": True,
+                "tenant_id": self.tenant_id,
+                "backend": "postgres",
+                "schema": db.schema,
+                "sources_root": str(self.sources_root),
+                "chunks_root": str(self.chunks_root),
+                "index_root": str(self.index_root),
+                "cache_root": str(self.cache_root),
+                "source_count": len(sources),
+                "chunk_count": len(chunks),
+                "index_entry_count": len(index_entries),
+                "index_exists": bool(index_entries),
+                "index_path": f"postgres://{db.schema}.rag_index_entries",
+                "updated_at": "postgres",
+            }
         sources = self.list_sources()
         chunks = self.iter_chunks()
         index = self.load_index() if self.index_path.exists() else {"entries": []}
@@ -630,3 +713,11 @@ def compact_hits(hits: list[dict[str, Any]], *, limit: int = 3, text_limit: int 
             }
         )
     return compacted
+
+
+def postgres_store(tenant_id: str):
+    config = load_storage_config()
+    if not config.use_postgres or not config.postgres_configured:
+        return None
+    store = get_postgres_store(tenant_id=tenant_id, config=config)
+    return store if store.available() else None

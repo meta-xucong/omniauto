@@ -14,16 +14,21 @@ from typing import Any, Iterable
 try:  # pragma: no cover - supports package imports and direct workflow scripts.
     from apps.wechat_ai_customer_service.knowledge_paths import (
         LEGACY_KNOWLEDGE_BASE_ROOT,
+        active_tenant_id,
         default_admin_knowledge_base_root,
         runtime_knowledge_roots,
         tenant_product_item_knowledge_root,
     )
+    from apps.wechat_ai_customer_service.storage import get_postgres_store, load_storage_config
 except ImportError:  # pragma: no cover
     APP_PACKAGE_ROOT = Path(__file__).resolve().parents[1]
     LEGACY_KNOWLEDGE_BASE_ROOT = APP_PACKAGE_ROOT / "data" / "knowledge_bases"
+    active_tenant_id = lambda tenant_id=None: tenant_id or "default"
     default_admin_knowledge_base_root = lambda tenant_id=None: LEGACY_KNOWLEDGE_BASE_ROOT
     runtime_knowledge_roots = lambda tenant_id=None: [LEGACY_KNOWLEDGE_BASE_ROOT]
     tenant_product_item_knowledge_root = lambda tenant_id=None: APP_PACKAGE_ROOT / "data" / "tenants" / "default" / "product_item_knowledge"
+    get_postgres_store = None
+    load_storage_config = None
 
 APP_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_KNOWLEDGE_BASE_ROOT = default_admin_knowledge_base_root()
@@ -102,6 +107,7 @@ class KnowledgeRuntime:
     """Read-only runtime facade for classified knowledge."""
 
     def __init__(self, root: Path | None = None, *, tenant_id: str | None = None) -> None:
+        self.tenant_id = active_tenant_id(tenant_id)
         self.single_root_mode = root is not None
         self.roots = [root.resolve()] if root else [item.resolve() for item in runtime_knowledge_roots(tenant_id)]
         if not self.roots:
@@ -191,6 +197,22 @@ class KnowledgeRuntime:
         return self.category_root(category_id) / "items"
 
     def list_items(self, category_id: str, *, include_archived: bool = False) -> list[dict[str, Any]]:
+        db = postgres_store(self.tenant_id)
+        if db and not self.single_root_mode:
+            layer_items: list[dict[str, Any]] = []
+            if category_id in PRODUCT_SCOPED_SCHEMAS:
+                layer_items.extend(
+                    db.list_knowledge_items(self.tenant_id, layer="tenant_product", category_id=category_id, include_archived=include_archived)
+                )
+            else:
+                layer_items.extend(
+                    db.list_knowledge_items(self.tenant_id, layer="shared", category_id=category_id, include_archived=include_archived)
+                )
+                layer_items.extend(
+                    db.list_knowledge_items(self.tenant_id, layer="tenant", category_id=category_id, include_archived=include_archived)
+                )
+            if layer_items:
+                return layer_items
         items = []
         for root in self.roots:
             category = self.get_category_from_root(root, category_id)
@@ -207,6 +229,17 @@ class KnowledgeRuntime:
         return items
 
     def get_item(self, category_id: str, item_id: str) -> dict[str, Any] | None:
+        db = postgres_store(self.tenant_id)
+        if db and not self.single_root_mode:
+            if category_id in PRODUCT_SCOPED_SCHEMAS:
+                for item in db.list_knowledge_items(self.tenant_id, layer="tenant_product", category_id=category_id, include_archived=True):
+                    if str(item.get("id") or "") == item_id:
+                        return None if item.get("status") == "archived" else item
+            else:
+                for layer in ("shared", "tenant"):
+                    item = db.get_knowledge_item(self.tenant_id, layer=layer, category_id=category_id, item_id=item_id)
+                    if item:
+                        return None if item.get("status") == "archived" else item
         if category_id in PRODUCT_SCOPED_SCHEMAS:
             for _kind, _schema, _resolver, item in self.iter_all_product_scoped_items():
                 if str(item.get("id") or "") == item_id and item.get("status") != "archived":
@@ -228,6 +261,18 @@ class KnowledgeRuntime:
         return None
 
     def iter_reply_items(self) -> Iterable[tuple[dict[str, Any], dict[str, Any], dict[str, Any], dict[str, Any]]]:
+        db = postgres_store(self.tenant_id)
+        if db and not self.single_root_mode:
+            for category in self.list_categories(reply_only=True):
+                category_id = str(category.get("id") or "")
+                try:
+                    schema = self.load_schema(category_id)
+                    resolver = self.load_resolver(category_id)
+                except FileNotFoundError:
+                    continue
+                for item in self.list_items(category_id):
+                    yield category, schema, resolver, item
+            return
         for root in self.roots:
             for category in self.list_categories_from_root(root, reply_only=True):
                 category_id = str(category.get("id") or "")
@@ -252,6 +297,29 @@ class KnowledgeRuntime:
         self,
         product_ids: Iterable[str],
     ) -> Iterable[tuple[dict[str, Any], dict[str, Any], dict[str, Any], dict[str, Any]]]:
+        db = postgres_store(self.tenant_id)
+        if db and not self.single_root_mode:
+            for product_id in sorted({str(item) for item in product_ids if str(item)}):
+                for kind, category_id in PRODUCT_SCOPED_KINDS.items():
+                    category = {
+                        "id": category_id,
+                        "name": PRODUCT_SCOPED_SCHEMAS[category_id]["display_name"],
+                        "kind": "product_scoped",
+                        "path": f"product_item_knowledge/{product_id}/{kind}",
+                        "enabled": True,
+                        "participates_in_reply": True,
+                        "sort_order": 70,
+                    }
+                    schema = PRODUCT_SCOPED_SCHEMAS[category_id]
+                    resolver = PRODUCT_SCOPED_RESOLVERS[category_id]
+                    for item in db.list_knowledge_items(
+                        self.tenant_id,
+                        layer="tenant_product",
+                        category_id=category_id,
+                        product_id=product_id,
+                    ):
+                        yield category, schema, resolver, item
+            return
         for product_id in sorted({str(item) for item in product_ids if str(item)}):
             product_root = (self.product_item_root / product_id).resolve()
             if self.product_item_root not in product_root.parents and product_root != self.product_item_root:
@@ -281,6 +349,12 @@ class KnowledgeRuntime:
                     yield category, schema, resolver, item
 
     def iter_all_product_scoped_items(self) -> Iterable[tuple[str, dict[str, Any], dict[str, Any], dict[str, Any]]]:
+        db = postgres_store(self.tenant_id)
+        if db and not self.single_root_mode:
+            for category_id in PRODUCT_SCOPED_SCHEMAS:
+                for item in db.list_knowledge_items(self.tenant_id, layer="tenant_product", category_id=category_id):
+                    yield category_id, PRODUCT_SCOPED_SCHEMAS[category_id], PRODUCT_SCOPED_RESOLVERS[category_id], item
+            return
         if not self.product_item_root.exists():
             return
         product_ids = [path.name for path in self.product_item_root.iterdir() if path.is_dir()]
@@ -290,3 +364,13 @@ class KnowledgeRuntime:
 
 def read_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def postgres_store(tenant_id: str):
+    if get_postgres_store is None or load_storage_config is None:
+        return None
+    config = load_storage_config()
+    if not config.use_postgres or not config.postgres_configured:
+        return None
+    store = get_postgres_store(tenant_id=tenant_id, config=config)
+    return store if store.available() else None

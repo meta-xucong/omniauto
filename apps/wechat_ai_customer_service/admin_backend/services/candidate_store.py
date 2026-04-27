@@ -17,6 +17,8 @@ from .knowledge_base_store import KnowledgeBaseStore
 from .knowledge_compiler import KnowledgeCompiler
 from .knowledge_deduper import KnowledgeDeduper, normalize_key, normalize_price_tiers
 from .version_store import VersionStore
+from apps.wechat_ai_customer_service.knowledge_paths import active_tenant_id
+from apps.wechat_ai_customer_service.storage import get_postgres_store, load_storage_config
 from apps.wechat_ai_customer_service.workflows.knowledge_intake import evaluate_intake_item
 
 
@@ -39,6 +41,11 @@ class CandidateStore:
         self.deduper = KnowledgeDeduper(self.base_store)
 
     def list_candidates(self, status: str) -> list[dict[str, Any]]:
+        db = postgres_store()
+        if db:
+            items = db.list_candidates(active_tenant_id(), status=status)
+            if items:
+                return items
         root = self.status_root(status)
         if not root.exists():
             return []
@@ -65,6 +72,7 @@ class CandidateStore:
         candidate.update(patch)
         candidate.setdefault("review", {})["updated_at"] = datetime.now().isoformat(timespec="seconds")
         path.write_text(json.dumps(candidate, ensure_ascii=False, indent=2), encoding="utf-8")
+        upsert_candidate_to_db(candidate)
         append_audit("candidate_updated", {"candidate_id": candidate_id})
         return {"ok": True, "item": candidate}
 
@@ -85,6 +93,7 @@ class CandidateStore:
         self.reassess_native_candidate(candidate, target_category, item)
         candidate.setdefault("review", {})["updated_at"] = datetime.now().isoformat(timespec="seconds")
         path.write_text(json.dumps(candidate, ensure_ascii=False, indent=2), encoding="utf-8")
+        upsert_candidate_to_db(candidate)
         append_audit("candidate_supplemented", {"candidate_id": candidate_id, "target_category": target_category})
         return {"ok": True, "item": candidate}
 
@@ -129,6 +138,7 @@ class CandidateStore:
         self.reassess_native_candidate(candidate, target_category, item)
         candidate.setdefault("review", {})["updated_at"] = datetime.now().isoformat(timespec="seconds")
         path.write_text(json.dumps(candidate, ensure_ascii=False, indent=2), encoding="utf-8")
+        upsert_candidate_to_db(candidate)
         append_audit("candidate_category_changed", {"candidate_id": candidate_id, "target_category": target_category})
         return {"ok": True, "item": candidate}
 
@@ -341,6 +351,7 @@ class CandidateStore:
     def move_candidate(self, source: Path, target: Path, candidate: dict[str, Any]) -> None:
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(json.dumps(candidate, ensure_ascii=False, indent=2), encoding="utf-8")
+        upsert_candidate_to_db(candidate)
         if source.resolve() != target.resolve() and source.exists():
             source.unlink()
 
@@ -704,3 +715,19 @@ def atomic_write_json(path: Path, content: Any) -> None:
     temp_path = path.with_suffix(path.suffix + ".tmp")
     temp_path.write_text(json.dumps(content, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     os.replace(temp_path, path)
+
+
+def postgres_store():
+    config = load_storage_config()
+    if not config.use_postgres or not config.postgres_configured:
+        return None
+    store = get_postgres_store(config=config)
+    return store if store.available() else None
+
+
+def upsert_candidate_to_db(candidate: dict[str, Any]) -> None:
+    db = postgres_store()
+    if not db:
+        return
+    review = candidate.get("review") if isinstance(candidate.get("review"), dict) else {}
+    db.upsert_candidate(active_tenant_id(), candidate, status=str(review.get("status") or "pending"))

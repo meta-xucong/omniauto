@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Any
 
 from apps.wechat_ai_customer_service.knowledge_paths import active_tenant_id, tenant_root
+from apps.wechat_ai_customer_service.storage import get_postgres_store, load_storage_config
 
 
 MAX_RECORDS = 2000
@@ -30,6 +31,9 @@ class RagExperienceStore:
         return self.root / "experiences.json"
 
     def list(self, *, status: str = "active", limit: int = 100) -> list[dict[str, Any]]:
+        db = postgres_store(self.tenant_id)
+        if db:
+            return db.list_rag_experiences(self.tenant_id, status=status, limit=limit)
         records = self._read()
         if status and status != "all":
             records = [item for item in records if str(item.get("status") or "active") == status]
@@ -37,6 +41,14 @@ class RagExperienceStore:
         return records[: max(1, min(int(limit or 100), 500))]
 
     def counts(self) -> dict[str, int]:
+        db = postgres_store(self.tenant_id)
+        if db:
+            records = db.list_rag_experiences(self.tenant_id, status="all", limit=500)
+            counts = {"total": len(records), "active": 0, "discarded": 0}
+            for item in records:
+                status = str(item.get("status") or "active")
+                counts[status] = counts.get(status, 0) + 1
+            return counts
         records = self._read()
         counts = {"total": len(records), "active": 0, "discarded": 0}
         for item in records:
@@ -99,6 +111,37 @@ class RagExperienceStore:
             "created_at": now_text,
             "updated_at": now_text,
         }
+        db = postgres_store(self.tenant_id)
+        config = load_storage_config()
+        if db:
+            existing = next((item for item in db.list_rag_experiences(self.tenant_id, status="all", limit=500) if item.get("experience_id") == record["experience_id"]), None)
+            if existing:
+                usage = dict(existing.get("usage", {}) or {})
+                usage["reply_count"] = int(usage.get("reply_count", 1) or 1) + 1
+                usage["last_used_at"] = now_text
+                existing.update(
+                    {
+                        "status": existing.get("status") or "active",
+                        "summary": record["summary"],
+                        "question": record["question"],
+                        "reply_text": record["reply_text"],
+                        "target": record["target"],
+                        "message_ids": record["message_ids"],
+                        "intent": record["intent"],
+                        "recommended_action": record["recommended_action"],
+                        "safety": record["safety"],
+                        "rag_hit": record["rag_hit"],
+                        "usage": usage,
+                        "updated_at": now_text,
+                    }
+                )
+                db.upsert_rag_experience(existing)
+                if not config.mirror_files:
+                    return existing
+            else:
+                db.upsert_rag_experience(record)
+                if not config.mirror_files:
+                    return record
         records = self._read()
         for index, existing in enumerate(records):
             if existing.get("experience_id") == record["experience_id"]:
@@ -129,6 +172,22 @@ class RagExperienceStore:
         return record
 
     def discard(self, experience_id: str, *, reason: str = "") -> dict[str, Any]:
+        db = postgres_store(self.tenant_id)
+        config = load_storage_config()
+        if db:
+            records = db.list_rag_experiences(self.tenant_id, status="all", limit=500)
+            for item in records:
+                if item.get("experience_id") != experience_id:
+                    continue
+                now_text = now()
+                item["status"] = "discarded"
+                item["discard_reason"] = reason or "discarded_by_user"
+                item["discarded_at"] = now_text
+                item["updated_at"] = now_text
+                db.upsert_rag_experience(item)
+                if not config.mirror_files:
+                    return item
+                break
         records = self._read()
         now_text = now()
         for index, item in enumerate(records):
@@ -210,3 +269,11 @@ def stable_digest(value: str, length: int = 16) -> str:
 
 def now() -> str:
     return datetime.now().isoformat(timespec="seconds")
+
+
+def postgres_store(tenant_id: str):
+    config = load_storage_config()
+    if not config.use_postgres or not config.postgres_configured:
+        return None
+    store = get_postgres_store(tenant_id=tenant_id, config=config)
+    return store if store.available() else None

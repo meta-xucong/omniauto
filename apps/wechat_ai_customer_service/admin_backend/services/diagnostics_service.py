@@ -15,6 +15,8 @@ from .knowledge_base_store import KnowledgeBaseStore
 from .knowledge_compiler import KnowledgeCompiler
 from .knowledge_registry import KnowledgeRegistry
 from .knowledge_schema_manager import KnowledgeSchemaManager
+from apps.wechat_ai_customer_service.knowledge_paths import active_tenant_id
+from apps.wechat_ai_customer_service.storage import get_postgres_store, load_storage_config
 
 
 APP_ROOT = Path(__file__).resolve().parents[2]
@@ -119,6 +121,11 @@ class DiagnosticsService:
         return enriched
 
     def load_ignored(self) -> dict[str, Any]:
+        db = postgres_store()
+        if db:
+            payload = db.get_kv(active_tenant_id(), "diagnostics", "ignored_issues")
+            if isinstance(payload, dict):
+                return payload
         if not IGNORES_PATH.exists():
             return {}
         try:
@@ -128,6 +135,12 @@ class DiagnosticsService:
         return payload if isinstance(payload, dict) else {}
 
     def write_ignored(self, payload: dict[str, Any]) -> None:
+        db = postgres_store()
+        config = load_storage_config()
+        if db:
+            db.set_kv(active_tenant_id(), "diagnostics", "ignored_issues", payload)
+            if not config.mirror_files:
+                return
         IGNORES_PATH.parent.mkdir(parents=True, exist_ok=True)
         temp_path = IGNORES_PATH.with_suffix(".tmp")
         temp_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -611,3 +624,11 @@ def issue_fingerprint(issue: dict[str, Any]) -> str:
 
 def re_fullmatch_fingerprint(value: str) -> bool:
     return bool(value and len(value) <= 64 and all(char in "0123456789abcdef" for char in value.lower()))
+
+
+def postgres_store():
+    config = load_storage_config()
+    if not config.use_postgres or not config.postgres_configured:
+        return None
+    store = get_postgres_store(config=config)
+    return store if store.available() else None

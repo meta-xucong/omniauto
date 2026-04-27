@@ -12,6 +12,8 @@ from pathlib import Path
 from typing import Any
 
 from .audit_log import append_audit
+from apps.wechat_ai_customer_service.knowledge_paths import active_tenant_id
+from apps.wechat_ai_customer_service.storage import get_postgres_store, load_storage_config
 
 
 APP_ROOT = Path(__file__).resolve().parents[2]
@@ -73,11 +75,23 @@ class UploadStore:
         }
         records = [item for item in self.list_uploads() if item.get("upload_id") != upload_id]
         records.append(record)
+        db = postgres_store()
+        config = load_storage_config()
+        if db:
+            db.upsert_upload(active_tenant_id(), record)
+            if not config.mirror_files:
+                append_audit("upload_created", {"upload_id": upload_id, "kind": kind, "path": str(target_path)})
+                return {"ok": True, "item": record}
         self.write_index(records)
         append_audit("upload_created", {"upload_id": upload_id, "kind": kind, "path": str(target_path)})
         return {"ok": True, "item": record}
 
     def list_uploads(self) -> list[dict[str, Any]]:
+        db = postgres_store()
+        if db:
+            records = db.list_uploads(active_tenant_id())
+            if records:
+                return records
         if not UPLOAD_INDEX_PATH.exists():
             return []
         return json.loads(UPLOAD_INDEX_PATH.read_text(encoding="utf-8"))
@@ -105,6 +119,13 @@ class UploadStore:
                 deleted_file = True
         except OSError:
             deleted_file = False
+        db = postgres_store()
+        config = load_storage_config()
+        if db:
+            db.delete_upload(active_tenant_id(), upload_id)
+            if not config.mirror_files:
+                append_audit("upload_deleted", {"upload_id": upload_id, "path": str(file_path), "deleted_file": deleted_file})
+                return {"ok": True, "item": target, "deleted_file": deleted_file}
         self.write_index(remaining)
         append_audit("upload_deleted", {"upload_id": upload_id, "path": str(file_path), "deleted_file": deleted_file})
         return {"ok": True, "item": target, "deleted_file": deleted_file}
@@ -116,6 +137,11 @@ class UploadStore:
                 item["learned"] = True
                 item["candidate_ids"] = sorted(set([*item.get("candidate_ids", []), *candidate_ids]))
                 item["learned_at"] = datetime.now().isoformat(timespec="seconds")
+                db = postgres_store()
+                if db:
+                    db.upsert_upload(active_tenant_id(), item)
+        if postgres_store() and not load_storage_config().mirror_files:
+            return
         self.write_index(records)
 
     def write_index(self, records: list[dict[str, Any]]) -> None:
@@ -143,3 +169,11 @@ def cell_to_text(value: Any) -> str:
     if value is None:
         return ""
     return str(value).strip()
+
+
+def postgres_store():
+    config = load_storage_config()
+    if not config.use_postgres or not config.postgres_configured:
+        return None
+    store = get_postgres_store(config=config)
+    return store if store.available() else None
