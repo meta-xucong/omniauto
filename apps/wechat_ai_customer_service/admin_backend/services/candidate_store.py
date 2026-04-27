@@ -41,24 +41,21 @@ class CandidateStore:
         self.deduper = KnowledgeDeduper(self.base_store)
 
     def list_candidates(self, status: str) -> list[dict[str, Any]]:
+        db_items: list[dict[str, Any]] = []
         db = postgres_store()
         if db:
-            items = db.list_candidates(active_tenant_id(), status=status)
-            if items:
-                return items
+            db_items = db.list_candidates(active_tenant_id(), status=status)
         root = self.status_root(status)
-        if not root.exists():
-            return []
-        items = [json.loads(path.read_text(encoding="utf-8")) for path in sorted(root.glob("*.json"), reverse=True)]
+        items = [json.loads(path.read_text(encoding="utf-8")) for path in sorted(root.glob("*.json"), reverse=True)] if root.exists() else []
         if status != "pending":
-            return items
+            return merge_candidates(db_items, items)
         visible_items = []
         for item in items:
             duplicate = self.deduper.check_candidate(item)
             if duplicate.get("duplicate") and duplicate.get("source") == "knowledge_base":
                 continue
             visible_items.append(item)
-        return visible_items
+        return merge_candidates(db_items, visible_items)
 
     def get_candidate(self, candidate_id: str) -> dict[str, Any] | None:
         path = self.find_path(candidate_id)
@@ -366,6 +363,17 @@ def merge_non_empty_dicts(base: dict[str, Any], patch: dict[str, Any]) -> dict[s
         else:
             result[key] = value
     return result
+
+
+def merge_candidates(*groups: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    merged: dict[str, dict[str, Any]] = {}
+    for group in groups:
+        for item in group:
+            candidate_id = str(item.get("candidate_id") or item.get("id") or "")
+            if not candidate_id:
+                continue
+            merged[candidate_id] = item
+    return sorted(merged.values(), key=lambda item: str((item.get("review") or {}).get("updated_at") or item.get("created_at") or ""), reverse=True)
 
 
 def merge_product_data(existing_data: dict[str, Any], candidate_data: dict[str, Any]) -> dict[str, Any]:

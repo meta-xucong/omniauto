@@ -19,7 +19,7 @@ from apps.wechat_ai_customer_service.storage import get_postgres_store, load_sto
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Manage PostgreSQL storage for WeChat AI customer-service.")
-    parser.add_argument("command", choices=["status", "init", "counts"])
+    parser.add_argument("command", choices=["status", "init", "counts", "parity"])
     parser.add_argument("--tenant-id", default="")
     args = parser.parse_args()
 
@@ -39,6 +39,17 @@ def main() -> int:
     if args.command == "counts":
         print(json.dumps({"ok": True, "tenant_id": tenant_id, "counts": store.counts(tenant_id)}, ensure_ascii=False, indent=2))
         return 0
+    if args.command == "parity":
+        from apps.wechat_ai_customer_service.workflows.migrate_file_storage_to_postgres import (  # noqa: WPS433
+            build_parity_report,
+            collect_file_storage,
+        )
+
+        plan = collect_file_storage(tenant_id)
+        counts = store.counts(tenant_id)
+        report = build_parity_report(plan, counts)
+        print(json.dumps({"ok": report["ok"], "tenant_id": tenant_id, "counts": counts, "parity": report}, ensure_ascii=False, indent=2))
+        return 0 if report["ok"] else 3
     return 1
 
 

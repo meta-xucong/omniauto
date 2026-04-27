@@ -23,18 +23,20 @@ class KnowledgeRegistry:
     def __init__(self, root: Path | None = None) -> None:
         self.root = root or KNOWLEDGE_BASE_ROOT
         self.registry_path = self.root / "registry.json"
+        self.default_root_mode = self.root.resolve() == KNOWLEDGE_BASE_ROOT.resolve()
 
     def load(self) -> dict[str, Any]:
-        db = postgres_store()
+        db = postgres_store() if self.default_root_mode else None
         if db:
             categories = db.list_categories(active_tenant_id(), layer="tenant", enabled_only=False)
+            categories = [category for category in categories if self.category_files_available(category)]
             if categories:
                 return {"schema_version": 1, "categories": categories}
         return json.loads(self.registry_path.read_text(encoding="utf-8"))
 
     def save(self, registry: dict[str, Any]) -> None:
         registry["updated_at"] = datetime.now().isoformat(timespec="seconds")
-        db = postgres_store()
+        db = postgres_store() if self.default_root_mode else None
         config = load_storage_config()
         if db:
             for category in registry.get("categories", []) or []:
@@ -69,6 +71,13 @@ class KnowledgeRegistry:
         if root not in resolved.parents and resolved != root:
             raise ValueError(f"category path escapes knowledge base root: {category_id}")
         return resolved
+
+    def category_files_available(self, category: dict[str, Any]) -> bool:
+        category_id = str(category.get("id") or "")
+        if not category_id:
+            return False
+        path = self.root / str(category.get("path") or category_id)
+        return (path / "schema.json").exists() and (path / "resolver.json").exists()
 
     def create_custom_category(
         self,

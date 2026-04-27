@@ -166,3 +166,66 @@ CREATE TABLE IF NOT EXISTS {schema}.app_kv (
   updated_at timestamptz NOT NULL DEFAULT now(),
   PRIMARY KEY (tenant_id, namespace, key)
 );
+
+CREATE TABLE IF NOT EXISTS {schema}.work_queue_jobs (
+  tenant_id text NOT NULL,
+  job_id text PRIMARY KEY,
+  queue text NOT NULL DEFAULT 'default',
+  kind text NOT NULL,
+  status text NOT NULL DEFAULT 'pending',
+  priority integer NOT NULL DEFAULT 5,
+  dedupe_key text NOT NULL DEFAULT '',
+  attempts integer NOT NULL DEFAULT 0,
+  max_attempts integer NOT NULL DEFAULT 3,
+  available_at timestamptz NOT NULL DEFAULT now(),
+  locked_until timestamptz,
+  locked_by text NOT NULL DEFAULT '',
+  payload jsonb NOT NULL DEFAULT '{{}}'::jsonb,
+  result jsonb NOT NULL DEFAULT '{{}}'::jsonb,
+  error text NOT NULL DEFAULT '',
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  finished_at timestamptz
+);
+
+CREATE INDEX IF NOT EXISTS idx_work_queue_jobs_tenant_status
+  ON {schema}.work_queue_jobs (tenant_id, status, queue, priority, available_at);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_work_queue_jobs_active_dedupe
+  ON {schema}.work_queue_jobs (tenant_id, queue, dedupe_key)
+  WHERE dedupe_key <> '' AND status IN ('pending', 'running');
+
+CREATE TABLE IF NOT EXISTS {schema}.handoff_cases (
+  tenant_id text NOT NULL,
+  case_id text PRIMARY KEY,
+  target text NOT NULL DEFAULT '',
+  status text NOT NULL DEFAULT 'open',
+  priority integer NOT NULL DEFAULT 1,
+  reason text NOT NULL DEFAULT '',
+  message_ids jsonb NOT NULL DEFAULT '[]'::jsonb,
+  message_contents jsonb NOT NULL DEFAULT '[]'::jsonb,
+  reply_text text NOT NULL DEFAULT '',
+  operator_alert jsonb NOT NULL DEFAULT '{{}}'::jsonb,
+  product_context jsonb NOT NULL DEFAULT '{{}}'::jsonb,
+  payload jsonb NOT NULL DEFAULT '{{}}'::jsonb,
+  resolution jsonb NOT NULL DEFAULT '{{}}'::jsonb,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  resolved_at timestamptz
+);
+
+CREATE INDEX IF NOT EXISTS idx_handoff_cases_tenant_status
+  ON {schema}.handoff_cases (tenant_id, status, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS {schema}.runtime_heartbeats (
+  tenant_id text NOT NULL,
+  component_id text NOT NULL,
+  status text NOT NULL DEFAULT 'ok',
+  message text NOT NULL DEFAULT '',
+  payload jsonb NOT NULL DEFAULT '{{}}'::jsonb,
+  last_seen_at timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (tenant_id, component_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_runtime_heartbeats_tenant
+  ON {schema}.runtime_heartbeats (tenant_id, last_seen_at DESC);

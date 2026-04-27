@@ -33,7 +33,12 @@ runtime/state/
 
 # Local task/supervisor state
 .codex-longrun/
+.codex_publish/
 @AutomationLog.txt
+.local/
+.env.local
+*.local.env
+apps/wechat_ai_customer_service/configs/*.local.env
 
 # WeChat customer-service local runtime data
 apps/wechat_ai_customer_service/data/backups/

@@ -557,16 +557,351 @@ class PostgresJsonStore:
             "knowledge_items": "tenant_id = %s",
             "review_candidates": "tenant_id = %s",
             "uploads": "tenant_id = %s",
+            "version_snapshots": "tenant_id = %s",
             "rag_sources": "tenant_id = %s",
             "rag_chunks": "tenant_id = %s",
             "rag_index_entries": "tenant_id = %s",
             "rag_experiences": "tenant_id = %s",
+            "app_kv": "tenant_id = %s",
+            "audit_events": "tenant_id = %s",
+            "work_queue_jobs": "tenant_id = %s",
+            "handoff_cases": "tenant_id = %s",
+            "runtime_heartbeats": "tenant_id = %s",
         }
         result: dict[str, int] = {}
         for table, where in tables.items():
             row = self.fetchone(f"SELECT count(*) AS count FROM {self.schema}.{table} WHERE {where}", [tenant_id])
             result[table] = int(row["count"] if row else 0)
         return result
+
+    def enqueue_job(self, tenant_id: str, job: dict[str, Any]) -> dict[str, Any]:
+        job_id = str(job.get("job_id") or "")
+        if not job_id:
+            raise ValueError("job_id is required")
+        self.execute(
+            f"""
+            INSERT INTO {self.schema}.work_queue_jobs
+              (tenant_id, job_id, queue, kind, status, priority, dedupe_key, attempts, max_attempts, available_at, payload, updated_at)
+            VALUES (%s, %s, %s, %s, 'pending', %s, %s, 0, %s, COALESCE(%s::timestamptz, now()), %s, now())
+            ON CONFLICT (job_id)
+            DO UPDATE SET
+              payload = EXCLUDED.payload,
+              priority = EXCLUDED.priority,
+              max_attempts = EXCLUDED.max_attempts,
+              available_at = EXCLUDED.available_at,
+              updated_at = now()
+            """,
+            [
+                tenant_id,
+                job_id,
+                job.get("queue") or "default",
+                job.get("kind") or "generic",
+                int(job.get("priority", 5) or 5),
+                job.get("dedupe_key") or "",
+                int(job.get("max_attempts", 3) or 3),
+                job.get("available_at") or None,
+                self.jsonb(job.get("payload", {}) or {}),
+            ],
+        )
+        return self.get_job(tenant_id, job_id) or job
+
+    def get_job(self, tenant_id: str, job_id: str) -> dict[str, Any] | None:
+        row = self.fetchone(
+            f"""
+            SELECT tenant_id, job_id, queue, kind, status, priority, dedupe_key, attempts, max_attempts,
+                   available_at, locked_until, locked_by, payload, result, error, created_at, updated_at, finished_at
+            FROM {self.schema}.work_queue_jobs
+            WHERE tenant_id = %s AND job_id = %s
+            """,
+            [tenant_id, job_id],
+        )
+        return normalize_job_row(row) if row else None
+
+    def list_jobs(self, tenant_id: str, *, status: str = "all", limit: int = 100) -> list[dict[str, Any]]:
+        filters = ["tenant_id = %s"]
+        params: list[Any] = [tenant_id]
+        if status and status != "all":
+            filters.append("status = %s")
+            params.append(status)
+        params.append(max(1, min(int(limit or 100), 500)))
+        rows = self.fetchall(
+            f"""
+            SELECT tenant_id, job_id, queue, kind, status, priority, dedupe_key, attempts, max_attempts,
+                   available_at, locked_until, locked_by, payload, result, error, created_at, updated_at, finished_at
+            FROM {self.schema}.work_queue_jobs
+            WHERE {" AND ".join(filters)}
+            ORDER BY created_at DESC, job_id DESC
+            LIMIT %s
+            """,
+            params,
+        )
+        return [normalize_job_row(row) for row in rows]
+
+    def claim_jobs(self, tenant_id: str, *, queue: str = "default", worker_id: str = "", limit: int = 1, lock_seconds: int = 300) -> list[dict[str, Any]]:
+        rows = self.fetchall(
+            f"""
+            SELECT job_id
+            FROM {self.schema}.work_queue_jobs
+            WHERE tenant_id = %s
+              AND queue = %s
+              AND status = 'pending'
+              AND available_at <= now()
+              AND (locked_until IS NULL OR locked_until < now())
+            ORDER BY priority ASC, created_at ASC
+            LIMIT %s
+            """,
+            [tenant_id, queue or "default", max(1, min(int(limit or 1), 20))],
+        )
+        claimed: list[dict[str, Any]] = []
+        for row in rows:
+            job_id = str(row["job_id"])
+            self.execute(
+                f"""
+                UPDATE {self.schema}.work_queue_jobs
+                SET status = 'running',
+                    attempts = attempts + 1,
+                    locked_by = %s,
+                    locked_until = now() + (%s || ' seconds')::interval,
+                    updated_at = now()
+                WHERE tenant_id = %s AND job_id = %s AND status = 'pending'
+                """,
+                [worker_id or "worker", int(lock_seconds or 300), tenant_id, job_id],
+            )
+            job = self.get_job(tenant_id, job_id)
+            if job and job.get("status") == "running":
+                claimed.append(job)
+        return claimed
+
+    def complete_job(self, tenant_id: str, job_id: str, result: dict[str, Any] | None = None) -> dict[str, Any] | None:
+        self.execute(
+            f"""
+            UPDATE {self.schema}.work_queue_jobs
+            SET status = 'succeeded',
+                result = %s,
+                error = '',
+                locked_until = NULL,
+                finished_at = now(),
+                updated_at = now()
+            WHERE tenant_id = %s AND job_id = %s
+            """,
+            [self.jsonb(result or {}), tenant_id, job_id],
+        )
+        return self.get_job(tenant_id, job_id)
+
+    def fail_job(self, tenant_id: str, job_id: str, error: str, *, retry: bool = True) -> dict[str, Any] | None:
+        job = self.get_job(tenant_id, job_id)
+        if not job:
+            return None
+        attempts = int(job.get("attempts", 0) or 0)
+        max_attempts = int(job.get("max_attempts", 3) or 3)
+        status = "pending" if retry and attempts < max_attempts else "failed"
+        finished_expr = "NULL" if status == "pending" else "now()"
+        self.execute(
+            f"""
+            UPDATE {self.schema}.work_queue_jobs
+            SET status = %s,
+                error = %s,
+                locked_until = NULL,
+                locked_by = '',
+                finished_at = {finished_expr},
+                updated_at = now()
+            WHERE tenant_id = %s AND job_id = %s
+            """,
+            [status, error, tenant_id, job_id],
+        )
+        return self.get_job(tenant_id, job_id)
+
+    def cancel_job(self, tenant_id: str, job_id: str, reason: str = "") -> dict[str, Any] | None:
+        self.execute(
+            f"""
+            UPDATE {self.schema}.work_queue_jobs
+            SET status = 'cancelled',
+                error = %s,
+                locked_until = NULL,
+                locked_by = '',
+                finished_at = now(),
+                updated_at = now()
+            WHERE tenant_id = %s AND job_id = %s
+            """,
+            [reason, tenant_id, job_id],
+        )
+        return self.get_job(tenant_id, job_id)
+
+    def job_summary(self, tenant_id: str) -> dict[str, Any]:
+        rows = self.fetchall(
+            f"""
+            SELECT status, count(*) AS count
+            FROM {self.schema}.work_queue_jobs
+            WHERE tenant_id = %s
+            GROUP BY status
+            """,
+            [tenant_id],
+        )
+        counts = {str(row["status"]): int(row["count"]) for row in rows}
+        return {
+            "total": sum(counts.values()),
+            "pending": counts.get("pending", 0),
+            "running": counts.get("running", 0),
+            "succeeded": counts.get("succeeded", 0),
+            "failed": counts.get("failed", 0),
+            "cancelled": counts.get("cancelled", 0),
+            "by_status": counts,
+        }
+
+    def upsert_heartbeat(
+        self,
+        tenant_id: str,
+        *,
+        component_id: str,
+        status: str = "ok",
+        message: str = "",
+        payload: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        self.execute(
+            f"""
+            INSERT INTO {self.schema}.runtime_heartbeats
+              (tenant_id, component_id, status, message, payload, last_seen_at)
+            VALUES (%s, %s, %s, %s, %s, now())
+            ON CONFLICT (tenant_id, component_id)
+            DO UPDATE SET
+              status = EXCLUDED.status,
+              message = EXCLUDED.message,
+              payload = EXCLUDED.payload,
+              last_seen_at = now()
+            """,
+            [tenant_id, component_id, status or "ok", message or "", self.jsonb(payload or {})],
+        )
+        return self.get_heartbeat(tenant_id, component_id) or {}
+
+    def get_heartbeat(self, tenant_id: str, component_id: str) -> dict[str, Any] | None:
+        row = self.fetchone(
+            f"""
+            SELECT tenant_id, component_id, status, message, payload, last_seen_at
+            FROM {self.schema}.runtime_heartbeats
+            WHERE tenant_id = %s AND component_id = %s
+            """,
+            [tenant_id, component_id],
+        )
+        return normalize_heartbeat_row(row) if row else None
+
+    def list_heartbeats(self, tenant_id: str) -> list[dict[str, Any]]:
+        rows = self.fetchall(
+            f"""
+            SELECT tenant_id, component_id, status, message, payload, last_seen_at
+            FROM {self.schema}.runtime_heartbeats
+            WHERE tenant_id = %s
+            ORDER BY last_seen_at DESC, component_id ASC
+            """,
+            [tenant_id],
+        )
+        return [normalize_heartbeat_row(row) for row in rows]
+
+    def upsert_handoff_case(self, tenant_id: str, case_item: dict[str, Any]) -> dict[str, Any]:
+        case_id = str(case_item.get("case_id") or "")
+        if not case_id:
+            raise ValueError("case_id is required")
+        self.execute(
+            f"""
+            INSERT INTO {self.schema}.handoff_cases
+              (tenant_id, case_id, target, status, priority, reason, message_ids, message_contents,
+               reply_text, operator_alert, product_context, payload, updated_at)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, now())
+            ON CONFLICT (case_id)
+            DO UPDATE SET
+              status = EXCLUDED.status,
+              priority = EXCLUDED.priority,
+              reason = EXCLUDED.reason,
+              message_ids = EXCLUDED.message_ids,
+              message_contents = EXCLUDED.message_contents,
+              reply_text = EXCLUDED.reply_text,
+              operator_alert = EXCLUDED.operator_alert,
+              product_context = EXCLUDED.product_context,
+              payload = EXCLUDED.payload,
+              updated_at = now()
+            """,
+            [
+                tenant_id,
+                case_id,
+                case_item.get("target") or "",
+                case_item.get("status") or "open",
+                int(case_item.get("priority", 1) or 1),
+                case_item.get("reason") or "",
+                self.jsonb(case_item.get("message_ids", []) or []),
+                self.jsonb(case_item.get("message_contents", []) or []),
+                case_item.get("reply_text") or "",
+                self.jsonb(case_item.get("operator_alert", {}) or {}),
+                self.jsonb(case_item.get("product_context", {}) or {}),
+                self.jsonb(case_item),
+            ],
+        )
+        return self.get_handoff_case(tenant_id, case_id) or case_item
+
+    def get_handoff_case(self, tenant_id: str, case_id: str) -> dict[str, Any] | None:
+        row = self.fetchone(
+            f"""
+            SELECT tenant_id, case_id, target, status, priority, reason, message_ids, message_contents,
+                   reply_text, operator_alert, product_context, payload, resolution, created_at, updated_at, resolved_at
+            FROM {self.schema}.handoff_cases
+            WHERE tenant_id = %s AND case_id = %s
+            """,
+            [tenant_id, case_id],
+        )
+        return normalize_handoff_row(row) if row else None
+
+    def list_handoff_cases(self, tenant_id: str, *, status: str = "open", limit: int = 100) -> list[dict[str, Any]]:
+        filters = ["tenant_id = %s"]
+        params: list[Any] = [tenant_id]
+        if status and status != "all":
+            filters.append("status = %s")
+            params.append(status)
+        params.append(max(1, min(int(limit or 100), 500)))
+        rows = self.fetchall(
+            f"""
+            SELECT tenant_id, case_id, target, status, priority, reason, message_ids, message_contents,
+                   reply_text, operator_alert, product_context, payload, resolution, created_at, updated_at, resolved_at
+            FROM {self.schema}.handoff_cases
+            WHERE {" AND ".join(filters)}
+            ORDER BY created_at DESC, case_id DESC
+            LIMIT %s
+            """,
+            params,
+        )
+        return [normalize_handoff_row(row) for row in rows]
+
+    def update_handoff_status(self, tenant_id: str, case_id: str, status: str, resolution: dict[str, Any] | None = None) -> dict[str, Any] | None:
+        resolved_expr = "now()" if status in {"resolved", "ignored"} else "NULL"
+        self.execute(
+            f"""
+            UPDATE {self.schema}.handoff_cases
+            SET status = %s,
+                resolution = %s,
+                resolved_at = {resolved_expr},
+                updated_at = now()
+            WHERE tenant_id = %s AND case_id = %s
+            """,
+            [status, self.jsonb(resolution or {}), tenant_id, case_id],
+        )
+        return self.get_handoff_case(tenant_id, case_id)
+
+    def handoff_summary(self, tenant_id: str) -> dict[str, Any]:
+        rows = self.fetchall(
+            f"""
+            SELECT status, count(*) AS count
+            FROM {self.schema}.handoff_cases
+            WHERE tenant_id = %s
+            GROUP BY status
+            """,
+            [tenant_id],
+        )
+        counts = {str(row["status"]): int(row["count"]) for row in rows}
+        return {
+            "total": sum(counts.values()),
+            "open": counts.get("open", 0),
+            "acknowledged": counts.get("acknowledged", 0),
+            "resolved": counts.get("resolved", 0),
+            "ignored": counts.get("ignored", 0),
+            "by_status": counts,
+        }
 
     def execute(self, query: str, params: list[Any] | tuple[Any, ...] | None = None) -> None:
         with self.connect() as conn:
@@ -614,6 +949,35 @@ class PostgresJsonStore:
 
 def get_postgres_store(*, tenant_id: str | None = None, config: StorageConfig | None = None) -> PostgresJsonStore:
     return PostgresJsonStore(config=config, tenant_id=tenant_id)
+
+
+def normalize_job_row(row: dict[str, Any]) -> dict[str, Any]:
+    result = dict(row)
+    for key in ("available_at", "locked_until", "created_at", "updated_at", "finished_at"):
+        value = result.get(key)
+        if value is not None and hasattr(value, "isoformat"):
+            result[key] = value.isoformat(timespec="seconds")
+    return result
+
+
+def normalize_handoff_row(row: dict[str, Any]) -> dict[str, Any]:
+    result = dict(row)
+    payload = result.get("payload") if isinstance(result.get("payload"), dict) else {}
+    for key, value in payload.items():
+        result.setdefault(key, value)
+    for key in ("created_at", "updated_at", "resolved_at"):
+        value = result.get(key)
+        if value is not None and hasattr(value, "isoformat"):
+            result[key] = value.isoformat(timespec="seconds")
+    return result
+
+
+def normalize_heartbeat_row(row: dict[str, Any]) -> dict[str, Any]:
+    result = dict(row)
+    value = result.get("last_seen_at")
+    if value is not None and hasattr(value, "isoformat"):
+        result["last_seen_at"] = value.isoformat(timespec="seconds")
+    return result
 
 
 def search_text(payload: dict[str, Any]) -> str:

@@ -13,6 +13,8 @@ from .api.candidates import router as candidates_router
 from .api.diagnostics import router as diagnostics_router
 from .api.drafts import router as drafts_router
 from .api.generator import router as generator_router
+from .api.handoffs import router as handoffs_router
+from .api.jobs import router as jobs_router
 from .api.knowledge import router as knowledge_router
 from .api.learning import router as learning_router
 from .api.rag import router as rag_router
@@ -36,6 +38,8 @@ def create_app() -> FastAPI:
     app.include_router(diagnostics_router)
     app.include_router(drafts_router)
     app.include_router(generator_router)
+    app.include_router(handoffs_router)
+    app.include_router(jobs_router)
     app.include_router(knowledge_router)
     app.include_router(learning_router)
     app.include_router(rag_router)

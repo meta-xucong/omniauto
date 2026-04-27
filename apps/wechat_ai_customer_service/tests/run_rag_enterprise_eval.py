@@ -94,6 +94,7 @@ def check_hybrid_semantic_recall() -> None:
     assert_equal(top.get("product_id"), "fl-920", "top hit should be FL-920")
     assert_equal(top.get("retrieval_mode"), "hybrid_lexical_semantic", "hit should use hybrid retrieval mode")
     assert_true(float(top.get("scoring", {}).get("semantic", 0)) > 0, "hit should include semantic score")
+    assert_true("vector" in (top.get("scoring", {}) or {}), "hit should include vector score")
     expanded = set(result.get("query_profile", {}).get("expanded_terms", []) or [])
     assert_true("供电方式" in expanded or "酒店公寓" in expanded, "query profile should include semantic expansion")
 

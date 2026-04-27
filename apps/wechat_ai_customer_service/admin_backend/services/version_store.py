@@ -108,6 +108,7 @@ class VersionStore:
             replace_tree(tenants_source, TENANTS_ROOT)
         elif knowledge_source.exists():
             replace_tree(knowledge_source, KNOWLEDGE_BASE_ROOT)
+        refresh_postgres_formal_knowledge()
         append_audit("rollback_applied", {"version_id": version_id, "rollback_snapshot": rollback_snapshot["version_id"]})
         return {"ok": True, "message": "rollback applied", "version_id": version_id, "backup": rollback_snapshot}
 
@@ -116,6 +117,34 @@ def replace_tree(source: Path, target: Path) -> None:
     if target.exists():
         shutil.rmtree(target)
     shutil.copytree(source, target)
+
+
+def refresh_postgres_formal_knowledge() -> None:
+    db = postgres_store()
+    if not db:
+        return
+    tenant_id = active_tenant_id()
+    from apps.wechat_ai_customer_service.admin_backend.services.knowledge_base_store import product_scoped_category_records
+    from apps.wechat_ai_customer_service.workflows.migrate_file_storage_to_postgres import collect_file_storage
+
+    plan = collect_file_storage(tenant_id)
+    db.execute(f"DELETE FROM {db.schema}.knowledge_items WHERE tenant_id = %s", [tenant_id])
+    db.execute(f"DELETE FROM {db.schema}.knowledge_categories WHERE tenant_id = %s", [tenant_id])
+    db.upsert_tenant(plan["tenant"])
+    for category in plan["shared_categories"]:
+        db.upsert_category(tenant_id, "shared", category)
+    for category in plan["tenant_categories"]:
+        db.upsert_category(tenant_id, "tenant", category)
+    for category in product_scoped_category_records():
+        db.upsert_category(tenant_id, "tenant_product", category)
+    for item in plan["knowledge_items"]:
+        db.upsert_knowledge_item(
+            tenant_id,
+            item["layer"],
+            item["category_id"],
+            item["payload"],
+            product_id=item.get("product_id", ""),
+        )
 
 
 def postgres_store():

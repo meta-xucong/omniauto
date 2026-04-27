@@ -36,6 +36,7 @@ SUPPORTED_SUFFIXES = {".txt", ".md", ".json", ".csv"}
 DEFAULT_SOURCE_TYPES = {"upload", "chat_log", "product_doc", "policy_doc", "erp_export", "manual"}
 HIGH_RISK_TERMS = {"最低价", "账期", "月结", "赔偿", "退款", "合同", "盖章", "安装费", "先发货", "虚开"}
 RETRIEVAL_MODE = "hybrid_lexical_semantic"
+VECTOR_DIMENSIONS = 96
 SOURCE_TYPE_BOOSTS = {
     "product_doc": 0.045,
     "manual": 0.04,
@@ -285,11 +286,14 @@ class RagService:
             text = str(chunk.get("text") or "")
             terms = sorted(tokenize(text))
             semantic_terms = sorted(expand_semantic_terms(text, terms))
+            vector = build_sparse_vector([*terms, *semantic_terms])
             entries.append(
                 {
                     **chunk,
                     "terms": terms,
                     "semantic_terms": semantic_terms,
+                    "vector": vector,
+                    "vector_dimensions": VECTOR_DIMENSIONS,
                     "term_count": len(terms),
                     "semantic_term_count": len(semantic_terms),
                     "risk_terms": sorted(term for term in HIGH_RISK_TERMS if term in text),
@@ -561,6 +565,7 @@ def build_query_profile(query: str) -> dict[str, Any]:
         "terms": terms,
         "expanded_terms": expanded_terms,
         "variants": variants,
+        "vector": build_sparse_vector(expanded_terms),
     }
 
 
@@ -613,12 +618,15 @@ def score_entry(query: str, query_profile: dict[str, Any] | set[str], entry: dic
     entry_semantic_terms = set(entry.get("semantic_terms", []) or [])
     if not entry_semantic_terms:
         entry_semantic_terms = expand_semantic_terms(text, entry_terms)
+    query_vector = query_profile.get("vector") if isinstance(query_profile.get("vector"), dict) else build_sparse_vector(expanded_query_terms)
+    entry_vector = entry.get("vector") if isinstance(entry.get("vector"), dict) else build_sparse_vector(entry_terms | entry_semantic_terms)
+    vector_similarity = cosine_similarity(query_vector, entry_vector)
     overlap = query_terms & entry_terms
     semantic_overlap = expanded_query_terms & (entry_terms | entry_semantic_terms)
     variants = [str(item).lower() for item in query_profile.get("variants", []) or [] if str(item).strip()]
     phrase_match = query_text and query_text in text
     variant_match = any(variant and variant in text for variant in variants)
-    if not overlap and not semantic_overlap and not phrase_match and not variant_match:
+    if not overlap and not semantic_overlap and not phrase_match and not variant_match and vector_similarity < 0.1:
         return empty_scoring()
     coverage = len(overlap) / max(1, len(query_terms))
     density = len(overlap) / math.sqrt(max(1, len(entry_terms)))
@@ -630,10 +638,13 @@ def score_entry(query: str, query_profile: dict[str, Any] | set[str], entry: dic
     risk_penalty = 0.08 if entry.get("risk_terms") else 0.0
     lexical = coverage * 0.46 + min(0.16, density)
     semantic = semantic_coverage * 0.2 + min(0.12, semantic_density)
-    final = lexical + semantic + phrase_bonus + product_bonus + boost - risk_penalty
+    vector_component = min(0.14, vector_similarity * 0.18)
+    final = lexical + semantic + vector_component + phrase_bonus + product_bonus + boost - risk_penalty
     return {
         "lexical": round(max(0.0, lexical), 4),
         "semantic": round(max(0.0, semantic), 4),
+        "vector": round(max(0.0, vector_component), 4),
+        "vector_similarity": round(max(0.0, vector_similarity), 4),
         "phrase": round(max(0.0, phrase_bonus), 4),
         "product": round(max(0.0, product_bonus), 4),
         "boost": round(boost, 4),
@@ -646,6 +657,8 @@ def empty_scoring() -> dict[str, float]:
     return {
         "lexical": 0.0,
         "semantic": 0.0,
+        "vector": 0.0,
+        "vector_similarity": 0.0,
         "phrase": 0.0,
         "product": 0.0,
         "boost": 0.0,
@@ -659,6 +672,7 @@ def compact_query_profile(profile: dict[str, Any]) -> dict[str, Any]:
         "terms": sorted(profile.get("terms", set()) or [])[:40],
         "expanded_terms": sorted(profile.get("expanded_terms", set()) or [])[:60],
         "variants": sorted(profile.get("variants", []) or [])[:12],
+        "vector_dimensions": VECTOR_DIMENSIONS,
     }
 
 
@@ -695,6 +709,33 @@ def now() -> str:
 
 def stable_digest(value: str, length: int = 16) -> str:
     return hashlib.sha256(str(value).encode("utf-8")).hexdigest()[:length]
+
+
+def build_sparse_vector(terms: set[str] | list[str] | tuple[str, ...]) -> dict[str, float]:
+    weights: dict[str, float] = {}
+    for term in terms:
+        normalized = normalize_search_text(str(term))
+        if not normalized:
+            continue
+        bucket = int(hashlib.sha256(normalized.encode("utf-8")).hexdigest()[:8], 16) % VECTOR_DIMENSIONS
+        key = str(bucket)
+        weights[key] = weights.get(key, 0.0) + 1.0
+    norm = math.sqrt(sum(value * value for value in weights.values()))
+    if norm <= 0:
+        return {}
+    return {key: round(value / norm, 6) for key, value in sorted(weights.items(), key=lambda item: int(item[0]))}
+
+
+def cosine_similarity(left: dict[str, Any], right: dict[str, Any]) -> float:
+    if not left or not right:
+        return 0.0
+    total = 0.0
+    for key, value in left.items():
+        try:
+            total += float(value) * float(right.get(key, 0.0) or 0.0)
+        except (TypeError, ValueError):
+            continue
+    return max(0.0, min(1.0, total))
 
 
 def compact_hits(hits: list[dict[str, Any]], *, limit: int = 3, text_limit: int = 260) -> list[dict[str, Any]]:

@@ -136,10 +136,12 @@ class RagExperienceStore:
                     }
                 )
                 db.upsert_rag_experience(existing)
+                rebuild_rag_index_safely(self.tenant_id)
                 if not config.mirror_files:
                     return existing
             else:
                 db.upsert_rag_experience(record)
+                rebuild_rag_index_safely(self.tenant_id)
                 if not config.mirror_files:
                     return record
         records = self._read()
@@ -166,9 +168,11 @@ class RagExperienceStore:
                 )
                 records[index] = existing
                 self._write(records)
+                rebuild_rag_index_safely(self.tenant_id)
                 return existing
         records.append(record)
         self._write(records)
+        rebuild_rag_index_safely(self.tenant_id)
         return record
 
     def discard(self, experience_id: str, *, reason: str = "") -> dict[str, Any]:
@@ -185,6 +189,7 @@ class RagExperienceStore:
                 item["discarded_at"] = now_text
                 item["updated_at"] = now_text
                 db.upsert_rag_experience(item)
+                rebuild_rag_index_safely(self.tenant_id)
                 if not config.mirror_files:
                     return item
                 break
@@ -199,6 +204,7 @@ class RagExperienceStore:
             item["updated_at"] = now_text
             records[index] = item
             self._write(records)
+            rebuild_rag_index_safely(self.tenant_id)
             return item
         raise KeyError(experience_id)
 
@@ -269,6 +275,15 @@ def stable_digest(value: str, length: int = 16) -> str:
 
 def now() -> str:
     return datetime.now().isoformat(timespec="seconds")
+
+
+def rebuild_rag_index_safely(tenant_id: str) -> None:
+    try:
+        from apps.wechat_ai_customer_service.workflows.rag_layer import RagService
+
+        RagService(tenant_id=tenant_id).rebuild_index()
+    except Exception:
+        return
 
 
 def postgres_store(tenant_id: str):

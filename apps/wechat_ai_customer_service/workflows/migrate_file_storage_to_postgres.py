@@ -95,7 +95,14 @@ def main() -> int:
         store.set_kv(tenant_id, namespace, key, payload)
 
     db_counts = store.counts(tenant_id)
-    print(json.dumps({"ok": True, "tenant_id": tenant_id, "counts": plan["counts"], "db_counts": db_counts}, ensure_ascii=False, indent=2))
+    parity = build_parity_report(plan, db_counts)
+    print(
+        json.dumps(
+            {"ok": parity["ok"], "tenant_id": tenant_id, "counts": plan["counts"], "db_counts": db_counts, "parity": parity},
+            ensure_ascii=False,
+            indent=2,
+        )
+    )
     return 0
 
 
@@ -145,6 +152,47 @@ def collect_file_storage(tenant_id: str) -> dict[str, Any]:
             "uploads": len(uploads),
             "versions": len(versions),
             "kv_items": len(kv_items),
+        },
+    }
+
+
+def build_parity_report(plan: dict[str, Any], db_counts: dict[str, int]) -> dict[str, Any]:
+    candidate_ids = [
+        str(candidate.get("candidate_id") or candidate.get("id") or "")
+        for candidates in (plan.get("candidates_by_status") or {}).values()
+        for candidate in candidates
+        if str(candidate.get("candidate_id") or candidate.get("id") or "")
+    ]
+    unique_candidate_ids = sorted(set(candidate_ids))
+    duplicate_candidate_count = max(0, len(candidate_ids) - len(unique_candidate_ids))
+    expected = {
+        "knowledge_categories": len(plan.get("shared_categories", []) or [])
+        + len(plan.get("tenant_categories", []) or [])
+        + len(product_scoped_category_records()),
+        "knowledge_items": int((plan.get("counts") or {}).get("knowledge_items", 0) or 0),
+        "review_candidates": len(unique_candidate_ids),
+        "uploads": int((plan.get("counts") or {}).get("uploads", 0) or 0),
+        "version_snapshots": int((plan.get("counts") or {}).get("versions", 0) or 0),
+        "rag_sources": int((plan.get("counts") or {}).get("rag_sources", 0) or 0),
+        "rag_chunks": int((plan.get("counts") or {}).get("rag_chunks", 0) or 0),
+        "rag_index_entries": int((plan.get("counts") or {}).get("rag_index_entries", 0) or 0),
+        "rag_experiences": int((plan.get("counts") or {}).get("rag_experiences", 0) or 0),
+        "app_kv": int((plan.get("counts") or {}).get("kv_items", 0) or 0),
+    }
+    differences = []
+    for key, expected_count in expected.items():
+        actual_count = int(db_counts.get(key, 0) or 0)
+        if actual_count != expected_count:
+            differences.append({"name": key, "expected": expected_count, "actual": actual_count})
+    return {
+        "ok": not differences,
+        "expected": expected,
+        "differences": differences,
+        "dedupe": {
+            "review_candidate_file_total": len(candidate_ids),
+            "review_candidate_unique_ids": len(unique_candidate_ids),
+            "review_candidate_merged_duplicates": duplicate_candidate_count,
+            "note": "File-side candidates are deduplicated by candidate_id when imported into PostgreSQL.",
         },
     }
 

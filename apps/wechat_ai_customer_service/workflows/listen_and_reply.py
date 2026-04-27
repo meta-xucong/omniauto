@@ -651,9 +651,35 @@ def record_operator_alert(
         alert["delivery"] = {"type": "jsonl", "path": str(alert_path), "ok": True}
     else:
         alert["delivery"] = {"type": "disabled", "ok": False}
+    alert["case_store"] = create_handoff_case(config, alert)
     target_state.setdefault("operator_alerts", []).append(alert)
     target_state["operator_alerts"] = target_state["operator_alerts"][-MAX_STORED_IDS:]
     return alert
+
+
+def create_handoff_case(config: dict[str, Any], alert: dict[str, Any]) -> dict[str, Any]:
+    settings = config.get("handoff", {}) or {}
+    if settings.get("case_store_enabled", True) is False:
+        return {"enabled": False}
+    try:
+        from apps.wechat_ai_customer_service.admin_backend.services.handoff_store import HandoffStore
+
+        case = HandoffStore().create_case(
+            {
+                "target": alert.get("target"),
+                "reason": alert.get("reason"),
+                "message_ids": alert.get("message_ids", []),
+                "message_contents": alert.get("message_contents", []),
+                "reply_text": alert.get("reply_text") or "",
+                "operator_alert": alert,
+                "product_context": alert.get("product_knowledge", {}) or {},
+                "status": "open",
+                "priority": 1,
+            }
+        )
+        return {"enabled": True, "ok": True, "case_id": case.get("case_id"), "status": case.get("status")}
+    except Exception as exc:
+        return {"enabled": True, "ok": False, "error": repr(exc)}
 
 
 def maybe_capture_customer_data(

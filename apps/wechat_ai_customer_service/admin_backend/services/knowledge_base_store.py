@@ -11,7 +11,7 @@ from typing import Any
 
 from .knowledge_registry import KnowledgeRegistry
 from .knowledge_schema_manager import KnowledgeSchemaManager
-from apps.wechat_ai_customer_service.knowledge_paths import active_tenant_id, tenant_product_item_knowledge_root
+from apps.wechat_ai_customer_service.knowledge_paths import active_tenant_id, default_admin_knowledge_base_root, tenant_product_item_knowledge_root
 from apps.wechat_ai_customer_service.storage import get_postgres_store, load_storage_config
 from apps.wechat_ai_customer_service.workflows.knowledge_runtime import (
     PRODUCT_SCOPED_KINDS,
@@ -32,9 +32,10 @@ class KnowledgeBaseStore:
     ) -> None:
         self.registry = registry or KnowledgeRegistry()
         self.schema_manager = schema_manager or KnowledgeSchemaManager(self.registry)
+        self.default_root_mode = self.registry.root.resolve() == default_admin_knowledge_base_root().resolve()
 
     def list_items(self, category_id: str, include_archived: bool = False) -> list[dict[str, Any]]:
-        db = postgres_store()
+        db = postgres_store() if self.default_root_mode else None
         if db:
             layer = "tenant_product" if category_id in PRODUCT_SCOPED_CATEGORY_TO_KIND else "tenant"
             items = db.list_knowledge_items(active_tenant_id(), layer=layer, category_id=category_id, include_archived=include_archived)
@@ -54,7 +55,7 @@ class KnowledgeBaseStore:
         return items
 
     def get_item(self, category_id: str, item_id: str) -> dict[str, Any] | None:
-        db = postgres_store()
+        db = postgres_store() if self.default_root_mode else None
         if db:
             if category_id in PRODUCT_SCOPED_CATEGORY_TO_KIND:
                 for item in db.list_knowledge_items(active_tenant_id(), layer="tenant_product", category_id=category_id, include_archived=True):
@@ -78,7 +79,7 @@ class KnowledgeBaseStore:
         if not validation["ok"]:
             return validation
         normalized = normalize_item(category_id, item)
-        db = postgres_store()
+        db = postgres_store() if self.default_root_mode else None
         config = load_storage_config()
         if db:
             layer = "tenant_product" if category_id in PRODUCT_SCOPED_CATEGORY_TO_KIND else "tenant"
