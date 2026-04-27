@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "category_id": "products",
+  "id": "fl-920",
+  "status": "active",
+  "source": {
+    "type": "raw_upload",
+    "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\raw_inbox\\products\\upload_60f852261dbb5fe6_01_products_new_office_devices.xlsx.txt",
+    "candidate_id": "raw_1ba218dd9616a47f"
+  },
+  "data": {
+    "name": "智能指纹门锁 FL-920",
+    "sku": "FL-920",
+    "category": "安防门锁",
+    "aliases": [
+      "指纹锁",
+      "智能锁",
+      "公寓门锁",
+      "电子门锁"
+    ],
+    "specs": "半导体指纹识别，C级锁芯，支持密码/指纹/临时密码，适配 40-90mm 门厚",
+    "price": 699.0,
+    "unit": "套",
+    "inventory": 128.0,
+    "shipping_policy": "现货，付款后 24 小时内发出；安装服务需按城市确认",
+    "warranty_policy": "整机质保 2 年，电池和人为损坏不在免费范围内",
+    "risk_rules": [
+      "安装费用、上门时间、特殊门型必须人工确认"
+    ],
+    "reply_templates": {
+      "default": "安装费用、上门时间、特殊门型必须人工确认"
+    },
+    "price_tiers": [
+      {
+        "min_quantity": 1.0,
+        "unit_price": 699.0
+      },
+      {
+        "min_quantity": 10.0,
+        "unit_price": 649.0
+      },
+      {
+        "min_quantity": 50.0,
+        "unit_price": 599.0
+      }
+    ]
+  },
+  "runtime": {
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "risk_level": "warning"
+  },
+  "metadata": {
+    "created_at": "2026-04-27T00:55:41",
+    "updated_at": "2026-04-27T00:55:41",
+    "created_by": "admin",
+    "updated_by": "admin"
+  }
+}

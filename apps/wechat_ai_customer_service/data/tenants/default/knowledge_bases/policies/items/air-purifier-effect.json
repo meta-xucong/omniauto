@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "category_id": "policies",
+  "id": "air-purifier-effect",
+  "status": "active",
+  "source": {
+    "type": "deepseek_upload_learning",
+    "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\raw_inbox\\products\\upload_60f852261dbb5fe6_01_products_new_office_devices.xlsx.txt",
+    "candidate_id": "raw_c78f17d7c53faf59"
+  },
+  "data": {
+    "title": "空气净化效果政策",
+    "policy_type": "售后",
+    "keywords": [
+      "空气净化效果"
+    ],
+    "answer": "空气净化器效果会受房间面积、通风、污染源影响，我们可以按适用面积和 CADR 帮您选型，但不能承诺百分百去除。",
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "handoff_reason": "",
+    "operator_alert": false,
+    "risk_level": "低",
+    "additional_details": {
+      "原始资料摘录": "{\"title\": \"空气净化效果政策\", \"policy_type\": \"售后\", \"keywords\": [\"空气净化效果\"], \"answer\": \"空气净化器效果会受房间面积、通风、污染源影响，我们可以按适用面积和 CADR 帮您选型，但不能承诺百分百去除。\", \"allow_auto_reply\": true, \"requires_handoff\": false, \"handoff_reason\": \"\", \"operator_alert\": false, \"risk_level\": \"低\", \"additional_details\": {}}"
+    }
+  },
+  "runtime": {
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "risk_level": "normal"
+  },
+  "metadata": {
+    "created_at": "2026-04-27T02:10:43",
+    "updated_at": "2026-04-27T02:10:43",
+    "created_by": "admin",
+    "updated_by": "admin"
+  }
+}

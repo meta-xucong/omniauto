@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "category_id": "products",
+  "id": "packing_carton_ct_50",
+  "status": "active",
+  "source": {
+    "type": "admin_draft",
+    "legacy_target": "product_knowledge"
+  },
+  "data": {
+    "name": "五层加硬包装纸箱 CT-50",
+    "sku": "packing_carton_ct_50",
+    "category": "包装耗材",
+    "aliases": [
+      "包装纸箱",
+      "纸箱",
+      "CT-50",
+      "五层纸箱",
+      "快递箱",
+      "打包箱",
+      "发货纸箱",
+      "仓库纸箱",
+      "搬家箱",
+      "加硬纸箱",
+      "五层加硬",
+      "包装箱",
+      "发快递的箱子"
+    ],
+    "specs": "50x40x30cm，五层加硬，牛皮纸色",
+    "price": 3.8,
+    "unit": "个",
+    "price_tiers": [
+      {
+        "min_quantity": 1000,
+        "unit_price": 3.4
+      },
+      {
+        "min_quantity": 5000,
+        "unit_price": 3.1
+      }
+    ],
+    "inventory": 8000,
+    "shipping_policy": "常规尺寸现货，24 小时内出库\n满 1000 个包邮，少量按物流实收",
+    "warranty_policy": "耗材类签收后请当场验收，破损短少 24 小时内反馈",
+    "reply_templates": {
+      "discount_policy": "1000 个起 3.4 元/个，5000 个起 3.1 元/个",
+      "notes": "用于测试低客单高数量耗材采购"
+    },
+    "risk_rules": []
+  },
+  "runtime": {
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "risk_level": "normal"
+  },
+  "metadata": {
+    "created_at": "2026-04-26T23:15:06",
+    "updated_at": "2026-04-26T23:15:06",
+    "created_by": "admin",
+    "updated_by": "admin"
+  }
+}

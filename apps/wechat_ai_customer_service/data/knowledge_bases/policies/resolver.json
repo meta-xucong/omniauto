@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "category_id": "policies",
+  "match_fields": ["title", "policy_type", "keywords", "answer", "additional_details"],
+  "intent_fields": ["policy_type", "keywords"],
+  "risk_fields": ["requires_handoff", "handoff_reason", "risk_level", "keywords"],
+  "reply_fields": ["title", "policy_type", "answer", "allow_auto_reply", "requires_handoff", "handoff_reason", "additional_details"],
+  "minimum_confidence": 0.4,
+  "default_action": "answer_or_handoff_from_policy"
+}

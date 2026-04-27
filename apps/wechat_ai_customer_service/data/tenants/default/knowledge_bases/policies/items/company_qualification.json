@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "category_id": "policies",
+  "id": "company_qualification",
+  "status": "active",
+  "source": {
+    "type": "migration",
+    "path": "structured/product_knowledge.example.json"
+  },
+  "data": {
+    "title": "company_qualification",
+    "policy_type": "company",
+    "keywords": [
+      "营业执照",
+      "资质",
+      "税号是多少",
+      "你们税号",
+      "纳税人识别号",
+      "公司税号"
+    ],
+    "answer": "测试公司税号为 91330110MA8TEST88XK。如需营业执照、开户许可证或供应商入库资料，我可以先记录需求并转人工发送正式文件。",
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "handoff_reason": "",
+    "operator_alert": false,
+    "risk_level": "normal"
+  },
+  "runtime": {
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "risk_level": "normal"
+  },
+  "metadata": {
+    "created_at": "2026-04-26T17:58:50",
+    "updated_at": "2026-04-26T17:58:50",
+    "created_by": "migration",
+    "updated_by": "migration"
+  }
+}

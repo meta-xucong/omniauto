@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "category_id": "chats",
+  "id": "over_boundary_handoff",
+  "status": "active",
+  "source": {
+    "type": "migration",
+    "path": "structured/style_examples.json"
+  },
+  "data": {
+    "customer_message": "",
+    "service_reply": "这个已经超出我能直接确认的范围，我先帮您记录下来，稍后请示后给您准话。",
+    "intent_tags": [
+      "handoff"
+    ],
+    "tone_tags": [],
+    "linked_categories": [],
+    "linked_item_ids": [],
+    "usable_as_template": true
+  },
+  "runtime": {
+    "allow_auto_reply": true,
+    "requires_handoff": true,
+    "risk_level": "high"
+  },
+  "metadata": {
+    "created_at": "2026-04-26T17:58:50",
+    "updated_at": "2026-04-26T17:58:50",
+    "created_by": "migration",
+    "updated_by": "migration"
+  }
+}

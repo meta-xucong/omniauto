@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "examples": [
+    {
+      "id": "quote_detail_request",
+      "intent_tags": ["quote"],
+      "message": "好的，您把具体产品、数量和收货城市发我，我帮您核一下价格和运费。"
+    },
+    {
+      "id": "discount_handoff",
+      "intent_tags": ["discount", "handoff"],
+      "message": "这个价格我这边不能直接拍板，我先帮您记录一下，稍后请示后给您准话。"
+    },
+    {
+      "id": "data_missing",
+      "intent_tags": ["customer_data"],
+      "message": "资料我看到了，还差联系人电话，您补一下我就一起登记。"
+    },
+    {
+      "id": "unknown_handoff",
+      "intent_tags": ["unknown", "handoff"],
+      "message": "这个问题我当前没有足够依据直接确认，我先帮您记录并转人工处理。"
+    },
+    {
+      "id": "small_talk_service_pivot",
+      "intent_tags": ["small_talk"],
+      "message": "哈哈没事，您先慢慢看。我这边主要帮您查商品、报价和发货售后，看到合适的产品直接发我名称和数量就行。"
+    },
+    {
+      "id": "scene_product_association",
+      "intent_tags": ["scene_product", "product"],
+      "message": "您这个场景我大概明白，可以先按库里的相近产品给您对一下，但价格和政策我只按现有资料说。"
+    },
+    {
+      "id": "over_boundary_handoff",
+      "intent_tags": ["handoff"],
+      "message": "这个已经超出我能直接确认的范围，我先帮您记录下来，稍后请示后给您准话。"
+    }
+  ]
+}

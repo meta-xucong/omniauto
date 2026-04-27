@@ -4,6 +4,7 @@
 """
 
 import asyncio
+from datetime import datetime
 import json
 import os
 import random
@@ -39,6 +40,7 @@ MAX_PAGES = 5
 SAMPLE_SIZE = 5
 OUTPUT_DIR = Path("runtime/data/reports/1688_nvzhuang_5")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+REPORT_TEMPLATE = Path(__file__).resolve().parents[3] / "platform" / "src" / "omniauto" / "templates" / "reports" / "ecom_report.html.j2"
 
 _all_items: list = []
 _enriched_items: list = []
@@ -415,7 +417,7 @@ async def step_generate_report(ctx: TaskContext):
         "skip_count": _skip_count,
         "all_items": _all_items,
         "items": _enriched_items,
-        "generated_at": __import__('datetime').datetime.now().isoformat(),
+        "generated_at": datetime.now().isoformat(),
     }
 
     # JSON 数据备份
@@ -423,11 +425,10 @@ async def step_generate_report(ctx: TaskContext):
     json_path.write_text(json.dumps(report_data, ensure_ascii=False, indent=2), encoding="utf-8")
 
     # 如果配置了 report_template_path，渲染 HTML
-    report_template = "D:/AI/AI_RPA/src/omniauto/templates/reports/ecom_report.html.j2"
     html_path = OUTPUT_DIR / "report.html"
-    if report_template and Path(report_template).exists():
+    if REPORT_TEMPLATE.exists():
         from jinja2 import Template
-        tpl = Template(Path(report_template).read_text(encoding="utf-8"))
+        tpl = Template(REPORT_TEMPLATE.read_text(encoding="utf-8"))
         html = tpl.render(**report_data)
         html_path.write_text(html, encoding="utf-8")
     else:

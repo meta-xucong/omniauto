@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "category_id": "policies",
+  "id": "after-sales-mt160-compensation",
+  "status": "active",
+  "source": {
+    "type": "deepseek_upload_learning",
+    "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\raw_inbox\\products\\upload_bfc6fce395f6d774_04_erp_export_after_sales.json",
+    "candidate_id": "raw_e27d185f2f6e2e14"
+  },
+  "data": {
+    "title": "升降会议桌MT-160运输磕碰赔偿",
+    "policy_type": "after_sales",
+    "keywords": [
+      "赔偿",
+      "磕碰",
+      "运输",
+      "MT-160"
+    ],
+    "answer": "赔偿金额不能自动承诺，需要客服收集照片、订单号、外包装情况并转人工确认。",
+    "allow_auto_reply": false,
+    "requires_handoff": true,
+    "handoff_reason": "赔偿金额不能自动承诺，需人工确认",
+    "additional_details": {
+      "source_system": "测试ERP-售后模块",
+      "export_time": "2026-04-26T21:58:00+08:00",
+      "record_type": "after_sales",
+      "external_id": "AS-TEST-20260426-002",
+      "product_name": "升降会议桌 MT-160",
+      "customer_region": "浙江杭州",
+      "issue": "客户要求运输磕碰赔偿 500 元",
+      "原始资料摘录": "{\"title\": \"升降会议桌MT-160运输磕碰赔偿\", \"policy_type\": \"after_sales\", \"keywords\": [\"赔偿\", \"磕碰\", \"运输\", \"MT-160\"], \"answer\": \"赔偿金额不能自动承诺，需要客服收集照片、订单号、外包装情况并转人工确认。\", \"allow_auto_reply\": false, \"requires_handoff\": true, \"handoff_reason\": \"赔偿金额不能自动承诺，需人工确认\", \"additional_details\": {\"source_system\": \"测试ERP-售后模块\", \"export_time\": \"2026-04-26T21:58:00+08:00\", \"record_type\": \"af"
+    }
+  },
+  "runtime": {
+    "allow_auto_reply": false,
+    "requires_handoff": true,
+    "risk_level": "warning"
+  },
+  "metadata": {
+    "created_at": "2026-04-27T02:10:09",
+    "updated_at": "2026-04-27T02:10:09",
+    "created_by": "admin",
+    "updated_by": "admin"
+  }
+}

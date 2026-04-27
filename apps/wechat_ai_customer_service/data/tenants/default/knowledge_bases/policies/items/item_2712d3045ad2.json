@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "category_id": "policies",
+  "id": "item_2712d3045ad2",
+  "status": "active",
+  "source": {
+    "type": "deepseek_upload_learning",
+    "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\raw_inbox\\products\\upload_c54b9fd38e442a30_05_mixed_company_faq.txt",
+    "candidate_id": "raw_e74d6c745111b232",
+    "reclassified_from": "products"
+  },
+  "data": {
+    "title": "杭州云桥办公设备有限公司",
+    "policy_type": "company",
+    "keywords": [
+      "杭州云桥办公设备有限公司",
+      "办公设备",
+      "公司名称",
+      "公司信息",
+      "主营范围",
+      "生产方",
+      "开票信息"
+    ],
+    "answer": "公司名称：杭州云桥办公设备有限公司；主营范围：办公家具、智能门锁、空气净化设备、会议室配套设备；对外客服风格：耐心、简洁、专业，不主动夸大效果；原始资料摘录：{\"name\": \"杭州云桥办公设备有限公司\", \"category\": \"办公设备\", \"additional_details\": {\"主营范围\": \"办公家具、智能门锁、空气净化设备、会议室配套设备\", \"对外客服人设\": \"耐心、简洁、专业，不主动夸大效果\"}}",
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "operator_alert": false,
+    "risk_level": "normal",
+    "additional_details": {
+      "主营范围": "办公家具、智能门锁、空气净化设备、会议室配套设备",
+      "对外客服人设": "耐心、简洁、专业，不主动夸大效果",
+      "原始资料摘录": "{\"name\": \"杭州云桥办公设备有限公司\", \"category\": \"办公设备\", \"additional_details\": {\"主营范围\": \"办公家具、智能门锁、空气净化设备、会议室配套设备\", \"对外客服人设\": \"耐心、简洁、专业，不主动夸大效果\"}}",
+      "name": "杭州云桥办公设备有限公司",
+      "category": "办公设备",
+      "来源资料摘录": "{\"name\": \"杭州云桥办公设备有限公司\", \"category\": \"办公设备\", \"additional_details\": {\"主营范围\": \"办公家具、智能门锁、空气净化设备、会议室配套设备\", \"对外客服人设\": \"耐心、简洁、专业，不主动夸大效果\"}}"
+    }
+  },
+  "runtime": {
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "risk_level": "normal"
+  },
+  "metadata": {
+    "created_at": "2026-04-27T02:09:07",
+    "updated_at": "2026-04-27T02:09:07",
+    "created_by": "admin",
+    "updated_by": "admin"
+  }
+}

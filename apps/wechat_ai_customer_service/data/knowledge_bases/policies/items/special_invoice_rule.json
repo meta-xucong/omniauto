@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "category_id": "policies",
+  "id": "special_invoice_rule",
+  "status": "active",
+  "source": {
+    "type": "deepseek_upload_learning",
+    "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\raw_inbox\\products\\upload_b3c3f6ee9adfe528_02_policy_delivery_invoice.csv",
+    "candidate_id": "raw_86e60fa4d3e0a10c"
+  },
+  "data": {
+    "title": "专票开具资料",
+    "policy_type": "开票规则",
+    "keywords": [
+      "专票",
+      "增值税专用发票",
+      "税号",
+      "开户行",
+      "地址电话"
+    ],
+    "answer": "可以开增值税专用发票。请提供公司抬头、税号、注册地址、注册电话、开户行和银行账号；订单确认后 3 个工作日内开具。",
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "handoff_reason": null,
+    "operator_alert": false,
+    "risk_level": null,
+    "additional_details": {
+      "原始资料摘录": "{\"title\": \"专票开具资料\", \"policy_type\": \"开票规则\", \"keywords\": [\"专票\", \"增值税专用发票\", \"税号\", \"开户行\", \"地址电话\"], \"answer\": \"可以开增值税专用发票。请提供公司抬头、税号、注册地址、注册电话、开户行和银行账号；订单确认后 3 个工作日内开具。\", \"allow_auto_reply\": true, \"requires_handoff\": false, \"handoff_reason\": null, \"operator_alert\": false, \"risk_level\": null, \"additional_details\": {}}"
+    }
+  },
+  "runtime": {
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "risk_level": "normal"
+  },
+  "metadata": {
+    "created_at": "2026-04-27T02:12:05",
+    "updated_at": "2026-04-27T02:12:05",
+    "created_by": "admin",
+    "updated_by": "admin"
+  }
+}

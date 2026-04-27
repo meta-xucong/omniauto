@@ -569,21 +569,24 @@ class BrowserRecoveryManager:
                                 'inset:0',
                                 'z-index:2147483646',
                                 'display:flex',
-                                'align-items:center',
+                                'align-items:flex-start',
                                 'justify-content:center',
-                                'background:rgba(0,0,0,0.32)',
+                                'padding-top:24px',
+                                'pointer-events:none',
+                                'background:transparent',
                                 'font-family:Segoe UI, Microsoft YaHei, sans-serif'
                             ].join(';');
 
                             const panel = document.createElement('div');
                             panel.style.cssText = [
-                                'width:min(520px, calc(100vw - 40px))',
+                                'width:min(560px, calc(100vw - 40px))',
                                 'background:#111827',
                                 'color:#fff',
                                 'border-radius:16px',
                                 'padding:22px 22px 18px',
                                 'box-shadow:0 24px 64px rgba(0,0,0,0.45)',
-                                'border:1px solid rgba(255,255,255,0.12)'
+                                'border:1px solid rgba(255,255,255,0.12)',
+                                'pointer-events:auto'
                             ].join(';');
 
                             const title = document.createElement('div');
@@ -591,7 +594,7 @@ class BrowserRecoveryManager:
                             title.style.cssText = 'font-size:18px; font-weight:700; margin-bottom:10px;';
 
                             const body = document.createElement('div');
-                            body.innerHTML = 'OmniAuto 已暂停当前步骤。<br>请先手动完成滑块/登录/验证，再点击页面底部黑色提示条中的“已处理，继续任务”。';
+                            body.innerHTML = 'OmniAuto 已暂停当前步骤。<br>请先手动完成滑块/登录/验证。这个提示卡片不会阻塞页面操作；完成后点击页面底部黑色提示条中的“已处理，继续任务”。';
                             body.style.cssText = 'font-size:14px; line-height:1.7; color:rgba(255,255,255,0.88); margin-bottom:16px;';
 
                             const close = document.createElement('button');

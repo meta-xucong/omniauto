@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "category_id": "products",
+  "id": "test_product_standard",
+  "status": "active",
+  "source": {
+    "type": "admin_draft",
+    "legacy_target": "product_knowledge"
+  },
+  "data": {
+    "name": "测试产品 标准款",
+    "sku": "test_product_standard",
+    "category": "测试商品",
+    "aliases": [
+      "测试产品",
+      "测试款",
+      "标准款",
+      "样品测试款"
+    ],
+    "specs": "标准款，白色，单件装",
+    "price": 199,
+    "unit": "个",
+    "price_tiers": [
+      {
+        "min_quantity": 50,
+        "unit_price": 179
+      },
+      {
+        "min_quantity": 100,
+        "unit_price": 159
+      }
+    ],
+    "inventory": 500,
+    "shipping_policy": "现货，当天可发\n满 20 个包邮，不满按 12 元/单",
+    "warranty_policy": "非人为损坏 7 天包换",
+    "reply_templates": {
+      "discount_policy": "50 个起 179 元/个，100 个起 159 元/个",
+      "notes": "用于测试产品、数量、报价、优惠等问答"
+    },
+    "risk_rules": []
+  },
+  "runtime": {
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "risk_level": "normal"
+  },
+  "metadata": {
+    "created_at": "2026-04-26T23:15:06",
+    "updated_at": "2026-04-26T23:15:06",
+    "created_by": "admin",
+    "updated_by": "admin"
+  }
+}

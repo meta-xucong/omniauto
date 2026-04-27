@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "category_id": "policies",
+  "id": "free_shipping_promo_2026_spring",
+  "status": "active",
+  "source": {
+    "type": "ai_generator",
+    "session_id": "gen_20260427_021710_6470652b"
+  },
+  "data": {
+    "title": "优惠政策",
+    "policy_type": "discount",
+    "keywords": [
+      "包邮",
+      "满1000包邮",
+      "免费配送",
+      "免运费",
+      "优惠"
+    ],
+    "answer": "关于包邮政策，新增统一的优惠活动规则：在2026.4.25-2026.6.25之间，单笔消费满1000元包邮（偏远地区除外）",
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "handoff_reason": "",
+    "operator_alert": false,
+    "risk_level": "normal",
+    "additional_details": {
+      "start_date": "2026-04-25",
+      "end_date": "2026-06-25",
+      "condition": "单笔消费满1000元",
+      "exclusions": "偏远地区除外",
+      "用户原始描述": "关于包邮政策，新增统一的优惠活动规则：在2026.4.25-2026.6.25之间，单笔消费满1000元包邮（偏远地区除外）"
+    }
+  },
+  "runtime": {
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "risk_level": "normal"
+  },
+  "metadata": {
+    "created_at": "2026-04-27T02:17:31",
+    "updated_at": "2026-04-27T02:17:31",
+    "created_by": "admin",
+    "updated_by": "admin"
+  }
+}

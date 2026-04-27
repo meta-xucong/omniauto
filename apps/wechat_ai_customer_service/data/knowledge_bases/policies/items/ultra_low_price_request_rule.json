@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "category_id": "policies",
+  "id": "ultra_low_price_request_rule",
+  "status": "active",
+  "source": {
+    "type": "deepseek_upload_learning",
+    "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\raw_inbox\\products\\upload_b3c3f6ee9adfe528_02_policy_delivery_invoice.csv",
+    "candidate_id": "raw_694203b7990dd900"
+  },
+  "data": {
+    "title": "超低价申请规则",
+    "policy_type": "议价规则",
+    "keywords": [
+      "最低价",
+      "赔钱卖",
+      "全网最低",
+      "独家报价"
+    ],
+    "answer": "涉及最低价、独家价、赔钱价等承诺时，客服不能直接答应，需要回复已记录需求并请示上级后确认。",
+    "allow_auto_reply": false,
+    "requires_handoff": true,
+    "handoff_reason": "涉及最低价等承诺需请示上级",
+    "operator_alert": true,
+    "risk_level": null,
+    "additional_details": {
+      "原始资料摘录": "{\"title\": \"超低价申请规则\", \"policy_type\": \"议价规则\", \"keywords\": [\"最低价\", \"赔钱卖\", \"全网最低\", \"独家报价\"], \"answer\": \"涉及最低价、独家价、赔钱价等承诺时，客服不能直接答应，需要回复已记录需求并请示上级后确认。\", \"allow_auto_reply\": false, \"requires_handoff\": true, \"handoff_reason\": \"涉及最低价等承诺需请示上级\", \"operator_alert\": true, \"risk_level\": null, \"additional_details\": {}}"
+    }
+  },
+  "runtime": {
+    "allow_auto_reply": false,
+    "requires_handoff": true,
+    "risk_level": "warning"
+  },
+  "metadata": {
+    "created_at": "2026-04-27T02:13:14",
+    "updated_at": "2026-04-27T02:13:14",
+    "created_by": "admin",
+    "updated_by": "admin"
+  }
+}

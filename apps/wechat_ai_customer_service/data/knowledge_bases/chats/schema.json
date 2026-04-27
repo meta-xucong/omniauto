@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "category_id": "chats",
+  "display_name": "聊天记录与话术",
+  "description": "用于沉淀真实客服话术、风格样例、问答样例和边界处理样例。",
+  "item_title_field": "customer_message",
+  "item_subtitle_field": "service_reply",
+  "fields": [
+    {"id": "customer_message", "label": "客户问题", "type": "long_text", "required": false, "searchable": true, "form_order": 10},
+    {"id": "service_reply", "label": "客服回复", "type": "long_text", "required": true, "searchable": true, "form_order": 20},
+    {"id": "intent_tags", "label": "意图标签", "type": "tags", "required": false, "searchable": true, "form_order": 30},
+    {"id": "tone_tags", "label": "语气标签", "type": "tags", "required": false, "searchable": true, "form_order": 40},
+    {"id": "linked_categories", "label": "关联门类", "type": "tags", "required": false, "form_order": 50},
+    {"id": "linked_item_ids", "label": "关联知识", "type": "tags", "required": false, "form_order": 60},
+    {"id": "usable_as_template", "label": "可作为话术模板", "type": "boolean", "required": false, "default": true, "form_order": 70},
+    {"id": "additional_details", "label": "补充信息", "type": "object", "required": false, "searchable": true, "form_order": 80}
+  ],
+  "validation": {
+    "unique_fields": ["id"],
+    "required_for_auto_reply": ["service_reply"]
+  }
+}

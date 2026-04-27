@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "category_id": "policies",
+  "id": "logistics",
+  "status": "active",
+  "source": {
+    "type": "migration",
+    "path": "structured/product_knowledge.example.json"
+  },
+  "data": {
+    "title": "logistics",
+    "policy_type": "logistics",
+    "keywords": [
+      "物流",
+      "快递",
+      "运费",
+      "包邮",
+      "发货多久",
+      "几天到",
+      "到货",
+      "从哪里发货",
+      "送货",
+      "上楼",
+      "送货上楼"
+    ],
+    "answer": "默认从杭州余杭测试仓发货，常用顺丰、京东物流、德邦、安能物流。工作日 16:00 前付款的现货订单尽量当天出库；大件商品默认物流到站，送货上楼需另行确认；偏远地区运费和时效需人工确认。",
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "handoff_reason": "",
+    "operator_alert": false,
+    "risk_level": "normal"
+  },
+  "runtime": {
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "risk_level": "normal"
+  },
+  "metadata": {
+    "created_at": "2026-04-26T17:58:50",
+    "updated_at": "2026-04-26T17:58:50",
+    "created_by": "migration",
+    "updated_by": "migration"
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "category_id": "chats",
+  "id": "chat_style_guidelines",
+  "status": "active",
+  "source": {
+    "type": "deepseek_upload_learning",
+    "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\raw_inbox\\products\\upload_5de0c2bb46fb1848_03_chat_records_new_energy_storage.md",
+    "candidate_id": "raw_4402ab7b51cd1dd8"
+  },
+  "data": {
+    "service_reply": "回复要自然，先接住客户使用场景，再问关键参数。对功率、续航、最低价等不确定内容，不能凭空承诺。适合自动回复的内容：参数收集、常规质保说明、使用场景推荐。需要转人工的内容：最低价、特殊补偿、先发货后付款。",
+    "intent_tags": [
+      "话术风格",
+      "自动回复规则"
+    ],
+    "tone_tags": [
+      "指导"
+    ],
+    "linked_categories": [
+      "policies"
+    ],
+    "usable_as_template": false,
+    "additional_details": {
+      "原始资料摘录": "{\"service_reply\": \"回复要自然，先接住客户使用场景，再问关键参数。对功率、续航、最低价等不确定内容，不能凭空承诺。适合自动回复的内容：参数收集、常规质保说明、使用场景推荐。需要转人工的内容：最低价、特殊补偿、先发货后付款。\", \"intent_tags\": [\"话术风格\", \"自动回复规则\"], \"tone_tags\": [\"指导\"], \"linked_categories\": [\"policies\"], \"usable_as_template\": false, \"additional_details\": {}}"
+    }
+  },
+  "runtime": {
+    "allow_auto_reply": false,
+    "requires_handoff": true,
+    "risk_level": "warning"
+  },
+  "metadata": {
+    "created_at": "2026-04-27T02:15:15",
+    "updated_at": "2026-04-27T02:15:15",
+    "created_by": "admin",
+    "updated_by": "admin"
+  }
+}

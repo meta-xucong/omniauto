@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "mode": "single",
+  "max_attempts": 0,
+  "stop_on_loss": false,
+  "single_attempt_steps": 0,
+  "artifacts_dir": "runtime/apps/minesweeper_autoplay/test_artifacts"
+}
+

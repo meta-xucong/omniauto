@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "scope": "wechat_ai_customer_service",
+  "source": "three_layer_knowledge",
+  "compiled_at": "2026-04-27T23:49:06",
+  "items": [
+    {
+      "id": "global_guidelines",
+      "path": "global_guidelines",
+      "summary": "Global Assistant Guidelines",
+      "participates_in_reply": true
+    },
+    {
+      "id": "products",
+      "path": "products",
+      "summary": "商品资料",
+      "participates_in_reply": true
+    },
+    {
+      "id": "chats",
+      "path": "chats",
+      "summary": "聊天记录与话术",
+      "participates_in_reply": true
+    },
+    {
+      "id": "policies",
+      "path": "policies",
+      "summary": "政策规则",
+      "participates_in_reply": true
+    },
+    {
+      "id": "erp_exports",
+      "path": "erp_exports",
+      "summary": "ERP 导出",
+      "participates_in_reply": false
+    },
+    {
+      "id": "product_faq",
+      "path": "product_item_knowledge/*/faq",
+      "summary": "商品专属问答",
+      "participates_in_reply": true
+    },
+    {
+      "id": "product_rules",
+      "path": "product_item_knowledge/*/rules",
+      "summary": "商品专属规则",
+      "participates_in_reply": true
+    },
+    {
+      "id": "product_explanations",
+      "path": "product_item_knowledge/*/explanations",
+      "summary": "商品专属解释",
+      "participates_in_reply": true
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "category_id": "products",
+  "id": "wooden-rocking-chair",
+  "status": "active",
+  "source": {
+    "type": "admin_draft",
+    "legacy_target": "product_knowledge"
+  },
+  "data": {
+    "name": "木质摇椅",
+    "sku": "wooden-rocking-chair",
+    "category": "",
+    "aliases": [],
+    "specs": "",
+    "price": 199.0,
+    "unit": "件",
+    "price_tiers": [
+      {
+        "min_quantity": 1.0,
+        "unit_price": 199.0
+      },
+      {
+        "min_quantity": 10.0,
+        "unit_price": 180.0
+      }
+    ],
+    "inventory": null,
+    "shipping_policy": "下订单后48小时发货，1年质保",
+    "warranty_policy": "下订单后48小时发货，1年质保",
+    "reply_templates": {
+      "discount_policy": "",
+      "notes": ""
+    },
+    "risk_rules": []
+  },
+  "runtime": {
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "risk_level": "normal"
+  },
+  "metadata": {
+    "created_at": "2026-04-26T23:15:06",
+    "updated_at": "2026-04-26T23:15:06",
+    "created_by": "admin",
+    "updated_by": "admin"
+  }
+}

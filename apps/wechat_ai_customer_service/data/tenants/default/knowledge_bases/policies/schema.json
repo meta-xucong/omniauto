@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "category_id": "policies",
+  "display_name": "政策规则",
+  "description": "用于开票、付款、物流、售后、合同、安装、退款、人工接管等规则。",
+  "item_title_field": "title",
+  "item_subtitle_field": "policy_type",
+  "fields": [
+    {"id": "title", "label": "规则名称", "type": "short_text", "required": true, "searchable": true, "form_order": 10},
+    {"id": "policy_type", "label": "规则类型", "type": "single_select", "required": true, "searchable": true, "form_order": 20, "options": ["company", "invoice", "payment", "logistics", "after_sales", "discount", "sample", "installation", "contract", "manual_required", "other"]},
+    {"id": "keywords", "label": "触发关键词", "type": "tags", "required": false, "searchable": true, "form_order": 30},
+    {"id": "answer", "label": "标准回复", "type": "long_text", "required": true, "searchable": true, "form_order": 40},
+    {"id": "allow_auto_reply", "label": "允许自动回复", "type": "boolean", "required": false, "default": true, "form_order": 50},
+    {"id": "requires_handoff", "label": "必须转人工", "type": "boolean", "required": false, "default": false, "form_order": 60},
+    {"id": "handoff_reason", "label": "转人工原因", "type": "short_text", "required": false, "searchable": true, "form_order": 70},
+    {"id": "operator_alert", "label": "提醒人工客服", "type": "boolean", "required": false, "default": false, "form_order": 80},
+    {"id": "risk_level", "label": "风险等级", "type": "single_select", "required": false, "default": "normal", "form_order": 90, "options": ["normal", "warning", "high"]},
+    {"id": "additional_details", "label": "补充信息", "type": "object", "required": false, "searchable": true, "form_order": 100}
+  ],
+  "validation": {
+    "unique_fields": ["id"],
+    "unique_tag_fields": ["keywords"],
+    "required_for_auto_reply": ["title", "answer"]
+  }
+}

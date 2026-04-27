@@ -1,6 +1,7 @@
 """Automatic knowledge growth tests."""
 
 from pathlib import Path
+import time
 import textwrap
 
 import pytest
@@ -227,3 +228,41 @@ def test_manual_closeout_forces_task_record(tmp_path):
 
     assert summary["applied"] is True
     assert (repo_root / "knowledge" / summary["task_record"]).exists()
+
+
+def test_manual_closeout_refreshes_task_record_summary_to_latest_run(tmp_path):
+    repo_root = _make_repo_root(tmp_path)
+    external_script = tmp_path / "manual_refresh.py"
+    external_script.write_text("print('manual closeout refresh')\n", encoding="utf-8")
+
+    service = OmniAutoService(
+        state_store=StateStore(db_path=str(repo_root / "runtime" / "state.db")),
+        knowledge_manager=KnowledgeManager(repo_root=repo_root),
+    )
+
+    first = service.closeout_task(
+        str(external_script),
+        task_id="manual_refresh_probe",
+        final_state="FAILED",
+        description="Manual refresh probe",
+        note="First run failed.",
+        domain="general",
+    )
+    time.sleep(1.1)
+    second = service.closeout_task(
+        str(external_script),
+        task_id="manual_refresh_probe",
+        final_state="COMPLETED",
+        description="Manual refresh probe",
+        note="Second run completed.",
+        domain="general",
+    )
+
+    record_path = repo_root / "knowledge" / second["task_record"]
+    content = record_path.read_text(encoding="utf-8")
+
+    assert first["task_record"] == second["task_record"]
+    assert "status: completed" in content
+    assert "- Status: completed" in content
+    assert "First run failed." in content
+    assert "Second run completed." in content

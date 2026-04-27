@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "category_id": "policies",
+  "id": "payment",
+  "status": "active",
+  "source": {
+    "type": "migration",
+    "path": "structured/product_knowledge.example.json"
+  },
+  "data": {
+    "title": "payment",
+    "policy_type": "payment",
+    "keywords": [
+      "付款",
+      "支付",
+      "怎么付",
+      "对公",
+      "转账",
+      "收款账户",
+      "定金",
+      "尾款"
+    ],
+    "answer": "支持对公转账、微信支付和支付宝企业收款。常规订单付款后发货；定制或大额订单可先收 30% 定金，尾款发货前结清。需要对公账户的话，我可以发您测试账户信息。",
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "handoff_reason": "",
+    "operator_alert": false,
+    "risk_level": "normal"
+  },
+  "runtime": {
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "risk_level": "normal"
+  },
+  "metadata": {
+    "created_at": "2026-04-26T17:58:50",
+    "updated_at": "2026-04-26T17:58:50",
+    "created_by": "migration",
+    "updated_by": "migration"
+  }
+}

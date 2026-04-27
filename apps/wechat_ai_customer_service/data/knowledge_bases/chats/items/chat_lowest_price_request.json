@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "category_id": "chats",
+  "id": "chat_lowest_price_request",
+  "status": "active",
+  "source": {
+    "type": "deepseek_upload_learning",
+    "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\raw_inbox\\products\\upload_5de0c2bb46fb1848_03_chat_records_new_energy_storage.md",
+    "candidate_id": "raw_f7d9cc23ead9f3f6"
+  },
+  "data": {
+    "customer_message": "你直接给我全网最低价，我今天就下单。",
+    "service_reply": "价格我可以帮您争取，但最低价和特殊折扣需要主管确认。我先把采购数量和目标价记录下来，请示后再给您准确回复。",
+    "intent_tags": [
+      "议价",
+      "下单意向"
+    ],
+    "tone_tags": [
+      "谨慎",
+      "专业"
+    ],
+    "linked_categories": [
+      "policies"
+    ],
+    "usable_as_template": true,
+    "additional_details": {
+      "原始资料摘录": "{\"customer_message\": \"你直接给我全网最低价，我今天就下单。\", \"service_reply\": \"价格我可以帮您争取，但最低价和特殊折扣需要主管确认。我先把采购数量和目标价记录下来，请示后再给您准确回复。\", \"intent_tags\": [\"议价\", \"下单意向\"], \"tone_tags\": [\"谨慎\", \"专业\"], \"linked_categories\": [\"policies\"], \"usable_as_template\": true, \"additional_details\": {}}"
+    }
+  },
+  "runtime": {
+    "allow_auto_reply": false,
+    "requires_handoff": true,
+    "risk_level": "warning"
+  },
+  "metadata": {
+    "created_at": "2026-04-27T01:01:06",
+    "updated_at": "2026-04-27T01:01:06",
+    "created_by": "admin",
+    "updated_by": "admin"
+  }
+}

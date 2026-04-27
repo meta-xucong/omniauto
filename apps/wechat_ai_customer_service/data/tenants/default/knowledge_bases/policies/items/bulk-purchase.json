@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "category_id": "policies",
+  "id": "bulk-purchase",
+  "status": "active",
+  "source": {
+    "type": "deepseek_upload_learning",
+    "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\raw_inbox\\products\\upload_60f852261dbb5fe6_01_products_new_office_devices.xlsx.txt",
+    "candidate_id": "raw_5c7e4e7ccf444f55"
+  },
+  "data": {
+    "title": "批量采购政策",
+    "policy_type": "销售",
+    "keywords": [
+      "批量采购"
+    ],
+    "answer": "批量采购可以按阶梯价先报价，若客户要求更低价或账期，需要转人工确认。",
+    "allow_auto_reply": false,
+    "requires_handoff": true,
+    "handoff_reason": "客户要求更低价或账期",
+    "operator_alert": true,
+    "risk_level": "中",
+    "additional_details": {
+      "原始资料摘录": "{\"title\": \"批量采购政策\", \"policy_type\": \"销售\", \"keywords\": [\"批量采购\"], \"answer\": \"批量采购可以按阶梯价先报价，若客户要求更低价或账期，需要转人工确认。\", \"allow_auto_reply\": false, \"requires_handoff\": true, \"handoff_reason\": \"客户要求更低价或账期\", \"operator_alert\": true, \"risk_level\": \"中\", \"additional_details\": {}}"
+    }
+  },
+  "runtime": {
+    "allow_auto_reply": false,
+    "requires_handoff": true,
+    "risk_level": "warning"
+  },
+  "metadata": {
+    "created_at": "2026-04-27T02:14:47",
+    "updated_at": "2026-04-27T02:14:47",
+    "created_by": "admin",
+    "updated_by": "admin"
+  }
+}

@@ -4,9 +4,14 @@ This file lists project-local skills that have been explicitly approved by the u
 
 ## Current State
 
-The repository currently has two user-approved formal project-local skills.
+The repository currently has three user-approved formal project-local skills.
 
 ## task_skills/
+
+- `marketplace_1688_research`
+  - runtime bundle: `.agents/skills/1688-marketplace-research/`
+  - human entry: `skills/task_skills/marketplace_1688_research/README.md`
+  - scope: runs 1688 keyword research, detail sampling, manual verification handoff, and complete HTML report generation
 
 - `minesweeper_autoplay`
   - runtime bundle: `.agents/skills/minesweeper-autoplay/`
@@ -20,7 +25,7 @@ The repository currently has two user-approved formal project-local skills.
   - human entry: `skills/capability_skills/guarded_knowledge_closeout/README.md`
   - scope: governs how automatic knowledge closeout, manual closeout, and strict AI review candidates must behave
 
-Other task families such as marketplace research and WPS automation are still intentionally **not** being promoted into formal project-local skills in this refactor.
+Other task families such as WPS automation are still intentionally **not** being promoted into formal project-local skills in this refactor.
 
 ## Future Sections
 

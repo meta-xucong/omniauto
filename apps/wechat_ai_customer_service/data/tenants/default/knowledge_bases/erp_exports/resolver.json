@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "category_id": "erp_exports",
+  "match_fields": ["source_system", "record_type", "external_id", "fields", "additional_details"],
+  "intent_fields": ["record_type"],
+  "risk_fields": [],
+  "reply_fields": ["record_type", "external_id", "fields", "sync_status", "additional_details"],
+  "minimum_confidence": 0.5,
+  "default_action": "erp_context_only"
+}

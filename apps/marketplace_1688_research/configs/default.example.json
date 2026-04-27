@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "keyword": "色谱柱",
+  "pages": 3,
+  "detail_sample_size": 27,
+  "task_slug": "sepuzhu_3",
+  "profile_dir": "runtime/apps/marketplace_1688_research/chrome_profile_1688_safe",
+  "cdp_port": 9232,
+  "runtime": {
+    "generated_workflow_dir": "runtime/apps/marketplace_1688_research/generated_workflows/marketplaces",
+    "report_dir": "runtime/apps/marketplace_1688_research/reports"
+  }
+}
+

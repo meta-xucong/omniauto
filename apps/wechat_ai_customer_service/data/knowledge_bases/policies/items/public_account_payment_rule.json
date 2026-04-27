@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "category_id": "policies",
+  "id": "public_account_payment_rule",
+  "status": "active",
+  "source": {
+    "type": "deepseek_upload_learning",
+    "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\raw_inbox\\products\\upload_b3c3f6ee9adfe528_02_policy_delivery_invoice.csv",
+    "candidate_id": "raw_e71b7ae3d10ba323"
+  },
+  "data": {
+    "title": "对公付款确认",
+    "policy_type": "付款规则",
+    "keywords": [
+      "对公",
+      "转账",
+      "付款截图",
+      "到账"
+    ],
+    "answer": "支持对公转账。收到付款截图后可先安排订单审核，最终发货以财务到账为准。",
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "handoff_reason": null,
+    "operator_alert": false,
+    "risk_level": null,
+    "additional_details": {
+      "原始资料摘录": "{\"title\": \"对公付款确认\", \"policy_type\": \"付款规则\", \"keywords\": [\"对公\", \"转账\", \"付款截图\", \"到账\"], \"answer\": \"支持对公转账。收到付款截图后可先安排订单审核，最终发货以财务到账为准。\", \"allow_auto_reply\": true, \"requires_handoff\": false, \"handoff_reason\": null, \"operator_alert\": false, \"risk_level\": null, \"additional_details\": {}}"
+    }
+  },
+  "runtime": {
+    "allow_auto_reply": false,
+    "requires_handoff": true,
+    "risk_level": "warning"
+  },
+  "metadata": {
+    "created_at": "2026-04-27T02:09:31",
+    "updated_at": "2026-04-27T02:09:31",
+    "created_by": "admin",
+    "updated_by": "admin"
+  }
+}

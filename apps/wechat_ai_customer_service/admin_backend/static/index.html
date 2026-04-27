@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>微信 AI 客服知识管理台</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <aside class="sidebar glass-panel">
+        <div class="brand">
+          <div class="brand-mark">OA</div>
+          <div>
+            <div class="brand-title">知识管理台</div>
+            <div class="brand-subtitle">WeChat AI Service</div>
+          </div>
+        </div>
+        <nav class="nav-list" aria-label="主导航">
+          <button class="nav-item is-active" data-view="overview">总览</button>
+          <button class="nav-item" data-view="knowledge">知识库</button>
+          <button class="nav-item" data-view="generator">知识生成器</button>
+          <button class="nav-item" data-view="uploads">资料上传</button>
+          <button class="nav-item" data-view="rag">资料检索增强</button>
+          <button class="nav-item" data-view="rag_experiences">RAG经验</button>
+          <button class="nav-item" data-view="candidates">候选审核</button>
+          <button class="nav-item" data-view="diagnostics">一键检测</button>
+          <button class="nav-item" data-view="versions">备份还原</button>
+        </nav>
+      </aside>
+
+      <section class="workspace">
+        <header class="topbar glass-panel">
+          <div>
+            <p class="eyebrow">OmniAuto Local Console</p>
+            <h1 id="view-title">总览</h1>
+          </div>
+          <div class="status-pill" id="health-pill">连接中</div>
+        </header>
+
+        <section class="hero glass-panel">
+          <div>
+            <p class="eyebrow">Knowledge Operations</p>
+            <h2>按门类管理客服知识，支持表单维护、AI 生成、审核入库、检测与回滚。</h2>
+          </div>
+          <div class="hero-metrics">
+            <div><span id="metric-products">-</span><label>商品</label></div>
+            <div><span id="metric-candidates">-</span><label>待审核</label></div>
+            <div><span id="metric-diagnostics">-</span><label>检测</label></div>
+          </div>
+        </section>
+
+        <section class="content-grid">
+          <article class="glass-panel content-card view-panel is-visible" data-panel="overview">
+            <div class="section-head">
+              <h2>运行总览</h2>
+              <button class="secondary-button" id="refresh-overview">刷新</button>
+            </div>
+            <div class="metric-grid" id="overview-cards"></div>
+          </article>
+
+          <article class="glass-panel content-card view-panel" data-panel="knowledge">
+            <div class="section-head">
+              <h2>正式知识</h2>
+              <div class="button-row">
+                <select id="category-select" aria-label="知识门类"></select>
+                <button class="secondary-button" id="create-category">新增门类</button>
+              </div>
+            </div>
+            <div class="section-head sub-head">
+              <input class="search-input" id="knowledge-search" placeholder="搜索名称、关键词、话术" />
+              <div class="button-row">
+                <button class="secondary-button" id="new-knowledge-item">新增知识</button>
+                <button class="secondary-button" id="edit-knowledge-item">编辑</button>
+                <button class="secondary-button" id="cancel-knowledge-edit">取消</button>
+                <button class="primary-button" id="save-knowledge-item">保存</button>
+                <button class="secondary-button danger-button" id="archive-knowledge-item">归档</button>
+              </div>
+            </div>
+            <div class="split-layout">
+              <div class="list-pane" id="knowledge-list"></div>
+              <div class="detail-pane form-pane" id="knowledge-detail">等待加载</div>
+            </div>
+          </article>
+
+          <article class="glass-panel content-card view-panel" data-panel="generator">
+            <div class="section-head">
+              <h2>知识生成器</h2>
+              <div class="button-row">
+                <select id="generator-category">
+                  <option value="">自动判断门类</option>
+                </select>
+                <button class="secondary-button" id="reset-generator">清空</button>
+              </div>
+            </div>
+            <div class="generator-layout">
+              <div class="generator-chat" id="generator-chat"></div>
+              <div class="generator-side">
+                <label class="form-field">
+                  <span>自然语言描述</span>
+                  <textarea id="generator-input" placeholder="例如：新增商品 200L 商用冷柜，单价 1999 元/台，10 台以上 1880 元，24 小时发货"></textarea>
+                </label>
+                <button class="primary-button" id="send-generator">生成/补充</button>
+                <div class="generator-summary" id="generator-summary"></div>
+                <button class="primary-button" id="confirm-generator" disabled>确认保存到知识库</button>
+              </div>
+            </div>
+          </article>
+
+          <article class="glass-panel content-card view-panel" data-panel="uploads">
+            <div class="section-head">
+              <h2>资料上传</h2>
+              <button class="primary-button is-hidden" id="upload-button" type="button">手动上传</button>
+            </div>
+            <div class="upload-zone">
+              <input id="upload-file" type="file" multiple />
+              <select id="upload-kind">
+                <option value="products">商品资料</option>
+                <option value="chats">聊天记录</option>
+                <option value="policies">政策规则</option>
+                <option value="erp_exports">ERP 导出</option>
+              </select>
+            </div>
+            <div id="upload-list" class="compact-list"></div>
+          </article>
+
+          <article class="glass-panel content-card view-panel" data-panel="rag">
+            <div class="section-head">
+              <h2>资料检索增强</h2>
+              <div class="button-row">
+                <button class="secondary-button" id="refresh-rag">刷新状态</button>
+                <button class="primary-button" id="rebuild-rag">重建索引</button>
+              </div>
+            </div>
+            <div class="helper-card">
+              <strong>RAG 只作为资料检索和候选证据，不直接决定价格、优惠、赔偿、合同或账期。</strong>
+              <span>正式回复仍以结构化知识库和安全规则为准。</span>
+            </div>
+            <div class="metric-grid" id="rag-status-cards"></div>
+            <div id="rag-analytics" class="compact-list compact-list-small">等待运营分析</div>
+            <div class="rag-search-grid">
+              <label class="form-field">
+                <span>检索问题</span>
+                <input id="rag-query" placeholder="例如：酒店公寓门锁安装注意事项" />
+              </label>
+              <label class="form-field">
+                <span>商品 ID（可选）</span>
+                <input id="rag-product-id" placeholder="例如：fl-920" />
+              </label>
+              <button class="primary-button" id="rag-search">检索资料</button>
+            </div>
+            <div id="rag-results" class="compact-list">等待检索</div>
+          </article>
+
+          <article class="glass-panel content-card view-panel" data-panel="rag_experiences">
+            <div class="section-head">
+              <div>
+                <h2>RAG新经验</h2>
+                <p>客服在 RAG 场景中形成的可复用回答概括，默认采纳为经验参考，但不会写入正式知识库。</p>
+              </div>
+              <button class="secondary-button" id="refresh-rag-experiences">刷新经验</button>
+            </div>
+            <div class="helper-card">
+              <strong>这里展示的是经验层，不是正式业务规则。</strong>
+              <span>不合适的经验可以一键废弃；需要变成正式规则时，仍应通过知识生成器或候选审核进入知识库。</span>
+            </div>
+            <div class="metric-grid" id="rag-experience-cards"></div>
+            <div id="rag-experience-list" class="compact-list">等待加载</div>
+          </article>
+
+          <article class="glass-panel content-card view-panel" data-panel="candidates">
+            <div class="section-head">
+              <h2>候选审核</h2>
+              <button class="primary-button" id="run-learning">AI 学习</button>
+            </div>
+            <div class="helper-card">
+              <strong>候选来自上传资料的 AI 提取结果。</strong>
+              <span>确认后写入正式知识库；不合适的内容可以拒绝并记录原因。</span>
+            </div>
+            <div class="split-layout">
+              <div class="list-pane" id="candidate-list"></div>
+              <div class="detail-pane form-pane" id="candidate-detail">暂无候选</div>
+            </div>
+          </article>
+
+          <article class="glass-panel content-card view-panel" data-panel="diagnostics">
+            <div class="section-head">
+              <h2>一键检测</h2>
+              <div class="button-row">
+                <button class="secondary-button" id="quick-diagnostics">快速检测</button>
+                <button class="primary-button" id="full-diagnostics">全量检测</button>
+              </div>
+            </div>
+            <div id="diagnostics-report" class="report-panel">等待检测</div>
+          </article>
+
+          <article class="glass-panel content-card view-panel" data-panel="versions">
+            <div class="section-head">
+              <h2>备份还原</h2>
+              <div class="button-row">
+                <button class="primary-button" id="create-backup">一键备份</button>
+                <button class="secondary-button" id="refresh-versions">刷新</button>
+              </div>
+            </div>
+            <div id="version-list" class="compact-list"></div>
+          </article>
+        </section>
+      </section>
+    </main>
+    <script src="/static/app.js"></script>
+  </body>
+</html>

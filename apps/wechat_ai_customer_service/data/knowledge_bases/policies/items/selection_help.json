@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "category_id": "policies",
+  "id": "selection_help",
+  "status": "active",
+  "source": {
+    "type": "migration",
+    "path": "structured/product_knowledge.example.json"
+  },
+  "data": {
+    "title": "selection_help",
+    "policy_type": "other",
+    "keywords": [
+      "不知道选哪个",
+      "怎么选",
+      "推荐一下",
+      "帮我看看",
+      "适合什么",
+      "小店",
+      "便利店",
+      "办公室",
+      "仓库",
+      "打包",
+      "饮料",
+      "久坐",
+      "净水耗材"
+    ],
+    "answer": "可以，我先按使用场景帮您缩小范围：饮料冷藏可先看商用冰箱 BX-200；办公室久坐可先看人体工学办公椅 OC-300；净水耗材可先看净水器滤芯标准款；仓库发货可先看五层加硬包装纸箱 CT-50。您告诉我用途、数量和收货城市，我再帮您核算。",
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "handoff_reason": "",
+    "operator_alert": false,
+    "risk_level": "normal"
+  },
+  "runtime": {
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "risk_level": "normal"
+  },
+  "metadata": {
+    "created_at": "2026-04-26T17:58:50",
+    "updated_at": "2026-04-26T17:58:50",
+    "created_by": "migration",
+    "updated_by": "migration"
+  }
+}

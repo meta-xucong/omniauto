@@ -1,0 +1,150 @@
+[
+  {
+    "name": "catalog_request",
+    "kind": "product_knowledge",
+    "text": "你有哪些商品？把简单的介绍信息列一下",
+    "expect_equal": {
+      "matched": true,
+      "match_type": "catalog",
+      "intent": "catalog"
+    },
+    "expect_contains": {
+      "reply_text": ["商用冰箱", "测试商品"]
+    }
+  },
+  {
+    "name": "product_quote",
+    "kind": "product_knowledge",
+    "text": "商用冰箱多少钱？",
+    "expect_equal": {
+      "matched": true,
+      "match_type": "product",
+      "intent": "quote",
+      "product_id": "commercial_fridge_bx_200"
+    },
+    "expect_contains": {
+      "reply_text": ["商用冰箱", "999"]
+    },
+    "expect_not_contains": {
+      "reply_text": ["None"]
+    }
+  },
+  {
+    "name": "below_tier_discount_handoff",
+    "kind": "product_knowledge",
+    "text": "买7台冰箱能按920吗？",
+    "expect_equal": {
+      "matched": true,
+      "match_type": "product",
+      "intent": "discount",
+      "needs_handoff": true
+    }
+  },
+  {
+    "name": "invoice_policy",
+    "kind": "product_knowledge",
+    "text": "可以开专票吗？",
+    "expect_equal": {
+      "matched": true,
+      "match_type": "faq",
+      "intent": "invoice"
+    },
+    "expect_contains": {
+      "reply_text": ["增值税专用发票", "公司抬头"]
+    }
+  },
+  {
+    "name": "company_info",
+    "kind": "product_knowledge",
+    "text": "你们公司的信息给我一下",
+    "expect_equal": {
+      "matched": true,
+      "match_type": "faq",
+      "intent": "company_profile"
+    },
+    "expect_contains": {
+      "reply_text": ["杭州星澜供应链科技有限公司", "客服电话"]
+    }
+  },
+  {
+    "name": "context_shipping",
+    "kind": "product_knowledge",
+    "text": "发江苏南京，包邮吗？",
+    "context": {
+      "last_product_id": "commercial_fridge_bx_200"
+    },
+    "expect_equal": {
+      "matched": true,
+      "match_type": "product",
+      "intent": "shipping",
+      "context_used": true,
+      "product_id": "commercial_fridge_bx_200"
+    },
+    "expect_contains": {
+      "reply_text": ["江浙沪", "包邮"]
+    },
+    "expect_max_occurrences": {
+      "reply_text": {
+        "现货，付款后 48 小时内发出": 1
+      }
+    }
+  },
+  {
+    "name": "evidence_discount_handoff",
+    "kind": "evidence_pack",
+    "text": "买7台冰箱能按920吗？",
+    "expect_equal": {
+      "safety.must_handoff": true,
+      "safety.allowed_auto_reply": false
+    },
+    "expect_in": {
+      "intent_tags": ["discount", "product", "quote"],
+      "safety.reasons": ["requested_price_below_public_tier"]
+    }
+  },
+  {
+    "name": "customer_data_complete",
+    "kind": "data_capture",
+    "text": "姓名：张三 电话：13800000000 地址：杭州市余杭区 产品：商用冰箱 数量：5台",
+    "expect_equal": {
+      "is_customer_data": true,
+      "complete": true,
+      "fields.name": "张三",
+      "fields.phone": "13800000000"
+    }
+  },
+  {
+    "name": "greeting_not_customer_data",
+    "kind": "data_capture",
+    "text": "你好，在吗？",
+    "expect_equal": {
+      "is_customer_data": false,
+      "complete": false,
+      "fields.name": null
+    }
+  },
+  {
+    "name": "manual_handoff_contract",
+    "kind": "evidence_pack",
+    "text": "这个订单能不能月结，合同可以盖章吗？",
+    "expect_equal": {
+      "safety.must_handoff": true,
+      "safety.allowed_auto_reply": false
+    },
+    "expect_in": {
+      "intent_tags": ["handoff"]
+    }
+  },
+  {
+    "name": "no_relevant_business_evidence",
+    "kind": "evidence_pack",
+    "text": "你们老板喜欢什么颜色的包装？",
+    "expect_equal": {
+      "safety.must_handoff": true,
+      "safety.allowed_auto_reply": false
+    },
+    "expect_in": {
+      "safety.reasons": ["no_relevant_business_evidence"]
+    }
+  }
+]

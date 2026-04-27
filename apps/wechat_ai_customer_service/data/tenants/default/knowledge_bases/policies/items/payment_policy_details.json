@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "category_id": "policies",
+  "id": "payment_policy_details",
+  "status": "active",
+  "source": {
+    "type": "migration",
+    "path": "structured/product_knowledge.example.json"
+  },
+  "data": {
+    "title": "付款政策",
+    "policy_type": "payment",
+    "keywords": [
+      "payment"
+    ],
+    "answer": "{\n  \"methods\": [\n    \"对公转账\",\n    \"微信支付\",\n    \"支付宝企业收款\",\n    \"月结客户测试通道\"\n  ],\n  \"deposit_policy\": \"常规订单付款后发货；定制或大额订单可先收 30% 定金，尾款发货前结清。\",\n  \"credit_policy\": \"月结、账期、赊销需要人工审核，不由自动客服直接承诺。\"\n}",
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "handoff_reason": "",
+    "operator_alert": false,
+    "risk_level": "warning"
+  },
+  "runtime": {
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "risk_level": "normal"
+  },
+  "metadata": {
+    "created_at": "2026-04-26T17:58:50",
+    "updated_at": "2026-04-26T17:58:50",
+    "created_by": "migration",
+    "updated_by": "migration"
+  }
+}

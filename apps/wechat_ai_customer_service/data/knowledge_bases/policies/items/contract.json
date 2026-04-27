@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "category_id": "policies",
+  "id": "contract",
+  "status": "active",
+  "source": {
+    "type": "migration",
+    "path": "structured/product_knowledge.example.json"
+  },
+  "data": {
+    "title": "contract",
+    "policy_type": "contract",
+    "keywords": [
+      "合同",
+      "采购合同",
+      "盖章",
+      "协议",
+      "月结",
+      "账期",
+      "赊账"
+    ],
+    "answer": "采购合同、盖章文件、月结、账期和赊销都需要人工审核。我先帮您记录需求并转给同事确认。",
+    "allow_auto_reply": false,
+    "requires_handoff": true,
+    "handoff_reason": "contract_or_credit_requires_manual_review",
+    "operator_alert": true,
+    "risk_level": "high"
+  },
+  "runtime": {
+    "allow_auto_reply": false,
+    "requires_handoff": true,
+    "risk_level": "high"
+  },
+  "metadata": {
+    "created_at": "2026-04-26T17:58:50",
+    "updated_at": "2026-04-26T17:58:50",
+    "created_by": "migration",
+    "updated_by": "migration"
+  }
+}

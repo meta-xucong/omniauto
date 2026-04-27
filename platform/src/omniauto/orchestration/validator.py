@@ -41,7 +41,9 @@ class ScriptValidator:
         """
         self.issues = []
         self._import_aliases = {}
-        code = Path(script_path).read_text(encoding="utf-8")
+        # Some generated workflows were written with a UTF-8 BOM on Windows.
+        # Treat them as normal UTF-8 source so legacy assets still validate.
+        code = Path(script_path).read_text(encoding="utf-8-sig")
 
         # 1. AST 遍历检查危险调用
         try:

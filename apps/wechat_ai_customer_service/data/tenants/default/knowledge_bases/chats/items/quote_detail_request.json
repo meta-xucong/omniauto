@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "category_id": "chats",
+  "id": "quote_detail_request",
+  "status": "active",
+  "source": {
+    "type": "admin_draft",
+    "legacy_target": "style_examples"
+  },
+  "data": {
+    "customer_message": "",
+    "service_reply": "好的，您把具体产品、数量和收货城市发我，我帮您核一下价格和运费。",
+    "intent_tags": [
+      "quote"
+    ],
+    "tone_tags": [],
+    "linked_categories": [],
+    "linked_item_ids": [],
+    "usable_as_template": true
+  },
+  "runtime": {
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "risk_level": "normal"
+  },
+  "metadata": {
+    "created_at": "2026-04-27T03:25:17",
+    "updated_at": "2026-04-27T03:25:17",
+    "created_by": "admin",
+    "updated_by": "admin"
+  }
+}

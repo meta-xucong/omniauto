@@ -1,0 +1,292 @@
+"""Runtime access to the category-isolated knowledge bases.
+
+This module is intentionally independent from the admin API layer. The WeChat
+workflow can use it directly without depending on FastAPI routes or admin-only
+models, while still reading the same formal knowledge source.
+"""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+from typing import Any, Iterable
+
+try:  # pragma: no cover - supports package imports and direct workflow scripts.
+    from apps.wechat_ai_customer_service.knowledge_paths import (
+        LEGACY_KNOWLEDGE_BASE_ROOT,
+        default_admin_knowledge_base_root,
+        runtime_knowledge_roots,
+        tenant_product_item_knowledge_root,
+    )
+except ImportError:  # pragma: no cover
+    APP_PACKAGE_ROOT = Path(__file__).resolve().parents[1]
+    LEGACY_KNOWLEDGE_BASE_ROOT = APP_PACKAGE_ROOT / "data" / "knowledge_bases"
+    default_admin_knowledge_base_root = lambda tenant_id=None: LEGACY_KNOWLEDGE_BASE_ROOT
+    runtime_knowledge_roots = lambda tenant_id=None: [LEGACY_KNOWLEDGE_BASE_ROOT]
+    tenant_product_item_knowledge_root = lambda tenant_id=None: APP_PACKAGE_ROOT / "data" / "tenants" / "default" / "product_item_knowledge"
+
+APP_ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_KNOWLEDGE_BASE_ROOT = default_admin_knowledge_base_root()
+
+PRODUCT_SCOPED_KINDS = {
+    "faq": "product_faq",
+    "rules": "product_rules",
+    "explanations": "product_explanations",
+}
+
+PRODUCT_SCOPED_SCHEMAS: dict[str, dict[str, Any]] = {
+    "product_faq": {
+        "schema_version": 1,
+        "category_id": "product_faq",
+        "display_name": "商品专属问答",
+        "item_title_field": "title",
+        "item_subtitle_field": "product_id",
+        "fields": [
+            {"id": "product_id", "label": "商品 ID", "type": "short_text", "required": True},
+            {"id": "title", "label": "标题", "type": "short_text", "required": True},
+            {"id": "keywords", "label": "触发关键词", "type": "tags", "required": False},
+            {"id": "question", "label": "客户问题", "type": "long_text", "required": False},
+            {"id": "answer", "label": "标准回复", "type": "long_text", "required": True},
+            {"id": "additional_details", "label": "补充信息", "type": "object", "required": False},
+        ],
+    },
+    "product_rules": {
+        "schema_version": 1,
+        "category_id": "product_rules",
+        "display_name": "商品专属规则",
+        "item_title_field": "title",
+        "item_subtitle_field": "product_id",
+        "fields": [
+            {"id": "product_id", "label": "商品 ID", "type": "short_text", "required": True},
+            {"id": "title", "label": "规则名称", "type": "short_text", "required": True},
+            {"id": "keywords", "label": "触发关键词", "type": "tags", "required": False},
+            {"id": "answer", "label": "标准回复", "type": "long_text", "required": True},
+            {"id": "allow_auto_reply", "label": "允许自动回复", "type": "boolean", "required": False},
+            {"id": "requires_handoff", "label": "必须转人工", "type": "boolean", "required": False},
+            {"id": "handoff_reason", "label": "转人工原因", "type": "short_text", "required": False},
+            {"id": "additional_details", "label": "补充信息", "type": "object", "required": False},
+        ],
+    },
+    "product_explanations": {
+        "schema_version": 1,
+        "category_id": "product_explanations",
+        "display_name": "商品专属解释",
+        "item_title_field": "title",
+        "item_subtitle_field": "product_id",
+        "fields": [
+            {"id": "product_id", "label": "商品 ID", "type": "short_text", "required": True},
+            {"id": "title", "label": "说明主题", "type": "short_text", "required": True},
+            {"id": "keywords", "label": "触发关键词", "type": "tags", "required": False},
+            {"id": "content", "label": "说明内容", "type": "long_text", "required": True},
+            {"id": "additional_details", "label": "补充信息", "type": "object", "required": False},
+        ],
+    },
+}
+
+PRODUCT_SCOPED_RESOLVERS: dict[str, dict[str, Any]] = {
+    category_id: {
+        "schema_version": 1,
+        "category_id": category_id,
+        "match_fields": ["title", "keywords", "question", "answer", "content", "additional_details"],
+        "intent_fields": ["keywords"],
+        "risk_fields": ["keywords", "answer", "content"],
+        "reply_fields": ["answer", "content", "additional_details"],
+        "minimum_confidence": 0.35,
+        "default_action": "product_scoped_context",
+    }
+    for category_id in PRODUCT_SCOPED_SCHEMAS
+}
+
+
+class KnowledgeRuntime:
+    """Read-only runtime facade for classified knowledge."""
+
+    def __init__(self, root: Path | None = None, *, tenant_id: str | None = None) -> None:
+        self.single_root_mode = root is not None
+        self.roots = [root.resolve()] if root else [item.resolve() for item in runtime_knowledge_roots(tenant_id)]
+        if not self.roots:
+            self.roots = [LEGACY_KNOWLEDGE_BASE_ROOT.resolve()]
+        self.root = (root or default_admin_knowledge_base_root(tenant_id)).resolve()
+        self.registry_path = self.root / "registry.json"
+        self.product_item_root = tenant_product_item_knowledge_root(tenant_id).resolve() if not root else (root.parent / "product_item_knowledge").resolve()
+
+    def load_registry(self) -> dict[str, Any]:
+        if not self.registry_path.exists():
+            raise FileNotFoundError(str(self.registry_path))
+        return read_json(self.registry_path)
+
+    def load_registry_from_root(self, root: Path) -> dict[str, Any]:
+        path = root / "registry.json"
+        if not path.exists():
+            raise FileNotFoundError(str(path))
+        return read_json(path)
+
+    def list_categories(
+        self,
+        *,
+        enabled_only: bool = True,
+        reply_only: bool = False,
+    ) -> list[dict[str, Any]]:
+        categories = []
+        seen: set[str] = set()
+        for root in self.roots:
+            for item in self.load_registry_from_root(root).get("categories", []) or []:
+                category_id = str(item.get("id") or "")
+                if not category_id or category_id in seen:
+                    continue
+                seen.add(category_id)
+                categories.append(item)
+        if enabled_only:
+            categories = [item for item in categories if item.get("enabled", True)]
+        if reply_only:
+            categories = [item for item in categories if item.get("participates_in_reply", False)]
+        return sorted(categories, key=lambda item: (int(item.get("sort_order", 999)), str(item.get("id") or "")))
+
+    def get_category(self, category_id: str) -> dict[str, Any] | None:
+        for root in self.roots:
+            for category in self.load_registry_from_root(root).get("categories", []) or []:
+                if category.get("id") == category_id:
+                    return category
+        return None
+
+    def require_category(self, category_id: str) -> dict[str, Any]:
+        category = self.get_category(category_id)
+        if not category:
+            raise FileNotFoundError(f"category not found: {category_id}")
+        return category
+
+    def category_root(self, category_id: str) -> Path:
+        for root in self.roots:
+            category = self.get_category_from_root(root, category_id)
+            if not category:
+                continue
+            path = (root / str(category.get("path") or category_id)).resolve()
+            if root not in path.parents and path != root:
+                raise ValueError(f"category path escapes knowledge base root: {category_id}")
+            return path
+        raise FileNotFoundError(f"category not found: {category_id}")
+
+    def get_category_from_root(self, root: Path, category_id: str) -> dict[str, Any] | None:
+        for category in self.load_registry_from_root(root).get("categories", []) or []:
+            if category.get("id") == category_id:
+                return category
+        return None
+
+    def category_root_from_root(self, root: Path, category_id: str) -> Path:
+        category = self.get_category_from_root(root, category_id)
+        if not category:
+            raise FileNotFoundError(f"category not found: {category_id}")
+        path = (root / str(category.get("path") or category_id)).resolve()
+        if root not in path.parents and path != root:
+            raise ValueError(f"category path escapes knowledge base root: {category_id}")
+        return path
+
+    def load_schema(self, category_id: str) -> dict[str, Any]:
+        return read_json(self.category_root(category_id) / "schema.json")
+
+    def load_resolver(self, category_id: str) -> dict[str, Any]:
+        return read_json(self.category_root(category_id) / "resolver.json")
+
+    def items_root(self, category_id: str) -> Path:
+        return self.category_root(category_id) / "items"
+
+    def list_items(self, category_id: str, *, include_archived: bool = False) -> list[dict[str, Any]]:
+        items = []
+        for root in self.roots:
+            category = self.get_category_from_root(root, category_id)
+            if not category:
+                continue
+            items_root = self.category_root_from_root(root, category_id) / "items"
+            if not items_root.exists():
+                continue
+            for path in sorted(items_root.glob("*.json")):
+                item = read_json(path)
+                if not include_archived and item.get("status") == "archived":
+                    continue
+                items.append(item)
+        return items
+
+    def get_item(self, category_id: str, item_id: str) -> dict[str, Any] | None:
+        if category_id in PRODUCT_SCOPED_SCHEMAS:
+            for _kind, _schema, _resolver, item in self.iter_all_product_scoped_items():
+                if str(item.get("id") or "") == item_id and item.get("status") != "archived":
+                    return item
+            return None
+        for root in self.roots:
+            if not self.get_category_from_root(root, category_id):
+                continue
+            items_root = (self.category_root_from_root(root, category_id) / "items").resolve()
+            path = (items_root / f"{item_id}.json").resolve()
+            if items_root not in path.parents:
+                raise ValueError(f"item path escapes category root: {item_id}")
+            if not path.exists():
+                continue
+            item = read_json(path)
+            if item.get("status") == "archived":
+                return None
+            return item
+        return None
+
+    def iter_reply_items(self) -> Iterable[tuple[dict[str, Any], dict[str, Any], dict[str, Any], dict[str, Any]]]:
+        for root in self.roots:
+            for category in self.list_categories_from_root(root, reply_only=True):
+                category_id = str(category.get("id") or "")
+                schema = read_json(self.category_root_from_root(root, category_id) / "schema.json")
+                resolver = read_json(self.category_root_from_root(root, category_id) / "resolver.json")
+                items_root = self.category_root_from_root(root, category_id) / "items"
+                if not items_root.exists():
+                    continue
+                for path in sorted(items_root.glob("*.json")):
+                    item = read_json(path)
+                    if item.get("status") == "archived":
+                        continue
+                    yield category, schema, resolver, item
+
+    def list_categories_from_root(self, root: Path, *, reply_only: bool = False) -> list[dict[str, Any]]:
+        categories = [item for item in self.load_registry_from_root(root).get("categories", []) or [] if item.get("enabled", True)]
+        if reply_only:
+            categories = [item for item in categories if item.get("participates_in_reply", False)]
+        return sorted(categories, key=lambda item: (int(item.get("sort_order", 999)), str(item.get("id") or "")))
+
+    def iter_product_scoped_items(
+        self,
+        product_ids: Iterable[str],
+    ) -> Iterable[tuple[dict[str, Any], dict[str, Any], dict[str, Any], dict[str, Any]]]:
+        for product_id in sorted({str(item) for item in product_ids if str(item)}):
+            product_root = (self.product_item_root / product_id).resolve()
+            if self.product_item_root not in product_root.parents and product_root != self.product_item_root:
+                continue
+            for kind, category_id in PRODUCT_SCOPED_KINDS.items():
+                kind_root = product_root / kind
+                if not kind_root.exists():
+                    continue
+                category = {
+                    "id": category_id,
+                    "name": PRODUCT_SCOPED_SCHEMAS[category_id]["display_name"],
+                    "kind": "product_scoped",
+                    "path": str(kind_root),
+                    "enabled": True,
+                    "participates_in_reply": True,
+                    "sort_order": 70,
+                }
+                schema = PRODUCT_SCOPED_SCHEMAS[category_id]
+                resolver = PRODUCT_SCOPED_RESOLVERS[category_id]
+                for path in sorted(kind_root.glob("*.json")):
+                    item = read_json(path)
+                    if item.get("status") == "archived":
+                        continue
+                    item.setdefault("category_id", category_id)
+                    item.setdefault("data", {})
+                    item["data"].setdefault("product_id", product_id)
+                    yield category, schema, resolver, item
+
+    def iter_all_product_scoped_items(self) -> Iterable[tuple[str, dict[str, Any], dict[str, Any], dict[str, Any]]]:
+        if not self.product_item_root.exists():
+            return
+        product_ids = [path.name for path in self.product_item_root.iterdir() if path.is_dir()]
+        for category, schema, resolver, item in self.iter_product_scoped_items(product_ids):
+            yield str(category.get("id") or ""), schema, resolver, item
+
+
+def read_json(path: Path) -> dict[str, Any]:
+    return json.loads(path.read_text(encoding="utf-8"))

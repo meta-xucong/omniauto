@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "category_id": "global_guidelines",
+  "match_fields": [
+    "title",
+    "guideline_text",
+    "intent_tags",
+    "tone_tags",
+    "additional_details"
+  ],
+  "intent_fields": [
+    "intent_tags"
+  ],
+  "risk_fields": [],
+  "reply_fields": [
+    "guideline_text",
+    "intent_tags",
+    "tone_tags",
+    "additional_details"
+  ],
+  "minimum_confidence": 0.35,
+  "default_action": "global_style_guideline"
+}

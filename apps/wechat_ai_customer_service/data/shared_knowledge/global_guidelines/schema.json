@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "category_id": "global_guidelines",
+  "display_name": "全局客服准则",
+  "description": "所有微信 AI 客服/助理共享的表达风格和安全边界。",
+  "item_title_field": "title",
+  "item_subtitle_field": "priority",
+  "fields": [
+    {
+      "id": "title",
+      "label": "准则名称",
+      "type": "short_text",
+      "required": true,
+      "searchable": true,
+      "form_order": 10
+    },
+    {
+      "id": "guideline_text",
+      "label": "准则内容",
+      "type": "long_text",
+      "required": true,
+      "searchable": true,
+      "form_order": 20
+    },
+    {
+      "id": "intent_tags",
+      "label": "适用意图",
+      "type": "tags",
+      "required": false,
+      "searchable": true,
+      "form_order": 30
+    },
+    {
+      "id": "tone_tags",
+      "label": "语气标签",
+      "type": "tags",
+      "required": false,
+      "searchable": true,
+      "form_order": 40
+    },
+    {
+      "id": "priority",
+      "label": "优先级",
+      "type": "number",
+      "required": false,
+      "default": 50,
+      "form_order": 50
+    },
+    {
+      "id": "always_include",
+      "label": "默认纳入上下文",
+      "type": "boolean",
+      "required": false,
+      "default": false,
+      "form_order": 60
+    },
+    {
+      "id": "additional_details",
+      "label": "补充信息",
+      "type": "object",
+      "required": false,
+      "searchable": true,
+      "form_order": 70
+    }
+  ]
+}

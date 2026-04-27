@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "compiled_at": "2026-04-27T23:49:06",
+  "source_root": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\default\\knowledge_bases",
+  "counts": {
+    "categories": 8,
+    "category_items": {
+      "global_guidelines": 1,
+      "products": 8,
+      "chats": 8,
+      "policies": 35,
+      "erp_exports": 0,
+      "product_faq": 0,
+      "product_rules": 2,
+      "product_explanations": 0
+    },
+    "products": 8,
+    "faq": 32,
+    "style_examples": 9
+  },
+  "note": "Compatibility export only. Formal runtime source is shared_knowledge plus tenant knowledge_bases and product_item_knowledge."
+}

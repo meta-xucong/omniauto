@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "category_id": "policies",
+  "id": "after_sales_policy_details",
+  "status": "active",
+  "source": {
+    "type": "migration",
+    "path": "structured/product_knowledge.example.json"
+  },
+  "data": {
+    "title": "售后政策",
+    "policy_type": "after_sales",
+    "keywords": [
+      "after",
+      "sales"
+    ],
+    "answer": "{\n  \"general\": \"签收 7 天内发现非人为质量问题，可提供照片/视频申请售后。\",\n  \"damage_on_arrival\": \"外包装破损请先拍照并当场备注，24 小时内反馈更容易处理。\",\n  \"return_rule\": \"非质量问题退换货需商品未使用且包装完整，运费按责任方承担。\",\n  \"manual_required\": \"退款、赔偿、争议、投诉、账期、合同条款均转人工。\"\n}",
+    "allow_auto_reply": true,
+    "requires_handoff": true,
+    "handoff_reason": "manual_required",
+    "operator_alert": true,
+    "risk_level": "warning"
+  },
+  "runtime": {
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "risk_level": "normal"
+  },
+  "metadata": {
+    "created_at": "2026-04-26T17:58:50",
+    "updated_at": "2026-04-26T17:58:50",
+    "created_by": "migration",
+    "updated_by": "migration"
+  }
+}

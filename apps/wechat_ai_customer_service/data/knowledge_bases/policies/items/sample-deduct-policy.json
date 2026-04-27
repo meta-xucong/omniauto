@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "category_id": "policies",
+  "id": "sample-deduct-policy",
+  "status": "active",
+  "source": {
+    "type": "deepseek_upload_learning",
+    "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\raw_inbox\\products\\upload_c54b9fd38e442a30_05_mixed_company_faq.txt",
+    "candidate_id": "raw_2db2d2960bc39d41"
+  },
+  "data": {
+    "title": "样品费抵扣规则",
+    "policy_type": "sample",
+    "keywords": [
+      "样品费",
+      "抵扣",
+      "大货款"
+    ],
+    "answer": "样品费是否可抵扣大货款，需要按商品和数量人工确认。",
+    "allow_auto_reply": false,
+    "requires_handoff": true,
+    "handoff_reason": "需要人工确认抵扣条件",
+    "additional_details": {
+      "原始资料摘录": "{\"title\": \"样品费抵扣规则\", \"policy_type\": \"sample\", \"keywords\": [\"样品费\", \"抵扣\", \"大货款\"], \"answer\": \"样品费是否可抵扣大货款，需要按商品和数量人工确认。\", \"allow_auto_reply\": false, \"requires_handoff\": true, \"handoff_reason\": \"需要人工确认抵扣条件\", \"additional_details\": {}}"
+    }
+  },
+  "runtime": {
+    "allow_auto_reply": false,
+    "requires_handoff": true,
+    "risk_level": "warning"
+  },
+  "metadata": {
+    "created_at": "2026-04-27T02:15:20",
+    "updated_at": "2026-04-27T02:15:20",
+    "created_by": "admin",
+    "updated_by": "admin"
+  }
+}

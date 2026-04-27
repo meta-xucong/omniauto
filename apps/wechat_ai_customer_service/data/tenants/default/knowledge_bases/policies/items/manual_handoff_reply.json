@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "category_id": "policies",
+  "id": "manual_handoff_reply",
+  "status": "active",
+  "source": {
+    "type": "ai_generator",
+    "session_id": "gen_20260427_024635_98cf6b99"
+  },
+  "data": {
+    "title": "转人工规则",
+    "policy_type": "manual_required",
+    "keywords": [
+      "转人工",
+      "人工客服",
+      "人工服务",
+      "转人工服务",
+      "人工客服在吗",
+      "人工"
+    ],
+    "answer": "已转人工客服，线路切换中，请稍候片刻。",
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "handoff_reason": "用户明确要求转人工或询问人工客服",
+    "operator_alert": false,
+    "risk_level": "normal",
+    "additional_details": {
+      "原始描述": "如果用户要求转人工服务，或者问人工客服在不在，要明确的回复：已转人工客服，线路切换中，请稍候片刻。",
+      "触发条件": "用户发送包含'转人工'、'人工客服'、'人工服务'、'人工客服在吗'等关键词的消息",
+      "适用场景": "用户主动要求转人工或询问人工客服是否存在时",
+      "user_original_description": "如果用户要求转人工服务，或者问人工客服在不在，要明确的回复：已转人工客服，线路切换中，请稍候片刻。",
+      "trigger_conditions": "如果用户要求转人工服务，或者问人工客服在不在",
+      "用户原始描述": "如果用户要求转人工服务，或者问人工客服在不在，要明确的回复：已转人工客服，线路切换中，请稍候片刻。"
+    }
+  },
+  "runtime": {
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "risk_level": "normal"
+  },
+  "metadata": {
+    "created_at": "2026-04-27T02:47:05",
+    "updated_at": "2026-04-27T02:47:05",
+    "created_by": "admin",
+    "updated_by": "admin"
+  }
+}

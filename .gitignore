@@ -26,6 +26,25 @@ runtime/test_artifacts/*
 !runtime/test_artifacts/
 !runtime/test_artifacts/README.md
 !runtime/README.md
+runtime/apps/
+runtime/generated_workflows/
+runtime/logs/
+runtime/state/
+
+# Local task/supervisor state
+.codex-longrun/
+@AutomationLog.txt
+
+# WeChat customer-service local runtime data
+apps/wechat_ai_customer_service/data/backups/
+apps/wechat_ai_customer_service/data/raw_inbox/
+apps/wechat_ai_customer_service/data/review_candidates/
+apps/wechat_ai_customer_service/data/versions/
+apps/wechat_ai_customer_service/data/tenants/*/rag_cache/
+apps/wechat_ai_customer_service/data/tenants/*/rag_chunks/
+apps/wechat_ai_customer_service/data/tenants/*/rag_experience/
+apps/wechat_ai_customer_service/data/tenants/*/rag_index/
+apps/wechat_ai_customer_service/data/tenants/*/rag_sources/
 
 # Cache / misc
 .pytest_cache/

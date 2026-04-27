@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <title>{{ keyword }} — {{ site }} 调研报告</title>
+  <title>{{ keyword }} - {{ site }} 调研报告</title>
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; margin: 40px; background: #f8f9fa; color: #333; }
     .container { max-width: 1400px; margin: 0 auto; background: #fff; padding: 32px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
@@ -25,24 +25,43 @@
     .item-info { flex: 1; }
     .item-title { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
     .item-meta { font-size: 13px; color: #64748b; margin-bottom: 6px; }
-    .params { font-size: 12px; color: #475569; background: #f8fafc; padding: 8px; border-radius: 4px; margin-top: 6px; }
-    .screenshot { margin-top: 8px; max-width: 100%; border: 1px solid #e2e8f0; border-radius: 4px; }
+    .params { font-size: 12px; color: #475569; background: #f8fafc; padding: 10px; border-radius: 4px; margin-top: 8px; }
+    .params-label { font-weight: 600; color: #334155; margin-bottom: 6px; }
+    .params-list { display: flex; flex-wrap: wrap; gap: 8px; }
+    .param-chip { display: inline-flex; align-items: center; max-width: 100%; line-height: 1.45; background: #fff; border: 1px solid #dbe4ee; border-radius: 999px; padding: 4px 10px; }
+    .screenshot-link { display: inline-block; margin-top: 10px; cursor: zoom-in; }
+    .screenshot { display: block; max-width: 240px; max-height: 180px; border: 1px solid #e2e8f0; border-radius: 4px; box-shadow: 0 1px 4px rgba(15, 23, 42, 0.08); }
     .error-badge { display: inline-block; background: #fee2e2; color: #991b1b; padding: 2px 8px; border-radius: 4px; font-size: 12px; margin-left: 8px; }
     .section-desc { color: #64748b; font-size: 13px; margin-top: -8px; margin-bottom: 12px; }
+    .empty { color: #64748b; margin-top: 16px; }
+    .small { font-size: 12px; color: #64748b; }
+    .lightbox { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.82); display: none; align-items: center; justify-content: center; padding: 32px; z-index: 9999; }
+    .lightbox.open { display: flex; }
+    .lightbox-inner { position: relative; max-width: 96vw; max-height: 92vh; }
+    .lightbox img { display: block; max-width: 96vw; max-height: 92vh; border-radius: 8px; box-shadow: 0 12px 40px rgba(0,0,0,0.35); background: #fff; }
+    .lightbox-close { position: absolute; top: -14px; right: -14px; width: 34px; height: 34px; border: none; border-radius: 999px; background: #fff; color: #0f172a; font-size: 22px; line-height: 1; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.18); }
+    .lightbox-hint { margin-top: 10px; text-align: center; color: #e2e8f0; font-size: 12px; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>{{ keyword }} — {{ site }} 调研报告</h1>
-    <div class="meta">生成时间: {{ generated_at | default('') }} | 数据来源: {{ site }}</div>
+    {% set stats = namespace(min_price_text='-', min_price_num=None) %}
+    {% for it in all_items | default([]) %}
+      {% if it.price_num is not none and (stats.min_price_text == '-' or it.price_num < stats.min_price_num) %}
+        {% set stats.min_price_text = it.price_text %}
+        {% set stats.min_price_num = it.price_num %}
+      {% endif %}
+    {% endfor %}
+    <h1>{{ keyword }} - {{ site }} 调研报告</h1>
+    <div class="meta">生成时间: {{ generated_at | default('') }} | 数据来源: {{ site | default('') }}</div>
 
     <div class="stats">
       <div class="stat-card">
-        <div class="number">{{ total_items }}</div>
+        <div class="number">{{ total_items | default(0) }}</div>
         <div class="label">抓取商品总数</div>
       </div>
       <div class="stat-card">
-        <div class="number">{{ sample_size }}</div>
+        <div class="number">{{ detail_sample_completed | default(sample_size | default(0)) }}</div>
         <div class="label">详情页抽样数</div>
       </div>
       <div class="stat-card skip">
@@ -50,58 +69,136 @@
         <div class="label">因验证跳过</div>
       </div>
       <div class="stat-card">
-        <div class="number">{{ items[0].price_text | default('—') }}</div>
+        <div class="number">{{ stats.min_price_text }}</div>
         <div class="label">最低价格</div>
+      </div>
+      <div class="stat-card">
+        <div class="number">{{ list_pages_completed | default(0) }}</div>
+        <div class="label">完成列表页数</div>
       </div>
     </div>
 
     <h2>全部商品汇总表</h2>
-    <p class="section-desc">列出所有从列表页抓取到的商品（按价格从低到高排序）。</p>
+    <p class="section-desc">列出所有从列表页抓取到的商品，按页面实际抓取顺序展示；搜索条件仍为价格排序。</p>
+    {% if all_items %}
     <div style="overflow-x: auto;">
       <table>
         <thead>
-          <tr><th>#</th><th>商品标题</th><th>价格</th><th>店铺</th></tr>
+          <tr>
+            <th>#</th>
+            <th>商品标题</th>
+            <th>价格</th>
+            <th>店铺</th>
+            <th>来源页</th>
+            <th>链接</th>
+          </tr>
         </thead>
         <tbody>
           {% for it in all_items %}
           <tr>
             <td>{{ loop.index }}</td>
-            <td>{{ it.title }}</td>
-            <td class="price">{{ it.price_text }}</td>
-            <td>{{ it.shop_name | default('—') }}</td>
+            <td>{{ it.title | default('') }}</td>
+            <td class="price">{{ it.price_text | default('') }}</td>
+            <td>{{ it.shop_name | default('') }}</td>
+            <td>{{ it.source_page | default('') }}</td>
+            <td class="small">{{ it.link | default('') }}</td>
           </tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
+    {% else %}
+    <div class="empty">本次没有抓到列表页商品。</div>
+    {% endif %}
 
     <h2>抽样商品详情</h2>
-    <p class="section-desc">仅展示成功进入详情页并提取到信息的商品。若出现红色标签，表示该商品因验证被跳过。</p>
-    {% for it in items %}
-    <div class="item-card">
-      {% if it.image %}
-      <img src="{{ it.image }}" alt="">
-      {% endif %}
-      <div class="item-info">
-        <div class="item-title">
-          {{ it.title }}
-          {% if it.detail_error %}<span class="error-badge">跳过: {{ it.detail_error }}</span>{% endif %}
-        </div>
-        <div class="item-meta">
-          <span class="price">{{ it.price_text }}</span> &nbsp;|&nbsp;
-          店铺: {{ it.shop_name | default('—') }}
-          {% if it.detail and it.detail.location %} &nbsp;|&nbsp; 所在地: {{ it.detail.location }}{% endif %}
-          {% if it.detail and it.detail.business_model %} &nbsp;|&nbsp; 经营模式: {{ it.detail.business_model }}{% endif %}
-        </div>
-        {% if it.detail and it.detail.params %}
-        <div class="params">参数: {{ it.detail.params | join('； ') }}</div>
+    <p class="section-desc">仅展示成功进入详情页并提取到信息的商品。若出现红色标签，表示该商品在详情页阶段遇到了异常或验证。</p>
+    {% if items %}
+      {% for it in items %}
+      <div class="item-card">
+        {% if it.image %}
+        <img src="{{ it.image }}" alt="">
         {% endif %}
-        {% if it.screenshot %}
-        <img class="screenshot" src="{{ it.screenshot }}" alt="page screenshot">
-        {% endif %}
+        <div class="item-info">
+          <div class="item-title">
+            {{ it.title | default('') }}
+            {% if it.detail_error %}
+            <span class="error-badge">{{ it.detail_error }}</span>
+            {% endif %}
+          </div>
+          <div class="item-meta">价格: <span class="price">{{ it.price_text | default('') }}</span></div>
+          <div class="item-meta">店铺: {{ it.detail.shop_name if it.detail and it.detail.shop_name else it.shop_name | default('') }}</div>
+          <div class="item-meta">地区: {{ it.detail.location if it.detail and it.detail.location else '-' }}</div>
+          <div class="item-meta">经营模式: {{ it.detail.business_model if it.detail and it.detail.business_model else '-' }}</div>
+          <div class="item-meta">链接: {{ it.link | default('') }}</div>
+          {% if it.detail and it.detail.params %}
+          <div class="params">
+            <div class="params-label">参数</div>
+            <div class="params-list">
+              {% for pair in it.detail.params %}
+                {% if pair is mapping %}
+                <span class="param-chip">{{ (pair.name | default('') | replace('\t', ' ') | replace('\n', ' ') | trim) ~ ': ' ~ (pair.value | default('') | replace('\t', ' ') | replace('\n', ' ') | trim) }}</span>
+                {% else %}
+                <span class="param-chip">{{ pair | replace('\t', ' ') | replace('\n', ' ') | trim }}</span>
+                {% endif %}
+              {% endfor %}
+            </div>
+          </div>
+          {% elif it.detail and it.detail.raw_text %}
+          <div class="params">{{ it.detail.raw_text }}</div>
+          {% endif %}
+          {% if it.screenshot %}
+          <a class="screenshot-link" href="{{ it.screenshot }}" data-lightbox-src="{{ it.screenshot }}">
+            <img class="screenshot" src="{{ it.screenshot }}" alt="page screenshot">
+          </a>
+          {% endif %}
+        </div>
       </div>
-    </div>
-    {% endfor %}
+      {% endfor %}
+    {% else %}
+    <div class="empty">本次没有详情抽样结果。</div>
+    {% endif %}
   </div>
+  <div class="lightbox" id="report-lightbox" aria-hidden="true">
+    <div class="lightbox-inner">
+      <button class="lightbox-close" type="button" aria-label="关闭">×</button>
+      <img id="report-lightbox-image" src="" alt="enlarged screenshot">
+      <div class="lightbox-hint">点击空白处或右上角关闭</div>
+    </div>
+  </div>
+  <script>
+    (() => {
+      const lightbox = document.getElementById('report-lightbox');
+      const lightboxImage = document.getElementById('report-lightbox-image');
+      const closeButton = lightbox.querySelector('.lightbox-close');
+      const open = (src) => {
+        lightboxImage.src = src;
+        lightbox.classList.add('open');
+        lightbox.setAttribute('aria-hidden', 'false');
+      };
+      const close = () => {
+        lightbox.classList.remove('open');
+        lightbox.setAttribute('aria-hidden', 'true');
+        lightboxImage.src = '';
+      };
+      document.querySelectorAll('[data-lightbox-src]').forEach((link) => {
+        link.addEventListener('click', (event) => {
+          event.preventDefault();
+          open(link.getAttribute('data-lightbox-src'));
+        });
+      });
+      lightbox.addEventListener('click', (event) => {
+        if (event.target === lightbox) {
+          close();
+        }
+      });
+      closeButton.addEventListener('click', close);
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && lightbox.classList.contains('open')) {
+          close();
+        }
+      });
+    })();
+  </script>
 </body>
 </html>

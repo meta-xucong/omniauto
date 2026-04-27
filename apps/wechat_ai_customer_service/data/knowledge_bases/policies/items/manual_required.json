@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "category_id": "policies",
+  "id": "manual_required",
+  "status": "active",
+  "source": {
+    "type": "migration",
+    "path": "structured/product_knowledge.example.json"
+  },
+  "data": {
+    "title": "manual_required",
+    "policy_type": "manual_required",
+    "keywords": [
+      "投诉",
+      "赔偿",
+      "退款",
+      "举报",
+      "法务",
+      "律师",
+      "我要人工",
+      "转人工",
+      "免单",
+      "白送",
+      "先发货月底结",
+      "月底结",
+      "虚开发票",
+      "伪造发票",
+      "假发票",
+      "不开票走账"
+    ],
+    "answer": "我已收到，这类问题需要人工继续处理。我先帮您记录并提醒同事接管，稍后给您回复。",
+    "allow_auto_reply": false,
+    "requires_handoff": true,
+    "handoff_reason": "sensitive_or_manual_request",
+    "operator_alert": true,
+    "risk_level": "high"
+  },
+  "runtime": {
+    "allow_auto_reply": false,
+    "requires_handoff": true,
+    "risk_level": "high"
+  },
+  "metadata": {
+    "created_at": "2026-04-26T17:58:50",
+    "updated_at": "2026-04-26T17:58:50",
+    "created_by": "migration",
+    "updated_by": "migration"
+  }
+}

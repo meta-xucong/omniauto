@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "category_id": "chats",
+  "id": "unknown_handoff",
+  "status": "active",
+  "source": {
+    "type": "migration",
+    "path": "structured/style_examples.json"
+  },
+  "data": {
+    "customer_message": "",
+    "service_reply": "这个问题我当前没有足够依据直接确认，我先帮您记录并转人工处理。",
+    "intent_tags": [
+      "unknown",
+      "handoff"
+    ],
+    "tone_tags": [],
+    "linked_categories": [],
+    "linked_item_ids": [],
+    "usable_as_template": true
+  },
+  "runtime": {
+    "allow_auto_reply": true,
+    "requires_handoff": true,
+    "risk_level": "high"
+  },
+  "metadata": {
+    "created_at": "2026-04-26T17:58:50",
+    "updated_at": "2026-04-26T17:58:50",
+    "created_by": "migration",
+    "updated_by": "migration"
+  }
+}

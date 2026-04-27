@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "category_id": "policies",
+  "id": "invoice_policy_details",
+  "status": "active",
+  "source": {
+    "type": "migration",
+    "path": "structured/product_knowledge.example.json"
+  },
+  "data": {
+    "title": "开票政策",
+    "policy_type": "invoice",
+    "keywords": [
+      "invoice"
+    ],
+    "answer": "{\n  \"supported_types\": [\n    \"普通发票\",\n    \"增值税专用发票\"\n  ],\n  \"tax_rate_note\": \"默认按商品类目匹配测试税率，具体税率以下单确认为准。\",\n  \"required_fields\": [\n    \"公司抬头\",\n    \"税号\",\n    \"开票类型\",\n    \"邮箱\",\n    \"收票手机号\"\n  ],\n  \"issue_time\": \"订单完成付款后 1-3 个工作日内开具电子发票。\",\n  \"red_invoice\": \"如需红冲或重开，需要提供原发票信息和正确开票资料，转人工处理。\"\n}",
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "handoff_reason": "",
+    "operator_alert": false,
+    "risk_level": "normal"
+  },
+  "runtime": {
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "risk_level": "normal"
+  },
+  "metadata": {
+    "created_at": "2026-04-26T17:58:50",
+    "updated_at": "2026-04-26T17:58:50",
+    "created_by": "migration",
+    "updated_by": "migration"
+  }
+}

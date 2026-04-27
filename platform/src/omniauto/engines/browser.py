@@ -153,8 +153,21 @@ class StealthBrowser:
         # 妯″紡 A: 閫氳繃 CDP 杩炴帴宸茶繍琛岀殑 Chrome
         if self.cdp_url:
             self._browser = await self._playwright.chromium.connect_over_cdp(self.cdp_url)
-            self._context = self._browser.contexts[0] if self._browser.contexts else await self._browser.new_context()
-            self._page = self._context.pages[0] if self._context.pages else await self._context.new_page()
+            contexts = list(self._browser.contexts)
+            preferred_page = None
+            for context in contexts:
+                for page in context.pages:
+                    if not page.url.startswith("chrome://"):
+                        preferred_page = page
+                        break
+                if preferred_page is not None:
+                    break
+            if preferred_page is not None:
+                self._context = preferred_page.context
+                self._page = preferred_page
+            else:
+                self._context = contexts[0] if contexts else await self._browser.new_context()
+                self._page = self._context.pages[0] if self._context.pages else await self._context.new_page()
             await self._inject_stealth_scripts()
             return self
 

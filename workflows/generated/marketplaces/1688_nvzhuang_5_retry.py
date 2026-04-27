@@ -32,6 +32,7 @@ ARTIFACT_DIR = OUTPUT_DIR / "browser_artifacts"
 ARTIFACT_DIR.mkdir(parents=True, exist_ok=True)
 STATUS_PATH = OUTPUT_DIR / "run_status.json"
 HANDOFF_PATH = OUTPUT_DIR / "manual_handoff.json"
+REPORT_TEMPLATE = Path(__file__).resolve().parents[3] / "platform" / "src" / "omniauto" / "templates" / "reports" / "ecom_report.html.j2"
 
 RISK_URL_TOKENS = (
     "login",
@@ -399,11 +400,10 @@ async def step_generate_report(ctx: TaskContext):
     json_path = OUTPUT_DIR / "report_data.json"
     _write_json(json_path, report_data)
 
-    report_template = "D:/AI/AI_RPA/src/omniauto/templates/reports/ecom_report.html.j2"
     html_path = OUTPUT_DIR / "report.html"
-    if report_template and Path(report_template).exists():
+    if REPORT_TEMPLATE.exists():
         from jinja2 import Template
-        tpl = Template(Path(report_template).read_text(encoding="utf-8"))
+        tpl = Template(REPORT_TEMPLATE.read_text(encoding="utf-8"))
         html = tpl.render(**report_data)
         html_path.write_text(html, encoding="utf-8")
     else:

@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "category_id": "policies",
+  "id": "company_profile_details",
+  "status": "active",
+  "source": {
+    "type": "migration",
+    "path": "structured/product_knowledge.example.json"
+  },
+  "data": {
+    "title": "公司信息",
+    "policy_type": "company",
+    "keywords": [
+      "company",
+      "profile"
+    ],
+    "answer": "{\n  \"company_name\": \"杭州星澜供应链科技有限公司\",\n  \"short_name\": \"星澜供应链\",\n  \"brand_name\": \"星澜优采\",\n  \"business_scope\": \"商用设备、办公用品、净水耗材、包装耗材的批发与企业采购服务\",\n  \"city\": \"杭州\",\n  \"address\": \"浙江省杭州市余杭区未来科技城星澜路 88 号 3 幢 502 室\",\n  \"business_hours\": \"周一至周六 09:00-18:30\",\n  \"service_phone\": \"0571-8800-1234\",\n  \"after_sales_phone\": \"0571-8800-5678\",\n  \"tax_id\": \"91330110MA8TEST88XK\",\n  \"bank_account\": \"杭州星澜供应链科技有限公司 / 招商银行杭州未来科技城支行 / 5719000012345678\",\n  \"note\": \"以上为自动客服联调测试数据，不代表真实公司信息。\"\n}",
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "handoff_reason": "",
+    "operator_alert": false,
+    "risk_level": "normal"
+  },
+  "runtime": {
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "risk_level": "normal"
+  },
+  "metadata": {
+    "created_at": "2026-04-26T17:58:50",
+    "updated_at": "2026-04-26T17:58:50",
+    "created_by": "migration",
+    "updated_by": "migration"
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "category_id": "products",
+  "id": "office_chair_oc_300",
+  "status": "active",
+  "source": {
+    "type": "admin_draft",
+    "legacy_target": "product_knowledge"
+  },
+  "data": {
+    "name": "人体工学办公椅 OC-301",
+    "sku": "office_chair_oc_301",
+    "category": "办公家具",
+    "aliases": [
+      "办公椅",
+      "人体工学椅",
+      "OC-300",
+      "电脑椅",
+      "椅子",
+      "工位椅",
+      "办公室椅子",
+      "员工椅",
+      "久坐椅",
+      "护腰椅",
+      "腰疼",
+      "坐久了",
+      "舒服点的椅子"
+    ],
+    "specs": "黑色网布，可升降扶手，静音轮，承重 120kg",
+    "price": 399,
+    "unit": "把",
+    "price_tiers": [
+      {
+        "min_quantity": 10,
+        "unit_price": 369
+      },
+      {
+        "min_quantity": 30,
+        "unit_price": 339
+      }
+    ],
+    "inventory": 82,
+    "shipping_policy": "现货，付款后 72 小时内发货\n满 10 把包邮；少量采购按快递/物流实收",
+    "warranty_policy": "框架保修 2 年，气杆保修 1 年",
+    "reply_templates": {
+      "discount_policy": "10 把起 369 元/把，30 把起 339 元/把",
+      "notes": "用于测试办公用品采购场景"
+    },
+    "risk_rules": [],
+    "additional_details": {}
+  },
+  "runtime": {
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "risk_level": "normal"
+  },
+  "metadata": {
+    "created_at": "2026-04-26T23:15:06",
+    "updated_at": "2026-04-27T02:47:28",
+    "created_by": "admin",
+    "updated_by": "admin"
+  }
+}

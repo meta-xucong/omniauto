@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "category_id": "chats",
+  "id": "small_talk_service_pivot",
+  "status": "active",
+  "source": {
+    "type": "migration",
+    "path": "structured/style_examples.json"
+  },
+  "data": {
+    "customer_message": "",
+    "service_reply": "哈哈没事，您先慢慢看。我这边主要帮您查商品、报价和发货售后，看到合适的产品直接发我名称和数量就行。",
+    "intent_tags": [
+      "small_talk"
+    ],
+    "tone_tags": [],
+    "linked_categories": [],
+    "linked_item_ids": [],
+    "usable_as_template": true
+  },
+  "runtime": {
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "risk_level": "normal"
+  },
+  "metadata": {
+    "created_at": "2026-04-26T17:58:50",
+    "updated_at": "2026-04-26T17:58:50",
+    "created_by": "migration",
+    "updated_by": "migration"
+  }
+}

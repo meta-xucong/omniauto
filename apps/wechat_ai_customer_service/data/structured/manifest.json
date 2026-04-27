@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "scope": "wechat_ai_customer_service",
+  "description": "Reviewed structured business data for the WeChat AI customer-service app.",
+  "items": [
+    {
+      "id": "product_knowledge",
+      "path": "product_knowledge.example.json",
+      "kind": "business_data",
+      "format": "json",
+      "intent_tags": [
+        "catalog",
+        "product",
+        "quote",
+        "discount",
+        "stock",
+        "shipping",
+        "warranty",
+        "spec",
+        "invoice",
+        "payment",
+        "company",
+        "after_sales",
+        "handoff",
+        "small_talk",
+        "scene_product"
+      ],
+      "summary": "测试商品、FAQ、公司信息、开票、支付、物流和售后政策。",
+      "token_budget": 3000
+    },
+    {
+      "id": "style_examples",
+      "path": "style_examples.json",
+      "kind": "style_data",
+      "format": "json",
+      "intent_tags": [
+        "greeting",
+        "quote",
+        "discount",
+        "customer_data",
+        "small_talk",
+        "scene_product",
+        "handoff",
+        "unknown"
+      ],
+      "summary": "已审核的客服口吻示例，用于让回复更像真实客服。",
+      "token_budget": 800
+    }
+  ]
+}

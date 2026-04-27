@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "category_id": "policies",
+  "id": "sample-policy-large",
+  "status": "active",
+  "source": {
+    "type": "deepseek_upload_learning",
+    "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\raw_inbox\\products\\upload_c54b9fd38e442a30_05_mixed_company_faq.txt",
+    "candidate_id": "raw_c401940c9667b76e"
+  },
+  "data": {
+    "title": "大件商品样品规则",
+    "policy_type": "sample",
+    "keywords": [
+      "大件",
+      "会议桌",
+      "折叠床",
+      "保险柜",
+      "视频验货"
+    ],
+    "answer": "大件商品如会议桌、折叠床、保险柜不默认寄样，可提供视频验货。",
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "additional_details": {
+      "原始资料摘录": "{\"title\": \"大件商品样品规则\", \"policy_type\": \"sample\", \"keywords\": [\"大件\", \"会议桌\", \"折叠床\", \"保险柜\", \"视频验货\"], \"answer\": \"大件商品如会议桌、折叠床、保险柜不默认寄样，可提供视频验货。\", \"allow_auto_reply\": true, \"requires_handoff\": false, \"additional_details\": {}}"
+    }
+  },
+  "runtime": {
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "risk_level": "normal"
+  },
+  "metadata": {
+    "created_at": "2026-04-27T02:11:06",
+    "updated_at": "2026-04-27T02:11:06",
+    "created_by": "admin",
+    "updated_by": "admin"
+  }
+}

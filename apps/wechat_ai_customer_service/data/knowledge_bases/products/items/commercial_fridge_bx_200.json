@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "category_id": "products",
+  "id": "commercial_fridge_bx_200",
+  "status": "active",
+  "source": {
+    "type": "admin_draft",
+    "legacy_target": "product_knowledge"
+  },
+  "data": {
+    "name": "商用冰箱 BX-200",
+    "sku": "commercial_fridge_bx_200",
+    "category": "制冷设备",
+    "aliases": [
+      "商用冰箱",
+      "冰箱",
+      "BX-200",
+      "测试冰箱",
+      "冷藏柜",
+      "冷柜",
+      "饮料柜",
+      "饮料冷藏柜",
+      "保鲜柜",
+      "展示柜",
+      "便利店冰柜",
+      "小店冷柜",
+      "放饮料",
+      "餐饮店冷藏"
+    ],
+    "specs": "200L，单门，冷藏 0-10℃，220V，约 58kg",
+    "price": 999,
+    "unit": "台",
+    "price_tiers": [
+      {
+        "min_quantity": 5,
+        "unit_price": 950
+      },
+      {
+        "min_quantity": 10,
+        "unit_price": 920
+      }
+    ],
+    "inventory": 36,
+    "shipping_policy": "现货，付款后 48 小时内发出\n江浙沪包邮，其他地区按物流实报实销；大件默认物流到站，送货上楼需另行确认",
+    "warranty_policy": "整机保修 1 年，压缩机保修 3 年",
+    "reply_templates": {
+      "discount_policy": "5 台起 950 元/台，10 台起 920 元/台",
+      "notes": "测试用商品，价格只用于自动客服联调"
+    },
+    "risk_rules": []
+  },
+  "runtime": {
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "risk_level": "normal"
+  },
+  "metadata": {
+    "created_at": "2026-04-26T23:15:06",
+    "updated_at": "2026-04-26T23:15:06",
+    "created_by": "admin",
+    "updated_by": "admin"
+  }
+}

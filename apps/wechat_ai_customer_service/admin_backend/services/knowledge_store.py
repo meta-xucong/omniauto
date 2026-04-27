@@ -1,0 +1,192 @@
+"""Structured knowledge file access for the Web admin console."""
+
+from __future__ import annotations
+
+import json
+from datetime import datetime
+from pathlib import Path
+from typing import Any
+
+from .knowledge_compiler import KnowledgeCompiler
+from .knowledge_deduper import KnowledgeDeduper
+from apps.wechat_ai_customer_service.knowledge_paths import (
+    SHARED_KNOWLEDGE_ROOT,
+    TENANTS_ROOT,
+    default_admin_knowledge_base_root,
+    tenant_product_item_knowledge_root,
+)
+from apps.wechat_ai_customer_service.workflows.knowledge_runtime import KnowledgeRuntime
+
+
+APP_ROOT = Path(__file__).resolve().parents[2]
+STRUCTURED_ROOT = APP_ROOT / "data" / "structured"
+KNOWLEDGE_BASE_ROOT = default_admin_knowledge_base_root()
+PROMPTS_ROOT = APP_ROOT / "prompts"
+REVIEW_ROOT = APP_ROOT / "data" / "review_candidates"
+RAW_INBOX_ROOT = APP_ROOT / "data" / "raw_inbox"
+
+
+class KnowledgeStore:
+    def __init__(self, app_root: Path | None = None) -> None:
+        self.app_root = app_root or APP_ROOT
+        self.structured_root = self.app_root / "data" / "structured"
+        self.knowledge_base_root = default_admin_knowledge_base_root()
+        self.shared_knowledge_root = SHARED_KNOWLEDGE_ROOT
+        self.tenants_root = TENANTS_ROOT
+        self.product_item_knowledge_root = tenant_product_item_knowledge_root()
+        self.review_root = self.app_root / "data" / "review_candidates"
+        self.raw_inbox_root = self.app_root / "data" / "raw_inbox"
+        self.prompts_root = self.app_root / "prompts"
+        self.runtime = KnowledgeRuntime()
+        self.compiler = KnowledgeCompiler(runtime=self.runtime)
+
+    @property
+    def manifest_path(self) -> Path:
+        return self.structured_root / "manifest.json"
+
+    @property
+    def product_knowledge_path(self) -> Path:
+        return self.structured_root / "product_knowledge.example.json"
+
+    @property
+    def style_examples_path(self) -> Path:
+        return self.structured_root / "style_examples.json"
+
+    def overview(self) -> dict[str, Any]:
+        product_knowledge = self.product_knowledge()
+        styles = self.style_data()
+        manifest = self.manifest()
+        categories = self.runtime.list_categories(enabled_only=True)
+        pending_count = count_visible_pending_candidates(self.review_root / "pending")
+        approved_count = count_json_files(self.review_root / "approved")
+        rejected_count = count_json_files(self.review_root / "rejected")
+        raw_file_count = count_supported_files(self.raw_inbox_root)
+        return {
+            "ok": True,
+            "created_at": datetime.now().isoformat(timespec="seconds"),
+            "version": product_knowledge.get("version"),
+            "scope": manifest.get("scope"),
+            "counts": {
+                "categories": len(categories),
+                "products": len(product_knowledge.get("products", []) or []),
+                "faqs": len(product_knowledge.get("faq", []) or []),
+                "policies": len(self.policies()),
+                "style_examples": len(styles.get("examples", []) or []),
+                "pending_candidates": pending_count,
+                "approved_candidates": approved_count,
+                "rejected_candidates": rejected_count,
+                "raw_files": raw_file_count,
+            },
+            "paths": {
+                "knowledge_base_root": str(self.knowledge_base_root),
+                "shared_knowledge_root": str(self.shared_knowledge_root),
+                "tenants_root": str(self.tenants_root),
+                "product_item_knowledge_root": str(self.product_item_knowledge_root),
+                "structured_root": str(self.structured_root),
+                "raw_inbox_root": str(self.raw_inbox_root),
+                "review_root": str(self.review_root),
+            },
+            "updated_at": {
+                "knowledge_bases": newest_mtime(self.knowledge_base_root),
+                "shared_knowledge": newest_mtime(self.shared_knowledge_root),
+                "product_item_knowledge": newest_mtime(self.product_item_knowledge_root),
+                "product_knowledge": file_mtime(self.product_knowledge_path),
+                "style_examples": file_mtime(self.style_examples_path),
+                "manifest": file_mtime(self.manifest_path),
+            },
+        }
+
+    def manifest(self) -> dict[str, Any]:
+        return self.compiler.compile()["manifest"]
+
+    def product_knowledge(self) -> dict[str, Any]:
+        return self.compiler.compile()["product_knowledge"]
+
+    def style_data(self) -> dict[str, Any]:
+        return self.compiler.compile()["style_examples"]
+
+    def products(self) -> list[dict[str, Any]]:
+        return list(self.product_knowledge().get("products", []) or [])
+
+    def product(self, product_id: str) -> dict[str, Any] | None:
+        for item in self.products():
+            if str(item.get("id") or "") == product_id:
+                return item
+        return None
+
+    def faqs(self) -> list[dict[str, Any]]:
+        return list(self.product_knowledge().get("faq", []) or [])
+
+    def policies(self) -> dict[str, Any]:
+        knowledge = self.product_knowledge()
+        excluded = {"version", "currency", "products", "faq"}
+        return {key: value for key, value in knowledge.items() if key not in excluded}
+
+    def styles(self) -> list[dict[str, Any]]:
+        return list(self.style_data().get("examples", []) or [])
+
+    def persona(self) -> dict[str, Any]:
+        prompt_files = {}
+        for path in sorted(self.prompts_root.glob("*.md")):
+            prompt_files[path.stem] = path.read_text(encoding="utf-8")
+        return {"prompt_files": prompt_files}
+
+    def raw_json(self, file_key: str) -> dict[str, Any]:
+        path = {
+            "manifest": self.manifest_path,
+            "product_knowledge": self.product_knowledge_path,
+            "style_examples": self.style_examples_path,
+        }[file_key]
+        return load_json(path)
+
+
+def load_json(path: Path) -> dict[str, Any]:
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def file_mtime(path: Path) -> str:
+    if not path.exists():
+        return ""
+    return datetime.fromtimestamp(path.stat().st_mtime).isoformat(timespec="seconds")
+
+
+def newest_mtime(path: Path) -> str:
+    if not path.exists():
+        return ""
+    latest = path.stat().st_mtime
+    for item in path.rglob("*"):
+        if item.is_file():
+            latest = max(latest, item.stat().st_mtime)
+    return datetime.fromtimestamp(latest).isoformat(timespec="seconds")
+
+
+def count_json_files(path: Path) -> int:
+    if not path.exists():
+        return 0
+    return sum(1 for item in path.glob("*.json") if item.is_file())
+
+
+def count_visible_pending_candidates(path: Path) -> int:
+    if not path.exists():
+        return 0
+    deduper = KnowledgeDeduper()
+    count = 0
+    for item_path in path.glob("*.json"):
+        if not item_path.is_file():
+            continue
+        try:
+            candidate = json.loads(item_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        duplicate = deduper.check_candidate(candidate)
+        if duplicate.get("duplicate") and duplicate.get("source") == "knowledge_base":
+            continue
+        count += 1
+    return count
+
+
+def count_supported_files(path: Path) -> int:
+    if not path.exists():
+        return 0
+    suffixes = {".txt", ".md", ".json", ".csv", ".xlsx", ".docx", ".pdf"}
+    return sum(1 for item in path.rglob("*") if item.is_file() and item.suffix.lower() in suffixes)

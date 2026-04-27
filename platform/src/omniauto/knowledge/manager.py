@@ -537,32 +537,13 @@ class KnowledgeManager:
         record_path = self.knowledge_root / record
         record_path.parent.mkdir(parents=True, exist_ok=True)
         title = existing["title"] if existing else (task_run.description or Path(task_run.script_path).stem.replace("_", " "))
-        if not record_path.exists():
-            content = [
-                self._front_matter(
-                    {
-                        "title": title,
-                        "kind": "task",
-                        "domain": task_run.domain,
-                        "status": "observed",
-                        "last_updated": task_run.finished_at or _iso_now(),
-                        "managed_by": "automatic_closeout",
-                        "evidence": [script_rel],
-                    }
-                ),
-                f"# {title}",
-                "",
-                "## Summary",
-                "",
-                f"- Status: {result.get('final_state', 'UNKNOWN').lower()}",
-                f"- Domain: {task_run.domain}",
-                f"- Controlled entrypoint: `{task_run.entrypoint}`",
-                f"- Primary script: `{script_rel}`",
-                "",
-                "## Automated Runs",
-                "",
-            ]
-            record_path.write_text("\n".join(content), encoding="utf-8")
+        self._refresh_task_record_header(
+            record_path,
+            title=title,
+            task_run=task_run,
+            result=result,
+            script_rel=script_rel,
+        )
         self._append_run_section(record_path, task_run=task_run, result=result)
         entry = {
             "slug": slug,
@@ -584,6 +565,52 @@ class KnowledgeManager:
         }
         registry["tasks"] = self._replace_entry(registry.get("tasks", []), entry, key="slug")
         return entry
+
+    def _refresh_task_record_header(
+        self,
+        record_path: Path,
+        *,
+        title: str,
+        task_run: TaskRun,
+        result: Dict[str, Any],
+        script_rel: str,
+    ) -> None:
+        text = record_path.read_text(encoding="utf-8") if record_path.exists() else ""
+        run_history = ""
+        marker = "## Automated Runs"
+        if marker in text:
+            _, suffix = text.split(marker, 1)
+            run_history = suffix.lstrip("\n")
+
+        content = [
+            self._front_matter(
+                {
+                    "title": title,
+                    "kind": "task",
+                    "domain": task_run.domain,
+                    "status": (result.get("final_state", "UNKNOWN") or "UNKNOWN").lower(),
+                    "last_updated": task_run.finished_at or _iso_now(),
+                    "managed_by": "automatic_closeout",
+                    "evidence": [script_rel],
+                }
+            ),
+            f"# {title}",
+            "",
+            "## Summary",
+            "",
+            f"- Status: {(result.get('final_state', 'UNKNOWN') or 'UNKNOWN').lower()}",
+            f"- Domain: {task_run.domain}",
+            f"- Controlled entrypoint: `{task_run.entrypoint}`",
+            f"- Primary script: `{script_rel}`",
+            "",
+            marker,
+            "",
+        ]
+        header = "\n".join(content).rstrip()
+        if run_history:
+            record_path.write_text(header + "\n\n" + run_history.rstrip() + "\n", encoding="utf-8")
+        else:
+            record_path.write_text(header + "\n", encoding="utf-8")
 
     def _append_run_section(self, record_path: Path, *, task_run: TaskRun, result: Dict[str, Any]) -> None:
         text = record_path.read_text(encoding="utf-8")

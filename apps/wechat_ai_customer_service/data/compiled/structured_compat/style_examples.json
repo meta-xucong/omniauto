@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "examples": [
+    {
+      "id": "chat_851791b208",
+      "message": "哈哈谢谢，您需要查商品、报价或发货售后都可以直接发我。",
+      "intent_tags": [
+        "after_sales",
+        "product",
+        "quote",
+        "shipping"
+      ],
+      "tone_tags": [
+        "真实客服话术"
+      ],
+      "customer_message": "你们客服还挺快的",
+      "details": "原始资料摘录: customer_message: 你们客服还挺快的；service_reply: 哈哈谢谢，您需要查商品、报价或发货售后都可以直接发我。"
+    },
+    {
+      "id": "data_missing",
+      "message": "资料我看到了，还差联系人电话，您补一下我就一起登记。",
+      "intent_tags": [
+        "customer_data"
+      ]
+    },
+    {
+      "id": "discount_handoff",
+      "message": "这个价格我这边不能直接拍板，我先帮您记录一下，稍后请示后给您准话。",
+      "intent_tags": [
+        "discount",
+        "handoff"
+      ]
+    },
+    {
+      "id": "over_boundary_handoff",
+      "message": "这个已经超出我能直接确认的范围，我先帮您记录下来，稍后请示后给您准话。",
+      "intent_tags": [
+        "handoff"
+      ]
+    },
+    {
+      "id": "quote_detail_request",
+      "message": "好的，您把具体产品、数量和收货城市发我，我帮您核一下价格和运费。",
+      "intent_tags": [
+        "quote"
+      ]
+    },
+    {
+      "id": "scene_product_association",
+      "message": "您这个场景我大概明白，可以先按库里的相近产品给您对一下，但价格和政策我只按现有资料说。",
+      "intent_tags": [
+        "scene_product",
+        "product"
+      ]
+    },
+    {
+      "id": "small_talk_service_pivot",
+      "message": "哈哈没事，您先慢慢看。我这边主要帮您查商品、报价和发货售后，看到合适的产品直接发我名称和数量就行。",
+      "intent_tags": [
+        "small_talk"
+      ]
+    },
+    {
+      "id": "unknown_handoff",
+      "message": "这个问题我当前没有足够依据直接确认，我先帮您记录并转人工处理。",
+      "intent_tags": [
+        "unknown",
+        "handoff"
+      ]
+    },
+    {
+      "id": "customer_service_style_guidelines",
+      "message": "回复要自然，先接住客户使用场景，再问关键参数。对功率、续航、最低价等不确定内容，不能凭空承诺。适合自动回复的内容：参数收集、常规质保说明、使用场景推荐。需要转人工的内容：最低价、特殊补偿、先发货后付款。",
+      "intent_tags": [
+        "greeting",
+        "small_talk",
+        "scene_product",
+        "quote",
+        "discount",
+        "handoff"
+      ],
+      "tone_tags": [
+        "natural",
+        "truthful",
+        "safe"
+      ],
+      "customer_message": "客服通用表达与边界原则",
+      "details": "source: three_layer_migration；migrated_from: tenant.chats.chat_style_guidelines"
+    }
+  ]
+}

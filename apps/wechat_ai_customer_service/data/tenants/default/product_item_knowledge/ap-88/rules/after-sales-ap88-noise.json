@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "category_id": "product_rules",
+  "id": "after-sales-ap88-noise",
+  "status": "active",
+  "source": {
+    "type": "three_layer_product_scope_migration",
+    "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\raw_inbox\\products\\upload_bfc6fce395f6d774_04_erp_export_after_sales.json",
+    "candidate_id": "raw_bc88575b7237f91f"
+  },
+  "data": {
+    "title": "静音空气净化器AP-88异响处理",
+    "policy_type": "after_sales",
+    "keywords": [
+      "异响",
+      "噪音",
+      "空气净化器",
+      "AP-88"
+    ],
+    "answer": "先引导客户拍摄视频并确认滤芯安装方向，无法排除时登记售后工单。",
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "additional_details": {
+      "source_system": "测试ERP-售后模块",
+      "export_time": "2026-04-26T21:58:00+08:00",
+      "record_type": "after_sales",
+      "external_id": "AS-TEST-20260426-001",
+      "product_name": "静音空气净化器 AP-88",
+      "customer_region": "江苏苏州",
+      "issue": "客户反馈开机 10 分钟后有异响",
+      "原始资料摘录": "{\"title\": \"静音空气净化器AP-88异响处理\", \"policy_type\": \"after_sales\", \"keywords\": [\"异响\", \"噪音\", \"空气净化器\", \"AP-88\"], \"answer\": \"先引导客户拍摄视频并确认滤芯安装方向，无法排除时登记售后工单。\", \"allow_auto_reply\": true, \"requires_handoff\": false, \"additional_details\": {\"source_system\": \"测试ERP-售后模块\", \"export_time\": \"2026-04-26T21:58:00+08:00\", \"record_type\": \"after_sales\", \"external_id\": \"AS-TEST-202604"
+    },
+    "product_id": "ap-88"
+  },
+  "runtime": {
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "risk_level": "normal"
+  },
+  "metadata": {
+    "created_at": "2026-04-27T02:11:51",
+    "updated_at": "2026-04-27T02:11:51",
+    "created_by": "admin",
+    "updated_by": "admin"
+  }
+}

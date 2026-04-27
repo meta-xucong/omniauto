@@ -51,6 +51,7 @@ AI_FALLBACK_HTML = """
 @pytest.mark.asyncio
 async def test_browser_recovery_manager_waits_for_manual_handoff_resolution(tmp_path):
     artifact_dir = tmp_path / "handoff_case"
+    observed_styles = {}
 
     async with async_playwright() as playwright:
         browser = await playwright.chromium.launch(headless=True)
@@ -59,6 +60,12 @@ async def test_browser_recovery_manager_waits_for_manual_handoff_resolution(tmp_
 
         async def clear_challenge():
             await asyncio.sleep(0.5)
+            observed_styles["modal_pointer_events"] = await page.locator(
+                "#__omniauto_manual_handoff_modal"
+            ).evaluate("(el) => window.getComputedStyle(el).pointerEvents")
+            observed_styles["panel_pointer_events"] = await page.locator(
+                "#__omniauto_manual_handoff_modal > div"
+            ).evaluate("(el) => window.getComputedStyle(el).pointerEvents")
             await page.set_content(NORMAL_HTML)
             await page.wait_for_function(
                 "() => !!document.getElementById('__omniauto_manual_handoff_continue')",
@@ -81,6 +88,8 @@ async def test_browser_recovery_manager_waits_for_manual_handoff_resolution(tmp_
     assert result.source == "manual_handoff"
     assert result.handoff_requested is True
     assert result.handoff_reason == "verification_challenge_detected"
+    assert observed_styles["modal_pointer_events"] == "none"
+    assert observed_styles["panel_pointer_events"] == "auto"
     assert (artifact_dir / "recovery").exists()
     assert any(path.suffix == ".json" for path in (artifact_dir / "recovery").iterdir())
 

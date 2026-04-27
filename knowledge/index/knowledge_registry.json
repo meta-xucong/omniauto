@@ -86,6 +86,57 @@
       "last_updated": "2026-04-21T20:18:43"
     },
     {
+      "slug": "1688_chuangshangyongpin_5p_20260424",
+      "title": "1688 marketplace research skill run (床上用品)",
+      "domain": "marketplaces",
+      "record": "tasks/marketplaces/1688_chuangshangyongpin_5p_20260424.md",
+      "status": "completed",
+      "summary": "Latest run via service.manual_closeout",
+      "evidence": [
+        "runtime/generated_workflows/marketplaces/1688_chuangshangyongpin_5p_20260424.py",
+        "runtime/knowledge_runs/2026-04-24/20260424_012959_marketplace_1688_research/task_run.json",
+        "tasks/marketplaces/1688_chuangshangyongpin_5p_20260424.md",
+        "runtime/knowledge_runs/2026-04-24/20260424_064135_marketplace_1688_research/task_run.json",
+        "runtime/knowledge_runs/2026-04-24/20260424_064943_marketplace_1688_research/task_run.json",
+        "runtime/knowledge_runs/2026-04-24/20260424_065443_marketplace_1688_research/task_run.json",
+        "runtime/knowledge_runs/2026-04-24/20260424_070441_marketplace_1688_research/task_run.json",
+        "runtime/knowledge_runs/2026-04-24/20260424_073222_marketplace_1688_research/task_run.json",
+        "runtime/knowledge_runs/2026-04-24/20260424_190830_marketplace_1688_research/task_run.json"
+      ],
+      "managed": true,
+      "last_updated": "2026-04-24T19:08:30"
+    },
+    {
+      "slug": "1688_live_smoke_cat_litter_1p",
+      "title": "1688 marketplace research skill run (猫砂)",
+      "domain": "marketplaces",
+      "record": "tasks/marketplaces/1688_live_smoke_cat_litter_1p.md",
+      "status": "failed",
+      "summary": "Latest run via service.manual_closeout",
+      "evidence": [
+        "runtime/apps/marketplace_1688_research/generated_workflows/marketplaces/1688_live_smoke_cat_litter_1p.py",
+        "runtime/knowledge_runs/2026-04-26/20260426_021544_marketplace_1688_research/task_run.json",
+        "tasks/marketplaces/1688_live_smoke_cat_litter_1p.md"
+      ],
+      "managed": true,
+      "last_updated": "2026-04-26T02:15:44"
+    },
+    {
+      "slug": "1688_live_smoke_cat_litter_after_verify",
+      "title": "1688 marketplace research skill run (猫砂)",
+      "domain": "marketplaces",
+      "record": "tasks/marketplaces/1688_live_smoke_cat_litter_after_verify.md",
+      "status": "completed",
+      "summary": "Latest run via service.manual_closeout",
+      "evidence": [
+        "runtime/apps/marketplace_1688_research/generated_workflows/marketplaces/1688_live_smoke_cat_litter_after_verify.py",
+        "runtime/knowledge_runs/2026-04-26/20260426_022732_marketplace_1688_research/task_run.json",
+        "tasks/marketplaces/1688_live_smoke_cat_litter_after_verify.md"
+      ],
+      "managed": true,
+      "last_updated": "2026-04-26T02:27:32"
+    },
+    {
       "slug": "1688-research-family",
       "title": "1688 research family",
       "domain": "marketplaces",

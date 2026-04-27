@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "category_id": "chats",
+  "id": "chat_after_sales_worry",
+  "status": "active",
+  "source": {
+    "type": "deepseek_upload_learning",
+    "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\raw_inbox\\products\\upload_5de0c2bb46fb1848_03_chat_records_new_energy_storage.md",
+    "candidate_id": "raw_855aa246a4b4f85a"
+  },
+  "data": {
+    "customer_message": "这个电源坏了怎么办？寄回去很麻烦吧。",
+    "service_reply": "正常质保期内可以先远程排查。确认为产品问题后，我们会按售后规则处理维修或换新，具体以订单和检测结果为准。",
+    "intent_tags": [
+      "售后咨询",
+      "保修"
+    ],
+    "tone_tags": [
+      "安抚",
+      "规范"
+    ],
+    "linked_categories": [
+      "policies"
+    ],
+    "usable_as_template": true,
+    "additional_details": {
+      "原始资料摘录": "{\"customer_message\": \"这个电源坏了怎么办？寄回去很麻烦吧。\", \"service_reply\": \"正常质保期内可以先远程排查。确认为产品问题后，我们会按售后规则处理维修或换新，具体以订单和检测结果为准。\", \"intent_tags\": [\"售后咨询\", \"保修\"], \"tone_tags\": [\"安抚\", \"规范\"], \"linked_categories\": [\"policies\"], \"usable_as_template\": true, \"additional_details\": {}}"
+    }
+  },
+  "runtime": {
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "risk_level": "normal"
+  },
+  "metadata": {
+    "created_at": "2026-04-27T02:12:14",
+    "updated_at": "2026-04-27T02:12:14",
+    "created_by": "admin",
+    "updated_by": "admin"
+  }
+}

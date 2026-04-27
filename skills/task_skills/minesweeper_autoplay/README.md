@@ -3,9 +3,10 @@
 这是一个用户批准的 OmniAuto 正式 `task_skill`。
 
 - Runtime bundle: `.agents/skills/minesweeper-autoplay/`
+- App package: `apps/minesweeper_autoplay/`
 - Scope: 运行、长测、诊断并优化 Windows 扫雷自动游玩流程
-- Primary solver: `workflows/temporary/desktop/minesweeper_solver.py`
-- Main artifacts: `runtime/test_artifacts/verification/minesweeper/`
+- Primary solver: `apps/minesweeper_autoplay/workflows/minesweeper_solver.py`
+- Main artifacts: `runtime/apps/minesweeper_autoplay/test_artifacts/`
 
 ## What This Skill Covers
 
@@ -26,6 +27,7 @@
 
 For runtime behavior, use the bundle under:
 
+- `apps/minesweeper_autoplay/`
 - `.agents/skills/minesweeper-autoplay/`
 
-That bundle is the AI-facing operational skill. This README is the formal project-local approval entry.
+The app package is the formal task implementation. The `.agents` bundle is the AI-facing operational skill and should point to the app entrypoints.

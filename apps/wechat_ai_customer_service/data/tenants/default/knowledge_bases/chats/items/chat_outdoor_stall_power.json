@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "category_id": "chats",
+  "id": "chat_outdoor_stall_power",
+  "status": "archived",
+  "source": {
+    "type": "deepseek_upload_learning",
+    "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\raw_inbox\\products\\upload_5de0c2bb46fb1848_03_chat_records_new_energy_storage.md",
+    "candidate_id": "raw_7dbaa00f39e3327a"
+  },
+  "data": {
+    "customer_message": "我想买一个户外摆摊用的电源，能带小冰柜和灯吗？",
+    "service_reply": "可以的。您先看一下电器功率和预计使用时长，如果是 300W 左右的小冰柜加 LED 灯，建议优先看 1200Wh 以上的储能电源。我们可以帮您按设备功率估算续航。",
+    "intent_tags": [
+      "产品咨询",
+      "使用场景"
+    ],
+    "tone_tags": [
+      "专业",
+      "建议"
+    ],
+    "linked_categories": [
+      "products"
+    ],
+    "usable_as_template": true,
+    "additional_details": {
+      "原始资料摘录": "{\"customer_message\": \"我想买一个户外摆摊用的电源，能带小冰柜和灯吗？\", \"service_reply\": \"可以的。您先看一下电器功率和预计使用时长，如果是 300W 左右的小冰柜加 LED 灯，建议优先看 1200Wh 以上的储能电源。我们可以帮您按设备功率估算续航。\", \"intent_tags\": [\"产品咨询\", \"使用场景\"], \"tone_tags\": [\"专业\", \"建议\"], \"linked_categories\": [\"products\"], \"usable_as_template\": true, \"additional_details\": {}}"
+    }
+  },
+  "runtime": {
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "risk_level": "normal"
+  },
+  "metadata": {
+    "created_at": "2026-04-27T02:12:26",
+    "updated_at": "2026-04-27T03:25:17",
+    "created_by": "admin",
+    "updated_by": "admin"
+  }
+}
