@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -15,6 +15,8 @@ from apps.wechat_ai_customer_service.storage import get_postgres_store, load_sto
 PROJECT_ROOT = Path(__file__).resolve().parents[4]
 QUEUE_PATH = PROJECT_ROOT / "runtime" / "apps" / "wechat_ai_customer_service" / "admin" / "work_queue.json"
 ACTIVE_STATUSES = {"pending", "running"}
+TERMINAL_STATUSES = {"succeeded", "failed", "cancelled"}
+VALID_STATUSES = ACTIVE_STATUSES | TERMINAL_STATUSES
 
 
 class WorkQueueService:
@@ -77,15 +79,21 @@ class WorkQueueService:
         jobs = self.read_jobs()
         claimed: list[dict[str, Any]] = []
         now_text = now()
+        locked_until = (datetime.now() + timedelta(seconds=max(1, int(lock_seconds or 300)))).isoformat(timespec="seconds")
         for job in sorted(jobs, key=lambda item: (int(item.get("priority", 5) or 5), str(item.get("created_at") or ""))):
             if len(claimed) >= max(1, int(limit or 1)):
                 break
-            if job.get("tenant_id") != self.tenant_id or job.get("queue") != queue or job.get("status") != "pending":
+            if job.get("tenant_id") != self.tenant_id or job.get("queue") != queue:
+                continue
+            status = str(job.get("status") or "")
+            claimable_pending = status == "pending" and is_due(str(job.get("available_at") or ""))
+            claimable_expired = status == "running" and is_lock_expired(str(job.get("locked_until") or "")) and int(job.get("attempts", 0) or 0) < int(job.get("max_attempts", 3) or 3)
+            if not (claimable_pending or claimable_expired):
                 continue
             job["status"] = "running"
             job["attempts"] = int(job.get("attempts", 0) or 0) + 1
             job["locked_by"] = worker_id or "worker"
-            job["locked_until"] = now_text
+            job["locked_until"] = locked_until
             job["updated_at"] = now_text
             claimed.append(dict(job))
         self.write_jobs(jobs)
@@ -107,7 +115,10 @@ class WorkQueueService:
         attempts = int(job.get("attempts", 0) or 0)
         max_attempts = int(job.get("max_attempts", 3) or 3)
         status = "pending" if retry and attempts < max_attempts else "failed"
-        return self.update_file_job(job_id, status=status, error=error, finished=status == "failed")
+        updates: dict[str, Any] = {"status": status, "error": error, "finished": status == "failed"}
+        if status == "pending":
+            updates.update({"locked_until": None, "locked_by": "", "finished_at": None})
+        return self.update_file_job(job_id, **updates)
 
     def cancel(self, job_id: str, reason: str = "") -> dict[str, Any] | None:
         db = self.db()
@@ -139,13 +150,17 @@ class WorkQueueService:
         if db:
             return db.job_summary(self.tenant_id)
         counts: dict[str, int] = {}
+        stale_running = 0
         for job in self.list_jobs(status="all", limit=500):
             status = str(job.get("status") or "unknown")
             counts[status] = counts.get(status, 0) + 1
+            if status == "running" and is_lock_expired(str(job.get("locked_until") or "")):
+                stale_running += 1
         return {
             "total": sum(counts.values()),
             "pending": counts.get("pending", 0),
             "running": counts.get("running", 0),
+            "stale_running": stale_running,
             "succeeded": counts.get("succeeded", 0),
             "failed": counts.get("failed", 0),
             "cancelled": counts.get("cancelled", 0),
@@ -211,3 +226,21 @@ def stable_digest(text: str, length: int = 16) -> str:
 def now() -> str:
     return datetime.now().isoformat(timespec="seconds")
 
+
+def parse_time(value: str | None) -> datetime | None:
+    if not value:
+        return None
+    try:
+        return datetime.fromisoformat(str(value).replace("Z", "+00:00")).replace(tzinfo=None)
+    except ValueError:
+        return None
+
+
+def is_due(value: str | None) -> bool:
+    parsed = parse_time(value)
+    return parsed is None or parsed <= datetime.now()
+
+
+def is_lock_expired(value: str | None) -> bool:
+    parsed = parse_time(value)
+    return parsed is not None and parsed <= datetime.now()

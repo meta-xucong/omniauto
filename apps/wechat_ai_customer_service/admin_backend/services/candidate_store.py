@@ -45,17 +45,19 @@ class CandidateStore:
         db = postgres_store()
         if db:
             db_items = db.list_candidates(active_tenant_id(), status=status)
+            db_items = filter_candidates_by_status(db_items, status)
         root = self.status_root(status)
         items = [json.loads(path.read_text(encoding="utf-8")) for path in sorted(root.glob("*.json"), reverse=True)] if root.exists() else []
+        items = filter_candidates_by_status(items, status)
         if status != "pending":
             return merge_candidates(db_items, items)
         visible_items = []
-        for item in items:
+        for item in merge_candidates(db_items, items):
             duplicate = self.deduper.check_candidate(item)
             if duplicate.get("duplicate") and duplicate.get("source") == "knowledge_base":
                 continue
             visible_items.append(item)
-        return merge_candidates(db_items, visible_items)
+        return visible_items
 
     def get_candidate(self, candidate_id: str) -> dict[str, Any] | None:
         path = self.find_path(candidate_id)
@@ -374,6 +376,17 @@ def merge_candidates(*groups: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 continue
             merged[candidate_id] = item
     return sorted(merged.values(), key=lambda item: str((item.get("review") or {}).get("updated_at") or item.get("created_at") or ""), reverse=True)
+
+
+def filter_candidates_by_status(items: list[dict[str, Any]], status: str) -> list[dict[str, Any]]:
+    expected = status or "pending"
+    filtered = []
+    for item in items:
+        review = item.get("review") if isinstance(item.get("review"), dict) else {}
+        item_status = str(review.get("status") or "pending")
+        if item_status == expected:
+            filtered.append(item)
+    return filtered
 
 
 def merge_product_data(existing_data: dict[str, Any], candidate_data: dict[str, Any]) -> dict[str, Any]:

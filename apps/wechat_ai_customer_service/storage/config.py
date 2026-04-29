@@ -32,7 +32,7 @@ def load_storage_config() -> StorageConfig:
         backend = "json"
     schema = (os.getenv("WECHAT_POSTGRES_SCHEMA") or "wechat_ai_customer_service").strip()
     validate_schema_name(schema)
-    mirror = (os.getenv("WECHAT_POSTGRES_MIRROR_FILES") or "0").strip().lower() in {"1", "true", "yes", "on"}
+    mirror = parse_bool(os.getenv("WECHAT_POSTGRES_MIRROR_FILES"), default=backend == "postgres")
     return StorageConfig(
         backend=backend,
         postgres_dsn=(os.getenv("WECHAT_POSTGRES_DSN") or os.getenv("DATABASE_URL") or "").strip(),
@@ -49,3 +49,9 @@ def postgres_enabled() -> bool:
 def validate_schema_name(schema: str) -> None:
     if not VALID_SCHEMA_RE.fullmatch(schema):
         raise ValueError("WECHAT_POSTGRES_SCHEMA must be a safe PostgreSQL identifier")
+
+
+def parse_bool(value: str | None, *, default: bool = False) -> bool:
+    if value is None or value.strip() == "":
+        return default
+    return value.strip().lower() in {"1", "true", "yes", "on"}

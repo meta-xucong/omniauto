@@ -21,9 +21,10 @@ RESERVED_CATEGORY_IDS = {"products", "chats", "policies", "erp_exports", "custom
 
 class KnowledgeRegistry:
     def __init__(self, root: Path | None = None) -> None:
-        self.root = root or KNOWLEDGE_BASE_ROOT
+        default_root = default_admin_knowledge_base_root()
+        self.root = root or default_root
         self.registry_path = self.root / "registry.json"
-        self.default_root_mode = self.root.resolve() == KNOWLEDGE_BASE_ROOT.resolve()
+        self.default_root_mode = self.root.resolve() == default_root.resolve()
 
     def load(self) -> dict[str, Any]:
         db = postgres_store() if self.default_root_mode else None

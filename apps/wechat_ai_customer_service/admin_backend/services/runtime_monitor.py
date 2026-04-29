@@ -52,15 +52,25 @@ class RuntimeMonitor:
         handoffs = HandoffStore(tenant_id=self.tenant_id).summary()
         heartbeats = self.list_heartbeats()
         problems = []
+        attention_items: list[dict[str, Any]] = []
         if storage["backend"] == "postgres" and not storage["postgres_ok"]:
-            problems.append("PostgreSQL is configured but unavailable")
+            add_attention(attention_items, problems, "storage", "PostgreSQL 已配置但当前不可用", severity="error", detail=storage.get("postgres_reason") or "")
         if queue.get("failed", 0):
-            problems.append(f"{queue.get('failed')} queue job(s) failed")
+            add_attention(attention_items, problems, "work_queue", f"{queue.get('failed')} 个队列任务失败", severity="warning")
+        if queue.get("stale_running", 0):
+            add_attention(attention_items, problems, "work_queue", f"{queue.get('stale_running')} 个运行中任务锁已过期，可由下一轮 worker 接管", severity="warning")
         if handoffs.get("open", 0):
-            problems.append(f"{handoffs.get('open')} handoff case(s) need attention")
+            add_attention(attention_items, problems, "handoff", f"{handoffs.get('open')} 个转人工工单待处理", severity="warning")
         for item in heartbeats:
             if item.get("status") not in {"ok", "idle"}:
-                problems.append(f"{item.get('component_id')} heartbeat is {item.get('status')}")
+                add_attention(
+                    attention_items,
+                    problems,
+                    "heartbeat",
+                    f"{item.get('component_id')} 心跳状态为 {item.get('status')}",
+                    severity="warning",
+                    detail=str(item.get("message") or ""),
+                )
         return {
             "ok": not problems,
             "tenant_id": self.tenant_id,
@@ -68,6 +78,7 @@ class RuntimeMonitor:
             "work_queue": queue,
             "handoffs": handoffs,
             "heartbeats": heartbeats,
+            "attention_items": attention_items,
             "problems": problems,
             "summary": "系统运行正常" if not problems else "需要关注：" + "；".join(problems),
         }
@@ -113,3 +124,16 @@ class RuntimeMonitor:
 
 def now() -> str:
     return datetime.now().isoformat(timespec="seconds")
+
+
+def add_attention(
+    items: list[dict[str, Any]],
+    problems: list[str],
+    area: str,
+    message: str,
+    *,
+    severity: str = "warning",
+    detail: str = "",
+) -> None:
+    problems.append(message)
+    items.append({"area": area, "severity": severity, "message": message, "detail": detail})

@@ -19,6 +19,25 @@ from apps.wechat_ai_customer_service.storage import get_postgres_store, load_sto
 
 
 MAX_RECORDS = 2000
+QUALITY_RETRIEVAL_MIN_SCORE = 0.52
+QUALITY_RETRIEVAL_MIN_HIT_SCORE = 0.32
+QUALITY_REPEATABLE_MIN_HIT_SCORE = 0.24
+QUALITY_REPEATABLE_REPLY_COUNT = 3
+QUALITY_BLOCK_ACTION_TERMS = {
+    "handoff",
+    "manual",
+    "human",
+    "operator",
+    "approve",
+    "approval",
+    "reject",
+    "refuse",
+    "blocked",
+    "请示",
+    "人工",
+    "接管",
+    "转人工",
+}
 
 
 class RagExperienceStore:
@@ -39,6 +58,14 @@ class RagExperienceStore:
             records = [item for item in records if str(item.get("status") or "active") == status]
         records.sort(key=lambda item: str(item.get("created_at") or ""), reverse=True)
         return records[: max(1, min(int(limit or 100), 500))]
+
+    def list_retrievable(self, *, limit: int = 500) -> list[dict[str, Any]]:
+        records = []
+        for item in self.list(status="active", limit=limit):
+            enriched = with_quality(item)
+            if experience_is_retrievable(enriched):
+                records.append(enriched)
+        return records
 
     def counts(self) -> dict[str, int]:
         db = postgres_store(self.tenant_id)
@@ -111,6 +138,7 @@ class RagExperienceStore:
             "created_at": now_text,
             "updated_at": now_text,
         }
+        record["quality"] = score_experience_quality(record)
         db = postgres_store(self.tenant_id)
         config = load_storage_config()
         if db:
@@ -135,10 +163,12 @@ class RagExperienceStore:
                         "updated_at": now_text,
                     }
                 )
+                existing["quality"] = score_experience_quality(existing)
                 db.upsert_rag_experience(existing)
                 rebuild_rag_index_safely(self.tenant_id)
                 if not config.mirror_files:
                     return existing
+                record = existing
             else:
                 db.upsert_rag_experience(record)
                 rebuild_rag_index_safely(self.tenant_id)
@@ -166,6 +196,7 @@ class RagExperienceStore:
                         "updated_at": now_text,
                     }
                 )
+                existing["quality"] = score_experience_quality(existing)
                 records[index] = existing
                 self._write(records)
                 rebuild_rag_index_safely(self.tenant_id)
@@ -176,36 +207,119 @@ class RagExperienceStore:
         return record
 
     def discard(self, experience_id: str, *, reason: str = "") -> dict[str, Any]:
+        return self.update_status(
+            experience_id,
+            status="discarded",
+            reason=reason or "discarded_by_user",
+            extra={"discarded_at": now()},
+        )
+
+    def update_status(
+        self,
+        experience_id: str,
+        *,
+        status: str,
+        reason: str = "",
+        extra: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        allowed = {"active", "discarded", "promoted"}
+        status = str(status or "").strip()
+        if status not in allowed:
+            raise ValueError(f"unsupported rag experience status: {status}")
+        extra = extra or {}
         db = postgres_store(self.tenant_id)
         config = load_storage_config()
+        db_item: dict[str, Any] | None = None
         if db:
             records = db.list_rag_experiences(self.tenant_id, status="all", limit=500)
             for item in records:
                 if item.get("experience_id") != experience_id:
                     continue
                 now_text = now()
-                item["status"] = "discarded"
-                item["discard_reason"] = reason or "discarded_by_user"
-                item["discarded_at"] = now_text
+                item["status"] = status
+                if reason:
+                    item[f"{status}_reason"] = reason
+                    if status == "discarded":
+                        item["discard_reason"] = reason
+                for key, value in extra.items():
+                    item[key] = value
                 item["updated_at"] = now_text
+                item["quality"] = score_experience_quality(item)
                 db.upsert_rag_experience(item)
                 rebuild_rag_index_safely(self.tenant_id)
                 if not config.mirror_files:
                     return item
+                db_item = item
                 break
         records = self._read()
         now_text = now()
         for index, item in enumerate(records):
             if item.get("experience_id") != experience_id:
                 continue
-            item["status"] = "discarded"
-            item["discard_reason"] = reason or "discarded_by_user"
-            item["discarded_at"] = now_text
+            item["status"] = status
+            if reason:
+                item[f"{status}_reason"] = reason
+                if status == "discarded":
+                    item["discard_reason"] = reason
+            for key, value in extra.items():
+                item[key] = value
             item["updated_at"] = now_text
+            item["quality"] = score_experience_quality(item)
             records[index] = item
             self._write(records)
             rebuild_rag_index_safely(self.tenant_id)
             return item
+        if db_item:
+            records.append(db_item)
+            self._write(records)
+            rebuild_rag_index_safely(self.tenant_id)
+            return db_item
+        raise KeyError(experience_id)
+
+    def update_metadata(
+        self,
+        experience_id: str,
+        metadata: dict[str, Any],
+        *,
+        rebuild_index: bool = False,
+    ) -> dict[str, Any]:
+        metadata = dict(metadata or {})
+        db = postgres_store(self.tenant_id)
+        config = load_storage_config()
+        db_item: dict[str, Any] | None = None
+        if db:
+            records = db.list_rag_experiences(self.tenant_id, status="all", limit=500)
+            for item in records:
+                if item.get("experience_id") != experience_id:
+                    continue
+                item.update(metadata)
+                item["updated_at"] = now()
+                item["quality"] = score_experience_quality(item)
+                db.upsert_rag_experience(item)
+                if rebuild_index:
+                    rebuild_rag_index_safely(self.tenant_id)
+                if not config.mirror_files:
+                    return item
+                db_item = item
+                break
+        records = self._read()
+        for index, item in enumerate(records):
+            if item.get("experience_id") != experience_id:
+                continue
+            item.update(metadata)
+            item["updated_at"] = now()
+            item["quality"] = score_experience_quality(item)
+            records[index] = item
+            self._write(records)
+            if rebuild_index:
+                rebuild_rag_index_safely(self.tenant_id)
+            return item
+        if db_item:
+            records.append(db_item)
+            self._write(records)
+            if rebuild_index:
+                rebuild_rag_index_safely(self.tenant_id)
+            return db_item
         raise KeyError(experience_id)
 
     def _read(self) -> list[dict[str, Any]]:
@@ -256,6 +370,115 @@ def summarize_experience(question: str, reply_text: str, hit: dict[str, Any]) ->
     if reply:
         parts.append(f"回复要点：{reply}")
     return "；".join(parts)
+
+
+def with_quality(item: dict[str, Any]) -> dict[str, Any]:
+    enriched = dict(item)
+    quality = enriched.get("quality")
+    if not isinstance(quality, dict) or "retrieval_allowed" not in quality:
+        quality = score_experience_quality(enriched)
+    enriched["quality"] = quality
+    return enriched
+
+
+def experience_is_retrievable(item: dict[str, Any]) -> bool:
+    if str(item.get("status") or "active") != "active":
+        return False
+    quality = item.get("quality") if isinstance(item.get("quality"), dict) else score_experience_quality(item)
+    return bool(quality.get("retrieval_allowed"))
+
+
+def score_experience_quality(item: dict[str, Any]) -> dict[str, Any]:
+    hit = item.get("rag_hit", {}) or {}
+    usage = item.get("usage", {}) or {}
+    safety = item.get("safety", {}) or {}
+    question = normalize_space(str(item.get("question") or ""))
+    reply = normalize_space(str(item.get("reply_text") or ""))
+    hit_text = normalize_space(str(hit.get("text") or ""))
+    hit_score = coerce_float(hit.get("score"), 0.0)
+    reply_count = max(1, int(coerce_float(usage.get("reply_count"), 1)))
+    risk_terms = [str(value) for value in hit.get("risk_terms", []) or [] if str(value).strip()]
+    recommended_action = str(item.get("recommended_action") or "").lower()
+    must_handoff = bool(safety.get("must_handoff"))
+    blocked_action = any(term.lower() in recommended_action for term in QUALITY_BLOCK_ACTION_TERMS)
+    has_text = bool(question and reply)
+    has_source = bool(hit_text or str(hit.get("chunk_id") or ""))
+
+    score = 0.22
+    score += min(0.46, max(0.0, hit_score) * 0.46)
+    score += min(0.12, reply_count * 0.025)
+    if has_text:
+        score += 0.1
+    if has_source:
+        score += 0.06
+    if len(question) >= 8 and len(reply) >= 12:
+        score += 0.05
+
+    blockers: list[str] = []
+    reasons: list[str] = []
+    if not has_text:
+        blockers.append("缺少清晰的问题或回复")
+    if not has_source:
+        reasons.append("缺少可追溯的命中资料")
+        score -= 0.08
+    if risk_terms:
+        blockers.append("命中资料包含风险词")
+        score -= 0.25
+    if must_handoff:
+        blockers.append("当时证据要求人工接管")
+        score -= 0.25
+    if blocked_action:
+        blockers.append("当时建议动作需要人工处理")
+        score -= 0.18
+    if hit_score < QUALITY_REPEATABLE_MIN_HIT_SCORE:
+        reasons.append("原始命中分偏低")
+        score -= 0.08
+    elif hit_score < QUALITY_RETRIEVAL_MIN_HIT_SCORE and reply_count < QUALITY_REPEATABLE_REPLY_COUNT:
+        reasons.append("命中分中等偏低且复用次数不足")
+        score -= 0.04
+    else:
+        reasons.append("证据命中分达到经验层要求")
+    if reply_count >= QUALITY_REPEATABLE_REPLY_COUNT:
+        reasons.append("已被多次复用")
+
+    score = round(max(0.0, min(0.99, score)), 3)
+    enough_hit_score = hit_score >= QUALITY_RETRIEVAL_MIN_HIT_SCORE or (
+        hit_score >= QUALITY_REPEATABLE_MIN_HIT_SCORE and reply_count >= QUALITY_REPEATABLE_REPLY_COUNT
+    )
+    retrieval_allowed = not blockers and enough_hit_score and score >= QUALITY_RETRIEVAL_MIN_SCORE
+    if blockers:
+        band = "blocked"
+    elif score >= 0.72:
+        band = "high"
+    elif retrieval_allowed:
+        band = "medium"
+    else:
+        band = "low"
+    reasons.append("允许参与 RAG 经验检索" if retrieval_allowed else "暂不参与 RAG 经验检索")
+    return {
+        "score": score,
+        "band": band,
+        "retrieval_allowed": retrieval_allowed,
+        "reasons": [*blockers, *reasons],
+        "signals": {
+            "hit_score": hit_score,
+            "reply_count": reply_count,
+            "has_risk_terms": bool(risk_terms),
+            "risk_terms": risk_terms,
+            "must_handoff": must_handoff,
+            "blocked_action": blocked_action,
+            "has_text": has_text,
+            "has_source": has_source,
+        },
+        "evaluated_at": now(),
+    }
+
+
+def coerce_float(value: Any, default: float = 0.0) -> float:
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return default
 
 
 def normalize_space(value: str) -> str:

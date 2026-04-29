@@ -28,6 +28,11 @@ def rebuild() -> dict[str, Any]:
     return service.rebuild()
 
 
+@router.get("/sources")
+def sources(limit: int = 80) -> dict[str, Any]:
+    return service.sources({"limit": limit})
+
+
 @router.get("/analytics")
 def analytics() -> dict[str, Any]:
     return service.analytics()
@@ -44,3 +49,14 @@ def discard_experience(experience_id: str, payload: dict[str, Any] | None = None
         return service.discard_experience(experience_id, payload or {})
     except KeyError as exc:
         raise HTTPException(status_code=404, detail=f"RAG experience not found: {experience_id}") from exc
+
+
+@router.post("/experiences/{experience_id}/promote")
+def promote_experience(experience_id: str, payload: dict[str, Any] | None = None) -> dict[str, Any]:
+    try:
+        result = service.promote_experience(experience_id, payload or {})
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=f"RAG experience not found: {experience_id}") from exc
+    if not result.get("ok"):
+        raise HTTPException(status_code=400, detail=result)
+    return result

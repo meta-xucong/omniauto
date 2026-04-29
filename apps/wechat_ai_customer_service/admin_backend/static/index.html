@@ -12,18 +12,15 @@
         <div class="brand">
           <div class="brand-mark">OA</div>
           <div>
-            <div class="brand-title">知识管理台</div>
-            <div class="brand-subtitle">WeChat AI Service</div>
+            <div class="brand-title">OmniAuto</div>
+            <div class="brand-subtitle">知识管理台</div>
           </div>
         </div>
         <nav class="nav-list" aria-label="主导航">
           <button class="nav-item is-active" data-view="overview">总览</button>
           <button class="nav-item" data-view="knowledge">知识库</button>
-          <button class="nav-item" data-view="generator">知识生成器</button>
-          <button class="nav-item" data-view="uploads">资料上传</button>
-          <button class="nav-item" data-view="rag">资料检索增强</button>
-          <button class="nav-item" data-view="rag_experiences">RAG经验</button>
-          <button class="nav-item" data-view="candidates">候选审核</button>
+          <button class="nav-item" data-view="intake">知识录入与学习</button>
+          <button class="nav-item" data-view="ai_reference">AI参考资料</button>
           <button class="nav-item" data-view="diagnostics">一键检测</button>
           <button class="nav-item" data-view="versions">备份还原</button>
         </nav>
@@ -41,7 +38,7 @@
         <section class="hero glass-panel">
           <div>
             <p class="eyebrow">Knowledge Operations</p>
-            <h2>按门类管理客服知识，支持表单维护、AI 生成、审核入库、检测与回滚。</h2>
+            <h2>把正式知识、资料学习、AI参考资料和系统检测分开管理，新增资料只需上传、整理、确认三步。</h2>
           </div>
           <div class="hero-metrics">
             <div><span id="metric-products">-</span><label>商品</label></div>
@@ -83,104 +80,150 @@
             </div>
           </article>
 
-          <article class="glass-panel content-card view-panel" data-panel="generator">
-            <div class="section-head">
-              <h2>知识生成器</h2>
-              <div class="button-row">
-                <select id="generator-category">
-                  <option value="">自动判断门类</option>
-                </select>
-                <button class="secondary-button" id="reset-generator">清空</button>
-              </div>
-            </div>
-            <div class="generator-layout">
-              <div class="generator-chat" id="generator-chat"></div>
-              <div class="generator-side">
-                <label class="form-field">
-                  <span>自然语言描述</span>
-                  <textarea id="generator-input" placeholder="例如：新增商品 200L 商用冷柜，单价 1999 元/台，10 台以上 1880 元，24 小时发货"></textarea>
-                </label>
-                <button class="primary-button" id="send-generator">生成/补充</button>
-                <div class="generator-summary" id="generator-summary"></div>
-                <button class="primary-button" id="confirm-generator" disabled>确认保存到知识库</button>
-              </div>
-            </div>
-          </article>
-
-          <article class="glass-panel content-card view-panel" data-panel="uploads">
-            <div class="section-head">
-              <h2>资料上传</h2>
-              <button class="primary-button is-hidden" id="upload-button" type="button">手动上传</button>
-            </div>
-            <div class="upload-zone">
-              <input id="upload-file" type="file" multiple />
-              <select id="upload-kind">
-                <option value="products">商品资料</option>
-                <option value="chats">聊天记录</option>
-                <option value="policies">政策规则</option>
-                <option value="erp_exports">ERP 导出</option>
-              </select>
-            </div>
-            <div id="upload-list" class="compact-list"></div>
-          </article>
-
-          <article class="glass-panel content-card view-panel" data-panel="rag">
-            <div class="section-head">
-              <h2>资料检索增强</h2>
-              <div class="button-row">
-                <button class="secondary-button" id="refresh-rag">刷新状态</button>
-                <button class="primary-button" id="rebuild-rag">重建索引</button>
-              </div>
-            </div>
-            <div class="helper-card">
-              <strong>RAG 只作为资料检索和候选证据，不直接决定价格、优惠、赔偿、合同或账期。</strong>
-              <span>正式回复仍以结构化知识库和安全规则为准。</span>
-            </div>
-            <div class="metric-grid" id="rag-status-cards"></div>
-            <div id="rag-analytics" class="compact-list compact-list-small">等待运营分析</div>
-            <div class="rag-search-grid">
-              <label class="form-field">
-                <span>检索问题</span>
-                <input id="rag-query" placeholder="例如：酒店公寓门锁安装注意事项" />
-              </label>
-              <label class="form-field">
-                <span>商品 ID（可选）</span>
-                <input id="rag-product-id" placeholder="例如：fl-920" />
-              </label>
-              <button class="primary-button" id="rag-search">检索资料</button>
-            </div>
-            <div id="rag-results" class="compact-list">等待检索</div>
-          </article>
-
-          <article class="glass-panel content-card view-panel" data-panel="rag_experiences">
+          <article class="glass-panel content-card view-panel" data-panel="intake">
             <div class="section-head">
               <div>
-                <h2>RAG新经验</h2>
-                <p>客服在 RAG 场景中形成的可复用回答概括，默认采纳为经验参考，但不会写入正式知识库。</p>
+                <h2>知识录入与学习</h2>
+                <p>上传资料、让 AI 整理、逐条确认入库都在这里完成；正式生效后会进入“知识库”。</p>
               </div>
-              <button class="secondary-button" id="refresh-rag-experiences">刷新经验</button>
+              <div class="button-row">
+                <button class="workflow-tab is-active" data-group="intake" data-tab="generator">AI生成知识</button>
+                <button class="workflow-tab" data-group="intake" data-tab="uploads">导入资料</button>
+                <button class="workflow-tab" data-group="intake" data-tab="candidates">待确认知识</button>
+              </div>
             </div>
-            <div class="helper-card">
-              <strong>这里展示的是经验层，不是正式业务规则。</strong>
-              <span>不合适的经验可以一键废弃；需要变成正式规则时，仍应通过知识生成器或候选审核进入知识库。</span>
+
+            <div class="flow-guide">
+              <div class="flow-step"><strong>1. 放入资料</strong><span>上传文件、粘贴描述，或导入聊天记录。</span></div>
+              <div class="flow-step"><strong>2. AI整理</strong><span>自动归类、去重、找缺失字段。</span></div>
+              <div class="flow-step"><strong>3. 人工确认</strong><span>点“应用”后才进入正式知识库。</span></div>
             </div>
-            <div class="metric-grid" id="rag-experience-cards"></div>
-            <div id="rag-experience-list" class="compact-list">等待加载</div>
+
+            <section class="workflow-section is-visible" data-intake-tab="generator">
+              <div class="section-head sub-head">
+                <h2>AI生成知识</h2>
+                <div class="button-row">
+                  <select id="generator-category">
+                    <option value="">自动判断门类</option>
+                  </select>
+                  <button class="secondary-button" id="reset-generator">清空</button>
+                </div>
+              </div>
+              <div class="generator-layout">
+                <div class="generator-chat" id="generator-chat"></div>
+                <div class="generator-side">
+                  <label class="form-field">
+                    <span>自然语言描述</span>
+                    <textarea id="generator-input" placeholder="例如：新增商品 200L 商用冷柜，单价 1999 元/台，10 台以上 1880 元，24 小时发货"></textarea>
+                  </label>
+                  <button class="primary-button" id="send-generator">生成/补充</button>
+                  <div class="generator-summary" id="generator-summary"></div>
+                  <button class="primary-button" id="confirm-generator" disabled>确认保存到知识库</button>
+                </div>
+              </div>
+            </section>
+
+            <section class="workflow-section" data-intake-tab="uploads">
+              <div class="section-head sub-head">
+                <div>
+                  <h2>导入资料</h2>
+                  <p>选择资料类型后直接选文件，系统会自动上传；上传后点击“AI整理资料”生成待确认知识。</p>
+                </div>
+                <button class="primary-button is-hidden" id="upload-button" type="button">手动上传</button>
+              </div>
+              <div class="helper-card">
+                <strong>聊天记录也按同一流程处理。</strong>
+                <span>上传聊天记录后，AI 会提取可复用话术或规则，先放入“待确认知识”；不会自动写入正式库。</span>
+              </div>
+              <div class="upload-zone">
+                <input id="upload-file" type="file" multiple />
+                <select id="upload-kind">
+                  <option value="products">商品资料</option>
+                  <option value="chats">聊天记录</option>
+                  <option value="policies">政策规则</option>
+                  <option value="erp_exports">ERP 导出</option>
+                </select>
+                <button class="primary-button" id="run-learning">AI整理资料</button>
+              </div>
+              <div id="upload-list" class="compact-list"></div>
+            </section>
+
+            <section class="workflow-section" data-intake-tab="candidates">
+              <div class="section-head sub-head">
+                <div>
+                  <h2>待确认知识</h2>
+                  <p>AI整理出的内容都在这里逐条确认。只有点“应用”后，才会写入正式知识库。</p>
+                </div>
+                <button class="primary-button" id="run-learning-from-candidates">AI整理资料</button>
+              </div>
+              <div class="helper-card">
+                <strong>候选来自上传资料、聊天记录或知识生成器。</strong>
+                <span>可补充字段、切换类型、应用入库或拒绝；不合适的内容不会影响正式客服。</span>
+              </div>
+              <div class="split-layout">
+                <div class="list-pane" id="candidate-list"></div>
+                <div class="detail-pane form-pane" id="candidate-detail">暂无候选</div>
+              </div>
+            </section>
           </article>
 
-          <article class="glass-panel content-card view-panel" data-panel="candidates">
+          <article class="glass-panel content-card view-panel" data-panel="ai_reference">
             <div class="section-head">
-              <h2>候选审核</h2>
-              <button class="primary-button" id="run-learning">AI 学习</button>
+              <div>
+                <h2>AI参考资料</h2>
+                <p>这里存放 AI 回答时可参考的资料和对话经验。它们不是正式规则，风险问题仍以知识库和安全规则为准。</p>
+              </div>
+              <div class="button-row">
+                <button class="workflow-tab is-active" data-group="reference" data-tab="sources">已导入资料</button>
+                <button class="workflow-tab" data-group="reference" data-tab="experiences">对话中学到的经验</button>
+              </div>
             </div>
-            <div class="helper-card">
-              <strong>候选来自上传资料的 AI 提取结果。</strong>
-              <span>确认后写入正式知识库；不合适的内容可以拒绝并记录原因。</span>
-            </div>
-            <div class="split-layout">
-              <div class="list-pane" id="candidate-list"></div>
-              <div class="detail-pane form-pane" id="candidate-detail">暂无候选</div>
-            </div>
+
+            <section class="workflow-section is-visible" data-reference-tab="sources">
+              <div class="section-head sub-head">
+                <h2>已导入资料</h2>
+                <div class="button-row">
+                  <button class="secondary-button" id="refresh-rag">刷新状态</button>
+                  <button class="primary-button" id="rebuild-rag">重建索引</button>
+                </div>
+              </div>
+              <div class="helper-card">
+                <strong>这些资料只用于辅助检索和审核证据。</strong>
+                <span>正式回复仍以结构化知识库和安全规则为准；价格、优惠、赔偿、合同或账期不会只凭参考资料自动决定。</span>
+              </div>
+              <div class="metric-grid" id="rag-status-cards"></div>
+              <div id="rag-analytics" class="compact-list compact-list-small">等待运营分析</div>
+              <div id="rag-source-list" class="compact-list compact-list-small">等待资料源列表</div>
+              <div id="rag-chunk-list" class="compact-list compact-list-small">等待资料切片预览</div>
+              <div class="rag-search-grid">
+                <label class="form-field">
+                  <span>检索问题</span>
+                  <input id="rag-query" placeholder="例如：酒店公寓门锁安装注意事项" />
+                </label>
+                <label class="form-field">
+                  <span>商品 ID（可选）</span>
+                  <input id="rag-product-id" placeholder="例如：fl-920" />
+                </label>
+                <button class="primary-button" id="rag-search">检索资料</button>
+              </div>
+              <div id="rag-results" class="compact-list">等待检索</div>
+            </section>
+
+            <section class="workflow-section" data-reference-tab="experiences">
+              <div class="section-head sub-head">
+                <div>
+                  <h2>对话中学到的经验</h2>
+                  <p>客服在参考资料场景里形成的可复用回答概括，默认作为经验参考，但不会写入正式知识库。</p>
+                </div>
+                <button class="secondary-button" id="refresh-rag-experiences">刷新经验</button>
+              </div>
+              <div class="helper-card">
+                <strong>这里展示的是经验层，不是正式业务规则。</strong>
+                <span>不合适的经验可以一键废弃；需要变成正式规则时，仍应通过知识录入与学习进入知识库。</span>
+              </div>
+              <div class="metric-grid" id="rag-experience-cards"></div>
+              <div id="rag-experience-list" class="compact-list">等待加载</div>
+            </section>
           </article>
 
           <article class="glass-panel content-card view-panel" data-panel="diagnostics">

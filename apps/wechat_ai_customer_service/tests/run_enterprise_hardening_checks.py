@@ -6,6 +6,7 @@ import argparse
 import json
 import os
 import sys
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Callable
 
@@ -83,8 +84,21 @@ def check_json_work_queue_roundtrip() -> None:
         completed = service.complete(str(job["job_id"]), {"ok": True})
         assert_true(completed is not None, "completed job should exist")
         assert_equal(completed.get("status"), "succeeded", "completed job should succeed")
+        stale = service.enqueue(kind="diagnostics", payload={"mode": "full"}, dedupe_key="diag:stale", max_attempts=3)
+        service.update_file_job(
+            str(stale["job_id"]),
+            status="running",
+            attempts=1,
+            locked_by="dead-json-worker",
+            locked_until=past_time(),
+        )
+        stale_summary = service.summary()
+        assert_equal(stale_summary.get("stale_running"), 1, "summary should count stale running jobs")
+        reclaimed = service.claim(worker_id="json-recovery")
+        assert_equal(reclaimed[0].get("job_id"), stale.get("job_id"), "expired JSON job lock should be reclaimable")
+        service.complete(str(stale["job_id"]), {"recovered": True})
         summary = service.summary()
-        assert_equal(summary.get("succeeded"), 1, "summary should count succeeded job")
+        assert_equal(summary.get("succeeded"), 2, "summary should count recovered job")
     finally:
         restore_env("WECHAT_STORAGE_BACKEND", old_backend)
 
@@ -112,8 +126,26 @@ def check_postgres_work_queue_roundtrip(dsn: str) -> None:
         assert_equal(len(claimed_again), 1, "retried job should be claimable")
         completed = service.complete(str(job["job_id"]), {"learned": True})
         assert_equal(completed.get("status"), "succeeded", "PostgreSQL job should complete")
+        stale = service.enqueue(kind="rag_rebuild", payload={"source": "stale"}, dedupe_key="rag:stale", max_attempts=3)
+        store.execute(
+            f"""
+            UPDATE {store.schema}.work_queue_jobs
+            SET status = 'running',
+                attempts = 1,
+                locked_by = 'dead-pg-worker',
+                locked_until = now() - interval '10 seconds',
+                updated_at = now()
+            WHERE tenant_id = %s AND job_id = %s
+            """,
+            [tenant_id, stale["job_id"]],
+        )
+        stale_summary = service.summary()
+        assert_equal(stale_summary.get("stale_running"), 1, "PostgreSQL summary should count stale running jobs")
+        reclaimed = service.claim(worker_id="pg-recovery")
+        assert_equal(reclaimed[0].get("job_id"), stale.get("job_id"), "expired PostgreSQL job lock should be reclaimable")
+        service.complete(str(stale["job_id"]), {"recovered": True})
         summary = service.summary()
-        assert_equal(summary.get("succeeded"), 1, "PostgreSQL summary should count succeeded job")
+        assert_equal(summary.get("succeeded"), 2, "PostgreSQL summary should count recovered job")
     finally:
         restore_env("WECHAT_STORAGE_BACKEND", old_backend)
         restore_env("WECHAT_POSTGRES_DSN", old_dsn)
@@ -136,6 +168,17 @@ def check_json_handoff_roundtrip() -> None:
                 "reply_text": "我先帮您请示一下。",
             }
         )
+        duplicate = store.create_case(
+            {
+                "target": "文件传输助手",
+                "reason": "discount_requires_approval",
+                "message_ids": ["m1"],
+                "message_contents": ["能不能再便宜点"],
+                "reply_text": "我先帮您请示一下。",
+            }
+        )
+        assert_equal(duplicate.get("case_id"), case.get("case_id"), "JSON handoff should dedupe by message id")
+        assert_true(duplicate.get("deduped") is True, "JSON duplicate handoff should be marked")
         assert_equal(store.summary().get("open"), 1, "JSON handoff summary should count open case")
         resolved = store.update_status(str(case["case_id"]), "resolved", {"operator": "test"})
         assert_equal(resolved.get("status"), "resolved", "JSON handoff case should resolve")
@@ -164,6 +207,17 @@ def check_postgres_handoff_roundtrip(dsn: str) -> None:
                 "reply_text": "我先帮您请示一下。",
             }
         )
+        duplicate = handoffs.create_case(
+            {
+                "target": "文件传输助手",
+                "reason": "payment_terms_requires_approval",
+                "message_ids": ["risk-1"],
+                "message_contents": ["能不能月结"],
+                "reply_text": "我先帮您请示一下。",
+            }
+        )
+        assert_equal(duplicate.get("case_id"), case.get("case_id"), "PostgreSQL handoff should dedupe by message id")
+        assert_true(duplicate.get("deduped") is True, "PostgreSQL duplicate handoff should be marked")
         assert_equal(handoffs.summary().get("open"), 1, "PostgreSQL handoff summary should count open case")
         ignored = handoffs.update_status(str(case["case_id"]), "ignored", {"operator": "test"})
         assert_equal(ignored.get("status"), "ignored", "PostgreSQL handoff case should ignore")
@@ -182,10 +236,12 @@ def check_json_runtime_monitor_readiness() -> None:
         monitor = RuntimeMonitor(tenant_id="hardening_json_monitor", path=path)
         item = monitor.heartbeat("listener", status="ok", message="alive")
         assert_equal(item.get("component_id"), "listener", "heartbeat should store component")
+        monitor.heartbeat("llm", status="warning", message="rate limit")
         report = monitor.readiness()
         assert_true("storage" in report, "readiness should include storage")
         assert_true("work_queue" in report, "readiness should include queue")
         assert_true("handoffs" in report, "readiness should include handoffs")
+        assert_true(report.get("attention_items"), "readiness should include attention items for warning heartbeat")
     finally:
         restore_env("WECHAT_STORAGE_BACKEND", old_backend)
 
@@ -204,9 +260,11 @@ def check_postgres_runtime_monitor_readiness(dsn: str) -> None:
         monitor = RuntimeMonitor(tenant_id=tenant_id)
         item = monitor.heartbeat("admin", status="ok", payload={"port": 8765})
         assert_equal(item.get("component_id"), "admin", "PostgreSQL heartbeat should store component")
+        monitor.heartbeat("listener", status="warning", message="stale poll")
         report = monitor.readiness()
         assert_true(report.get("storage", {}).get("postgres_ok"), "PostgreSQL readiness should confirm storage")
         assert_true(any(hb.get("component_id") == "admin" for hb in report.get("heartbeats", [])), "readiness should list heartbeat")
+        assert_true(report.get("attention_items"), "PostgreSQL readiness should include attention items")
     finally:
         restore_env("WECHAT_STORAGE_BACKEND", old_backend)
         restore_env("WECHAT_POSTGRES_DSN", old_dsn)
@@ -217,6 +275,10 @@ def restore_env(name: str, value: str | None) -> None:
         os.environ.pop(name, None)
     else:
         os.environ[name] = value
+
+
+def past_time() -> str:
+    return (datetime.now() - timedelta(seconds=10)).isoformat(timespec="seconds")
 
 
 def check_name(check: Callable[..., Any]) -> str:

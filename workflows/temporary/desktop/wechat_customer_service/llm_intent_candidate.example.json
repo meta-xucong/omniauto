@@ -1,0 +1,18 @@
+{
+  "intent": "quote_with_product_detail",
+  "confidence": 0.82,
+  "suggested_reply": "收到，我会按您提供的产品和数量整理报价信息；如方便，也请补充联系人姓名和电话。",
+  "recommended_action": "collect_contact_or_prepare_quote",
+  "safe_to_auto_send": true,
+  "needs_handoff": false,
+  "reason": "客户在询价且提到了具体产品，适合继续收集报价所需信息。",
+  "fields": {
+    "product": "冰箱"
+  },
+  "missing_fields": [
+    "name",
+    "phone",
+    "quantity",
+    "spec"
+  ]
+}

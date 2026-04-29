@@ -40,6 +40,7 @@ RAG_AUTHORITY_BLOCK_TAGS = {
 }
 RAG_SOFT_REFERENCE_CATEGORIES = {"product_explanations", "product_faq", "product_rules", "products"}
 RAG_SOFT_REFERENCE_SOURCE_TYPES = {"product_doc", "manual"}
+RAG_SOFT_REFERENCE_MIN_SCORE = 0.18
 
 INTENT_KEYWORDS: dict[str, list[str]] = {
     "greeting": ["你好", "您好", "hello", "在吗"],
@@ -334,6 +335,12 @@ def rag_can_support_soft_reference(intent_tags: list[str], rag_evidence: dict[st
 
 def rag_hit_can_support_soft_reference(hit: dict[str, Any]) -> bool:
     if hit.get("risk_terms"):
+        return False
+    try:
+        score = float(hit.get("score") or 0)
+    except (TypeError, ValueError):
+        score = 0.0
+    if score < RAG_SOFT_REFERENCE_MIN_SCORE:
         return False
     category = str(hit.get("category") or "")
     source_type = str(hit.get("source_type") or "")

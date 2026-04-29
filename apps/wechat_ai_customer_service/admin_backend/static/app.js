@@ -11,6 +11,8 @@ const state = {
   selectedCandidate: null,
   learningInProgress: false,
   uploadInProgress: false,
+  activeIntakeTab: "generator",
+  activeReferenceTab: "sources",
   ragStatus: null,
   ragHits: [],
   ragExperiences: [],
@@ -20,13 +22,18 @@ const state = {
 const titles = {
   overview: "总览",
   knowledge: "知识库",
-  generator: "知识生成器",
-  uploads: "资料上传",
-  rag: "资料检索增强",
-  rag_experiences: "RAG经验",
-  candidates: "候选审核",
+  intake: "知识录入与学习",
+  ai_reference: "AI参考资料",
   diagnostics: "一键检测",
   versions: "备份还原",
+};
+
+const viewAliases = {
+  generator: {view: "intake", group: "intake", tab: "generator"},
+  uploads: {view: "intake", group: "intake", tab: "uploads"},
+  candidates: {view: "intake", group: "intake", tab: "candidates"},
+  rag: {view: "ai_reference", group: "reference", tab: "sources"},
+  rag_experiences: {view: "ai_reference", group: "reference", tab: "experiences"},
 };
 
 const templateLabels = {
@@ -71,14 +78,34 @@ const fieldLabelOverrides = {
 };
 
 function selectView(view) {
-  state.activeView = view;
+  const target = viewAliases[view] || {view};
+  if (target.group === "intake") state.activeIntakeTab = target.tab;
+  if (target.group === "reference") state.activeReferenceTab = target.tab;
+  const activeView = target.view;
+  state.activeView = activeView;
   document.querySelectorAll(".nav-item").forEach((item) => {
-    item.classList.toggle("is-active", item.dataset.view === view);
+    item.classList.toggle("is-active", item.dataset.view === activeView);
   });
   document.querySelectorAll(".view-panel").forEach((panel) => {
-    panel.classList.toggle("is-visible", panel.dataset.panel === view);
+    panel.classList.toggle("is-visible", panel.dataset.panel === activeView);
   });
-  document.getElementById("view-title").textContent = titles[view] || "总览";
+  document.getElementById("view-title").textContent = titles[activeView] || "总览";
+  syncWorkflowTabs();
+}
+
+function syncWorkflowTabs() {
+  document.querySelectorAll('[data-intake-tab]').forEach((section) => {
+    section.classList.toggle("is-visible", section.dataset.intakeTab === state.activeIntakeTab);
+  });
+  document.querySelectorAll('[data-reference-tab]').forEach((section) => {
+    section.classList.toggle("is-visible", section.dataset.referenceTab === state.activeReferenceTab);
+  });
+  document.querySelectorAll('.workflow-tab[data-group="intake"]').forEach((button) => {
+    button.classList.toggle("is-active", button.dataset.tab === state.activeIntakeTab);
+  });
+  document.querySelectorAll('.workflow-tab[data-group="reference"]').forEach((button) => {
+    button.classList.toggle("is-active", button.dataset.tab === state.activeReferenceTab);
+  });
 }
 
 async function refreshHealth() {
@@ -880,7 +907,7 @@ function renderRagStatus() {
     ["资料源", status.source_count ?? 0],
     ["切片", status.chunk_count ?? 0],
     ["索引", status.index_exists ? "正常" : "未建立"],
-    ["RAG经验", experienceCounts.active ?? 0],
+    ["对话经验", experienceCounts.active ?? 0],
   ]
     .map(([label, value]) => `<div class="metric-card"><span>${escapeHtml(value)}</span><label>${escapeHtml(label)}</label></div>`)
     .join("");
@@ -900,8 +927,8 @@ function renderRagAnalytics() {
   panel.innerHTML = `
     <div class="record-row">
       <strong>运营概览</strong>
-      <span>RAG应答 ${escapeHtml(counters.rag_reply_applied ?? 0)} 次 · 命中证据 ${escapeHtml(counters.rag_evidence_hit ?? 0)} 次 · 记录经验 ${escapeHtml(counters.rag_experience_recorded ?? 0)} 条</span>
-      <p>建议转正式知识：${escapeHtml(formalization.length)} 条。RAG 仍只作为辅助证据，正式规则需走知识生成器或候选审核。</p>
+      <span>参考资料应答 ${escapeHtml(counters.rag_reply_applied ?? 0)} 次 · 命中证据 ${escapeHtml(counters.rag_evidence_hit ?? 0)} 次 · 记录经验 ${escapeHtml(counters.rag_experience_recorded ?? 0)} 条</span>
+      <p>建议转正式知识：${escapeHtml(formalization.length)} 条。参考资料只作为辅助证据，正式规则需走“知识录入与学习”。</p>
     </div>
   `;
 }
@@ -987,7 +1014,7 @@ function renderRagExperiences(payload = {}) {
           </div>
         `;
       }).join("")
-    : `<div class="empty-state">暂无 RAG 新经验。系统只有在客服使用 RAG 场景成功回复后，才会在这里生成概括。</div>`;
+    : `<div class="empty-state">暂无对话经验。系统只有在客服使用参考资料成功回复后，才会在这里生成概括。</div>`;
   list.querySelectorAll(".rag-experience-discard").forEach((button) => {
     button.addEventListener("click", () => discardRagExperience(button.dataset.id).catch((error) => alert(error.message)));
   });
@@ -995,12 +1022,250 @@ function renderRagExperiences(payload = {}) {
 
 async function discardRagExperience(experienceId) {
   if (!experienceId) return;
-  if (!confirm("确认废弃这条 RAG 经验？废弃后不会再作为默认经验展示。")) return;
+  if (!confirm("确认废弃这条对话经验？废弃后不会再作为默认经验展示。")) return;
   await apiJson(`/api/rag/experiences/${encodeURIComponent(experienceId)}/discard`, {
     method: "POST",
     body: JSON.stringify({reason: "discarded in admin"}),
   });
   await Promise.all([loadRagExperiences(), loadRagStatus().catch(() => {})]);
+}
+
+async function loadRagStatus() {
+  const [payload, analytics, sources] = await Promise.all([
+    apiGet("/api/rag/status"),
+    apiGet("/api/rag/analytics").catch(() => null),
+    apiGet("/api/rag/sources?limit=80").catch(() => ({ok: false, sources: [], chunks: []})),
+  ]);
+  state.ragStatus = payload;
+  state.ragAnalytics = analytics;
+  state.ragSources = sources.sources || [];
+  state.ragChunks = sources.chunks || [];
+  renderRagStatus();
+  renderRagAnalytics();
+  renderRagSources(sources);
+}
+
+function renderRagStatus() {
+  const status = state.ragStatus || {};
+  const experienceCounts = status.experience_counts || {};
+  document.getElementById("rag-status-cards").innerHTML = [
+    ["资料源", status.source_count ?? 0],
+    ["切片", status.chunk_count ?? 0],
+    ["索引", status.index_exists ? "正常" : "未建立"],
+    ["对话经验", experienceCounts.active ?? 0],
+  ]
+    .map(([label, value]) => `<div class="metric-card"><span>${escapeHtml(value)}</span><label>${escapeHtml(label)}</label></div>`)
+    .join("");
+}
+
+function renderRagAnalytics() {
+  const panel = document.getElementById("rag-analytics");
+  if (!panel) return;
+  const analytics = state.ragAnalytics;
+  if (!analytics?.ok) {
+    panel.innerHTML = `<div class="empty-state">暂无运营分析数据。</div>`;
+    return;
+  }
+  const audit = analytics.audit || {};
+  const counters = audit.counters || {};
+  const formalization = analytics.formalization_candidates || [];
+  panel.innerHTML = `
+    <div class="record-row reference-summary">
+      <div>
+        <strong>运营概览</strong>
+        <span>参考资料应答 ${escapeHtml(counters.rag_reply_applied ?? 0)} 次 · 命中证据 ${escapeHtml(counters.rag_evidence_hit ?? 0)} 次 · 记录经验 ${escapeHtml(counters.rag_experience_recorded ?? 0)} 条</span>
+        <p>建议转正式知识：${escapeHtml(formalization.length)} 条。参考资料和对话经验只做辅助，正式规则仍走“待确认知识”。</p>
+      </div>
+    </div>
+  `;
+}
+
+function renderRagSources(payload = {}) {
+  const sources = payload.sources || state.ragSources || [];
+  const chunks = payload.chunks || state.ragChunks || [];
+  const sourcePanel = document.getElementById("rag-source-list");
+  const chunkPanel = document.getElementById("rag-chunk-list");
+  if (sourcePanel) {
+    sourcePanel.innerHTML = sources.length
+      ? `
+        <div class="section-mini-title">已导入资料源</div>
+        ${sources.map((source) => `
+          <div class="record-row rag-source-row">
+            <div>
+              <strong>${escapeHtml(sourceLabel(source))}</strong>
+              <span>${escapeHtml(source.category || "未分类")} · ${escapeHtml(source.product_id || "未指定商品")} · ${escapeHtml(source.chunk_count ?? 0)} 个切片</span>
+              <p>${escapeHtml(shortPath(source.source_path || ""))}</p>
+            </div>
+          </div>
+        `).join("")}
+      `
+      : `<div class="empty-state">暂无已导入的参考资料。上传资料并 AI 整理后，这里会显示资料源和切片概况。</div>`;
+  }
+  if (chunkPanel) {
+    chunkPanel.innerHTML = chunks.length
+      ? `
+        <div class="section-mini-title">资料切片预览</div>
+        ${chunks.slice(0, 12).map((chunk) => `
+          <details class="record-row rag-chunk-row">
+            <summary>${escapeHtml(chunk.category || chunk.source_type || "资料片段")} · ${escapeHtml(chunk.chunk_id || "")}</summary>
+            <p>${escapeHtml(chunk.text || "")}</p>
+          </details>
+        `).join("")}
+      `
+      : `<div class="empty-state">暂无资料切片。点击“重建索引”可重新生成。</div>`;
+  }
+}
+
+async function loadRagExperiences() {
+  const payload = await apiGet("/api/rag/experiences?status=all&limit=200");
+  state.ragExperiences = payload.items || [];
+  renderRagExperiences(payload);
+}
+
+function renderRagExperiences(payload = {}) {
+  const items = payload.items || state.ragExperiences || [];
+  const counts = payload.counts || {};
+  const relationCounts = payload.relation_counts || {};
+  const qualityCounts = payload.quality_counts || {};
+  const retrievalCounts = payload.retrieval_counts || {};
+  const cards = document.getElementById("rag-experience-cards");
+  if (cards) {
+    cards.innerHTML = [
+      ["默认采纳", counts.active ?? 0],
+      ["可参与检索", retrievalCounts.retrievable ?? 0],
+      ["需观察", qualityCounts.low ?? 0],
+      ["已阻断", qualityCounts.blocked ?? 0],
+      ["建议升级", relationCounts.promotion_candidate ?? 0],
+      ["正式覆盖", relationCounts.covered_by_formal ?? 0],
+      ["已升级", counts.promoted ?? 0],
+      ["已废弃", counts.discarded ?? 0],
+      ["总经验", counts.total ?? items.length],
+    ]
+      .map(([label, value]) => `<div class="metric-card"><span>${escapeHtml(value)}</span><label>${escapeHtml(label)}</label></div>`)
+      .join("");
+  }
+  const list = document.getElementById("rag-experience-list");
+  if (!list) return;
+  list.innerHTML = items.length
+    ? items.map((item) => {
+        const hit = item.rag_hit || {};
+        const usage = item.usage || {};
+        const source = [hit.category || hit.source_type || "RAG片段", hit.product_id || "未指定商品"].filter(Boolean).join(" · ");
+        const relation = item.formal_relation || item.status || "novel";
+        const match = item.formal_match || {};
+        const quality = item.quality || {};
+        const qualityBand = quality.band || "unknown";
+        const qualityReasons = Array.isArray(quality.reasons) ? quality.reasons : [];
+        const canAct = (item.status || "active") === "active";
+        const canPromote = canAct && relation !== "covered_by_formal" && relation !== "conflicts_formal";
+        return `
+          <div class="record-row rag-experience-row">
+            <div>
+              <div class="row-title-line">
+                <strong>${escapeHtml(item.summary || "未生成概括")}</strong>
+                <span class="relation-chip relation-${escapeHtml(relation)}">${escapeHtml(relationText(relation))}</span>
+              </div>
+              <div class="quality-line" title="${escapeHtml(qualityReasons.join("；"))}">
+                <span class="quality-chip quality-${escapeHtml(qualityBand)}">${escapeHtml(qualityText(qualityBand))} · ${escapeHtml(quality.score ?? "")}</span>
+                <span class="status-chip ${quality.retrieval_allowed ? "ok" : "warning"}">${escapeHtml(quality.retrieval_allowed ? "参与检索" : "不参与检索")}</span>
+              </div>
+              ${qualityReasons.length ? `<p><b>质量说明：</b>${escapeHtml(qualityReasons.join("；"))}</p>` : ""}
+              <span>${escapeHtml(source)} · 使用 ${escapeHtml(usage.reply_count ?? 1)} 次 · ${escapeHtml(item.updated_at || item.created_at || "")}</span>
+              <p><b>客户问法：</b>${escapeHtml(item.question || "")}</p>
+              <p><b>回复要点：</b>${escapeHtml(item.reply_text || "")}</p>
+              ${hit.text ? `<p><b>命中资料：</b>${escapeHtml(hit.text)}</p>` : ""}
+              ${match.item_id ? `<p><b>正式知识关系：</b>${escapeHtml(match.category_id || "")}/${escapeHtml(match.item_id || "")} · 相似度 ${escapeHtml(match.similarity ?? "")} · ${escapeHtml(match.title || "")}</p>` : ""}
+              <p><b>建议：</b>${escapeHtml(actionText(item.recommended_action || ""))}</p>
+            </div>
+            <div class="inline-actions">
+              ${canPromote ? `<button class="primary-button rag-experience-promote" data-id="${escapeHtml(item.experience_id || "")}">升级为待确认知识</button>` : ""}
+              ${canAct ? `<button class="secondary-button rag-experience-discard" data-id="${escapeHtml(item.experience_id || "")}">废弃</button>` : `<span class="status-chip">${escapeHtml(statusText(item.status || relation))}</span>`}
+            </div>
+          </div>
+        `;
+      }).join("")
+    : `<div class="empty-state">暂无对话经验。系统只有在客服使用参考资料成功回复后，才会在这里生成概括。</div>`;
+  list.querySelectorAll(".rag-experience-discard").forEach((button) => {
+    button.addEventListener("click", () => discardRagExperience(button.dataset.id).catch((error) => alert(error.message)));
+  });
+  list.querySelectorAll(".rag-experience-promote").forEach((button) => {
+    button.addEventListener("click", () => promoteRagExperience(button.dataset.id).catch((error) => alert(error.message)));
+  });
+}
+
+async function promoteRagExperience(experienceId) {
+  if (!experienceId) return;
+  if (!confirm("确认把这条经验转为“待确认知识”？它仍需要人工审核后才会进入正式知识库。")) return;
+  const payload = await apiJson(`/api/rag/experiences/${encodeURIComponent(experienceId)}/promote`, {
+    method: "POST",
+    body: JSON.stringify({source: "admin_console"}),
+  });
+  if (!payload.ok) throw new Error(payload.message || "经验升级失败");
+  await Promise.all([
+    loadRagExperiences(),
+    loadRagStatus().catch(() => {}),
+    loadCandidates().catch(() => {}),
+    loadOverview().catch(() => {}),
+  ]);
+}
+
+async function discardRagExperience(experienceId) {
+  if (!experienceId) return;
+  if (!confirm("确认废弃这条对话经验？废弃后不会再参与参考检索。")) return;
+  await apiJson(`/api/rag/experiences/${encodeURIComponent(experienceId)}/discard`, {
+    method: "POST",
+    body: JSON.stringify({reason: "discarded in admin"}),
+  });
+  await Promise.all([loadRagExperiences(), loadRagStatus().catch(() => {})]);
+}
+
+function sourceLabel(source) {
+  return [source.source_type || "资料源", source.source_id || ""].filter(Boolean).join(" · ");
+}
+
+function shortPath(value) {
+  const text = String(value || "");
+  if (!text) return "";
+  const parts = text.split(/[\\/]+/);
+  return parts.slice(-3).join("/");
+}
+
+function qualityText(value) {
+  return {
+    high: "高质量",
+    medium: "可参考",
+    low: "需观察",
+    blocked: "已阻断",
+    unknown: "未评估",
+  }[value] || value || "未评估";
+}
+
+function relationText(value) {
+  return {
+    novel: "新经验",
+    covered_by_formal: "正式知识已覆盖",
+    supports_formal: "支持正式知识",
+    conflicts_formal: "疑似冲突",
+    promotion_candidate: "建议升级",
+    promoted: "已升级",
+    discarded: "已废弃",
+  }[value] || value || "未判断";
+}
+
+function actionText(value) {
+  return {
+    keep_as_rag_experience: "保留在经验层，作为辅助表达参考。",
+    keep_low_priority_or_discard: "正式知识已经覆盖，可降低优先级或废弃。",
+    keep_as_supporting_expression: "可保留为正式知识的表达补充。",
+    manual_review_conflict: "疑似和正式知识冲突，建议人工检查后处理。",
+    promote_to_review_candidate: "建议升级为待确认知识，由人工审核后再入库。",
+    already_promoted: "已升级为待确认知识。",
+    already_discarded: "已废弃。",
+  }[value] || value || "保持观察。";
+}
+
+function statusText(value) {
+  return {promoted: "已升级", discarded: "已废弃", active: "默认采纳"}[value] || value || "默认采纳";
 }
 
 function formatBytes(value) {
@@ -1017,11 +1282,13 @@ async function runLearning() {
   const uploadIds = (uploads.items || []).filter((item) => !item.learned).map((item) => item.upload_id);
   if (!uploadIds.length) {
     document.getElementById("candidate-detail").innerHTML = `<div class="empty-state">没有待学习的上传资料。</div>`;
-    selectView("candidates");
+    state.activeIntakeTab = "candidates";
+    selectView("intake");
     await loadCandidates();
     return;
   }
-  selectView("candidates");
+  state.activeIntakeTab = "candidates";
+  selectView("intake");
   setLearningBusy(true, uploadIds.length);
   try {
     const payload = await apiJson("/api/learning/jobs", {method: "POST", body: JSON.stringify({upload_ids: uploadIds, use_llm: true})});
@@ -1076,10 +1343,10 @@ async function loadCandidates() {
 
 function setLearningBusy(isBusy, uploadCount = 0) {
   state.learningInProgress = isBusy;
-  const button = document.getElementById("run-learning");
-  if (button) {
+  const buttons = [document.getElementById("run-learning"), document.getElementById("run-learning-from-candidates")].filter(Boolean);
+  for (const button of buttons) {
     button.disabled = isBusy;
-    button.textContent = isBusy ? "分析中..." : "AI 学习";
+    button.textContent = isBusy ? "分析中..." : "AI整理资料";
   }
   if (isBusy) {
     renderCandidatePlaceholder(
@@ -1150,7 +1417,7 @@ function candidateRagEvidenceHtml(item) {
     <div class="candidate-rag">
       <div class="editor-head">
         <div>
-          <strong>RAG 来源片段</strong>
+          <strong>参考资料来源片段</strong>
           <span>这些片段只用于辅助审核，不会绕过正式知识库规则。</span>
         </div>
       </div>
@@ -1159,7 +1426,7 @@ function candidateRagEvidenceHtml(item) {
           <span>${escapeHtml(hit.category || "资料片段")} · ${escapeHtml(hit.score || "")}</span>
           <p>${escapeHtml(hit.text || "")}</p>
         </div>
-      `).join("") : `<div class="empty-state">没有可展示的 RAG 片段。</div>`}
+      `).join("") : `<div class="empty-state">没有可展示的参考资料片段。</div>`}
     </div>
   `;
 }
@@ -1241,6 +1508,7 @@ async function applyCandidate(candidateId) {
   if (!candidateId) return;
   if (!confirm(`确认应用候选 ${candidateId}？应用前会自动创建备份。`)) return;
   const payload = await apiJson(`/api/candidates/${encodeURIComponent(candidateId)}/apply`, {method: "POST"});
+  if (!payload.ok) throw new Error(payload.message || "候选应用失败，请查看详情后补充、合并或拒绝。");
   renderDiagnostics(payload);
   clearCandidateDetail("已应用入库，候选已移出待审核列表。");
   await Promise.all([loadCandidates(), loadOverview(), loadKnowledge(), loadVersions()]);
@@ -1535,34 +1803,57 @@ function bindNavigation() {
         window.location.hash = item.dataset.view;
       }
       selectView(item.dataset.view);
-      if (item.dataset.view === "knowledge") loadKnowledge().catch(console.error);
-      if (item.dataset.view === "generator") {
-        renderGeneratorCategorySelect();
-        renderGenerator();
+      loadViewData(item.dataset.view).catch(console.error);
+    });
+  });
+  document.querySelectorAll(".workflow-tab").forEach((button) => {
+    button.addEventListener("click", () => {
+      if (button.dataset.group === "intake") {
+        state.activeIntakeTab = button.dataset.tab || "generator";
       }
-      if (item.dataset.view === "uploads") loadUploads().catch(console.error);
-      if (item.dataset.view === "rag") loadRagStatus().catch(console.error);
-      if (item.dataset.view === "rag_experiences") loadRagExperiences().catch(console.error);
-      if (item.dataset.view === "candidates") loadCandidates().catch(console.error);
-      if (item.dataset.view === "versions") loadVersions().catch(console.error);
+      if (button.dataset.group === "reference") {
+        state.activeReferenceTab = button.dataset.tab || "sources";
+      }
+      syncWorkflowTabs();
+      loadActiveSubsection().catch(console.error);
     });
   });
 }
 
 function activateHashView() {
   const view = window.location.hash.replace("#", "");
-  if (!titles[view]) return;
+  if (!titles[view] && !viewAliases[view]) return;
   selectView(view);
-  if (view === "knowledge") loadKnowledge().catch(console.error);
-  if (view === "generator") {
+  loadViewData(view).catch(console.error);
+}
+
+async function loadViewData(view) {
+  const activeView = (viewAliases[view] || {view}).view;
+  if (activeView === "knowledge") await loadKnowledge();
+  if (activeView === "intake") {
     renderGeneratorCategorySelect();
     renderGenerator();
+    await Promise.all([loadUploads().catch(console.error), loadCandidates().catch(console.error)]);
   }
-  if (view === "uploads") loadUploads().catch(console.error);
-  if (view === "rag") loadRagStatus().catch(console.error);
-  if (view === "rag_experiences") loadRagExperiences().catch(console.error);
-  if (view === "candidates") loadCandidates().catch(console.error);
-  if (view === "versions") loadVersions().catch(console.error);
+  if (activeView === "ai_reference") {
+    await Promise.all([loadRagStatus().catch(console.error), loadRagExperiences().catch(console.error)]);
+  }
+  if (activeView === "versions") await loadVersions();
+}
+
+async function loadActiveSubsection() {
+  if (state.activeView === "intake") {
+    if (state.activeIntakeTab === "generator") {
+      renderGeneratorCategorySelect();
+      renderGenerator();
+    }
+    if (state.activeIntakeTab === "uploads") await loadUploads();
+    if (state.activeIntakeTab === "candidates") await loadCandidates();
+  }
+  if (state.activeView === "ai_reference") {
+    if (state.activeReferenceTab === "sources") await loadRagStatus();
+    if (state.activeReferenceTab === "experiences") await loadRagExperiences();
+  }
 }
 
 bindNavigation();
@@ -1588,6 +1879,7 @@ document.getElementById("rebuild-rag").addEventListener("click", () => rebuildRa
 document.getElementById("rag-search").addEventListener("click", () => searchRag().catch((error) => alert(error.message)));
 document.getElementById("refresh-rag-experiences").addEventListener("click", () => loadRagExperiences().catch((error) => alert(error.message)));
 document.getElementById("run-learning").addEventListener("click", () => runLearning().catch((error) => alert(error.message)));
+document.getElementById("run-learning-from-candidates").addEventListener("click", () => runLearning().catch((error) => alert(error.message)));
 document.getElementById("quick-diagnostics").addEventListener("click", () => runDiagnostics("quick").catch((error) => alert(error.message)));
 document.getElementById("full-diagnostics").addEventListener("click", () => runDiagnostics("full").catch((error) => alert(error.message)));
 document.getElementById("create-backup").addEventListener("click", () => createBackup().catch((error) => alert(error.message)));

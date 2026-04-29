@@ -123,7 +123,7 @@
 - `WECHAT_STORAGE_BACKEND=postgres`：启用 PostgreSQL。
 - `WECHAT_POSTGRES_DSN`：PostgreSQL 连接串，例如 `postgresql://omniauto:omniauto@127.0.0.1:5432/omniauto`.
 - `WECHAT_POSTGRES_SCHEMA=wechat_ai_customer_service`：业务 schema，默认该值。
-- `WECHAT_POSTGRES_MIRROR_FILES=0|1`：PostgreSQL 模式下是否同时写回 JSON 文件，默认 `0`。
+- `WECHAT_POSTGRES_MIRROR_FILES=0|1`：PostgreSQL 模式下是否同时写回 JSON 文件。默认随 PostgreSQL 模式开启，即默认 `1`；只有明确设置为 `0` 时才关闭 JSON 镜像。
 
 ## 回滚策略
 

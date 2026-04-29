@@ -28,6 +28,7 @@ The local DSN shape is:
 ```powershell
 $env:WECHAT_STORAGE_BACKEND = "postgres"
 $env:WECHAT_POSTGRES_DSN = "postgresql://postgres:<local-password>@127.0.0.1:55432/omniauto_wechat_dev"
+$env:WECHAT_POSTGRES_MIRROR_FILES = "1"
 ```
 
 Do not commit the real local password.
@@ -90,6 +91,7 @@ Run PostgreSQL integration checks:
 
 - Use port `55432` locally to avoid collisions with any system PostgreSQL on `5432`.
 - Keep JSON/file fallback enabled as the default in committed config.
+- In PostgreSQL mode, JSON mirroring is enabled by default. This means normal admin-console knowledge writes update PostgreSQL and the matching JSON file, so the JSON tree remains a backup/fallback source without manual migration.
+- Set `WECHAT_POSTGRES_MIRROR_FILES=0` only when a deployment intentionally disables JSON backups and relies on external database backup tooling.
 - Only set `WECHAT_STORAGE_BACKEND=postgres` in the current shell or ignored local env files.
 - DB-backed live tests should clean temporary RAG sources and experiences after each run.
-

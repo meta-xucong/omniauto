@@ -1877,9 +1877,32 @@ class MinesweeperSolver:
         colorful = core[channel_diff > 40]
         mean_rgb = core.mean(axis=(0, 1))
         std_rgb = core.std(axis=(0, 1))
+        maybe_shadowed_empty = (
+            red_pixels == 0
+            and mean_rgb[0] > 160 - shadow_weight * 12.0
+            and mean_rgb[1] > 168 - shadow_weight * 12.0
+            and mean_rgb[2] > 200 - shadow_weight * 10.0
+            and std_rgb[0] < 20
+            and std_rgb[1] < 20
+            and std_rgb[2] < 14
+        )
+        bright_shadow_empty_candidate = (
+            red_pixels == 0
+            and dark_pixels < 10 + shadow_weight * 8.0
+            and bright_pixels < 12 + shadow_weight * 8.0
+            and len(colorful) > 420
+            and mean_rgb[0] > 170 - shadow_weight * 10.0
+            and mean_rgb[1] > 178 - shadow_weight * 10.0
+            and mean_rgb[2] > 210 - shadow_weight * 8.0
+            and std_rgb[0] < 8.2
+            and std_rgb[1] < 8.2
+            and std_rgb[2] < 4.6
+        )
 
         if flag_like:
             return STATE_FLAG
+        if bright_shadow_empty_candidate:
+            return STATE_EMPTY
         shadow_empty_candidate = (
             shadow_weight >= 0.18
             and red_pixels < 24
@@ -1901,6 +1924,13 @@ class MinesweeperSolver:
             and std_rgb[1] < 18
             and std_rgb[2] < 12
         ):
+            if maybe_shadowed_empty and self.cell_looks_shadowed_open_empty(
+                arr,
+                row,
+                col,
+                template_profiles=template_profiles,
+            ):
+                return STATE_EMPTY
             return STATE_HIDDEN
         if (
             red_pixels == 0
@@ -1958,6 +1988,13 @@ class MinesweeperSolver:
         if bright_pixels > max(110, 150 - int(round(35 * shadow_weight))) and len(colorful) < 80:
             return STATE_EMPTY
         if bright_pixels < 40 + int(round(18 * shadow_weight)) and len(colorful) > max(380, 500 - int(round(90 * shadow_weight))):
+            if maybe_shadowed_empty and self.cell_looks_shadowed_open_empty(
+                arr,
+                row,
+                col,
+                template_profiles=template_profiles,
+            ):
+                return STATE_EMPTY
             return STATE_HIDDEN
         if len(colorful) < 20:
             return STATE_EMPTY

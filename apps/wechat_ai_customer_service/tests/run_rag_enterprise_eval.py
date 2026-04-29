@@ -30,6 +30,7 @@ from rag_experience_store import RagExperienceStore  # noqa: E402
 from rag_layer import RagService  # noqa: E402
 from rag_operations import RagOperationsAnalyzer  # noqa: E402
 from apps.wechat_ai_customer_service.knowledge_paths import tenant_root  # noqa: E402
+from apps.wechat_ai_customer_service.storage import get_postgres_store, load_storage_config  # noqa: E402
 
 
 def main() -> int:
@@ -161,6 +162,30 @@ def check_experience_layer_active_and_discarded_retrieval() -> None:
     )
     active = service.search("办公室午休床占不占地方", product_id="fb-100", limit=10)
     assert_true(any(hit.get("source_id") == record["experience_id"] for hit in active.get("hits", [])), "active experience should be searchable")
+    low_record = store.record_reply(
+        target="eval",
+        message_ids=["eval-exp-low"],
+        question="客户问午休床闲聊里的颜色偏好",
+        reply_text="这个只能作为弱参考，不能当正式规则。",
+        raw_reply_text="这个只能作为弱参考，不能当正式规则。",
+        intent_assist={"intent": "product_detail", "recommended_action": "answer_from_evidence"},
+        rag_reply={
+            "applied": True,
+            "hit": {
+                "chunk_id": "eval-low-chunk",
+                "source_id": "eval-low-source",
+                "score": 0.04,
+                "category": "product_explanations",
+                "source_type": "product_doc",
+                "product_id": "fb-100",
+                "text": "闲聊里提到的颜色偏好，和正式资料关联很弱。",
+                "risk_terms": [],
+            },
+        },
+    )
+    assert_true(low_record.get("quality", {}).get("retrieval_allowed") is False, "low-confidence experience should be blocked by quality gate")
+    low_search = service.search("午休床颜色偏好", product_id="fb-100", limit=10)
+    assert_true(not any(hit.get("source_id") == low_record["experience_id"] for hit in low_search.get("hits", [])), "low-confidence experience should not be searchable")
     store.discard(record["experience_id"], reason="eval discard")
     discarded = service.search("办公室午休床占不占地方", product_id="fb-100", limit=10)
     assert_true(not any(hit.get("source_id") == record["experience_id"] for hit in discarded.get("hits", [])), "discarded experience should not be searchable")
@@ -221,6 +246,12 @@ def cleanup() -> None:
     tenant_path = tenant_root(TENANT_ID)
     if tenant_path.exists():
         shutil.rmtree(tenant_path)
+    config = load_storage_config()
+    if config.use_postgres and config.postgres_configured:
+        store = get_postgres_store(tenant_id=TENANT_ID, config=config)
+        if store.available():
+            for table in ("rag_index_entries", "rag_chunks", "rag_sources", "rag_experiences", "audit_events"):
+                store.execute(f"DELETE FROM {store.schema}.{table} WHERE tenant_id = %s", [TENANT_ID])
 
 
 def assert_true(value: bool, message: str) -> None:

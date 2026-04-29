@@ -14,6 +14,7 @@ from apps.wechat_ai_customer_service.storage import get_postgres_store, load_sto
 
 PROJECT_ROOT = Path(__file__).resolve().parents[4]
 HANDOFF_PATH = PROJECT_ROOT / "runtime" / "apps" / "wechat_ai_customer_service" / "admin" / "handoff_cases.json"
+ALLOWED_STATUSES = {"open", "acknowledged", "resolved", "ignored"}
 
 
 class HandoffStore:
@@ -24,9 +25,14 @@ class HandoffStore:
     def create_case(self, item: dict[str, Any]) -> dict[str, Any]:
         now_text = now()
         message_ids = [str(value) for value in item.get("message_ids", []) or []]
+        case_id = item.get("case_id") or self.build_case_id(item, message_ids, now_text)
+        existing = self.get_case(str(case_id))
+        if existing:
+            existing["deduped"] = True
+            return existing
         case = {
             "tenant_id": self.tenant_id,
-            "case_id": item.get("case_id") or "handoff_" + stable_digest(f"{self.tenant_id}:{item.get('target')}:{message_ids}:{item.get('reason')}:{now_text}", 20),
+            "case_id": case_id,
             "target": item.get("target") or "",
             "status": item.get("status") or "open",
             "priority": int(item.get("priority", 1) or 1),
@@ -50,6 +56,13 @@ class HandoffStore:
         self.write_cases(cases)
         return case
 
+    def build_case_id(self, item: dict[str, Any], message_ids: list[str], now_text: str) -> str:
+        if message_ids:
+            seed = f"{self.tenant_id}:{item.get('target')}:{message_ids}:{item.get('reason')}"
+        else:
+            seed = f"{self.tenant_id}:{item.get('target')}:{item.get('reason')}:{now_text}:{item.get('reply_text')}"
+        return "handoff_" + stable_digest(seed, 20)
+
     def list_cases(self, *, status: str = "open", limit: int = 100) -> list[dict[str, Any]]:
         db = self.db()
         if db:
@@ -70,6 +83,8 @@ class HandoffStore:
         return None
 
     def update_status(self, case_id: str, status: str, resolution: dict[str, Any] | None = None) -> dict[str, Any] | None:
+        if status not in ALLOWED_STATUSES:
+            raise ValueError(f"invalid handoff status: {status}")
         db = self.db()
         if db:
             return db.update_handoff_status(self.tenant_id, case_id, status, resolution or {})
@@ -137,4 +152,3 @@ def stable_digest(text: str, length: int = 16) -> str:
 
 def now() -> str:
     return datetime.now().isoformat(timespec="seconds")
-

@@ -72,6 +72,9 @@ def approve_candidate(candidate_id: str) -> dict[str, Any]:
 @router.post("/{candidate_id}/apply")
 def apply_candidate(candidate_id: str) -> dict[str, Any]:
     try:
-        return store.apply(candidate_id)
+        result = store.apply(candidate_id)
     except FileNotFoundError as exc:
         raise HTTPException(status_code=404, detail=f"candidate not found: {candidate_id}") from exc
+    if not result.get("ok"):
+        raise HTTPException(status_code=400, detail=result)
+    return result

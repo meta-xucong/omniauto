@@ -8,11 +8,13 @@ import os
 import subprocess
 import uuid
 from datetime import datetime, timedelta
+from difflib import SequenceMatcher
 from pathlib import Path
 from typing import Any
 
 from .knowledge_base_store import KnowledgeBaseStore
 from .knowledge_compiler import KnowledgeCompiler
+from .knowledge_deduper import duplicate_text, normalize_price_tiers, normalized_fingerprint, semantic_key
 from .knowledge_registry import KnowledgeRegistry
 from .knowledge_schema_manager import KnowledgeSchemaManager
 from apps.wechat_ai_customer_service.knowledge_paths import active_tenant_id
@@ -25,6 +27,7 @@ DIAGNOSTICS_ROOT = PROJECT_ROOT / "runtime" / "apps" / "wechat_ai_customer_servi
 IGNORES_PATH = PROJECT_ROOT / "runtime" / "apps" / "wechat_ai_customer_service" / "admin" / "diagnostic_ignores.json"
 HIGH_RISK_KEYWORDS = ["月结", "账期", "赔偿", "退款", "虚开", "伪造", "免单", "白送"]
 TOKEN_BUDGET_NOTICE_THRESHOLD = 7000
+KNOWLEDGE_DUPLICATE_SIMILARITY_THRESHOLD = 0.94
 
 
 class DiagnosticsService:
@@ -355,7 +358,15 @@ class DiagnosticsService:
                 if not validation.get("ok"):
                     for problem in validation.get("problems", []) or []:
                         issues.append({"severity": "error", "title": "category schema invalid", "detail": str(problem), "target": category_id})
-                for item in store.list_items(category_id):
+                all_items = store.list_items(category_id)
+                focus_ids: set[str] | None = None
+                if recent_only:
+                    focus_ids = {
+                        str(item.get("id") or "")
+                        for item in all_items
+                        if item_is_recent(store, category_id, str(item.get("id") or ""))
+                    }
+                for item in all_items:
                     if recent_only and not item_is_recent(store, category_id, str(item.get("id") or "")):
                         continue
                     checked_items += 1
@@ -363,6 +374,7 @@ class DiagnosticsService:
                     if not item_validation.get("ok"):
                         for problem in item_validation.get("problems", []) or []:
                             issues.append({"severity": "error", "title": "knowledge item invalid", "detail": str(problem), "target": f"{category_id}/{item.get('id')}"})
+                issues.extend(self.detect_consistency_issues(category_id, all_items, focus_ids=focus_ids))
             except Exception as exc:
                 issues.append({"severity": "error", "title": "category validation failed", "detail": repr(exc), "target": category_id})
         return {
@@ -373,6 +385,63 @@ class DiagnosticsService:
             "checked_items": checked_items,
             "recent_only": recent_only,
         }
+
+    def detect_consistency_issues(
+        self,
+        category_id: str,
+        items: list[dict[str, Any]],
+        *,
+        focus_ids: set[str] | None = None,
+    ) -> list[dict[str, Any]]:
+        issues: list[dict[str, Any]] = []
+        grouped: dict[str, list[dict[str, Any]]] = {}
+        for item in items:
+            if item.get("status") == "archived":
+                continue
+            key = semantic_key(category_id, item)
+            if not key:
+                continue
+            grouped.setdefault(key, []).append(item)
+        for group in grouped.values():
+            if len(group) < 2:
+                continue
+            for left_index, left in enumerate(group):
+                left_id = str(left.get("id") or "")
+                if focus_ids is not None and left_id not in focus_ids:
+                    continue
+                for right in group[left_index + 1 :]:
+                    right_id = str(right.get("id") or "")
+                    if left_id and right_id and left_id == right_id:
+                        continue
+                    left_fp = normalized_fingerprint(duplicate_text(category_id, left))
+                    right_fp = normalized_fingerprint(duplicate_text(category_id, right))
+                    similarity = SequenceMatcher(None, left_fp, right_fp).ratio() if left_fp and right_fp else 0.0
+                    conflicts = conflicting_fields(category_id, left, right)
+                    if conflicts:
+                        issues.append(knowledge_consistency_issue(
+                            code="knowledge_potential_conflict",
+                            title="知识可能互相矛盾",
+                            category_id=category_id,
+                            left=left,
+                            right=right,
+                            detail=f"{category_id}/{left_id} 与 {category_id}/{right_id} 属于同一业务对象，但字段取值不一致：{', '.join(conflicts)}。",
+                            similarity=similarity,
+                            fields=conflicts,
+                        ))
+                    elif similarity >= KNOWLEDGE_DUPLICATE_SIMILARITY_THRESHOLD:
+                        issues.append(knowledge_consistency_issue(
+                            code="knowledge_potential_duplicate",
+                            title="知识可能重复",
+                            category_id=category_id,
+                            left=left,
+                            right=right,
+                            detail=f"{category_id}/{left_id} 与 {category_id}/{right_id} 内容高度相似，建议人工确认是否合并或归档其中一条。",
+                            similarity=similarity,
+                            fields=[],
+                        ))
+                    if len(issues) >= 40:
+                        return issues
+        return issues
 
     def apply_suggestion(self, run_id: str, payload: dict[str, Any] | None = None) -> dict[str, Any]:
         report = self.get_run(run_id)
@@ -562,6 +631,110 @@ def item_is_recent(store: KnowledgeBaseStore, category_id: str, item_id: str, *,
         return True
     modified_at = datetime.fromtimestamp(path.stat().st_mtime)
     return modified_at >= datetime.now() - timedelta(days=days)
+
+
+def conflicting_fields(category_id: str, left: dict[str, Any], right: dict[str, Any]) -> list[str]:
+    left_data = left.get("data") if isinstance(left.get("data"), dict) else {}
+    right_data = right.get("data") if isinstance(right.get("data"), dict) else {}
+    if category_id == "products":
+        return changed_fields(
+            left_data,
+            right_data,
+            ["price", "unit", "price_tiers", "inventory", "shipping_policy", "warranty_policy", "risk_rules"],
+        )
+    if category_id == "policies":
+        fields = changed_fields(left_data, right_data, ["answer", "allow_auto_reply", "requires_handoff", "handoff_reason", "risk_level"])
+        return fields if text_differs(left_data.get("answer"), right_data.get("answer")) or len(fields) > 1 else []
+    if category_id == "chats":
+        return changed_fields(left_data, right_data, ["service_reply", "intent_tags", "tone_tags"])
+    if category_id == "erp_exports":
+        return changed_fields(left_data, right_data, ["record_type", "fields"])
+    return changed_fields(left_data, right_data, ["answer", "content", "price", "unit", "requires_handoff", "risk_level"])
+
+
+def changed_fields(left_data: dict[str, Any], right_data: dict[str, Any], fields: list[str]) -> list[str]:
+    changed = []
+    for field in fields:
+        left_value = left_data.get(field)
+        right_value = right_data.get(field)
+        if is_blank(left_value) or is_blank(right_value):
+            continue
+        if field == "price_tiers":
+            if normalize_price_tiers(left_value) != normalize_price_tiers(right_value):
+                changed.append(field)
+            continue
+        if normalized_value(left_value) != normalized_value(right_value):
+            changed.append(field)
+    return changed
+
+
+def text_differs(left: Any, right: Any, *, threshold: float = 0.86) -> bool:
+    left_text = normalized_fingerprint(str(left or ""))
+    right_text = normalized_fingerprint(str(right or ""))
+    if not left_text or not right_text:
+        return False
+    return SequenceMatcher(None, left_text, right_text).ratio() < threshold
+
+
+def normalized_value(value: Any) -> str:
+    return normalized_fingerprint(json.dumps(value, ensure_ascii=False, sort_keys=True) if isinstance(value, (dict, list)) else str(value or ""))
+
+
+def is_blank(value: Any) -> bool:
+    return value is None or value == "" or value == [] or value == {}
+
+
+def knowledge_consistency_issue(
+    *,
+    code: str,
+    title: str,
+    category_id: str,
+    left: dict[str, Any],
+    right: dict[str, Any],
+    detail: str,
+    similarity: float,
+    fields: list[str],
+) -> dict[str, Any]:
+    left_id = str(left.get("id") or "")
+    right_id = str(right.get("id") or "")
+    left_title = readable_item_title(left)
+    right_title = readable_item_title(right)
+    return {
+        "code": code,
+        "severity": "warning",
+        "title": title,
+        "detail": detail,
+        "target": f"{category_id}/{left_id}",
+        "target_label": f"{category_id}: {left_title} / {right_title}",
+        "repairable": False,
+        "details": [
+            {"label": "知识 A", "value": f"{category_id}/{left_id} · {left_title}", "level": "warning"},
+            {"label": "知识 B", "value": f"{category_id}/{right_id} · {right_title}", "level": "warning"},
+            {"label": "相似度", "value": f"{similarity:.2f}", "level": "normal"},
+            {"label": "争议字段", "value": "、".join(fields) if fields else "整体内容高度相似", "level": "danger" if fields else "warning"},
+        ],
+        "suggestions": [
+            {
+                "title": "请人工确认处理",
+                "detail": "如果两条表达的是同一件事，建议保留信息更完整的一条，另一条归档；如果新资料更准确，可以手动合并后保存。",
+                "level": "warning",
+            },
+            {
+                "title": "不要自动覆盖",
+                "detail": "系统只做风险提示，不会擅自删除或覆盖正式知识，避免误删客户真实规则。",
+                "level": "normal",
+            },
+        ],
+    }
+
+
+def readable_item_title(item: dict[str, Any]) -> str:
+    data = item.get("data") if isinstance(item.get("data"), dict) else {}
+    for key in ("name", "title", "question", "customer_message", "external_id"):
+        value = data.get(key)
+        if value:
+            return str(value)
+    return str(item.get("id") or "未命名知识")
 
 
 def readable_target(target: Any) -> str:

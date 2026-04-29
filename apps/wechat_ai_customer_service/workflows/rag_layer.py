@@ -253,12 +253,13 @@ class RagService:
             return []
         store = RagExperienceStore(tenant_id=self.tenant_id)
         chunks: list[dict[str, Any]] = []
-        for item in store.list(status="active", limit=500):
+        for item in store.list_retrievable(limit=500):
             text = build_experience_chunk_text(item)
             if not text.strip():
                 continue
             experience_id = str(item.get("experience_id") or "")
             hit = item.get("rag_hit", {}) or {}
+            quality = item.get("quality", {}) if isinstance(item.get("quality"), dict) else {}
             chunks.append(
                 {
                     "chunk_id": "chunk_" + stable_digest(f"rag_experience:{experience_id}:{text}", 16),
@@ -273,6 +274,7 @@ class RagService:
                     "text": text,
                     "char_count": len(text),
                     "status": "active",
+                    "quality": quality,
                     "created_at": item.get("created_at") or now(),
                 }
             )

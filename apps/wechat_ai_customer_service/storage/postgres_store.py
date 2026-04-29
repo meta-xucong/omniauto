@@ -640,37 +640,42 @@ class PostgresJsonStore:
     def claim_jobs(self, tenant_id: str, *, queue: str = "default", worker_id: str = "", limit: int = 1, lock_seconds: int = 300) -> list[dict[str, Any]]:
         rows = self.fetchall(
             f"""
-            SELECT job_id
-            FROM {self.schema}.work_queue_jobs
-            WHERE tenant_id = %s
-              AND queue = %s
-              AND status = 'pending'
-              AND available_at <= now()
-              AND (locked_until IS NULL OR locked_until < now())
-            ORDER BY priority ASC, created_at ASC
-            LIMIT %s
-            """,
-            [tenant_id, queue or "default", max(1, min(int(limit or 1), 20))],
-        )
-        claimed: list[dict[str, Any]] = []
-        for row in rows:
-            job_id = str(row["job_id"])
-            self.execute(
-                f"""
-                UPDATE {self.schema}.work_queue_jobs
-                SET status = 'running',
-                    attempts = attempts + 1,
-                    locked_by = %s,
-                    locked_until = now() + (%s || ' seconds')::interval,
-                    updated_at = now()
-                WHERE tenant_id = %s AND job_id = %s AND status = 'pending'
-                """,
-                [worker_id or "worker", int(lock_seconds or 300), tenant_id, job_id],
+            WITH claimable AS (
+              SELECT job_id
+              FROM {self.schema}.work_queue_jobs
+              WHERE tenant_id = %s
+                AND queue = %s
+                AND attempts < max_attempts
+                AND (
+                  (status = 'pending' AND available_at <= now())
+                  OR (status = 'running' AND locked_until IS NOT NULL AND locked_until < now())
+                )
+              ORDER BY priority ASC, created_at ASC
+              LIMIT %s
             )
-            job = self.get_job(tenant_id, job_id)
-            if job and job.get("status") == "running":
-                claimed.append(job)
-        return claimed
+            UPDATE {self.schema}.work_queue_jobs AS jobs
+            SET status = 'running',
+                attempts = jobs.attempts + 1,
+                locked_by = %s,
+                locked_until = now() + (%s || ' seconds')::interval,
+                updated_at = now()
+            FROM claimable
+            WHERE jobs.tenant_id = %s AND jobs.job_id = claimable.job_id
+            RETURNING jobs.tenant_id, jobs.job_id, jobs.queue, jobs.kind, jobs.status, jobs.priority,
+                      jobs.dedupe_key, jobs.attempts, jobs.max_attempts, jobs.available_at,
+                      jobs.locked_until, jobs.locked_by, jobs.payload, jobs.result, jobs.error,
+                      jobs.created_at, jobs.updated_at, jobs.finished_at
+            """,
+            [
+                tenant_id,
+                queue or "default",
+                max(1, min(int(limit or 1), 20)),
+                worker_id or "worker",
+                int(lock_seconds or 300),
+                tenant_id,
+            ],
+        )
+        return [normalize_job_row(row) for row in rows]
 
     def complete_job(self, tenant_id: str, job_id: str, result: dict[str, Any] | None = None) -> dict[str, Any] | None:
         self.execute(
@@ -738,10 +743,23 @@ class PostgresJsonStore:
             [tenant_id],
         )
         counts = {str(row["status"]): int(row["count"]) for row in rows}
+        stale_row = self.fetchone(
+            f"""
+            SELECT count(*) AS count
+            FROM {self.schema}.work_queue_jobs
+            WHERE tenant_id = %s
+              AND status = 'running'
+              AND locked_until IS NOT NULL
+              AND locked_until < now()
+            """,
+            [tenant_id],
+        )
+        stale_running = int(stale_row["count"] if stale_row else 0)
         return {
             "total": sum(counts.values()),
             "pending": counts.get("pending", 0),
             "running": counts.get("running", 0),
+            "stale_running": stale_running,
             "succeeded": counts.get("succeeded", 0),
             "failed": counts.get("failed", 0),
             "cancelled": counts.get("cancelled", 0),

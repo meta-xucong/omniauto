@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import shutil
 import sys
 from io import BytesIO
@@ -27,11 +28,13 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from apps.wechat_ai_customer_service.admin_backend.app import create_app  # noqa: E402
+from apps.wechat_ai_customer_service.admin_backend.services.diagnostics_service import DiagnosticsService  # noqa: E402
 from apps.wechat_ai_customer_service.admin_backend.services.knowledge_deduper import KnowledgeDeduper  # noqa: E402
 from apps.wechat_ai_customer_service.admin_backend.services.knowledge_compiler import KnowledgeCompiler, compile_faq  # noqa: E402
 from apps.wechat_ai_customer_service.admin_backend.services.learning_service import LearningService  # noqa: E402
 from apps.wechat_ai_customer_service.admin_backend.services import learning_service as learning_service_module  # noqa: E402
-from apps.wechat_ai_customer_service.knowledge_paths import default_admin_knowledge_base_root, tenant_product_item_knowledge_root  # noqa: E402
+from apps.wechat_ai_customer_service.knowledge_paths import active_tenant_id, default_admin_knowledge_base_root, tenant_product_item_knowledge_root  # noqa: E402
+from apps.wechat_ai_customer_service.storage import get_postgres_store, load_storage_config  # noqa: E402
 from apps.wechat_ai_customer_service.workflows import generate_review_candidates as review_candidate_generator  # noqa: E402
 from apps.wechat_ai_customer_service.workflows.rag_experience_store import RagExperienceStore  # noqa: E402
 from apps.wechat_ai_customer_service.workflows.rag_layer import RagService  # noqa: E402
@@ -46,9 +49,18 @@ def main() -> int:
     parser.add_argument("--chapter", choices=CHAPTERS, default="all")
     args = parser.parse_args()
 
-    result = run_checks(args.chapter)
-    print(json.dumps(result, ensure_ascii=False, indent=2))
-    return 0 if result.get("ok") else 1
+    old_mirror = os.environ.get("WECHAT_POSTGRES_MIRROR_FILES")
+    if old_mirror is None and os.environ.get("WECHAT_STORAGE_BACKEND", "").strip().lower() == "postgres":
+        os.environ["WECHAT_POSTGRES_MIRROR_FILES"] = "0"
+    try:
+        result = run_checks(args.chapter)
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return 0 if result.get("ok") else 1
+    finally:
+        if old_mirror is None:
+            os.environ.pop("WECHAT_POSTGRES_MIRROR_FILES", None)
+        else:
+            os.environ["WECHAT_POSTGRES_MIRROR_FILES"] = old_mirror
 
 
 def run_checks(chapter: str) -> dict[str, Any]:
@@ -127,6 +139,10 @@ def check_index_page(client: TestClient) -> None:
     assert_true("WeChat AI Service" in text, "index should render app shell")
     assert_true("/static/styles.css" in text, "index should link stylesheet")
     assert_true('id="upload-file" type="file" multiple' in text, "upload input should support multiple files")
+    assert_true("知识录入与学习" in text, "index should group upload, learning, and candidate review")
+    assert_true("AI参考资料" in text, "index should group reference material and dialogue experience")
+    assert_true("AI整理资料" in text, "index should expose one-click material learning")
+    assert_true("待确认知识" in text, "index should expose simple candidate review wording")
 
 
 def check_static_assets(client: TestClient) -> None:
@@ -153,6 +169,9 @@ def check_static_assets(client: TestClient) -> None:
     assert_true("use_llm: true" in js.text, "frontend should request LLM-assisted upload learning")
     assert_true("skipped_duplicate_count" in js.text, "frontend should show duplicate-skip count after learning")
     assert_true("upload-delete" in js.text, "frontend should expose upload delete action")
+    assert_true("workflow-tab" in js.text, "frontend should expose grouped workflow tabs")
+    assert_true("activeIntakeTab" in js.text, "frontend should keep intake subpage state")
+    assert_true("viewAliases" in js.text, "frontend should keep old deep links compatible")
     assert_true("candidateIsIncomplete" in js.text, "frontend should mark incomplete candidates")
     assert_true("candidate-supplement-save" in js.text, "frontend should expose candidate supplement action")
     assert_true("/supplement" in js.text, "frontend should call candidate supplement endpoint")
@@ -160,19 +179,27 @@ def check_static_assets(client: TestClient) -> None:
     assert_true("/category" in js.text, "frontend should call candidate category correction endpoint")
     assert_true("setLearningBusy(true" in js.text, "frontend should show upload learning progress")
     assert_true("clearCandidateDetail(\"已应用入库" in js.text, "frontend should clear candidate detail after apply")
+    assert_true("候选应用失败" in js.text, "frontend should surface failed candidate apply instead of silently refreshing")
     assert_true("if (reasonInput === null) return" in js.text, "frontend should cancel reject without rejecting")
     assert_true("loading-spinner" in css.text, "frontend should include loading spinner style")
     assert_true("knowledge-form" in js.text, "frontend should render business forms")
     assert_true("category-select" in js.text, "frontend should expose category selector")
     assert_true("rag-search" in js.text, "frontend should expose rag search action")
     assert_true("/api/rag/status" in js.text, "frontend should call rag status endpoint")
+    assert_true("/api/rag/sources" in js.text, "frontend should call rag source list endpoint")
     assert_true("/api/rag/analytics" in js.text, "frontend should call rag analytics endpoint")
-    assert_true("rag_experiences" in js.text, "frontend should expose rag experience page")
+    assert_true("ai_reference" in js.text, "frontend should expose AI reference page")
     assert_true("/api/rag/experiences" in js.text, "frontend should call rag experience endpoint")
+    assert_true("status=all" in js.text, "frontend should show all rag experience statuses")
     assert_true("rag-experience-discard" in js.text, "frontend should expose rag experience discard action")
+    assert_true("rag-experience-promote" in js.text, "frontend should expose rag experience promotion action")
+    assert_true("formal_relation" in js.text, "frontend should render rag/formal knowledge relationship")
+    assert_true("quality-chip" in js.text, "frontend should render rag experience quality chips")
+    assert_true("retrieval_allowed" in js.text, "frontend should render rag retrieval eligibility")
     assert_true("rag_evidence" in js.text, "frontend should render candidate rag evidence")
-    assert_true("资料检索增强" in client.get("/").text, "frontend should expose rag navigation")
-    assert_true("RAG新经验" in client.get("/").text, "frontend should expose rag experience navigation")
+    assert_true('id="rag-source-list"' in client.get("/").text, "frontend should expose rag source list")
+    assert_true("已导入资料" in client.get("/").text, "frontend should expose imported reference material")
+    assert_true("对话中学到的经验" in client.get("/").text, "frontend should expose dialogue experience")
 
 
 def check_rag_status_and_search_api(client: TestClient) -> None:
@@ -182,6 +209,12 @@ def check_rag_status_and_search_api(client: TestClient) -> None:
     assert_true(payload.get("ok") is True, "rag status ok")
     assert_true("source_count" in payload, "rag status source count")
     assert_true("experience_counts" in payload, "rag status should include experience counts")
+
+    sources = client.get("/api/rag/sources", params={"limit": 5})
+    assert_equal(sources.status_code, 200, "rag source list endpoint")
+    source_payload = sources.json()
+    assert_true(source_payload.get("ok") is True, "rag source list ok")
+    assert_true("sources" in source_payload and "chunks" in source_payload, "rag source list should expose sources and chunks")
 
     rebuild = client.post("/api/rag/rebuild")
     assert_equal(rebuild.status_code, 200, "rag rebuild endpoint")
@@ -222,11 +255,15 @@ def check_rag_experience_api(client: TestClient) -> None:
                 },
             },
         )
+        assert_true(record.get("quality", {}).get("retrieval_allowed") is True, "high quality rag experience should be retrieval eligible")
         listed = client.get("/api/rag/experiences", params={"status": "active", "limit": 50})
         assert_equal(listed.status_code, 200, "rag experience list endpoint")
         items = listed.json().get("items", [])
         assert_true(any(item.get("experience_id") == record["experience_id"] for item in items), "rag experience should be listed as active")
         assert_equal(listed.json().get("formal_knowledge_policy"), "rag_experience_only_not_formal_knowledge", "rag experience policy marker")
+        listed_record = next(item for item in items if item.get("experience_id") == record["experience_id"])
+        assert_true(listed_record.get("quality", {}).get("retrieval_allowed") is True, "rag experience API should expose retrieval eligibility")
+        assert_true(listed_record.get("quality", {}).get("band") in {"high", "medium"}, "rag experience API should expose quality band")
 
         search = client.post("/api/rag/search", json={"query": "公寓门锁安装提前留电源", "limit": 10})
         assert_equal(search.status_code, 200, "rag experience search endpoint")
@@ -234,6 +271,61 @@ def check_rag_experience_api(client: TestClient) -> None:
             any(hit.get("source_id") == record["experience_id"] and hit.get("source_type") == "rag_experience" for hit in search.json().get("hits", [])),
             "active rag experience should participate in rag retrieval",
         )
+
+        low_record = store.record_reply(
+            target="admin_rag_experience_probe",
+            message_ids=["admin-rag-exp-low"],
+            question="客户随口问一个资料里很弱相关的门锁颜色偏好",
+            reply_text="这个我只能按现有资料做轻参考，不能当成正式规则。",
+            raw_reply_text="这个我只能按现有资料做轻参考，不能当成正式规则。",
+            intent_assist={"intent": "product_detail", "recommended_action": "answer"},
+            rag_reply={
+                "applied": True,
+                "hit": {
+                    "chunk_id": "admin-rag-exp-low-chunk",
+                    "source_id": "admin-rag-exp-low-source",
+                    "score": 0.05,
+                    "category": "product_explanations",
+                    "source_type": "rag_soft_reference",
+                    "product_id": "fl-920",
+                    "text": "门锁颜色偏好来自一次很弱相关的闲聊摘录。",
+                },
+            },
+        )
+        assert_true(low_record.get("quality", {}).get("retrieval_allowed") is False, "low quality rag experience should not be retrieval eligible")
+        low_search = client.post("/api/rag/search", json={"query": "门锁颜色偏好弱相关闲聊摘录", "limit": 10})
+        assert_equal(low_search.status_code, 200, "low quality rag search endpoint")
+        assert_true(
+            not any(hit.get("source_id") == low_record["experience_id"] for hit in low_search.json().get("hits", [])),
+            "low quality active rag experience should not participate in retrieval",
+        )
+
+        listed_all = client.get("/api/rag/experiences", params={"status": "all", "limit": 50}).json()
+        all_items = listed_all.get("items", [])
+        active_item = next(item for item in all_items if item.get("experience_id") == record["experience_id"])
+        assert_true("formal_relation" in active_item, "rag experience should expose formal relation annotation")
+        assert_true("recommended_action" in active_item, "rag experience should expose recommended action")
+        assert_true("formal_relation_cache" in active_item, "rag experience should expose formal relation cache")
+        low_item = next(item for item in all_items if item.get("experience_id") == low_record["experience_id"])
+        assert_true(low_item.get("quality", {}).get("retrieval_allowed") is False, "low quality item should remain visible for review")
+
+        promoted = client.post(
+            f"/api/rag/experiences/{record['experience_id']}/promote",
+            json={"source": "admin backend check"},
+        )
+        assert_equal(promoted.status_code, 200, "rag experience promote endpoint")
+        promoted_payload = promoted.json()
+        assert_true(promoted_payload.get("ok"), f"rag experience promote should be ok: {promoted_payload}")
+        candidate_id = promoted_payload.get("candidate", {}).get("candidate_id")
+        assert_true(str(candidate_id).startswith("rag_promote_"), "promote should create a rag candidate id")
+        pending_candidates = client.get("/api/candidates", params={"status": "pending"}).json().get("items", [])
+        assert_true(candidate_id in {item.get("candidate_id") for item in pending_candidates}, "promoted rag experience should appear as pending candidate")
+        promoted_all = client.get("/api/rag/experiences", params={"status": "all", "limit": 50}).json().get("items", [])
+        promoted_item = next(item for item in promoted_all if item.get("experience_id") == record["experience_id"])
+        assert_equal(promoted_item.get("status"), "promoted", "rag experience should be marked promoted")
+        assert_equal(promoted_item.get("formal_relation"), "promoted", "promoted experience should expose promoted relation")
+        search_promoted = client.post("/api/rag/search", json={"query": "公寓门锁安装提前留电源", "limit": 10}).json().get("hits", [])
+        assert_true(not any(hit.get("source_id") == record["experience_id"] for hit in search_promoted), "promoted rag experience should not participate in retrieval")
 
         discarded = client.post(
             f"/api/rag/experiences/{record['experience_id']}/discard",
@@ -251,14 +343,50 @@ def check_rag_experience_api(client: TestClient) -> None:
 
 
 def cleanup_rag_experience_probe(store: RagExperienceStore) -> None:
-    if not store.path.exists():
+    experience_ids = [
+        str(item.get("experience_id") or "")
+        for item in store.list(status="all", limit=500)
+        if item.get("target") == "admin_rag_experience_probe"
+    ]
+    cleanup_rag_promotion_candidates(experience_ids)
+    config = load_storage_config()
+    if config.use_postgres and config.postgres_configured:
+        db = get_postgres_store(tenant_id=store.tenant_id, config=config)
+        if db.available():
+            db.execute(
+                f"DELETE FROM {db.schema}.rag_experiences WHERE tenant_id = %s AND payload->>'target' = %s",
+                [store.tenant_id, "admin_rag_experience_probe"],
+            )
+
+    if store.path.exists():
+        records = json.loads(store.path.read_text(encoding="utf-8"))
+        if isinstance(records, list):
+            filtered = [item for item in records if item.get("target") != "admin_rag_experience_probe"]
+            store.path.write_text(json.dumps(filtered, ensure_ascii=False, indent=2), encoding="utf-8")
+    RagService(tenant_id=store.tenant_id).rebuild_index()
+
+
+def cleanup_rag_promotion_candidates(experience_ids: list[str]) -> None:
+    if not experience_ids:
         return
-    records = json.loads(store.path.read_text(encoding="utf-8"))
-    if not isinstance(records, list):
-        return
-    filtered = [item for item in records if item.get("target") != "admin_rag_experience_probe"]
-    store.path.write_text(json.dumps(filtered, ensure_ascii=False, indent=2), encoding="utf-8")
-    RagService().rebuild_index()
+    review_root = APP_ROOT / "data" / "review_candidates"
+    for path in review_root.glob("*/*.json"):
+        try:
+            item = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        source = item.get("source") if isinstance(item.get("source"), dict) else {}
+        if str(source.get("experience_id") or "") in experience_ids:
+            path.unlink()
+    config = load_storage_config()
+    if config.use_postgres and config.postgres_configured:
+        db = get_postgres_store(config=config)
+        if db.available():
+            for experience_id in experience_ids:
+                db.execute(
+                    f"DELETE FROM {db.schema}.review_candidates WHERE tenant_id = %s AND payload->'source'->>'experience_id' = %s",
+                    [active_tenant_id(), experience_id],
+                )
 
 
 def check_knowledge_overview(client: TestClient) -> None:
@@ -592,6 +720,11 @@ def check_upload_learning_candidate_apply_and_reject(client: TestClient) -> None
         assert_true(product_apply.get("ok"), f"xlsx product candidate apply should be ok: {product_apply}")
         product_snapshot_id = product_apply["snapshot"]["version_id"]
         created_version_ids.append(product_snapshot_id)
+        pending_after_product_apply = client.get("/api/candidates", params={"status": "pending"}).json().get("items", [])
+        assert_true(
+            product_candidate["candidate_id"] not in {item.get("candidate_id") for item in pending_after_product_apply},
+            "applied product candidate should leave pending list",
+        )
         category_products = client.get("/api/knowledge/categories/products/items").json().get("items", [])
         assert_true(product_id in {item.get("id") for item in category_products}, "applied xlsx product should be visible in product category")
         compiled_products = client.get("/api/knowledge/products").json().get("items", [])
@@ -621,7 +754,9 @@ def check_upload_learning_candidate_apply_and_reject(client: TestClient) -> None
         incomplete_candidate = incomplete_job["candidates"][0]
         assert_equal(incomplete_candidate.get("intake", {}).get("status"), "needs_more_info", "incomplete upload should be kept as needs-more-info candidate")
         assert_true("price" in set(incomplete_candidate.get("intake", {}).get("missing_fields", [])), "incomplete upload should ask for missing price")
-        incomplete_apply = client.post(f"/api/candidates/{incomplete_candidate['candidate_id']}/apply").json()
+        incomplete_apply_response = client.post(f"/api/candidates/{incomplete_candidate['candidate_id']}/apply")
+        assert_equal(incomplete_apply_response.status_code, 400, "incomplete candidate apply should return 400")
+        incomplete_apply = incomplete_apply_response.json().get("detail", {})
         assert_true(incomplete_apply.get("ok") is False, "incomplete candidate should not apply")
         supplement_data = dict(incomplete_candidate["proposal"]["formal_patch"]["item"]["data"])
         supplement_data.update({"price": 38, "unit": "件"})
@@ -659,6 +794,8 @@ def check_upload_learning_candidate_apply_and_reject(client: TestClient) -> None
         assert_true(applied.get("ok"), f"candidate apply should be ok: {applied}")
         snapshot_id = applied["snapshot"]["version_id"]
         created_version_ids.append(snapshot_id)
+        pending_after_apply = client.get("/api/candidates", params={"status": "pending"}).json().get("items", [])
+        assert_true(candidate_id not in {item.get("candidate_id") for item in pending_after_apply}, "applied chat candidate should leave pending list")
         style_id = applied["item"]["proposal"]["formal_patch"]["item"]["id"]
         after_apply = client.get("/api/knowledge/styles").json().get("items", [])
         assert_true(style_id in {item.get("id") for item in after_apply}, "candidate style should be visible after apply")
@@ -687,6 +824,7 @@ def check_upload_learning_candidate_apply_and_reject(client: TestClient) -> None
 
 
 def check_duplicate_candidate_detection_and_learning_skip() -> None:
+    check_knowledge_consistency_diagnostics()
     existing = json.loads((KNOWLEDGE_BASE_ROOT / "products" / "items" / "commercial_fridge_bx_200.json").read_text(encoding="utf-8"))
     candidate = {
         "schema_version": 1,
@@ -755,6 +893,37 @@ def check_duplicate_candidate_detection_and_learning_skip() -> None:
     assert_equal(result["job"]["candidate_count"], 0, "duplicate candidate should not be written as pending")
     assert_equal(result["job"]["skipped_duplicate_count"], 1, "duplicate candidate should be counted as skipped")
     assert_true(not (APP_ROOT / "data" / "review_candidates" / "pending" / "admin_duplicate_candidate_probe.json").exists(), "duplicate pending candidate file should not be created")
+
+
+def check_knowledge_consistency_diagnostics() -> None:
+    base_item = {
+        "schema_version": 1,
+        "category_id": "products",
+        "id": "admin_conflict_product_a",
+        "status": "active",
+        "data": {"name": "冲突检测测试商品", "sku": "admin-conflict-sku", "price": 100, "unit": "件"},
+        "runtime": {"allow_auto_reply": True, "requires_handoff": False, "risk_level": "normal"},
+    }
+    conflict_item = {
+        **base_item,
+        "id": "admin_conflict_product_b",
+        "data": {"name": "冲突检测测试商品", "sku": "admin-conflict-sku", "price": 120, "unit": "件"},
+    }
+    duplicate_item = {
+        **base_item,
+        "id": "admin_conflict_product_c",
+    }
+    service = DiagnosticsService()
+    conflict_issues = service.detect_consistency_issues("products", [base_item, conflict_item])
+    assert_true(
+        any(issue.get("code") == "knowledge_potential_conflict" for issue in conflict_issues),
+        f"diagnostics should flag same-SKU conflicting product fields: {conflict_issues}",
+    )
+    duplicate_issues = service.detect_consistency_issues("products", [base_item, duplicate_item])
+    assert_true(
+        any(issue.get("code") == "knowledge_potential_duplicate" for issue in duplicate_issues),
+        f"diagnostics should flag duplicate product knowledge: {duplicate_issues}",
+    )
 
 
 def check_mixed_text_upload_candidate_generation() -> None:
