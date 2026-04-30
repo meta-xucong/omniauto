@@ -1,12 +1,12 @@
-# 阿里云1 OmniAuto VPS 服务端部署记录
+# 阿里云1 OmniAuto VPS 服务端运维记录
 
 更新时间：2026-05-01
 
-## 当前结论
+## 当前状态
 
-阿里云1已经部署微信自动客服 VPS admin 服务端，并通过本机与公网 IP 健康检查。
+阿里云1现在只作为 OmniAuto 微信自动客服 VPS admin 服务端使用。
 
-- 公网访问：`http://139.196.101.174/`
+- 公网入口：`http://139.196.101.174/`
 - 健康检查：`http://139.196.101.174/v1/health`
 - systemd 服务：`omniauto-vps-admin.service`
 - 应用目录：`/opt/omniauto`
@@ -15,19 +15,45 @@
 - 错误日志：`/opt/omniauto-runtime/logs/vps-admin.err.log`
 - Nginx 配置：`/www/server/panel/vhost/nginx/omniauto.conf`
 
-注意：截至本次部署，`alcochrom.cn` 和 `www.alcochrom.cn` 的 DNS 解析仍指向 `101.133.234.199`，`alcochrom.vip` 和 `www.alcochrom.vip` 指向 `47.101.209.149`，不是阿里云1的 `139.196.101.174`。域名切换前请使用公网 IP 测试。
+未配置域名入口。Nginx 只保留公网 IP 与 default server 入口。
 
-## 部署内容
+## 保留组件
 
-远端保留系统自带 Nginx/宝塔面板、Python 3.10、Git、curl 等基础组件，只为 VPS admin 安装最小 Python 依赖：
+服务器只保留当前运行所需组件：
+
+- 系统自带 Nginx 与面板基础目录
+- Python 3.10 与 `/opt/omniauto/.venv`
+- Git、curl 等基础运维命令
+- `/opt/omniauto`
+- `/opt/omniauto-runtime`
+
+VPS admin 最小 Python 依赖：
 
 - `fastapi`
 - `uvicorn`
 - `openpyxl`
 - `python-multipart`
-- `httpx`，仅用于远端运行回归测试
+- `httpx`，仅用于远端回归测试
 
-没有安装桌面自动化、Playwright、OpenCV、Windows UI 自动化等 Local 客户端才需要的组件。
+未安装 Local 客户端侧的桌面自动化、Playwright、OpenCV、Windows UI 自动化等组件。
+
+## 已清理内容
+
+以下旧内容已从服务器删除：
+
+- 旧业务项目与旧项目备份
+- 旧 systemd 服务
+- 旧 Nginx 站点配置与域名证书记录
+- 旧开发工具草稿和缓存
+- 旧可疑系统级组件及其备份
+- 旧面板备份、旧站点目录、旧项目模板目录
+
+当前 `/opt` 顶层应只保留：
+
+```text
+/opt/omniauto
+/opt/omniauto-runtime
+```
 
 ## 常用命令
 
@@ -65,27 +91,35 @@ curl -sS http://127.0.0.1:8766/v1/health
 ```bash
 /www/server/nginx/sbin/nginx -t -c /www/server/nginx/conf/nginx.conf
 /www/server/nginx/sbin/nginx -s reload -c /www/server/nginx/conf/nginx.conf
-curl -sS -H 'Host: alcochrom.cn' http://127.0.0.1/v1/health
-curl -k -sS -H 'Host: alcochrom.cn' https://127.0.0.1/v1/health
+curl -sS http://127.0.0.1/v1/health
 ```
 
-## 关键备份
+## 当前 Nginx 入口
 
-旧环境没有直接删除，均已移动或复制到 root 下备份目录：
+`/www/server/panel/vhost/nginx/omniauto.conf` 应保持为只代理到本机 OmniAuto：
 
-- 旧 ERP 项目与 systemd：`/root/omniauto_predeploy_backup_20260501_034658`
-- 可疑 preload 组件：`/root/omniauto_predeploy_security_manual`
-- Nginx 旧配置备份：`/root/omniauto_nginx_backup_20260501_044103`
+```nginx
+server {
+    listen 80 default_server;
+    server_name 139.196.101.174 _;
 
-## 安全发现
+    client_max_body_size 100m;
 
-部署时发现服务器存在 `/etc/ld.so.preload`，内容指向 `/usr/local/lib/sshdd.so`，该预加载库会拦截文件操作，导致创建 `log/logs` 路径和 Git 的 `.git/logs` 失败。处理方式：
-
-- 备份并禁用 `/usr/local/lib/sshdd.so`
-- 清除 `/etc/ld.so.preload` 的 immutable 标记后移动到备份目录
-- 验证 `mkdir /tmp/xlogs_after_clear` 正常
-
-这类 preload 机制不应出现在正式商用环境中。正式承载客户数据前，建议优先做一次完整安全巡检，或者使用干净的新镜像重新部署。
+    location / {
+        proxy_pass http://127.0.0.1:8766;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 120s;
+    }
+}
+```
 
 ## 已通过验证
 
@@ -99,7 +133,7 @@ curl http://127.0.0.1:8766/v1/health
 Nginx 本机代理：
 
 ```text
-curl -H 'Host: alcochrom.cn' http://127.0.0.1/v1/health
+curl http://127.0.0.1/v1/health
 {"ok":true,"app":"wechat_ai_customer_service_vps_admin","version":"0.1.0"}
 ```
 
