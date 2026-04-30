@@ -58,6 +58,7 @@ docs/                    Task-specific operation and debugging notes.
 - `docs/KNOWLEDGE_ADMIN_REQUIREMENTS.md`: 知识管理台需求文档。
 - `docs/KNOWLEDGE_ADMIN_DEVELOPMENT_GUIDE.md`: 知识管理台开发文档。
 - `docs/KNOWLEDGE_ADMIN_CODE_ROADMAP.md`: 知识管理台代码落地清单。
+- `docs/AUTH_SECURITY_COMMERCIAL_READINESS.md`: 密码修改、邮箱验证码登录与商用安全补齐清单。
 
 ## Migration Rule
 

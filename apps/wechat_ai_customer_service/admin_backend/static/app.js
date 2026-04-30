@@ -1,4 +1,5 @@
 const state = {
+  authToken: localStorage.getItem("localAuthToken") || "",
   activeView: "overview",
   overview: null,
   categories: [],
@@ -17,15 +18,29 @@ const state = {
   ragHits: [],
   ragExperiences: [],
   ragAnalytics: null,
+  auth: null,
+  tenants: [],
+  activeTenantId: "",
+  syncStatus: null,
+  sharedPublic: null,
+  selectedSharedPublic: null,
+  loginChallenge: null,
+  initChallenge: null,
+  passwordChallenge: null,
+  emailChallenge: null,
+  security: null,
 };
+const localDeviceId = getOrCreateDeviceId("localConsoleDeviceId");
 
 const titles = {
   overview: "总览",
   knowledge: "知识库",
+  shared_public: "共享公共知识库",
   intake: "知识录入与学习",
   ai_reference: "AI参考资料",
   diagnostics: "一键检测",
   versions: "备份还原",
+  security: "账号安全",
 };
 
 const viewAliases = {
@@ -120,8 +135,15 @@ async function refreshHealth() {
   }
 }
 
+function apiHeaders(extra = {}) {
+  const headers = {...extra};
+  if (state.activeTenantId) headers["X-Tenant-ID"] = state.activeTenantId;
+  if (state.authToken) headers.Authorization = `Bearer ${state.authToken}`;
+  return headers;
+}
+
 async function apiGet(path) {
-  const response = await fetch(path);
+  const response = await fetch(path, {headers: apiHeaders()});
   if (!response.ok) throw new Error(await responseErrorMessage(response, path));
   return response.json();
 }
@@ -129,7 +151,7 @@ async function apiGet(path) {
 async function apiJson(path, options = {}) {
   const response = await fetch(path, {
     ...options,
-    headers: {"Content-Type": "application/json", ...(options.headers || {})},
+    headers: apiHeaders({"Content-Type": "application/json", ...(options.headers || {})}),
   });
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) {
@@ -150,6 +172,347 @@ function formatApiError(payload, fallback) {
   if (!detail) return fallback;
   if (typeof detail === "string") return detail;
   return detail.message || JSON.stringify(detail);
+}
+
+function initializeLocalLogin() {
+  document.body.classList.toggle("auth-locked", !state.authToken);
+  const form = document.getElementById("local-login-form");
+  form?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    loginLocal(new FormData(form)).catch((error) => showLoginMessage(error.message));
+  });
+  document.getElementById("local-login-reset")?.addEventListener("click", resetLocalLoginChallenge);
+  document.getElementById("local-init-form")?.addEventListener("submit", (event) => initializeLocalAccount(event).catch((error) => showInitMessage(error.message)));
+  document.getElementById("local-init-back")?.addEventListener("click", resetLocalInitialization);
+  if (state.authToken) {
+    bootstrapAuthenticatedApp().catch((error) => {
+      showLoginMessage(error.message || "登录状态已失效，请重新登录。");
+      lockLocalConsole();
+    });
+  }
+}
+
+async function loginLocal(form) {
+  if (state.loginChallenge) {
+    if (state.loginChallenge.mode === "bind_email") {
+      const response = await fetch("/api/auth/login/bind-email/start", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({challenge_id: state.loginChallenge.challenge_id, email: form.get("bind_email")}),
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok || payload.ok === false) {
+        throw new Error(payload.detail || "邮箱绑定验证发起失败，请检查邮箱。");
+      }
+      state.loginChallenge.mode = "verify";
+      document.getElementById("local-login-bind-email-field")?.classList.add("is-hidden");
+      document.getElementById("local-login-code-field")?.classList.remove("is-hidden");
+      document.getElementById("local-login-trust-field")?.classList.remove("is-hidden");
+      document.getElementById("local-login-submit").textContent = "验证并登录";
+      showLoginMessage(
+        payload.debug_code
+          ? `验证码已生成：${payload.debug_code}。生产环境会发送到 ${payload.masked_email || "绑定邮箱"}。`
+          : `验证码已发送到 ${payload.masked_email || "绑定邮箱"}，请输入后登录。`
+      );
+      return;
+    }
+    const response = await fetch("/api/auth/login/verify", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        challenge_id: state.loginChallenge.challenge_id,
+        code: form.get("email_code"),
+        trust_device: Boolean(form.get("trust_device")),
+      }),
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok || payload.ok === false) {
+      throw new Error(payload.detail || "验证码错误或已过期，请重新获取。");
+    }
+    await completeLocalLogin(payload.session);
+    return;
+  }
+  const response = await fetch("/api/auth/login/start", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      username: form.get("username"),
+      password: form.get("password"),
+      tenant_id: state.activeTenantId || "default",
+      device_id: localDeviceId,
+      device_name: browserDeviceName(),
+    }),
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok || payload.ok === false) {
+    throw new Error(payload.detail || "登录失败，请检查账号和密码。");
+  }
+  if (!payload.requires_verification && payload.session) {
+    await completeLocalLogin(payload.session);
+    return;
+  }
+  if (payload.requires_initialization) {
+    showLocalInitialization(payload);
+    return;
+  }
+  state.loginChallenge = {challenge_id: payload.challenge_id, mode: payload.requires_email_binding ? "bind_email" : "verify"};
+  if (payload.requires_email_binding) {
+    document.getElementById("local-login-bind-email-field")?.classList.remove("is-hidden");
+    document.getElementById("local-login-code-field")?.classList.add("is-hidden");
+    document.getElementById("local-login-trust-field")?.classList.add("is-hidden");
+    document.getElementById("local-login-submit").textContent = "发送邮箱验证码";
+    showLoginMessage(payload.message || "这个账号还没有绑定邮箱，请填写邮箱后获取验证码。");
+  } else {
+    document.getElementById("local-login-bind-email-field")?.classList.add("is-hidden");
+    document.getElementById("local-login-code-field")?.classList.remove("is-hidden");
+    document.getElementById("local-login-trust-field")?.classList.remove("is-hidden");
+    document.getElementById("local-login-submit").textContent = "验证并登录";
+    showLoginMessage(
+      payload.debug_code
+        ? `验证码已生成：${payload.debug_code}。生产环境会发送到 ${payload.masked_email || "绑定邮箱"}。`
+        : `验证码已发送到 ${payload.masked_email || "绑定邮箱"}，请输入后登录。`
+    );
+  }
+  document.getElementById("local-login-reset")?.classList.remove("is-hidden");
+}
+
+function showLocalInitialization(payload) {
+  state.initChallenge = {challenge_id: payload.challenge_id, role: payload.role || "customer", mode: "start"};
+  document.body.classList.add("auth-locked", "auth-initializing");
+  const isAdmin = state.initChallenge.role === "admin";
+  const intro = document.getElementById("local-init-intro");
+  if (intro) {
+    intro.textContent = isAdmin
+      ? "admin 首次进入客户端前必须修改密码并绑定邮箱。SMTP 发信配置在 VPS 管理控制台统一设置，Local 不保存客户可见的 SMTP 密码。"
+      : "首次使用前必须修改密码并绑定邮箱。完成后需要用新密码重新登录。";
+  }
+  document.getElementById("local-init-code-field")?.classList.add("is-hidden");
+  document.getElementById("local-init-submit").textContent = "发送初始化验证码";
+  hideLoginMessage();
+  showInitMessage(payload.message || "请完成首次初始化。");
+}
+
+async function initializeLocalAccount(event) {
+  event.preventDefault();
+  const formElement = event.currentTarget;
+  const form = new FormData(formElement);
+  if (!state.initChallenge) throw new Error("初始化会话已失效，请返回登录重新开始。");
+  if (state.initChallenge.mode === "verify") {
+    const response = await fetch("/api/auth/initialize/verify", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({challenge_id: state.initChallenge.challenge_id, code: form.get("email_code")}),
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok || payload.ok === false) throw new Error(payload.detail || "验证码错误或已过期。");
+    formElement.reset();
+    resetLocalInitialization({silent: true});
+    resetLocalLoginChallenge({silent: true});
+    showLoginMessage("初始化已完成，请使用新密码重新登录。登录时仍需要邮箱验证码。");
+    return;
+  }
+  if (form.get("new_password") !== form.get("confirm_password")) {
+    throw new Error("两次输入的新密码不一致。");
+  }
+  const response = await fetch("/api/auth/initialize/start", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      challenge_id: state.initChallenge.challenge_id,
+      email: form.get("email"),
+      new_password: form.get("new_password"),
+    }),
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok || payload.ok === false) throw new Error(payload.detail || "初始化验证码发送失败。");
+  state.initChallenge.mode = "verify";
+  document.getElementById("local-init-code-field")?.classList.remove("is-hidden");
+  document.getElementById("local-init-submit").textContent = "验证并完成初始化";
+  showInitMessage(
+    payload.debug_code
+      ? `验证码已生成：${payload.debug_code}。生产环境会发送到 ${payload.masked_email || "绑定邮箱"}。`
+      : `验证码已发送到 ${payload.masked_email || "绑定邮箱"}，请输入后完成初始化。`
+  );
+}
+
+function resetLocalInitialization(options = {}) {
+  state.initChallenge = null;
+  document.body.classList.remove("auth-initializing");
+  if (!state.authToken) document.body.classList.add("auth-locked");
+  document.getElementById("local-init-code-field")?.classList.add("is-hidden");
+  document.getElementById("local-init-submit").textContent = "发送初始化验证码";
+  const codeInput = document.getElementById("local-init-form")?.querySelector("[name='email_code']");
+  if (codeInput) codeInput.value = "";
+  if (!options.silent) hideInitMessage();
+}
+
+async function completeLocalLogin(session) {
+  state.authToken = session?.token || "";
+  if (!state.authToken) throw new Error("登录成功但没有返回会话 token。");
+  localStorage.setItem("localAuthToken", state.authToken);
+  document.body.classList.remove("auth-locked");
+  resetLocalLoginChallenge({silent: true});
+  hideLoginMessage();
+  await bootstrapAuthenticatedApp();
+}
+
+function resetLocalLoginChallenge(options = {}) {
+  state.loginChallenge = null;
+  const form = document.getElementById("local-login-form");
+  document.getElementById("local-login-bind-email-field")?.classList.add("is-hidden");
+  document.getElementById("local-login-code-field")?.classList.add("is-hidden");
+  document.getElementById("local-login-trust-field")?.classList.add("is-hidden");
+  document.getElementById("local-login-reset")?.classList.add("is-hidden");
+  document.getElementById("local-login-submit").textContent = "登录";
+  const codeInput = form?.querySelector("[name='email_code']");
+  if (codeInput) codeInput.value = "";
+  const emailInput = form?.querySelector("[name='bind_email']");
+  if (emailInput) emailInput.value = "";
+  const trustInput = form?.querySelector("[name='trust_device']");
+  if (trustInput) trustInput.checked = false;
+  if (!options.silent) hideLoginMessage();
+}
+
+async function bootstrapAuthenticatedApp() {
+  await refreshAccountContext();
+  await registerLocalNode().catch((error) => console.warn("register local node failed", error));
+  await Promise.all([loadOverview().catch(console.error), loadKnowledge().catch(console.error)]);
+  renderGenerator();
+  activateHashView();
+}
+
+async function logoutLocal() {
+  if (state.authToken) {
+    await fetch("/api/auth/logout", {method: "POST", headers: apiHeaders()}).catch(() => {});
+  }
+  lockLocalConsole();
+}
+
+function lockLocalConsole() {
+  state.authToken = "";
+  state.auth = null;
+  state.security = null;
+  state.initChallenge = null;
+  state.passwordChallenge = null;
+  state.emailChallenge = null;
+  document.getElementById("local-password-code-field")?.classList.add("is-hidden");
+  document.getElementById("local-email-code-field")?.classList.add("is-hidden");
+  resetLocalLoginChallenge({silent: true});
+  resetLocalInitialization({silent: true});
+  localStorage.removeItem("localAuthToken");
+  document.body.classList.add("auth-locked");
+}
+
+function showLoginMessage(text) {
+  const element = document.getElementById("login-message");
+  if (!element) return;
+  element.textContent = text;
+  element.classList.remove("is-hidden");
+}
+
+function hideLoginMessage() {
+  const element = document.getElementById("login-message");
+  if (!element) return;
+  element.textContent = "";
+  element.classList.add("is-hidden");
+}
+
+function showInitMessage(text) {
+  const element = document.getElementById("local-init-message");
+  if (!element) return;
+  element.textContent = text;
+  element.classList.remove("is-hidden");
+}
+
+function hideInitMessage() {
+  const element = document.getElementById("local-init-message");
+  if (!element) return;
+  element.textContent = "";
+  element.classList.add("is-hidden");
+}
+
+function getOrCreateDeviceId(key) {
+  let value = localStorage.getItem(key);
+  if (!value) {
+    value = `device_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+    localStorage.setItem(key, value);
+  }
+  return value;
+}
+
+function browserDeviceName() {
+  const platform = navigator.platform || "Browser";
+  const language = navigator.language || "";
+  return `${platform} ${language}`.trim();
+}
+
+async function registerLocalNode() {
+  if (!state.syncStatus?.vps_configured) return;
+  const result = await apiJson("/api/sync/register-node", {
+    method: "POST",
+    body: JSON.stringify({display_name: `${state.auth?.session?.user?.display_name || state.auth?.session?.user?.user_id || "Local"} 客户端`}),
+  });
+  if (result.ok && result.node) {
+    state.syncStatus.node = result.node;
+    renderAccountContext();
+  }
+}
+
+async function refreshAccountContext() {
+  const [auth, tenants, sync, security] = await Promise.all([
+    apiGet("/api/auth/me").catch(() => ({ok: false})),
+    apiGet("/api/tenants").catch(() => ({ok: false, items: []})),
+    apiGet("/api/sync/status").catch(() => ({ok: false, mode: "unknown"})),
+    apiGet("/api/auth/security").catch(() => ({ok: false, security: {}})),
+  ]);
+  state.auth = auth.auth || null;
+  state.tenants = tenants.items || [];
+  state.activeTenantId = state.activeTenantId || tenants.active_tenant_id || auth.auth?.tenant_id || "default";
+  state.syncStatus = sync;
+  state.security = security.security || {};
+  renderAccountContext();
+  renderLocalSecurity();
+}
+
+function renderAccountContext() {
+  const select = document.getElementById("tenant-select");
+  if (select) {
+    const items = state.tenants.length ? state.tenants : [{tenant_id: state.activeTenantId || "default", display_name: state.activeTenantId || "default"}];
+    select.innerHTML = items.map((item) => `<option value="${escapeHtml(item.tenant_id)}">${escapeHtml(item.display_name || item.tenant_id)}</option>`).join("");
+    select.value = state.activeTenantId || "default";
+  }
+  const user = state.auth?.session?.user || {};
+  const role = user.role || state.auth?.role || "local";
+  const roleNames = {admin: "管理员", customer: "客户", guest: "访客", local: "本地"};
+  const accountName = user.username || user.display_name || user.user_id || "未登录";
+  document.getElementById("auth-pill").textContent = `${roleNames[role] || role}：${accountName}`;
+  const nodeText = state.syncStatus?.node?.node_id ? "VPS 已连接" : "VPS 已配置";
+  document.getElementById("sync-pill").textContent = state.syncStatus?.vps_configured ? nodeText : "本地模式";
+  document.querySelectorAll(".admin-only-nav").forEach((item) => item.classList.toggle("is-hidden", role !== "admin"));
+  if (role !== "admin" && state.activeView === "shared_public") {
+    window.location.hash = "overview";
+    selectView("overview");
+  }
+}
+
+function renderLocalSecurity() {
+  const panel = document.getElementById("local-security-summary");
+  if (!panel) return;
+  const security = state.security || {};
+  panel.innerHTML = `
+    <div>
+      <span>当前绑定邮箱</span>
+      <strong>${escapeHtml(security.masked_email || security.email || "未绑定")}</strong>
+    </div>
+    <div>
+      <span>邮箱验证码</span>
+      <strong>${security.otp_required === false ? "未强制" : "已启用"}</strong>
+    </div>
+    <div>
+      <span>信任设备</span>
+      <strong>${escapeHtml(String(security.trusted_device_days || 30))} 天</strong>
+    </div>
+  `;
 }
 
 async function loadOverview() {
@@ -1681,7 +2044,8 @@ async function clearDiagnosticNotices() {
 
 async function loadVersions() {
   const payload = await apiGet("/api/versions");
-  document.getElementById("version-list").innerHTML = (payload.items || [])
+  const items = (payload.items || []).slice(0, 20);
+  document.getElementById("version-list").innerHTML = items
     .map((item) => `
       <div class="record-row version-row">
         <button class="link-button version-select" data-id="${escapeHtml(item.version_id)}">
@@ -1796,6 +2160,203 @@ function escapeHtml(value) {
     .replaceAll('"', "&quot;");
 }
 
+function escapeAttr(value) {
+  return escapeHtml(value).replaceAll("'", "&#39;");
+}
+
+async function loadSharedPublic() {
+  if ((state.auth?.session?.user?.role || "") !== "admin") {
+    state.sharedPublic = null;
+    renderSharedPublic();
+    return;
+  }
+  state.sharedPublic = await apiGet("/api/shared-knowledge/items");
+  renderSharedPublic();
+}
+
+function renderSharedPublic() {
+  const list = document.getElementById("shared-public-list");
+  const detail = document.getElementById("shared-public-detail");
+  if (!list || !detail) return;
+  const items = state.sharedPublic?.items || [];
+  if (!state.sharedPublic) {
+    list.innerHTML = emptyPanel("仅 admin 可查看共享公共知识库。");
+    detail.textContent = "客户账号不会显示这个入口。";
+    return;
+  }
+  list.innerHTML = items.map((item) => `
+    <button class="list-item ${state.selectedSharedPublic?.item_id === item.item_id ? "is-active" : ""}" data-shared-action="select" data-item-id="${escapeAttr(item.item_id)}">
+      <strong>${escapeHtml(item.title || item.item_id)}</strong>
+      <span>${escapeHtml(item.category_id || "-")} · ${escapeHtml(item.status || "-")}</span>
+    </button>
+  `).join("") || emptyPanel("暂无共享公共知识");
+  const selected = state.selectedSharedPublic || items[0] || null;
+  if (selected && !state.selectedSharedPublic) state.selectedSharedPublic = selected;
+  renderSharedPublicDetail(selected);
+}
+
+function renderSharedPublicDetail(item) {
+  const detail = document.getElementById("shared-public-detail");
+  if (!detail) return;
+  if (!item) {
+    detail.textContent = "请选择一条共享公共知识。";
+    return;
+  }
+  const payload = item.payload || item;
+  const data = payload.data || {};
+  detail.innerHTML = `
+    <div class="detail-title">
+      <div>
+        <h3>${escapeHtml(item.title || data.title || item.item_id)}</h3>
+        <p>${escapeHtml(item.category_id || payload.category_id || "-")} · ${escapeHtml(item.item_id || payload.id || "-")}</p>
+      </div>
+      <span class="status-badge ok">${escapeHtml(item.status || payload.status || "active")}</span>
+    </div>
+    <div class="detail-section">
+      <h4>正文</h4>
+      <p>${escapeHtml(data.guideline_text || data.content || "")}</p>
+    </div>
+    <div class="button-row">
+      <button class="secondary-button" data-shared-action="edit" data-item-id="${escapeAttr(item.item_id)}">编辑</button>
+      <button class="secondary-button danger-button" data-shared-action="delete" data-item-id="${escapeAttr(item.item_id)}">删除</button>
+    </div>
+  `;
+}
+
+async function createSharedPublicItem(event) {
+  event.preventDefault();
+  const form = new FormData(event.currentTarget);
+  await apiJson("/api/shared-knowledge/items", {
+    method: "POST",
+    body: JSON.stringify({
+      item_id: form.get("item_id"),
+      category_id: form.get("category_id"),
+      title: form.get("title"),
+      content: form.get("content"),
+      source: "local_admin_console",
+    }),
+  });
+  event.currentTarget.reset();
+  state.selectedSharedPublic = null;
+  await loadSharedPublic();
+}
+
+async function handleSharedPublicAction(event) {
+  const button = event.target.closest("[data-shared-action]");
+  if (!button) return;
+  const action = button.dataset.sharedAction;
+  const itemId = button.dataset.itemId;
+  if (action === "select") {
+    const selected = (state.sharedPublic?.items || []).find((item) => item.item_id === itemId);
+    state.selectedSharedPublic = selected || null;
+    renderSharedPublic();
+    return;
+  }
+  if (action === "edit") {
+    const payload = await apiGet(`/api/shared-knowledge/items/${encodeURIComponent(itemId)}`);
+    const item = payload.item || {};
+    const data = item.data || {};
+    const title = prompt("标题", data.title || item.id || "");
+    if (title === null) return;
+    const content = prompt("正文", data.guideline_text || data.content || "");
+    if (content === null) return;
+    await apiJson(`/api/shared-knowledge/items/${encodeURIComponent(itemId)}`, {
+      method: "PUT",
+      body: JSON.stringify({title, content, category_id: item.category_id || "global_guidelines", status: item.status || "active"}),
+    });
+    state.selectedSharedPublic = null;
+    await loadSharedPublic();
+    return;
+  }
+  if (action === "delete") {
+    if (!confirm("确认删除这条本地共享公共知识吗？")) return;
+    await apiJson(`/api/shared-knowledge/items/${encodeURIComponent(itemId)}`, {method: "DELETE"});
+    state.selectedSharedPublic = null;
+    await loadSharedPublic();
+  }
+}
+
+async function uploadSharedCandidates() {
+  const result = await apiJson("/api/sync/shared/upload-candidates", {method: "POST", body: "{}"});
+  const uploaded = result.uploaded?.length || 0;
+  const skipped = result.skipped?.length || 0;
+  alert(result.ok === false ? result.error || "上传失败" : `上传完成：新增 ${uploaded} 条，跳过 ${skipped} 条。`);
+}
+
+async function changeLocalPassword(event) {
+  event.preventDefault();
+  const formElement = event.currentTarget;
+  const form = new FormData(formElement);
+  if (state.passwordChallenge) {
+    await apiJson("/api/auth/change-password/verify", {
+      method: "POST",
+      body: JSON.stringify({challenge_id: state.passwordChallenge.challenge_id, code: form.get("email_code")}),
+    });
+    state.passwordChallenge = null;
+    formElement.reset();
+    document.getElementById("local-password-code-field")?.classList.add("is-hidden");
+    formElement.querySelector("button[type='submit']").textContent = "发送验证码并修改";
+    alert("密码已修改，请用新密码重新登录。");
+    await logoutLocal();
+    return;
+  }
+  if (form.get("new_password") !== form.get("confirm_password")) {
+    alert("两次输入的新密码不一致。");
+    return;
+  }
+  const result = await apiJson("/api/auth/change-password/start", {
+    method: "POST",
+    body: JSON.stringify({
+      current_password: form.get("current_password"),
+      new_password: form.get("new_password"),
+    }),
+  });
+  state.passwordChallenge = {challenge_id: result.challenge_id};
+  document.getElementById("local-password-code-field")?.classList.remove("is-hidden");
+  formElement.querySelector("button[type='submit']").textContent = "验证并保存新密码";
+  alert(
+    result.debug_code
+      ? `验证码已生成：${result.debug_code}。生产环境会发送到 ${result.masked_email || "绑定邮箱"}。`
+      : `验证码已发送到 ${result.masked_email || "绑定邮箱"}，请输入后保存新密码。`
+  );
+}
+
+async function bindLocalEmail(event) {
+  event.preventDefault();
+  const formElement = event.currentTarget;
+  const form = new FormData(formElement);
+  if (state.emailChallenge) {
+    const result = await apiJson("/api/auth/email/verify", {
+      method: "POST",
+      body: JSON.stringify({challenge_id: state.emailChallenge.challenge_id, code: form.get("email_code")}),
+    });
+    state.emailChallenge = null;
+    formElement.reset();
+    document.getElementById("local-email-code-field")?.classList.add("is-hidden");
+    formElement.querySelector("button[type='submit']").textContent = "发送绑定验证码";
+    state.security = {...(state.security || {}), email: result.email, masked_email: result.masked_email};
+    renderLocalSecurity();
+    alert("邮箱已绑定。");
+    return;
+  }
+  const result = await apiJson("/api/auth/email/start", {
+    method: "POST",
+    body: JSON.stringify({email: form.get("email")}),
+  });
+  state.emailChallenge = {challenge_id: result.challenge_id};
+  document.getElementById("local-email-code-field")?.classList.remove("is-hidden");
+  formElement.querySelector("button[type='submit']").textContent = "验证并绑定邮箱";
+  alert(
+    result.debug_code
+      ? `验证码已生成：${result.debug_code}。生产环境会发送到 ${result.masked_email || "绑定邮箱"}。`
+      : `验证码已发送到 ${result.masked_email || "绑定邮箱"}，请输入后完成绑定。`
+  );
+}
+
+function emptyPanel(text) {
+  return `<div class="empty-state">${escapeHtml(text)}</div>`;
+}
+
 function bindNavigation() {
   document.querySelectorAll(".nav-item").forEach((item) => {
     item.addEventListener("click", () => {
@@ -1830,6 +2391,7 @@ function activateHashView() {
 async function loadViewData(view) {
   const activeView = (viewAliases[view] || {view}).view;
   if (activeView === "knowledge") await loadKnowledge();
+  if (activeView === "shared_public") await loadSharedPublic();
   if (activeView === "intake") {
     renderGeneratorCategorySelect();
     renderGenerator();
@@ -1858,6 +2420,11 @@ async function loadActiveSubsection() {
 
 bindNavigation();
 document.getElementById("refresh-overview").addEventListener("click", () => loadOverview().catch(console.error));
+document.getElementById("tenant-select").addEventListener("change", async (event) => {
+  state.activeTenantId = event.target.value || "default";
+  await Promise.all([refreshAccountContext().catch(console.error), loadOverview().catch(console.error), loadKnowledge().catch(console.error)]);
+  await loadActiveSubsection().catch(console.error);
+});
 document.getElementById("category-select").addEventListener("change", async (event) => {
   state.activeCategoryId = event.target.value;
   await loadCategoryItems();
@@ -1884,10 +2451,16 @@ document.getElementById("quick-diagnostics").addEventListener("click", () => run
 document.getElementById("full-diagnostics").addEventListener("click", () => runDiagnostics("full").catch((error) => alert(error.message)));
 document.getElementById("create-backup").addEventListener("click", () => createBackup().catch((error) => alert(error.message)));
 document.getElementById("refresh-versions").addEventListener("click", () => loadVersions().catch((error) => alert(error.message)));
+document.getElementById("refresh-shared-public")?.addEventListener("click", () => loadSharedPublic().catch((error) => alert(error.message)));
+document.getElementById("upload-shared-candidates")?.addEventListener("click", () => uploadSharedCandidates().catch((error) => alert(error.message)));
+document.getElementById("shared-public-form")?.addEventListener("submit", (event) => createSharedPublicItem(event).catch((error) => alert(error.message)));
+document.getElementById("shared-public-list")?.addEventListener("click", (event) => handleSharedPublicAction(event).catch((error) => alert(error.message)));
+document.getElementById("shared-public-detail")?.addEventListener("click", (event) => handleSharedPublicAction(event).catch((error) => alert(error.message)));
+document.getElementById("local-password-form")?.addEventListener("submit", (event) => changeLocalPassword(event).catch((error) => alert(error.message)));
+document.getElementById("local-email-form")?.addEventListener("submit", (event) => bindLocalEmail(event).catch((error) => alert(error.message)));
+document.getElementById("local-logout-button")?.addEventListener("click", () => logoutLocal().catch((error) => alert(error.message)));
 
+document.body.classList.toggle("auth-locked", !state.authToken);
+initializeLocalLogin();
 refreshHealth();
-loadOverview().catch(console.error);
-loadKnowledge().catch(console.error);
-renderGenerator();
 window.addEventListener("hashchange", activateHashView);
-activateHashView();

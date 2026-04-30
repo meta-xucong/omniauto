@@ -43,6 +43,7 @@ from listen_and_reply import (  # noqa: E402
     select_batch,
     should_operator_handoff,
 )
+from wxauto4_sidecar import is_wechat_main_window  # noqa: E402
 
 
 CONFIG_PATH = APP_ROOT / "configs" / "file_transfer_smoke.example.json"
@@ -81,6 +82,7 @@ def run_checks() -> dict[str, Any]:
         check_review_queue_reports_pending_and_handoff_items,
         check_evidence_boundary_cases,
         check_after_sales_intent_preempts_duration_logistics,
+        check_wechat_main_window_recognition,
     ]
     results = []
     for check in checks:
@@ -115,6 +117,22 @@ def check_configured_bot_prefix_is_skipped() -> None:
         config=config,
     )
     assert_equal([item["id"] for item in batch], ["m-1"], "batch should exclude configured bot prefix")
+
+
+def check_wechat_main_window_recognition() -> None:
+    for title in ["微信", "Weixin", "WeChat"]:
+        assert_true(
+            is_wechat_main_window({"title": title, "class_name": "QWindowIcon"}),
+            f"{title} main window should be recognized",
+        )
+    assert_true(
+        not is_wechat_main_window({"title": "微信", "class_name": "LoginWindow"}),
+        "non-main class should not be treated as main window",
+    )
+    assert_true(
+        not is_wechat_main_window({"title": "登录", "class_name": "QWindowIcon"}),
+        "login/secondary titles should not be treated as main window",
+    )
 
 
 def check_mixed_safety_batch_forces_handoff() -> None:

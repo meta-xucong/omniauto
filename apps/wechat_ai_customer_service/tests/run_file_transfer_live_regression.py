@@ -26,6 +26,7 @@ for path in (WORKFLOWS_ROOT, APP_ROOT, ADAPTERS_ROOT):
 
 from approved_outbound_send import run as run_outbound  # noqa: E402
 from listen_and_reply import load_config, resolve_path, run_workflow  # noqa: E402
+from rag_layer import RagService  # noqa: E402
 from wechat_connector import FILE_TRANSFER_ASSISTANT  # noqa: E402
 
 
@@ -54,6 +55,10 @@ def run_live_regression(args: argparse.Namespace) -> dict[str, Any]:
     scenarios = json.loads(args.scenarios.read_text(encoding="utf-8"))
     if args.reset_state:
         reset_runtime_files(config, args.result_path)
+    rag_seed = seed_configured_rag_sources(config)
+    live_run_id = time.strftime("%Y%m%d%H%M%S")
+    setattr(args, "_live_run_id", live_run_id)
+    setattr(args, "_append_live_run_nonce", bool(config.get("append_live_run_nonce", bool(args.send))))
 
     bootstrap = run_workflow(
         Namespace(
@@ -94,6 +99,8 @@ def run_live_regression(args: argparse.Namespace) -> dict[str, Any]:
         "send": bool(args.send),
         "config_path": str(args.config),
         "scenario_path": str(args.scenarios),
+        "rag_seed": rag_seed,
+        "live_run_id": live_run_id,
         "bootstrap": bootstrap,
         "count": len(results),
         "failures": failures,
@@ -103,6 +110,35 @@ def run_live_regression(args: argparse.Namespace) -> dict[str, Any]:
     return payload
 
 
+def seed_configured_rag_sources(config: dict[str, Any]) -> dict[str, Any]:
+    seeds = config.get("rag_seed_paths", []) or []
+    if not isinstance(seeds, list) or not seeds:
+        return {"enabled": False, "count": 0}
+    service = RagService(tenant_id=str(config.get("tenant_id") or config.get("rag_tenant_id") or "") or None)
+    results = []
+    for raw in seeds:
+        item = {"path": raw} if isinstance(raw, str) else dict(raw or {})
+        path_value = item.get("path")
+        if not path_value:
+            results.append({"ok": False, "message": "seed path is required"})
+            continue
+        path = resolve_path(path_value)
+        try:
+            service.delete_source_by_path(path)
+            result = service.ingest_file(
+                path,
+                source_type=str(item.get("source_type") or "product_doc"),
+                category=str(item.get("category") or "product_explanations"),
+                product_id=str(item.get("product_id") or ""),
+                layer=str(item.get("layer") or "tenant"),
+            )
+            results.append({"ok": bool(result.get("ok")), "path": str(path), "source_id": result.get("source_id")})
+        except Exception as exc:
+            results.append({"ok": False, "path": str(path), "error": repr(exc)})
+    failures = [item for item in results if not item.get("ok")]
+    return {"enabled": True, "ok": not failures, "count": len(results), "failures": failures, "results": results}
+
+
 def run_scenario(args: argparse.Namespace, scenario: dict[str, Any], *, index: int) -> dict[str, Any]:
     messages = [str(item) for item in scenario.get("messages", []) or []]
     if not messages:
@@ -110,10 +146,11 @@ def run_scenario(args: argparse.Namespace, scenario: dict[str, Any], *, index: i
 
     outbound_results = []
     for message_index, text in enumerate(messages, start=1):
+        send_text = live_outbound_text(args, text, scenario_index=index, message_index=message_index)
         outbound_args = Namespace(
             config=args.config,
             target=FILE_TRANSFER_ASSISTANT,
-            text=text,
+            text=send_text,
             send=bool(args.send),
             reason=f"live_regression:{index}:{scenario.get('name')}:{message_index}",
             allow_prefixless=True,
@@ -148,6 +185,13 @@ def run_scenario(args: argparse.Namespace, scenario: dict[str, Any], *, index: i
         "workflow": workflow,
         "event": event,
     }
+
+
+def live_outbound_text(args: argparse.Namespace, text: str, *, scenario_index: int, message_index: int) -> str:
+    if not bool(getattr(args, "_append_live_run_nonce", False)):
+        return text
+    run_id = str(getattr(args, "_live_run_id", "") or time.strftime("%Y%m%d%H%M%S"))
+    return f"{text}\n[live-regression:{run_id}:{scenario_index}:{message_index}]"
 
 
 def assert_scenario(scenario: dict[str, Any], output: dict[str, Any]) -> None:

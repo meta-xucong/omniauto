@@ -30,7 +30,7 @@ body {
   font-size: 14px;
   font-weight: 400;
   line-height: 1.6;
-  letter-spacing: -0.01em;
+  letter-spacing: 0;
   background: #f5f5f7;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -42,6 +42,37 @@ select,
 textarea {
   font: inherit;
   letter-spacing: inherit;
+}
+
+.login-screen,
+.init-screen {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.login-card,
+.init-card {
+  display: grid;
+  gap: 16px;
+  width: min(430px, 100%);
+  padding: 28px;
+}
+
+.init-card {
+  width: min(640px, 100%);
+}
+
+body:not(.auth-locked) .login-screen,
+body:not(.auth-initializing) .init-screen,
+body.auth-initializing .login-screen {
+  display: none;
+}
+
+body.auth-locked .shell,
+body.auth-initializing .shell {
+  display: none;
 }
 
 /* ── Layout ── */
@@ -102,7 +133,7 @@ textarea {
 .brand-title {
   font-size: 17px;
   font-weight: 600;
-  letter-spacing: -0.03em;
+  letter-spacing: 0;
   line-height: 1.25;
   color: var(--ink);
 }
@@ -205,6 +236,26 @@ label {
   justify-content: space-between;
   min-height: 80px;
   padding: 18px 28px;
+}
+
+.topbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.topbar-actions select {
+  min-height: 32px;
+  max-width: 180px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0 12px;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.86);
+  font: inherit;
+  font-size: 12px;
 }
 
 h1, h2, p {
@@ -532,6 +583,7 @@ textarea,
 
 .compact-list-small {
   min-height: 0;
+  margin-top: 16px;
   margin-bottom: 16px;
 }
 
@@ -716,6 +768,22 @@ textarea,
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.form-grid > .primary-button,
+.form-grid > .secondary-button {
+  grid-column: 1 / -1;
+  justify-self: end;
+  min-height: 36px;
+  margin-top: 4px;
+  padding: 0 14px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.compact-form > .primary-button,
+.compact-form > .secondary-button {
+  margin-top: 8px;
+}
+
 .form-field {
   display: grid;
   gap: 8px;
@@ -748,7 +816,8 @@ textarea,
   resize: vertical;
 }
 
-.checkbox-line {
+.checkbox-line,
+.checkbox-field {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -757,6 +826,12 @@ textarea,
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
   background: var(--surface-raised);
+}
+
+.checkbox-field input {
+  width: 18px;
+  min-height: 18px;
+  padding: 0;
 }
 
 .checkbox-line input {
@@ -1041,6 +1116,127 @@ textarea {
 
 .wide-field {
   grid-column: 1 / -1;
+}
+
+.security-head {
+  margin-bottom: 14px;
+}
+
+.security-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.security-summary div {
+  min-height: 68px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface-raised);
+}
+
+.security-summary span,
+.security-panel-head span,
+.security-note span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.security-summary strong {
+  display: block;
+  margin-top: 6px;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.security-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+
+.security-panel {
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+}
+
+.security-panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.security-panel-head h3 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.security-panel-head span {
+  max-width: 180px;
+  text-align: right;
+}
+
+.security-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.security-form .form-field input {
+  min-height: 36px;
+  padding: 8px 11px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.security-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 6px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.compact-button {
+  min-height: 34px;
+  padding: 0 14px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.security-note {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 16px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+
+.security-note strong {
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .nested-field {
@@ -1545,6 +1741,9 @@ textarea {
   .nav-list,
   .hero-metrics,
   .metric-grid,
+  .security-summary,
+  .security-grid,
+  .security-form,
   .split-layout,
   .editor-layout,
   .form-summary,
@@ -1619,6 +1818,25 @@ textarea {
   .button-row > *,
   .upload-zone > * {
     min-width: min(100%, 120px);
+  }
+
+  .security-panel-head,
+  .security-note {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .security-panel-head span {
+    max-width: none;
+    text-align: left;
+  }
+
+  .security-actions {
+    justify-content: stretch;
+  }
+
+  .security-actions .compact-button {
+    width: 100%;
   }
 
   .hero {

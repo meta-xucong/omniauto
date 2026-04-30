@@ -519,6 +519,56 @@ def check_rag_answer_layer_blocks_authority_or_risk_terms() -> None:
     )
     assert_true(result.get("applied") is False, "RAG hit with risk terms must not become a reply")
 
+    scoped = dict(config)
+    scoped["rag_response"] = {
+        **(config.get("rag_response", {}) or {}),
+        "allowed_source_types": ["product_doc"],
+    }
+    scoped_result = maybe_build_rag_reply(
+        config=scoped,
+        text="鍨嬪彿鍛藉悕涓€鑸€庝箞鐪嬶紵",
+        decision=ReplyDecision(
+            reply_text="榛樿鍥炲",
+            rule_name=None,
+            matched=False,
+            need_handoff=False,
+            reason="no_rule_matched",
+        ),
+        reply_text="榛樿鍥炲",
+        intent_assist={
+            "intent": "product_detail",
+            "recommended_action": "answer_from_evidence",
+            "evidence": {
+                "intent_tags": ["scene_product"],
+                "safety": {"must_handoff": False, "allowed_auto_reply": True, "reasons": []},
+                "rag_hits": [
+                    {
+                        "chunk_id": "out_of_scope_risky_upload",
+                        "source_id": "upload_source",
+                        "score": 0.99,
+                        "text": "Out-of-scope upload mentions an installation fee.",
+                        "category": "products",
+                        "source_type": "upload",
+                        "risk_terms": ["manual_risk"],
+                    },
+                    {
+                        "chunk_id": "safe_product_doc",
+                        "source_id": "doc_source",
+                        "score": 0.8,
+                        "text": "Product docs put capacity, power requirements, and scenarios near the model description for reference.",
+                        "category": "product_explanations",
+                        "source_type": "product_doc",
+                        "risk_terms": [],
+                    },
+                ],
+            },
+        },
+        product_knowledge={"matched": False},
+        data_capture={"is_customer_data": False},
+    )
+    assert_true(scoped_result.get("applied") is True, "out-of-scope risky upload should not block safe scoped RAG")
+    assert_equal(scoped_result.get("hit", {}).get("source_id"), "doc_source", "safe scoped RAG source should be selected")
+
 
 def check_rag_answer_layer_preserves_structured_product_reply_by_default() -> None:
     config = load_test_config()

@@ -171,8 +171,6 @@ def rag_reply_allowed_for_decision(
 def eligible_rag_hits(evidence: dict[str, Any], settings: dict[str, Any]) -> list[dict[str, Any]]:
     hits = [item for item in evidence.get("rag_hits", []) or [] if isinstance(item, dict)]
     min_score = float(settings.get("min_hit_score", DEFAULT_MIN_HIT_SCORE) or DEFAULT_MIN_HIT_SCORE)
-    allowed_categories = {str(item) for item in settings.get("allowed_categories", []) or [] if str(item)}
-    allowed_source_types = {str(item) for item in settings.get("allowed_source_types", []) or [] if str(item)}
     filtered = []
     for hit in hits:
         try:
@@ -181,9 +179,7 @@ def eligible_rag_hits(evidence: dict[str, Any], settings: dict[str, Any]) -> lis
             score = 0.0
         if score < min_score:
             continue
-        if allowed_categories and str(hit.get("category") or "") not in allowed_categories:
-            continue
-        if allowed_source_types and str(hit.get("source_type") or "") not in allowed_source_types:
+        if not hit_passes_scope_filters(hit, settings):
             continue
         if hit_has_risk(hit):
             continue
@@ -200,8 +196,20 @@ def first_risky_rag_hit(evidence: dict[str, Any], settings: dict[str, Any]) -> d
         except (TypeError, ValueError):
             score = 0.0
         if score >= min_score and hit_has_risk(hit):
+            if not hit_passes_scope_filters(hit, settings):
+                continue
             return hit
     return None
+
+
+def hit_passes_scope_filters(hit: dict[str, Any], settings: dict[str, Any]) -> bool:
+    allowed_categories = {str(item) for item in settings.get("allowed_categories", []) or [] if str(item)}
+    allowed_source_types = {str(item) for item in settings.get("allowed_source_types", []) or [] if str(item)}
+    if allowed_categories and str(hit.get("category") or "") not in allowed_categories:
+        return False
+    if allowed_source_types and str(hit.get("source_type") or "") not in allowed_source_types:
+        return False
+    return True
 
 
 def build_reply_from_hit(hit: dict[str, Any], *, intent_tags: set[str], settings: dict[str, Any]) -> str:

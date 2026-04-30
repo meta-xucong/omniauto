@@ -104,13 +104,14 @@ class WeChatConnector:
         return status
 
     def ensure_wechat_started(self) -> None:
-        """Explicit startup helper. Normal workflows should not call this by default."""
-        if any_weixin_process():
+        """Compatibility helper; startup is deliberately manual."""
+        status = self.status()
+        if status.get("ok") and status.get("online"):
             return
-        if not WECHAT_EXE.exists():
-            raise FileNotFoundError(str(WECHAT_EXE))
-        subprocess.Popen([str(WECHAT_EXE)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        time.sleep(8)
+        raise WeChatConnectorError(
+            "Automatic WeChat startup is disabled. Open WeChat, finish login manually, "
+            "and keep the main window visible before running the workflow."
+        )
 
     def call_sidecar(self, args: list[str], allow_failure: bool = False) -> dict[str, Any]:
         if not self.sidecar_python.exists():

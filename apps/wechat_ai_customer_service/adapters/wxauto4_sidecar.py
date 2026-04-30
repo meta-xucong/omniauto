@@ -10,10 +10,12 @@ from __future__ import annotations
 
 import argparse
 import contextlib
+import ctypes
 import io
 import json
 import sys
 import time
+from ctypes import wintypes
 from typing import Any
 
 
@@ -31,7 +33,7 @@ def main() -> int:
     try:
         with contextlib.redirect_stdout(captured):
             payload = run_action(args)
-        payload["ok"] = True
+        payload.setdefault("ok", bool(payload.get("online")))
     except Exception as exc:
         payload = {"ok": False, "error": repr(exc)}
 
@@ -44,26 +46,35 @@ def main() -> int:
 
 
 def run_action(args: argparse.Namespace) -> dict[str, Any]:
-    from wxauto4 import LoginWnd, WeChat
+    from wxauto4 import WeChat
+
+    window_probe = ensure_visible_wechat_window()
+    if not window_probe["visible_main_windows"]:
+        return {
+            "login_window_exists": False,
+            "online": False,
+            "state": "main_window_not_found",
+            "window_probe": window_probe,
+            "error": "No visible WeChat main window was found; refusing to start or attach to a login/secondary window.",
+        }
 
     try:
         wx = WeChat(debug=False, resize=args.resize, ads=False)
     except Exception as exc:
-        login = LoginWnd()
-        login_exists = bool(login.exists(1))
-        if args.action == "status" and login_exists:
-            return {
-                "login_window_exists": True,
-                "online": False,
-                "state": "login_window",
-                "connect_error": repr(exc),
-            }
-        raise
+        return {
+            "login_window_exists": False,
+            "online": False,
+            "state": "connect_failed",
+            "connect_error": repr(exc),
+            "window_probe": window_probe,
+            "error": "Visible WeChat window exists, but wxauto4 could not attach to it.",
+        }
 
     payload: dict[str, Any] = {
         "login_window_exists": False,
         "online": bool(wx.IsOnline()),
         "my_info": safe_call(wx.GetMyInfo),
+        "window_probe": window_probe,
     }
 
     if args.action == "status":
@@ -81,10 +92,138 @@ def run_action(args: argparse.Namespace) -> dict[str, Any]:
             raise ValueError("--target is required for send")
         if args.text is None:
             raise ValueError("--text is required for send")
+        chat_result = safe_call(lambda: wx.ChatWith(args.target, exact=args.exact, force=True, force_wait=0.5))
+        time.sleep(0.5)
+        chat_info = safe_call(wx.ChatInfo)
+        if not chat_matches(chat_info, args.target, exact=args.exact):
+            raise RuntimeError(f"target chat not active before send: target={args.target!r} chat_info={chat_info!r}")
+        payload["chat_with_result"] = chat_result
+        payload["chat_info_before_send"] = chat_info
         payload["send_result"] = normalize_response(
-            wx.SendMsg(args.text, who=args.target, clear=True, exact=args.exact)
+            wx.SendMsg(args.text, who=None, clear=True, exact=args.exact)
         )
+        time.sleep(0.5)
+        payload["chat_info_after_send"] = safe_call(wx.ChatInfo)
     return payload
+
+
+def probe_wechat_windows() -> dict[str, Any]:
+    windows: list[dict[str, Any]] = []
+    visible_windows: list[dict[str, Any]] = []
+    main_windows: list[dict[str, Any]] = []
+    visible_main_windows: list[dict[str, Any]] = []
+
+    user32 = ctypes.windll.user32
+    kernel32 = ctypes.windll.kernel32
+
+    enum_windows_proc = ctypes.WINFUNCTYPE(wintypes.BOOL, wintypes.HWND, wintypes.LPARAM)
+    process_query_limited_information = 0x1000
+
+    def process_path(pid: int) -> str:
+        handle = kernel32.OpenProcess(process_query_limited_information, False, pid)
+        if not handle:
+            return ""
+        try:
+            size = wintypes.DWORD(32768)
+            buffer = ctypes.create_unicode_buffer(size.value)
+            if kernel32.QueryFullProcessImageNameW(handle, 0, buffer, ctypes.byref(size)):
+                return buffer.value
+            return ""
+        finally:
+            kernel32.CloseHandle(handle)
+
+    def callback(hwnd: int, _lparam: int) -> bool:
+        pid = wintypes.DWORD()
+        user32.GetWindowThreadProcessId(hwnd, ctypes.byref(pid))
+        path = process_path(int(pid.value))
+        if not path.lower().endswith("\\weixin.exe"):
+            return True
+
+        title_length = user32.GetWindowTextLengthW(hwnd)
+        title_buffer = ctypes.create_unicode_buffer(title_length + 1)
+        user32.GetWindowTextW(hwnd, title_buffer, title_length + 1)
+
+        class_buffer = ctypes.create_unicode_buffer(256)
+        user32.GetClassNameW(hwnd, class_buffer, 256)
+
+        item = {
+            "hwnd": int(hwnd),
+            "pid": int(pid.value),
+            "title": title_buffer.value,
+            "class_name": class_buffer.value,
+            "visible": bool(user32.IsWindowVisible(hwnd)),
+            "path": path,
+        }
+        windows.append(item)
+        if item["visible"]:
+            visible_windows.append(item)
+        if is_wechat_main_window(item):
+            main_windows.append(item)
+            if item["visible"]:
+                visible_main_windows.append(item)
+        return True
+
+    user32.EnumWindows(enum_windows_proc(callback), 0)
+    return {
+        "windows": windows,
+        "visible_windows": visible_windows,
+        "main_windows": main_windows,
+        "visible_main_windows": visible_main_windows,
+        "visible_count": len(visible_windows),
+        "main_count": len(main_windows),
+        "visible_main_count": len(visible_main_windows),
+    }
+
+
+def ensure_visible_wechat_window() -> dict[str, Any]:
+    probe = probe_wechat_windows()
+    if probe["visible_main_windows"]:
+        return probe
+
+    restored = restore_wechat_window(probe)
+    if restored:
+        time.sleep(0.8)
+        probe = probe_wechat_windows()
+        probe["restored_window"] = restored
+    return probe
+
+
+def restore_wechat_window(probe: dict[str, Any]) -> dict[str, Any] | None:
+    user32 = ctypes.windll.user32
+    sw_restore = 9
+    sw_show = 5
+    for item in probe.get("windows") or []:
+        if not is_wechat_main_window(item):
+            continue
+        hwnd = int(item.get("hwnd") or 0)
+        if not hwnd:
+            continue
+        user32.ShowWindow(hwnd, sw_restore)
+        user32.ShowWindow(hwnd, sw_show)
+        user32.SetForegroundWindow(hwnd)
+        return dict(item)
+    return None
+
+
+def is_wechat_main_window(item: dict[str, Any]) -> bool:
+    title = str(item.get("title") or "").strip()
+    class_name = str(item.get("class_name") or "")
+    return title in {"微信", "Weixin", "WeChat"} and "QWindowIcon" in class_name
+
+
+def chat_matches(chat_info: Any, target: str, exact: bool) -> bool:
+    if not isinstance(chat_info, dict):
+        return False
+    names = [
+        chat_info.get("chat_name"),
+        chat_info.get("name"),
+        chat_info.get("Name"),
+        chat_info.get("title"),
+    ]
+    normalized = [str(item).strip() for item in names if item]
+    if exact:
+        return target in normalized
+    return any(target in item for item in normalized)
 
 
 def session_to_dict(session: Any) -> dict[str, Any]:

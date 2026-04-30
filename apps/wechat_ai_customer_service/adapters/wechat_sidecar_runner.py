@@ -2,7 +2,7 @@
 
 This runner intentionally avoids screenshot/OCR/window-capture probes. It only:
 1. Connects to an already logged-in WeChat main window.
-2. Optionally starts WeChat only when ``--start-if-missing`` is passed.
+2. Refuses to start WeChat or interact with the login window.
 3. Calls the Python 3.12 wxauto4 sidecar.
 4. Emits JSON for status, sessions, messages, send, or smoke-test actions.
 """
@@ -15,7 +15,7 @@ import sys
 from datetime import datetime
 from typing import Any
 
-from wechat_connector import FILE_TRANSFER_ASSISTANT, WeChatConnector, any_weixin_process
+from wechat_connector import FILE_TRANSFER_ASSISTANT, WeChatConnector
 
 
 def main() -> int:
@@ -27,7 +27,7 @@ def main() -> int:
     parser.add_argument(
         "--start-if-missing",
         action="store_true",
-        help="Start WeChat if no logged-in main window is found.",
+        help="Deprecated no-op; WeChat must already be open and logged in.",
     )
     parser.add_argument("--no-start", action="store_true", help=argparse.SUPPRESS)
     args = parser.parse_args()
@@ -39,15 +39,7 @@ def main() -> int:
 
     connector = WeChatConnector()
     status = connector.status()
-    if (
-        not status.get("online")
-        and args.start_if_missing
-        and not args.no_start
-        and not any_weixin_process()
-    ):
-        connector.ensure_wechat_started()
-        status = connector.wait_online(args.wait)
-    elif not status.get("online") and any_weixin_process():
+    if not status.get("online"):
         status = connector.wait_online(args.wait)
 
     result: dict[str, Any] = {"status": status}

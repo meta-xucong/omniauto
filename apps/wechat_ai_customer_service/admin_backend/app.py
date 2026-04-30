@@ -9,6 +9,8 @@ from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
+from .api.auth import compat_router as auth_compat_router
+from .api.auth import router as auth_router
 from .api.candidates import router as candidates_router
 from .api.diagnostics import router as diagnostics_router
 from .api.drafts import router as drafts_router
@@ -18,9 +20,13 @@ from .api.jobs import router as jobs_router
 from .api.knowledge import router as knowledge_router
 from .api.learning import router as learning_router
 from .api.rag import router as rag_router
+from .api.shared_knowledge import router as shared_knowledge_router
 from .api.system import router as system_router
+from .api.sync import router as sync_router
+from .api.tenants import router as tenants_router
 from .api.uploads import router as uploads_router
 from .api.versions import router as versions_router
+from .auth_context import AuthTenantMiddleware
 
 
 APP_ROOT = Path(__file__).resolve().parents[1]
@@ -34,6 +40,10 @@ def create_app() -> FastAPI:
         description="Local knowledge admin console for the OmniAuto WeChat customer-service app.",
     )
 
+    app.add_middleware(AuthTenantMiddleware)
+
+    app.include_router(auth_router)
+    app.include_router(auth_compat_router)
     app.include_router(candidates_router)
     app.include_router(diagnostics_router)
     app.include_router(drafts_router)
@@ -43,7 +53,10 @@ def create_app() -> FastAPI:
     app.include_router(knowledge_router)
     app.include_router(learning_router)
     app.include_router(rag_router)
+    app.include_router(shared_knowledge_router)
     app.include_router(system_router)
+    app.include_router(sync_router)
+    app.include_router(tenants_router)
     app.include_router(uploads_router)
     app.include_router(versions_router)
 

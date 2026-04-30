@@ -7,6 +7,70 @@
     <link rel="stylesheet" href="/static/styles.css" />
   </head>
   <body>
+    <section id="login-screen" class="login-screen">
+      <form id="local-login-form" class="login-card glass-panel">
+        <div>
+          <p class="eyebrow">OmniAuto Local Console</p>
+          <h1>登录客户端</h1>
+          <p>使用分配的账号进入对应知识库。</p>
+        </div>
+        <label class="form-field">
+          <span>账号</span>
+          <input name="username" autocomplete="username" placeholder="请输入账号" required />
+        </label>
+        <label class="form-field">
+          <span>密码</span>
+          <input name="password" autocomplete="current-password" type="password" placeholder="请输入密码" required />
+        </label>
+        <label class="form-field is-hidden" id="local-login-bind-email-field">
+          <span>绑定邮箱</span>
+          <input name="bind_email" autocomplete="email" type="email" placeholder="请输入用于接收验证码的邮箱" />
+        </label>
+        <label class="form-field is-hidden" id="local-login-code-field">
+          <span>邮箱验证码</span>
+          <input name="email_code" autocomplete="one-time-code" inputmode="numeric" placeholder="请输入邮箱收到的验证码" />
+        </label>
+        <label class="checkbox-field is-hidden" id="local-login-trust-field">
+          <input name="trust_device" type="checkbox" />
+          <span>登录后 30 天内信任此设备</span>
+        </label>
+        <div class="button-row">
+          <button class="primary-button" id="local-login-submit" type="submit">登录</button>
+          <button class="secondary-button is-hidden" id="local-login-reset" type="button">重新输入账号密码</button>
+        </div>
+        <div class="status-card warning is-hidden" id="login-message"></div>
+      </form>
+    </section>
+    <section id="local-init-screen" class="init-screen">
+      <form id="local-init-form" class="init-card glass-panel">
+        <div>
+          <p class="eyebrow">Account Setup</p>
+          <h1>首次使用初始化</h1>
+          <p id="local-init-intro">为了保护账号安全，请先修改密码并绑定邮箱。完成后需要用新密码重新登录。</p>
+        </div>
+        <label class="form-field">
+          <span>绑定邮箱</span>
+          <input name="email" autocomplete="email" type="email" placeholder="用于接收登录验证码" required />
+        </label>
+        <label class="form-field">
+          <span>新密码</span>
+          <input name="new_password" autocomplete="new-password" type="password" required />
+        </label>
+        <label class="form-field">
+          <span>再次输入新密码</span>
+          <input name="confirm_password" autocomplete="new-password" type="password" required />
+        </label>
+        <label class="form-field is-hidden" id="local-init-code-field">
+          <span>邮箱验证码</span>
+          <input name="email_code" autocomplete="one-time-code" inputmode="numeric" placeholder="请输入邮箱收到的验证码" />
+        </label>
+        <div class="button-row">
+          <button class="primary-button" id="local-init-submit" type="submit">发送初始化验证码</button>
+          <button class="secondary-button" id="local-init-back" type="button">返回登录</button>
+        </div>
+        <div class="status-card warning is-hidden" id="local-init-message"></div>
+      </form>
+    </section>
     <main class="shell">
       <aside class="sidebar glass-panel">
         <div class="brand">
@@ -19,10 +83,12 @@
         <nav class="nav-list" aria-label="主导航">
           <button class="nav-item is-active" data-view="overview">总览</button>
           <button class="nav-item" data-view="knowledge">知识库</button>
+          <button class="nav-item admin-only-nav is-hidden" data-view="shared_public">共享公共知识库</button>
           <button class="nav-item" data-view="intake">知识录入与学习</button>
           <button class="nav-item" data-view="ai_reference">AI参考资料</button>
           <button class="nav-item" data-view="diagnostics">一键检测</button>
           <button class="nav-item" data-view="versions">备份还原</button>
+          <button class="nav-item" data-view="security">账号安全</button>
         </nav>
       </aside>
 
@@ -32,7 +98,13 @@
             <p class="eyebrow">OmniAuto Local Console</p>
             <h1 id="view-title">总览</h1>
           </div>
-          <div class="status-pill" id="health-pill">连接中</div>
+          <div class="topbar-actions">
+            <select id="tenant-select" aria-label="tenant"></select>
+            <div class="status-pill" id="auth-pill">Role</div>
+            <div class="status-pill" id="sync-pill">Sync</div>
+            <div class="status-pill" id="health-pill">连接中</div>
+            <button class="secondary-button danger-button" id="local-logout-button">退出登录</button>
+          </div>
         </header>
 
         <section class="hero glass-panel">
@@ -77,6 +149,33 @@
             <div class="split-layout">
               <div class="list-pane" id="knowledge-list"></div>
               <div class="detail-pane form-pane" id="knowledge-detail">等待加载</div>
+            </div>
+          </article>
+
+          <article class="glass-panel content-card view-panel" data-panel="shared_public">
+            <div class="section-head">
+              <div>
+                <h2>共享公共知识库</h2>
+                <p>这是本地全局共享知识，只对 admin 可见。客户账号不会看到这个入口，也不能直接修改公共库。</p>
+              </div>
+              <div class="button-row">
+                <button class="secondary-button" id="refresh-shared-public">刷新</button>
+                <button class="primary-button" id="upload-shared-candidates">上传新增候选到 VPS</button>
+              </div>
+            </div>
+            <div class="workflow-section is-visible">
+              <h2>新增共享知识</h2>
+              <form class="form-grid compact-form" id="shared-public-form">
+                <label class="form-field"><span>条目 ID</span><input name="item_id" placeholder="可留空自动生成" /></label>
+                <label class="form-field"><span>分类</span><input name="category_id" value="global_guidelines" /></label>
+                <label class="form-field"><span>标题</span><input name="title" required /></label>
+                <label class="form-field wide-field"><span>正文</span><input name="content" required /></label>
+                <button class="primary-button" type="submit">保存到共享库</button>
+              </form>
+            </div>
+            <div class="split-layout">
+              <div class="list-pane" id="shared-public-list"></div>
+              <div class="detail-pane form-pane" id="shared-public-detail">等待加载</div>
             </div>
           </article>
 
@@ -239,13 +338,60 @@
 
           <article class="glass-panel content-card view-panel" data-panel="versions">
             <div class="section-head">
-              <h2>备份还原</h2>
+              <div>
+                <h2>备份还原</h2>
+                <p>仅保留最近 20 条备份快照，超过数量的旧备份会自动清理。</p>
+              </div>
               <div class="button-row">
                 <button class="primary-button" id="create-backup">一键备份</button>
                 <button class="secondary-button" id="refresh-versions">刷新</button>
               </div>
             </div>
             <div id="version-list" class="compact-list"></div>
+          </article>
+
+          <article class="glass-panel content-card view-panel" data-panel="security">
+            <div class="section-head security-head">
+              <div>
+                <h2>账号安全</h2>
+                <p>维护当前账号的登录密码和验证码邮箱。</p>
+              </div>
+            </div>
+            <div class="security-summary" id="local-security-summary">账号安全信息读取中...</div>
+            <div class="security-grid">
+              <section class="security-panel">
+                <div class="security-panel-head">
+                  <h3>修改密码</h3>
+                  <span>保存后请用新密码重新登录</span>
+                </div>
+                <form class="security-form" id="local-password-form">
+                  <label class="form-field"><span>当前密码</span><input name="current_password" type="password" autocomplete="current-password" required /></label>
+                  <label class="form-field"><span>新密码</span><input name="new_password" type="password" autocomplete="new-password" required /></label>
+                  <label class="form-field"><span>再次输入新密码</span><input name="confirm_password" type="password" autocomplete="new-password" required /></label>
+                  <label class="form-field is-hidden" id="local-password-code-field"><span>邮箱验证码</span><input name="email_code" autocomplete="one-time-code" inputmode="numeric" placeholder="请输入验证码" /></label>
+                  <div class="security-actions">
+                    <button class="primary-button compact-button" type="submit">发送验证码并修改</button>
+                  </div>
+                </form>
+              </section>
+              <section class="security-panel">
+                <div class="security-panel-head">
+                  <h3>绑定邮箱</h3>
+                  <span>用于登录和改密验证码</span>
+                </div>
+                <form class="security-form" id="local-email-form">
+                  <label class="form-field wide-field"><span>邮箱</span><input name="email" type="email" autocomplete="email" placeholder="请输入绑定邮箱" required /></label>
+                  <label class="form-field is-hidden" id="local-email-code-field"><span>邮箱验证码</span><input name="email_code" autocomplete="one-time-code" inputmode="numeric" placeholder="请输入验证码" /></label>
+                  <div class="security-actions">
+                    <button class="primary-button compact-button" type="submit">发送绑定验证码</button>
+                  </div>
+                </form>
+              </section>
+            </div>
+            <div class="security-note">
+              <strong>邮箱验证码登录</strong>
+              <span>客户端只负责绑定邮箱和填写验证码，SMTP 发信配置由 VPS 服务端统一管理。</span>
+            </div>
           </article>
         </section>
       </section>

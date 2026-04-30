@@ -545,6 +545,12 @@ class PostgresJsonStore:
         )
         return row["payload"] if row else None
 
+    def delete_version(self, tenant_id: str, version_id: str) -> None:
+        self.execute(
+            f"DELETE FROM {self.schema}.version_snapshots WHERE tenant_id = %s AND version_id = %s",
+            [tenant_id, version_id],
+        )
+
     def append_audit(self, tenant_id: str, action: str, payload: dict[str, Any]) -> None:
         self.execute(
             f"INSERT INTO {self.schema}.audit_events (tenant_id, action, payload) VALUES (%s, %s, %s)",

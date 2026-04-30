@@ -3,6 +3,7 @@
   "rules_path": "apps/wechat_ai_customer_service/configs/customer_service_rag_live_rules.example.json",
   "state_path": "runtime/apps/wechat_ai_customer_service/state/file_transfer_rag_enterprise_state.json",
   "audit_log_path": "runtime/apps/wechat_ai_customer_service/logs/file_transfer_rag_enterprise_audit.jsonl",
+  "append_live_run_nonce": true,
   "poll": {
     "interval_seconds": 1,
     "iterations": 1
@@ -31,8 +32,17 @@
     "skip_llm_after_apply": true,
     "min_hit_score": 0.12,
     "max_reply_chars": 220,
-    "max_snippet_chars": 130
+    "max_snippet_chars": 130,
+    "allowed_source_types": ["product_doc", "manual", "rag_experience"]
   },
+  "rag_seed_paths": [
+    {
+      "path": "apps/wechat_ai_customer_service/tests/fixtures/rag_enterprise_live_reference.txt",
+      "source_type": "product_doc",
+      "category": "product_explanations",
+      "product_id": "fl-920"
+    }
+  ],
   "data_capture": {
     "enabled": true,
     "workbook_path": "runtime/apps/wechat_ai_customer_service/test_artifacts/file_transfer_rag_enterprise_customer_leads.xlsx",

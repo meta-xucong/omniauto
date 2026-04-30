@@ -30,6 +30,7 @@ runtime/apps/
 runtime/generated_workflows/
 runtime/logs/
 runtime/state/
+runtime/skill_compare_*/
 
 # Local task/supervisor state
 .codex-longrun/

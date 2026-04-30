@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "state_path": "runtime/apps/codex_wechat_bridge/state/bridge_state.json",
+  "ledger_path": "runtime/apps/codex_wechat_bridge/state/task_ledger.json",
+  "artifact_root": "runtime/apps/codex_wechat_bridge/test_artifacts",
+  "codex": {
+    "mode": "app_server",
+    "endpoint": "ws://127.0.0.1:17910",
+    "manage_app_server": true,
+    "model": "gpt-5.4",
+    "cwd": "D:/AI/AI_RPA",
+    "approval_policy": "never",
+    "sandbox": "danger-full-access",
+    "service_name": "codex-wechat-bridge",
+    "thread_title_prefix": "WECHAT_CODEX_TASK",
+    "sync_desktop_index": true,
+    "timeout_ms": 180000,
+    "node_command": "node"
+  },
+  "wechat": {
+    "target": "\u6587\u4ef6\u4f20\u8f93\u52a9\u624b",
+    "exact": true,
+    "allow_self_messages": true,
+    "command_prefix": "[ToCodex]",
+    "reply_prefix": "[Codex] ",
+    "send_receipts": true,
+    "ignore_prefixes": [
+      "[Codex] "
+    ],
+    "max_messages_per_poll": 1,
+    "max_reply_chars": 3500,
+    "max_final_reply_chars": 1200,
+    "max_pending_retries": 1
+  },
+  "dedupe": {
+    "history_limit": 200
+  },
+  "ledger": {
+    "history_limit": 200
+  },
+  "monitor": {
+    "host": "127.0.0.1",
+    "port": 17911
+  }
+}
