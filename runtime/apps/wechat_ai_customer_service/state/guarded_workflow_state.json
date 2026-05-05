@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "targets": {
+    "文件传输助手": {
+      "processed_message_ids": [
+        "2368b5ab270998b392c5e5c0fe4f395d"
+      ],
+      "handoff_message_ids": [],
+      "sent_replies": [],
+      "reply_timestamps": [],
+      "bootstrap_events": [
+        {
+          "message_ids": [
+            "2368b5ab270998b392c5e5c0fe4f395d"
+          ],
+          "created_at": "2026-04-26T03:23:27"
+        }
+      ]
+    }
+  }
+}

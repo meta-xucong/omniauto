@@ -1,0 +1,19 @@
+{
+  "local_init_8HVkuvh7WfEv2hjrzoCQQ7U3LHFgWscR": {
+    "challenge_id": "local_init_8HVkuvh7WfEv2hjrzoCQQ7U3LHFgWscR",
+    "purpose": "initialize_account",
+    "username": "admin",
+    "user_id": "admin",
+    "role": "admin",
+    "tenant_id": "default",
+    "device_fingerprint": "73f419b3db2f8b7c2dff8d7facd9f900f417326ac84b46b6180f9cc6cb84624e",
+    "device_name": "Win32 zh-CN",
+    "expires_at": "2026-05-02T14:31:26+00:00",
+    "created_at": "2026-05-02T14:01:26+00:00",
+    "email": "xu__cong@126.con",
+    "new_password_hash": "pbkdf2_sha256$120000$dba7a96af28043592398382c448d2c64$yGWU5h7xxd8ta7My5wB5BZuMtirVAsMRiPTdNVKV74s=",
+    "code_hash": "pbkdf2_sha256$120000$cb166dd0bffe79c17b1de8da311e54b9$tCa0AUnWqqjSlQIEHWvQxOKN4u2EeCfCcNx8F0xDdRo=",
+    "attempts_remaining": 5,
+    "last_sent_at": "2026-05-02T14:01:48+00:00"
+  }
+}

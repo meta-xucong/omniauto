@@ -1,0 +1,26 @@
+{
+  "job_id": "job_50df40577ba6",
+  "created_at": "2026-05-05T20:57:32",
+  "status": "completed",
+  "upload_ids": [
+    "upload_393c5f9d2fe67cac"
+  ],
+  "use_llm": false,
+  "llm_assist_policy": {
+    "policy_version": "knowledge_llm_assist_v1",
+    "stage": "upload_to_rag_experience_review",
+    "requested": false,
+    "rule_fallback_allowed": true,
+    "human_approval_required": true,
+    "strict_promotion_policy": "uploads_create_rag_experience_only; pending candidates require manual RAG promotion"
+  },
+  "candidate_ids": [],
+  "candidate_count": 0,
+  "rag_experience_ids": [
+    "rag_exp_33d4477961974cf9fd06"
+  ],
+  "rag_experience_count": 1,
+  "strict_promotion_policy": "rag_experience_manual_promotion_only",
+  "skipped_duplicate_count": 0,
+  "skipped_duplicates": []
+}

@@ -1,0 +1,53 @@
+{
+  "title": "service_reliability",
+  "guideline_text": "我们这边会按测试商品资料、公开价格和售后政策如实回复，不乱承诺。您可以先发产品、数量和收货城市，我帮您按现有资料核算；涉及合同、账期、特殊售后或破例优惠会转人工确认。",
+  "keywords": [
+    "靠谱吗",
+    "可靠吗",
+    "靠不靠谱",
+    "质量怎么样",
+    "稳不稳",
+    "是不是正品",
+    "售后靠谱不",
+    "先了解一下"
+  ],
+  "applies_to": "所有客户都可能遇到的通用客服场景",
+  "schema_version": 1,
+  "id": "shared_e0472c24f2467fa627",
+  "item_id": "shared_e0472c24f2467fa627",
+  "category_id": "risk_control",
+  "status": "active",
+  "content": "我们这边会按测试商品资料、公开价格和售后政策如实回复，不乱承诺。您可以先发产品、数量和收货城市，我帮您按现有资料核算；涉及合同、账期、特殊售后或破例优惠会转人工确认。",
+  "data": {
+    "title": "service_reliability",
+    "guideline_text": "我们这边会按测试商品资料、公开价格和售后政策如实回复，不乱承诺。您可以先发产品、数量和收货城市，我帮您按现有资料核算；涉及合同、账期、特殊售后或破例优惠会转人工确认。",
+    "keywords": [
+      "靠谱吗",
+      "可靠吗",
+      "靠不靠谱",
+      "质量怎么样",
+      "稳不稳",
+      "是不是正品",
+      "售后靠谱不",
+      "先了解一下"
+    ],
+    "applies_to": "所有客户都可能遇到的通用客服场景",
+    "allow_auto_reply": false,
+    "requires_handoff": true
+  },
+  "runtime": {
+    "allow_auto_reply": false,
+    "requires_handoff": true,
+    "risk_level": "high"
+  },
+  "source": {
+    "type": "cloud_official_shared_library",
+    "item_id": "shared_e0472c24f2467fa627",
+    "version": ""
+  },
+  "metadata": {
+    "knowledge_layer": "shared",
+    "cloud_item_id": "shared_e0472c24f2467fa627",
+    "cloud_updated_at": "2026-05-02T19:56:46+00:00"
+  }
+}

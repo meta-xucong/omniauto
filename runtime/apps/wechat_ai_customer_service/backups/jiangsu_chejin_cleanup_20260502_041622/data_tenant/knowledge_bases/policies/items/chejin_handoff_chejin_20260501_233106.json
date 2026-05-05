@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "category_id": "policies",
+  "id": "chejin_handoff_chejin_20260501_233106",
+  "status": "active",
+  "source": {
+    "type": "test_fixture",
+    "batch_token": "CHEJIN_20260501_233106"
+  },
+  "data": {
+    "title": "江苏车金试驾到店转人工",
+    "policy_type": "manual_required",
+    "keywords": [
+      "试驾",
+      "到店",
+      "订金",
+      "定金",
+      "保证无事故",
+      "包过"
+    ],
+    "answer": "客户明确要求试驾、到店、订金或事故赔付承诺时，AI只能记录并转人工确认。",
+    "allow_auto_reply": false,
+    "requires_handoff": true,
+    "handoff_reason": "used_car_high_intent_or_risk",
+    "operator_alert": true,
+    "risk_level": "high"
+  },
+  "runtime": {
+    "allow_auto_reply": false,
+    "requires_handoff": true,
+    "risk_level": "high",
+    "operator_alert": true
+  },
+  "review_state": {
+    "is_new": true,
+    "new_reason": "newly_added_formal_knowledge",
+    "marked_at": "2026-05-01T23:31:08",
+    "updated_at": "2026-05-01T23:31:08",
+    "read_at": "",
+    "read_by": "",
+    "source": {
+      "source_module": "jiangsu_chejin_test",
+      "target_category": "policies",
+      "item_id": "chejin_handoff_chejin_20260501_233106"
+    }
+  },
+  "metadata": {
+    "created_at": "2026-05-01T23:31:08",
+    "updated_at": "2026-05-01T23:31:08",
+    "created_by": "admin",
+    "updated_by": "admin"
+  }
+}

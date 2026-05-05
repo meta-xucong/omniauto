@@ -1,0 +1,70 @@
+{
+  "job_id": "job_59d9243a3cf1",
+  "created_at": "2026-05-03T20:48:25",
+  "status": "completed",
+  "upload_ids": [
+    "upload_bf013ee4bcdcfb7b"
+  ],
+  "use_llm": false,
+  "llm_assist_policy": {
+    "policy_version": "knowledge_llm_assist_v1",
+    "stage": "upload_to_review_candidate",
+    "requested": false,
+    "rule_fallback_allowed": true,
+    "human_approval_required": true
+  },
+  "candidate_ids": [],
+  "candidate_count": 0,
+  "rag_experience_ids": [],
+  "skipped_duplicate_count": 4,
+  "skipped_duplicates": [
+    {
+      "candidate_id": "raw_dfc41303e1b311f3",
+      "upload_id": "upload_bf013ee4bcdcfb7b",
+      "duplicate": {
+        "duplicate": true,
+        "reason": "same_id_near_same_content",
+        "source": "review_candidate:raw_2fe282d42a027cbb",
+        "existing_item_id": "chejin-camry-2021g",
+        "similarity": 0.986,
+        "message": "检测到与现有知识或候选高度重复，已跳过去重。"
+      }
+    },
+    {
+      "candidate_id": "raw_5dded305dd5a3ffc",
+      "upload_id": "upload_bf013ee4bcdcfb7b",
+      "duplicate": {
+        "duplicate": true,
+        "reason": "same_id_near_same_content",
+        "source": "review_candidate:raw_57ea3f1e14e7200a",
+        "existing_item_id": "chejin-civic-2020t",
+        "similarity": 0.987,
+        "message": "检测到与现有知识或候选高度重复，已跳过去重。"
+      }
+    },
+    {
+      "candidate_id": "raw_a5ccdd0d94735de9",
+      "upload_id": "upload_bf013ee4bcdcfb7b",
+      "duplicate": {
+        "duplicate": true,
+        "reason": "same_id_near_same_content",
+        "source": "review_candidate:raw_22fb7636a4c9a76d",
+        "existing_item_id": "chejin-bmw320-2019m",
+        "similarity": 0.982,
+        "message": "检测到与现有知识或候选高度重复，已跳过去重。"
+      }
+    },
+    {
+      "candidate_id": "raw_101428247bb84c1e",
+      "upload_id": "upload_bf013ee4bcdcfb7b",
+      "duplicate": {
+        "duplicate": true,
+        "reason": "same_id_near_same_content",
+        "source": "review_candidate:raw_f6d0b79688cf6f6e",
+        "existing_item_id": "chejin-qinplus-2022dmi",
+        "similarity": 0.987,
+        "message": "检测到与现有知识或候选高度重复，已跳过去重。"
+      }
+    }
+  ]
+}

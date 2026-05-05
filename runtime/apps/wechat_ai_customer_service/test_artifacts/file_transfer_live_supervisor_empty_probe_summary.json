@@ -1,0 +1,19 @@
+{
+  "ok": true,
+  "started_at": "2026-05-03T13:12:18+0800",
+  "finished_at": "2026-05-03T13:12:18+0800",
+  "send": false,
+  "temporary_full_auto": false,
+  "scenario_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\tests\\scenarios\\file_transfer_live_regression.json",
+  "result_path": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\file_transfer_live_supervisor_empty_probe_result.json",
+  "summary_path": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\file_transfer_live_supervisor_empty_probe_summary.json",
+  "selected_count": 0,
+  "passed_count": 0,
+  "failed_count": 0,
+  "pending_count": 0,
+  "pending": [],
+  "failures": [],
+  "invocation_count": 0,
+  "timed_out_count": 0,
+  "invocations": []
+}

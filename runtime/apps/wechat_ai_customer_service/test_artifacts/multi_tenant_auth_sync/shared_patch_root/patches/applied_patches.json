@@ -1,0 +1,14 @@
+[
+  {
+    "patch_id": "shared_patch_test",
+    "version": "test.1",
+    "applied_at": "2026-05-05T21:44:55",
+    "operation_count": 1
+  },
+  {
+    "patch_id": "shared_patch_risk_control_test",
+    "version": "test.2",
+    "applied_at": "2026-05-05T21:44:55",
+    "operation_count": 1
+  }
+]

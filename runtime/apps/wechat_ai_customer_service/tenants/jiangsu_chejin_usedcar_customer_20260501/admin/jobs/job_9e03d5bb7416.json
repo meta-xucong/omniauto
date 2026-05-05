@@ -1,0 +1,27 @@
+{
+  "job_id": "job_9e03d5bb7416",
+  "created_at": "2026-05-03T04:39:23",
+  "status": "completed",
+  "upload_ids": [
+    "upload_1aa69c592036ab5c"
+  ],
+  "use_llm": false,
+  "llm_assist_policy": {
+    "policy_version": "knowledge_llm_assist_v1",
+    "stage": "upload_to_review_candidate",
+    "requested": false,
+    "rule_fallback_allowed": true,
+    "human_approval_required": true
+  },
+  "candidate_ids": [
+    "raw_d3355ed983d06299",
+    "raw_442041fc302bd308",
+    "raw_c7523b6b1b55b7f0"
+  ],
+  "candidate_count": 3,
+  "rag_experience_ids": [
+    "rag_exp_c340ad6335c978c0f8a5"
+  ],
+  "skipped_duplicate_count": 0,
+  "skipped_duplicates": []
+}

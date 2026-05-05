@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "category_id": "global_guidelines",
+  "id": "customer_service_style_guidelines",
+  "status": "active",
+  "source": {
+    "type": "cloud_official_shared_library",
+    "item_id": "customer_service_style_guidelines",
+    "version": ""
+  },
+  "data": {
+    "title": "客服通用表达与边界原则",
+    "guideline_text": "回复要自然，先接住客户使用场景，再问关键参数。对功率、续航、最低价等不确定内容，不能凭空承诺。适合自动回复的内容：参数收集、常规质保说明、使用场景推荐。需要转人工的内容：最低价、特殊补偿、先发货后付款。",
+    "intent_tags": [
+      "greeting",
+      "small_talk",
+      "scene_product",
+      "quote",
+      "discount",
+      "handoff"
+    ],
+    "tone_tags": [
+      "natural",
+      "truthful",
+      "safe"
+    ],
+    "priority": 100,
+    "always_include": true,
+    "additional_details": {
+      "source": "three_layer_migration",
+      "migrated_from": "tenant.chats.chat_style_guidelines"
+    },
+    "keywords": [],
+    "applies_to": ""
+  },
+  "runtime": {
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "risk_level": "normal"
+  },
+  "metadata": {
+    "updated_at": "2026-04-27T03:15:56",
+    "updated_by": "three_layer_migration",
+    "knowledge_layer": "shared",
+    "cloud_item_id": "customer_service_style_guidelines",
+    "cloud_updated_at": "2026-04-29T17:54:51+00:00"
+  },
+  "item_id": "customer_service_style_guidelines",
+  "title": "客服通用表达与边界原则",
+  "content": "回复要自然，先接住客户使用场景，再问关键参数。对功率、续航、最低价等不确定内容，不能凭空承诺。适合自动回复的内容：参数收集、常规质保说明、使用场景推荐。需要转人工的内容：最低价、特殊补偿、先发货后付款。",
+  "keywords": [],
+  "applies_to": ""
+}

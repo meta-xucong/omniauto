@@ -1,0 +1,2391 @@
+{
+  "archived_at": "2026-05-02T19:44:51+00:00",
+  "count": 23,
+  "items": {
+    "proposal_shared_local_597e94f66d86827c4d": {
+      "proposal_id": "proposal_shared_local_597e94f66d86827c4d",
+      "tenant_id": "default",
+      "title": "quote_detail_request",
+      "summary": "客户正式知识经 AI 判断后提交为候选共享公共知识，等待服务端 admin 审核。",
+      "operations": [
+        {
+          "op": "upsert_json",
+          "path": "reply_style/items/shared_17773edea8d200616b.json",
+          "content": {
+            "schema_version": 1,
+            "id": "shared_17773edea8d200616b",
+            "item_id": "shared_17773edea8d200616b",
+            "category_id": "reply_style",
+            "title": "quote_detail_request",
+            "status": "active",
+            "keywords": [
+              "quote"
+            ],
+            "applies_to": "所有客户都可能遇到的通用客服场景",
+            "content": "好的，您把具体产品、数量和收货城市发我，我帮您核一下价格和运费。",
+            "guideline_text": "好的，您把具体产品、数量和收货城市发我，我帮您核一下价格和运费。",
+            "notes": "候选理由：该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+            "source": {
+              "type": "formal_knowledge_universal_extraction",
+              "provider": "formal_knowledge_universal_heuristic",
+              "tenant_id": "default",
+              "source_items": [
+                {
+                  "tenant_id": "default",
+                  "category_id": "chats",
+                  "item_id": "quote_detail_request",
+                  "source_key": "default:chats:quote_detail_request:0137ae6eeb65e716"
+                }
+              ],
+              "llm_used": false
+            },
+            "data": {
+              "title": "quote_detail_request",
+              "guideline_text": "好的，您把具体产品、数量和收货城市发我，我帮您核一下价格和运费。",
+              "keywords": [
+                "quote"
+              ],
+              "applies_to": "所有客户都可能遇到的通用客服场景"
+            }
+          }
+        }
+      ],
+      "source": "formal_knowledge_universal_heuristic",
+      "status": "rejected",
+      "created_by": "local-node",
+      "created_at": "2026-05-02T18:08:32+00:00",
+      "updated_at": "2026-05-02T19:42:07+00:00",
+      "source_meta": {
+        "v4_reaudit": {
+          "model": "deepseek-v4-pro",
+          "reviewed_at": "2026-05-02T19:42:07+00:00",
+          "raw_model_review": {
+            "proposal_id": "proposal_shared_local_597e94f66d86827c4d",
+            "action": "keep_rewrite",
+            "confidence": 0.95,
+            "reason": "Clear request for quote details. Efficient and professional.",
+            "rewritten": {
+              "title": "quote_detail_request",
+              "category_id": "reply_style",
+              "guideline_text": "",
+              "keywords": [
+                "quote"
+              ]
+            }
+          }
+        }
+      },
+      "reviewed_by": "codex_v4_reaudit",
+      "reviewed_at": "2026-05-02T19:42:07+00:00",
+      "review_note": "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。",
+      "review_assist": {
+        "provider": "deepseek-v4-pro_reaudit_guarded",
+        "llm_used": true,
+        "recommendation": "reject",
+        "universal_score": 20,
+        "summary": "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。",
+        "reasons": [
+          "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。"
+        ],
+        "risks": [
+          "如误入共享公共知识库，可能把某个客户的承诺或流程错推给其他客户。"
+        ],
+        "duplicate_level": "none",
+        "existing_matches": [],
+        "admin_checklist": [
+          "如需保留，应放回该 customer 自己的正式知识库，不进入共享公共知识。"
+        ],
+        "generated_at": "2026-05-02T19:42:07+00:00"
+      }
+    },
+    "proposal_shared_local_6f7275dd524dd6fa64": {
+      "proposal_id": "proposal_shared_local_6f7275dd524dd6fa64",
+      "tenant_id": "default",
+      "title": "scene_product_association",
+      "summary": "客户正式知识经 AI 判断后提交为候选共享公共知识，等待服务端 admin 审核。",
+      "operations": [
+        {
+          "op": "upsert_json",
+          "path": "reply_style/items/shared_5ca0a29d987bbf1f66.json",
+          "content": {
+            "schema_version": 1,
+            "id": "shared_5ca0a29d987bbf1f66",
+            "item_id": "shared_5ca0a29d987bbf1f66",
+            "category_id": "reply_style",
+            "title": "scene_product_association",
+            "status": "active",
+            "keywords": [
+              "scene_product",
+              "product"
+            ],
+            "applies_to": "所有客户都可能遇到的通用客服场景",
+            "content": "您这个场景我大概明白，可以先按库里的相近产品给您对一下，但价格和政策我只按现有资料说。",
+            "guideline_text": "您这个场景我大概明白，可以先按库里的相近产品给您对一下，但价格和政策我只按现有资料说。",
+            "notes": "候选理由：该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+            "source": {
+              "type": "formal_knowledge_universal_extraction",
+              "provider": "formal_knowledge_universal_heuristic",
+              "tenant_id": "default",
+              "source_items": [
+                {
+                  "tenant_id": "default",
+                  "category_id": "chats",
+                  "item_id": "scene_product_association",
+                  "source_key": "default:chats:scene_product_association:8bcad931926a0afc"
+                }
+              ],
+              "llm_used": false
+            },
+            "data": {
+              "title": "scene_product_association",
+              "guideline_text": "您这个场景我大概明白，可以先按库里的相近产品给您对一下，但价格和政策我只按现有资料说。",
+              "keywords": [
+                "scene_product",
+                "product"
+              ],
+              "applies_to": "所有客户都可能遇到的通用客服场景"
+            }
+          }
+        }
+      ],
+      "source": "formal_knowledge_universal_heuristic",
+      "status": "rejected",
+      "created_by": "local-node",
+      "created_at": "2026-05-02T18:08:32+00:00",
+      "updated_at": "2026-05-02T19:42:07+00:00",
+      "source_meta": {
+        "v4_reaudit": {
+          "model": "deepseek-v4-pro",
+          "reviewed_at": "2026-05-02T19:42:07+00:00",
+          "raw_model_review": {
+            "proposal_id": "proposal_shared_local_6f7275dd524dd6fa64",
+            "action": "keep_rewrite",
+            "confidence": 0.95,
+            "reason": "Good handling of ambiguous product scenario. Sets correct expectations.",
+            "rewritten": {
+              "title": "scene_product_association",
+              "category_id": "reply_style",
+              "guideline_text": "",
+              "keywords": [
+                "scene_product",
+                "product"
+              ]
+            }
+          }
+        }
+      },
+      "reviewed_by": "codex_v4_reaudit",
+      "reviewed_at": "2026-05-02T19:42:07+00:00",
+      "review_note": "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。",
+      "review_assist": {
+        "provider": "deepseek-v4-pro_reaudit_guarded",
+        "llm_used": true,
+        "recommendation": "reject",
+        "universal_score": 20,
+        "summary": "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。",
+        "reasons": [
+          "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。"
+        ],
+        "risks": [
+          "如误入共享公共知识库，可能把某个客户的承诺或流程错推给其他客户。"
+        ],
+        "duplicate_level": "none",
+        "existing_matches": [],
+        "admin_checklist": [
+          "如需保留，应放回该 customer 自己的正式知识库，不进入共享公共知识。"
+        ],
+        "generated_at": "2026-05-02T19:42:07+00:00"
+      }
+    },
+    "proposal_shared_local_ad56c1bb84cf6d34f9": {
+      "proposal_id": "proposal_shared_local_ad56c1bb84cf6d34f9",
+      "tenant_id": "default",
+      "title": "升降会议桌MT-160运输磕碰赔偿",
+      "summary": "客户正式知识经 AI 判断后提交为候选共享公共知识，等待服务端 admin 审核。",
+      "operations": [
+        {
+          "op": "upsert_json",
+          "path": "global_guidelines/items/shared_d2e2b9fcfac70a7e8a.json",
+          "content": {
+            "schema_version": 1,
+            "id": "shared_d2e2b9fcfac70a7e8a",
+            "item_id": "shared_d2e2b9fcfac70a7e8a",
+            "category_id": "global_guidelines",
+            "title": "升降会议桌MT-160运输磕碰赔偿",
+            "status": "active",
+            "keywords": [
+              "赔偿",
+              "磕碰",
+              "运输",
+              "MT-160"
+            ],
+            "applies_to": "所有客户都可能遇到的通用客服场景",
+            "content": "赔偿金额不能自动承诺，需要客服收集照片、订单号、外包装情况并转人工确认。",
+            "guideline_text": "赔偿金额不能自动承诺，需要客服收集照片、订单号、外包装情况并转人工确认。",
+            "notes": "候选理由：该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+            "source": {
+              "type": "formal_knowledge_universal_extraction",
+              "provider": "formal_knowledge_universal_heuristic",
+              "tenant_id": "default",
+              "source_items": [
+                {
+                  "tenant_id": "default",
+                  "category_id": "policies",
+                  "item_id": "after-sales-mt160-compensation",
+                  "source_key": "default:policies:after-sales-mt160-compensation:a87f9898936f5e31"
+                }
+              ],
+              "llm_used": false
+            },
+            "data": {
+              "title": "升降会议桌MT-160运输磕碰赔偿",
+              "guideline_text": "赔偿金额不能自动承诺，需要客服收集照片、订单号、外包装情况并转人工确认。",
+              "keywords": [
+                "赔偿",
+                "磕碰",
+                "运输",
+                "MT-160"
+              ],
+              "applies_to": "所有客户都可能遇到的通用客服场景"
+            }
+          }
+        }
+      ],
+      "source": "formal_knowledge_universal_heuristic",
+      "status": "rejected",
+      "created_by": "local-node",
+      "created_at": "2026-05-02T18:08:32+00:00",
+      "updated_at": "2026-05-02T19:42:07+00:00",
+      "source_meta": {
+        "v4_reaudit": {
+          "model": "deepseek-v4-pro",
+          "reviewed_at": "2026-05-02T19:42:07+00:00",
+          "raw_model_review": {
+            "proposal_id": "proposal_shared_local_ad56c1bb84cf6d34f9",
+            "action": "keep_rewrite",
+            "confidence": 0.9,
+            "reason": "Proposal aligns with guidelines.",
+            "rewritten": {
+              "title": "升降会议桌MT-160运输磕碰赔偿",
+              "category_id": "global_guidelines",
+              "guideline_text": "赔偿金额不能自动承诺，需要客服收集照片、订单号、外包装情况并转人工确认。",
+              "keywords": [
+                "赔偿",
+                "磕碰",
+                "运输",
+                "MT-160"
+              ]
+            }
+          }
+        }
+      },
+      "reviewed_by": "codex_v4_reaudit",
+      "reviewed_at": "2026-05-02T19:42:07+00:00",
+      "review_note": "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。",
+      "review_assist": {
+        "provider": "deepseek-v4-pro_reaudit_guarded",
+        "llm_used": true,
+        "recommendation": "reject",
+        "universal_score": 20,
+        "summary": "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。",
+        "reasons": [
+          "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。"
+        ],
+        "risks": [
+          "如误入共享公共知识库，可能把某个客户的承诺或流程错推给其他客户。"
+        ],
+        "duplicate_level": "none",
+        "existing_matches": [],
+        "admin_checklist": [
+          "如需保留，应放回该 customer 自己的正式知识库，不进入共享公共知识。"
+        ],
+        "generated_at": "2026-05-02T19:42:07+00:00"
+      }
+    },
+    "proposal_shared_local_6bec0da184233f61c8": {
+      "proposal_id": "proposal_shared_local_6bec0da184233f61c8",
+      "tenant_id": "default",
+      "title": "after_sales",
+      "summary": "客户正式知识经 AI 判断后提交为候选共享公共知识，等待服务端 admin 审核。",
+      "operations": [
+        {
+          "op": "upsert_json",
+          "path": "after_sale/items/shared_d8fe20868241b83d8c.json",
+          "content": {
+            "schema_version": 1,
+            "id": "shared_d8fe20868241b83d8c",
+            "item_id": "shared_d8fe20868241b83d8c",
+            "category_id": "after_sale",
+            "title": "after_sales",
+            "status": "active",
+            "keywords": [
+              "售后",
+              "保修",
+              "质保",
+              "坏了",
+              "退换",
+              "退货",
+              "换货",
+              "破损"
+            ],
+            "applies_to": "所有客户都可能遇到的通用客服场景",
+            "content": "签收 7 天内发现非人为质量问题，请提供照片或视频申请售后。外包装破损请先拍照并当场备注；退款、赔偿、争议或投诉需要转人工继续处理。",
+            "guideline_text": "签收 7 天内发现非人为质量问题，请提供照片或视频申请售后。外包装破损请先拍照并当场备注；退款、赔偿、争议或投诉需要转人工继续处理。",
+            "notes": "候选理由：该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+            "source": {
+              "type": "formal_knowledge_universal_extraction",
+              "provider": "formal_knowledge_universal_heuristic",
+              "tenant_id": "default",
+              "source_items": [
+                {
+                  "tenant_id": "default",
+                  "category_id": "policies",
+                  "item_id": "after_sales",
+                  "source_key": "default:policies:after_sales:5432b31559ba7ade"
+                }
+              ],
+              "llm_used": false
+            },
+            "data": {
+              "title": "after_sales",
+              "guideline_text": "签收 7 天内发现非人为质量问题，请提供照片或视频申请售后。外包装破损请先拍照并当场备注；退款、赔偿、争议或投诉需要转人工继续处理。",
+              "keywords": [
+                "售后",
+                "保修",
+                "质保",
+                "坏了",
+                "退换",
+                "退货",
+                "换货",
+                "破损"
+              ],
+              "applies_to": "所有客户都可能遇到的通用客服场景"
+            }
+          }
+        }
+      ],
+      "source": "formal_knowledge_universal_heuristic",
+      "status": "rejected",
+      "created_by": "local-node",
+      "created_at": "2026-05-02T18:08:32+00:00",
+      "updated_at": "2026-05-02T19:42:07+00:00",
+      "source_meta": {
+        "v4_reaudit": {
+          "model": "deepseek-v4-pro",
+          "reviewed_at": "2026-05-02T19:42:07+00:00",
+          "raw_model_review": {
+            "proposal_id": "proposal_shared_local_6bec0da184233f61c8",
+            "action": "keep_rewrite",
+            "confidence": 0.9,
+            "reason": "Proposal aligns with guidelines.",
+            "rewritten": {
+              "title": "after_sales",
+              "category_id": "after_sale",
+              "guideline_text": "签收 7 天内发现非人为质量问题，请提供照片或视频申请售后。外包装破损请先拍照并当场备注；退款、赔偿、争议或投诉需要转人工继续处理。",
+              "keywords": [
+                "售后",
+                "保修",
+                "质保",
+                "坏了",
+                "退换",
+                "退货",
+                "换货",
+                "破损"
+              ]
+            }
+          }
+        }
+      },
+      "reviewed_by": "codex_v4_reaudit",
+      "reviewed_at": "2026-05-02T19:42:07+00:00",
+      "review_note": "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。",
+      "review_assist": {
+        "provider": "deepseek-v4-pro_reaudit_guarded",
+        "llm_used": true,
+        "recommendation": "reject",
+        "universal_score": 20,
+        "summary": "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。",
+        "reasons": [
+          "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。"
+        ],
+        "risks": [
+          "如误入共享公共知识库，可能把某个客户的承诺或流程错推给其他客户。"
+        ],
+        "duplicate_level": "none",
+        "existing_matches": [],
+        "admin_checklist": [
+          "如需保留，应放回该 customer 自己的正式知识库，不进入共享公共知识。"
+        ],
+        "generated_at": "2026-05-02T19:42:07+00:00"
+      }
+    },
+    "proposal_shared_local_575e3821b84f6c04fd": {
+      "proposal_id": "proposal_shared_local_575e3821b84f6c04fd",
+      "tenant_id": "default",
+      "title": "售后政策",
+      "summary": "客户正式知识经 AI 判断后提交为候选共享公共知识，等待服务端 admin 审核。",
+      "operations": [
+        {
+          "op": "upsert_json",
+          "path": "after_sale/items/shared_c84c5657c92ec9ea77.json",
+          "content": {
+            "schema_version": 1,
+            "id": "shared_c84c5657c92ec9ea77",
+            "item_id": "shared_c84c5657c92ec9ea77",
+            "category_id": "after_sale",
+            "title": "售后政策",
+            "status": "active",
+            "keywords": [
+              "after",
+              "sales"
+            ],
+            "applies_to": "所有客户都可能遇到的通用客服场景",
+            "content": "{ \"general\": \"签收 7 天内发现非人为质量问题，可提供照片/视频申请售后。\", \"damage_on_arrival\": \"外包装破损请先拍照并当场备注，24 小时内反馈更容易处理。\", \"return_rule\": \"非质量问题退换货需商品未使用且包装完整，运费按责任方承担。\", \"manual_required\": \"退款、赔偿、争议、投诉、账期、合同条款均转人工。\" }",
+            "guideline_text": "{ \"general\": \"签收 7 天内发现非人为质量问题，可提供照片/视频申请售后。\", \"damage_on_arrival\": \"外包装破损请先拍照并当场备注，24 小时内反馈更容易处理。\", \"return_rule\": \"非质量问题退换货需商品未使用且包装完整，运费按责任方承担。\", \"manual_required\": \"退款、赔偿、争议、投诉、账期、合同条款均转人工。\" }",
+            "notes": "候选理由：该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+            "source": {
+              "type": "formal_knowledge_universal_extraction",
+              "provider": "formal_knowledge_universal_heuristic",
+              "tenant_id": "default",
+              "source_items": [
+                {
+                  "tenant_id": "default",
+                  "category_id": "policies",
+                  "item_id": "after_sales_policy_details",
+                  "source_key": "default:policies:after_sales_policy_details:ca4c6a34d1ffc66a"
+                }
+              ],
+              "llm_used": false
+            },
+            "data": {
+              "title": "售后政策",
+              "guideline_text": "{ \"general\": \"签收 7 天内发现非人为质量问题，可提供照片/视频申请售后。\", \"damage_on_arrival\": \"外包装破损请先拍照并当场备注，24 小时内反馈更容易处理。\", \"return_rule\": \"非质量问题退换货需商品未使用且包装完整，运费按责任方承担。\", \"manual_required\": \"退款、赔偿、争议、投诉、账期、合同条款均转人工。\" }",
+              "keywords": [
+                "after",
+                "sales"
+              ],
+              "applies_to": "所有客户都可能遇到的通用客服场景"
+            }
+          }
+        }
+      ],
+      "source": "formal_knowledge_universal_heuristic",
+      "status": "rejected",
+      "created_by": "local-node",
+      "created_at": "2026-05-02T18:08:32+00:00",
+      "updated_at": "2026-05-02T19:42:07+00:00",
+      "source_meta": {
+        "v4_reaudit": {
+          "model": "deepseek-v4-pro",
+          "reviewed_at": "2026-05-02T19:42:07+00:00",
+          "raw_model_review": {
+            "proposal_id": "proposal_shared_local_575e3821b84f6c04fd",
+            "action": "keep_rewrite",
+            "confidence": 0.9,
+            "reason": "Proposal aligns with guidelines.",
+            "rewritten": {
+              "title": "售后政策",
+              "category_id": "after_sale",
+              "guideline_text": "{ \"general\": \"签收 7 天内发现非人为质量问题，可提供照片/视频申请售后。\", \"damage_on_arrival\": \"外包装破损请先拍照并当场备注，24 小时内反馈更容易处理。\", \"return_rule\": \"非质量问题退换货需商品未使用且包装完整，运费按责任方承担。\", \"manual_required\": \"退款、赔偿、争议、投诉、账期、合同条款均转人工。\" }",
+              "keywords": [
+                "after",
+                "sales"
+              ]
+            }
+          }
+        }
+      },
+      "reviewed_by": "codex_v4_reaudit",
+      "reviewed_at": "2026-05-02T19:42:07+00:00",
+      "review_note": "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。",
+      "review_assist": {
+        "provider": "deepseek-v4-pro_reaudit_guarded",
+        "llm_used": true,
+        "recommendation": "reject",
+        "universal_score": 20,
+        "summary": "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。",
+        "reasons": [
+          "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。"
+        ],
+        "risks": [
+          "如误入共享公共知识库，可能把某个客户的承诺或流程错推给其他客户。"
+        ],
+        "duplicate_level": "none",
+        "existing_matches": [],
+        "admin_checklist": [
+          "如需保留，应放回该 customer 自己的正式知识库，不进入共享公共知识。"
+        ],
+        "generated_at": "2026-05-02T19:42:07+00:00"
+      }
+    },
+    "proposal_shared_local_81af487dcce82c8b62": {
+      "proposal_id": "proposal_shared_local_81af487dcce82c8b62",
+      "tenant_id": "default",
+      "title": "空气净化效果政策",
+      "summary": "客户正式知识经 AI 判断后提交为候选共享公共知识，等待服务端 admin 审核。",
+      "operations": [
+        {
+          "op": "upsert_json",
+          "path": "global_guidelines/items/shared_6f38aaf368b99bd211.json",
+          "content": {
+            "schema_version": 1,
+            "id": "shared_6f38aaf368b99bd211",
+            "item_id": "shared_6f38aaf368b99bd211",
+            "category_id": "global_guidelines",
+            "title": "空气净化效果政策",
+            "status": "active",
+            "keywords": [
+              "空气净化效果"
+            ],
+            "applies_to": "所有客户都可能遇到的通用客服场景",
+            "content": "空气净化器效果会受房间面积、通风、污染源影响，我们可以按适用面积和 CADR 帮您选型，但不能承诺百分百去除。",
+            "guideline_text": "空气净化器效果会受房间面积、通风、污染源影响，我们可以按适用面积和 CADR 帮您选型，但不能承诺百分百去除。",
+            "notes": "候选理由：该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+            "source": {
+              "type": "formal_knowledge_universal_extraction",
+              "provider": "formal_knowledge_universal_heuristic",
+              "tenant_id": "default",
+              "source_items": [
+                {
+                  "tenant_id": "default",
+                  "category_id": "policies",
+                  "item_id": "air-purifier-effect",
+                  "source_key": "default:policies:air-purifier-effect:28edbd810cfc5518"
+                }
+              ],
+              "llm_used": false
+            },
+            "data": {
+              "title": "空气净化效果政策",
+              "guideline_text": "空气净化器效果会受房间面积、通风、污染源影响，我们可以按适用面积和 CADR 帮您选型，但不能承诺百分百去除。",
+              "keywords": [
+                "空气净化效果"
+              ],
+              "applies_to": "所有客户都可能遇到的通用客服场景"
+            }
+          }
+        }
+      ],
+      "source": "formal_knowledge_universal_heuristic",
+      "status": "rejected",
+      "created_by": "local-node",
+      "created_at": "2026-05-02T18:08:32+00:00",
+      "updated_at": "2026-05-02T19:42:07+00:00",
+      "source_meta": {
+        "v4_reaudit": {
+          "model": "deepseek-v4-pro",
+          "reviewed_at": "2026-05-02T19:42:07+00:00",
+          "raw_model_review": {
+            "proposal_id": "proposal_shared_local_81af487dcce82c8b62",
+            "action": "keep_rewrite",
+            "confidence": 0.9,
+            "reason": "Proposal aligns with guidelines.",
+            "rewritten": {
+              "title": "空气净化效果政策",
+              "category_id": "global_guidelines",
+              "guideline_text": "空气净化器效果会受房间面积、通风、污染源影响，我们可以按适用面积和 CADR 帮您选型，但不能承诺百分百去除。",
+              "keywords": [
+                "空气净化效果"
+              ]
+            }
+          }
+        }
+      },
+      "reviewed_by": "codex_v4_reaudit",
+      "reviewed_at": "2026-05-02T19:42:07+00:00",
+      "review_note": "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。",
+      "review_assist": {
+        "provider": "deepseek-v4-pro_reaudit_guarded",
+        "llm_used": true,
+        "recommendation": "reject",
+        "universal_score": 20,
+        "summary": "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。",
+        "reasons": [
+          "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。"
+        ],
+        "risks": [
+          "如误入共享公共知识库，可能把某个客户的承诺或流程错推给其他客户。"
+        ],
+        "duplicate_level": "none",
+        "existing_matches": [],
+        "admin_checklist": [
+          "如需保留，应放回该 customer 自己的正式知识库，不进入共享公共知识。"
+        ],
+        "generated_at": "2026-05-02T19:42:07+00:00"
+      }
+    },
+    "proposal_shared_local_784676bca8d649bdb0": {
+      "proposal_id": "proposal_shared_local_784676bca8d649bdb0",
+      "tenant_id": "default",
+      "title": "bank_account",
+      "summary": "客户正式知识经 AI 判断后提交为候选共享公共知识，等待服务端 admin 审核。",
+      "operations": [
+        {
+          "op": "upsert_json",
+          "path": "payment/items/shared_673cad0e55ab235954.json",
+          "content": {
+            "schema_version": 1,
+            "id": "shared_673cad0e55ab235954",
+            "item_id": "shared_673cad0e55ab235954",
+            "category_id": "payment",
+            "title": "bank_account",
+            "status": "active",
+            "keywords": [
+              "银行账号",
+              "账户信息",
+              "打款账户",
+              "对公账户"
+            ],
+            "applies_to": "所有客户都可能遇到的通用客服场景",
+            "content": "测试对公账户：杭州星澜供应链科技有限公司 / 招商银行杭州未来科技城支行 / 5719000012345678。正式付款前请以人工确认的合同或订单信息为准。",
+            "guideline_text": "测试对公账户：杭州星澜供应链科技有限公司 / 招商银行杭州未来科技城支行 / 5719000012345678。正式付款前请以人工确认的合同或订单信息为准。",
+            "notes": "候选理由：该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+            "source": {
+              "type": "formal_knowledge_universal_extraction",
+              "provider": "formal_knowledge_universal_heuristic",
+              "tenant_id": "default",
+              "source_items": [
+                {
+                  "tenant_id": "default",
+                  "category_id": "policies",
+                  "item_id": "bank_account",
+                  "source_key": "default:policies:bank_account:1d35f092be2b8d12"
+                }
+              ],
+              "llm_used": false
+            },
+            "data": {
+              "title": "bank_account",
+              "guideline_text": "测试对公账户：杭州星澜供应链科技有限公司 / 招商银行杭州未来科技城支行 / 5719000012345678。正式付款前请以人工确认的合同或订单信息为准。",
+              "keywords": [
+                "银行账号",
+                "账户信息",
+                "打款账户",
+                "对公账户"
+              ],
+              "applies_to": "所有客户都可能遇到的通用客服场景"
+            }
+          }
+        }
+      ],
+      "source": "formal_knowledge_universal_heuristic",
+      "status": "rejected",
+      "created_by": "local-node",
+      "created_at": "2026-05-02T18:08:32+00:00",
+      "updated_at": "2026-05-02T19:42:07+00:00",
+      "source_meta": {
+        "v4_reaudit": {
+          "model": "deepseek-v4-pro",
+          "reviewed_at": "2026-05-02T19:42:07+00:00",
+          "raw_model_review": {
+            "proposal_id": "proposal_shared_local_784676bca8d649bdb0",
+            "action": "keep_rewrite",
+            "confidence": 0.9,
+            "reason": "Proposal aligns with guidelines.",
+            "rewritten": {
+              "title": "bank_account",
+              "category_id": "payment",
+              "guideline_text": "测试对公账户：杭州星澜供应链科技有限公司 / 招商银行杭州未来科技城支行 / 5719000012345678。正式付款前请以人工确认的合同或订单信息为准。",
+              "keywords": [
+                "银行账号",
+                "账户信息",
+                "打款账户",
+                "对公账户"
+              ]
+            }
+          }
+        }
+      },
+      "reviewed_by": "codex_v4_reaudit",
+      "reviewed_at": "2026-05-02T19:42:07+00:00",
+      "review_note": "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。",
+      "review_assist": {
+        "provider": "deepseek-v4-pro_reaudit_guarded",
+        "llm_used": true,
+        "recommendation": "reject",
+        "universal_score": 20,
+        "summary": "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。",
+        "reasons": [
+          "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。"
+        ],
+        "risks": [
+          "如误入共享公共知识库，可能把某个客户的承诺或流程错推给其他客户。"
+        ],
+        "duplicate_level": "none",
+        "existing_matches": [],
+        "admin_checklist": [
+          "如需保留，应放回该 customer 自己的正式知识库，不进入共享公共知识。"
+        ],
+        "generated_at": "2026-05-02T19:42:07+00:00"
+      }
+    },
+    "proposal_shared_local_1af26ce7b424e7de1d": {
+      "proposal_id": "proposal_shared_local_1af26ce7b424e7de1d",
+      "tenant_id": "default",
+      "title": "company_profile",
+      "summary": "客户正式知识经 AI 判断后提交为候选共享公共知识，等待服务端 admin 审核。",
+      "operations": [
+        {
+          "op": "upsert_json",
+          "path": "global_guidelines/items/shared_653d7dc5ff7b53e14e.json",
+          "content": {
+            "schema_version": 1,
+            "id": "shared_653d7dc5ff7b53e14e",
+            "item_id": "shared_653d7dc5ff7b53e14e",
+            "category_id": "global_guidelines",
+            "title": "company_profile",
+            "status": "active",
+            "keywords": [
+              "你们公司",
+              "公司名称",
+              "公司叫什么",
+              "公司信息",
+              "公司地址",
+              "你们地址",
+              "在哪里",
+              "营业时间",
+              "客服电话"
+            ],
+            "applies_to": "所有客户都可能遇到的通用客服场景",
+            "content": "我们测试公司为杭州星澜供应链科技有限公司，主营商用设备、办公用品、净水耗材和包装耗材批发。地址：浙江省杭州市余杭区未来科技城星澜路 88 号 3 幢 502 室；服务时间：周一至周六 09:00-18:30；客服电话：0571-8800-1234。",
+            "guideline_text": "我们测试公司为杭州星澜供应链科技有限公司，主营商用设备、办公用品、净水耗材和包装耗材批发。地址：浙江省杭州市余杭区未来科技城星澜路 88 号 3 幢 502 室；服务时间：周一至周六 09:00-18:30；客服电话：0571-8800-1234。",
+            "notes": "候选理由：该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+            "source": {
+              "type": "formal_knowledge_universal_extraction",
+              "provider": "formal_knowledge_universal_heuristic",
+              "tenant_id": "default",
+              "source_items": [
+                {
+                  "tenant_id": "default",
+                  "category_id": "policies",
+                  "item_id": "company_profile",
+                  "source_key": "default:policies:company_profile:23a86b3239f1a176"
+                }
+              ],
+              "llm_used": false
+            },
+            "data": {
+              "title": "company_profile",
+              "guideline_text": "我们测试公司为杭州星澜供应链科技有限公司，主营商用设备、办公用品、净水耗材和包装耗材批发。地址：浙江省杭州市余杭区未来科技城星澜路 88 号 3 幢 502 室；服务时间：周一至周六 09:00-18:30；客服电话：0571-8800-1234。",
+              "keywords": [
+                "你们公司",
+                "公司名称",
+                "公司叫什么",
+                "公司信息",
+                "公司地址",
+                "你们地址",
+                "在哪里",
+                "营业时间",
+                "客服电话"
+              ],
+              "applies_to": "所有客户都可能遇到的通用客服场景"
+            }
+          }
+        }
+      ],
+      "source": "formal_knowledge_universal_heuristic",
+      "status": "rejected",
+      "created_by": "local-node",
+      "created_at": "2026-05-02T18:08:32+00:00",
+      "updated_at": "2026-05-02T19:42:07+00:00",
+      "source_meta": {
+        "v4_reaudit": {
+          "model": "deepseek-v4-pro",
+          "reviewed_at": "2026-05-02T19:42:07+00:00",
+          "raw_model_review": {
+            "proposal_id": "proposal_shared_local_1af26ce7b424e7de1d",
+            "action": "keep_rewrite",
+            "confidence": 0.9,
+            "reason": "Proposal aligns with guidelines.",
+            "rewritten": {
+              "title": "company_profile",
+              "category_id": "global_guidelines",
+              "guideline_text": "我们测试公司为杭州星澜供应链科技有限公司，主营商用设备、办公用品、净水耗材和包装耗材批发。地址：浙江省杭州市余杭区未来科技城星澜路 88 号 3 幢 502 室；服务时间：周一至周六 09:00-18:30；客服电话：0571-8800-1234。",
+              "keywords": [
+                "你们公司",
+                "公司名称",
+                "公司叫什么",
+                "公司信息",
+                "公司地址",
+                "你们地址",
+                "在哪里",
+                "营业时间",
+                "客服电话"
+              ]
+            }
+          }
+        }
+      },
+      "reviewed_by": "codex_v4_reaudit",
+      "reviewed_at": "2026-05-02T19:42:07+00:00",
+      "review_note": "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。",
+      "review_assist": {
+        "provider": "deepseek-v4-pro_reaudit_guarded",
+        "llm_used": true,
+        "recommendation": "reject",
+        "universal_score": 20,
+        "summary": "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。",
+        "reasons": [
+          "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。"
+        ],
+        "risks": [
+          "如误入共享公共知识库，可能把某个客户的承诺或流程错推给其他客户。"
+        ],
+        "duplicate_level": "none",
+        "existing_matches": [],
+        "admin_checklist": [
+          "如需保留，应放回该 customer 自己的正式知识库，不进入共享公共知识。"
+        ],
+        "generated_at": "2026-05-02T19:42:07+00:00"
+      }
+    },
+    "proposal_shared_local_6affc16d7fabbfa2b4": {
+      "proposal_id": "proposal_shared_local_6affc16d7fabbfa2b4",
+      "tenant_id": "default",
+      "title": "公司信息",
+      "summary": "客户正式知识经 AI 判断后提交为候选共享公共知识，等待服务端 admin 审核。",
+      "operations": [
+        {
+          "op": "upsert_json",
+          "path": "after_sale/items/shared_8cceeaf3b8be406358.json",
+          "content": {
+            "schema_version": 1,
+            "id": "shared_8cceeaf3b8be406358",
+            "item_id": "shared_8cceeaf3b8be406358",
+            "category_id": "after_sale",
+            "title": "公司信息",
+            "status": "active",
+            "keywords": [
+              "company",
+              "profile"
+            ],
+            "applies_to": "所有客户都可能遇到的通用客服场景",
+            "content": "{ \"company_name\": \"杭州星澜供应链科技有限公司\", \"short_name\": \"星澜供应链\", \"brand_name\": \"星澜优采\", \"business_scope\": \"商用设备、办公用品、净水耗材、包装耗材的批发与企业采购服务\", \"city\": \"杭州\", \"address\": \"浙江省杭州市余杭区未来科技城星澜路 88 号 3 幢 502 室\", \"business_hours\": \"周一至周六 09:00-18:30\", \"service_phone\": \"0571-8800-1234\", \"after_sales_phone\": \"0571-8800-5678\", \"tax_id\": \"91330110MA8TEST88XK\", \"bank_account\": \"杭州星澜供应链科技有限公司 / 招商银行杭州未来科技城支行 / 5719000012345678\", \"note\": \"以上为自动客服联调测试数据，不代表真实公司信息。\" }",
+            "guideline_text": "{ \"company_name\": \"杭州星澜供应链科技有限公司\", \"short_name\": \"星澜供应链\", \"brand_name\": \"星澜优采\", \"business_scope\": \"商用设备、办公用品、净水耗材、包装耗材的批发与企业采购服务\", \"city\": \"杭州\", \"address\": \"浙江省杭州市余杭区未来科技城星澜路 88 号 3 幢 502 室\", \"business_hours\": \"周一至周六 09:00-18:30\", \"service_phone\": \"0571-8800-1234\", \"after_sales_phone\": \"0571-8800-5678\", \"tax_id\": \"91330110MA8TEST88XK\", \"bank_account\": \"杭州星澜供应链科技有限公司 / 招商银行杭州未来科技城支行 / 5719000012345678\", \"note\": \"以上为自动客服联调测试数据，不代表真实公司信息。\" }",
+            "notes": "候选理由：该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+            "source": {
+              "type": "formal_knowledge_universal_extraction",
+              "provider": "formal_knowledge_universal_heuristic",
+              "tenant_id": "default",
+              "source_items": [
+                {
+                  "tenant_id": "default",
+                  "category_id": "policies",
+                  "item_id": "company_profile_details",
+                  "source_key": "default:policies:company_profile_details:7542c44871f6999e"
+                }
+              ],
+              "llm_used": false
+            },
+            "data": {
+              "title": "公司信息",
+              "guideline_text": "{ \"company_name\": \"杭州星澜供应链科技有限公司\", \"short_name\": \"星澜供应链\", \"brand_name\": \"星澜优采\", \"business_scope\": \"商用设备、办公用品、净水耗材、包装耗材的批发与企业采购服务\", \"city\": \"杭州\", \"address\": \"浙江省杭州市余杭区未来科技城星澜路 88 号 3 幢 502 室\", \"business_hours\": \"周一至周六 09:00-18:30\", \"service_phone\": \"0571-8800-1234\", \"after_sales_phone\": \"0571-8800-5678\", \"tax_id\": \"91330110MA8TEST88XK\", \"bank_account\": \"杭州星澜供应链科技有限公司 / 招商银行杭州未来科技城支行 / 5719000012345678\", \"note\": \"以上为自动客服联调测试数据，不代表真实公司信息。\" }",
+              "keywords": [
+                "company",
+                "profile"
+              ],
+              "applies_to": "所有客户都可能遇到的通用客服场景"
+            }
+          }
+        }
+      ],
+      "source": "formal_knowledge_universal_heuristic",
+      "status": "rejected",
+      "created_by": "local-node",
+      "created_at": "2026-05-02T18:08:32+00:00",
+      "updated_at": "2026-05-02T19:42:07+00:00",
+      "source_meta": {
+        "v4_reaudit": {
+          "model": "deepseek-v4-pro",
+          "reviewed_at": "2026-05-02T19:42:07+00:00",
+          "raw_model_review": {
+            "proposal_id": "proposal_shared_local_6affc16d7fabbfa2b4",
+            "action": "keep_rewrite",
+            "confidence": 0.9,
+            "reason": "改为更自然的对话文本，丰富关键词，并将 category_id 调整为 global_guidelines 以便统一管理。",
+            "rewritten": {
+              "title": "公司信息",
+              "category_id": "global_guidelines",
+              "guideline_text": "我们是杭州星澜供应链科技有限公司（简称星澜供应链），旗下品牌为星澜优采。公司主要经营商用设备、办公用品、净水耗材和包装耗材的批发与企业采购服务。位于浙江省杭州市余杭区未来科技城星澜路88号3幢502室。工作时间：周一至周六 09:00-18:30。客服电话：0571-8800-1234，售后电话：0571-8800-5678。税号：91330110MA8TEST88XK。开户行：招商银行杭州未来科技城支行，账号：5719000012345678。注：以上数据仅供测试，非真实信息。",
+              "keywords": [
+                "公司信息",
+                "公司介绍",
+                "公司名称",
+                "品牌",
+                "地址",
+                "工作时间",
+                "电话",
+                "税号",
+                "开户行"
+              ]
+            }
+          }
+        }
+      },
+      "reviewed_by": "codex_v4_reaudit",
+      "reviewed_at": "2026-05-02T19:42:07+00:00",
+      "review_note": "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。",
+      "review_assist": {
+        "provider": "deepseek-v4-pro_reaudit_guarded",
+        "llm_used": true,
+        "recommendation": "reject",
+        "universal_score": 20,
+        "summary": "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。",
+        "reasons": [
+          "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。"
+        ],
+        "risks": [
+          "如误入共享公共知识库，可能把某个客户的承诺或流程错推给其他客户。"
+        ],
+        "duplicate_level": "none",
+        "existing_matches": [],
+        "admin_checklist": [
+          "如需保留，应放回该 customer 自己的正式知识库，不进入共享公共知识。"
+        ],
+        "generated_at": "2026-05-02T19:42:07+00:00"
+      }
+    },
+    "proposal_shared_local_b2576e4d07484b45e4": {
+      "proposal_id": "proposal_shared_local_b2576e4d07484b45e4",
+      "tenant_id": "default",
+      "title": "company_qualification",
+      "summary": "客户正式知识经 AI 判断后提交为候选共享公共知识，等待服务端 admin 审核。",
+      "operations": [
+        {
+          "op": "upsert_json",
+          "path": "global_guidelines/items/shared_252fc16e7dd03c2397.json",
+          "content": {
+            "schema_version": 1,
+            "id": "shared_252fc16e7dd03c2397",
+            "item_id": "shared_252fc16e7dd03c2397",
+            "category_id": "global_guidelines",
+            "title": "company_qualification",
+            "status": "active",
+            "keywords": [
+              "营业执照",
+              "资质",
+              "税号是多少",
+              "你们税号",
+              "纳税人识别号",
+              "公司税号"
+            ],
+            "applies_to": "所有客户都可能遇到的通用客服场景",
+            "content": "测试公司税号为 91330110MA8TEST88XK。如需营业执照、开户许可证或供应商入库资料，我可以先记录需求并转人工发送正式文件。",
+            "guideline_text": "测试公司税号为 91330110MA8TEST88XK。如需营业执照、开户许可证或供应商入库资料，我可以先记录需求并转人工发送正式文件。",
+            "notes": "候选理由：该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+            "source": {
+              "type": "formal_knowledge_universal_extraction",
+              "provider": "formal_knowledge_universal_heuristic",
+              "tenant_id": "default",
+              "source_items": [
+                {
+                  "tenant_id": "default",
+                  "category_id": "policies",
+                  "item_id": "company_qualification",
+                  "source_key": "default:policies:company_qualification:aff048256532f37c"
+                }
+              ],
+              "llm_used": false
+            },
+            "data": {
+              "title": "company_qualification",
+              "guideline_text": "测试公司税号为 91330110MA8TEST88XK。如需营业执照、开户许可证或供应商入库资料，我可以先记录需求并转人工发送正式文件。",
+              "keywords": [
+                "营业执照",
+                "资质",
+                "税号是多少",
+                "你们税号",
+                "纳税人识别号",
+                "公司税号"
+              ],
+              "applies_to": "所有客户都可能遇到的通用客服场景"
+            }
+          }
+        }
+      ],
+      "source": "formal_knowledge_universal_heuristic",
+      "status": "rejected",
+      "created_by": "local-node",
+      "created_at": "2026-05-02T18:08:32+00:00",
+      "updated_at": "2026-05-02T19:42:07+00:00",
+      "source_meta": {
+        "v4_reaudit": {
+          "model": "deepseek-v4-pro",
+          "reviewed_at": "2026-05-02T19:42:07+00:00",
+          "raw_model_review": {
+            "proposal_id": "proposal_shared_local_b2576e4d07484b45e4",
+            "action": "keep_rewrite",
+            "confidence": 1.0,
+            "reason": "内容准确，覆盖了常见资质询问场景，直接可用。",
+            "rewritten": {
+              "title": "company_qualification",
+              "category_id": "global_guidelines",
+              "guideline_text": "测试公司税号为 91330110MA8TEST88XK。如需营业执照、开户许可证或供应商入库资料，我可以先记录需求并转人工发送正式文件。",
+              "keywords": [
+                "营业执照",
+                "资质",
+                "税号是多少",
+                "你们税号",
+                "纳税人识别号",
+                "公司税号"
+              ]
+            }
+          }
+        }
+      },
+      "reviewed_by": "codex_v4_reaudit",
+      "reviewed_at": "2026-05-02T19:42:07+00:00",
+      "review_note": "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。",
+      "review_assist": {
+        "provider": "deepseek-v4-pro_reaudit_guarded",
+        "llm_used": true,
+        "recommendation": "reject",
+        "universal_score": 20,
+        "summary": "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。",
+        "reasons": [
+          "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。"
+        ],
+        "risks": [
+          "如误入共享公共知识库，可能把某个客户的承诺或流程错推给其他客户。"
+        ],
+        "duplicate_level": "none",
+        "existing_matches": [],
+        "admin_checklist": [
+          "如需保留，应放回该 customer 自己的正式知识库，不进入共享公共知识。"
+        ],
+        "generated_at": "2026-05-02T19:42:07+00:00"
+      }
+    },
+    "proposal_shared_local_6bd5aa015669122f08": {
+      "proposal_id": "proposal_shared_local_6bd5aa015669122f08",
+      "tenant_id": "default",
+      "title": "批量采购电子合同规则",
+      "summary": "客户正式知识经 AI 判断后提交为候选共享公共知识，等待服务端 admin 审核。",
+      "operations": [
+        {
+          "op": "upsert_json",
+          "path": "global_guidelines/items/shared_88ea5ae7e931a554de.json",
+          "content": {
+            "schema_version": 1,
+            "id": "shared_88ea5ae7e931a554de",
+            "item_id": "shared_88ea5ae7e931a554de",
+            "category_id": "global_guidelines",
+            "title": "批量采购电子合同规则",
+            "status": "active",
+            "keywords": [
+              "批量采购",
+              "电子合同"
+            ],
+            "applies_to": "所有客户都可能遇到的通用客服场景",
+            "content": "批量采购可签电子合同。",
+            "guideline_text": "批量采购可签电子合同。",
+            "notes": "候选理由：该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+            "source": {
+              "type": "formal_knowledge_universal_extraction",
+              "provider": "formal_knowledge_universal_heuristic",
+              "tenant_id": "default",
+              "source_items": [
+                {
+                  "tenant_id": "default",
+                  "category_id": "policies",
+                  "item_id": "contract-batch",
+                  "source_key": "default:policies:contract-batch:34d20dbdb33c0a5d"
+                }
+              ],
+              "llm_used": false
+            },
+            "data": {
+              "title": "批量采购电子合同规则",
+              "guideline_text": "批量采购可签电子合同。",
+              "keywords": [
+                "批量采购",
+                "电子合同"
+              ],
+              "applies_to": "所有客户都可能遇到的通用客服场景"
+            }
+          }
+        }
+      ],
+      "source": "formal_knowledge_universal_heuristic",
+      "status": "rejected",
+      "created_by": "local-node",
+      "created_at": "2026-05-02T18:08:32+00:00",
+      "updated_at": "2026-05-02T19:42:07+00:00",
+      "source_meta": {
+        "v4_reaudit": {
+          "model": "deepseek-v4-pro",
+          "reviewed_at": "2026-05-02T19:42:07+00:00",
+          "raw_model_review": {
+            "proposal_id": "proposal_shared_local_6bd5aa015669122f08",
+            "action": "keep_rewrite",
+            "confidence": 0.9,
+            "reason": "扩充了电子合同的说明，使规则更完整清晰。",
+            "rewritten": {
+              "title": "批量采购电子合同规则",
+              "category_id": "global_guidelines",
+              "guideline_text": "批量采购订单支持签订电子合同，电子合同与纸质合同具有同等法律效力。如需签订电子合同，请在订单确认后联系在线客服，我们将协助您完成签署流程。",
+              "keywords": [
+                "批量采购",
+                "电子合同",
+                "签订",
+                "批量采购规则"
+              ]
+            }
+          }
+        }
+      },
+      "reviewed_by": "codex_v4_reaudit",
+      "reviewed_at": "2026-05-02T19:42:07+00:00",
+      "review_note": "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。",
+      "review_assist": {
+        "provider": "deepseek-v4-pro_reaudit_guarded",
+        "llm_used": true,
+        "recommendation": "reject",
+        "universal_score": 20,
+        "summary": "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。",
+        "reasons": [
+          "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。"
+        ],
+        "risks": [
+          "如误入共享公共知识库，可能把某个客户的承诺或流程错推给其他客户。"
+        ],
+        "duplicate_level": "none",
+        "existing_matches": [],
+        "admin_checklist": [
+          "如需保留，应放回该 customer 自己的正式知识库，不进入共享公共知识。"
+        ],
+        "generated_at": "2026-05-02T19:42:07+00:00"
+      }
+    },
+    "proposal_shared_local_743c24af11e6d7b54d": {
+      "proposal_id": "proposal_shared_local_743c24af11e6d7b54d",
+      "tenant_id": "default",
+      "title": "合同发送流程",
+      "summary": "客户正式知识经 AI 判断后提交为候选共享公共知识，等待服务端 admin 审核。",
+      "operations": [
+        {
+          "op": "upsert_json",
+          "path": "payment/items/shared_c2025b4a8896647fd7.json",
+          "content": {
+            "schema_version": 1,
+            "id": "shared_c2025b4a8896647fd7",
+            "item_id": "shared_c2025b4a8896647fd7",
+            "category_id": "payment",
+            "title": "合同发送流程",
+            "status": "active",
+            "keywords": [
+              "合同",
+              "合同模板",
+              "人工客服"
+            ],
+            "applies_to": "所有客户都可能遇到的通用客服场景",
+            "content": "合同主体、收货信息、付款方式确认后，由人工客服发送合同模板。",
+            "guideline_text": "合同主体、收货信息、付款方式确认后，由人工客服发送合同模板。",
+            "notes": "候选理由：该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+            "source": {
+              "type": "formal_knowledge_universal_extraction",
+              "provider": "formal_knowledge_universal_heuristic",
+              "tenant_id": "default",
+              "source_items": [
+                {
+                  "tenant_id": "default",
+                  "category_id": "policies",
+                  "item_id": "contract-process",
+                  "source_key": "default:policies:contract-process:b0dc0065d5d0ef22"
+                }
+              ],
+              "llm_used": false
+            },
+            "data": {
+              "title": "合同发送流程",
+              "guideline_text": "合同主体、收货信息、付款方式确认后，由人工客服发送合同模板。",
+              "keywords": [
+                "合同",
+                "合同模板",
+                "人工客服"
+              ],
+              "applies_to": "所有客户都可能遇到的通用客服场景"
+            }
+          }
+        }
+      ],
+      "source": "formal_knowledge_universal_heuristic",
+      "status": "rejected",
+      "created_by": "local-node",
+      "created_at": "2026-05-02T18:08:33+00:00",
+      "updated_at": "2026-05-02T19:42:07+00:00",
+      "source_meta": {
+        "v4_reaudit": {
+          "model": "deepseek-v4-pro",
+          "reviewed_at": "2026-05-02T19:42:07+00:00",
+          "raw_model_review": {
+            "proposal_id": "proposal_shared_local_743c24af11e6d7b54d",
+            "action": "keep_rewrite",
+            "confidence": 1.0,
+            "reason": "补充了流程细节，提高可操作性。",
+            "rewritten": {
+              "title": "合同发送流程",
+              "category_id": "payment",
+              "guideline_text": "为了生成准确的合同，请提供合同主体信息、收货人信息及付款方式。确认后，我们将安排人工客服为您发送合同模板，并协助后续盖章流程。",
+              "keywords": [
+                "合同",
+                "合同模板",
+                "人工客服",
+                "合同发送",
+                "合同流程"
+              ]
+            }
+          }
+        }
+      },
+      "reviewed_by": "codex_v4_reaudit",
+      "reviewed_at": "2026-05-02T19:42:07+00:00",
+      "review_note": "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。",
+      "review_assist": {
+        "provider": "deepseek-v4-pro_reaudit_guarded",
+        "llm_used": true,
+        "recommendation": "reject",
+        "universal_score": 20,
+        "summary": "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。",
+        "reasons": [
+          "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。"
+        ],
+        "risks": [
+          "如误入共享公共知识库，可能把某个客户的承诺或流程错推给其他客户。"
+        ],
+        "duplicate_level": "none",
+        "existing_matches": [],
+        "admin_checklist": [
+          "如需保留，应放回该 customer 自己的正式知识库，不进入共享公共知识。"
+        ],
+        "generated_at": "2026-05-02T19:42:07+00:00"
+      }
+    },
+    "proposal_shared_local_a6e23f9c7bf15bdfb8": {
+      "proposal_id": "proposal_shared_local_a6e23f9c7bf15bdfb8",
+      "tenant_id": "default",
+      "title": "账期及先货后款处理规则",
+      "summary": "客户正式知识经 AI 判断后提交为候选共享公共知识，等待服务端 admin 审核。",
+      "operations": [
+        {
+          "op": "upsert_json",
+          "path": "global_guidelines/items/shared_11c85ebb1a05e93745.json",
+          "content": {
+            "schema_version": 1,
+            "id": "shared_11c85ebb1a05e93745",
+            "item_id": "shared_11c85ebb1a05e93745",
+            "category_id": "global_guidelines",
+            "title": "账期及先货后款处理规则",
+            "status": "active",
+            "keywords": [
+              "账期",
+              "月结",
+              "先货后款"
+            ],
+            "applies_to": "所有客户都可能遇到的通用客服场景",
+            "content": "涉及账期、月结、先货后款，AI 客服只能记录需求并转人工，不能直接同意。",
+            "guideline_text": "涉及账期、月结、先货后款，AI 客服只能记录需求并转人工，不能直接同意。",
+            "notes": "候选理由：该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+            "source": {
+              "type": "formal_knowledge_universal_extraction",
+              "provider": "formal_knowledge_universal_heuristic",
+              "tenant_id": "default",
+              "source_items": [
+                {
+                  "tenant_id": "default",
+                  "category_id": "policies",
+                  "item_id": "credit-term-policy",
+                  "source_key": "default:policies:credit-term-policy:71aaafb277f07c43"
+                }
+              ],
+              "llm_used": false
+            },
+            "data": {
+              "title": "账期及先货后款处理规则",
+              "guideline_text": "涉及账期、月结、先货后款，AI 客服只能记录需求并转人工，不能直接同意。",
+              "keywords": [
+                "账期",
+                "月结",
+                "先货后款"
+              ],
+              "applies_to": "所有客户都可能遇到的通用客服场景"
+            }
+          }
+        }
+      ],
+      "source": "formal_knowledge_universal_heuristic",
+      "status": "rejected",
+      "created_by": "local-node",
+      "created_at": "2026-05-02T18:08:33+00:00",
+      "updated_at": "2026-05-02T19:42:07+00:00",
+      "source_meta": {
+        "v4_reaudit": {
+          "model": "deepseek-v4-pro",
+          "reviewed_at": "2026-05-02T19:42:07+00:00",
+          "raw_model_review": {
+            "proposal_id": "proposal_shared_local_a6e23f9c7bf15bdfb8",
+            "action": "reject",
+            "confidence": 1.0,
+            "reason": "与提案 proposal_shared_local_38e7644af4a3a88575 内容高度重复，合并后已无需独立保留。",
+            "rewritten": {
+              "title": "",
+              "category_id": "",
+              "guideline_text": "",
+              "keywords": []
+            }
+          }
+        }
+      },
+      "reviewed_by": "codex_v4_reaudit",
+      "reviewed_at": "2026-05-02T19:42:07+00:00",
+      "review_note": "已被更通用的风险边界候选覆盖，不重复保留。",
+      "review_assist": {
+        "provider": "deepseek-v4-pro_reaudit_guarded",
+        "llm_used": true,
+        "recommendation": "reject",
+        "universal_score": 20,
+        "summary": "已被更通用的风险边界候选覆盖，不重复保留。",
+        "reasons": [
+          "已被更通用的风险边界候选覆盖，不重复保留。"
+        ],
+        "risks": [
+          "如误入共享公共知识库，可能把某个客户的承诺或流程错推给其他客户。"
+        ],
+        "duplicate_level": "possible",
+        "existing_matches": [],
+        "admin_checklist": [
+          "如需保留，应放回该 customer 自己的正式知识库，不进入共享公共知识。"
+        ],
+        "generated_at": "2026-05-02T19:42:07+00:00"
+      }
+    },
+    "proposal_shared_local_fec5d6a4dab2e5bc86": {
+      "proposal_id": "proposal_shared_local_fec5d6a4dab2e5bc86",
+      "tenant_id": "default",
+      "title": "discount_general",
+      "summary": "客户正式知识经 AI 判断后提交为候选共享公共知识，等待服务端 admin 审核。",
+      "operations": [
+        {
+          "op": "upsert_json",
+          "path": "global_guidelines/items/shared_2d0384bc9d989ac48d.json",
+          "content": {
+            "schema_version": 1,
+            "id": "shared_2d0384bc9d989ac48d",
+            "item_id": "shared_2d0384bc9d989ac48d",
+            "category_id": "global_guidelines",
+            "title": "discount_general",
+            "status": "active",
+            "keywords": [
+              "便宜",
+              "优惠",
+              "最低",
+              "折扣",
+              "贵",
+              "能少点"
+            ],
+            "applies_to": "所有客户都可能遇到的通用客服场景",
+            "content": "可以按采购数量匹配公开阶梯价。请发我具体产品、数量和收货城市，我帮您核算；如果需要破例优惠，我会帮您请示上级后再回复。",
+            "guideline_text": "可以按采购数量匹配公开阶梯价。请发我具体产品、数量和收货城市，我帮您核算；如果需要破例优惠，我会帮您请示上级后再回复。",
+            "notes": "候选理由：该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+            "source": {
+              "type": "formal_knowledge_universal_extraction",
+              "provider": "formal_knowledge_universal_heuristic",
+              "tenant_id": "default",
+              "source_items": [
+                {
+                  "tenant_id": "default",
+                  "category_id": "policies",
+                  "item_id": "discount_general",
+                  "source_key": "default:policies:discount_general:c3dbe58c5dc2a9bc"
+                }
+              ],
+              "llm_used": false
+            },
+            "data": {
+              "title": "discount_general",
+              "guideline_text": "可以按采购数量匹配公开阶梯价。请发我具体产品、数量和收货城市，我帮您核算；如果需要破例优惠，我会帮您请示上级后再回复。",
+              "keywords": [
+                "便宜",
+                "优惠",
+                "最低",
+                "折扣",
+                "贵",
+                "能少点"
+              ],
+              "applies_to": "所有客户都可能遇到的通用客服场景"
+            }
+          }
+        }
+      ],
+      "source": "formal_knowledge_universal_heuristic",
+      "status": "rejected",
+      "created_by": "local-node",
+      "created_at": "2026-05-02T18:08:33+00:00",
+      "updated_at": "2026-05-02T19:42:07+00:00",
+      "source_meta": {
+        "v4_reaudit": {
+          "model": "deepseek-v4-pro",
+          "reviewed_at": "2026-05-02T19:42:07+00:00",
+          "raw_model_review": {
+            "proposal_id": "proposal_shared_local_fec5d6a4dab2e5bc86",
+            "action": "keep_rewrite",
+            "confidence": 1.0,
+            "reason": "符合话术规范，无需修改",
+            "rewritten": {
+              "title": "discount_general",
+              "category_id": "global_guidelines",
+              "guideline_text": "可以按采购数量匹配公开阶梯价。请发我具体产品、数量和收货城市，我帮您核算；如果需要破例优惠，我会帮您请示上级后再回复。",
+              "keywords": [
+                "便宜",
+                "优惠",
+                "最低",
+                "折扣",
+                "贵",
+                "能少点"
+              ]
+            }
+          }
+        }
+      },
+      "reviewed_by": "codex_v4_reaudit",
+      "reviewed_at": "2026-05-02T19:42:07+00:00",
+      "review_note": "已被更通用的风险边界候选覆盖，不重复保留。",
+      "review_assist": {
+        "provider": "deepseek-v4-pro_reaudit_guarded",
+        "llm_used": true,
+        "recommendation": "reject",
+        "universal_score": 20,
+        "summary": "已被更通用的风险边界候选覆盖，不重复保留。",
+        "reasons": [
+          "已被更通用的风险边界候选覆盖，不重复保留。"
+        ],
+        "risks": [
+          "如误入共享公共知识库，可能把某个客户的承诺或流程错推给其他客户。"
+        ],
+        "duplicate_level": "possible",
+        "existing_matches": [],
+        "admin_checklist": [
+          "如需保留，应放回该 customer 自己的正式知识库，不进入共享公共知识。"
+        ],
+        "generated_at": "2026-05-02T19:42:07+00:00"
+      }
+    },
+    "proposal_shared_local_9c4937309d794ec05c": {
+      "proposal_id": "proposal_shared_local_9c4937309d794ec05c",
+      "tenant_id": "default",
+      "title": "优惠政策",
+      "summary": "客户正式知识经 AI 判断后提交为候选共享公共知识，等待服务端 admin 审核。",
+      "operations": [
+        {
+          "op": "upsert_json",
+          "path": "global_guidelines/items/shared_e39cca2867d9f24792.json",
+          "content": {
+            "schema_version": 1,
+            "id": "shared_e39cca2867d9f24792",
+            "item_id": "shared_e39cca2867d9f24792",
+            "category_id": "global_guidelines",
+            "title": "优惠政策",
+            "status": "active",
+            "keywords": [
+              "包邮",
+              "满1000包邮",
+              "免费配送",
+              "免运费",
+              "优惠"
+            ],
+            "applies_to": "所有客户都可能遇到的通用客服场景",
+            "content": "关于包邮政策，新增统一的优惠活动规则：在2026.4.25-2026.6.25之间，单笔消费满1000元包邮（偏远地区除外）",
+            "guideline_text": "关于包邮政策，新增统一的优惠活动规则：在2026.4.25-2026.6.25之间，单笔消费满1000元包邮（偏远地区除外）",
+            "notes": "候选理由：该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+            "source": {
+              "type": "formal_knowledge_universal_extraction",
+              "provider": "formal_knowledge_universal_heuristic",
+              "tenant_id": "default",
+              "source_items": [
+                {
+                  "tenant_id": "default",
+                  "category_id": "policies",
+                  "item_id": "free_shipping_promo_2026_spring",
+                  "source_key": "default:policies:free_shipping_promo_2026_spring:80110de6c3aa90b8"
+                }
+              ],
+              "llm_used": false
+            },
+            "data": {
+              "title": "优惠政策",
+              "guideline_text": "关于包邮政策，新增统一的优惠活动规则：在2026.4.25-2026.6.25之间，单笔消费满1000元包邮（偏远地区除外）",
+              "keywords": [
+                "包邮",
+                "满1000包邮",
+                "免费配送",
+                "免运费",
+                "优惠"
+              ],
+              "applies_to": "所有客户都可能遇到的通用客服场景"
+            }
+          }
+        }
+      ],
+      "source": "formal_knowledge_universal_heuristic",
+      "status": "rejected",
+      "created_by": "local-node",
+      "created_at": "2026-05-02T18:08:33+00:00",
+      "updated_at": "2026-05-02T19:42:07+00:00",
+      "source_meta": {
+        "v4_reaudit": {
+          "model": "deepseek-v4-pro",
+          "reviewed_at": "2026-05-02T19:42:07+00:00",
+          "raw_model_review": {
+            "proposal_id": "proposal_shared_local_9c4937309d794ec05c",
+            "action": "keep_rewrite",
+            "confidence": 1.0,
+            "reason": "优惠活动说明清晰，格式正确",
+            "rewritten": {
+              "title": "优惠政策",
+              "category_id": "global_guidelines",
+              "guideline_text": "关于包邮政策，新增统一的优惠活动规则：在2026.4.25-2026.6.25之间，单笔消费满1000元包邮（偏远地区除外）",
+              "keywords": [
+                "包邮",
+                "满1000包邮",
+                "免费配送",
+                "免运费",
+                "优惠"
+              ]
+            }
+          }
+        }
+      },
+      "reviewed_by": "codex_v4_reaudit",
+      "reviewed_at": "2026-05-02T19:42:07+00:00",
+      "review_note": "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。",
+      "review_assist": {
+        "provider": "deepseek-v4-pro_reaudit_guarded",
+        "llm_used": true,
+        "recommendation": "reject",
+        "universal_score": 20,
+        "summary": "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。",
+        "reasons": [
+          "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。"
+        ],
+        "risks": [
+          "如误入共享公共知识库，可能把某个客户的承诺或流程错推给其他客户。"
+        ],
+        "duplicate_level": "none",
+        "existing_matches": [],
+        "admin_checklist": [
+          "如需保留，应放回该 customer 自己的正式知识库，不进入共享公共知识。"
+        ],
+        "generated_at": "2026-05-02T19:42:07+00:00"
+      }
+    },
+    "proposal_shared_local_c5972855bb085f51d8": {
+      "proposal_id": "proposal_shared_local_c5972855bb085f51d8",
+      "tenant_id": "default",
+      "title": "installation",
+      "summary": "客户正式知识经 AI 判断后提交为候选共享公共知识，等待服务端 admin 审核。",
+      "operations": [
+        {
+          "op": "upsert_json",
+          "path": "global_guidelines/items/shared_69d784f8d349b85c71.json",
+          "content": {
+            "schema_version": 1,
+            "id": "shared_69d784f8d349b85c71",
+            "item_id": "shared_69d784f8d349b85c71",
+            "category_id": "global_guidelines",
+            "title": "installation",
+            "status": "active",
+            "keywords": [
+              "安装",
+              "上门安装",
+              "调试",
+              "师傅"
+            ],
+            "applies_to": "所有客户都可能遇到的通用客服场景",
+            "content": "安装和上门调试要看产品、城市和现场条件，我当前不能直接承诺。我先帮您记录需求并请同事确认。",
+            "guideline_text": "安装和上门调试要看产品、城市和现场条件，我当前不能直接承诺。我先帮您记录需求并请同事确认。",
+            "notes": "候选理由：该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+            "source": {
+              "type": "formal_knowledge_universal_extraction",
+              "provider": "formal_knowledge_universal_heuristic",
+              "tenant_id": "default",
+              "source_items": [
+                {
+                  "tenant_id": "default",
+                  "category_id": "policies",
+                  "item_id": "installation",
+                  "source_key": "default:policies:installation:8e9cd8a470ba6488"
+                }
+              ],
+              "llm_used": false
+            },
+            "data": {
+              "title": "installation",
+              "guideline_text": "安装和上门调试要看产品、城市和现场条件，我当前不能直接承诺。我先帮您记录需求并请同事确认。",
+              "keywords": [
+                "安装",
+                "上门安装",
+                "调试",
+                "师傅"
+              ],
+              "applies_to": "所有客户都可能遇到的通用客服场景"
+            }
+          }
+        }
+      ],
+      "source": "formal_knowledge_universal_heuristic",
+      "status": "rejected",
+      "created_by": "local-node",
+      "created_at": "2026-05-02T18:08:33+00:00",
+      "updated_at": "2026-05-02T19:42:07+00:00",
+      "source_meta": {
+        "v4_reaudit": {
+          "model": "deepseek-v4-pro",
+          "reviewed_at": "2026-05-02T19:42:07+00:00",
+          "raw_model_review": {
+            "proposal_id": "proposal_shared_local_c5972855bb085f51d8",
+            "action": "keep_rewrite",
+            "confidence": 1.0,
+            "reason": "安装话术得体，不夸大承诺",
+            "rewritten": {
+              "title": "installation",
+              "category_id": "global_guidelines",
+              "guideline_text": "安装和上门调试要看产品、城市和现场条件，我当前不能直接承诺。我先帮您记录需求并请同事确认。",
+              "keywords": [
+                "安装",
+                "上门安装",
+                "调试",
+                "师傅"
+              ]
+            }
+          }
+        }
+      },
+      "reviewed_by": "codex_v4_reaudit",
+      "reviewed_at": "2026-05-02T19:42:07+00:00",
+      "review_note": "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。",
+      "review_assist": {
+        "provider": "deepseek-v4-pro_reaudit_guarded",
+        "llm_used": true,
+        "recommendation": "reject",
+        "universal_score": 20,
+        "summary": "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。",
+        "reasons": [
+          "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。"
+        ],
+        "risks": [
+          "如误入共享公共知识库，可能把某个客户的承诺或流程错推给其他客户。"
+        ],
+        "duplicate_level": "none",
+        "existing_matches": [],
+        "admin_checklist": [
+          "如需保留，应放回该 customer 自己的正式知识库，不进入共享公共知识。"
+        ],
+        "generated_at": "2026-05-02T19:42:07+00:00"
+      }
+    },
+    "proposal_shared_local_bfc3e32e4727f559a9": {
+      "proposal_id": "proposal_shared_local_bfc3e32e4727f559a9",
+      "tenant_id": "default",
+      "title": "invoice",
+      "summary": "客户正式知识经 AI 判断后提交为候选共享公共知识，等待服务端 admin 审核。",
+      "operations": [
+        {
+          "op": "upsert_json",
+          "path": "payment/items/shared_9252ca67550cc78256.json",
+          "content": {
+            "schema_version": 1,
+            "id": "shared_9252ca67550cc78256",
+            "item_id": "shared_9252ca67550cc78256",
+            "category_id": "payment",
+            "title": "invoice",
+            "status": "active",
+            "keywords": [
+              "发票",
+              "开票",
+              "专票",
+              "普票",
+              "税号",
+              "电子发票",
+              "发票资料"
+            ],
+            "applies_to": "所有客户都可能遇到的通用客服场景",
+            "content": "可以开普通发票或增值税专用发票。请提供公司抬头、税号、开票类型、邮箱和收票手机号；付款完成后通常 1-3 个工作日内开具电子发票。红冲或重开需要转人工处理。",
+            "guideline_text": "可以开普通发票或增值税专用发票。请提供公司抬头、税号、开票类型、邮箱和收票手机号；付款完成后通常 1-3 个工作日内开具电子发票。红冲或重开需要转人工处理。",
+            "notes": "候选理由：该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+            "source": {
+              "type": "formal_knowledge_universal_extraction",
+              "provider": "formal_knowledge_universal_heuristic",
+              "tenant_id": "default",
+              "source_items": [
+                {
+                  "tenant_id": "default",
+                  "category_id": "policies",
+                  "item_id": "invoice",
+                  "source_key": "default:policies:invoice:2a4e41434b18b28f"
+                }
+              ],
+              "llm_used": false
+            },
+            "data": {
+              "title": "invoice",
+              "guideline_text": "可以开普通发票或增值税专用发票。请提供公司抬头、税号、开票类型、邮箱和收票手机号；付款完成后通常 1-3 个工作日内开具电子发票。红冲或重开需要转人工处理。",
+              "keywords": [
+                "发票",
+                "开票",
+                "专票",
+                "普票",
+                "税号",
+                "电子发票",
+                "发票资料"
+              ],
+              "applies_to": "所有客户都可能遇到的通用客服场景"
+            }
+          }
+        }
+      ],
+      "source": "formal_knowledge_universal_heuristic",
+      "status": "rejected",
+      "created_by": "local-node",
+      "created_at": "2026-05-02T18:08:33+00:00",
+      "updated_at": "2026-05-02T19:42:07+00:00",
+      "source_meta": {
+        "v4_reaudit": {
+          "model": "deepseek-v4-pro",
+          "reviewed_at": "2026-05-02T19:42:07+00:00",
+          "raw_model_review": {
+            "proposal_id": "proposal_shared_local_bfc3e32e4727f559a9",
+            "action": "keep_rewrite",
+            "confidence": 1.0,
+            "reason": "发票话术完整准确",
+            "rewritten": {
+              "title": "invoice",
+              "category_id": "payment",
+              "guideline_text": "可以开普通发票或增值税专用发票。请提供公司抬头、税号、开票类型、邮箱和收票手机号；付款完成后通常 1-3 个工作日内开具电子发票。红冲或重开需要转人工处理。",
+              "keywords": [
+                "发票",
+                "开票",
+                "专票",
+                "普票",
+                "税号",
+                "电子发票",
+                "发票资料"
+              ]
+            }
+          }
+        }
+      },
+      "reviewed_by": "codex_v4_reaudit",
+      "reviewed_at": "2026-05-02T19:42:07+00:00",
+      "review_note": "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。",
+      "review_assist": {
+        "provider": "deepseek-v4-pro_reaudit_guarded",
+        "llm_used": true,
+        "recommendation": "reject",
+        "universal_score": 20,
+        "summary": "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。",
+        "reasons": [
+          "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。"
+        ],
+        "risks": [
+          "如误入共享公共知识库，可能把某个客户的承诺或流程错推给其他客户。"
+        ],
+        "duplicate_level": "none",
+        "existing_matches": [],
+        "admin_checklist": [
+          "如需保留，应放回该 customer 自己的正式知识库，不进入共享公共知识。"
+        ],
+        "generated_at": "2026-05-02T19:42:07+00:00"
+      }
+    },
+    "proposal_shared_local_19f4499dd8f3bb8146": {
+      "proposal_id": "proposal_shared_local_19f4499dd8f3bb8146",
+      "tenant_id": "default",
+      "title": "开票政策",
+      "summary": "客户正式知识经 AI 判断后提交为候选共享公共知识，等待服务端 admin 审核。",
+      "operations": [
+        {
+          "op": "upsert_json",
+          "path": "payment/items/shared_ffe7924de3f2780797.json",
+          "content": {
+            "schema_version": 1,
+            "id": "shared_ffe7924de3f2780797",
+            "item_id": "shared_ffe7924de3f2780797",
+            "category_id": "payment",
+            "title": "开票政策",
+            "status": "active",
+            "keywords": [
+              "invoice"
+            ],
+            "applies_to": "所有客户都可能遇到的通用客服场景",
+            "content": "{ \"supported_types\": [ \"普通发票\", \"增值税专用发票\" ], \"tax_rate_note\": \"默认按商品类目匹配测试税率，具体税率以下单确认为准。\", \"required_fields\": [ \"公司抬头\", \"税号\", \"开票类型\", \"邮箱\", \"收票手机号\" ], \"issue_time\": \"订单完成付款后 1-3 个工作日内开具电子发票。\", \"red_invoice\": \"如需红冲或重开，需要提供原发票信息和正确开票资料，转人工处理。\" }",
+            "guideline_text": "{ \"supported_types\": [ \"普通发票\", \"增值税专用发票\" ], \"tax_rate_note\": \"默认按商品类目匹配测试税率，具体税率以下单确认为准。\", \"required_fields\": [ \"公司抬头\", \"税号\", \"开票类型\", \"邮箱\", \"收票手机号\" ], \"issue_time\": \"订单完成付款后 1-3 个工作日内开具电子发票。\", \"red_invoice\": \"如需红冲或重开，需要提供原发票信息和正确开票资料，转人工处理。\" }",
+            "notes": "候选理由：该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+            "source": {
+              "type": "formal_knowledge_universal_extraction",
+              "provider": "formal_knowledge_universal_heuristic",
+              "tenant_id": "default",
+              "source_items": [
+                {
+                  "tenant_id": "default",
+                  "category_id": "policies",
+                  "item_id": "invoice_policy_details",
+                  "source_key": "default:policies:invoice_policy_details:506b822420ee5d5f"
+                }
+              ],
+              "llm_used": false
+            },
+            "data": {
+              "title": "开票政策",
+              "guideline_text": "{ \"supported_types\": [ \"普通发票\", \"增值税专用发票\" ], \"tax_rate_note\": \"默认按商品类目匹配测试税率，具体税率以下单确认为准。\", \"required_fields\": [ \"公司抬头\", \"税号\", \"开票类型\", \"邮箱\", \"收票手机号\" ], \"issue_time\": \"订单完成付款后 1-3 个工作日内开具电子发票。\", \"red_invoice\": \"如需红冲或重开，需要提供原发票信息和正确开票资料，转人工处理。\" }",
+              "keywords": [
+                "invoice"
+              ],
+              "applies_to": "所有客户都可能遇到的通用客服场景"
+            }
+          }
+        }
+      ],
+      "source": "formal_knowledge_universal_heuristic",
+      "status": "rejected",
+      "created_by": "local-node",
+      "created_at": "2026-05-02T18:08:33+00:00",
+      "updated_at": "2026-05-02T19:42:07+00:00",
+      "source_meta": {
+        "v4_reaudit": {
+          "model": "deepseek-v4-pro",
+          "reviewed_at": "2026-05-02T19:42:07+00:00",
+          "raw_model_review": {
+            "proposal_id": "proposal_shared_local_19f4499dd8f3bb8146",
+            "action": "reject",
+            "confidence": 0.9,
+            "reason": "与 invoice 提案内容重复且存在冲突（包含测试占位符“测试税率”），不符合话术唯一性要求",
+            "rewritten": {
+              "title": "开票政策",
+              "category_id": "payment",
+              "guideline_text": "",
+              "keywords": [
+                ""
+              ]
+            }
+          }
+        }
+      },
+      "reviewed_by": "codex_v4_reaudit",
+      "reviewed_at": "2026-05-02T19:42:07+00:00",
+      "review_note": "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。",
+      "review_assist": {
+        "provider": "deepseek-v4-pro_reaudit_guarded",
+        "llm_used": true,
+        "recommendation": "reject",
+        "universal_score": 20,
+        "summary": "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。",
+        "reasons": [
+          "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。"
+        ],
+        "risks": [
+          "如误入共享公共知识库，可能把某个客户的承诺或流程错推给其他客户。"
+        ],
+        "duplicate_level": "none",
+        "existing_matches": [],
+        "admin_checklist": [
+          "如需保留，应放回该 customer 自己的正式知识库，不进入共享公共知识。"
+        ],
+        "generated_at": "2026-05-02T19:42:07+00:00"
+      }
+    },
+    "proposal_shared_local_7851f3fe1c53923aa0": {
+      "proposal_id": "proposal_shared_local_7851f3fe1c53923aa0",
+      "tenant_id": "default",
+      "title": "杭州云桥办公设备有限公司",
+      "summary": "客户正式知识经 AI 判断后提交为候选共享公共知识，等待服务端 admin 审核。",
+      "operations": [
+        {
+          "op": "upsert_json",
+          "path": "payment/items/shared_1e54044fd870c2f638.json",
+          "content": {
+            "schema_version": 1,
+            "id": "shared_1e54044fd870c2f638",
+            "item_id": "shared_1e54044fd870c2f638",
+            "category_id": "payment",
+            "title": "杭州云桥办公设备有限公司",
+            "status": "active",
+            "keywords": [
+              "杭州云桥办公设备有限公司",
+              "办公设备",
+              "公司名称",
+              "公司信息",
+              "主营范围",
+              "生产方",
+              "开票信息"
+            ],
+            "applies_to": "所有客户都可能遇到的通用客服场景",
+            "content": "公司名称：杭州云桥办公设备有限公司；主营范围：办公家具、智能门锁、空气净化设备、会议室配套设备；对外客服风格：耐心、简洁、专业，不主动夸大效果；原始资料摘录：{\"name\": \"杭州云桥办公设备有限公司\", \"category\": \"办公设备\", \"additional_details\": {\"主营范围\": \"办公家具、智能门锁、空气净化设备、会议室配套设备\", \"对外客服人设\": \"耐心、简洁、专业，不主动夸大效果\"}}",
+            "guideline_text": "公司名称：杭州云桥办公设备有限公司；主营范围：办公家具、智能门锁、空气净化设备、会议室配套设备；对外客服风格：耐心、简洁、专业，不主动夸大效果；原始资料摘录：{\"name\": \"杭州云桥办公设备有限公司\", \"category\": \"办公设备\", \"additional_details\": {\"主营范围\": \"办公家具、智能门锁、空气净化设备、会议室配套设备\", \"对外客服人设\": \"耐心、简洁、专业，不主动夸大效果\"}}",
+            "notes": "候选理由：该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+            "source": {
+              "type": "formal_knowledge_universal_extraction",
+              "provider": "formal_knowledge_universal_heuristic",
+              "tenant_id": "default",
+              "source_items": [
+                {
+                  "tenant_id": "default",
+                  "category_id": "policies",
+                  "item_id": "item_2712d3045ad2",
+                  "source_key": "default:policies:item_2712d3045ad2:823a0c4482b2d8e8"
+                }
+              ],
+              "llm_used": false
+            },
+            "data": {
+              "title": "杭州云桥办公设备有限公司",
+              "guideline_text": "公司名称：杭州云桥办公设备有限公司；主营范围：办公家具、智能门锁、空气净化设备、会议室配套设备；对外客服风格：耐心、简洁、专业，不主动夸大效果；原始资料摘录：{\"name\": \"杭州云桥办公设备有限公司\", \"category\": \"办公设备\", \"additional_details\": {\"主营范围\": \"办公家具、智能门锁、空气净化设备、会议室配套设备\", \"对外客服人设\": \"耐心、简洁、专业，不主动夸大效果\"}}",
+              "keywords": [
+                "杭州云桥办公设备有限公司",
+                "办公设备",
+                "公司名称",
+                "公司信息",
+                "主营范围",
+                "生产方",
+                "开票信息"
+              ],
+              "applies_to": "所有客户都可能遇到的通用客服场景"
+            }
+          }
+        }
+      ],
+      "source": "formal_knowledge_universal_heuristic",
+      "status": "rejected",
+      "created_by": "local-node",
+      "created_at": "2026-05-02T18:08:33+00:00",
+      "updated_at": "2026-05-02T19:42:07+00:00",
+      "source_meta": {
+        "v4_reaudit": {
+          "model": "deepseek-v4-pro",
+          "reviewed_at": "2026-05-02T19:42:07+00:00",
+          "raw_model_review": {
+            "proposal_id": "proposal_shared_local_7851f3fe1c53923aa0",
+            "action": "reject",
+            "confidence": 1.0,
+            "reason": "非 AI 生成的话术类内容，疑似外部资料录入，且 category_id 归类不当（应属其他资料库而非 payment）",
+            "rewritten": {
+              "title": "杭州云桥办公设备有限公司",
+              "category_id": "payment",
+              "guideline_text": "",
+              "keywords": [
+                ""
+              ]
+            }
+          }
+        }
+      },
+      "reviewed_by": "codex_v4_reaudit",
+      "reviewed_at": "2026-05-02T19:42:07+00:00",
+      "review_note": "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。",
+      "review_assist": {
+        "provider": "deepseek-v4-pro_reaudit_guarded",
+        "llm_used": true,
+        "recommendation": "reject",
+        "universal_score": 20,
+        "summary": "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。",
+        "reasons": [
+          "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。"
+        ],
+        "risks": [
+          "如误入共享公共知识库，可能把某个客户的承诺或流程错推给其他客户。"
+        ],
+        "duplicate_level": "none",
+        "existing_matches": [],
+        "admin_checklist": [
+          "如需保留，应放回该 customer 自己的正式知识库，不进入共享公共知识。"
+        ],
+        "generated_at": "2026-05-02T19:42:07+00:00"
+      }
+    },
+    "proposal_shared_local_dce18ad1901fb33fea": {
+      "proposal_id": "proposal_shared_local_dce18ad1901fb33fea",
+      "tenant_id": "default",
+      "title": "logistics",
+      "summary": "客户正式知识经 AI 判断后提交为候选共享公共知识，等待服务端 admin 审核。",
+      "operations": [
+        {
+          "op": "upsert_json",
+          "path": "logistics/items/shared_780a4119f85ce1e707.json",
+          "content": {
+            "schema_version": 1,
+            "id": "shared_780a4119f85ce1e707",
+            "item_id": "shared_780a4119f85ce1e707",
+            "category_id": "logistics",
+            "title": "logistics",
+            "status": "active",
+            "keywords": [
+              "物流",
+              "快递",
+              "运费",
+              "包邮",
+              "发货多久",
+              "几天到",
+              "到货",
+              "从哪里发货",
+              "送货",
+              "上楼",
+              "送货上楼"
+            ],
+            "applies_to": "所有客户都可能遇到的通用客服场景",
+            "content": "默认从杭州余杭测试仓发货，常用顺丰、京东物流、德邦、安能物流。工作日 16:00 前付款的现货订单尽量当天出库；大件商品默认物流到站，送货上楼需另行确认；偏远地区运费和时效需人工确认。",
+            "guideline_text": "默认从杭州余杭测试仓发货，常用顺丰、京东物流、德邦、安能物流。工作日 16:00 前付款的现货订单尽量当天出库；大件商品默认物流到站，送货上楼需另行确认；偏远地区运费和时效需人工确认。",
+            "notes": "候选理由：该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+            "source": {
+              "type": "formal_knowledge_universal_extraction",
+              "provider": "formal_knowledge_universal_heuristic",
+              "tenant_id": "default",
+              "source_items": [
+                {
+                  "tenant_id": "default",
+                  "category_id": "policies",
+                  "item_id": "logistics",
+                  "source_key": "default:policies:logistics:5ceedd1aa955d4d9"
+                }
+              ],
+              "llm_used": false
+            },
+            "data": {
+              "title": "logistics",
+              "guideline_text": "默认从杭州余杭测试仓发货，常用顺丰、京东物流、德邦、安能物流。工作日 16:00 前付款的现货订单尽量当天出库；大件商品默认物流到站，送货上楼需另行确认；偏远地区运费和时效需人工确认。",
+              "keywords": [
+                "物流",
+                "快递",
+                "运费",
+                "包邮",
+                "发货多久",
+                "几天到",
+                "到货",
+                "从哪里发货",
+                "送货",
+                "上楼",
+                "送货上楼"
+              ],
+              "applies_to": "所有客户都可能遇到的通用客服场景"
+            }
+          }
+        }
+      ],
+      "source": "formal_knowledge_universal_heuristic",
+      "status": "rejected",
+      "created_by": "local-node",
+      "created_at": "2026-05-02T18:08:33+00:00",
+      "updated_at": "2026-05-02T19:42:07+00:00",
+      "source_meta": {
+        "v4_reaudit": {
+          "model": "deepseek-v4-pro",
+          "reviewed_at": "2026-05-02T19:42:07+00:00",
+          "raw_model_review": {
+            "proposal_id": "proposal_shared_local_dce18ad1901fb33fea",
+            "action": "reject",
+            "confidence": 0,
+            "reason": "Proposal is irrelevant to the task. Task asks about output format JSON vs Markdown, but proposal discusses logistics and shipping."
+          }
+        }
+      },
+      "reviewed_by": "codex_v4_reaudit",
+      "reviewed_at": "2026-05-02T19:42:07+00:00",
+      "review_note": "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。",
+      "review_assist": {
+        "provider": "deepseek-v4-pro_reaudit_guarded",
+        "llm_used": true,
+        "recommendation": "reject",
+        "universal_score": 20,
+        "summary": "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。",
+        "reasons": [
+          "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。"
+        ],
+        "risks": [
+          "如误入共享公共知识库，可能把某个客户的承诺或流程错推给其他客户。"
+        ],
+        "duplicate_level": "none",
+        "existing_matches": [],
+        "admin_checklist": [
+          "如需保留，应放回该 customer 自己的正式知识库，不进入共享公共知识。"
+        ],
+        "generated_at": "2026-05-02T19:42:07+00:00"
+      }
+    },
+    "proposal_shared_local_7518d6fef0fcb4edbb": {
+      "proposal_id": "proposal_shared_local_7518d6fef0fcb4edbb",
+      "tenant_id": "default",
+      "title": "物流政策",
+      "summary": "客户正式知识经 AI 判断后提交为候选共享公共知识，等待服务端 admin 审核。",
+      "operations": [
+        {
+          "op": "upsert_json",
+          "path": "logistics/items/shared_f4d63f6f05946a7933.json",
+          "content": {
+            "schema_version": 1,
+            "id": "shared_f4d63f6f05946a7933",
+            "item_id": "shared_f4d63f6f05946a7933",
+            "category_id": "logistics",
+            "title": "物流政策",
+            "status": "active",
+            "keywords": [
+              "logistics"
+            ],
+            "applies_to": "所有客户都可能遇到的通用客服场景",
+            "content": "{ \"default_carriers\": [ \"顺丰\", \"京东物流\", \"德邦\", \"安能物流\" ], \"warehouse\": \"杭州余杭测试仓\", \"same_day_cutoff\": \"工作日 16:00 前付款的现货订单尽量当天出库。\", \"remote_area_note\": \"新疆、西藏、青海、港澳台及偏远地区运费和时效需人工确认。\", \"tracking_note\": \"发货后会提供物流单号；大件商品默认物流到站，送货上楼需另行确认。\" }",
+            "guideline_text": "{ \"default_carriers\": [ \"顺丰\", \"京东物流\", \"德邦\", \"安能物流\" ], \"warehouse\": \"杭州余杭测试仓\", \"same_day_cutoff\": \"工作日 16:00 前付款的现货订单尽量当天出库。\", \"remote_area_note\": \"新疆、西藏、青海、港澳台及偏远地区运费和时效需人工确认。\", \"tracking_note\": \"发货后会提供物流单号；大件商品默认物流到站，送货上楼需另行确认。\" }",
+            "notes": "候选理由：该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+            "source": {
+              "type": "formal_knowledge_universal_extraction",
+              "provider": "formal_knowledge_universal_heuristic",
+              "tenant_id": "default",
+              "source_items": [
+                {
+                  "tenant_id": "default",
+                  "category_id": "policies",
+                  "item_id": "logistics_policy_details",
+                  "source_key": "default:policies:logistics_policy_details:500147da5afc8847"
+                }
+              ],
+              "llm_used": false
+            },
+            "data": {
+              "title": "物流政策",
+              "guideline_text": "{ \"default_carriers\": [ \"顺丰\", \"京东物流\", \"德邦\", \"安能物流\" ], \"warehouse\": \"杭州余杭测试仓\", \"same_day_cutoff\": \"工作日 16:00 前付款的现货订单尽量当天出库。\", \"remote_area_note\": \"新疆、西藏、青海、港澳台及偏远地区运费和时效需人工确认。\", \"tracking_note\": \"发货后会提供物流单号；大件商品默认物流到站，送货上楼需另行确认。\" }",
+              "keywords": [
+                "logistics"
+              ],
+              "applies_to": "所有客户都可能遇到的通用客服场景"
+            }
+          }
+        }
+      ],
+      "source": "formal_knowledge_universal_heuristic",
+      "status": "rejected",
+      "created_by": "local-node",
+      "created_at": "2026-05-02T18:08:33+00:00",
+      "updated_at": "2026-05-02T19:42:07+00:00",
+      "source_meta": {
+        "v4_reaudit": {
+          "model": "deepseek-v4-pro",
+          "reviewed_at": "2026-05-02T19:42:07+00:00",
+          "raw_model_review": {
+            "proposal_id": "proposal_shared_local_7518d6fef0fcb4edbb",
+            "action": "reject",
+            "confidence": 0,
+            "reason": "Proposal is irrelevant to the task. Task asks about output format, but proposal provides logistics policy data."
+          }
+        }
+      },
+      "reviewed_by": "codex_v4_reaudit",
+      "reviewed_at": "2026-05-02T19:42:07+00:00",
+      "review_note": "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。",
+      "review_assist": {
+        "provider": "deepseek-v4-pro_reaudit_guarded",
+        "llm_used": true,
+        "recommendation": "reject",
+        "universal_score": 20,
+        "summary": "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。",
+        "reasons": [
+          "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。"
+        ],
+        "risks": [
+          "如误入共享公共知识库，可能把某个客户的承诺或流程错推给其他客户。"
+        ],
+        "duplicate_level": "none",
+        "existing_matches": [],
+        "admin_checklist": [
+          "如需保留，应放回该 customer 自己的正式知识库，不进入共享公共知识。"
+        ],
+        "generated_at": "2026-05-02T19:42:07+00:00"
+      }
+    },
+    "proposal_shared_local_79dbc76df5023388e3": {
+      "proposal_id": "proposal_shared_local_79dbc76df5023388e3",
+      "tenant_id": "default",
+      "title": "payment",
+      "summary": "客户正式知识经 AI 判断后提交为候选共享公共知识，等待服务端 admin 审核。",
+      "operations": [
+        {
+          "op": "upsert_json",
+          "path": "logistics/items/shared_378599b0868a144e1a.json",
+          "content": {
+            "schema_version": 1,
+            "id": "shared_378599b0868a144e1a",
+            "item_id": "shared_378599b0868a144e1a",
+            "category_id": "logistics",
+            "title": "payment",
+            "status": "active",
+            "keywords": [
+              "付款",
+              "支付",
+              "怎么付",
+              "对公",
+              "转账",
+              "收款账户",
+              "定金",
+              "尾款"
+            ],
+            "applies_to": "所有客户都可能遇到的通用客服场景",
+            "content": "支持对公转账、微信支付和支付宝企业收款。常规订单付款后发货；定制或大额订单可先收 30% 定金，尾款发货前结清。需要对公账户的话，我可以发您测试账户信息。",
+            "guideline_text": "支持对公转账、微信支付和支付宝企业收款。常规订单付款后发货；定制或大额订单可先收 30% 定金，尾款发货前结清。需要对公账户的话，我可以发您测试账户信息。",
+            "notes": "候选理由：该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+            "source": {
+              "type": "formal_knowledge_universal_extraction",
+              "provider": "formal_knowledge_universal_heuristic",
+              "tenant_id": "default",
+              "source_items": [
+                {
+                  "tenant_id": "default",
+                  "category_id": "policies",
+                  "item_id": "payment",
+                  "source_key": "default:policies:payment:6b25c48077dd088f"
+                }
+              ],
+              "llm_used": false
+            },
+            "data": {
+              "title": "payment",
+              "guideline_text": "支持对公转账、微信支付和支付宝企业收款。常规订单付款后发货；定制或大额订单可先收 30% 定金，尾款发货前结清。需要对公账户的话，我可以发您测试账户信息。",
+              "keywords": [
+                "付款",
+                "支付",
+                "怎么付",
+                "对公",
+                "转账",
+                "收款账户",
+                "定金",
+                "尾款"
+              ],
+              "applies_to": "所有客户都可能遇到的通用客服场景"
+            }
+          }
+        }
+      ],
+      "source": "formal_knowledge_universal_heuristic",
+      "status": "rejected",
+      "created_by": "local-node",
+      "created_at": "2026-05-02T18:08:33+00:00",
+      "updated_at": "2026-05-02T19:42:07+00:00",
+      "source_meta": {
+        "v4_reaudit": {
+          "model": "deepseek-v4-pro",
+          "reviewed_at": "2026-05-02T19:42:07+00:00",
+          "raw_model_review": {
+            "proposal_id": "proposal_shared_local_79dbc76df5023388e3",
+            "action": "reject",
+            "confidence": 0,
+            "reason": "Proposal is irrelevant to the task. Task asks about output format, but proposal discusses payment methods."
+          }
+        }
+      },
+      "reviewed_by": "codex_v4_reaudit",
+      "reviewed_at": "2026-05-02T19:42:07+00:00",
+      "review_note": "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。",
+      "review_assist": {
+        "provider": "deepseek-v4-pro_reaudit_guarded",
+        "llm_used": true,
+        "recommendation": "reject",
+        "universal_score": 20,
+        "summary": "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。",
+        "reasons": [
+          "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。"
+        ],
+        "risks": [
+          "如误入共享公共知识库，可能把某个客户的承诺或流程错推给其他客户。"
+        ],
+        "duplicate_level": "none",
+        "existing_matches": [],
+        "admin_checklist": [
+          "如需保留，应放回该 customer 自己的正式知识库，不进入共享公共知识。"
+        ],
+        "generated_at": "2026-05-02T19:42:07+00:00"
+      }
+    },
+    "proposal_shared_local_68eaa8913870e55131": {
+      "proposal_id": "proposal_shared_local_68eaa8913870e55131",
+      "tenant_id": "default",
+      "title": "付款政策",
+      "summary": "客户正式知识经 AI 判断后提交为候选共享公共知识，等待服务端 admin 审核。",
+      "operations": [
+        {
+          "op": "upsert_json",
+          "path": "logistics/items/shared_a030254a298a829758.json",
+          "content": {
+            "schema_version": 1,
+            "id": "shared_a030254a298a829758",
+            "item_id": "shared_a030254a298a829758",
+            "category_id": "logistics",
+            "title": "付款政策",
+            "status": "active",
+            "keywords": [
+              "payment"
+            ],
+            "applies_to": "所有客户都可能遇到的通用客服场景",
+            "content": "{ \"methods\": [ \"对公转账\", \"微信支付\", \"支付宝企业收款\", \"月结客户测试通道\" ], \"deposit_policy\": \"常规订单付款后发货；定制或大额订单可先收 30% 定金，尾款发货前结清。\", \"credit_policy\": \"月结、账期、赊销需要人工审核，不由自动客服直接承诺。\" }",
+            "guideline_text": "{ \"methods\": [ \"对公转账\", \"微信支付\", \"支付宝企业收款\", \"月结客户测试通道\" ], \"deposit_policy\": \"常规订单付款后发货；定制或大额订单可先收 30% 定金，尾款发货前结清。\", \"credit_policy\": \"月结、账期、赊销需要人工审核，不由自动客服直接承诺。\" }",
+            "notes": "候选理由：该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+            "source": {
+              "type": "formal_knowledge_universal_extraction",
+              "provider": "formal_knowledge_universal_heuristic",
+              "tenant_id": "default",
+              "source_items": [
+                {
+                  "tenant_id": "default",
+                  "category_id": "policies",
+                  "item_id": "payment_policy_details",
+                  "source_key": "default:policies:payment_policy_details:e62f7f8712ec2f4f"
+                }
+              ],
+              "llm_used": false
+            },
+            "data": {
+              "title": "付款政策",
+              "guideline_text": "{ \"methods\": [ \"对公转账\", \"微信支付\", \"支付宝企业收款\", \"月结客户测试通道\" ], \"deposit_policy\": \"常规订单付款后发货；定制或大额订单可先收 30% 定金，尾款发货前结清。\", \"credit_policy\": \"月结、账期、赊销需要人工审核，不由自动客服直接承诺。\" }",
+              "keywords": [
+                "payment"
+              ],
+              "applies_to": "所有客户都可能遇到的通用客服场景"
+            }
+          }
+        }
+      ],
+      "source": "formal_knowledge_universal_heuristic",
+      "status": "rejected",
+      "created_by": "local-node",
+      "created_at": "2026-05-02T18:08:33+00:00",
+      "updated_at": "2026-05-02T19:42:07+00:00",
+      "source_meta": {
+        "v4_reaudit": {
+          "model": "deepseek-v4-pro",
+          "reviewed_at": "2026-05-02T19:42:07+00:00",
+          "raw_model_review": {
+            "proposal_id": "proposal_shared_local_68eaa8913870e55131",
+            "action": "reject",
+            "confidence": 0,
+            "reason": "Proposal is irrelevant to the task. Task asks about output format, but proposal provides payment policy data."
+          }
+        }
+      },
+      "reviewed_by": "codex_v4_reaudit",
+      "reviewed_at": "2026-05-02T19:42:07+00:00",
+      "review_note": "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。",
+      "review_assist": {
+        "provider": "deepseek-v4-pro_reaudit_guarded",
+        "llm_used": true,
+        "recommendation": "reject",
+        "universal_score": 20,
+        "summary": "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。",
+        "reasons": [
+          "含客户、行业、商品、城市、价格、物流、开票、售后或促销等专属信息，不适合作为所有客户共用的公共知识。"
+        ],
+        "risks": [
+          "如误入共享公共知识库，可能把某个客户的承诺或流程错推给其他客户。"
+        ],
+        "duplicate_level": "none",
+        "existing_matches": [],
+        "admin_checklist": [
+          "如需保留，应放回该 customer 自己的正式知识库，不进入共享公共知识。"
+        ],
+        "generated_at": "2026-05-02T19:42:07+00:00"
+      }
+    }
+  }
+}

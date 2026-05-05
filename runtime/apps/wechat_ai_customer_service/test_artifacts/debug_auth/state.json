@@ -1,0 +1,307 @@
+{
+  "schema_version": 1,
+  "tenants": {},
+  "users": {},
+  "sessions": {
+    "vps_zn7sANRWudx0gR8rMtrQ4mfxULo8kRDsAflu1Km4GMY": {
+      "session_id": "vps_zn7sANRWudx0gR8rMtrQ4mfxULo8kRDsAflu1Km4GMY",
+      "user": {
+        "user_id": "platform-admin",
+        "role": "admin",
+        "tenant_ids": [
+          "*"
+        ],
+        "display_name": "Platform Admin",
+        "username": "admin",
+        "resource_scopes": [
+          "*"
+        ]
+      },
+      "active_tenant_id": "default",
+      "issued_at": "2026-04-30T16:25:20+00:00",
+      "expires_at": "2026-05-01T04:25:20+00:00",
+      "source": "vps",
+      "token": "vps_zn7sANRWudx0gR8rMtrQ4mfxULo8kRDsAflu1Km4GMY"
+    },
+    "vps_tQhcGhf_YdjGIkH6SB37PmF3x_b3sJ5BEUZIuGMSiHQ": {
+      "session_id": "vps_tQhcGhf_YdjGIkH6SB37PmF3x_b3sJ5BEUZIuGMSiHQ",
+      "user": {
+        "user_id": "platform-admin",
+        "role": "admin",
+        "tenant_ids": [
+          "*"
+        ],
+        "display_name": "Platform Admin",
+        "username": "admin",
+        "resource_scopes": [
+          "*"
+        ]
+      },
+      "active_tenant_id": "default",
+      "issued_at": "2026-04-30T16:25:20+00:00",
+      "expires_at": "2026-05-01T04:25:20+00:00",
+      "source": "vps",
+      "token": "vps_tQhcGhf_YdjGIkH6SB37PmF3x_b3sJ5BEUZIuGMSiHQ"
+    }
+  },
+  "admin_credentials": {
+    "platform-admin": {
+      "user_id": "platform-admin",
+      "username": "admin",
+      "email": "admin@example.local",
+      "password_hash": "pbkdf2_sha256$120000$62ccb7b239d05c51dcf7e5ae0d5f4725$8LUswUfWZchs77djncW+w7ePwTjJUiD8u6UcLCV9V9c=",
+      "initialized_at": "2026-04-30T16:25:19+00:00",
+      "updated_at": "2026-04-30T16:25:20+00:00"
+    }
+  },
+  "auth_challenges": {
+    "init_5fQSvgU3Keg0yk6NhV_cC9Eg67GScm5X": {
+      "challenge_id": "init_5fQSvgU3Keg0yk6NhV_cC9Eg67GScm5X",
+      "purpose": "initialize_account_pending",
+      "username": "admin",
+      "user_id": "platform-admin",
+      "user": {
+        "user_id": "platform-admin",
+        "role": "admin",
+        "tenant_ids": [
+          "*"
+        ],
+        "display_name": "Platform Admin",
+        "username": "admin",
+        "resource_scopes": [
+          "*"
+        ]
+      },
+      "role": "admin",
+      "active_tenant_id": "default",
+      "actor_id": "platform-admin",
+      "device_fingerprint": "ef54902dbcd342ac5eb31c085d466f55e61a039c645a11bbe698d8e168cdd02e",
+      "device_name": "",
+      "ip_address": "testclient",
+      "expires_at": "2026-04-30T16:55:21+00:00",
+      "created_at": "2026-04-30T16:25:21+00:00"
+    }
+  },
+  "trusted_devices": {
+    "2f8edb8a4bebae8fb85fd4bd97984962469ecc61b3bef81965fc66a631ecadd3": {
+      "fingerprint": "2f8edb8a4bebae8fb85fd4bd97984962469ecc61b3bef81965fc66a631ecadd3",
+      "user_id": "platform-admin",
+      "device_name": "当前设备",
+      "ip_address": "testclient",
+      "trusted_until": "2026-05-30T16:25:20+00:00",
+      "created_at": "2026-04-30T16:25:20+00:00",
+      "last_seen_at": "2026-04-30T16:25:20+00:00"
+    }
+  },
+  "smtp_config": {
+    "server": "",
+    "port": 465,
+    "use_ssl": true,
+    "use_tls": false,
+    "username": "",
+    "password": "",
+    "from_email": "admin@example.local",
+    "sender_name": "OmniAuto Test",
+    "otp_required": false,
+    "code_length": 4,
+    "ttl_minutes": 15,
+    "resend_seconds": 60,
+    "trusted_device_days": 30,
+    "updated_by": "platform-admin",
+    "updated_at": "2026-04-30T16:25:20+00:00"
+  },
+  "local_nodes": {},
+  "commands": {},
+  "command_results": [],
+  "shared_proposals": {},
+  "shared_library": {},
+  "shared_patches": {},
+  "backup_requests": {},
+  "restore_requests": {},
+  "customer_data_packages": {},
+  "shared_snapshots": {},
+  "releases": {},
+  "audit_events": [
+    {
+      "event_id": "audit_00000001",
+      "actor_id": "platform-admin",
+      "action": "start_account_initialization",
+      "target_type": "auth_challenge",
+      "target_id": "init_YD_ccPNn0EjBaNwVoGAns1QRGE503dil",
+      "detail": {
+        "username": "admin",
+        "role": "admin"
+      },
+      "created_at": "2026-04-30T16:25:19+00:00"
+    },
+    {
+      "event_id": "audit_00000002",
+      "actor_id": "platform-admin",
+      "action": "send_initialization_code",
+      "target_type": "auth_challenge",
+      "target_id": "init_YD_ccPNn0EjBaNwVoGAns1QRGE503dil",
+      "detail": {
+        "email": "ad***n@example.local",
+        "role": "admin"
+      },
+      "created_at": "2026-04-30T16:25:19+00:00"
+    },
+    {
+      "event_id": "audit_00000003",
+      "actor_id": "platform-admin",
+      "action": "verify_initialize_account",
+      "target_type": "auth_challenge",
+      "target_id": "init_YD_ccPNn0EjBaNwVoGAns1QRGE503dil",
+      "detail": {
+        "email": "ad***n@example.local"
+      },
+      "created_at": "2026-04-30T16:25:19+00:00"
+    },
+    {
+      "event_id": "audit_00000004",
+      "actor_id": "platform-admin",
+      "action": "complete_account_initialization",
+      "target_type": "admin",
+      "target_id": "platform-admin",
+      "detail": {
+        "email": "ad***n@example.local",
+        "revoked_sessions": 0
+      },
+      "created_at": "2026-04-30T16:25:19+00:00"
+    },
+    {
+      "event_id": "audit_00000005",
+      "actor_id": "platform-admin",
+      "action": "start_email_login",
+      "target_type": "auth_challenge",
+      "target_id": "otp_rH3VMod4sZ4UPDsZ_H5QL7d957FMxTqc",
+      "detail": {
+        "username": "admin",
+        "email": "ad***n@example.local"
+      },
+      "created_at": "2026-04-30T16:25:19+00:00"
+    },
+    {
+      "event_id": "audit_00000006",
+      "actor_id": "platform-admin",
+      "action": "verify_login",
+      "target_type": "auth_challenge",
+      "target_id": "otp_rH3VMod4sZ4UPDsZ_H5QL7d957FMxTqc",
+      "detail": {
+        "email": "ad***n@example.local"
+      },
+      "created_at": "2026-04-30T16:25:20+00:00"
+    },
+    {
+      "event_id": "audit_00000007",
+      "actor_id": "platform-admin",
+      "action": "trust_device",
+      "target_type": "trusted_device",
+      "target_id": "2f8edb8a4bebae8fb85fd4bd97984962469ecc61b3bef81965fc66a631ecadd3",
+      "detail": {
+        "device_name": "当前设备",
+        "days": 30
+      },
+      "created_at": "2026-04-30T16:25:20+00:00"
+    },
+    {
+      "event_id": "audit_00000008",
+      "actor_id": "platform-admin",
+      "action": "login",
+      "target_type": "session",
+      "target_id": "vps_zn7sANRWudx0gR8rMtrQ4mfxULo8kRDsAflu1Km4GMY",
+      "detail": {},
+      "created_at": "2026-04-30T16:25:20+00:00"
+    },
+    {
+      "event_id": "audit_00000009",
+      "actor_id": "platform-admin",
+      "action": "start_password_change",
+      "target_type": "auth_challenge",
+      "target_id": "otp_oCsGT9nL4iEtzgfVmQe1ASkKkt8FSl8F",
+      "detail": {
+        "email": "ad***n@example.local"
+      },
+      "created_at": "2026-04-30T16:25:20+00:00"
+    },
+    {
+      "event_id": "audit_00000010",
+      "actor_id": "platform-admin",
+      "action": "verify_change_password",
+      "target_type": "auth_challenge",
+      "target_id": "otp_oCsGT9nL4iEtzgfVmQe1ASkKkt8FSl8F",
+      "detail": {
+        "email": "ad***n@example.local"
+      },
+      "created_at": "2026-04-30T16:25:20+00:00"
+    },
+    {
+      "event_id": "audit_00000011",
+      "actor_id": "platform-admin",
+      "action": "change_password",
+      "target_type": "admin",
+      "target_id": "platform-admin",
+      "detail": {
+        "revoked_sessions": 0,
+        "verified_by_email": true
+      },
+      "created_at": "2026-04-30T16:25:20+00:00"
+    },
+    {
+      "event_id": "audit_00000012",
+      "actor_id": "platform-admin",
+      "action": "start_email_login",
+      "target_type": "auth_challenge",
+      "target_id": "otp_tdfam8MYc--UyZK5knrobdCnsWNC2qxb",
+      "detail": {
+        "username": "admin",
+        "email": "ad***n@example.local"
+      },
+      "created_at": "2026-04-30T16:25:20+00:00"
+    },
+    {
+      "event_id": "audit_00000013",
+      "actor_id": "platform-admin",
+      "action": "verify_login",
+      "target_type": "auth_challenge",
+      "target_id": "otp_tdfam8MYc--UyZK5knrobdCnsWNC2qxb",
+      "detail": {
+        "email": "ad***n@example.local"
+      },
+      "created_at": "2026-04-30T16:25:20+00:00"
+    },
+    {
+      "event_id": "audit_00000014",
+      "actor_id": "platform-admin",
+      "action": "login",
+      "target_type": "session",
+      "target_id": "vps_tQhcGhf_YdjGIkH6SB37PmF3x_b3sJ5BEUZIuGMSiHQ",
+      "detail": {},
+      "created_at": "2026-04-30T16:25:20+00:00"
+    },
+    {
+      "event_id": "audit_00000015",
+      "actor_id": "platform-admin",
+      "action": "update_smtp_config",
+      "target_type": "security",
+      "target_id": "smtp_config",
+      "detail": {
+        "server": "",
+        "otp_required": false
+      },
+      "created_at": "2026-04-30T16:25:20+00:00"
+    },
+    {
+      "event_id": "audit_00000016",
+      "actor_id": "platform-admin",
+      "action": "start_account_initialization",
+      "target_type": "auth_challenge",
+      "target_id": "init_5fQSvgU3Keg0yk6NhV_cC9Eg67GScm5X",
+      "detail": {
+        "username": "admin",
+        "role": "admin"
+      },
+      "created_at": "2026-04-30T16:25:21+00:00"
+    }
+  ]
+}

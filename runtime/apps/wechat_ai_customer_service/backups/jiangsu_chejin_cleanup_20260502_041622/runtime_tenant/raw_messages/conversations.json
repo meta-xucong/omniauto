@@ -1,0 +1,179 @@
+[
+  {
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "conversation_type": "private",
+    "target_name": "许聪",
+    "display_name": "许聪",
+    "group_name": "",
+    "status": "active",
+    "exact": true,
+    "record_self": false,
+    "learning_enabled": true,
+    "notify_enabled": false,
+    "selected_by_user": false,
+    "created_at": "2026-05-02T01:06:49",
+    "updated_at": "2026-05-02T01:06:49",
+    "source": {
+      "type": "wechat_session_discovery"
+    },
+    "raw_payload": {
+      "name": "许聪",
+      "time": "2026-05-02 00:50:00",
+      "content": "[文件] 纯安集团港股上市路演.pptx",
+      "isnew": false,
+      "new_count": 0,
+      "ismute": false
+    }
+  },
+  {
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_87036d2253c2c945ed",
+    "conversation_type": "file_transfer",
+    "target_name": "文件传输助手",
+    "display_name": "文件传输助手",
+    "group_name": "",
+    "status": "active",
+    "exact": true,
+    "record_self": false,
+    "learning_enabled": true,
+    "notify_enabled": false,
+    "selected_by_user": true,
+    "created_at": "2026-05-02T01:06:49",
+    "updated_at": "2026-05-02T01:06:49",
+    "source": {
+      "type": "wechat_session_discovery"
+    },
+    "raw_payload": {
+      "name": "文件传输助手",
+      "time": "2026-05-01 16:24:00",
+      "content": "[车金AI] 您好，我是江苏车金AI助手。您可以直接告诉我预算、用途、想看的车型和所在城市，我先帮您筛车源。",
+      "isnew": false,
+      "new_count": 0,
+      "ismute": false
+    }
+  },
+  {
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_1c4c2bfac8a6d1ae7d",
+    "conversation_type": "group",
+    "target_name": "偷数据测试",
+    "display_name": "偷数据测试",
+    "group_name": "偷数据测试",
+    "status": "active",
+    "exact": true,
+    "record_self": false,
+    "learning_enabled": true,
+    "notify_enabled": false,
+    "selected_by_user": true,
+    "created_at": "2026-05-02T01:06:49",
+    "updated_at": "2026-05-02T01:06:49",
+    "source": {
+      "type": "wechat_session_discovery"
+    },
+    "raw_payload": {
+      "name": "偷数据测试",
+      "time": "2026-05-01 16:23:00",
+      "content": "边界噪音：CHEJIN_20260501_162302_LIVE_NOISE 今天群里测试心跳，不是车源知识。",
+      "isnew": false,
+      "new_count": 0,
+      "ismute": false
+    }
+  },
+  {
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_54a96e57c70563ab9c",
+    "conversation_type": "private",
+    "target_name": "车金测试私聊",
+    "display_name": "车金测试私聊",
+    "group_name": "",
+    "status": "active",
+    "exact": true,
+    "record_self": true,
+    "learning_enabled": true,
+    "notify_enabled": false,
+    "selected_by_user": true,
+    "created_at": "2026-05-01T23:31:09",
+    "updated_at": "2026-05-01T23:51:19",
+    "source": {
+      "type": "customer_service_listener"
+    },
+    "raw_payload": {
+      "target_name": "车金测试私聊",
+      "display_name": "车金测试私聊",
+      "conversation_type": "private",
+      "status": "active",
+      "exact": true,
+      "record_self": true,
+      "learning_enabled": true,
+      "notify_enabled": false,
+      "source": {
+        "type": "customer_service_listener"
+      }
+    }
+  },
+  {
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_8022f0948f611f15b4",
+    "conversation_type": "group",
+    "target_name": "离线回归-记录员群聊",
+    "display_name": "离线回归-记录员群聊",
+    "group_name": "离线回归-记录员群聊",
+    "status": "active",
+    "exact": true,
+    "record_self": false,
+    "learning_enabled": true,
+    "notify_enabled": false,
+    "selected_by_user": true,
+    "created_at": "2026-05-01T23:31:09",
+    "updated_at": "2026-05-01T23:31:09",
+    "source": {
+      "type": "jiangsu_chejin_offline_recorder",
+      "batch_token": "CHEJIN_20260501_233106"
+    },
+    "raw_payload": {
+      "target_name": "离线回归-记录员群聊",
+      "display_name": "离线回归-记录员群聊",
+      "conversation_type": "group",
+      "selected_by_user": true,
+      "learning_enabled": true,
+      "notify_enabled": false,
+      "source": {
+        "type": "jiangsu_chejin_offline_recorder",
+        "batch_token": "CHEJIN_20260501_233106"
+      }
+    }
+  },
+  {
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_376a9c7df7cd80d69b",
+    "conversation_type": "group",
+    "target_name": "江苏车金测试群",
+    "display_name": "江苏车金测试群",
+    "group_name": "江苏车金测试群",
+    "status": "active",
+    "exact": true,
+    "record_self": false,
+    "learning_enabled": true,
+    "notify_enabled": false,
+    "selected_by_user": true,
+    "created_at": "2026-05-01T16:23:07",
+    "updated_at": "2026-05-01T16:24:26",
+    "source": {
+      "type": "jiangsu_chejin_offline_recorder",
+      "batch_token": "CHEJIN_20260501_162302"
+    },
+    "raw_payload": {
+      "target_name": "江苏车金测试群",
+      "display_name": "江苏车金测试群",
+      "conversation_type": "group",
+      "selected_by_user": true,
+      "learning_enabled": true,
+      "notify_enabled": false,
+      "source": {
+        "type": "jiangsu_chejin_offline_recorder",
+        "batch_token": "CHEJIN_20260501_162302"
+      }
+    }
+  }
+]

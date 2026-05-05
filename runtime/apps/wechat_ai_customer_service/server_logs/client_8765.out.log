@@ -1,0 +1,23 @@
+INFO:     127.0.0.1:52140 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52213 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52213 - "GET /static/styles.css HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:52214 - "GET /static/app.js HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:52214 - "GET /api/auth/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52217 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52215 - "GET /api/sync/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52213 - "GET /api/tenants HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52216 - "GET /api/auth/security HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52216 - "POST /api/sync/register-node HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52216 - "POST /api/sync/commands/poll HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52215 - "GET /api/sync/update/check HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52222 - "GET /api/knowledge/categories HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52213 - "POST /api/sync/shared/formal-candidates HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52222 - "GET /api/knowledge/categories/products/items HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52216 - "GET /api/rag/experiences?status=all&limit=200 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52217 - "GET /api/knowledge/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52214 - "GET /api/system/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52214 - "GET /api/customer-service/settings HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52217 - "GET /api/knowledge/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53146 - "POST /api/sync/shared/formal-candidates HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53147 - "GET /api/sync/update/check HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53145 - "POST /api/sync/commands/poll HTTP/1.1" 200 OK

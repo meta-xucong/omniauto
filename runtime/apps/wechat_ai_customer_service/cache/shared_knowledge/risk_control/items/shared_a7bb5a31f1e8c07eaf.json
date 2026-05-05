@@ -1,0 +1,43 @@
+{
+  "title": "样品费抵扣规则",
+  "guideline_text": "样品费是否可抵扣大货款，需要按商品和数量人工确认。",
+  "keywords": [
+    "样品费",
+    "抵扣",
+    "大货款"
+  ],
+  "applies_to": "所有客户都可能遇到的通用客服场景",
+  "schema_version": 1,
+  "id": "shared_a7bb5a31f1e8c07eaf",
+  "item_id": "shared_a7bb5a31f1e8c07eaf",
+  "category_id": "risk_control",
+  "status": "active",
+  "content": "样品费是否可抵扣大货款，需要按商品和数量人工确认。",
+  "data": {
+    "title": "样品费抵扣规则",
+    "guideline_text": "样品费是否可抵扣大货款，需要按商品和数量人工确认。",
+    "keywords": [
+      "样品费",
+      "抵扣",
+      "大货款"
+    ],
+    "applies_to": "所有客户都可能遇到的通用客服场景",
+    "allow_auto_reply": false,
+    "requires_handoff": true
+  },
+  "runtime": {
+    "allow_auto_reply": false,
+    "requires_handoff": true,
+    "risk_level": "high"
+  },
+  "source": {
+    "type": "cloud_official_shared_library",
+    "item_id": "shared_a7bb5a31f1e8c07eaf",
+    "version": ""
+  },
+  "metadata": {
+    "knowledge_layer": "shared",
+    "cloud_item_id": "shared_a7bb5a31f1e8c07eaf",
+    "cloud_updated_at": "2026-05-02T19:57:43+00:00"
+  }
+}

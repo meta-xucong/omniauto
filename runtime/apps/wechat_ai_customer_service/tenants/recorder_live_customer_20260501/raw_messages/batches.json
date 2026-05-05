@@ -1,0 +1,182 @@
+[
+  {
+    "batch_id": "raw_batch_341a544d9a08279d090f",
+    "tenant_id": "recorder_live_customer_20260501",
+    "conversation_id": "conv_f028c8b6584677e497",
+    "message_ids": [
+      "raw_msg_760592d188d4a80ec951",
+      "raw_msg_54f106a9dfd7c73d3910"
+    ],
+    "reason": "recorder_capture",
+    "source_module": "smart_recorder",
+    "status": "processed",
+    "created_at": "2026-05-01T15:34:41",
+    "processed_at": "2026-05-01T15:34:41",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\recorder_live_customer_20260501\\raw_messages\\learning_batches\\raw_batch_341a544d9a08279d090f.txt",
+    "candidate_ids": [
+      "raw_6462532e1929b031"
+    ],
+    "candidate_count": 1,
+    "skipped_duplicate_count": 0,
+    "skipped_duplicates": [],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_40b5493de36efe33",
+        "tenant_id": "recorder_live_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "file_transfer",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\recorder_live_customer_20260501\\raw_messages\\learning_batches\\raw_batch_341a544d9a08279d090f.txt",
+        "content_hash": "b4c45acac21e5e8190a35e8fe87de473",
+        "status": "active",
+        "created_at": "2026-05-01T15:34:41",
+        "updated_at": "2026-05-01T15:34:41"
+      },
+      "source_id": "source_40b5493de36efe33",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\recorder_live_customer_20260501\\rag_chunks\\source_40b5493de36efe33.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\recorder_live_customer_20260501\\rag_index\\index.json",
+        "entry_count": 4
+      }
+    },
+    "updated_at": "2026-05-01T15:34:41"
+  },
+  {
+    "batch_id": "raw_batch_7f23459cd23446254586",
+    "tenant_id": "recorder_live_customer_20260501",
+    "conversation_id": "conv_262384249ceac39fa8",
+    "message_ids": [
+      "raw_msg_9c8e3ec424eb7e442355"
+    ],
+    "reason": "recorder_capture",
+    "source_module": "smart_recorder",
+    "status": "processed",
+    "created_at": "2026-05-01T15:34:19",
+    "processed_at": "2026-05-01T15:34:19",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\recorder_live_customer_20260501\\raw_messages\\learning_batches\\raw_batch_7f23459cd23446254586.txt",
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "skipped_duplicate_count": 0,
+    "skipped_duplicates": [],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_e26a2ff104b75f4f",
+        "tenant_id": "recorder_live_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "group",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\recorder_live_customer_20260501\\raw_messages\\learning_batches\\raw_batch_7f23459cd23446254586.txt",
+        "content_hash": "3fd0fe201524f21b83b6deb2aa03d1bc",
+        "status": "active",
+        "created_at": "2026-05-01T15:34:19",
+        "updated_at": "2026-05-01T15:34:19"
+      },
+      "source_id": "source_e26a2ff104b75f4f",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\recorder_live_customer_20260501\\rag_chunks\\source_e26a2ff104b75f4f.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\recorder_live_customer_20260501\\rag_index\\index.json",
+        "entry_count": 3
+      }
+    },
+    "updated_at": "2026-05-01T15:34:19"
+  },
+  {
+    "batch_id": "raw_batch_cd64de23acb3dc54afb2",
+    "tenant_id": "recorder_live_customer_20260501",
+    "conversation_id": "conv_262384249ceac39fa8",
+    "message_ids": [
+      "raw_msg_9e1998f353cc4f819e46"
+    ],
+    "reason": "recorder_capture",
+    "source_module": "smart_recorder",
+    "status": "processed",
+    "created_at": "2026-05-01T15:33:52",
+    "processed_at": "2026-05-01T15:33:52",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\recorder_live_customer_20260501\\raw_messages\\learning_batches\\raw_batch_cd64de23acb3dc54afb2.txt",
+    "candidate_ids": [
+      "raw_1c58e19a37a09389"
+    ],
+    "candidate_count": 1,
+    "skipped_duplicate_count": 0,
+    "skipped_duplicates": [],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_6c7f191c49b0f804",
+        "tenant_id": "recorder_live_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "group",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\recorder_live_customer_20260501\\raw_messages\\learning_batches\\raw_batch_cd64de23acb3dc54afb2.txt",
+        "content_hash": "cd0cb9109082a78fb5977cf1895a51a5",
+        "status": "active",
+        "created_at": "2026-05-01T15:33:52",
+        "updated_at": "2026-05-01T15:33:52"
+      },
+      "source_id": "source_6c7f191c49b0f804",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\recorder_live_customer_20260501\\rag_chunks\\source_6c7f191c49b0f804.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\recorder_live_customer_20260501\\rag_index\\index.json",
+        "entry_count": 2
+      }
+    },
+    "updated_at": "2026-05-01T15:33:52"
+  },
+  {
+    "batch_id": "raw_batch_a12be18d84de851ac12e",
+    "tenant_id": "recorder_live_customer_20260501",
+    "conversation_id": "conv_262384249ceac39fa8",
+    "message_ids": [
+      "raw_msg_d4caaed7bcdcc5edd95c",
+      "raw_msg_46ac2041daee9523c1e3"
+    ],
+    "reason": "recorder_capture",
+    "source_module": "smart_recorder",
+    "status": "processed",
+    "created_at": "2026-05-01T15:33:37",
+    "processed_at": "2026-05-01T15:33:37",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\recorder_live_customer_20260501\\raw_messages\\learning_batches\\raw_batch_a12be18d84de851ac12e.txt",
+    "candidate_ids": [
+      "raw_3ec4ad1252a86e0b"
+    ],
+    "candidate_count": 1,
+    "skipped_duplicate_count": 0,
+    "skipped_duplicates": [],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_5ba40d6114fefd1c",
+        "tenant_id": "recorder_live_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "group",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\recorder_live_customer_20260501\\raw_messages\\learning_batches\\raw_batch_a12be18d84de851ac12e.txt",
+        "content_hash": "01a89a65d917dc0f00216d1caafdfdb7",
+        "status": "active",
+        "created_at": "2026-05-01T15:33:37",
+        "updated_at": "2026-05-01T15:33:37"
+      },
+      "source_id": "source_5ba40d6114fefd1c",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\recorder_live_customer_20260501\\rag_chunks\\source_5ba40d6114fefd1c.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\recorder_live_customer_20260501\\rag_index\\index.json",
+        "entry_count": 1
+      }
+    },
+    "updated_at": "2026-05-01T15:33:37"
+  }
+]

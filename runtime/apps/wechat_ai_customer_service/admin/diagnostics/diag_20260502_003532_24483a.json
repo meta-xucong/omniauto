@@ -1,0 +1,93 @@
+{
+  "ok": true,
+  "run_id": "diag_20260502_003532_24483a",
+  "mode": "quick",
+  "status": "ok",
+  "created_at": "2026-05-02T00:35:33",
+  "checks": [
+    {
+      "name": "quick_knowledge_validation",
+      "ok": true,
+      "issues": [
+        {
+          "code": "knowledge_token_budget_large",
+          "severity": "info",
+          "title": "知识体积较大",
+          "detail": "当前分类知识库总量估算约 41875 token。这不是知识格式故障，也没有某条知识需要立即删除；它提醒后续继续按客户问题检索相关知识，避免一次性加载全部知识。",
+          "target_label": "全局知识库",
+          "details": [
+            {
+              "label": "问题性质",
+              "value": "容量提示，不是知识格式故障",
+              "level": "normal"
+            },
+            {
+              "label": "估算总量",
+              "value": "约 41875 token",
+              "level": "warning"
+            },
+            {
+              "label": "检测阈值",
+              "value": "超过 7000 token 时提示",
+              "level": "normal"
+            },
+            {
+              "label": "文件数量",
+              "value": "67 个 JSON 文件",
+              "level": "normal"
+            },
+            {
+              "label": "chats",
+              "value": "约 8140 token / 15 个文件",
+              "level": "normal"
+            },
+            {
+              "label": "erp_exports",
+              "value": "约 860 token / 2 个文件",
+              "level": "normal"
+            },
+            {
+              "label": "policies",
+              "value": "约 24672 token / 39 个文件",
+              "level": "normal"
+            },
+            {
+              "label": "products",
+              "value": "约 7510 token / 11 个文件",
+              "level": "normal"
+            }
+          ],
+          "suggestions": [
+            {
+              "title": "不建议自动删除知识",
+              "detail": "当前没有发现哪一条知识错误，系统不能为了降低体积擅自删内容。",
+              "level": "danger"
+            },
+            {
+              "title": "继续保持按门类和问题范围检索",
+              "detail": "客服运行时应只取相关商品、政策、话术和上下文证据，不要把全库一次性塞给大模型。",
+              "level": "normal"
+            },
+            {
+              "title": "如果后续继续变大",
+              "detail": "优先拆分过长政策、归档过期商品、把重复话术合并为模板，再重新检测。",
+              "level": "warning"
+            }
+          ],
+          "repairable": false
+        }
+      ],
+      "token_budget_estimate": 41875,
+      "recent_only": true
+    }
+  ],
+  "issues": [],
+  "ignored_count": 0,
+  "summary": {
+    "error_count": 0,
+    "warning_count": 0,
+    "info_count": 0,
+    "ignored_count": 0,
+    "hidden_notice_count": 1
+  }
+}

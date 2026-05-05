@@ -1,0 +1,68 @@
+[
+  {
+    "tenant_id": "default",
+    "conversation_id": "conv_6a6c8916a9e214148a",
+    "conversation_type": "file_transfer",
+    "target_name": "文件传输助手",
+    "display_name": "文件传输助手",
+    "group_name": "",
+    "status": "active",
+    "exact": true,
+    "record_self": true,
+    "learning_enabled": true,
+    "notify_enabled": false,
+    "selected_by_user": false,
+    "created_at": "2026-05-06T02:46:08",
+    "updated_at": "2026-05-06T02:46:08",
+    "source": {
+      "type": "customer_service_listener"
+    },
+    "raw_payload": {
+      "target_name": "文件传输助手",
+      "display_name": "文件传输助手",
+      "conversation_type": "file_transfer",
+      "status": "active",
+      "exact": true,
+      "record_self": true,
+      "learning_enabled": true,
+      "notify_enabled": false,
+      "source": {
+        "type": "customer_service_listener"
+      }
+    }
+  },
+  {
+    "tenant_id": "default",
+    "conversation_id": "conv_99cb61255614ec38c5",
+    "conversation_type": "group",
+    "target_name": "偷数据测试",
+    "display_name": "偷数据测试",
+    "group_name": "偷数据测试",
+    "status": "active",
+    "exact": true,
+    "record_self": false,
+    "learning_enabled": true,
+    "notify_enabled": false,
+    "selected_by_user": true,
+    "created_at": "2026-05-01T06:12:51",
+    "updated_at": "2026-05-01T06:38:43",
+    "source": {
+      "type": "live_recorder_test",
+      "batch_token": "LIVE_RECORDER_20260501_063645"
+    },
+    "raw_payload": {
+      "target_name": "偷数据测试",
+      "display_name": "偷数据测试",
+      "conversation_type": "group",
+      "selected_by_user": true,
+      "status": "active",
+      "exact": true,
+      "learning_enabled": true,
+      "notify_enabled": false,
+      "source": {
+        "type": "live_recorder_test",
+        "batch_token": "LIVE_RECORDER_20260501_061249"
+      }
+    }
+  }
+]

@@ -1,0 +1,14 @@
+{
+  "navBadge": "2",
+  "navBadgeVisible": true,
+  "tabBadge": "2",
+  "tabBadgeVisible": true,
+  "pointLabels": [
+    "要点 1",
+    "要点 1",
+    "要点 1"
+  ],
+  "editorFields": 9,
+  "overflow": false,
+  "ok": true
+}

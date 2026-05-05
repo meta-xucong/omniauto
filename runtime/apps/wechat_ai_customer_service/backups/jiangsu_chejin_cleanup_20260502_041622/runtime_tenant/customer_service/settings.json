@@ -1,0 +1,10 @@
+{
+  "enabled": true,
+  "reply_mode": "full_auto",
+  "record_messages": true,
+  "auto_learn": true,
+  "rag_enabled": true,
+  "data_capture_enabled": true,
+  "handoff_enabled": true,
+  "operator_alert_enabled": true
+}

@@ -1,0 +1,43 @@
+{
+  "title": "超出权限的问题转人工确认",
+  "guideline_text": "问题超出知识库或客服权限时，AI客服应说明需要进一步核实，并转人工确认后再回复。",
+  "keywords": [
+    "超出权限",
+    "核实",
+    "转人工"
+  ],
+  "applies_to": "所有行业都可能遇到的通用 AI 客服场景",
+  "schema_version": 1,
+  "id": "shared_000f9428cac0dc954b",
+  "item_id": "shared_000f9428cac0dc954b",
+  "category_id": "risk_control",
+  "status": "active",
+  "content": "问题超出知识库或客服权限时，AI客服应说明需要进一步核实，并转人工确认后再回复。",
+  "data": {
+    "title": "超出权限的问题转人工确认",
+    "guideline_text": "问题超出知识库或客服权限时，AI客服应说明需要进一步核实，并转人工确认后再回复。",
+    "keywords": [
+      "超出权限",
+      "核实",
+      "转人工"
+    ],
+    "applies_to": "所有行业都可能遇到的通用 AI 客服场景",
+    "allow_auto_reply": false,
+    "requires_handoff": true
+  },
+  "runtime": {
+    "allow_auto_reply": false,
+    "requires_handoff": true,
+    "risk_level": "high"
+  },
+  "source": {
+    "type": "cloud_official_shared_library",
+    "item_id": "shared_000f9428cac0dc954b",
+    "version": ""
+  },
+  "metadata": {
+    "knowledge_layer": "shared",
+    "cloud_item_id": "shared_000f9428cac0dc954b",
+    "cloud_updated_at": "2026-05-02T20:08:00+00:00"
+  }
+}

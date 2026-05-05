@@ -1,0 +1,25 @@
+{
+  "node_id": "local_8bcbb764d81d3f68",
+  "display_name": "Local Admin 客户端",
+  "tenant_ids": [
+    "jiangsu_chejin_usedcar_customer_20260501"
+  ],
+  "status": "online",
+  "version": "local-dev",
+  "capabilities": [
+    "backup_tenant",
+    "backup_all",
+    "pull_shared_patch",
+    "check_update",
+    "restore_backup",
+    "push_update"
+  ],
+  "node_token": "node_0sQTc_ixEA7CMteEY_TIJcPphNNZ-ZhF",
+  "registered_at": "2026-05-05T18:24:42+00:00",
+  "last_seen_at": "2026-05-05T18:24:42+00:00",
+  "metadata": {
+    "hostname": "LAPTOP-PT3DCHM7",
+    "platform": "Windows-10-10.0.19045-SP0",
+    "runtime_root": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service"
+  }
+}

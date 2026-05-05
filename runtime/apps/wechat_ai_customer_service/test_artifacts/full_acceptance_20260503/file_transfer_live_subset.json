@@ -1,0 +1,40 @@
+[
+  {
+    "name": "company_profile",
+    "messages": [
+      "你们公司信息和地址发我一下"
+    ],
+    "expect_action": "sent",
+    "expect_reply_contains": [
+      "杭州星澜供应链科技有限公司",
+      "星澜路 88 号",
+      "0571-8800-1234"
+    ]
+  },
+  {
+    "name": "complete_customer_data",
+    "messages": [
+      "客户资料\n姓名：王测试\n电话：13800001111\n地址：上海市徐汇区测试路1号\n产品：商用冰箱\n数量：2台"
+    ],
+    "expect_action": "sent",
+    "expect_reply_contains": [
+      "客户资料已记录"
+    ],
+    "expect_data_write": true
+  },
+  {
+    "name": "mixed_discount_and_customer_data_handoff",
+    "messages": [
+      "买7台商用冰箱能按10台价格吗？",
+      "客户资料\n姓名：周批次\n电话：13700003333\n地址：广州市天河区测试路3号\n产品：商用冰箱\n数量：7台"
+    ],
+    "expect_action": "handoff_sent",
+    "expect_reply_contains": [
+      "请示上级"
+    ],
+    "expect_handoff_reason_contains": [
+      "evidence_safety"
+    ],
+    "expect_data_write": false
+  }
+]

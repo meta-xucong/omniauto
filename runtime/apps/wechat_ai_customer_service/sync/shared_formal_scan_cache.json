@@ -1,0 +1,323 @@
+{
+  "default:chats:data_missing:c07c8b1e169fac36": {
+    "status": "uploaded",
+    "proposal_id": "proposal_shared_local_86e04d714d077ab0e5",
+    "updated_at": "2026-05-02T19:42:50+00:00",
+    "llm_used": true,
+    "reaudit": "deepseek-v4-pro"
+  },
+  "default:chats:discount_handoff:b2b3815ac8dff921": {
+    "status": "uploaded",
+    "proposal_id": "proposal_shared_local_63d30f233ed7dbc5b0",
+    "updated_at": "2026-05-02T19:42:50+00:00",
+    "llm_used": true,
+    "reaudit": "deepseek-v4-pro"
+  },
+  "default:chats:over_boundary_handoff:3ffaaa88fcfc15d0": {
+    "status": "uploaded",
+    "proposal_id": "proposal_shared_local_7a40d1c961ab2ecb59",
+    "updated_at": "2026-05-02T19:42:50+00:00",
+    "llm_used": true,
+    "reaudit": "deepseek-v4-pro"
+  },
+  "default:chats:quote_detail_request:0137ae6eeb65e716": {
+    "status": "rejected",
+    "proposal_id": "proposal_shared_local_597e94f66d86827c4d",
+    "updated_at": "2026-05-02T19:42:50+00:00",
+    "llm_used": true,
+    "reaudit": "deepseek-v4-pro"
+  },
+  "default:chats:scene_product_association:8bcad931926a0afc": {
+    "status": "rejected",
+    "proposal_id": "proposal_shared_local_6f7275dd524dd6fa64",
+    "updated_at": "2026-05-02T19:42:50+00:00",
+    "llm_used": true,
+    "reaudit": "deepseek-v4-pro"
+  },
+  "default:chats:unknown_handoff:0c2261604f1e4f83": {
+    "status": "uploaded",
+    "proposal_id": "proposal_shared_local_a86e574b73d9e39ff4",
+    "updated_at": "2026-05-02T19:42:50+00:00",
+    "llm_used": true,
+    "reaudit": "deepseek-v4-pro"
+  },
+  "default:policies:after-sales-mt160-compensation:a87f9898936f5e31": {
+    "status": "rejected",
+    "proposal_id": "proposal_shared_local_ad56c1bb84cf6d34f9",
+    "updated_at": "2026-05-02T19:42:50+00:00",
+    "llm_used": true,
+    "reaudit": "deepseek-v4-pro"
+  },
+  "default:policies:after_sales:5432b31559ba7ade": {
+    "status": "rejected",
+    "proposal_id": "proposal_shared_local_6bec0da184233f61c8",
+    "updated_at": "2026-05-02T19:42:50+00:00",
+    "llm_used": true,
+    "reaudit": "deepseek-v4-pro"
+  },
+  "default:policies:after_sales_policy_details:ca4c6a34d1ffc66a": {
+    "status": "rejected",
+    "proposal_id": "proposal_shared_local_575e3821b84f6c04fd",
+    "updated_at": "2026-05-02T19:42:50+00:00",
+    "llm_used": true,
+    "reaudit": "deepseek-v4-pro"
+  },
+  "default:policies:air-purifier-effect:28edbd810cfc5518": {
+    "status": "rejected",
+    "proposal_id": "proposal_shared_local_81af487dcce82c8b62",
+    "updated_at": "2026-05-02T19:42:50+00:00",
+    "llm_used": true,
+    "reaudit": "deepseek-v4-pro"
+  },
+  "default:policies:bank_account:1d35f092be2b8d12": {
+    "status": "rejected",
+    "proposal_id": "proposal_shared_local_784676bca8d649bdb0",
+    "updated_at": "2026-05-02T19:42:50+00:00",
+    "llm_used": true,
+    "reaudit": "deepseek-v4-pro"
+  },
+  "default:policies:company_profile:23a86b3239f1a176": {
+    "status": "rejected",
+    "proposal_id": "proposal_shared_local_1af26ce7b424e7de1d",
+    "updated_at": "2026-05-02T19:42:50+00:00",
+    "llm_used": true,
+    "reaudit": "deepseek-v4-pro"
+  },
+  "default:policies:company_profile_details:7542c44871f6999e": {
+    "status": "rejected",
+    "proposal_id": "proposal_shared_local_6affc16d7fabbfa2b4",
+    "updated_at": "2026-05-02T19:42:50+00:00",
+    "llm_used": true,
+    "reaudit": "deepseek-v4-pro"
+  },
+  "default:policies:company_qualification:aff048256532f37c": {
+    "status": "rejected",
+    "proposal_id": "proposal_shared_local_b2576e4d07484b45e4",
+    "updated_at": "2026-05-02T19:42:50+00:00",
+    "llm_used": true,
+    "reaudit": "deepseek-v4-pro"
+  },
+  "default:policies:contract-batch:34d20dbdb33c0a5d": {
+    "status": "rejected",
+    "proposal_id": "proposal_shared_local_6bd5aa015669122f08",
+    "updated_at": "2026-05-02T19:42:50+00:00",
+    "llm_used": true,
+    "reaudit": "deepseek-v4-pro"
+  },
+  "default:policies:contract-process:b0dc0065d5d0ef22": {
+    "status": "rejected",
+    "proposal_id": "proposal_shared_local_743c24af11e6d7b54d",
+    "updated_at": "2026-05-02T19:42:50+00:00",
+    "llm_used": true,
+    "reaudit": "deepseek-v4-pro"
+  },
+  "default:policies:contract:ef2ee2e3f6f2364b": {
+    "status": "uploaded",
+    "proposal_id": "proposal_shared_local_38e7644af4a3a88575",
+    "updated_at": "2026-05-02T19:42:50+00:00",
+    "llm_used": true,
+    "reaudit": "deepseek-v4-pro"
+  },
+  "default:policies:credit-term-policy:71aaafb277f07c43": {
+    "status": "rejected",
+    "proposal_id": "proposal_shared_local_a6e23f9c7bf15bdfb8",
+    "updated_at": "2026-05-02T19:42:50+00:00",
+    "llm_used": true,
+    "reaudit": "deepseek-v4-pro"
+  },
+  "default:policies:discount_general:c3dbe58c5dc2a9bc": {
+    "status": "rejected",
+    "proposal_id": "proposal_shared_local_fec5d6a4dab2e5bc86",
+    "updated_at": "2026-05-02T19:42:50+00:00",
+    "llm_used": true,
+    "reaudit": "deepseek-v4-pro"
+  },
+  "default:policies:free_shipping_promo_2026_spring:80110de6c3aa90b8": {
+    "status": "rejected",
+    "proposal_id": "proposal_shared_local_9c4937309d794ec05c",
+    "updated_at": "2026-05-02T19:42:50+00:00",
+    "llm_used": true,
+    "reaudit": "deepseek-v4-pro"
+  },
+  "default:policies:installation:8e9cd8a470ba6488": {
+    "status": "rejected",
+    "proposal_id": "proposal_shared_local_c5972855bb085f51d8",
+    "updated_at": "2026-05-02T19:42:50+00:00",
+    "llm_used": true,
+    "reaudit": "deepseek-v4-pro"
+  },
+  "default:policies:invoice:2a4e41434b18b28f": {
+    "status": "rejected",
+    "proposal_id": "proposal_shared_local_bfc3e32e4727f559a9",
+    "updated_at": "2026-05-02T19:42:50+00:00",
+    "llm_used": true,
+    "reaudit": "deepseek-v4-pro"
+  },
+  "default:policies:invoice_policy_details:506b822420ee5d5f": {
+    "status": "rejected",
+    "proposal_id": "proposal_shared_local_19f4499dd8f3bb8146",
+    "updated_at": "2026-05-02T19:42:50+00:00",
+    "llm_used": true,
+    "reaudit": "deepseek-v4-pro"
+  },
+  "default:policies:item_2712d3045ad2:823a0c4482b2d8e8": {
+    "status": "rejected",
+    "proposal_id": "proposal_shared_local_7851f3fe1c53923aa0",
+    "updated_at": "2026-05-02T19:42:50+00:00",
+    "llm_used": true,
+    "reaudit": "deepseek-v4-pro"
+  },
+  "default:policies:logistics:5ceedd1aa955d4d9": {
+    "status": "rejected",
+    "proposal_id": "proposal_shared_local_dce18ad1901fb33fea",
+    "updated_at": "2026-05-02T19:42:50+00:00",
+    "llm_used": true,
+    "reaudit": "deepseek-v4-pro"
+  },
+  "default:policies:logistics_policy_details:500147da5afc8847": {
+    "status": "rejected",
+    "proposal_id": "proposal_shared_local_7518d6fef0fcb4edbb",
+    "updated_at": "2026-05-02T19:42:50+00:00",
+    "llm_used": true,
+    "reaudit": "deepseek-v4-pro"
+  },
+  "default:policies:manual_handoff_reply:1ea9fa012c5415ad": {
+    "status": "uploaded",
+    "proposal_id": "proposal_shared_local_dfeb00a6c9a32425e6",
+    "updated_at": "2026-05-02T19:42:50+00:00",
+    "llm_used": true,
+    "reaudit": "deepseek-v4-pro"
+  },
+  "default:policies:manual_required:bc483591a2ab6838": {
+    "status": "uploaded",
+    "proposal_id": "proposal_shared_local_403728ae13b4072f4b",
+    "updated_at": "2026-05-02T19:42:50+00:00",
+    "llm_used": true,
+    "reaudit": "deepseek-v4-pro"
+  },
+  "default:policies:payment:6b25c48077dd088f": {
+    "status": "rejected",
+    "proposal_id": "proposal_shared_local_79dbc76df5023388e3",
+    "updated_at": "2026-05-02T19:42:50+00:00",
+    "llm_used": true,
+    "reaudit": "deepseek-v4-pro"
+  },
+  "default:policies:payment_policy_details:e62f7f8712ec2f4f": {
+    "status": "rejected",
+    "proposal_id": "proposal_shared_local_68eaa8913870e55131",
+    "updated_at": "2026-05-02T19:42:50+00:00",
+    "llm_used": true,
+    "reaudit": "deepseek-v4-pro"
+  },
+  "default:policies:public_account_payment_rule:83f06636e279583b": {
+    "status": "not_recommended",
+    "updated_at": "2026-05-03T02:59:55",
+    "llm_used": true
+  },
+  "default:policies:remote_area_shipping_rule:3d626deb53190903": {
+    "status": "not_recommended",
+    "updated_at": "2026-05-03T02:59:55",
+    "llm_used": true
+  },
+  "default:policies:sample-deduct-policy:e458c892d2975aee": {
+    "status": "not_recommended",
+    "updated_at": "2026-05-03T02:59:55",
+    "llm_used": true
+  },
+  "default:policies:sample-policy-large:ace16c1f6cb10289": {
+    "status": "not_recommended",
+    "updated_at": "2026-05-03T02:59:55",
+    "llm_used": true
+  },
+  "default:policies:sample-policy-standard:a93772c4a5a5889f": {
+    "status": "not_recommended",
+    "updated_at": "2026-05-03T02:59:55",
+    "llm_used": true
+  },
+  "default:policies:sample:ca9d8b07c122f752": {
+    "status": "not_recommended",
+    "updated_at": "2026-05-03T02:59:55",
+    "llm_used": true
+  },
+  "default:policies:service_reliability:839c6fca9411b21b": {
+    "status": "not_recommended",
+    "updated_at": "2026-05-03T03:47:11",
+    "llm_used": true
+  },
+  "jiangsu_chejin_usedcar_customer_20260501:chats:chejin_chat_complaint:771a4abd07c03c57": {
+    "status": "uploaded",
+    "proposal_id": "proposal_shared_local_86eefda9bfd3763fb0",
+    "updated_at": "2026-05-03T20:46:01",
+    "llm_used": false
+  },
+  "jiangsu_chejin_usedcar_customer_20260501:chats:chejin_chat_duplicate_lead:fc4c846be5e813fb": {
+    "status": "uploaded",
+    "proposal_id": "proposal_shared_local_245e7f16a43ba04b47",
+    "updated_at": "2026-05-03T20:46:01",
+    "llm_used": false
+  },
+  "jiangsu_chejin_usedcar_customer_20260501:chats:chejin_chat_hold:2f099b2c81f5a63c": {
+    "status": "uploaded",
+    "proposal_id": "proposal_shared_local_0a4fd8c510c133d9f1",
+    "updated_at": "2026-05-03T20:46:01",
+    "llm_used": false
+  },
+  "jiangsu_chejin_usedcar_customer_20260501:chats:chejin_chat_photo_video:2b62fc333d3156d2": {
+    "status": "not_recommended",
+    "updated_at": "2026-05-03T20:46:01",
+    "llm_used": true
+  },
+  "jiangsu_chejin_usedcar_customer_20260501:chats:chejin_chat_private_payment:226c64555b1ed764": {
+    "status": "uploaded",
+    "proposal_id": "proposal_shared_local_5fb9bbd35b3f5c829b",
+    "updated_at": "2026-05-03T20:46:01",
+    "llm_used": false
+  },
+  "jiangsu_chejin_usedcar_customer_20260501:chats:chejin_chat_universal_handoff:7635fca2b21ee0ea": {
+    "status": "uploaded",
+    "proposal_id": "proposal_shared_local_7e26d6eeb24319dc63",
+    "updated_at": "2026-05-03T20:46:01",
+    "llm_used": false
+  },
+  "jiangsu_chejin_usedcar_customer_20260501:policies:chejin_complaint_rule:4048136bf6e80983": {
+    "status": "uploaded",
+    "proposal_id": "proposal_shared_local_75a5c7dfdeea79bc87",
+    "updated_at": "2026-05-03T20:46:01",
+    "llm_used": false
+  },
+  "jiangsu_chejin_usedcar_customer_20260501:policies:chejin_emission_relocation_rule:fb94b002e0990717": {
+    "status": "uploaded",
+    "proposal_id": "proposal_shared_local_408035cb35dd7c10eb",
+    "updated_at": "2026-05-03T20:46:01",
+    "llm_used": false
+  },
+  "jiangsu_chejin_usedcar_customer_20260501:policies:chejin_generic_manual_transfer:7ca4c4e5702e3093": {
+    "status": "uploaded",
+    "proposal_id": "proposal_shared_local_de605318a53125e8fd",
+    "updated_at": "2026-05-03T20:46:01",
+    "llm_used": false
+  },
+  "jiangsu_chejin_usedcar_customer_20260501:policies:chejin_maintenance_record_rule:88d074b036e76a9e": {
+    "status": "uploaded",
+    "proposal_id": "proposal_shared_local_b8347c98605b419c0d",
+    "updated_at": "2026-05-03T20:46:01",
+    "llm_used": false
+  },
+  "jiangsu_chejin_usedcar_customer_20260501:policies:chejin_odometer_rule:5af4a92ecf5c6d2a": {
+    "status": "uploaded",
+    "proposal_id": "proposal_shared_local_8f26c36438fe4ac117",
+    "updated_at": "2026-05-03T20:46:01",
+    "llm_used": false
+  },
+  "jiangsu_chejin_usedcar_customer_20260501:policies:chejin_vehicle_hold_rule:6b05534228690405": {
+    "status": "uploaded",
+    "proposal_id": "proposal_shared_local_c4bd08d10660f6db19",
+    "updated_at": "2026-05-03T20:46:01",
+    "llm_used": false
+  },
+  "jiangsu_chejin_usedcar_customer_20260501:policies:policy_invoice_actual_transaction:a5a88fab0670e2e8": {
+    "status": "not_recommended",
+    "updated_at": "2026-05-05T00:34:52",
+    "llm_used": true
+  }
+}

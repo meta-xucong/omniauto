@@ -1,0 +1,105 @@
+[
+  {
+    "kind": "products",
+    "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\raw_inbox\\products\\upload_60f852261dbb5fe6_01_products_new_office_devices.xlsx.txt",
+    "size": 1731,
+    "sha256": "60f852261dbb5fe629946d88a7f584455f4243c6509be0cfe22b218010dcdca5",
+    "learned": true,
+    "filename": "01_products_new_office_devices.xlsx",
+    "upload_id": "upload_60f852261dbb5fe6",
+    "learned_at": "2026-04-27T01:32:53",
+    "uploaded_at": "2026-04-27T01:32:30",
+    "candidate_ids": [
+      "raw_0bb68b4c0c6a1408",
+      "raw_5c7e4e7ccf444f55",
+      "raw_6196747756676b28",
+      "raw_a7861356d08cd6c5",
+      "raw_c421395b03d9c304",
+      "raw_c78f17d7c53faf59",
+      "raw_f475168b608b2c32"
+    ],
+    "stored_suffix": ".txt",
+    "normalized_from": ".xlsx",
+    "original_suffix": ".xlsx"
+  },
+  {
+    "kind": "products",
+    "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\raw_inbox\\products\\upload_b3c3f6ee9adfe528_02_policy_delivery_invoice.csv",
+    "size": 1055,
+    "sha256": "b3c3f6ee9adfe52803c2c7e8925d0e36519e57d3d920b15260ac1f85e3af321f",
+    "learned": true,
+    "filename": "02_policy_delivery_invoice.csv",
+    "upload_id": "upload_b3c3f6ee9adfe528",
+    "learned_at": "2026-04-27T01:33:04",
+    "uploaded_at": "2026-04-27T01:32:30",
+    "candidate_ids": [
+      "raw_694203b7990dd900",
+      "raw_6e8c2de8ca0a567c",
+      "raw_86e60fa4d3e0a10c",
+      "raw_e71b7ae3d10ba323"
+    ],
+    "stored_suffix": ".csv",
+    "normalized_from": "",
+    "original_suffix": ".csv"
+  },
+  {
+    "kind": "products",
+    "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\raw_inbox\\products\\upload_5de0c2bb46fb1848_03_chat_records_new_energy_storage.md",
+    "size": 1276,
+    "sha256": "5de0c2bb46fb184860668c2230e4ddac26e894750d9885e13fea248f0ffdbac6",
+    "learned": true,
+    "filename": "03_chat_records_new_energy_storage.md",
+    "upload_id": "upload_5de0c2bb46fb1848",
+    "learned_at": "2026-04-27T01:33:15",
+    "uploaded_at": "2026-04-27T01:32:30",
+    "candidate_ids": [
+      "raw_4402ab7b51cd1dd8",
+      "raw_7dbaa00f39e3327a",
+      "raw_855aa246a4b4f85a"
+    ],
+    "stored_suffix": ".md",
+    "normalized_from": "",
+    "original_suffix": ".md"
+  },
+  {
+    "kind": "products",
+    "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\raw_inbox\\products\\upload_bfc6fce395f6d774_04_erp_export_after_sales.json",
+    "size": 1147,
+    "sha256": "bfc6fce395f6d774a115f02c31b63747fe19f817d1db70566e91e559a91bd371",
+    "learned": true,
+    "filename": "04_erp_export_after_sales.json",
+    "upload_id": "upload_bfc6fce395f6d774",
+    "learned_at": "2026-04-27T01:33:22",
+    "uploaded_at": "2026-04-27T01:32:30",
+    "candidate_ids": [
+      "raw_bc88575b7237f91f",
+      "raw_e27d185f2f6e2e14"
+    ],
+    "stored_suffix": ".json",
+    "normalized_from": "",
+    "original_suffix": ".json"
+  },
+  {
+    "kind": "products",
+    "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\raw_inbox\\products\\upload_c54b9fd38e442a30_05_mixed_company_faq.txt",
+    "size": 1222,
+    "sha256": "c54b9fd38e442a30d518d495217795b47157a71ab5191d6b8da93900d60a3804",
+    "learned": true,
+    "filename": "05_mixed_company_faq.txt",
+    "upload_id": "upload_c54b9fd38e442a30",
+    "learned_at": "2026-04-27T01:33:40",
+    "uploaded_at": "2026-04-27T01:32:30",
+    "candidate_ids": [
+      "raw_0639e5b4f9fc3856",
+      "raw_2db2d2960bc39d41",
+      "raw_6ad1c0c583582f67",
+      "raw_c401940c9667b76e",
+      "raw_ca4f0e29a471fb50",
+      "raw_e74d6c745111b232",
+      "raw_f5d4aafc31b164d8"
+    ],
+    "stored_suffix": ".txt",
+    "normalized_from": "",
+    "original_suffix": ".txt"
+  }
+]

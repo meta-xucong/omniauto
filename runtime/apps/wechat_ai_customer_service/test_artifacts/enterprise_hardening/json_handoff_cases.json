@@ -1,0 +1,38 @@
+{
+  "cases": [
+    {
+      "tenant_id": "hardening_json_test",
+      "case_id": "handoff_89b67a5a64f2a6b54f0a",
+      "target": "文件传输助手",
+      "status": "resolved",
+      "priority": 1,
+      "reason": "discount_requires_approval",
+      "message_ids": [
+        "m1"
+      ],
+      "message_contents": [
+        "能不能再便宜点"
+      ],
+      "reply_text": "我先帮您请示一下。",
+      "operator_alert": {},
+      "product_context": {},
+      "payload": {
+        "target": "文件传输助手",
+        "reason": "discount_requires_approval",
+        "message_ids": [
+          "m1"
+        ],
+        "message_contents": [
+          "能不能再便宜点"
+        ],
+        "reply_text": "我先帮您请示一下。"
+      },
+      "resolution": {
+        "operator": "test"
+      },
+      "created_at": "2026-05-03T08:47:10",
+      "updated_at": "2026-05-03T08:47:10",
+      "resolved_at": "2026-05-03T08:47:10"
+    }
+  ]
+}

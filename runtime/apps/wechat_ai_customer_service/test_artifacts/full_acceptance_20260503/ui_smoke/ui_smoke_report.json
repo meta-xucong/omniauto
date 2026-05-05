@@ -1,0 +1,711 @@
+{
+  "ok": true,
+  "count": 44,
+  "failures": [],
+  "results": [
+    {
+      "app": "client_customer",
+      "viewport": "desktop",
+      "view": "customer_service",
+      "ok": true,
+      "metrics": {
+        "innerWidth": 1366,
+        "pageWidth": 1366,
+        "pageOverflow": 0,
+        "offenders": [],
+        "bodyClass": "",
+        "title": "微信智能客服"
+      },
+      "page_errors": [],
+      "screenshot": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\full_acceptance_20260503\\ui_smoke\\client_customer_desktop_customer_service.png"
+    },
+    {
+      "app": "client_customer",
+      "viewport": "desktop",
+      "view": "recorder",
+      "ok": true,
+      "metrics": {
+        "innerWidth": 1366,
+        "pageWidth": 1366,
+        "pageOverflow": 0,
+        "offenders": [],
+        "bodyClass": "",
+        "title": "AI智能记录员"
+      },
+      "page_errors": [],
+      "screenshot": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\full_acceptance_20260503\\ui_smoke\\client_customer_desktop_recorder.png"
+    },
+    {
+      "app": "client_customer",
+      "viewport": "desktop",
+      "view": "knowledge_center",
+      "ok": true,
+      "metrics": {
+        "innerWidth": 1366,
+        "pageWidth": 1366,
+        "pageOverflow": 0,
+        "offenders": [],
+        "bodyClass": "",
+        "title": "知识成长中心"
+      },
+      "page_errors": [],
+      "screenshot": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\full_acceptance_20260503\\ui_smoke\\client_customer_desktop_knowledge_center.png"
+    },
+    {
+      "app": "client_customer",
+      "viewport": "desktop",
+      "view": "product_catalog",
+      "ok": true,
+      "metrics": {
+        "innerWidth": 1366,
+        "pageWidth": 1366,
+        "pageOverflow": 0,
+        "offenders": [],
+        "bodyClass": "",
+        "title": "商品库"
+      },
+      "page_errors": [],
+      "screenshot": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\full_acceptance_20260503\\ui_smoke\\client_customer_desktop_product_catalog.png"
+    },
+    {
+      "app": "client_customer",
+      "viewport": "desktop",
+      "view": "uploads",
+      "ok": true,
+      "metrics": {
+        "innerWidth": 1366,
+        "pageWidth": 1366,
+        "pageOverflow": 0,
+        "offenders": [],
+        "bodyClass": "",
+        "title": "资料导入与待确认知识"
+      },
+      "page_errors": [],
+      "screenshot": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\full_acceptance_20260503\\ui_smoke\\client_customer_desktop_uploads.png"
+    },
+    {
+      "app": "client_customer",
+      "viewport": "desktop",
+      "view": "candidates",
+      "ok": true,
+      "metrics": {
+        "innerWidth": 1366,
+        "pageWidth": 1366,
+        "pageOverflow": 0,
+        "offenders": [],
+        "bodyClass": "",
+        "title": "资料导入与待确认知识"
+      },
+      "page_errors": [],
+      "screenshot": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\full_acceptance_20260503\\ui_smoke\\client_customer_desktop_candidates.png"
+    },
+    {
+      "app": "client_customer",
+      "viewport": "desktop",
+      "view": "ai_reference",
+      "ok": true,
+      "metrics": {
+        "innerWidth": 1366,
+        "pageWidth": 1366,
+        "pageOverflow": 0,
+        "offenders": [],
+        "bodyClass": "",
+        "title": "AI经验池"
+      },
+      "page_errors": [],
+      "screenshot": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\full_acceptance_20260503\\ui_smoke\\client_customer_desktop_ai_reference.png"
+    },
+    {
+      "app": "client_customer",
+      "viewport": "desktop",
+      "view": "knowledge",
+      "ok": true,
+      "metrics": {
+        "innerWidth": 1366,
+        "pageWidth": 1366,
+        "pageOverflow": 0,
+        "offenders": [],
+        "bodyClass": "",
+        "title": "正式知识库"
+      },
+      "page_errors": [],
+      "screenshot": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\full_acceptance_20260503\\ui_smoke\\client_customer_desktop_knowledge.png"
+    },
+    {
+      "app": "client_customer",
+      "viewport": "desktop",
+      "view": "diagnostics",
+      "ok": true,
+      "metrics": {
+        "innerWidth": 1366,
+        "pageWidth": 1366,
+        "pageOverflow": 0,
+        "offenders": [],
+        "bodyClass": "",
+        "title": "知识检测"
+      },
+      "page_errors": [],
+      "screenshot": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\full_acceptance_20260503\\ui_smoke\\client_customer_desktop_diagnostics.png"
+    },
+    {
+      "app": "client_customer",
+      "viewport": "desktop",
+      "view": "settings",
+      "ok": true,
+      "metrics": {
+        "innerWidth": 1366,
+        "pageWidth": 1366,
+        "pageOverflow": 0,
+        "offenders": [],
+        "bodyClass": "",
+        "title": "系统设置"
+      },
+      "page_errors": [],
+      "screenshot": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\full_acceptance_20260503\\ui_smoke\\client_customer_desktop_settings.png"
+    },
+    {
+      "app": "client_customer",
+      "viewport": "mobile",
+      "view": "customer_service",
+      "ok": true,
+      "metrics": {
+        "innerWidth": 390,
+        "pageWidth": 390,
+        "pageOverflow": 0,
+        "offenders": [],
+        "bodyClass": "",
+        "title": "微信智能客服"
+      },
+      "page_errors": [],
+      "screenshot": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\full_acceptance_20260503\\ui_smoke\\client_customer_mobile_customer_service.png"
+    },
+    {
+      "app": "client_customer",
+      "viewport": "mobile",
+      "view": "recorder",
+      "ok": true,
+      "metrics": {
+        "innerWidth": 390,
+        "pageWidth": 390,
+        "pageOverflow": 0,
+        "offenders": [],
+        "bodyClass": "",
+        "title": "AI智能记录员"
+      },
+      "page_errors": [],
+      "screenshot": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\full_acceptance_20260503\\ui_smoke\\client_customer_mobile_recorder.png"
+    },
+    {
+      "app": "client_customer",
+      "viewport": "mobile",
+      "view": "knowledge_center",
+      "ok": true,
+      "metrics": {
+        "innerWidth": 390,
+        "pageWidth": 390,
+        "pageOverflow": 0,
+        "offenders": [],
+        "bodyClass": "",
+        "title": "知识成长中心"
+      },
+      "page_errors": [],
+      "screenshot": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\full_acceptance_20260503\\ui_smoke\\client_customer_mobile_knowledge_center.png"
+    },
+    {
+      "app": "client_customer",
+      "viewport": "mobile",
+      "view": "product_catalog",
+      "ok": true,
+      "metrics": {
+        "innerWidth": 390,
+        "pageWidth": 390,
+        "pageOverflow": 0,
+        "offenders": [],
+        "bodyClass": "",
+        "title": "商品库"
+      },
+      "page_errors": [],
+      "screenshot": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\full_acceptance_20260503\\ui_smoke\\client_customer_mobile_product_catalog.png"
+    },
+    {
+      "app": "client_customer",
+      "viewport": "mobile",
+      "view": "uploads",
+      "ok": true,
+      "metrics": {
+        "innerWidth": 390,
+        "pageWidth": 390,
+        "pageOverflow": 0,
+        "offenders": [],
+        "bodyClass": "",
+        "title": "资料导入与待确认知识"
+      },
+      "page_errors": [],
+      "screenshot": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\full_acceptance_20260503\\ui_smoke\\client_customer_mobile_uploads.png"
+    },
+    {
+      "app": "client_customer",
+      "viewport": "mobile",
+      "view": "candidates",
+      "ok": true,
+      "metrics": {
+        "innerWidth": 390,
+        "pageWidth": 390,
+        "pageOverflow": 0,
+        "offenders": [],
+        "bodyClass": "",
+        "title": "资料导入与待确认知识"
+      },
+      "page_errors": [],
+      "screenshot": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\full_acceptance_20260503\\ui_smoke\\client_customer_mobile_candidates.png"
+    },
+    {
+      "app": "client_customer",
+      "viewport": "mobile",
+      "view": "ai_reference",
+      "ok": true,
+      "metrics": {
+        "innerWidth": 390,
+        "pageWidth": 390,
+        "pageOverflow": 0,
+        "offenders": [],
+        "bodyClass": "",
+        "title": "AI经验池"
+      },
+      "page_errors": [],
+      "screenshot": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\full_acceptance_20260503\\ui_smoke\\client_customer_mobile_ai_reference.png"
+    },
+    {
+      "app": "client_customer",
+      "viewport": "mobile",
+      "view": "knowledge",
+      "ok": true,
+      "metrics": {
+        "innerWidth": 390,
+        "pageWidth": 390,
+        "pageOverflow": 0,
+        "offenders": [],
+        "bodyClass": "",
+        "title": "正式知识库"
+      },
+      "page_errors": [],
+      "screenshot": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\full_acceptance_20260503\\ui_smoke\\client_customer_mobile_knowledge.png"
+    },
+    {
+      "app": "client_customer",
+      "viewport": "mobile",
+      "view": "diagnostics",
+      "ok": true,
+      "metrics": {
+        "innerWidth": 390,
+        "pageWidth": 390,
+        "pageOverflow": 0,
+        "offenders": [],
+        "bodyClass": "",
+        "title": "知识检测"
+      },
+      "page_errors": [],
+      "screenshot": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\full_acceptance_20260503\\ui_smoke\\client_customer_mobile_diagnostics.png"
+    },
+    {
+      "app": "client_customer",
+      "viewport": "mobile",
+      "view": "settings",
+      "ok": true,
+      "metrics": {
+        "innerWidth": 390,
+        "pageWidth": 390,
+        "pageOverflow": 0,
+        "offenders": [],
+        "bodyClass": "",
+        "title": "系统设置"
+      },
+      "page_errors": [],
+      "screenshot": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\full_acceptance_20260503\\ui_smoke\\client_customer_mobile_settings.png"
+    },
+    {
+      "app": "client_admin",
+      "viewport": "desktop",
+      "view": "customer_service",
+      "ok": true,
+      "metrics": {
+        "innerWidth": 1366,
+        "pageWidth": 1366,
+        "pageOverflow": 0,
+        "offenders": [],
+        "bodyClass": "",
+        "title": "微信智能客服"
+      },
+      "page_errors": [],
+      "screenshot": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\full_acceptance_20260503\\ui_smoke\\client_admin_desktop_customer_service.png"
+    },
+    {
+      "app": "client_admin",
+      "viewport": "desktop",
+      "view": "shared_public",
+      "ok": true,
+      "metrics": {
+        "innerWidth": 1366,
+        "pageWidth": 1366,
+        "pageOverflow": 0,
+        "offenders": [],
+        "bodyClass": "",
+        "title": "共享公共知识库"
+      },
+      "page_errors": [],
+      "screenshot": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\full_acceptance_20260503\\ui_smoke\\client_admin_desktop_shared_public.png"
+    },
+    {
+      "app": "client_admin",
+      "viewport": "desktop",
+      "view": "settings",
+      "ok": true,
+      "metrics": {
+        "innerWidth": 1366,
+        "pageWidth": 1366,
+        "pageOverflow": 0,
+        "offenders": [],
+        "bodyClass": "",
+        "title": "系统设置"
+      },
+      "page_errors": [],
+      "screenshot": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\full_acceptance_20260503\\ui_smoke\\client_admin_desktop_settings.png"
+    },
+    {
+      "app": "client_admin",
+      "viewport": "mobile",
+      "view": "customer_service",
+      "ok": true,
+      "metrics": {
+        "innerWidth": 390,
+        "pageWidth": 390,
+        "pageOverflow": 0,
+        "offenders": [],
+        "bodyClass": "",
+        "title": "微信智能客服"
+      },
+      "page_errors": [],
+      "screenshot": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\full_acceptance_20260503\\ui_smoke\\client_admin_mobile_customer_service.png"
+    },
+    {
+      "app": "client_admin",
+      "viewport": "mobile",
+      "view": "shared_public",
+      "ok": true,
+      "metrics": {
+        "innerWidth": 390,
+        "pageWidth": 390,
+        "pageOverflow": 0,
+        "offenders": [],
+        "bodyClass": "",
+        "title": "共享公共知识库"
+      },
+      "page_errors": [],
+      "screenshot": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\full_acceptance_20260503\\ui_smoke\\client_admin_mobile_shared_public.png"
+    },
+    {
+      "app": "client_admin",
+      "viewport": "mobile",
+      "view": "settings",
+      "ok": true,
+      "metrics": {
+        "innerWidth": 390,
+        "pageWidth": 390,
+        "pageOverflow": 0,
+        "offenders": [],
+        "bodyClass": "",
+        "title": "系统设置"
+      },
+      "page_errors": [],
+      "screenshot": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\full_acceptance_20260503\\ui_smoke\\client_admin_mobile_settings.png"
+    },
+    {
+      "app": "vps_admin",
+      "viewport": "desktop",
+      "view": "overview",
+      "ok": true,
+      "metrics": {
+        "innerWidth": 1366,
+        "pageWidth": 1366,
+        "pageOverflow": 0,
+        "offenders": [],
+        "bodyClass": "",
+        "title": "运行总览"
+      },
+      "page_errors": [],
+      "screenshot": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\full_acceptance_20260503\\ui_smoke\\vps_admin_desktop_overview.png"
+    },
+    {
+      "app": "vps_admin",
+      "viewport": "desktop",
+      "view": "accounts",
+      "ok": true,
+      "metrics": {
+        "innerWidth": 1366,
+        "pageWidth": 1366,
+        "pageOverflow": 0,
+        "offenders": [],
+        "bodyClass": "",
+        "title": "客户与权限"
+      },
+      "page_errors": [],
+      "screenshot": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\full_acceptance_20260503\\ui_smoke\\vps_admin_desktop_accounts.png"
+    },
+    {
+      "app": "vps_admin",
+      "viewport": "desktop",
+      "view": "customerData",
+      "ok": true,
+      "metrics": {
+        "innerWidth": 1366,
+        "pageWidth": 1366,
+        "pageOverflow": 0,
+        "offenders": [],
+        "bodyClass": "",
+        "title": "客户数据"
+      },
+      "page_errors": [],
+      "screenshot": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\full_acceptance_20260503\\ui_smoke\\vps_admin_desktop_customerData.png"
+    },
+    {
+      "app": "vps_admin",
+      "viewport": "desktop",
+      "view": "sharedKnowledge",
+      "ok": true,
+      "metrics": {
+        "innerWidth": 1366,
+        "pageWidth": 1366,
+        "pageOverflow": 0,
+        "offenders": [],
+        "bodyClass": "",
+        "title": "共享公共知识"
+      },
+      "page_errors": [],
+      "screenshot": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\full_acceptance_20260503\\ui_smoke\\vps_admin_desktop_sharedKnowledge.png"
+    },
+    {
+      "app": "vps_admin",
+      "viewport": "desktop",
+      "view": "nodes",
+      "ok": true,
+      "metrics": {
+        "innerWidth": 1366,
+        "pageWidth": 1366,
+        "pageOverflow": 0,
+        "offenders": [],
+        "bodyClass": "",
+        "title": "客户电脑连接"
+      },
+      "page_errors": [],
+      "screenshot": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\full_acceptance_20260503\\ui_smoke\\vps_admin_desktop_nodes.png"
+    },
+    {
+      "app": "vps_admin",
+      "viewport": "desktop",
+      "view": "backupRestore",
+      "ok": true,
+      "metrics": {
+        "innerWidth": 1366,
+        "pageWidth": 1366,
+        "pageOverflow": 0,
+        "offenders": [],
+        "bodyClass": "",
+        "title": "备份与还原"
+      },
+      "page_errors": [],
+      "screenshot": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\full_acceptance_20260503\\ui_smoke\\vps_admin_desktop_backupRestore.png"
+    },
+    {
+      "app": "vps_admin",
+      "viewport": "desktop",
+      "view": "updates",
+      "ok": true,
+      "metrics": {
+        "innerWidth": 1366,
+        "pageWidth": 1366,
+        "pageOverflow": 0,
+        "offenders": [],
+        "bodyClass": "",
+        "title": "版本更新"
+      },
+      "page_errors": [],
+      "screenshot": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\full_acceptance_20260503\\ui_smoke\\vps_admin_desktop_updates.png"
+    },
+    {
+      "app": "vps_admin",
+      "viewport": "desktop",
+      "view": "security",
+      "ok": true,
+      "metrics": {
+        "innerWidth": 1366,
+        "pageWidth": 1366,
+        "pageOverflow": 0,
+        "offenders": [],
+        "bodyClass": "",
+        "title": "账号安全"
+      },
+      "page_errors": [],
+      "screenshot": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\full_acceptance_20260503\\ui_smoke\\vps_admin_desktop_security.png"
+    },
+    {
+      "app": "vps_admin",
+      "viewport": "desktop",
+      "view": "audit",
+      "ok": true,
+      "metrics": {
+        "innerWidth": 1366,
+        "pageWidth": 1366,
+        "pageOverflow": 0,
+        "offenders": [],
+        "bodyClass": "",
+        "title": "操作审计"
+      },
+      "page_errors": [],
+      "screenshot": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\full_acceptance_20260503\\ui_smoke\\vps_admin_desktop_audit.png"
+    },
+    {
+      "app": "vps_admin",
+      "viewport": "mobile",
+      "view": "overview",
+      "ok": true,
+      "metrics": {
+        "innerWidth": 390,
+        "pageWidth": 390,
+        "pageOverflow": 0,
+        "offenders": [],
+        "bodyClass": "",
+        "title": "运行总览"
+      },
+      "page_errors": [],
+      "screenshot": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\full_acceptance_20260503\\ui_smoke\\vps_admin_mobile_overview.png"
+    },
+    {
+      "app": "vps_admin",
+      "viewport": "mobile",
+      "view": "accounts",
+      "ok": true,
+      "metrics": {
+        "innerWidth": 390,
+        "pageWidth": 390,
+        "pageOverflow": 0,
+        "offenders": [],
+        "bodyClass": "",
+        "title": "客户与权限"
+      },
+      "page_errors": [],
+      "screenshot": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\full_acceptance_20260503\\ui_smoke\\vps_admin_mobile_accounts.png"
+    },
+    {
+      "app": "vps_admin",
+      "viewport": "mobile",
+      "view": "customerData",
+      "ok": true,
+      "metrics": {
+        "innerWidth": 390,
+        "pageWidth": 390,
+        "pageOverflow": 0,
+        "offenders": [],
+        "bodyClass": "",
+        "title": "客户数据"
+      },
+      "page_errors": [],
+      "screenshot": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\full_acceptance_20260503\\ui_smoke\\vps_admin_mobile_customerData.png"
+    },
+    {
+      "app": "vps_admin",
+      "viewport": "mobile",
+      "view": "sharedKnowledge",
+      "ok": true,
+      "metrics": {
+        "innerWidth": 390,
+        "pageWidth": 390,
+        "pageOverflow": 0,
+        "offenders": [],
+        "bodyClass": "",
+        "title": "共享公共知识"
+      },
+      "page_errors": [],
+      "screenshot": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\full_acceptance_20260503\\ui_smoke\\vps_admin_mobile_sharedKnowledge.png"
+    },
+    {
+      "app": "vps_admin",
+      "viewport": "mobile",
+      "view": "nodes",
+      "ok": true,
+      "metrics": {
+        "innerWidth": 390,
+        "pageWidth": 390,
+        "pageOverflow": 0,
+        "offenders": [],
+        "bodyClass": "",
+        "title": "客户电脑连接"
+      },
+      "page_errors": [],
+      "screenshot": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\full_acceptance_20260503\\ui_smoke\\vps_admin_mobile_nodes.png"
+    },
+    {
+      "app": "vps_admin",
+      "viewport": "mobile",
+      "view": "backupRestore",
+      "ok": true,
+      "metrics": {
+        "innerWidth": 390,
+        "pageWidth": 390,
+        "pageOverflow": 0,
+        "offenders": [],
+        "bodyClass": "",
+        "title": "备份与还原"
+      },
+      "page_errors": [],
+      "screenshot": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\full_acceptance_20260503\\ui_smoke\\vps_admin_mobile_backupRestore.png"
+    },
+    {
+      "app": "vps_admin",
+      "viewport": "mobile",
+      "view": "updates",
+      "ok": true,
+      "metrics": {
+        "innerWidth": 390,
+        "pageWidth": 390,
+        "pageOverflow": 0,
+        "offenders": [],
+        "bodyClass": "",
+        "title": "版本更新"
+      },
+      "page_errors": [],
+      "screenshot": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\full_acceptance_20260503\\ui_smoke\\vps_admin_mobile_updates.png"
+    },
+    {
+      "app": "vps_admin",
+      "viewport": "mobile",
+      "view": "security",
+      "ok": true,
+      "metrics": {
+        "innerWidth": 390,
+        "pageWidth": 390,
+        "pageOverflow": 0,
+        "offenders": [],
+        "bodyClass": "",
+        "title": "账号安全"
+      },
+      "page_errors": [],
+      "screenshot": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\full_acceptance_20260503\\ui_smoke\\vps_admin_mobile_security.png"
+    },
+    {
+      "app": "vps_admin",
+      "viewport": "mobile",
+      "view": "audit",
+      "ok": true,
+      "metrics": {
+        "innerWidth": 390,
+        "pageWidth": 390,
+        "pageOverflow": 0,
+        "offenders": [],
+        "bodyClass": "",
+        "title": "操作审计"
+      },
+      "page_errors": [],
+      "screenshot": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\full_acceptance_20260503\\ui_smoke\\vps_admin_mobile_audit.png"
+    }
+  ]
+}

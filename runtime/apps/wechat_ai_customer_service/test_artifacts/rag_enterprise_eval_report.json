@@ -1,0 +1,27 @@
+{
+  "ok": true,
+  "count": 5,
+  "failures": [],
+  "results": [
+    {
+      "name": "check_hybrid_semantic_recall",
+      "ok": true
+    },
+    {
+      "name": "check_product_filter_and_rerank",
+      "ok": true
+    },
+    {
+      "name": "check_risk_hit_retrieves_but_answer_layer_blocks",
+      "ok": true
+    },
+    {
+      "name": "check_experience_layer_active_and_discarded_retrieval",
+      "ok": true
+    },
+    {
+      "name": "check_operations_analytics_report",
+      "ok": true
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "scope": "wechat_ai_customer_service_shared",
+  "categories": [
+    {
+      "id": "global_guidelines",
+      "name": "Global Assistant Guidelines",
+      "kind": "global",
+      "path": "global_guidelines",
+      "enabled": true,
+      "participates_in_reply": true,
+      "participates_in_learning": false,
+      "participates_in_diagnostics": true,
+      "sort_order": 10
+    },
+    {
+      "id": "risk_control",
+      "name": "共享风险边界",
+      "kind": "global",
+      "path": "risk_control",
+      "enabled": true,
+      "participates_in_reply": true,
+      "participates_in_learning": false,
+      "participates_in_diagnostics": true,
+      "sort_order": 25
+    }
+  ],
+  "updated_at": "2026-05-05T21:44:55"
+}

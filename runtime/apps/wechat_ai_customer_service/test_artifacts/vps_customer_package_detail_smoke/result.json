@@ -1,0 +1,34 @@
+{
+  "ok": true,
+  "results": [
+    {
+      "drawerVisible": true,
+      "packageShell": true,
+      "noteVisible": true,
+      "metaVisible": true,
+      "metricCount": 6,
+      "maxMetricHeight": 60,
+      "drawerGap": "14px",
+      "pageOverflowX": false,
+      "noteTop": 1182,
+      "metricsBottom": 1168,
+      "viewport": "desktop",
+      "ok": true
+    },
+    {
+      "drawerVisible": true,
+      "packageShell": true,
+      "noteVisible": true,
+      "metaVisible": true,
+      "metricCount": 6,
+      "maxMetricHeight": 60,
+      "drawerGap": "14px",
+      "pageOverflowX": false,
+      "noteTop": 1677,
+      "metricsBottom": 1663,
+      "viewport": "mobile",
+      "ok": true
+    }
+  ],
+  "artifact": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\vps_customer_package_detail_smoke"
+}

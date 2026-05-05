@@ -1,0 +1,216 @@
+[
+  {
+    "session_id": "vps_6hBL0lZQWbYEAU0Oe-2vKQ1nMOD8LmRNSJ0f6Nxmh5s",
+    "user": {
+      "user_id": "customer_test01",
+      "role": "customer",
+      "tenant_ids": [
+        "default"
+      ],
+      "display_name": "测试客户 test01",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "default",
+    "issued_at": "2026-04-29T17:54:52+00:00",
+    "expires_at": "2026-04-30T05:54:52+00:00",
+    "source": "vps",
+    "token": "vps_6hBL0lZQWbYEAU0Oe-2vKQ1nMOD8LmRNSJ0f6Nxmh5s"
+  },
+  {
+    "session_id": "vps_WjT0obOCeuJXDzPSPIQ1sYqGin-in8wcY4H1zoFrteE",
+    "user": {
+      "user_id": "platform-admin",
+      "role": "admin",
+      "tenant_ids": [
+        "*"
+      ],
+      "display_name": "Platform Admin",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "default",
+    "issued_at": "2026-04-29T17:54:52+00:00",
+    "expires_at": "2026-04-30T05:54:52+00:00",
+    "source": "vps",
+    "token": "vps_WjT0obOCeuJXDzPSPIQ1sYqGin-in8wcY4H1zoFrteE"
+  },
+  {
+    "session_id": "vps_BhlegUJ54VwurW6VE6ZsUXnFNq_m5E0xjqw8s57RyPM",
+    "user": {
+      "user_id": "customer_test01",
+      "role": "customer",
+      "tenant_ids": [
+        "default"
+      ],
+      "display_name": "测试客户 test01",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "default",
+    "issued_at": "2026-04-29T17:58:03+00:00",
+    "expires_at": "2026-04-30T05:58:03+00:00",
+    "source": "vps",
+    "token": "vps_BhlegUJ54VwurW6VE6ZsUXnFNq_m5E0xjqw8s57RyPM"
+  },
+  {
+    "session_id": "vps_bggZ46FEyib4fMBo3ghZWigzMk7HAn77qsRW9kAWwFQ",
+    "user": {
+      "user_id": "platform-admin",
+      "role": "admin",
+      "tenant_ids": [
+        "*"
+      ],
+      "display_name": "Platform Admin",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "default",
+    "issued_at": "2026-04-29T17:58:03+00:00",
+    "expires_at": "2026-04-30T05:58:03+00:00",
+    "source": "vps",
+    "token": "vps_bggZ46FEyib4fMBo3ghZWigzMk7HAn77qsRW9kAWwFQ"
+  },
+  {
+    "session_id": "vps_q6ajRAD-U3pWcccpw9RlSxw2kGUmkxpIDUBzVM43Qso",
+    "user": {
+      "user_id": "customer_test01",
+      "role": "customer",
+      "tenant_ids": [
+        "default"
+      ],
+      "display_name": "测试客户 test01",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "default",
+    "issued_at": "2026-04-29T19:15:02+00:00",
+    "expires_at": "2026-04-30T07:15:02+00:00",
+    "source": "vps",
+    "token": "vps_q6ajRAD-U3pWcccpw9RlSxw2kGUmkxpIDUBzVM43Qso"
+  },
+  {
+    "session_id": "vps_g_IncrsOCFgAo3E7lSxTXN7hQFAAdH8OoDap9RP8Ea8",
+    "user": {
+      "user_id": "customer_test01",
+      "role": "customer",
+      "tenant_ids": [
+        "default"
+      ],
+      "display_name": "测试客户 test01",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "default",
+    "issued_at": "2026-04-29T19:15:20+00:00",
+    "expires_at": "2026-04-30T07:15:20+00:00",
+    "source": "vps",
+    "token": "vps_g_IncrsOCFgAo3E7lSxTXN7hQFAAdH8OoDap9RP8Ea8"
+  },
+  {
+    "session_id": "vps_jTbBs-YIFiUPdIymVIwUOnFNNOayjg6b6rGKX_jSP6E",
+    "user": {
+      "user_id": "customer_test01",
+      "role": "customer",
+      "tenant_ids": [
+        "default"
+      ],
+      "display_name": "测试客户 test01",
+      "username": "test01",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "default",
+    "issued_at": "2026-04-29T19:19:35+00:00",
+    "expires_at": "2026-04-30T07:19:35+00:00",
+    "source": "vps",
+    "token": "vps_jTbBs-YIFiUPdIymVIwUOnFNNOayjg6b6rGKX_jSP6E"
+  },
+  {
+    "session_id": "vps_BkTwxWpmXlBTuEqTVdBvTLydepdqd0WH8jsWuemtMeM",
+    "user": {
+      "user_id": "platform-admin",
+      "role": "admin",
+      "tenant_ids": [
+        "*"
+      ],
+      "display_name": "Platform Admin",
+      "username": "admin",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "default",
+    "issued_at": "2026-04-29T19:53:08+00:00",
+    "expires_at": "2026-04-30T07:53:08+00:00",
+    "source": "vps",
+    "token": "vps_BkTwxWpmXlBTuEqTVdBvTLydepdqd0WH8jsWuemtMeM"
+  },
+  {
+    "session_id": "vps_ajhvyrF9vckeNgdjbKyFOUz3R-0vpKkDtj1eLA5ptRY",
+    "user": {
+      "user_id": "platform-admin",
+      "role": "admin",
+      "tenant_ids": [
+        "*"
+      ],
+      "display_name": "Platform Admin",
+      "username": "admin",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "default",
+    "issued_at": "2026-04-29T19:54:19+00:00",
+    "expires_at": "2026-04-30T07:54:19+00:00",
+    "source": "vps",
+    "token": "vps_ajhvyrF9vckeNgdjbKyFOUz3R-0vpKkDtj1eLA5ptRY"
+  },
+  {
+    "session_id": "vps_p4GmSJy2A-NWnR-edePwGPUJf3CwnuOXAv5WaHi7nnE",
+    "user": {
+      "user_id": "platform-admin",
+      "role": "admin",
+      "tenant_ids": [
+        "*"
+      ],
+      "display_name": "Platform Admin",
+      "username": "admin",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "default",
+    "issued_at": "2026-04-29T20:30:02+00:00",
+    "expires_at": "2026-04-30T08:30:02+00:00",
+    "source": "vps",
+    "token": "vps_p4GmSJy2A-NWnR-edePwGPUJf3CwnuOXAv5WaHi7nnE"
+  },
+  {
+    "session_id": "vps_EPd8HGW9NgFwP1Tp1CvUEKhXYfbKl4v3qiVDmbJSkQw",
+    "user": {
+      "user_id": "platform-admin",
+      "role": "admin",
+      "tenant_ids": [
+        "*"
+      ],
+      "display_name": "Platform Admin",
+      "username": "admin",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "default",
+    "issued_at": "2026-04-30T14:26:52+00:00",
+    "expires_at": "2026-05-01T02:26:52+00:00",
+    "source": "vps",
+    "token": "vps_EPd8HGW9NgFwP1Tp1CvUEKhXYfbKl4v3qiVDmbJSkQw"
+  }
+]

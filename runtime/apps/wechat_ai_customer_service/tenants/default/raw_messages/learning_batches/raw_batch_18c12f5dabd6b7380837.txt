@@ -1,0 +1,13 @@
+[2026-05-01T06:13:49] self: [ToCodex] /stop
+[2026-05-01T06:13:49] self: [Codex] Stop requested. Bridge loop will exit after this reply.
+[2026-05-01T06:13:49] self: [ToCodex] /stop
+[2026-05-01T06:13:49] self: [Codex] 已就绪
+可用命令:
+[ToCodex] /status
+[ToCodex] /stop
+[ToCodex] /new <任务>
+[ToCodex] /list
+[ToCodex] /use <thread_id>
+[ToCodex] /help
+[ToCodex] <正常任务>
+monitor: http://127.0.0.1:17911/

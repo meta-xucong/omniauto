@@ -1,0 +1,15 @@
+[
+  {
+    "upload_id": "upload_f743db1b5defe514",
+    "filename": "product.txt",
+    "kind": "products",
+    "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\strict_flow_smoke\\raw_inbox\\products\\upload_f743db1b5defe514_product.txt",
+    "original_suffix": ".txt",
+    "stored_suffix": ".txt",
+    "normalized_from": "",
+    "sha256": "f743db1b5defe51438bcd1d36369950aaed3aff7ead911319faf6ecfe051c6be",
+    "size": 82,
+    "uploaded_at": "2026-05-04T18:11:50",
+    "learned": false
+  }
+]

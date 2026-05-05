@@ -1,0 +1,45 @@
+{
+  "title": "价格和优惠不能直接承诺",
+  "guideline_text": "涉及最低价、破例优惠、特殊折扣或超出公开规则的价格请求，AI客服不能直接承诺，应先记录需求并转人工确认。",
+  "keywords": [
+    "价格",
+    "优惠",
+    "折扣",
+    "人工确认"
+  ],
+  "applies_to": "所有行业都可能遇到的通用 AI 客服场景",
+  "schema_version": 1,
+  "id": "shared_1cc5b96184ae89ae92",
+  "item_id": "shared_1cc5b96184ae89ae92",
+  "category_id": "risk_control",
+  "status": "active",
+  "content": "涉及最低价、破例优惠、特殊折扣或超出公开规则的价格请求，AI客服不能直接承诺，应先记录需求并转人工确认。",
+  "data": {
+    "title": "价格和优惠不能直接承诺",
+    "guideline_text": "涉及最低价、破例优惠、特殊折扣或超出公开规则的价格请求，AI客服不能直接承诺，应先记录需求并转人工确认。",
+    "keywords": [
+      "价格",
+      "优惠",
+      "折扣",
+      "人工确认"
+    ],
+    "applies_to": "所有行业都可能遇到的通用 AI 客服场景",
+    "allow_auto_reply": false,
+    "requires_handoff": true
+  },
+  "runtime": {
+    "allow_auto_reply": false,
+    "requires_handoff": true,
+    "risk_level": "high"
+  },
+  "source": {
+    "type": "cloud_official_shared_library",
+    "item_id": "shared_1cc5b96184ae89ae92",
+    "version": ""
+  },
+  "metadata": {
+    "knowledge_layer": "shared",
+    "cloud_item_id": "shared_1cc5b96184ae89ae92",
+    "cloud_updated_at": "2026-05-02T20:07:58+00:00"
+  }
+}

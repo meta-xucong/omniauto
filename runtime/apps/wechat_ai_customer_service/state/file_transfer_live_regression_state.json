@@ -1,0 +1,1072 @@
+{
+  "version": 1,
+  "targets": {
+    "文件传输助手": {
+      "processed_message_ids": [
+        "ac557a2b1a9ef6043a0e781d2cb46211",
+        "634fb786c247aada5a9eeac5c4b96b82",
+        "e04d80f12c27894b2fe44e8d43253141",
+        "e8d43b246692a36fe8dfee31a21ae038",
+        "c9eff8a388b9dacfd7dc40926416aba4",
+        "ee0bfa79d59a07ee86beaad7cc97faf9",
+        "a766bc16af9bd5e0acd8d801f4410f89",
+        "a7efdb8d89931aecd998ffcd2d797c3b",
+        "81589d30bfed4d5bc053eda153eb8192",
+        "31254ff0085b565b25c03f7d30eea836",
+        "877609b2bfb4d0fae9d8917e89df7cd2",
+        "2f2d7569cc274670f84d286280f9766c",
+        "55cc06fad6bbe794a6ff09b5c536eee7",
+        "cb31ae333b44d3c07c9a5bdf212522fd",
+        "551e4dfa49abdbe1ae65c5bcdf55e963",
+        "150db1d857e74720d24eef03304a9004",
+        "dd0e4483126d620c73795501d7aa39a9",
+        "960cfc93ef9ba1ce26d42995c43547ae",
+        "d1ee80f998ec46c7920996bdd7a4803e",
+        "18b3764f2c38ff7266672eaec40fa18e",
+        "0290ea0388af73948e16c548b8f8d4a8",
+        "d3e612576af1219822398ae190ef6f28",
+        "00994ef072c18e245b576a67d671efa3",
+        "50492d458dc0426459d4409400230927"
+      ],
+      "handoff_message_ids": [
+        "31254ff0085b565b25c03f7d30eea836",
+        "150db1d857e74720d24eef03304a9004",
+        "dd0e4483126d620c73795501d7aa39a9",
+        "960cfc93ef9ba1ce26d42995c43547ae",
+        "d3e612576af1219822398ae190ef6f28",
+        "00994ef072c18e245b576a67d671efa3",
+        "50492d458dc0426459d4409400230927"
+      ],
+      "sent_replies": [
+        {
+          "message_ids": [
+            "e8d43b246692a36fe8dfee31a21ae038"
+          ],
+          "message_contents": [
+            "你好，在吗？\n[live-regression:20260503191931:1:1]"
+          ],
+          "reply_text": "[OmniAuto自测] 你好，我在的，请问有什么可以帮您？",
+          "processed_at": "2026-05-03T19:20:26"
+        },
+        {
+          "message_ids": [
+            "c9eff8a388b9dacfd7dc40926416aba4"
+          ],
+          "message_contents": [
+            "你们有哪些商品？\n[live-regression:20260503191931:2:1]"
+          ],
+          "reply_text": "[OmniAuto自测] 目前测试商品主要有：商用冰箱 BX-200（制冷设备）：999 元/台；人体工学办公椅 OC-301（办公家具）：399 元/把；净水器滤芯 标准款（净水耗材）：80 元/件；静音空气净化器 AP-88（空气净化设备）：1299.0 元/台。另外还有 4 类商品可选。您告诉我具体用途、数量和收货城市，我帮您推荐并核算报价。",
+          "processed_at": "2026-05-03T19:22:11"
+        },
+        {
+          "message_ids": [
+            "ee0bfa79d59a07ee86beaad7cc97faf9"
+          ],
+          "message_contents": [
+            "商用冰箱多少钱？\n[live-regression:20260503191931:3:1]"
+          ],
+          "reply_text": "[OmniAuto自测] 商用冰箱 BX-200 参考价 999 元/台，阶梯价 5台起，公开优惠规则：5台起 950 元/台，10台起 920 元/台。请发采购数量、联系人和收货城市，我帮您核算。",
+          "processed_at": "2026-05-03T19:24:05"
+        },
+        {
+          "message_ids": [
+            "a766bc16af9bd5e0acd8d801f4410f89"
+          ],
+          "message_contents": [
+            "6台商用冰箱发到上海多少钱？\n[live-regression:20260503191931:4:1]"
+          ],
+          "reply_text": "[OmniAuto自测] 商用冰箱 BX-200 按当前规则，6台 可按 950 元/台 核算，货款小计 5700 元。公开优惠规则：5台起 950 元/台，10台起 920 元/台。上海 按当前物流规则预计包邮，合计暂按货款小计计算。请再补充联系人姓名和电话。",
+          "processed_at": "2026-05-03T19:25:36"
+        },
+        {
+          "message_ids": [
+            "a7efdb8d89931aecd998ffcd2d797c3b"
+          ],
+          "message_contents": [
+            "再来10台发到杭州多少钱？\n[live-regression:20260503191931:5:1]"
+          ],
+          "reply_text": "[OmniAuto自测] 商用冰箱 BX-200 按当前规则，10台 可按 920 元/台 核算，货款小计 9200 元。公开优惠规则：5台起 950 元/台，10台起 920 元/台。杭州 按当前物流规则预计包邮，合计暂按货款小计计算。请再补充联系人姓名和电话。",
+          "processed_at": "2026-05-03T19:27:20"
+        },
+        {
+          "message_ids": [
+            "81589d30bfed4d5bc053eda153eb8192"
+          ],
+          "message_contents": [
+            "买10台商用冰箱有优惠吗？\n[live-regression:20260503191931:6:1]"
+          ],
+          "reply_text": "[OmniAuto自测] 商用冰箱 BX-200 按当前规则，10台 可按 920 元/台 核算，预估小计 9200 元。公开优惠规则：5台起 950 元/台，10台起 920 元/台。",
+          "processed_at": "2026-05-03T19:29:06"
+        },
+        {
+          "message_ids": [
+            "31254ff0085b565b25c03f7d30eea836"
+          ],
+          "message_contents": [
+            "买7台商用冰箱能按10台价格吗？\n[live-regression:20260503191931:7:1]"
+          ],
+          "reply_text": "[OmniAuto自测] 这个问题我当前无法直接确认，我先帮您记录并请示上级，稍后给您准确回复。",
+          "processed_at": "2026-05-03T19:30:19"
+        },
+        {
+          "message_ids": [
+            "877609b2bfb4d0fae9d8917e89df7cd2"
+          ],
+          "message_contents": [
+            "你们公司信息和地址发我一下\n[live-regression:20260503191931:8:1]"
+          ],
+          "reply_text": "[OmniAuto自测] 我们测试公司为杭州星澜供应链科技有限公司，主营商用设备、办公用品、净水耗材和包装耗材批发。地址：浙江省杭州市余杭区未来科技城星澜路 88 号 3 幢 502 室；服务时间：周一至周六 09:00-18:30；客服电话：0571-8800-1234。",
+          "processed_at": "2026-05-03T19:31:32"
+        },
+        {
+          "message_ids": [
+            "2f2d7569cc274670f84d286280f9766c"
+          ],
+          "message_contents": [
+            "可以开专票吗？发票资料需要哪些？\n[live-regression:20260503191931:9:1]"
+          ],
+          "reply_text": "[OmniAuto自测] 可以开普通发票或增值税专用发票。请提供公司抬头、税号、开票类型、邮箱和收票手机号；付款完成后通常 1-3 个工作日内开具电子发票。红冲或重开需要转人工处理。",
+          "processed_at": "2026-05-03T19:33:03"
+        },
+        {
+          "message_ids": [
+            "55cc06fad6bbe794a6ff09b5c536eee7"
+          ],
+          "message_contents": [
+            "对公账户和银行账号发我一下\n[live-regression:20260503191931:10:1]"
+          ],
+          "reply_text": "[OmniAuto自测] 测试对公账户：杭州星澜供应链科技有限公司 / 招商银行杭州未来科技城支行 / 5719000012345678。正式付款前请以人工确认的合同或订单信息为准。",
+          "processed_at": "2026-05-03T19:34:31"
+        },
+        {
+          "message_ids": [
+            "cb31ae333b44d3c07c9a5bdf212522fd"
+          ],
+          "message_contents": [
+            "商用冰箱发货多久，能送货上楼吗？\n[live-regression:20260503191931:11:1]"
+          ],
+          "reply_text": "[OmniAuto自测] 商用冰箱 BX-200 发货/物流信息：现货，付款后 48 小时内发出\n江浙沪包邮，其他地区按物流实报实销；大件默认物流到站，送货上楼需另行确认。",
+          "processed_at": "2026-05-03T19:36:05"
+        },
+        {
+          "message_ids": [
+            "551e4dfa49abdbe1ae65c5bcdf55e963"
+          ],
+          "message_contents": [
+            "商用冰箱保修多久？坏了怎么办？\n[live-regression:20260503191931:12:1]"
+          ],
+          "reply_text": "[OmniAuto自测] 商用冰箱 BX-200 售后政策：整机保修 1 年，压缩机保修 3 年。如需售后登记，请发订单信息和问题照片。",
+          "processed_at": "2026-05-03T19:39:05"
+        },
+        {
+          "message_ids": [
+            "150db1d857e74720d24eef03304a9004"
+          ],
+          "message_contents": [
+            "收到破损能不能赔偿或者退款？\n[live-regression:20260503191931:13:1]"
+          ],
+          "reply_text": "[OmniAuto自测] 这个问题我当前无法直接确认，我先帮您记录并请示上级，稍后给您准确回复。",
+          "processed_at": "2026-05-03T19:42:08"
+        },
+        {
+          "message_ids": [
+            "dd0e4483126d620c73795501d7aa39a9"
+          ],
+          "message_contents": [
+            "商用冰箱能安排上门安装调试吗？\n[live-regression:20260503191931:14:1]"
+          ],
+          "reply_text": "[OmniAuto自测] 这个问题我当前无法直接确认，我先帮您记录并请示上级，稍后给您准确回复。",
+          "processed_at": "2026-05-03T19:44:47"
+        },
+        {
+          "message_ids": [
+            "960cfc93ef9ba1ce26d42995c43547ae"
+          ],
+          "message_contents": [
+            "可以签采购合同盖章并走月结吗？\n[live-regression:20260503191931:15:1]"
+          ],
+          "reply_text": "[OmniAuto自测] 这个问题我当前无法直接确认，我先帮您记录并请示上级，稍后给您准确回复。",
+          "processed_at": "2026-05-03T19:46:06"
+        },
+        {
+          "message_ids": [
+            "d1ee80f998ec46c7920996bdd7a4803e"
+          ],
+          "message_contents": [
+            "客户资料\n姓名：王测试\n电话：13800001111\n地址：上海市徐汇区测试路1号\n产品：商用冰箱\n数量：2台\n[live-regression:20260503191931:16:1]"
+          ],
+          "reply_text": "[OmniAuto自测] 客户资料已记录，我会尽快为您继续处理。",
+          "processed_at": "2026-05-03T19:47:18"
+        },
+        {
+          "message_ids": [
+            "18b3764f2c38ff7266672eaec40fa18e"
+          ],
+          "message_contents": [
+            "客户资料\n电话：13900002222\n地址：杭州市余杭区测试路2号\n产品：净水器滤芯\n数量：100件\n[live-regression:20260503191931:17:1]"
+          ],
+          "reply_text": "[OmniAuto自测] 我看到了客户资料，但还缺少：姓名。请补充后我再记录。",
+          "processed_at": "2026-05-03T19:48:41"
+        },
+        {
+          "message_ids": [
+            "0290ea0388af73948e16c548b8f8d4a8"
+          ],
+          "message_contents": [
+            "联系人：李补全\n[live-regression:20260503191931:18:1]"
+          ],
+          "reply_text": "[OmniAuto自测] 客户资料已记录，我会尽快为您继续处理。",
+          "processed_at": "2026-05-03T19:50:03"
+        },
+        {
+          "message_ids": [
+            "d3e612576af1219822398ae190ef6f28"
+          ],
+          "message_contents": [
+            "你们老板喜欢什么颜色的包装？\n[live-regression:20260503191931:19:1]"
+          ],
+          "reply_text": "[OmniAuto自测] 这个问题我当前无法直接确认，我先帮您记录并请示上级，稍后给您准确回复。",
+          "processed_at": "2026-05-03T19:52:48"
+        },
+        {
+          "message_ids": [
+            "00994ef072c18e245b576a67d671efa3",
+            "50492d458dc0426459d4409400230927"
+          ],
+          "message_contents": [
+            "买7台商用冰箱能按10台价格吗？\n[live-regression:20260503191931:20:1]",
+            "客户资料\n姓名：周批次\n电话：13700003333\n地址：广州市天河区测试路3号\n产品：商用冰箱\n数量：7台\n[live-regression:20260503191931:20:2]"
+          ],
+          "reply_text": "[OmniAuto自测] 这个问题我当前无法直接确认，我先帮您记录并请示上级，稍后给您准确回复。",
+          "processed_at": "2026-05-03T19:55:12"
+        }
+      ],
+      "reply_timestamps": [
+        "2026-05-03T19:19:52",
+        "2026-05-03T19:20:26",
+        "2026-05-03T19:20:39",
+        "2026-05-03T19:22:11",
+        "2026-05-03T19:22:24",
+        "2026-05-03T19:24:05",
+        "2026-05-03T19:24:17",
+        "2026-05-03T19:25:36",
+        "2026-05-03T19:25:58",
+        "2026-05-03T19:27:20",
+        "2026-05-03T19:27:32",
+        "2026-05-03T19:29:06",
+        "2026-05-03T19:29:18",
+        "2026-05-03T19:30:19",
+        "2026-05-03T19:30:31",
+        "2026-05-03T19:31:32",
+        "2026-05-03T19:31:53",
+        "2026-05-03T19:33:03",
+        "2026-05-03T19:33:15",
+        "2026-05-03T19:34:31",
+        "2026-05-03T19:34:43",
+        "2026-05-03T19:36:05",
+        "2026-05-03T19:36:18",
+        "2026-05-03T19:39:05",
+        "2026-05-03T19:39:27",
+        "2026-05-03T19:42:08",
+        "2026-05-03T19:42:20",
+        "2026-05-03T19:44:47",
+        "2026-05-03T19:45:00",
+        "2026-05-03T19:46:06",
+        "2026-05-03T19:46:19",
+        "2026-05-03T19:47:18",
+        "2026-05-03T19:47:39",
+        "2026-05-03T19:48:41",
+        "2026-05-03T19:48:53",
+        "2026-05-03T19:50:03",
+        "2026-05-03T19:50:16",
+        "2026-05-03T19:52:48",
+        "2026-05-03T19:53:01",
+        "2026-05-03T19:53:14",
+        "2026-05-03T19:55:12"
+      ],
+      "bootstrap_events": [
+        {
+          "message_ids": [
+            "ac557a2b1a9ef6043a0e781d2cb46211",
+            "634fb786c247aada5a9eeac5c4b96b82",
+            "e04d80f12c27894b2fe44e8d43253141"
+          ],
+          "created_at": "2026-05-03T19:19:39"
+        },
+        {
+          "message_ids": [],
+          "created_at": "2026-05-03T19:25:46"
+        },
+        {
+          "message_ids": [],
+          "created_at": "2026-05-03T19:31:41"
+        },
+        {
+          "message_ids": [],
+          "created_at": "2026-05-03T19:39:14"
+        },
+        {
+          "message_ids": [],
+          "created_at": "2026-05-03T19:47:26"
+        }
+      ],
+      "outbound_sends": [
+        {
+          "text": "你好，在吗？\n[live-regression:20260503191931:1:1]",
+          "reason": "live_regression:1:greeting:1",
+          "sent_at": "2026-05-03T19:19:52",
+          "verified": true
+        },
+        {
+          "text": "你们有哪些商品？\n[live-regression:20260503191931:2:1]",
+          "reason": "live_regression:2:catalog:1",
+          "sent_at": "2026-05-03T19:20:39",
+          "verified": true
+        },
+        {
+          "text": "商用冰箱多少钱？\n[live-regression:20260503191931:3:1]",
+          "reason": "live_regression:3:product_quote_no_quantity:1",
+          "sent_at": "2026-05-03T19:22:24",
+          "verified": true
+        },
+        {
+          "text": "6台商用冰箱发到上海多少钱？\n[live-regression:20260503191931:4:1]",
+          "reason": "live_regression:4:quantity_quote_with_shipping_city:1",
+          "sent_at": "2026-05-03T19:24:17",
+          "verified": true
+        },
+        {
+          "text": "再来10台发到杭州多少钱？\n[live-regression:20260503191931:5:1]",
+          "reason": "live_regression:5:contextual_quote_without_product_name:1",
+          "sent_at": "2026-05-03T19:25:58",
+          "verified": true
+        },
+        {
+          "text": "买10台商用冰箱有优惠吗？\n[live-regression:20260503191931:6:1]",
+          "reason": "live_regression:6:public_discount_allowed:1",
+          "sent_at": "2026-05-03T19:27:32",
+          "verified": true
+        },
+        {
+          "text": "买7台商用冰箱能按10台价格吗？\n[live-regression:20260503191931:7:1]",
+          "reason": "live_regression:7:below_tier_discount_handoff:1",
+          "sent_at": "2026-05-03T19:29:18",
+          "verified": true
+        },
+        {
+          "text": "你们公司信息和地址发我一下\n[live-regression:20260503191931:8:1]",
+          "reason": "live_regression:8:company_profile:1",
+          "sent_at": "2026-05-03T19:30:31",
+          "verified": true
+        },
+        {
+          "text": "可以开专票吗？发票资料需要哪些？\n[live-regression:20260503191931:9:1]",
+          "reason": "live_regression:9:invoice_policy:1",
+          "sent_at": "2026-05-03T19:31:53",
+          "verified": true
+        },
+        {
+          "text": "对公账户和银行账号发我一下\n[live-regression:20260503191931:10:1]",
+          "reason": "live_regression:10:payment_and_bank_account:1",
+          "sent_at": "2026-05-03T19:33:15",
+          "verified": true
+        },
+        {
+          "text": "商用冰箱发货多久，能送货上楼吗？\n[live-regression:20260503191931:11:1]",
+          "reason": "live_regression:11:logistics_policy:1",
+          "sent_at": "2026-05-03T19:34:43",
+          "verified": true
+        },
+        {
+          "text": "商用冰箱保修多久？坏了怎么办？\n[live-regression:20260503191931:12:1]",
+          "reason": "live_regression:12:warranty_policy:1",
+          "sent_at": "2026-05-03T19:36:18",
+          "verified": true
+        },
+        {
+          "text": "收到破损能不能赔偿或者退款？\n[live-regression:20260503191931:13:1]",
+          "reason": "live_regression:13:after_sales_sensitive_handoff:1",
+          "sent_at": "2026-05-03T19:39:27",
+          "verified": true
+        },
+        {
+          "text": "商用冰箱能安排上门安装调试吗？\n[live-regression:20260503191931:14:1]",
+          "reason": "live_regression:14:installation_handoff:1",
+          "sent_at": "2026-05-03T19:42:20",
+          "verified": true
+        },
+        {
+          "text": "可以签采购合同盖章并走月结吗？\n[live-regression:20260503191931:15:1]",
+          "reason": "live_regression:15:contract_credit_handoff:1",
+          "sent_at": "2026-05-03T19:45:00",
+          "verified": true
+        },
+        {
+          "text": "客户资料\n姓名：王测试\n电话：13800001111\n地址：上海市徐汇区测试路1号\n产品：商用冰箱\n数量：2台\n[live-regression:20260503191931:16:1]",
+          "reason": "live_regression:16:complete_customer_data:1",
+          "sent_at": "2026-05-03T19:46:19",
+          "verified": true
+        },
+        {
+          "text": "客户资料\n电话：13900002222\n地址：杭州市余杭区测试路2号\n产品：净水器滤芯\n数量：100件\n[live-regression:20260503191931:17:1]",
+          "reason": "live_regression:17:customer_data_missing_name:1",
+          "sent_at": "2026-05-03T19:47:39",
+          "verified": true
+        },
+        {
+          "text": "联系人：李补全\n[live-regression:20260503191931:18:1]",
+          "reason": "live_regression:18:customer_data_pending_completion:1",
+          "sent_at": "2026-05-03T19:48:53",
+          "verified": true
+        },
+        {
+          "text": "你们老板喜欢什么颜色的包装？\n[live-regression:20260503191931:19:1]",
+          "reason": "live_regression:19:unknown_business_question_handoff:1",
+          "sent_at": "2026-05-03T19:50:16",
+          "verified": true
+        },
+        {
+          "text": "买7台商用冰箱能按10台价格吗？\n[live-regression:20260503191931:20:1]",
+          "reason": "live_regression:20:mixed_discount_and_customer_data_handoff:1",
+          "sent_at": "2026-05-03T19:53:01",
+          "verified": true
+        },
+        {
+          "text": "客户资料\n姓名：周批次\n电话：13700003333\n地址：广州市天河区测试路3号\n产品：商用冰箱\n数量：7台\n[live-regression:20260503191931:20:2]",
+          "reason": "live_regression:20:mixed_discount_and_customer_data_handoff:2",
+          "sent_at": "2026-05-03T19:53:14",
+          "verified": true
+        }
+      ],
+      "conversation_context": {
+        "last_product_id": "commercial_fridge_bx_200",
+        "last_product_name": "商用冰箱 BX-200",
+        "last_product_unit": "台",
+        "last_unit_price": 999.0,
+        "updated_at": "2026-05-03T19:36:51",
+        "last_quantity": 7.0,
+        "last_shipping_city": "货",
+        "last_total": 6650.0
+      },
+      "operator_alerts": [
+        {
+          "created_at": "2026-05-03T19:30:19",
+          "target": "文件传输助手",
+          "message_ids": [
+            "31254ff0085b565b25c03f7d30eea836"
+          ],
+          "message_contents": [
+            "买7台商用冰箱能按10台价格吗？\n[live-regression:20260503191931:7:1]"
+          ],
+          "combined_content": "买7台商用冰箱能按10台价格吗？\n[live-regression:20260503191931:7:1]",
+          "reason": "evidence_safety:requested_price_below_public_tier",
+          "reply_text": "[OmniAuto自测] 这个问题我当前无法直接确认，我先帮您记录并请示上级，稍后给您准确回复。",
+          "product_knowledge": {
+            "enabled": true,
+            "matched": true,
+            "match_type": "product",
+            "intent": "discount",
+            "product_id": "commercial_fridge_bx_200",
+            "product_name": "商用冰箱 BX-200",
+            "product_unit": "台",
+            "context_used": false,
+            "quantity": 7.0,
+            "unit_price": 950.0,
+            "total": 6650.0,
+            "shipping_city": "",
+            "reply_text": "商用冰箱 BX-200 当前可执行的公开阶梯价是：5台起 950 元/台，10台起 920 元/台。您提到的价格/优惠超出了我能直接确认的范围，我先帮您记录并请示上级，稍后给您准确回复。",
+            "needs_handoff": true,
+            "operator_alert": true,
+            "approval_reason": "requested_discount_tier_not_met",
+            "reason": "approval_required",
+            "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\compiled\\structured_compat\\product_knowledge.example.json"
+          },
+          "status": "open",
+          "delivery": {
+            "type": "jsonl",
+            "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\logs\\file_transfer_live_regression_operator_alerts.jsonl",
+            "ok": true
+          },
+          "case_store": {
+            "enabled": true,
+            "ok": true,
+            "case_id": "handoff_e5b720d2a0b694736572",
+            "status": "open"
+          }
+        },
+        {
+          "created_at": "2026-05-03T19:42:08",
+          "target": "文件传输助手",
+          "message_ids": [
+            "150db1d857e74720d24eef03304a9004"
+          ],
+          "message_contents": [
+            "收到破损能不能赔偿或者退款？\n[live-regression:20260503191931:13:1]"
+          ],
+          "combined_content": "收到破损能不能赔偿或者退款？\n[live-regression:20260503191931:13:1]",
+          "reason": "evidence_safety:handoff_intent_detected,matched_faq_requires_handoff,sensitive_or_manual_request,赔偿金额不能自动承诺，需人工确认",
+          "reply_text": "[OmniAuto自测] 这个问题我当前无法直接确认，我先帮您记录并请示上级，稍后给您准确回复。",
+          "product_knowledge": {
+            "enabled": true,
+            "matched": true,
+            "match_type": "faq",
+            "intent": "manual_required",
+            "faq_keywords": [
+              "投诉",
+              "赔偿",
+              "退款",
+              "举报",
+              "法务",
+              "律师",
+              "我要人工",
+              "转人工",
+              "免单",
+              "白送",
+              "先发货月底结",
+              "月底结",
+              "虚开发票",
+              "伪造发票",
+              "假发票",
+              "不开票走账"
+            ],
+            "reply_text": "我已收到，这类问题需要人工继续处理。我先帮您记录并提醒同事接管，稍后给您回复。",
+            "needs_handoff": true,
+            "auto_reply_allowed": false,
+            "operator_alert": true,
+            "reason": "sensitive_or_manual_request",
+            "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\compiled\\structured_compat\\product_knowledge.example.json"
+          },
+          "status": "open",
+          "delivery": {
+            "type": "jsonl",
+            "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\logs\\file_transfer_live_regression_operator_alerts.jsonl",
+            "ok": true
+          },
+          "case_store": {
+            "enabled": true,
+            "ok": true,
+            "case_id": "handoff_e73e4ed1c72193576399",
+            "status": "open"
+          }
+        },
+        {
+          "created_at": "2026-05-03T19:44:47",
+          "target": "文件传输助手",
+          "message_ids": [
+            "dd0e4483126d620c73795501d7aa39a9"
+          ],
+          "message_contents": [
+            "商用冰箱能安排上门安装调试吗？\n[live-regression:20260503191931:14:1]"
+          ],
+          "combined_content": "商用冰箱能安排上门安装调试吗？\n[live-regression:20260503191931:14:1]",
+          "reason": "evidence_safety:handoff_intent_detected,matched_faq_requires_handoff,installation_requires_manual_confirmation",
+          "reply_text": "[OmniAuto自测] 这个问题我当前无法直接确认，我先帮您记录并请示上级，稍后给您准确回复。",
+          "product_knowledge": {
+            "enabled": true,
+            "matched": true,
+            "match_type": "faq",
+            "intent": "installation",
+            "faq_keywords": [
+              "安装",
+              "上门安装",
+              "调试",
+              "师傅"
+            ],
+            "reply_text": "安装和上门调试要看产品、城市和现场条件，我当前不能直接承诺。我先帮您记录需求并请同事确认。",
+            "needs_handoff": true,
+            "auto_reply_allowed": false,
+            "operator_alert": true,
+            "reason": "installation_requires_manual_confirmation",
+            "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\compiled\\structured_compat\\product_knowledge.example.json"
+          },
+          "status": "open",
+          "delivery": {
+            "type": "jsonl",
+            "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\logs\\file_transfer_live_regression_operator_alerts.jsonl",
+            "ok": true
+          },
+          "case_store": {
+            "enabled": true,
+            "ok": true,
+            "case_id": "handoff_d5fe771e948809df72c8",
+            "status": "open"
+          }
+        },
+        {
+          "created_at": "2026-05-03T19:46:06",
+          "target": "文件传输助手",
+          "message_ids": [
+            "960cfc93ef9ba1ce26d42995c43547ae"
+          ],
+          "message_contents": [
+            "可以签采购合同盖章并走月结吗？\n[live-regression:20260503191931:15:1]"
+          ],
+          "combined_content": "可以签采购合同盖章并走月结吗？\n[live-regression:20260503191931:15:1]",
+          "reason": "evidence_safety:handoff_intent_detected,matched_faq_requires_handoff,contract_or_credit_requires_manual_review,需要人工发送合同模板,需要人工审核账期条件",
+          "reply_text": "[OmniAuto自测] 这个问题我当前无法直接确认，我先帮您记录并请示上级，稍后给您准确回复。",
+          "product_knowledge": {
+            "enabled": true,
+            "matched": true,
+            "match_type": "faq",
+            "intent": "contract",
+            "faq_keywords": [
+              "合同",
+              "采购合同",
+              "盖章",
+              "协议",
+              "月结",
+              "账期",
+              "赊账"
+            ],
+            "reply_text": "采购合同、盖章文件、月结、账期和赊销都需要人工审核。我先帮您记录需求并转给同事确认。",
+            "needs_handoff": true,
+            "auto_reply_allowed": false,
+            "operator_alert": true,
+            "reason": "contract_or_credit_requires_manual_review",
+            "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\compiled\\structured_compat\\product_knowledge.example.json"
+          },
+          "status": "open",
+          "delivery": {
+            "type": "jsonl",
+            "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\logs\\file_transfer_live_regression_operator_alerts.jsonl",
+            "ok": true
+          },
+          "case_store": {
+            "enabled": true,
+            "ok": true,
+            "case_id": "handoff_af7c74ee3d83b59c39a0",
+            "status": "open"
+          }
+        },
+        {
+          "created_at": "2026-05-03T19:52:48",
+          "target": "文件传输助手",
+          "message_ids": [
+            "d3e612576af1219822398ae190ef6f28"
+          ],
+          "message_contents": [
+            "你们老板喜欢什么颜色的包装？\n[live-regression:20260503191931:19:1]"
+          ],
+          "combined_content": "你们老板喜欢什么颜色的包装？\n[live-regression:20260503191931:19:1]",
+          "reason": "evidence_safety:no_relevant_business_evidence",
+          "reply_text": "[OmniAuto自测] 这个问题我当前无法直接确认，我先帮您记录并请示上级，稍后给您准确回复。",
+          "product_knowledge": {
+            "enabled": true,
+            "matched": false,
+            "intent": "product_info",
+            "reason": "no_product_or_faq_match",
+            "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\compiled\\structured_compat\\product_knowledge.example.json"
+          },
+          "status": "open",
+          "delivery": {
+            "type": "jsonl",
+            "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\logs\\file_transfer_live_regression_operator_alerts.jsonl",
+            "ok": true
+          },
+          "case_store": {
+            "enabled": true,
+            "ok": true,
+            "case_id": "handoff_a30b60342f774c94f543",
+            "status": "open"
+          }
+        },
+        {
+          "created_at": "2026-05-03T19:55:12",
+          "target": "文件传输助手",
+          "message_ids": [
+            "00994ef072c18e245b576a67d671efa3",
+            "50492d458dc0426459d4409400230927"
+          ],
+          "message_contents": [
+            "买7台商用冰箱能按10台价格吗？\n[live-regression:20260503191931:20:1]",
+            "客户资料\n姓名：周批次\n电话：13700003333\n地址：广州市天河区测试路3号\n产品：商用冰箱\n数量：7台\n[live-regression:20260503191931:20:2]"
+          ],
+          "combined_content": "买7台商用冰箱能按10台价格吗？\n[live-regression:20260503191931:20:1]\n客户资料\n姓名：周批次\n电话：13700003333\n地址：广州市天河区测试路3号\n产品：商用冰箱\n数量：7台\n[live-regression:20260503191931:20:2]",
+          "reason": "evidence_safety:requested_price_below_public_tier",
+          "reply_text": "[OmniAuto自测] 这个问题我当前无法直接确认，我先帮您记录并请示上级，稍后给您准确回复。",
+          "product_knowledge": {
+            "enabled": true,
+            "matched": false,
+            "reason": "skipped_for_customer_data"
+          },
+          "status": "open",
+          "delivery": {
+            "type": "jsonl",
+            "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\logs\\file_transfer_live_regression_operator_alerts.jsonl",
+            "ok": true
+          },
+          "case_store": {
+            "enabled": true,
+            "ok": true,
+            "case_id": "handoff_7d3e4bb87de58f6823ba",
+            "status": "open"
+          }
+        }
+      ],
+      "handoff_events": [
+        {
+          "message_ids": [
+            "31254ff0085b565b25c03f7d30eea836"
+          ],
+          "message_contents": [
+            "买7台商用冰箱能按10台价格吗？\n[live-regression:20260503191931:7:1]"
+          ],
+          "reason": "evidence_safety:requested_price_below_public_tier",
+          "status": "open",
+          "created_at": "2026-05-03T19:30:19",
+          "operator_alert": {
+            "created_at": "2026-05-03T19:30:19",
+            "target": "文件传输助手",
+            "message_ids": [
+              "31254ff0085b565b25c03f7d30eea836"
+            ],
+            "message_contents": [
+              "买7台商用冰箱能按10台价格吗？\n[live-regression:20260503191931:7:1]"
+            ],
+            "combined_content": "买7台商用冰箱能按10台价格吗？\n[live-regression:20260503191931:7:1]",
+            "reason": "evidence_safety:requested_price_below_public_tier",
+            "reply_text": "[OmniAuto自测] 这个问题我当前无法直接确认，我先帮您记录并请示上级，稍后给您准确回复。",
+            "product_knowledge": {
+              "enabled": true,
+              "matched": true,
+              "match_type": "product",
+              "intent": "discount",
+              "product_id": "commercial_fridge_bx_200",
+              "product_name": "商用冰箱 BX-200",
+              "product_unit": "台",
+              "context_used": false,
+              "quantity": 7.0,
+              "unit_price": 950.0,
+              "total": 6650.0,
+              "shipping_city": "",
+              "reply_text": "商用冰箱 BX-200 当前可执行的公开阶梯价是：5台起 950 元/台，10台起 920 元/台。您提到的价格/优惠超出了我能直接确认的范围，我先帮您记录并请示上级，稍后给您准确回复。",
+              "needs_handoff": true,
+              "operator_alert": true,
+              "approval_reason": "requested_discount_tier_not_met",
+              "reason": "approval_required",
+              "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\compiled\\structured_compat\\product_knowledge.example.json"
+            },
+            "status": "open",
+            "delivery": {
+              "type": "jsonl",
+              "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\logs\\file_transfer_live_regression_operator_alerts.jsonl",
+              "ok": true
+            },
+            "case_store": {
+              "enabled": true,
+              "ok": true,
+              "case_id": "handoff_e5b720d2a0b694736572",
+              "status": "open"
+            }
+          }
+        },
+        {
+          "message_ids": [
+            "150db1d857e74720d24eef03304a9004"
+          ],
+          "message_contents": [
+            "收到破损能不能赔偿或者退款？\n[live-regression:20260503191931:13:1]"
+          ],
+          "reason": "evidence_safety:handoff_intent_detected,matched_faq_requires_handoff,sensitive_or_manual_request,赔偿金额不能自动承诺，需人工确认",
+          "status": "open",
+          "created_at": "2026-05-03T19:42:08",
+          "operator_alert": {
+            "created_at": "2026-05-03T19:42:08",
+            "target": "文件传输助手",
+            "message_ids": [
+              "150db1d857e74720d24eef03304a9004"
+            ],
+            "message_contents": [
+              "收到破损能不能赔偿或者退款？\n[live-regression:20260503191931:13:1]"
+            ],
+            "combined_content": "收到破损能不能赔偿或者退款？\n[live-regression:20260503191931:13:1]",
+            "reason": "evidence_safety:handoff_intent_detected,matched_faq_requires_handoff,sensitive_or_manual_request,赔偿金额不能自动承诺，需人工确认",
+            "reply_text": "[OmniAuto自测] 这个问题我当前无法直接确认，我先帮您记录并请示上级，稍后给您准确回复。",
+            "product_knowledge": {
+              "enabled": true,
+              "matched": true,
+              "match_type": "faq",
+              "intent": "manual_required",
+              "faq_keywords": [
+                "投诉",
+                "赔偿",
+                "退款",
+                "举报",
+                "法务",
+                "律师",
+                "我要人工",
+                "转人工",
+                "免单",
+                "白送",
+                "先发货月底结",
+                "月底结",
+                "虚开发票",
+                "伪造发票",
+                "假发票",
+                "不开票走账"
+              ],
+              "reply_text": "我已收到，这类问题需要人工继续处理。我先帮您记录并提醒同事接管，稍后给您回复。",
+              "needs_handoff": true,
+              "auto_reply_allowed": false,
+              "operator_alert": true,
+              "reason": "sensitive_or_manual_request",
+              "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\compiled\\structured_compat\\product_knowledge.example.json"
+            },
+            "status": "open",
+            "delivery": {
+              "type": "jsonl",
+              "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\logs\\file_transfer_live_regression_operator_alerts.jsonl",
+              "ok": true
+            },
+            "case_store": {
+              "enabled": true,
+              "ok": true,
+              "case_id": "handoff_e73e4ed1c72193576399",
+              "status": "open"
+            }
+          }
+        },
+        {
+          "message_ids": [
+            "dd0e4483126d620c73795501d7aa39a9"
+          ],
+          "message_contents": [
+            "商用冰箱能安排上门安装调试吗？\n[live-regression:20260503191931:14:1]"
+          ],
+          "reason": "evidence_safety:handoff_intent_detected,matched_faq_requires_handoff,installation_requires_manual_confirmation",
+          "status": "open",
+          "created_at": "2026-05-03T19:44:47",
+          "operator_alert": {
+            "created_at": "2026-05-03T19:44:47",
+            "target": "文件传输助手",
+            "message_ids": [
+              "dd0e4483126d620c73795501d7aa39a9"
+            ],
+            "message_contents": [
+              "商用冰箱能安排上门安装调试吗？\n[live-regression:20260503191931:14:1]"
+            ],
+            "combined_content": "商用冰箱能安排上门安装调试吗？\n[live-regression:20260503191931:14:1]",
+            "reason": "evidence_safety:handoff_intent_detected,matched_faq_requires_handoff,installation_requires_manual_confirmation",
+            "reply_text": "[OmniAuto自测] 这个问题我当前无法直接确认，我先帮您记录并请示上级，稍后给您准确回复。",
+            "product_knowledge": {
+              "enabled": true,
+              "matched": true,
+              "match_type": "faq",
+              "intent": "installation",
+              "faq_keywords": [
+                "安装",
+                "上门安装",
+                "调试",
+                "师傅"
+              ],
+              "reply_text": "安装和上门调试要看产品、城市和现场条件，我当前不能直接承诺。我先帮您记录需求并请同事确认。",
+              "needs_handoff": true,
+              "auto_reply_allowed": false,
+              "operator_alert": true,
+              "reason": "installation_requires_manual_confirmation",
+              "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\compiled\\structured_compat\\product_knowledge.example.json"
+            },
+            "status": "open",
+            "delivery": {
+              "type": "jsonl",
+              "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\logs\\file_transfer_live_regression_operator_alerts.jsonl",
+              "ok": true
+            },
+            "case_store": {
+              "enabled": true,
+              "ok": true,
+              "case_id": "handoff_d5fe771e948809df72c8",
+              "status": "open"
+            }
+          }
+        },
+        {
+          "message_ids": [
+            "960cfc93ef9ba1ce26d42995c43547ae"
+          ],
+          "message_contents": [
+            "可以签采购合同盖章并走月结吗？\n[live-regression:20260503191931:15:1]"
+          ],
+          "reason": "evidence_safety:handoff_intent_detected,matched_faq_requires_handoff,contract_or_credit_requires_manual_review,需要人工发送合同模板,需要人工审核账期条件",
+          "status": "open",
+          "created_at": "2026-05-03T19:46:06",
+          "operator_alert": {
+            "created_at": "2026-05-03T19:46:06",
+            "target": "文件传输助手",
+            "message_ids": [
+              "960cfc93ef9ba1ce26d42995c43547ae"
+            ],
+            "message_contents": [
+              "可以签采购合同盖章并走月结吗？\n[live-regression:20260503191931:15:1]"
+            ],
+            "combined_content": "可以签采购合同盖章并走月结吗？\n[live-regression:20260503191931:15:1]",
+            "reason": "evidence_safety:handoff_intent_detected,matched_faq_requires_handoff,contract_or_credit_requires_manual_review,需要人工发送合同模板,需要人工审核账期条件",
+            "reply_text": "[OmniAuto自测] 这个问题我当前无法直接确认，我先帮您记录并请示上级，稍后给您准确回复。",
+            "product_knowledge": {
+              "enabled": true,
+              "matched": true,
+              "match_type": "faq",
+              "intent": "contract",
+              "faq_keywords": [
+                "合同",
+                "采购合同",
+                "盖章",
+                "协议",
+                "月结",
+                "账期",
+                "赊账"
+              ],
+              "reply_text": "采购合同、盖章文件、月结、账期和赊销都需要人工审核。我先帮您记录需求并转给同事确认。",
+              "needs_handoff": true,
+              "auto_reply_allowed": false,
+              "operator_alert": true,
+              "reason": "contract_or_credit_requires_manual_review",
+              "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\compiled\\structured_compat\\product_knowledge.example.json"
+            },
+            "status": "open",
+            "delivery": {
+              "type": "jsonl",
+              "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\logs\\file_transfer_live_regression_operator_alerts.jsonl",
+              "ok": true
+            },
+            "case_store": {
+              "enabled": true,
+              "ok": true,
+              "case_id": "handoff_af7c74ee3d83b59c39a0",
+              "status": "open"
+            }
+          }
+        },
+        {
+          "message_ids": [
+            "d3e612576af1219822398ae190ef6f28"
+          ],
+          "message_contents": [
+            "你们老板喜欢什么颜色的包装？\n[live-regression:20260503191931:19:1]"
+          ],
+          "reason": "evidence_safety:no_relevant_business_evidence",
+          "status": "open",
+          "created_at": "2026-05-03T19:52:48",
+          "operator_alert": {
+            "created_at": "2026-05-03T19:52:48",
+            "target": "文件传输助手",
+            "message_ids": [
+              "d3e612576af1219822398ae190ef6f28"
+            ],
+            "message_contents": [
+              "你们老板喜欢什么颜色的包装？\n[live-regression:20260503191931:19:1]"
+            ],
+            "combined_content": "你们老板喜欢什么颜色的包装？\n[live-regression:20260503191931:19:1]",
+            "reason": "evidence_safety:no_relevant_business_evidence",
+            "reply_text": "[OmniAuto自测] 这个问题我当前无法直接确认，我先帮您记录并请示上级，稍后给您准确回复。",
+            "product_knowledge": {
+              "enabled": true,
+              "matched": false,
+              "intent": "product_info",
+              "reason": "no_product_or_faq_match",
+              "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\compiled\\structured_compat\\product_knowledge.example.json"
+            },
+            "status": "open",
+            "delivery": {
+              "type": "jsonl",
+              "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\logs\\file_transfer_live_regression_operator_alerts.jsonl",
+              "ok": true
+            },
+            "case_store": {
+              "enabled": true,
+              "ok": true,
+              "case_id": "handoff_a30b60342f774c94f543",
+              "status": "open"
+            }
+          }
+        },
+        {
+          "message_ids": [
+            "00994ef072c18e245b576a67d671efa3",
+            "50492d458dc0426459d4409400230927"
+          ],
+          "message_contents": [
+            "买7台商用冰箱能按10台价格吗？\n[live-regression:20260503191931:20:1]",
+            "客户资料\n姓名：周批次\n电话：13700003333\n地址：广州市天河区测试路3号\n产品：商用冰箱\n数量：7台\n[live-regression:20260503191931:20:2]"
+          ],
+          "reason": "evidence_safety:requested_price_below_public_tier",
+          "status": "open",
+          "created_at": "2026-05-03T19:55:12",
+          "operator_alert": {
+            "created_at": "2026-05-03T19:55:12",
+            "target": "文件传输助手",
+            "message_ids": [
+              "00994ef072c18e245b576a67d671efa3",
+              "50492d458dc0426459d4409400230927"
+            ],
+            "message_contents": [
+              "买7台商用冰箱能按10台价格吗？\n[live-regression:20260503191931:20:1]",
+              "客户资料\n姓名：周批次\n电话：13700003333\n地址：广州市天河区测试路3号\n产品：商用冰箱\n数量：7台\n[live-regression:20260503191931:20:2]"
+            ],
+            "combined_content": "买7台商用冰箱能按10台价格吗？\n[live-regression:20260503191931:20:1]\n客户资料\n姓名：周批次\n电话：13700003333\n地址：广州市天河区测试路3号\n产品：商用冰箱\n数量：7台\n[live-regression:20260503191931:20:2]",
+            "reason": "evidence_safety:requested_price_below_public_tier",
+            "reply_text": "[OmniAuto自测] 这个问题我当前无法直接确认，我先帮您记录并请示上级，稍后给您准确回复。",
+            "product_knowledge": {
+              "enabled": true,
+              "matched": false,
+              "reason": "skipped_for_customer_data"
+            },
+            "status": "open",
+            "delivery": {
+              "type": "jsonl",
+              "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\logs\\file_transfer_live_regression_operator_alerts.jsonl",
+              "ok": true
+            },
+            "case_store": {
+              "enabled": true,
+              "ok": true,
+              "case_id": "handoff_7d3e4bb87de58f6823ba",
+              "status": "open"
+            }
+          }
+        }
+      ],
+      "pending_customer_data": [
+        {
+          "status": "completed",
+          "fields": {
+            "phone": "13900002222",
+            "address": "杭州市余杭区测试路2号",
+            "product": "净水器滤芯",
+            "quantity": "100件"
+          },
+          "missing_required_fields": [
+            "name"
+          ],
+          "missing_required_labels": [
+            "姓名"
+          ],
+          "message_ids": [
+            "18b3764f2c38ff7266672eaec40fa18e"
+          ],
+          "raw_text": "客户资料\n电话：13900002222\n地址：杭州市余杭区测试路2号\n产品：净水器滤芯\n数量：100件\n[live-regression:20260503191931:17:1]",
+          "updated_at": "2026-05-03T19:48:41",
+          "created_at": "2026-05-03T19:48:41",
+          "completed_at": "2026-05-03T19:50:03",
+          "completed_message_ids": [
+            "18b3764f2c38ff7266672eaec40fa18e",
+            "0290ea0388af73948e16c548b8f8d4a8"
+          ],
+          "write_result": {
+            "ok": true,
+            "workbook_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\file_transfer_live_regression_customer_leads.xlsx",
+            "sheet_name": "客户线索",
+            "row_number": 3,
+            "fields": {
+              "phone": "13900002222",
+              "name": "李补全",
+              "address": "杭州市余杭区测试路2号",
+              "product": "净水器滤芯",
+              "quantity": "100件"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

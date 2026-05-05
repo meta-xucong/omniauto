@@ -1,0 +1,322 @@
+[
+  {
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_54a96e57c70563ab9c",
+    "conversation_type": "private",
+    "target_name": "车金测试私聊",
+    "display_name": "车金测试私聊",
+    "group_name": "",
+    "status": "active",
+    "exact": true,
+    "record_self": true,
+    "learning_enabled": true,
+    "notify_enabled": false,
+    "selected_by_user": false,
+    "created_at": "2026-05-05T21:43:04",
+    "updated_at": "2026-05-05T21:43:04",
+    "source": {
+      "type": "customer_service_listener"
+    },
+    "raw_payload": {
+      "target_name": "车金测试私聊",
+      "display_name": "车金测试私聊",
+      "conversation_type": "private",
+      "status": "active",
+      "exact": true,
+      "record_self": true,
+      "learning_enabled": true,
+      "notify_enabled": false,
+      "source": {
+        "type": "customer_service_listener"
+      }
+    }
+  },
+  {
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_8022f0948f611f15b4",
+    "conversation_type": "group",
+    "target_name": "离线回归-记录员群聊",
+    "display_name": "离线回归-记录员群聊",
+    "group_name": "离线回归-记录员群聊",
+    "status": "active",
+    "exact": true,
+    "record_self": false,
+    "learning_enabled": true,
+    "notify_enabled": false,
+    "selected_by_user": false,
+    "created_at": "2026-05-05T21:43:04",
+    "updated_at": "2026-05-05T21:43:04",
+    "source": {
+      "type": "jiangsu_chejin_offline_recorder",
+      "batch_token": "CHEJIN_20260505_214257"
+    },
+    "raw_payload": {
+      "target_name": "离线回归-记录员群聊",
+      "display_name": "离线回归-记录员群聊",
+      "conversation_type": "group",
+      "selected_by_user": false,
+      "learning_enabled": true,
+      "notify_enabled": false,
+      "source": {
+        "type": "jiangsu_chejin_offline_recorder",
+        "batch_token": "CHEJIN_20260505_214257"
+      }
+    }
+  },
+  {
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_87036d2253c2c945ed",
+    "conversation_type": "file_transfer",
+    "target_name": "文件传输助手",
+    "display_name": "文件传输助手",
+    "group_name": "",
+    "status": "active",
+    "exact": true,
+    "record_self": false,
+    "learning_enabled": true,
+    "notify_enabled": false,
+    "selected_by_user": true,
+    "created_at": "2026-05-05T21:43:04",
+    "updated_at": "2026-05-05T21:43:04",
+    "source": {
+      "type": "jiangsu_chejin_offline_recorder",
+      "batch_token": "CHEJIN_20260505_214257"
+    },
+    "raw_payload": {
+      "target_name": "文件传输助手",
+      "display_name": "文件传输助手",
+      "conversation_type": "file_transfer",
+      "selected_by_user": true,
+      "learning_enabled": true,
+      "notify_enabled": false,
+      "source": {
+        "type": "jiangsu_chejin_offline_recorder",
+        "batch_token": "CHEJIN_20260505_214257"
+      }
+    }
+  },
+  {
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "conversation_type": "private",
+    "target_name": "许聪",
+    "display_name": "许聪",
+    "group_name": "",
+    "status": "active",
+    "exact": true,
+    "record_self": true,
+    "learning_enabled": true,
+    "notify_enabled": false,
+    "selected_by_user": false,
+    "created_at": "2026-05-04T04:23:46",
+    "updated_at": "2026-05-04T04:23:46",
+    "source": {
+      "type": "customer_service_listener"
+    },
+    "raw_payload": {
+      "target_name": "许聪",
+      "display_name": "许聪",
+      "conversation_type": "private",
+      "status": "active",
+      "exact": true,
+      "record_self": true,
+      "learning_enabled": true,
+      "notify_enabled": false,
+      "source": {
+        "type": "customer_service_listener"
+      }
+    }
+  },
+  {
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "chejin_demo_group_chejin_demo_20260503_203628",
+    "conversation_type": "group",
+    "target_name": "偷数据测试",
+    "display_name": "偷数据测试",
+    "group_name": "偷数据测试",
+    "status": "active",
+    "exact": true,
+    "record_self": false,
+    "learning_enabled": true,
+    "notify_enabled": false,
+    "selected_by_user": true,
+    "created_at": "2026-05-03T20:36:31",
+    "updated_at": "2026-05-03T20:58:18",
+    "source": {
+      "type": "jiangsu_chejin_live_test",
+      "batch_token": "CHEJIN_20260503_205541"
+    },
+    "raw_payload": {
+      "conversation_id": "chejin_demo_group_chejin_demo_20260503_203628",
+      "target_name": "偷数据测试",
+      "display_name": "偷数据测试",
+      "conversation_type": "group",
+      "selected_by_user": true,
+      "learning_enabled": true,
+      "notify_enabled": false,
+      "source": {
+        "type": "demo_seed",
+        "batch_token": "CHEJIN_DEMO_20260503_203628"
+      }
+    }
+  },
+  {
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "chejin_demo_file_transfer_chejin_demo_20260503_203628",
+    "conversation_type": "file_transfer",
+    "target_name": "文件传输助手",
+    "display_name": "文件传输助手",
+    "group_name": "",
+    "status": "active",
+    "exact": true,
+    "record_self": false,
+    "learning_enabled": true,
+    "notify_enabled": false,
+    "selected_by_user": true,
+    "created_at": "2026-05-03T20:36:31",
+    "updated_at": "2026-05-03T20:58:11",
+    "source": {
+      "type": "demo_seed",
+      "batch_token": "CHEJIN_DEMO_20260503_203628"
+    },
+    "raw_payload": {
+      "conversation_id": "chejin_demo_file_transfer_chejin_demo_20260503_203628",
+      "target_name": "文件传输助手",
+      "display_name": "文件传输助手",
+      "conversation_type": "file_transfer",
+      "selected_by_user": true,
+      "learning_enabled": true,
+      "notify_enabled": false,
+      "source": {
+        "type": "demo_seed",
+        "batch_token": "CHEJIN_DEMO_20260503_203628"
+      }
+    }
+  },
+  {
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "chejin_demo_private_zhang_chejin_demo_20260503_203628",
+    "conversation_type": "private",
+    "target_name": "抖音线索-张先生",
+    "display_name": "抖音线索-张先生",
+    "group_name": "",
+    "status": "active",
+    "exact": true,
+    "record_self": false,
+    "learning_enabled": true,
+    "notify_enabled": false,
+    "selected_by_user": true,
+    "created_at": "2026-05-03T20:36:31",
+    "updated_at": "2026-05-03T20:58:04",
+    "source": {
+      "type": "demo_seed",
+      "batch_token": "CHEJIN_DEMO_20260503_203628"
+    },
+    "raw_payload": {
+      "conversation_id": "chejin_demo_private_zhang_chejin_demo_20260503_203628",
+      "target_name": "抖音线索-张先生",
+      "display_name": "抖音线索-张先生",
+      "conversation_type": "private",
+      "selected_by_user": true,
+      "learning_enabled": true,
+      "notify_enabled": false,
+      "source": {
+        "type": "demo_seed",
+        "batch_token": "CHEJIN_DEMO_20260503_203628"
+      }
+    }
+  },
+  {
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "chejin_demo_private_li_chejin_demo_20260503_203628",
+    "conversation_type": "private",
+    "target_name": "置换线索-李女士",
+    "display_name": "置换线索-李女士",
+    "group_name": "",
+    "status": "active",
+    "exact": true,
+    "record_self": false,
+    "learning_enabled": true,
+    "notify_enabled": false,
+    "selected_by_user": true,
+    "created_at": "2026-05-03T20:36:31",
+    "updated_at": "2026-05-03T20:57:54",
+    "source": {
+      "type": "demo_seed",
+      "batch_token": "CHEJIN_DEMO_20260503_203628"
+    },
+    "raw_payload": {
+      "conversation_id": "chejin_demo_private_li_chejin_demo_20260503_203628",
+      "target_name": "置换线索-李女士",
+      "display_name": "置换线索-李女士",
+      "conversation_type": "private",
+      "selected_by_user": true,
+      "learning_enabled": true,
+      "notify_enabled": false,
+      "source": {
+        "type": "demo_seed",
+        "batch_token": "CHEJIN_DEMO_20260503_203628"
+      }
+    }
+  },
+  {
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_1c4c2bfac8a6d1ae7d",
+    "conversation_type": "group",
+    "target_name": "偷数据测试",
+    "display_name": "偷数据测试",
+    "group_name": "偷数据测试",
+    "status": "active",
+    "exact": true,
+    "record_self": false,
+    "learning_enabled": true,
+    "notify_enabled": false,
+    "selected_by_user": true,
+    "created_at": "2026-05-02T01:06:49",
+    "updated_at": "2026-05-03T20:57:46",
+    "source": {
+      "type": "live_recorder_test",
+      "batch_token": "LIVE_RECORDER_20260503_093238"
+    },
+    "raw_payload": {
+      "name": "偷数据测试",
+      "time": "2026-05-01 16:23:00",
+      "content": "边界噪音：CHEJIN_20260501_162302_LIVE_NOISE 今天群里测试心跳，不是车源知识。",
+      "isnew": false,
+      "new_count": 0,
+      "ismute": false
+    }
+  },
+  {
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_376a9c7df7cd80d69b",
+    "conversation_type": "group",
+    "target_name": "江苏车金测试群",
+    "display_name": "江苏车金测试群",
+    "group_name": "江苏车金测试群",
+    "status": "ignored",
+    "exact": true,
+    "record_self": false,
+    "learning_enabled": true,
+    "notify_enabled": false,
+    "selected_by_user": false,
+    "created_at": "2026-05-01T16:23:07",
+    "updated_at": "2026-05-01T16:24:26",
+    "source": {
+      "type": "jiangsu_chejin_offline_recorder",
+      "batch_token": "CHEJIN_20260501_162302"
+    },
+    "raw_payload": {
+      "target_name": "江苏车金测试群",
+      "display_name": "江苏车金测试群",
+      "conversation_type": "group",
+      "selected_by_user": true,
+      "learning_enabled": true,
+      "notify_enabled": false,
+      "source": {
+        "type": "jiangsu_chejin_offline_recorder",
+        "batch_token": "CHEJIN_20260501_162302"
+      }
+    }
+  }
+]

@@ -1,0 +1,31 @@
+{
+  "ok": true,
+  "results": [
+    {
+      "role": "admin",
+      "ok": true,
+      "state": {
+        "roleText": "管理员：admin",
+        "selectVisible": true,
+        "labelVisible": false,
+        "optionCount": 2,
+        "selected": "default",
+        "displayText": "\n              客户数据\n              admin · ????\n              ??????????????? 2026-05-01\n            ",
+        "switchedTo": "jiangsu_chejin_usedcar_customer_20260501"
+      }
+    },
+    {
+      "role": "customer",
+      "ok": true,
+      "state": {
+        "roleText": "客户：jiangsu_chejin_usedcar_customer_20260501",
+        "selectVisible": false,
+        "labelVisible": true,
+        "optionCount": 1,
+        "selected": "jiangsu_chejin_usedcar_customer_20260501",
+        "displayText": "\n              当前账号\n              jiangsu_chejin_usedcar_customer_20260501 · ??????????? 2026-05-01\n              ??????????? 2026-05-01\n            "
+      }
+    }
+  ],
+  "artifact": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\admin_tenant_selector_smoke"
+}

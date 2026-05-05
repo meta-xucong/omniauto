@@ -1,0 +1,14 @@
+{
+  "local_init__pDOgZ9eOZyf09I1_qBE2m1ZBXaNiaog": {
+    "challenge_id": "local_init__pDOgZ9eOZyf09I1_qBE2m1ZBXaNiaog",
+    "purpose": "initialize_account_pending",
+    "username": "test01",
+    "user_id": "customer_test01",
+    "role": "customer",
+    "tenant_id": "default",
+    "device_fingerprint": "f0f49fa5e7bcceeb3f58e1732f01eca69558da5268e1e06ebf405aee6a221f05",
+    "device_name": "Win32 en-US",
+    "expires_at": "2026-04-30T17:06:47+00:00",
+    "created_at": "2026-04-30T16:36:47+00:00"
+  }
+}

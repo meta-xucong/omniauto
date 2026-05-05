@@ -1,0 +1,260 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_c106ef5b6fcbec2d",
+  "generated_at": "2026-05-01T23:20:14",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\policies\\upload_e73f5b7b9e0669e2_chejin_policies_CHEJIN_20260501_232013.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "title: 售后规则；answer: 政策规则：江苏车金金融与车况合规 CHEJIN_20260501_232013 规则名称：金融审批与车况承诺边界 CHEJIN_20260501_232013 规则类型：contract 触发关键词：贷款,按揭,首付,月供,征信,保证无事故,水泡,火烧,赔偿,退款 答案：金融方案只能做初步说明，审批结果、利率、月供以资方审核为准；车况承诺必须以检测报告和合同为准，涉及赔偿、退款、纠纷必须转人工。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high；keywords: ['after_sales', 'policie', 'quote', 'style']",
+    "content_sha256": "579c50fcb2438f1e3dfd81a8680439371f2f5411d0b02deca10d6136b324916d",
+    "type": "rag_experience",
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_c30a17b45741f125",
+        "source_id": "source_6c42af6ef26e713d",
+        "score": 0.9325,
+        "category": "policies",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.5774,
+          "semantic": 0.2801,
+          "vector": 0.14,
+          "vector_similarity": 0.9295,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.015,
+          "risk_penalty": 0.08,
+          "final": 0.9325
+        },
+        "text": "政策规则：江苏车金高意向转人工 CHEJIN_20260501_232013\n规则名称：试驾到店与订金转人工 CHEJIN_20260501_232013\n规则类型：manual_required\n触发关键词：试驾,到店,订金,定金,今天看车,明天看车,销售联系,企业微信群\n答案：客户明确要求试驾、到店、订金、销售联系时，AI只做确认和记录，必须转人工或企业微信群承接，不能自行承诺车源保留和最终价格。\n允许自动回复：false\n必须转人工：true\n提醒人工客服：true\n风险等级：high\n政策规则：江苏车金金融"
+      },
+      {
+        "chunk_id": "chunk_a7db78a913637434",
+        "source_id": "source_394a878d33feda9f",
+        "score": 0.5338,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.223,
+          "semantic": 0.1457,
+          "vector": 0.14,
+          "vector_similarity": 0.8208,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.025,
+          "risk_penalty": 0.0,
+          "final": 0.5338
+        },
+        "text": "3系,320Li,试驾,精品车况\n规格参数：2019年上牌，表显5.6万公里，2.0T自动挡，一手车源，支持到店试驾。\n价格：12.80万\n单位：台\n库存：1\n发货：高意向试驾需转人工确认门店和时间。\n售后：精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。\n商品资料：江苏车金二手车车源 CHEJIN_20260501_232013\n商品名称：2022款比亚迪秦PLUS DM-i 55KM CHEJIN_20260501_232013\n型号：CHEJIN-QINPLUS-CHEJIN_20260501_2"
+      },
+      {
+        "chunk_id": "chunk_8e316937658670ae",
+        "source_id": "source_394a878d33feda9f",
+        "score": 0.4937,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.252,
+          "semantic": 0.1567,
+          "vector": 0.14,
+          "vector_similarity": 0.8245,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.025,
+          "risk_penalty": 0.08,
+          "final": 0.4937
+        },
+        "text": "商品资料：江苏车金二手车车源 CHEJIN_20260501_232013\n商品名称：2021款丰田凯美瑞2.0G豪华版 CHEJIN_20260501_232013\n型号：CHEJIN-CAMRY-CHEJIN_20260501_232013\n商品类目：二手车/中级轿车\n别名关键词：凯美瑞,丰田凯美瑞,8万预算,自动挡,省油,通勤\n规格参数：2021年上牌，表显4.8万公里，2.0L自动挡，南京现车，一手车，支持第三方检测。\n价格：8.98万\n单位：台\n库存：1\n发货：南京门店可看车，异地客户需人工确认物流与提档"
+      }
+    ],
+    "original_type": "raw_upload",
+    "original_channel": "knowledge_upload",
+    "rag_experience_id": "rag_exp_c9ba69b568f043fd87b4",
+    "experience_id": "rag_exp_c9ba69b568f043fd87b4"
+  },
+  "detected_tags": [
+    "after_sales",
+    "policie",
+    "quote",
+    "rag_experience",
+    "style"
+  ],
+  "proposal": {
+    "target_category": "policies",
+    "change_type": "upsert_policy",
+    "summary": "建议新增/更新政策规则：售后规则",
+    "suggested_fields": {
+      "title": "售后规则",
+      "policy_type": "after_sales",
+      "keywords": [
+        "after_sales",
+        "policie",
+        "quote",
+        "style"
+      ],
+      "answer": "政策规则：江苏车金金融与车况合规 CHEJIN_20260501_232013 规则名称：金融审批与车况承诺边界 CHEJIN_20260501_232013 规则类型：contract 触发关键词：贷款,按揭,首付,月供,征信,保证无事故,水泡,火烧,赔偿,退款 答案：金融方案只能做初步说明，审批结果、利率、月供以资方审核为准；车况承诺必须以检测报告和合同为准，涉及赔偿、退款、纠纷必须转人工。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high",
+      "allow_auto_reply": false,
+      "requires_handoff": true,
+      "operator_alert": true,
+      "risk_level": "warning",
+      "additional_details": {
+        "原始资料摘录": "title: 售后规则；answer: 政策规则：江苏车金金融与车况合规 CHEJIN_20260501_232013 规则名称：金融审批与车况承诺边界 CHEJIN_20260501_232013 规则类型：contract 触发关键词：贷款,按揭,首付,月供,征信,保证无事故,水泡,火烧,赔偿,退款 答案：金融方案只能做初步说明，审批结果、利率、月供以资方审核为准；车况承诺必须以检测报告和合同为准，涉及赔偿、退款、纠纷必须转人工。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high；keywords: ['after_sales', 'policie', 'quote', 'style']"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [
+      "包含高风险关键词：赔偿",
+      "明确要求人工确认：必须转人工"
+    ],
+    "formal_patch": {
+      "target_category": "policies",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "policies",
+        "id": "item_d1a5493ceac7",
+        "status": "active",
+        "source": {
+          "type": "raw_upload",
+          "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\policies\\upload_e73f5b7b9e0669e2_chejin_policies_CHEJIN_20260501_232013.txt",
+          "candidate_id": "raw_c106ef5b6fcbec2d",
+          "rag_experience_id": "rag_exp_c9ba69b568f043fd87b4",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_upload"
+        },
+        "data": {
+          "title": "售后规则",
+          "policy_type": "after_sales",
+          "keywords": [
+            "after_sales",
+            "policie",
+            "quote",
+            "style"
+          ],
+          "answer": "政策规则：江苏车金金融与车况合规 CHEJIN_20260501_232013 规则名称：金融审批与车况承诺边界 CHEJIN_20260501_232013 规则类型：contract 触发关键词：贷款,按揭,首付,月供,征信,保证无事故,水泡,火烧,赔偿,退款 答案：金融方案只能做初步说明，审批结果、利率、月供以资方审核为准；车况承诺必须以检测报告和合同为准，涉及赔偿、退款、纠纷必须转人工。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high",
+          "allow_auto_reply": false,
+          "requires_handoff": true,
+          "operator_alert": true,
+          "risk_level": "warning",
+          "additional_details": {
+            "原始资料摘录": "title: 售后规则；answer: 政策规则：江苏车金金融与车况合规 CHEJIN_20260501_232013 规则名称：金融审批与车况承诺边界 CHEJIN_20260501_232013 规则类型：contract 触发关键词：贷款,按揭,首付,月供,征信,保证无事故,水泡,火烧,赔偿,退款 答案：金融方案只能做初步说明，审批结果、利率、月供以资方审核为准；车况承诺必须以检测报告和合同为准，涉及赔偿、退款、纠纷必须转人工。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high；keywords: ['after_sales', 'policie', 'quote', 'style']"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": false,
+          "requires_handoff": true,
+          "risk_level": "high"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [
+      "包含高风险关键词：赔偿",
+      "明确要求人工确认：必须转人工"
+    ],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "pending",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "source_upload_id": "upload_e73f5b7b9e0669e2",
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_6c42af6ef26e713d",
+      "chunk_count": 1,
+      "query": "建议新增/更新政策规则：售后规则\ntitle: 售后规则；answer: 政策规则：江苏车金金融与车况合规 CHEJIN_20260501_232013 规则名称：金融审批与车况承诺边界 CHEJIN_20260501_232013 规则类型：contract 触发关键词：贷款,按揭,首付,月供,征信,保证无事故,水泡,火烧,赔偿,退款 答案：金融方案只能做初步说明，审批结果、利率、月供以资方审核为准；车况承诺必须以检测报告和合同为准，涉及赔偿、退款、纠纷必须转人工。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high；keywords: ['after_sales', 'policie', 'quote', 'style']\n售后规则\n政策规则：江苏车金金融与车况合规 CHEJIN_20260501_232013 规则名称：金融审批与车况承诺边界 CHEJIN_20260501_232013 规则类型：contract 触发关键词：贷款,按揭,首付,月供,征信,保证无事故,水泡,火烧,赔偿,退款 答案：金融方案只能做初步说明，审批结果、利率、月供以资方审核为准；车况承诺必须以检测报告和合同为准，涉及赔偿、退款、纠纷必须转人工。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high",
+      "hits": [
+        {
+          "chunk_id": "chunk_c30a17b45741f125",
+          "source_id": "source_6c42af6ef26e713d",
+          "score": 0.9325,
+          "category": "policies",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.5774,
+            "semantic": 0.2801,
+            "vector": 0.14,
+            "vector_similarity": 0.9295,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.015,
+            "risk_penalty": 0.08,
+            "final": 0.9325
+          },
+          "text": "政策规则：江苏车金高意向转人工 CHEJIN_20260501_232013\n规则名称：试驾到店与订金转人工 CHEJIN_20260501_232013\n规则类型：manual_required\n触发关键词：试驾,到店,订金,定金,今天看车,明天看车,销售联系,企业微信群\n答案：客户明确要求试驾、到店、订金、销售联系时，AI只做确认和记录，必须转人工或企业微信群承接，不能自行承诺车源保留和最终价格。\n允许自动回复：false\n必须转人工：true\n提醒人工客服：true\n风险等级：high\n政策规则：江苏车金金融"
+        },
+        {
+          "chunk_id": "chunk_a7db78a913637434",
+          "source_id": "source_394a878d33feda9f",
+          "score": 0.5338,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.223,
+            "semantic": 0.1457,
+            "vector": 0.14,
+            "vector_similarity": 0.8208,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.025,
+            "risk_penalty": 0.0,
+            "final": 0.5338
+          },
+          "text": "3系,320Li,试驾,精品车况\n规格参数：2019年上牌，表显5.6万公里，2.0T自动挡，一手车源，支持到店试驾。\n价格：12.80万\n单位：台\n库存：1\n发货：高意向试驾需转人工确认门店和时间。\n售后：精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。\n商品资料：江苏车金二手车车源 CHEJIN_20260501_232013\n商品名称：2022款比亚迪秦PLUS DM-i 55KM CHEJIN_20260501_232013\n型号：CHEJIN-QINPLUS-CHEJIN_20260501_2"
+        },
+        {
+          "chunk_id": "chunk_8e316937658670ae",
+          "source_id": "source_394a878d33feda9f",
+          "score": 0.4937,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.252,
+            "semantic": 0.1567,
+            "vector": 0.14,
+            "vector_similarity": 0.8245,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.025,
+            "risk_penalty": 0.08,
+            "final": 0.4937
+          },
+          "text": "商品资料：江苏车金二手车车源 CHEJIN_20260501_232013\n商品名称：2021款丰田凯美瑞2.0G豪华版 CHEJIN_20260501_232013\n型号：CHEJIN-CAMRY-CHEJIN_20260501_232013\n商品类目：二手车/中级轿车\n别名关键词：凯美瑞,丰田凯美瑞,8万预算,自动挡,省油,通勤\n规格参数：2021年上牌，表显4.8万公里，2.0L自动挡，南京现车，一手车，支持第三方检测。\n价格：8.98万\n单位：台\n库存：1\n发货：南京门店可看车，异地客户需人工确认物流与提档"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_c9ba69b568f043fd87b4",
+    "source_chain": [
+      "raw_upload",
+      "rag_experience",
+      "review_candidate"
+    ]
+  },
+  "suggested_tests": [
+    {
+      "scenario": "after_sales",
+      "assertion": "入库后应能按关键词回答该政策；高风险内容必须转人工。"
+    }
+  ]
+}

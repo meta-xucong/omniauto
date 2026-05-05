@@ -1,0 +1,49 @@
+{
+  "title": "合同、账期和先货后款需人工审核",
+  "guideline_text": "涉及合同、盖章、账期、赊销、先货后款等具有法律或财务承诺的事项，AI客服不能直接同意，应记录需求并转人工审核。",
+  "keywords": [
+    "合同",
+    "盖章",
+    "账期",
+    "赊销",
+    "先货后款",
+    "人工审核"
+  ],
+  "applies_to": "所有行业都可能遇到的通用 AI 客服场景",
+  "schema_version": 1,
+  "id": "shared_09b9e2d49f1b22d6ed",
+  "item_id": "shared_09b9e2d49f1b22d6ed",
+  "category_id": "risk_control",
+  "status": "active",
+  "content": "涉及合同、盖章、账期、赊销、先货后款等具有法律或财务承诺的事项，AI客服不能直接同意，应记录需求并转人工审核。",
+  "data": {
+    "title": "合同、账期和先货后款需人工审核",
+    "guideline_text": "涉及合同、盖章、账期、赊销、先货后款等具有法律或财务承诺的事项，AI客服不能直接同意，应记录需求并转人工审核。",
+    "keywords": [
+      "合同",
+      "盖章",
+      "账期",
+      "赊销",
+      "先货后款",
+      "人工审核"
+    ],
+    "applies_to": "所有行业都可能遇到的通用 AI 客服场景",
+    "allow_auto_reply": false,
+    "requires_handoff": true
+  },
+  "runtime": {
+    "allow_auto_reply": false,
+    "requires_handoff": true,
+    "risk_level": "high"
+  },
+  "source": {
+    "type": "cloud_official_shared_library",
+    "item_id": "shared_09b9e2d49f1b22d6ed",
+    "version": ""
+  },
+  "metadata": {
+    "knowledge_layer": "shared",
+    "cloud_item_id": "shared_09b9e2d49f1b22d6ed",
+    "cloud_updated_at": "2026-05-02T19:47:41+00:00"
+  }
+}

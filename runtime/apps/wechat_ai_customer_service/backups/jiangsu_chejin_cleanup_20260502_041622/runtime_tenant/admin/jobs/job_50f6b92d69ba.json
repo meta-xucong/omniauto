@@ -1,0 +1,55 @@
+{
+  "job_id": "job_50f6b92d69ba",
+  "created_at": "2026-05-01T22:57:58",
+  "status": "completed",
+  "upload_ids": [
+    "upload_afb780a540b9873a"
+  ],
+  "use_llm": false,
+  "candidate_ids": [
+    "raw_b9d23b1a43bdb6e3"
+  ],
+  "candidate_count": 1,
+  "rag_experience_ids": [
+    "rag_exp_3c43427283bd537d643d"
+  ],
+  "skipped_duplicate_count": 3,
+  "skipped_duplicates": [
+    {
+      "candidate_id": "raw_6961ec4dfab4a692",
+      "upload_id": "upload_afb780a540b9873a",
+      "duplicate": {
+        "duplicate": true,
+        "reason": "highly_similar_content",
+        "source": "review_candidate:raw_063425f280dd05d6",
+        "existing_item_id": "chejin-civic-chejin_20260501_220703",
+        "similarity": 0.943,
+        "message": "检测到与现有知识或候选高度重复，已跳过去重。"
+      }
+    },
+    {
+      "candidate_id": "raw_69018efca4557219",
+      "upload_id": "upload_afb780a540b9873a",
+      "duplicate": {
+        "duplicate": true,
+        "reason": "highly_similar_content",
+        "source": "review_candidate:raw_40148d54c9cb8eec",
+        "existing_item_id": "chejin-bmw320-chejin_20260501_220703",
+        "similarity": 0.938,
+        "message": "检测到与现有知识或候选高度重复，已跳过去重。"
+      }
+    },
+    {
+      "candidate_id": "raw_1f9eea62587030b5",
+      "upload_id": "upload_afb780a540b9873a",
+      "duplicate": {
+        "duplicate": true,
+        "reason": "highly_similar_content",
+        "source": "review_candidate:raw_c8a7b7aaf7218e4b",
+        "existing_item_id": "chejin-qinplus-chejin_20260501_220703",
+        "similarity": 0.944,
+        "message": "检测到与现有知识或候选高度重复，已跳过去重。"
+      }
+    }
+  ]
+}

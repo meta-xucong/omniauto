@@ -1,0 +1,12 @@
+{
+  "ok": true,
+  "state": "thinking",
+  "message": "正在处理「车金测试私聊」的 1 条新消息。",
+  "updated_at": "2026-05-05T21:43:04",
+  "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+  "target": "车金测试私聊",
+  "message_count": 1,
+  "message_ids": [
+    "real-after-bot"
+  ]
+}

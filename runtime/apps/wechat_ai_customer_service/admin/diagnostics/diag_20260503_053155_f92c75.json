@@ -1,0 +1,125 @@
+{
+  "ok": true,
+  "run_id": "diag_20260503_053155_f92c75",
+  "mode": "full",
+  "status": "ok",
+  "created_at": "2026-05-03T05:32:37",
+  "checks": [
+    {
+      "name": "quick_knowledge_validation",
+      "ok": true,
+      "issues": [
+        {
+          "code": "knowledge_token_budget_large",
+          "severity": "info",
+          "title": "知识体积较大",
+          "detail": "当前分类知识库总量估算约 42480 token。这不是知识格式故障，也没有某条知识需要立即删除；它提醒后续继续按客户问题检索相关知识，避免一次性加载全部知识。",
+          "target_label": "全局知识库",
+          "details": [
+            {
+              "label": "问题性质",
+              "value": "容量提示，不是知识格式故障",
+              "level": "normal"
+            },
+            {
+              "label": "估算总量",
+              "value": "约 42480 token",
+              "level": "warning"
+            },
+            {
+              "label": "检测阈值",
+              "value": "超过 7000 token 时提示",
+              "level": "normal"
+            },
+            {
+              "label": "文件数量",
+              "value": "67 个 JSON 文件",
+              "level": "normal"
+            },
+            {
+              "label": "chats",
+              "value": "约 8443 token / 15 个文件",
+              "level": "normal"
+            },
+            {
+              "label": "erp_exports",
+              "value": "约 860 token / 2 个文件",
+              "level": "normal"
+            },
+            {
+              "label": "policies",
+              "value": "约 24976 token / 39 个文件",
+              "level": "normal"
+            },
+            {
+              "label": "products",
+              "value": "约 7508 token / 11 个文件",
+              "level": "normal"
+            }
+          ],
+          "suggestions": [
+            {
+              "title": "不建议自动删除知识",
+              "detail": "当前没有发现哪一条知识错误，系统不能为了降低体积擅自删内容。",
+              "level": "danger"
+            },
+            {
+              "title": "继续保持按门类和问题范围检索",
+              "detail": "客服运行时应只取相关商品、政策、话术和上下文证据，不要把全库一次性塞给大模型。",
+              "level": "normal"
+            },
+            {
+              "title": "如果后续继续变大",
+              "detail": "优先拆分过长政策、归档过期商品、把重复话术合并为模板，再重新检测。",
+              "level": "warning"
+            }
+          ],
+          "repairable": false
+        }
+      ],
+      "token_budget_estimate": 42480,
+      "recent_only": false
+    },
+    {
+      "name": "knowledge_runtime",
+      "ok": true,
+      "returncode": 0,
+      "stdout_tail": "\": 13,\n  \"failures\": [],\n  \"results\": [\n    {\n      \"name\": \"check_product_alias_hits_products\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"check_public_product_discount_not_blocked_by_chat_template\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"check_invoice_hits_policies\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"check_public_bank_account_can_auto_reply\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"check_context_product_shipping\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"check_chat_style_hits_chats\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"check_global_guidelines_are_layered_style_context\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"check_tenant_formal_overrides_conflicting_shared_public\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"check_product_scoped_rule_requires_product_context\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"check_general_knowledge_applicability_scope\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"check_manual_boundary_requires_handoff\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"check_unknown_business_question_handoffs\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"check_custom_category_can_return_evidence\",\n      \"ok\": true\n    }\n  ]\n}\n",
+      "stderr_tail": "",
+      "issues": []
+    },
+    {
+      "name": "knowledge_compiler",
+      "ok": true,
+      "returncode": 0,
+      "stdout_tail": "{\n  \"ok\": true,\n  \"count\": 3,\n  \"failures\": [],\n  \"results\": [\n    {\n      \"name\": \"check_compile_to_disk_writes_expected_files\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"check_compiled_counts_match_category_source\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"check_compiled_product_knowledge_is_legacy_compatible\",\n      \"ok\": true\n    }\n  ]\n}\n",
+      "stderr_tail": "",
+      "issues": []
+    },
+    {
+      "name": "offline_regression",
+      "ok": true,
+      "returncode": 0,
+      "stdout_tail": "{\n  \"ok\": true,\n  \"scenario_path\": \"D:\\\\AI\\\\AI_RPA\\\\apps\\\\wechat_ai_customer_service\\\\tests\\\\scenarios\\\\offline_regression.json\",\n  \"count\": 11,\n  \"failures\": [],\n  \"results\": [\n    {\n      \"name\": \"catalog_request\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"product_quote\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"below_tier_discount_handoff\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"invoice_policy\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"company_info\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"context_shipping\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"evidence_discount_handoff\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"customer_data_complete\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"greeting_not_customer_data\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"manual_handoff_contract\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"no_relevant_business_evidence\",\n      \"ok\": true\n    }\n  ]\n}\n",
+      "stderr_tail": "",
+      "issues": []
+    },
+    {
+      "name": "workflow_logic",
+      "ok": true,
+      "returncode": 0,
+      "stdout_tail": "\": [],\n  \"results\": [\n    {\n      \"name\": \"check_configured_bot_prefix_is_skipped\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"check_mixed_safety_batch_forces_handoff\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"check_incomplete_customer_data_is_completed_and_written\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"check_rate_limit_notice_and_backoff\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"check_auto_reply_disabled_blocks_runtime_send\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"check_customer_service_console_switches_take_effect\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"check_deepseek_v4_pro_is_default\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"check_llm_reply_application_guards\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"check_llm_boundary_fallback_on_invalid_model_output\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"check_review_queue_reports_pending_and_handoff_items\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"check_evidence_boundary_cases\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"check_after_sales_intent_preempts_duration_logistics\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"check_wechat_main_window_recognition\",\n      \"ok\": true\n    }\n  ]\n}\n",
+      "stderr_tail": "",
+      "issues": []
+    }
+  ],
+  "issues": [],
+  "ignored_count": 0,
+  "summary": {
+    "error_count": 0,
+    "warning_count": 0,
+    "info_count": 0,
+    "ignored_count": 0,
+    "hidden_notice_count": 1
+  }
+}

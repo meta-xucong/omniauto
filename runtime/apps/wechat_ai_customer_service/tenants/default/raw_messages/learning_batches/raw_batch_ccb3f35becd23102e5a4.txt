@@ -1,0 +1,13 @@
+[2026-04-30 16:55:00] system: 昨天 16:55
+[2026-04-30 23:36:00] system: 昨天 23:36
+[2026-05-01T06:14:06] self: [Codex] Stop requested. Bridge loop will exit after this reply.
+[2026-05-01T06:14:06] self: [Codex] 已就绪
+可用命令:
+[ToCodex] /status
+[ToCodex] /stop
+[ToCodex] /new <任务>
+[ToCodex] /list
+[ToCodex] /use <thread_id>
+[ToCodex] /help
+[ToCodex] <正常任务>
+monitor: http://127.0.0.1:17911/

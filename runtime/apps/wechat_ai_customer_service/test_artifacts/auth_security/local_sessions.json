@@ -1,0 +1,42 @@
+[
+  {
+    "session_id": "sess_LwyFLZFD8egw_rNNML4ZT1zDyRVLw23h",
+    "user": {
+      "user_id": "customer_test01",
+      "role": "customer",
+      "tenant_ids": [
+        "default"
+      ],
+      "display_name": "test01",
+      "username": "test01",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "default",
+    "issued_at": "2026-05-03T13:48:17.536725+00:00",
+    "expires_at": "2026-05-04T01:48:17.536725+00:00",
+    "source": "local",
+    "token": "sess_LwyFLZFD8egw_rNNML4ZT1zDyRVLw23h"
+  },
+  {
+    "session_id": "sess_GE5hcjbHuvZjy0tH_UTAGOSI61L2IYHq",
+    "user": {
+      "user_id": "guest",
+      "role": "guest",
+      "tenant_ids": [
+        "default"
+      ],
+      "display_name": "guest",
+      "username": "guest",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "default",
+    "issued_at": "2026-05-03T13:48:19.671695+00:00",
+    "expires_at": "2026-05-04T01:48:19.671695+00:00",
+    "source": "local",
+    "token": "sess_GE5hcjbHuvZjy0tH_UTAGOSI61L2IYHq"
+  }
+]

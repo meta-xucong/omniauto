@@ -1,0 +1,25 @@
+{
+  "ok": null,
+  "status": "running",
+  "started_at": "2026-05-03T16:37:52+0800",
+  "command": [
+    "D:\\AI\\AI_RPA\\.venv\\Scripts\\python.exe",
+    "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\tests\\run_file_transfer_live_supervisor.py",
+    "--chunk-size",
+    "4",
+    "--per-run-timeout-seconds",
+    "1200",
+    "--delay-seconds",
+    "0.6",
+    "--result-path",
+    "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\file_transfer_live_full_guarded.json",
+    "--summary-path",
+    "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\file_transfer_live_full_guarded_summary.json",
+    "--send",
+    "--temporary-full-auto",
+    "--reset-state"
+  ],
+  "result_path": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\file_transfer_live_full_guarded.json",
+  "summary_path": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\file_transfer_live_full_guarded_summary.json",
+  "prevent_idle": true
+}

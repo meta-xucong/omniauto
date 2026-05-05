@@ -1,0 +1,82 @@
+[
+  {
+    "session_id": "sess_xyC2Renouu5Fkv6Z-KdxKUVvyXFF9Tku",
+    "user": {
+      "user_id": "customer_test01",
+      "role": "customer",
+      "tenant_ids": [
+        "default"
+      ],
+      "display_name": "test01",
+      "username": "test01",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "default",
+    "issued_at": "2026-05-05T13:31:54.720655+00:00",
+    "expires_at": "2026-05-06T01:31:54.720655+00:00",
+    "source": "local",
+    "token": "sess_xyC2Renouu5Fkv6Z-KdxKUVvyXFF9Tku"
+  },
+  {
+    "session_id": "sess_vzht3k7saaLFHo-GTOU56sdEvcBZ8kpK",
+    "user": {
+      "user_id": "customer_test01",
+      "role": "customer",
+      "tenant_ids": [
+        "default"
+      ],
+      "display_name": "test01",
+      "username": "test01",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "default",
+    "issued_at": "2026-05-05T13:31:54.993741+00:00",
+    "expires_at": "2026-05-06T01:31:54.993741+00:00",
+    "source": "local",
+    "token": "sess_vzht3k7saaLFHo-GTOU56sdEvcBZ8kpK"
+  },
+  {
+    "session_id": "local-shared-admin-session",
+    "user": {
+      "user_id": "server-admin",
+      "role": "admin",
+      "tenant_ids": [
+        "*"
+      ],
+      "display_name": "Admin",
+      "username": "admin",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "default",
+    "issued_at": "",
+    "expires_at": "",
+    "source": "vps",
+    "token": "local-shared-admin-session"
+  },
+  {
+    "session_id": "sess_xMByDA8nq6HF5TJ9iIpT8gY1FdqL93RX",
+    "user": {
+      "user_id": "customer_test01",
+      "role": "customer",
+      "tenant_ids": [
+        "default"
+      ],
+      "display_name": "test01",
+      "username": "test01",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "default",
+    "issued_at": "2026-05-05T13:31:55.353737+00:00",
+    "expires_at": "2026-05-06T01:31:55.353737+00:00",
+    "source": "local",
+    "token": "sess_xMByDA8nq6HF5TJ9iIpT8gY1FdqL93RX"
+  }
+]

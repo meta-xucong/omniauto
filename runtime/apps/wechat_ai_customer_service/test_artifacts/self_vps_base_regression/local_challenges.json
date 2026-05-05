@@ -1,0 +1,14 @@
+{
+  "local_init_BjfyKZ9J_CpK8znB0cO8d4oPG8LooNS-": {
+    "challenge_id": "local_init_BjfyKZ9J_CpK8znB0cO8d4oPG8LooNS-",
+    "purpose": "initialize_account_pending",
+    "username": "test01",
+    "user_id": "customer_test01",
+    "role": "customer",
+    "tenant_id": "default",
+    "device_fingerprint": "",
+    "device_name": "",
+    "expires_at": "2026-04-30T17:11:32+00:00",
+    "created_at": "2026-04-30T16:41:32+00:00"
+  }
+}

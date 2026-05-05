@@ -1,0 +1,21 @@
+{
+  "job_id": "job_e0360b413624",
+  "created_at": "2026-05-01T23:20:14",
+  "status": "completed",
+  "upload_ids": [
+    "upload_d73c5258ed69e039"
+  ],
+  "use_llm": false,
+  "candidate_ids": [
+    "raw_f3a59b4e27be9f6d",
+    "raw_d6ce0e29998162e7",
+    "raw_2961dbe69fbce091",
+    "raw_c3a9a2750ea48130"
+  ],
+  "candidate_count": 4,
+  "rag_experience_ids": [
+    "rag_exp_4a94f20648b273b1c189"
+  ],
+  "skipped_duplicate_count": 0,
+  "skipped_duplicates": []
+}

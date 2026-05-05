@@ -1,0 +1,17 @@
+{
+  "job_id": "job_d86d9961b3f2",
+  "created_at": "2026-05-01T22:06:14",
+  "status": "completed",
+  "upload_ids": [
+    "upload_c0c3e92aeba0565b"
+  ],
+  "use_llm": false,
+  "candidate_ids": [
+    "raw_bf0ec942500d1990",
+    "raw_ce51843ba1cd1405",
+    "raw_1f959ca90e9be9bd"
+  ],
+  "candidate_count": 3,
+  "skipped_duplicate_count": 0,
+  "skipped_duplicates": []
+}

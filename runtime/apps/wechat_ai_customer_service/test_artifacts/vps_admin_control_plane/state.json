@@ -1,0 +1,4217 @@
+{
+  "schema_version": 1,
+  "tenants": {
+    "recorder_live_customer_20260501": {
+      "tenant_id": "recorder_live_customer_20260501",
+      "display_name": "记录员真机测试客户 2026-05-01",
+      "status": "active",
+      "sync_enabled": true,
+      "metadata": {
+        "source": "local_client_account",
+        "account_username": "recorder_live_customer_20260501"
+      },
+      "created_at": "2026-05-01T07:31:51+00:00",
+      "updated_at": "2026-05-01T07:32:21+00:00"
+    },
+    "jiangsu_chejin_usedcar_customer_20260501": {
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "status": "active",
+      "sync_enabled": true,
+      "metadata": {
+        "source": "local_client_account",
+        "account_username": "jiangsu_chejin_usedcar_customer_20260501",
+        "schema_version": 1,
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "display_name": "江苏车金二手车测试客户 2026-05-01",
+        "knowledge_base_root": "knowledge_bases",
+        "product_item_knowledge_root": "product_item_knowledge",
+        "created_at": "2026-05-05T13:29:09+00:00",
+        "sync": {
+          "private_backup": {
+            "enabled": false,
+            "schedule": "manual"
+          }
+        },
+        "updated_at": "2026-05-05T13:29:09+00:00"
+      },
+      "created_at": "2026-05-01T08:09:49+00:00",
+      "updated_at": "2026-05-05T13:29:09+00:00"
+    },
+    "default": {
+      "tenant_id": "default",
+      "display_name": "测试客户 test01（当前客户端数据）",
+      "status": "active",
+      "sync_enabled": true,
+      "metadata": {
+        "source": "local_current_client",
+        "account_username": "test01"
+      },
+      "created_at": "2026-05-05T13:31:53+00:00",
+      "updated_at": "2026-05-05T13:32:51+00:00"
+    },
+    "smart_recorder_test": {
+      "tenant_id": "smart_recorder_test",
+      "display_name": "smart_recorder_test",
+      "status": "active",
+      "sync_enabled": true,
+      "metadata": {
+        "source": "local_client_account",
+        "account_username": "smart_recorder_test"
+      },
+      "created_at": "2026-05-05T13:31:53+00:00",
+      "updated_at": "2026-05-05T13:31:53+00:00"
+    },
+    "local_usedcar_tenant": {
+      "tenant_id": "local_usedcar_tenant",
+      "display_name": "Local Usedcar Customer",
+      "status": "active",
+      "sync_enabled": true,
+      "metadata": {
+        "source": "local_client_account",
+        "account_username": "local_usedcar_customer"
+      },
+      "created_at": "2026-05-05T13:31:53+00:00",
+      "updated_at": "2026-05-05T13:31:53+00:00"
+    },
+    "local_trade_tenant": {
+      "tenant_id": "local_trade_tenant",
+      "display_name": "Local Trade Customer",
+      "status": "active",
+      "sync_enabled": true,
+      "metadata": {
+        "source": "local_client_account",
+        "account_username": "local_trade_customer"
+      },
+      "created_at": "2026-05-05T13:31:53+00:00",
+      "updated_at": "2026-05-05T13:31:53+00:00"
+    },
+    "customer_auto": {
+      "tenant_id": "customer_auto",
+      "display_name": "customer_auto",
+      "status": "active",
+      "sync_enabled": false,
+      "metadata": {
+        "source": "customer_account",
+        "account_username": "customer_auto"
+      },
+      "created_at": "2026-05-05T13:31:54+00:00",
+      "updated_at": "2026-05-05T13:31:54+00:00"
+    },
+    "orphan_scope": {
+      "tenant_id": "orphan_scope",
+      "display_name": "Orphan Scope",
+      "status": "active",
+      "sync_enabled": false,
+      "metadata": {},
+      "created_at": "2026-05-05T13:31:59+00:00",
+      "updated_at": "2026-05-05T13:31:59+00:00"
+    },
+    "tenant_a": {
+      "tenant_id": "tenant_a",
+      "display_name": "Tenant A",
+      "status": "active",
+      "sync_enabled": false,
+      "metadata": {},
+      "created_at": "2026-05-05T13:31:59+00:00",
+      "updated_at": "2026-05-05T13:31:59+00:00"
+    }
+  },
+  "users": {
+    "recorder_live_customer_20260501": {
+      "user_id": "recorder_live_customer_20260501",
+      "username": "recorder_live_customer_20260501",
+      "display_name": "记录员真机测试客户 2026-05-01",
+      "email": "recorder_live_customer_20260501@example.local",
+      "role": "customer",
+      "tenant_ids": [
+        "recorder_live_customer_20260501"
+      ],
+      "resource_scopes": [
+        "*"
+      ],
+      "status": "active",
+      "source": "local_client_account",
+      "created_at": "2026-05-01T07:31:51+00:00",
+      "updated_at": "2026-05-01T07:32:21+00:00",
+      "password_hash": "pbkdf2_sha256$120000$825711a1858b2cff14e6761691c2c219$8aiK5rQCjZwplTGKshncM7fAmS23chVUu72DFRX0m9U="
+    },
+    "jiangsu_chejin_usedcar_customer_20260501": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "email": "jiangsu-chejin-usedcar@example.local",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "resource_scopes": [
+        "*"
+      ],
+      "status": "active",
+      "source": "local_client_account",
+      "created_at": "2026-05-01T08:09:49+00:00",
+      "updated_at": "2026-05-05T13:29:09+00:00",
+      "password_hash": "pbkdf2_sha256$120000$ea2a34bddd6780c95e14d681ff2d4483$uZCwJDlp14/fe9jtUdr7bWDiV/Q+4HyshYTaYzPPJOs="
+    },
+    "local_usedcar_customer": {
+      "user_id": "local_usedcar_customer",
+      "username": "local_usedcar_customer",
+      "display_name": "Local Usedcar Customer",
+      "email": "",
+      "role": "customer",
+      "tenant_ids": [
+        "local_usedcar_tenant"
+      ],
+      "resource_scopes": [
+        "*"
+      ],
+      "status": "active",
+      "source": "local_client_account",
+      "created_at": "2026-05-05T13:31:53+00:00",
+      "updated_at": "2026-05-05T13:31:53+00:00"
+    },
+    "local_trade_customer": {
+      "user_id": "local_trade_customer",
+      "username": "local_trade_customer",
+      "display_name": "Local Trade Customer",
+      "email": "",
+      "role": "customer",
+      "tenant_ids": [
+        "local_trade_tenant"
+      ],
+      "resource_scopes": [
+        "*"
+      ],
+      "status": "active",
+      "source": "local_client_account",
+      "created_at": "2026-05-05T13:31:53+00:00",
+      "updated_at": "2026-05-05T13:31:53+00:00"
+    },
+    "user_YBSSCeUKQg0e": {
+      "user_id": "user_YBSSCeUKQg0e",
+      "username": "customer_auto",
+      "display_name": "customer_auto",
+      "email": "customer_auto-3233caf3@example.local",
+      "role": "customer",
+      "tenant_ids": [
+        "customer_auto"
+      ],
+      "resource_scopes": [
+        "*"
+      ],
+      "status": "active",
+      "created_at": "2026-05-05T13:31:53+00:00",
+      "updated_at": "2026-05-05T13:31:56+00:00",
+      "password_hash": "pbkdf2_sha256$120000$d368d9b2178be176da95b73e158dacf5$H7oHGvc+ZEB0Xfif+TrR7AKIt2xaqhbZZfdrGeRSAKI=",
+      "initialized_at": "2026-05-05T13:31:56+00:00"
+    },
+    "user_DWMlpF62k2Ym": {
+      "user_id": "user_DWMlpF62k2Ym",
+      "username": "guest_auto",
+      "display_name": "guest_auto",
+      "email": "guest_auto-3233caf3@example.local",
+      "role": "guest",
+      "tenant_ids": [
+        "customer_auto"
+      ],
+      "resource_scopes": [
+        "*"
+      ],
+      "status": "active",
+      "created_at": "2026-05-05T13:31:54+00:00",
+      "updated_at": "2026-05-05T13:31:58+00:00",
+      "password_hash": "pbkdf2_sha256$120000$ef3d5a70f3192a50a563e90dd6a3119c$AckQ1fBbGZ/jBuKJhwmiEpEtTv56zx1f6yKf7BKBkbY=",
+      "initialized_at": "2026-05-05T13:31:58+00:00"
+    },
+    "user_s59PIUhHU2ki": {
+      "user_id": "user_s59PIUhHU2ki",
+      "username": "customer_a",
+      "display_name": "customer_a",
+      "email": "customer_a-3233caf3@example.local",
+      "role": "customer",
+      "tenant_ids": [
+        "tenant_a"
+      ],
+      "resource_scopes": [
+        "*"
+      ],
+      "status": "active",
+      "created_at": "2026-05-05T13:31:59+00:00",
+      "updated_at": "2026-05-05T13:32:00+00:00",
+      "password_hash": "pbkdf2_sha256$120000$d40c551c61a41ee807bbe65683c21d06$fmG0k1WE36vE5rCK8DzLNL9nUX76cMaNPJjDjeoVl10=",
+      "initialized_at": "2026-05-05T13:32:00+00:00"
+    },
+    "user_JZWQEVKOIBY9": {
+      "user_id": "user_JZWQEVKOIBY9",
+      "username": "guest_a",
+      "display_name": "guest_a",
+      "email": "guest_a-3233caf3@example.local",
+      "role": "guest",
+      "tenant_ids": [
+        "tenant_a"
+      ],
+      "resource_scopes": [
+        "*"
+      ],
+      "status": "active",
+      "created_at": "2026-05-05T13:31:59+00:00",
+      "updated_at": "2026-05-05T13:32:02+00:00",
+      "password_hash": "pbkdf2_sha256$120000$6c63a5efe5b82e51722a2f4946fb4b47$Lr3z1lDkUipNBzqo+U4456aNyKJv/J7mVTKVVw562RI=",
+      "initialized_at": "2026-05-05T13:32:02+00:00"
+    },
+    "customer_test01": {
+      "user_id": "customer_test01",
+      "username": "test01",
+      "display_name": "测试客户 test01",
+      "role": "customer",
+      "tenant_ids": [
+        "default"
+      ],
+      "resource_scopes": [
+        "*"
+      ],
+      "status": "active",
+      "email": "test01@example.local",
+      "password_hash": "pbkdf2_sha256$120000$f21769c0e00adb2e317295b87287d948$Xv30tjLHvI2wkakwzU0htOqIIqwBbVsXtjWodHyso98=",
+      "created_at": "2026-05-05T13:32:51+00:00",
+      "updated_at": "2026-05-05T13:32:51+00:00"
+    }
+  },
+  "sessions": {
+    "vps_23uL6hLDoQ6B5Imi6ux4NbK68JZrbsO-zLqoxUqXigI": {
+      "session_id": "vps_23uL6hLDoQ6B5Imi6ux4NbK68JZrbsO-zLqoxUqXigI",
+      "user": {
+        "user_id": "platform-admin",
+        "role": "admin",
+        "tenant_ids": [
+          "*"
+        ],
+        "display_name": "Platform Admin",
+        "username": "admin",
+        "resource_scopes": [
+          "*"
+        ]
+      },
+      "active_tenant_id": "default",
+      "issued_at": "2026-05-05T13:31:53+00:00",
+      "expires_at": "2026-05-06T01:31:53+00:00",
+      "source": "vps",
+      "token": "vps_23uL6hLDoQ6B5Imi6ux4NbK68JZrbsO-zLqoxUqXigI"
+    },
+    "vps_ngjiWC5jvQNEc4bDvh6nMEGz94fOkbvz9vw7gQIMLRk": {
+      "session_id": "vps_ngjiWC5jvQNEc4bDvh6nMEGz94fOkbvz9vw7gQIMLRk",
+      "user": {
+        "user_id": "user_YBSSCeUKQg0e",
+        "role": "customer",
+        "tenant_ids": [
+          "customer_auto"
+        ],
+        "display_name": "customer_auto",
+        "username": "customer_auto",
+        "resource_scopes": [
+          "*"
+        ]
+      },
+      "active_tenant_id": "customer_auto",
+      "issued_at": "2026-05-05T13:31:57+00:00",
+      "expires_at": "2026-05-06T01:31:57+00:00",
+      "source": "vps",
+      "token": "vps_ngjiWC5jvQNEc4bDvh6nMEGz94fOkbvz9vw7gQIMLRk"
+    },
+    "vps_EjW_T_cS36Ni84exxG9LltlKEx5xPgOh_Ro-R-9InJI": {
+      "session_id": "vps_EjW_T_cS36Ni84exxG9LltlKEx5xPgOh_Ro-R-9InJI",
+      "user": {
+        "user_id": "user_DWMlpF62k2Ym",
+        "role": "guest",
+        "tenant_ids": [
+          "customer_auto"
+        ],
+        "display_name": "guest_auto",
+        "username": "guest_auto",
+        "resource_scopes": [
+          "*"
+        ]
+      },
+      "active_tenant_id": "customer_auto",
+      "issued_at": "2026-05-05T13:31:59+00:00",
+      "expires_at": "2026-05-06T01:31:59+00:00",
+      "source": "vps",
+      "token": "vps_EjW_T_cS36Ni84exxG9LltlKEx5xPgOh_Ro-R-9InJI"
+    },
+    "vps_DvR4QRgDvG5AXmJtX8i-tdRnOONK_hfcnwkRwa70lyQ": {
+      "session_id": "vps_DvR4QRgDvG5AXmJtX8i-tdRnOONK_hfcnwkRwa70lyQ",
+      "user": {
+        "user_id": "user_s59PIUhHU2ki",
+        "role": "customer",
+        "tenant_ids": [
+          "tenant_a"
+        ],
+        "display_name": "customer_a",
+        "username": "customer_a",
+        "resource_scopes": [
+          "*"
+        ]
+      },
+      "active_tenant_id": "tenant_a",
+      "issued_at": "2026-05-05T13:32:01+00:00",
+      "expires_at": "2026-05-06T01:32:01+00:00",
+      "source": "vps",
+      "token": "vps_DvR4QRgDvG5AXmJtX8i-tdRnOONK_hfcnwkRwa70lyQ"
+    },
+    "vps_5sJuODgtK_LWpY-U1KLECW_9mtrlrmtDynGEYdRnYWY": {
+      "session_id": "vps_5sJuODgtK_LWpY-U1KLECW_9mtrlrmtDynGEYdRnYWY",
+      "user": {
+        "user_id": "user_JZWQEVKOIBY9",
+        "role": "guest",
+        "tenant_ids": [
+          "tenant_a"
+        ],
+        "display_name": "guest_a",
+        "username": "guest_a",
+        "resource_scopes": [
+          "*"
+        ]
+      },
+      "active_tenant_id": "tenant_a",
+      "issued_at": "2026-05-05T13:32:03+00:00",
+      "expires_at": "2026-05-06T01:32:03+00:00",
+      "source": "vps",
+      "token": "vps_5sJuODgtK_LWpY-U1KLECW_9mtrlrmtDynGEYdRnYWY"
+    }
+  },
+  "admin_credentials": {
+    "platform-admin": {
+      "user_id": "platform-admin",
+      "username": "admin",
+      "email": "admin@example.local",
+      "password_hash": "pbkdf2_sha256$120000$fd52447837a42166f7720d8562e7cccf$ZOORnwFRr3GPOOwawvsXfQrLJR+jFBnHhhVauuMv/78=",
+      "initialized_at": "2026-05-05T13:31:52+00:00",
+      "updated_at": "2026-05-05T13:31:52+00:00"
+    }
+  },
+  "auth_challenges": {},
+  "trusted_devices": {
+    "f32a77b4987949ccde9b810fadbb7be300ea47f4bcd14be4d71b4d086bcd0db6": {
+      "fingerprint": "f32a77b4987949ccde9b810fadbb7be300ea47f4bcd14be4d71b4d086bcd0db6",
+      "user_id": "platform-admin",
+      "device_name": "当前设备",
+      "ip_address": "testclient",
+      "trusted_until": "2026-06-04T13:31:53+00:00",
+      "created_at": "2026-05-05T13:31:53+00:00",
+      "last_seen_at": "2026-05-05T13:31:53+00:00"
+    }
+  },
+  "smtp_config": {
+    "server": "",
+    "port": 465,
+    "use_ssl": true,
+    "use_tls": false,
+    "username": "",
+    "password": "",
+    "from_email": "admin@example.local",
+    "sender_name": "OmniAuto",
+    "otp_required": true,
+    "code_length": 4,
+    "ttl_minutes": 15,
+    "resend_seconds": 60,
+    "trusted_device_days": 30,
+    "initialized_at": "2026-05-05T13:31:52+00:00",
+    "updated_at": "2026-05-05T13:31:52+00:00"
+  },
+  "local_nodes": {
+    "local_tenant_a_01": {
+      "node_id": "local_tenant_a_01",
+      "display_name": "Local Tenant A 01",
+      "tenant_ids": [
+        "tenant_a"
+      ],
+      "status": "online",
+      "version": "0.1.1-test",
+      "capabilities": [
+        "backup_tenant",
+        "backup_all",
+        "check_update"
+      ],
+      "node_token": "node_Mw4vuzl8qMBVuUdSPnn41ZzzC6tXxhBu",
+      "registered_at": "2026-05-05T13:32:03+00:00",
+      "last_seen_at": "2026-05-05T13:32:03+00:00",
+      "metadata": {},
+      "metrics": {
+        "pending_jobs": 0
+      }
+    },
+    "local_tenant_a_patch_01": {
+      "node_id": "local_tenant_a_patch_01",
+      "display_name": "Local Tenant A Patch 01",
+      "tenant_ids": [
+        "tenant_a"
+      ],
+      "status": "online",
+      "version": "0.1.0-test",
+      "capabilities": [
+        "pull_shared_patch"
+      ],
+      "node_token": "node_LJts5PqsWE_ujmm_fmYZD2NAYsybJbAM",
+      "registered_at": "2026-05-05T13:32:03+00:00",
+      "last_seen_at": "2026-05-05T13:32:26+00:00",
+      "metadata": {}
+    }
+  },
+  "commands": {
+    "cmd_qfgVm2HrHpfV": {
+      "command_id": "cmd_qfgVm2HrHpfV",
+      "type": "backup_tenant",
+      "tenant_id": "tenant_a",
+      "node_id": "local_tenant_a_01",
+      "payload": {},
+      "status": "succeeded",
+      "attempts": 1,
+      "created_by": "platform-admin",
+      "created_at": "2026-05-05T13:32:03+00:00",
+      "updated_at": "2026-05-05T13:32:03+00:00",
+      "sent_at": "2026-05-05T13:32:03+00:00",
+      "result": {
+        "ok": true,
+        "backup_id": "backup_test"
+      },
+      "error": "",
+      "completed_at": "2026-05-05T13:32:03+00:00"
+    },
+    "cmd_z2rSwnSr4Vth": {
+      "command_id": "cmd_z2rSwnSr4Vth",
+      "type": "pull_shared_patch",
+      "tenant_id": "tenant_a",
+      "node_id": "local_tenant_a_patch_01",
+      "payload": {
+        "patch_id": "patch_S4JQOCWosPqf",
+        "version": "shared-test.1",
+        "patch": {
+          "schema_version": 1,
+          "patch_id": "patch_S4JQOCWosPqf",
+          "version": "shared-test.1",
+          "source_proposal_id": "proposal_bIw3zPWJZsUm",
+          "tenant_id": "tenant_a",
+          "operations": [
+            {
+              "op": "upsert_json",
+              "path": "global_guidelines/items/after_sale_policy.json",
+              "content": {
+                "schema_version": 1,
+                "id": "after_sale_policy",
+                "data": {
+                  "title": "After Sale"
+                }
+              }
+            }
+          ],
+          "status": "published",
+          "created_by": "platform-admin",
+          "created_at": "2026-05-05T13:32:26+00:00",
+          "library_item_ids": [
+            "after_sale_policy"
+          ],
+          "signature": "fb109c81b68fdb46af1811b25c362542869e5cb8ef2a5913ee54c82ebfa81058",
+          "last_pushed_at": "2026-05-05T13:32:26+00:00",
+          "last_push_command_ids": [
+            "cmd_z2rSwnSr4Vth"
+          ],
+          "last_push_target": {
+            "tenant_id": "tenant_a",
+            "node_id": "local_tenant_a_patch_01"
+          },
+          "updated_at": "2026-05-05T13:32:26+00:00"
+        },
+        "apply": true
+      },
+      "status": "succeeded",
+      "attempts": 1,
+      "created_by": "platform-admin",
+      "created_at": "2026-05-05T13:32:26+00:00",
+      "updated_at": "2026-05-05T13:32:26+00:00",
+      "sent_at": "2026-05-05T13:32:26+00:00",
+      "result": {
+        "ok": true,
+        "applied": {
+          "ok": true
+        }
+      },
+      "error": "",
+      "completed_at": "2026-05-05T13:32:26+00:00"
+    },
+    "cmd_sCPrjWkVxzeg": {
+      "command_id": "cmd_sCPrjWkVxzeg",
+      "type": "restore_backup",
+      "tenant_id": "tenant_a",
+      "node_id": "local_tenant_a_01",
+      "payload": {
+        "tenant_id": "tenant_a",
+        "node_id": "local_tenant_a_01",
+        "backup_id": "backup_test",
+        "dry_run": true
+      },
+      "status": "queued",
+      "attempts": 0,
+      "created_by": "platform-admin",
+      "created_at": "2026-05-05T13:32:51+00:00",
+      "updated_at": "2026-05-05T13:32:51+00:00"
+    },
+    "cmd_FBNCTRBhXmvJ": {
+      "command_id": "cmd_FBNCTRBhXmvJ",
+      "type": "check_update",
+      "tenant_id": "tenant_a",
+      "node_id": "local_tenant_a_01",
+      "payload": {
+        "release_id": "release_xKHYxdqFxE6d",
+        "release": {
+          "release_id": "release_xKHYxdqFxE6d",
+          "channel": "stable",
+          "version": "0.2.0-test",
+          "title": "Test release",
+          "notes": "Test release notes",
+          "artifact_url": "https://example.invalid/release.zip",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+          "signature": "sig-test",
+          "status": "published",
+          "created_by": "platform-admin",
+          "created_at": "2026-05-05T13:32:51+00:00"
+        }
+      },
+      "status": "queued",
+      "attempts": 0,
+      "created_by": "platform-admin",
+      "created_at": "2026-05-05T13:32:51+00:00",
+      "updated_at": "2026-05-05T13:32:51+00:00"
+    },
+    "cmd_mNri2ii8UMmh": {
+      "command_id": "cmd_mNri2ii8UMmh",
+      "type": "check_update",
+      "tenant_id": "tenant_a",
+      "node_id": "local_tenant_a_patch_01",
+      "payload": {
+        "release_id": "release_xKHYxdqFxE6d",
+        "release": {
+          "release_id": "release_xKHYxdqFxE6d",
+          "channel": "stable",
+          "version": "0.2.0-test",
+          "title": "Test release",
+          "notes": "Test release notes",
+          "artifact_url": "https://example.invalid/release.zip",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+          "signature": "sig-test",
+          "status": "published",
+          "created_by": "platform-admin",
+          "created_at": "2026-05-05T13:32:51+00:00"
+        }
+      },
+      "status": "queued",
+      "attempts": 0,
+      "created_by": "platform-admin",
+      "created_at": "2026-05-05T13:32:51+00:00",
+      "updated_at": "2026-05-05T13:32:51+00:00"
+    },
+    "cmd_ttstYhjHA5HM": {
+      "command_id": "cmd_ttstYhjHA5HM",
+      "type": "restore_backup",
+      "tenant_id": "default",
+      "node_id": "",
+      "payload": {
+        "tenant_id": "default",
+        "node_id": "",
+        "backup_id": "backup_d300d0ebf6e0a3fb004a",
+        "backup_url": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\vps_admin\\backups\\backup_d300d0ebf6e0a3fb004a.zip",
+        "dry_run": true
+      },
+      "status": "queued",
+      "attempts": 0,
+      "created_by": "platform-admin",
+      "created_at": "2026-05-05T13:33:00+00:00",
+      "updated_at": "2026-05-05T13:33:00+00:00"
+    }
+  },
+  "command_results": [
+    {
+      "command_id": "cmd_qfgVm2HrHpfV",
+      "status": "succeeded",
+      "tenant_id": "tenant_a",
+      "node_id": "local_tenant_a_01",
+      "payload": {
+        "command_id": "cmd_qfgVm2HrHpfV",
+        "accepted": true,
+        "result": {
+          "ok": true,
+          "backup_id": "backup_test"
+        }
+      },
+      "created_at": "2026-05-05T13:32:03+00:00"
+    },
+    {
+      "command_id": "cmd_z2rSwnSr4Vth",
+      "status": "succeeded",
+      "tenant_id": "tenant_a",
+      "node_id": "local_tenant_a_patch_01",
+      "payload": {
+        "command_id": "cmd_z2rSwnSr4Vth",
+        "accepted": true,
+        "result": {
+          "ok": true,
+          "applied": {
+            "ok": true
+          }
+        }
+      },
+      "created_at": "2026-05-05T13:32:26+00:00"
+    }
+  ],
+  "shared_proposals": {
+    "proposal_shared_280b33bf14164e8c0f": {
+      "proposal_id": "proposal_shared_280b33bf14164e8c0f",
+      "tenant_id": "default",
+      "title": "discount_handoff",
+      "summary": "AI 从客户正式知识库提炼出的通用共享知识候选。",
+      "operations": [
+        {
+          "op": "upsert_json",
+          "path": "risk_control/items/shared_1cc5b96184ae89ae92.json",
+          "content": {
+            "schema_version": 1,
+            "id": "shared_1cc5b96184ae89ae92",
+            "item_id": "shared_1cc5b96184ae89ae92",
+            "category_id": "risk_control",
+            "title": "discount_handoff",
+            "status": "active",
+            "keywords": [
+              "discount",
+              "handoff"
+            ],
+            "applies_to": "所有客户都可能遇到的通用客服场景",
+            "content": "这个价格我这边不能直接拍板，我先帮您记录一下，稍后请示后给您准话。",
+            "guideline_text": "这个价格我这边不能直接拍板，我先帮您记录一下，稍后请示后给您准话。",
+            "notes": "候选理由：该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+            "source": {
+              "type": "formal_knowledge_universal_extraction",
+              "provider": "formal_knowledge_universal_heuristic",
+              "tenant_id": "default",
+              "source_items": [
+                {
+                  "tenant_id": "default",
+                  "category_id": "chats",
+                  "item_id": "discount_handoff",
+                  "source_key": "default:chats:discount_handoff:b2b3815ac8dff921"
+                }
+              ],
+              "llm_used": false
+            },
+            "data": {
+              "title": "discount_handoff",
+              "guideline_text": "这个价格我这边不能直接拍板，我先帮您记录一下，稍后请示后给您准话。",
+              "keywords": [
+                "discount",
+                "handoff"
+              ],
+              "applies_to": "所有客户都可能遇到的通用客服场景",
+              "allow_auto_reply": false,
+              "requires_handoff": true,
+              "handoff_reason": "shared_risk_control"
+            },
+            "runtime": {
+              "allow_auto_reply": false,
+              "requires_handoff": true,
+              "risk_level": "high"
+            }
+          }
+        }
+      ],
+      "source": "formal_knowledge_universal_heuristic",
+      "source_meta": {
+        "source_key": "1cc5b96184ae89ae92",
+        "source_items": [
+          {
+            "tenant_id": "default",
+            "category_id": "chats",
+            "item_id": "discount_handoff",
+            "source_key": "default:chats:discount_handoff:b2b3815ac8dff921"
+          }
+        ],
+        "universal_reason": "该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+        "llm_used": false
+      },
+      "status": "rejected",
+      "created_by": "platform-admin",
+      "created_at": "2026-05-05T13:32:03+00:00",
+      "updated_at": "2026-05-05T13:32:03+00:00",
+      "review_assist": {
+        "provider": "shared_review_heuristic",
+        "llm_used": false,
+        "recommendation": "accept",
+        "recommendation_label": "系统预判：采纳",
+        "universal_score": 78,
+        "duplicate_level": "none",
+        "summary": "这条候选没有明显商品或客户绑定信息，可由 admin 继续审核是否收录。",
+        "reasons": [
+          "候选内容来自正式知识库，当前没有发现明显商品专属或客户专属信息。"
+        ],
+        "risks": [
+          "采纳前请确认这条规则不会把某个客户的承诺误推给所有客户。"
+        ],
+        "existing_matches": [],
+        "admin_checklist": [
+          "确认不含具体客户、商品、价格、库存、门店和行业限定。",
+          "确认和已有共享知识不重复。"
+        ],
+        "checked_at": "2026-05-05T13:32:03+00:00"
+      },
+      "reviewed_by": "platform-admin",
+      "reviewed_at": "2026-05-05T13:32:03+00:00",
+      "review_note": "test cleanup"
+    },
+    "proposal_shared_7d68ef02a5b84af6ed": {
+      "proposal_id": "proposal_shared_7d68ef02a5b84af6ed",
+      "tenant_id": "default",
+      "title": "over_boundary_handoff",
+      "summary": "AI 从客户正式知识库提炼出的通用共享知识候选。",
+      "operations": [
+        {
+          "op": "upsert_json",
+          "path": "risk_control/items/shared_000f9428cac0dc954b.json",
+          "content": {
+            "schema_version": 1,
+            "id": "shared_000f9428cac0dc954b",
+            "item_id": "shared_000f9428cac0dc954b",
+            "category_id": "risk_control",
+            "title": "over_boundary_handoff",
+            "status": "active",
+            "keywords": [
+              "handoff"
+            ],
+            "applies_to": "所有客户都可能遇到的通用客服场景",
+            "content": "这个已经超出我能直接确认的范围，我先帮您记录下来，稍后请示后给您准话。",
+            "guideline_text": "这个已经超出我能直接确认的范围，我先帮您记录下来，稍后请示后给您准话。",
+            "notes": "候选理由：该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+            "source": {
+              "type": "formal_knowledge_universal_extraction",
+              "provider": "formal_knowledge_universal_heuristic",
+              "tenant_id": "default",
+              "source_items": [
+                {
+                  "tenant_id": "default",
+                  "category_id": "chats",
+                  "item_id": "over_boundary_handoff",
+                  "source_key": "default:chats:over_boundary_handoff:3ffaaa88fcfc15d0"
+                }
+              ],
+              "llm_used": false
+            },
+            "data": {
+              "title": "over_boundary_handoff",
+              "guideline_text": "这个已经超出我能直接确认的范围，我先帮您记录下来，稍后请示后给您准话。",
+              "keywords": [
+                "handoff"
+              ],
+              "applies_to": "所有客户都可能遇到的通用客服场景",
+              "allow_auto_reply": false,
+              "requires_handoff": true,
+              "handoff_reason": "shared_risk_control"
+            },
+            "runtime": {
+              "allow_auto_reply": false,
+              "requires_handoff": true,
+              "risk_level": "high"
+            }
+          }
+        }
+      ],
+      "source": "formal_knowledge_universal_heuristic",
+      "source_meta": {
+        "source_key": "000f9428cac0dc954b",
+        "source_items": [
+          {
+            "tenant_id": "default",
+            "category_id": "chats",
+            "item_id": "over_boundary_handoff",
+            "source_key": "default:chats:over_boundary_handoff:3ffaaa88fcfc15d0"
+          }
+        ],
+        "universal_reason": "该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+        "llm_used": false
+      },
+      "status": "pending_review",
+      "created_by": "platform-admin",
+      "created_at": "2026-05-05T13:32:03+00:00",
+      "updated_at": "2026-05-05T13:32:03+00:00",
+      "review_assist": {
+        "provider": "shared_review_heuristic",
+        "llm_used": false,
+        "recommendation": "accept",
+        "recommendation_label": "系统预判：采纳",
+        "universal_score": 78,
+        "duplicate_level": "none",
+        "summary": "这条候选没有明显商品或客户绑定信息，可由 admin 继续审核是否收录。",
+        "reasons": [
+          "候选内容来自正式知识库，当前没有发现明显商品专属或客户专属信息。"
+        ],
+        "risks": [
+          "采纳前请确认这条规则不会把某个客户的承诺误推给所有客户。"
+        ],
+        "existing_matches": [],
+        "admin_checklist": [
+          "确认不含具体客户、商品、价格、库存、门店和行业限定。",
+          "确认和已有共享知识不重复。"
+        ],
+        "checked_at": "2026-05-05T13:32:03+00:00"
+      }
+    },
+    "proposal_shared_921373a6c7911aba74": {
+      "proposal_id": "proposal_shared_921373a6c7911aba74",
+      "tenant_id": "default",
+      "title": "unknown_handoff",
+      "summary": "AI 从客户正式知识库提炼出的通用共享知识候选。",
+      "operations": [
+        {
+          "op": "upsert_json",
+          "path": "risk_control/items/shared_ac685c048a1e46fd99.json",
+          "content": {
+            "schema_version": 1,
+            "id": "shared_ac685c048a1e46fd99",
+            "item_id": "shared_ac685c048a1e46fd99",
+            "category_id": "risk_control",
+            "title": "unknown_handoff",
+            "status": "active",
+            "keywords": [
+              "unknown",
+              "handoff"
+            ],
+            "applies_to": "所有客户都可能遇到的通用客服场景",
+            "content": "这个问题我当前没有足够依据直接确认，我先帮您记录并转人工处理。",
+            "guideline_text": "这个问题我当前没有足够依据直接确认，我先帮您记录并转人工处理。",
+            "notes": "候选理由：该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+            "source": {
+              "type": "formal_knowledge_universal_extraction",
+              "provider": "formal_knowledge_universal_heuristic",
+              "tenant_id": "default",
+              "source_items": [
+                {
+                  "tenant_id": "default",
+                  "category_id": "chats",
+                  "item_id": "unknown_handoff",
+                  "source_key": "default:chats:unknown_handoff:0c2261604f1e4f83"
+                }
+              ],
+              "llm_used": false
+            },
+            "data": {
+              "title": "unknown_handoff",
+              "guideline_text": "这个问题我当前没有足够依据直接确认，我先帮您记录并转人工处理。",
+              "keywords": [
+                "unknown",
+                "handoff"
+              ],
+              "applies_to": "所有客户都可能遇到的通用客服场景",
+              "allow_auto_reply": false,
+              "requires_handoff": true,
+              "handoff_reason": "shared_risk_control"
+            },
+            "runtime": {
+              "allow_auto_reply": false,
+              "requires_handoff": true,
+              "risk_level": "high"
+            }
+          }
+        }
+      ],
+      "source": "formal_knowledge_universal_heuristic",
+      "source_meta": {
+        "source_key": "ac685c048a1e46fd99",
+        "source_items": [
+          {
+            "tenant_id": "default",
+            "category_id": "chats",
+            "item_id": "unknown_handoff",
+            "source_key": "default:chats:unknown_handoff:0c2261604f1e4f83"
+          }
+        ],
+        "universal_reason": "该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+        "llm_used": false
+      },
+      "status": "pending_review",
+      "created_by": "platform-admin",
+      "created_at": "2026-05-05T13:32:03+00:00",
+      "updated_at": "2026-05-05T13:32:03+00:00",
+      "review_assist": {
+        "provider": "shared_review_heuristic",
+        "llm_used": false,
+        "recommendation": "accept",
+        "recommendation_label": "系统预判：采纳",
+        "universal_score": 78,
+        "duplicate_level": "none",
+        "summary": "这条候选没有明显商品或客户绑定信息，可由 admin 继续审核是否收录。",
+        "reasons": [
+          "候选内容来自正式知识库，当前没有发现明显商品专属或客户专属信息。"
+        ],
+        "risks": [
+          "采纳前请确认这条规则不会把某个客户的承诺误推给所有客户。"
+        ],
+        "existing_matches": [],
+        "admin_checklist": [
+          "确认不含具体客户、商品、价格、库存、门店和行业限定。",
+          "确认和已有共享知识不重复。"
+        ],
+        "checked_at": "2026-05-05T13:32:03+00:00"
+      }
+    },
+    "proposal_shared_cdbd903caa47ab35c0": {
+      "proposal_id": "proposal_shared_cdbd903caa47ab35c0",
+      "tenant_id": "default",
+      "title": "after_sales",
+      "summary": "AI 从客户正式知识库提炼出的通用共享知识候选。",
+      "operations": [
+        {
+          "op": "upsert_json",
+          "path": "risk_control/items/shared_d8fe20868241b83d8c.json",
+          "content": {
+            "schema_version": 1,
+            "id": "shared_d8fe20868241b83d8c",
+            "item_id": "shared_d8fe20868241b83d8c",
+            "category_id": "risk_control",
+            "title": "after_sales",
+            "status": "active",
+            "keywords": [
+              "售后",
+              "保修",
+              "质保",
+              "坏了",
+              "退换",
+              "退货",
+              "换货",
+              "破损"
+            ],
+            "applies_to": "所有客户都可能遇到的通用客服场景",
+            "content": "签收 7 天内发现非人为质量问题，请提供照片或视频申请售后。外包装破损请先拍照并当场备注；退款、赔偿、争议或投诉需要转人工继续处理。",
+            "guideline_text": "签收 7 天内发现非人为质量问题，请提供照片或视频申请售后。外包装破损请先拍照并当场备注；退款、赔偿、争议或投诉需要转人工继续处理。",
+            "notes": "候选理由：该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+            "source": {
+              "type": "formal_knowledge_universal_extraction",
+              "provider": "formal_knowledge_universal_heuristic",
+              "tenant_id": "default",
+              "source_items": [
+                {
+                  "tenant_id": "default",
+                  "category_id": "policies",
+                  "item_id": "after_sales",
+                  "source_key": "default:policies:after_sales:5432b31559ba7ade"
+                }
+              ],
+              "llm_used": false
+            },
+            "data": {
+              "title": "after_sales",
+              "guideline_text": "签收 7 天内发现非人为质量问题，请提供照片或视频申请售后。外包装破损请先拍照并当场备注；退款、赔偿、争议或投诉需要转人工继续处理。",
+              "keywords": [
+                "售后",
+                "保修",
+                "质保",
+                "坏了",
+                "退换",
+                "退货",
+                "换货",
+                "破损"
+              ],
+              "applies_to": "所有客户都可能遇到的通用客服场景",
+              "allow_auto_reply": false,
+              "requires_handoff": true,
+              "handoff_reason": "shared_risk_control"
+            },
+            "runtime": {
+              "allow_auto_reply": false,
+              "requires_handoff": true,
+              "risk_level": "high"
+            }
+          }
+        }
+      ],
+      "source": "formal_knowledge_universal_heuristic",
+      "source_meta": {
+        "source_key": "d8fe20868241b83d8c",
+        "source_items": [
+          {
+            "tenant_id": "default",
+            "category_id": "policies",
+            "item_id": "after_sales",
+            "source_key": "default:policies:after_sales:5432b31559ba7ade"
+          }
+        ],
+        "universal_reason": "该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+        "llm_used": false
+      },
+      "status": "pending_review",
+      "created_by": "platform-admin",
+      "created_at": "2026-05-05T13:32:03+00:00",
+      "updated_at": "2026-05-05T13:32:03+00:00",
+      "review_assist": {
+        "provider": "shared_review_heuristic",
+        "llm_used": false,
+        "recommendation": "accept",
+        "recommendation_label": "系统预判：采纳",
+        "universal_score": 78,
+        "duplicate_level": "none",
+        "summary": "这条候选没有明显商品或客户绑定信息，可由 admin 继续审核是否收录。",
+        "reasons": [
+          "候选内容来自正式知识库，当前没有发现明显商品专属或客户专属信息。"
+        ],
+        "risks": [
+          "采纳前请确认这条规则不会把某个客户的承诺误推给所有客户。"
+        ],
+        "existing_matches": [],
+        "admin_checklist": [
+          "确认不含具体客户、商品、价格、库存、门店和行业限定。",
+          "确认和已有共享知识不重复。"
+        ],
+        "checked_at": "2026-05-05T13:32:03+00:00"
+      }
+    },
+    "proposal_shared_714567a28c184ab9ce": {
+      "proposal_id": "proposal_shared_714567a28c184ab9ce",
+      "tenant_id": "default",
+      "title": "售后政策",
+      "summary": "AI 从客户正式知识库提炼出的通用共享知识候选。",
+      "operations": [
+        {
+          "op": "upsert_json",
+          "path": "risk_control/items/shared_c84c5657c92ec9ea77.json",
+          "content": {
+            "schema_version": 1,
+            "id": "shared_c84c5657c92ec9ea77",
+            "item_id": "shared_c84c5657c92ec9ea77",
+            "category_id": "risk_control",
+            "title": "售后政策",
+            "status": "active",
+            "keywords": [
+              "after",
+              "sales"
+            ],
+            "applies_to": "所有客户都可能遇到的通用客服场景",
+            "content": "{ \"general\": \"签收 7 天内发现非人为质量问题，可提供照片/视频申请售后。\", \"damage_on_arrival\": \"外包装破损请先拍照并当场备注，24 小时内反馈更容易处理。\", \"return_rule\": \"非质量问题退换货需商品未使用且包装完整，运费按责任方承担。\", \"manual_required\": \"退款、赔偿、争议、投诉、账期、合同条款均转人工。\" }",
+            "guideline_text": "{ \"general\": \"签收 7 天内发现非人为质量问题，可提供照片/视频申请售后。\", \"damage_on_arrival\": \"外包装破损请先拍照并当场备注，24 小时内反馈更容易处理。\", \"return_rule\": \"非质量问题退换货需商品未使用且包装完整，运费按责任方承担。\", \"manual_required\": \"退款、赔偿、争议、投诉、账期、合同条款均转人工。\" }",
+            "notes": "候选理由：该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+            "source": {
+              "type": "formal_knowledge_universal_extraction",
+              "provider": "formal_knowledge_universal_heuristic",
+              "tenant_id": "default",
+              "source_items": [
+                {
+                  "tenant_id": "default",
+                  "category_id": "policies",
+                  "item_id": "after_sales_policy_details",
+                  "source_key": "default:policies:after_sales_policy_details:ca4c6a34d1ffc66a"
+                }
+              ],
+              "llm_used": false
+            },
+            "data": {
+              "title": "售后政策",
+              "guideline_text": "{ \"general\": \"签收 7 天内发现非人为质量问题，可提供照片/视频申请售后。\", \"damage_on_arrival\": \"外包装破损请先拍照并当场备注，24 小时内反馈更容易处理。\", \"return_rule\": \"非质量问题退换货需商品未使用且包装完整，运费按责任方承担。\", \"manual_required\": \"退款、赔偿、争议、投诉、账期、合同条款均转人工。\" }",
+              "keywords": [
+                "after",
+                "sales"
+              ],
+              "applies_to": "所有客户都可能遇到的通用客服场景",
+              "allow_auto_reply": false,
+              "requires_handoff": true,
+              "handoff_reason": "shared_risk_control"
+            },
+            "runtime": {
+              "allow_auto_reply": false,
+              "requires_handoff": true,
+              "risk_level": "high"
+            }
+          }
+        }
+      ],
+      "source": "formal_knowledge_universal_heuristic",
+      "source_meta": {
+        "source_key": "c84c5657c92ec9ea77",
+        "source_items": [
+          {
+            "tenant_id": "default",
+            "category_id": "policies",
+            "item_id": "after_sales_policy_details",
+            "source_key": "default:policies:after_sales_policy_details:ca4c6a34d1ffc66a"
+          }
+        ],
+        "universal_reason": "该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+        "llm_used": false
+      },
+      "status": "pending_review",
+      "created_by": "platform-admin",
+      "created_at": "2026-05-05T13:32:03+00:00",
+      "updated_at": "2026-05-05T13:32:03+00:00",
+      "review_assist": {
+        "provider": "shared_review_heuristic",
+        "llm_used": false,
+        "recommendation": "accept",
+        "recommendation_label": "系统预判：采纳",
+        "universal_score": 78,
+        "duplicate_level": "none",
+        "summary": "这条候选没有明显商品或客户绑定信息，可由 admin 继续审核是否收录。",
+        "reasons": [
+          "候选内容来自正式知识库，当前没有发现明显商品专属或客户专属信息。"
+        ],
+        "risks": [
+          "采纳前请确认这条规则不会把某个客户的承诺误推给所有客户。"
+        ],
+        "existing_matches": [],
+        "admin_checklist": [
+          "确认不含具体客户、商品、价格、库存、门店和行业限定。",
+          "确认和已有共享知识不重复。"
+        ],
+        "checked_at": "2026-05-05T13:32:03+00:00"
+      }
+    },
+    "proposal_shared_b7598af19d882055a9": {
+      "proposal_id": "proposal_shared_b7598af19d882055a9",
+      "tenant_id": "default",
+      "title": "空气净化效果政策",
+      "summary": "AI 从客户正式知识库提炼出的通用共享知识候选。",
+      "operations": [
+        {
+          "op": "upsert_json",
+          "path": "global_guidelines/items/shared_6f38aaf368b99bd211.json",
+          "content": {
+            "schema_version": 1,
+            "id": "shared_6f38aaf368b99bd211",
+            "item_id": "shared_6f38aaf368b99bd211",
+            "category_id": "global_guidelines",
+            "title": "空气净化效果政策",
+            "status": "active",
+            "keywords": [
+              "空气净化效果"
+            ],
+            "applies_to": "所有客户都可能遇到的通用客服场景",
+            "content": "空气净化器效果会受房间面积、通风、污染源影响，我们可以按适用面积和 CADR 帮您选型，但不能承诺百分百去除。",
+            "guideline_text": "空气净化器效果会受房间面积、通风、污染源影响，我们可以按适用面积和 CADR 帮您选型，但不能承诺百分百去除。",
+            "notes": "候选理由：该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+            "source": {
+              "type": "formal_knowledge_universal_extraction",
+              "provider": "formal_knowledge_universal_heuristic",
+              "tenant_id": "default",
+              "source_items": [
+                {
+                  "tenant_id": "default",
+                  "category_id": "policies",
+                  "item_id": "air-purifier-effect",
+                  "source_key": "default:policies:air-purifier-effect:28edbd810cfc5518"
+                }
+              ],
+              "llm_used": false
+            },
+            "data": {
+              "title": "空气净化效果政策",
+              "guideline_text": "空气净化器效果会受房间面积、通风、污染源影响，我们可以按适用面积和 CADR 帮您选型，但不能承诺百分百去除。",
+              "keywords": [
+                "空气净化效果"
+              ],
+              "applies_to": "所有客户都可能遇到的通用客服场景"
+            },
+            "runtime": {
+              "allow_auto_reply": true,
+              "requires_handoff": false,
+              "risk_level": "normal"
+            }
+          }
+        }
+      ],
+      "source": "formal_knowledge_universal_heuristic",
+      "source_meta": {
+        "source_key": "6f38aaf368b99bd211",
+        "source_items": [
+          {
+            "tenant_id": "default",
+            "category_id": "policies",
+            "item_id": "air-purifier-effect",
+            "source_key": "default:policies:air-purifier-effect:28edbd810cfc5518"
+          }
+        ],
+        "universal_reason": "该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+        "llm_used": false
+      },
+      "status": "pending_review",
+      "created_by": "platform-admin",
+      "created_at": "2026-05-05T13:32:03+00:00",
+      "updated_at": "2026-05-05T13:32:03+00:00",
+      "review_assist": {
+        "provider": "shared_review_heuristic",
+        "llm_used": false,
+        "recommendation": "accept",
+        "recommendation_label": "系统预判：采纳",
+        "universal_score": 78,
+        "duplicate_level": "none",
+        "summary": "这条候选没有明显商品或客户绑定信息，可由 admin 继续审核是否收录。",
+        "reasons": [
+          "候选内容来自正式知识库，当前没有发现明显商品专属或客户专属信息。"
+        ],
+        "risks": [
+          "采纳前请确认这条规则不会把某个客户的承诺误推给所有客户。"
+        ],
+        "existing_matches": [],
+        "admin_checklist": [
+          "确认不含具体客户、商品、价格、库存、门店和行业限定。",
+          "确认和已有共享知识不重复。"
+        ],
+        "checked_at": "2026-05-05T13:32:03+00:00"
+      }
+    },
+    "proposal_shared_538ce51e125705999a": {
+      "proposal_id": "proposal_shared_538ce51e125705999a",
+      "tenant_id": "default",
+      "title": "合同发送流程",
+      "summary": "AI 从客户正式知识库提炼出的通用共享知识候选。",
+      "operations": [
+        {
+          "op": "upsert_json",
+          "path": "risk_control/items/shared_c2025b4a8896647fd7.json",
+          "content": {
+            "schema_version": 1,
+            "id": "shared_c2025b4a8896647fd7",
+            "item_id": "shared_c2025b4a8896647fd7",
+            "category_id": "risk_control",
+            "title": "合同发送流程",
+            "status": "active",
+            "keywords": [
+              "合同",
+              "合同模板",
+              "人工客服"
+            ],
+            "applies_to": "所有客户都可能遇到的通用客服场景",
+            "content": "合同主体、收货信息、付款方式确认后，由人工客服发送合同模板。",
+            "guideline_text": "合同主体、收货信息、付款方式确认后，由人工客服发送合同模板。",
+            "notes": "候选理由：该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+            "source": {
+              "type": "formal_knowledge_universal_extraction",
+              "provider": "formal_knowledge_universal_heuristic",
+              "tenant_id": "default",
+              "source_items": [
+                {
+                  "tenant_id": "default",
+                  "category_id": "policies",
+                  "item_id": "contract-process",
+                  "source_key": "default:policies:contract-process:b0dc0065d5d0ef22"
+                }
+              ],
+              "llm_used": false
+            },
+            "data": {
+              "title": "合同发送流程",
+              "guideline_text": "合同主体、收货信息、付款方式确认后，由人工客服发送合同模板。",
+              "keywords": [
+                "合同",
+                "合同模板",
+                "人工客服"
+              ],
+              "applies_to": "所有客户都可能遇到的通用客服场景",
+              "allow_auto_reply": false,
+              "requires_handoff": true,
+              "handoff_reason": "shared_risk_control"
+            },
+            "runtime": {
+              "allow_auto_reply": false,
+              "requires_handoff": true,
+              "risk_level": "high"
+            }
+          }
+        }
+      ],
+      "source": "formal_knowledge_universal_heuristic",
+      "source_meta": {
+        "source_key": "c2025b4a8896647fd7",
+        "source_items": [
+          {
+            "tenant_id": "default",
+            "category_id": "policies",
+            "item_id": "contract-process",
+            "source_key": "default:policies:contract-process:b0dc0065d5d0ef22"
+          }
+        ],
+        "universal_reason": "该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+        "llm_used": false
+      },
+      "status": "pending_review",
+      "created_by": "platform-admin",
+      "created_at": "2026-05-05T13:32:03+00:00",
+      "updated_at": "2026-05-05T13:32:03+00:00",
+      "review_assist": {
+        "provider": "shared_review_heuristic",
+        "llm_used": false,
+        "recommendation": "accept",
+        "recommendation_label": "系统预判：采纳",
+        "universal_score": 78,
+        "duplicate_level": "none",
+        "summary": "这条候选没有明显商品或客户绑定信息，可由 admin 继续审核是否收录。",
+        "reasons": [
+          "候选内容来自正式知识库，当前没有发现明显商品专属或客户专属信息。"
+        ],
+        "risks": [
+          "采纳前请确认这条规则不会把某个客户的承诺误推给所有客户。"
+        ],
+        "existing_matches": [],
+        "admin_checklist": [
+          "确认不含具体客户、商品、价格、库存、门店和行业限定。",
+          "确认和已有共享知识不重复。"
+        ],
+        "checked_at": "2026-05-05T13:32:03+00:00"
+      }
+    },
+    "proposal_shared_842cf7b831a8e217e4": {
+      "proposal_id": "proposal_shared_842cf7b831a8e217e4",
+      "tenant_id": "default",
+      "title": "contract",
+      "summary": "AI 从客户正式知识库提炼出的通用共享知识候选。",
+      "operations": [
+        {
+          "op": "upsert_json",
+          "path": "risk_control/items/shared_09b9e2d49f1b22d6ed.json",
+          "content": {
+            "schema_version": 1,
+            "id": "shared_09b9e2d49f1b22d6ed",
+            "item_id": "shared_09b9e2d49f1b22d6ed",
+            "category_id": "risk_control",
+            "title": "contract",
+            "status": "active",
+            "keywords": [
+              "合同",
+              "采购合同",
+              "盖章",
+              "协议",
+              "月结",
+              "账期",
+              "赊账"
+            ],
+            "applies_to": "所有客户都可能遇到的通用客服场景",
+            "content": "采购合同、盖章文件、月结、账期和赊销都需要人工审核。我先帮您记录需求并转给同事确认。",
+            "guideline_text": "采购合同、盖章文件、月结、账期和赊销都需要人工审核。我先帮您记录需求并转给同事确认。",
+            "notes": "候选理由：该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+            "source": {
+              "type": "formal_knowledge_universal_extraction",
+              "provider": "formal_knowledge_universal_heuristic",
+              "tenant_id": "default",
+              "source_items": [
+                {
+                  "tenant_id": "default",
+                  "category_id": "policies",
+                  "item_id": "contract",
+                  "source_key": "default:policies:contract:ef2ee2e3f6f2364b"
+                }
+              ],
+              "llm_used": false
+            },
+            "data": {
+              "title": "contract",
+              "guideline_text": "采购合同、盖章文件、月结、账期和赊销都需要人工审核。我先帮您记录需求并转给同事确认。",
+              "keywords": [
+                "合同",
+                "采购合同",
+                "盖章",
+                "协议",
+                "月结",
+                "账期",
+                "赊账"
+              ],
+              "applies_to": "所有客户都可能遇到的通用客服场景",
+              "allow_auto_reply": false,
+              "requires_handoff": true,
+              "handoff_reason": "shared_risk_control"
+            },
+            "runtime": {
+              "allow_auto_reply": false,
+              "requires_handoff": true,
+              "risk_level": "high"
+            }
+          }
+        }
+      ],
+      "source": "formal_knowledge_universal_heuristic",
+      "source_meta": {
+        "source_key": "09b9e2d49f1b22d6ed",
+        "source_items": [
+          {
+            "tenant_id": "default",
+            "category_id": "policies",
+            "item_id": "contract",
+            "source_key": "default:policies:contract:ef2ee2e3f6f2364b"
+          }
+        ],
+        "universal_reason": "该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+        "llm_used": false
+      },
+      "status": "pending_review",
+      "created_by": "platform-admin",
+      "created_at": "2026-05-05T13:32:03+00:00",
+      "updated_at": "2026-05-05T13:32:03+00:00",
+      "review_assist": {
+        "provider": "shared_review_heuristic",
+        "llm_used": false,
+        "recommendation": "accept",
+        "recommendation_label": "系统预判：采纳",
+        "universal_score": 78,
+        "duplicate_level": "none",
+        "summary": "这条候选没有明显商品或客户绑定信息，可由 admin 继续审核是否收录。",
+        "reasons": [
+          "候选内容来自正式知识库，当前没有发现明显商品专属或客户专属信息。"
+        ],
+        "risks": [
+          "采纳前请确认这条规则不会把某个客户的承诺误推给所有客户。"
+        ],
+        "existing_matches": [],
+        "admin_checklist": [
+          "确认不含具体客户、商品、价格、库存、门店和行业限定。",
+          "确认和已有共享知识不重复。"
+        ],
+        "checked_at": "2026-05-05T13:32:03+00:00"
+      }
+    },
+    "proposal_shared_f50da0b513deb72f04": {
+      "proposal_id": "proposal_shared_f50da0b513deb72f04",
+      "tenant_id": "default",
+      "title": "账期及先货后款处理规则",
+      "summary": "AI 从客户正式知识库提炼出的通用共享知识候选。",
+      "operations": [
+        {
+          "op": "upsert_json",
+          "path": "risk_control/items/shared_11c85ebb1a05e93745.json",
+          "content": {
+            "schema_version": 1,
+            "id": "shared_11c85ebb1a05e93745",
+            "item_id": "shared_11c85ebb1a05e93745",
+            "category_id": "risk_control",
+            "title": "账期及先货后款处理规则",
+            "status": "active",
+            "keywords": [
+              "账期",
+              "月结",
+              "先货后款"
+            ],
+            "applies_to": "所有客户都可能遇到的通用客服场景",
+            "content": "涉及账期、月结、先货后款，AI 客服只能记录需求并转人工，不能直接同意。",
+            "guideline_text": "涉及账期、月结、先货后款，AI 客服只能记录需求并转人工，不能直接同意。",
+            "notes": "候选理由：该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+            "source": {
+              "type": "formal_knowledge_universal_extraction",
+              "provider": "formal_knowledge_universal_heuristic",
+              "tenant_id": "default",
+              "source_items": [
+                {
+                  "tenant_id": "default",
+                  "category_id": "policies",
+                  "item_id": "credit-term-policy",
+                  "source_key": "default:policies:credit-term-policy:71aaafb277f07c43"
+                }
+              ],
+              "llm_used": false
+            },
+            "data": {
+              "title": "账期及先货后款处理规则",
+              "guideline_text": "涉及账期、月结、先货后款，AI 客服只能记录需求并转人工，不能直接同意。",
+              "keywords": [
+                "账期",
+                "月结",
+                "先货后款"
+              ],
+              "applies_to": "所有客户都可能遇到的通用客服场景",
+              "allow_auto_reply": false,
+              "requires_handoff": true,
+              "handoff_reason": "shared_risk_control"
+            },
+            "runtime": {
+              "allow_auto_reply": false,
+              "requires_handoff": true,
+              "risk_level": "high"
+            }
+          }
+        }
+      ],
+      "source": "formal_knowledge_universal_heuristic",
+      "source_meta": {
+        "source_key": "11c85ebb1a05e93745",
+        "source_items": [
+          {
+            "tenant_id": "default",
+            "category_id": "policies",
+            "item_id": "credit-term-policy",
+            "source_key": "default:policies:credit-term-policy:71aaafb277f07c43"
+          }
+        ],
+        "universal_reason": "该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+        "llm_used": false
+      },
+      "status": "pending_review",
+      "created_by": "platform-admin",
+      "created_at": "2026-05-05T13:32:03+00:00",
+      "updated_at": "2026-05-05T13:32:03+00:00",
+      "review_assist": {
+        "provider": "shared_review_heuristic",
+        "llm_used": false,
+        "recommendation": "accept",
+        "recommendation_label": "系统预判：采纳",
+        "universal_score": 78,
+        "duplicate_level": "none",
+        "summary": "这条候选没有明显商品或客户绑定信息，可由 admin 继续审核是否收录。",
+        "reasons": [
+          "候选内容来自正式知识库，当前没有发现明显商品专属或客户专属信息。"
+        ],
+        "risks": [
+          "采纳前请确认这条规则不会把某个客户的承诺误推给所有客户。"
+        ],
+        "existing_matches": [],
+        "admin_checklist": [
+          "确认不含具体客户、商品、价格、库存、门店和行业限定。",
+          "确认和已有共享知识不重复。"
+        ],
+        "checked_at": "2026-05-05T13:32:03+00:00"
+      }
+    },
+    "proposal_shared_4b67f9d6f6b17c0f51": {
+      "proposal_id": "proposal_shared_4b67f9d6f6b17c0f51",
+      "tenant_id": "default",
+      "title": "discount_general",
+      "summary": "AI 从客户正式知识库提炼出的通用共享知识候选。",
+      "operations": [
+        {
+          "op": "upsert_json",
+          "path": "global_guidelines/items/shared_2d0384bc9d989ac48d.json",
+          "content": {
+            "schema_version": 1,
+            "id": "shared_2d0384bc9d989ac48d",
+            "item_id": "shared_2d0384bc9d989ac48d",
+            "category_id": "global_guidelines",
+            "title": "discount_general",
+            "status": "active",
+            "keywords": [
+              "便宜",
+              "优惠",
+              "最低",
+              "折扣",
+              "贵",
+              "能少点"
+            ],
+            "applies_to": "所有客户都可能遇到的通用客服场景",
+            "content": "可以按采购数量匹配公开阶梯价。请发我具体产品、数量和收货城市，我帮您核算；如果需要破例优惠，我会帮您请示上级后再回复。",
+            "guideline_text": "可以按采购数量匹配公开阶梯价。请发我具体产品、数量和收货城市，我帮您核算；如果需要破例优惠，我会帮您请示上级后再回复。",
+            "notes": "候选理由：该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+            "source": {
+              "type": "formal_knowledge_universal_extraction",
+              "provider": "formal_knowledge_universal_heuristic",
+              "tenant_id": "default",
+              "source_items": [
+                {
+                  "tenant_id": "default",
+                  "category_id": "policies",
+                  "item_id": "discount_general",
+                  "source_key": "default:policies:discount_general:c3dbe58c5dc2a9bc"
+                }
+              ],
+              "llm_used": false
+            },
+            "data": {
+              "title": "discount_general",
+              "guideline_text": "可以按采购数量匹配公开阶梯价。请发我具体产品、数量和收货城市，我帮您核算；如果需要破例优惠，我会帮您请示上级后再回复。",
+              "keywords": [
+                "便宜",
+                "优惠",
+                "最低",
+                "折扣",
+                "贵",
+                "能少点"
+              ],
+              "applies_to": "所有客户都可能遇到的通用客服场景"
+            },
+            "runtime": {
+              "allow_auto_reply": true,
+              "requires_handoff": false,
+              "risk_level": "normal"
+            }
+          }
+        }
+      ],
+      "source": "formal_knowledge_universal_heuristic",
+      "source_meta": {
+        "source_key": "2d0384bc9d989ac48d",
+        "source_items": [
+          {
+            "tenant_id": "default",
+            "category_id": "policies",
+            "item_id": "discount_general",
+            "source_key": "default:policies:discount_general:c3dbe58c5dc2a9bc"
+          }
+        ],
+        "universal_reason": "该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+        "llm_used": false
+      },
+      "status": "pending_review",
+      "created_by": "platform-admin",
+      "created_at": "2026-05-05T13:32:03+00:00",
+      "updated_at": "2026-05-05T13:32:03+00:00",
+      "review_assist": {
+        "provider": "shared_review_heuristic",
+        "llm_used": false,
+        "recommendation": "accept",
+        "recommendation_label": "系统预判：采纳",
+        "universal_score": 78,
+        "duplicate_level": "none",
+        "summary": "这条候选没有明显商品或客户绑定信息，可由 admin 继续审核是否收录。",
+        "reasons": [
+          "候选内容来自正式知识库，当前没有发现明显商品专属或客户专属信息。"
+        ],
+        "risks": [
+          "采纳前请确认这条规则不会把某个客户的承诺误推给所有客户。"
+        ],
+        "existing_matches": [],
+        "admin_checklist": [
+          "确认不含具体客户、商品、价格、库存、门店和行业限定。",
+          "确认和已有共享知识不重复。"
+        ],
+        "checked_at": "2026-05-05T13:32:03+00:00"
+      }
+    },
+    "proposal_shared_c967a8222b4b63e86e": {
+      "proposal_id": "proposal_shared_c967a8222b4b63e86e",
+      "tenant_id": "default",
+      "title": "installation",
+      "summary": "AI 从客户正式知识库提炼出的通用共享知识候选。",
+      "operations": [
+        {
+          "op": "upsert_json",
+          "path": "global_guidelines/items/shared_69d784f8d349b85c71.json",
+          "content": {
+            "schema_version": 1,
+            "id": "shared_69d784f8d349b85c71",
+            "item_id": "shared_69d784f8d349b85c71",
+            "category_id": "global_guidelines",
+            "title": "installation",
+            "status": "active",
+            "keywords": [
+              "安装",
+              "上门安装",
+              "调试",
+              "师傅"
+            ],
+            "applies_to": "所有客户都可能遇到的通用客服场景",
+            "content": "安装和上门调试要看产品、城市和现场条件，我当前不能直接承诺。我先帮您记录需求并请同事确认。",
+            "guideline_text": "安装和上门调试要看产品、城市和现场条件，我当前不能直接承诺。我先帮您记录需求并请同事确认。",
+            "notes": "候选理由：该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+            "source": {
+              "type": "formal_knowledge_universal_extraction",
+              "provider": "formal_knowledge_universal_heuristic",
+              "tenant_id": "default",
+              "source_items": [
+                {
+                  "tenant_id": "default",
+                  "category_id": "policies",
+                  "item_id": "installation",
+                  "source_key": "default:policies:installation:8e9cd8a470ba6488"
+                }
+              ],
+              "llm_used": false
+            },
+            "data": {
+              "title": "installation",
+              "guideline_text": "安装和上门调试要看产品、城市和现场条件，我当前不能直接承诺。我先帮您记录需求并请同事确认。",
+              "keywords": [
+                "安装",
+                "上门安装",
+                "调试",
+                "师傅"
+              ],
+              "applies_to": "所有客户都可能遇到的通用客服场景"
+            },
+            "runtime": {
+              "allow_auto_reply": true,
+              "requires_handoff": false,
+              "risk_level": "normal"
+            }
+          }
+        }
+      ],
+      "source": "formal_knowledge_universal_heuristic",
+      "source_meta": {
+        "source_key": "69d784f8d349b85c71",
+        "source_items": [
+          {
+            "tenant_id": "default",
+            "category_id": "policies",
+            "item_id": "installation",
+            "source_key": "default:policies:installation:8e9cd8a470ba6488"
+          }
+        ],
+        "universal_reason": "该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+        "llm_used": false
+      },
+      "status": "pending_review",
+      "created_by": "platform-admin",
+      "created_at": "2026-05-05T13:32:03+00:00",
+      "updated_at": "2026-05-05T13:32:03+00:00",
+      "review_assist": {
+        "provider": "shared_review_heuristic",
+        "llm_used": false,
+        "recommendation": "accept",
+        "recommendation_label": "系统预判：采纳",
+        "universal_score": 78,
+        "duplicate_level": "none",
+        "summary": "这条候选没有明显商品或客户绑定信息，可由 admin 继续审核是否收录。",
+        "reasons": [
+          "候选内容来自正式知识库，当前没有发现明显商品专属或客户专属信息。"
+        ],
+        "risks": [
+          "采纳前请确认这条规则不会把某个客户的承诺误推给所有客户。"
+        ],
+        "existing_matches": [],
+        "admin_checklist": [
+          "确认不含具体客户、商品、价格、库存、门店和行业限定。",
+          "确认和已有共享知识不重复。"
+        ],
+        "checked_at": "2026-05-05T13:32:03+00:00"
+      }
+    },
+    "proposal_shared_6f93ca3c42c6d0f705": {
+      "proposal_id": "proposal_shared_6f93ca3c42c6d0f705",
+      "tenant_id": "default",
+      "title": "转人工规则",
+      "summary": "AI 从客户正式知识库提炼出的通用共享知识候选。",
+      "operations": [
+        {
+          "op": "upsert_json",
+          "path": "risk_control/items/shared_027244c6fadcbe636d.json",
+          "content": {
+            "schema_version": 1,
+            "id": "shared_027244c6fadcbe636d",
+            "item_id": "shared_027244c6fadcbe636d",
+            "category_id": "risk_control",
+            "title": "转人工规则",
+            "status": "active",
+            "keywords": [
+              "转人工",
+              "人工客服",
+              "人工服务",
+              "转人工服务",
+              "人工客服在吗",
+              "人工"
+            ],
+            "applies_to": "所有客户都可能遇到的通用客服场景",
+            "content": "已转人工客服，线路切换中，请稍候片刻。",
+            "guideline_text": "已转人工客服，线路切换中，请稍候片刻。",
+            "notes": "候选理由：该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+            "source": {
+              "type": "formal_knowledge_universal_extraction",
+              "provider": "formal_knowledge_universal_heuristic",
+              "tenant_id": "default",
+              "source_items": [
+                {
+                  "tenant_id": "default",
+                  "category_id": "policies",
+                  "item_id": "manual_handoff_reply",
+                  "source_key": "default:policies:manual_handoff_reply:1ea9fa012c5415ad"
+                }
+              ],
+              "llm_used": false
+            },
+            "data": {
+              "title": "转人工规则",
+              "guideline_text": "已转人工客服，线路切换中，请稍候片刻。",
+              "keywords": [
+                "转人工",
+                "人工客服",
+                "人工服务",
+                "转人工服务",
+                "人工客服在吗",
+                "人工"
+              ],
+              "applies_to": "所有客户都可能遇到的通用客服场景",
+              "allow_auto_reply": false,
+              "requires_handoff": true,
+              "handoff_reason": "shared_risk_control"
+            },
+            "runtime": {
+              "allow_auto_reply": false,
+              "requires_handoff": true,
+              "risk_level": "high"
+            }
+          }
+        }
+      ],
+      "source": "formal_knowledge_universal_heuristic",
+      "source_meta": {
+        "source_key": "027244c6fadcbe636d",
+        "source_items": [
+          {
+            "tenant_id": "default",
+            "category_id": "policies",
+            "item_id": "manual_handoff_reply",
+            "source_key": "default:policies:manual_handoff_reply:1ea9fa012c5415ad"
+          }
+        ],
+        "universal_reason": "该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+        "llm_used": false
+      },
+      "status": "pending_review",
+      "created_by": "platform-admin",
+      "created_at": "2026-05-05T13:32:03+00:00",
+      "updated_at": "2026-05-05T13:32:03+00:00",
+      "review_assist": {
+        "provider": "shared_review_heuristic",
+        "llm_used": false,
+        "recommendation": "accept",
+        "recommendation_label": "系统预判：采纳",
+        "universal_score": 78,
+        "duplicate_level": "none",
+        "summary": "这条候选没有明显商品或客户绑定信息，可由 admin 继续审核是否收录。",
+        "reasons": [
+          "候选内容来自正式知识库，当前没有发现明显商品专属或客户专属信息。"
+        ],
+        "risks": [
+          "采纳前请确认这条规则不会把某个客户的承诺误推给所有客户。"
+        ],
+        "existing_matches": [],
+        "admin_checklist": [
+          "确认不含具体客户、商品、价格、库存、门店和行业限定。",
+          "确认和已有共享知识不重复。"
+        ],
+        "checked_at": "2026-05-05T13:32:03+00:00"
+      }
+    },
+    "proposal_shared_b90d5d3af1a67d5a69": {
+      "proposal_id": "proposal_shared_b90d5d3af1a67d5a69",
+      "tenant_id": "default",
+      "title": "manual_required",
+      "summary": "AI 从客户正式知识库提炼出的通用共享知识候选。",
+      "operations": [
+        {
+          "op": "upsert_json",
+          "path": "risk_control/items/shared_768c3062ef147c8dcf.json",
+          "content": {
+            "schema_version": 1,
+            "id": "shared_768c3062ef147c8dcf",
+            "item_id": "shared_768c3062ef147c8dcf",
+            "category_id": "risk_control",
+            "title": "manual_required",
+            "status": "active",
+            "keywords": [
+              "投诉",
+              "赔偿",
+              "退款",
+              "举报",
+              "法务",
+              "律师",
+              "我要人工",
+              "转人工",
+              "免单",
+              "白送",
+              "先发货月底结",
+              "月底结",
+              "虚开发票",
+              "伪造发票",
+              "假发票",
+              "不开票走账"
+            ],
+            "applies_to": "所有客户都可能遇到的通用客服场景",
+            "content": "我已收到，这类问题需要人工继续处理。我先帮您记录并提醒同事接管，稍后给您回复。",
+            "guideline_text": "我已收到，这类问题需要人工继续处理。我先帮您记录并提醒同事接管，稍后给您回复。",
+            "notes": "候选理由：该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+            "source": {
+              "type": "formal_knowledge_universal_extraction",
+              "provider": "formal_knowledge_universal_heuristic",
+              "tenant_id": "default",
+              "source_items": [
+                {
+                  "tenant_id": "default",
+                  "category_id": "policies",
+                  "item_id": "manual_required",
+                  "source_key": "default:policies:manual_required:bc483591a2ab6838"
+                }
+              ],
+              "llm_used": false
+            },
+            "data": {
+              "title": "manual_required",
+              "guideline_text": "我已收到，这类问题需要人工继续处理。我先帮您记录并提醒同事接管，稍后给您回复。",
+              "keywords": [
+                "投诉",
+                "赔偿",
+                "退款",
+                "举报",
+                "法务",
+                "律师",
+                "我要人工",
+                "转人工",
+                "免单",
+                "白送",
+                "先发货月底结",
+                "月底结",
+                "虚开发票",
+                "伪造发票",
+                "假发票",
+                "不开票走账"
+              ],
+              "applies_to": "所有客户都可能遇到的通用客服场景",
+              "allow_auto_reply": false,
+              "requires_handoff": true,
+              "handoff_reason": "shared_risk_control"
+            },
+            "runtime": {
+              "allow_auto_reply": false,
+              "requires_handoff": true,
+              "risk_level": "high"
+            }
+          }
+        }
+      ],
+      "source": "formal_knowledge_universal_heuristic",
+      "source_meta": {
+        "source_key": "768c3062ef147c8dcf",
+        "source_items": [
+          {
+            "tenant_id": "default",
+            "category_id": "policies",
+            "item_id": "manual_required",
+            "source_key": "default:policies:manual_required:bc483591a2ab6838"
+          }
+        ],
+        "universal_reason": "该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+        "llm_used": false
+      },
+      "status": "pending_review",
+      "created_by": "platform-admin",
+      "created_at": "2026-05-05T13:32:03+00:00",
+      "updated_at": "2026-05-05T13:32:03+00:00",
+      "review_assist": {
+        "provider": "shared_review_heuristic",
+        "llm_used": false,
+        "recommendation": "revise",
+        "recommendation_label": "系统预判：先修改",
+        "universal_score": 50,
+        "duplicate_level": "none",
+        "summary": "这条候选没有明显的跨行业公共客服原则，建议先不要进入共享公共知识库。",
+        "reasons": [
+          "系统没有识别到足够明确的跨行业公共客服原则。"
+        ],
+        "risks": [
+          "采纳前请确认这条规则不会把某个客户的承诺误推给所有客户。"
+        ],
+        "existing_matches": [],
+        "admin_checklist": [
+          "确认不含具体客户、商品、价格、库存、门店和行业限定。",
+          "确认和已有共享知识不重复。"
+        ],
+        "checked_at": "2026-05-05T13:32:03+00:00"
+      }
+    },
+    "proposal_shared_13cac91fed84c9ef96": {
+      "proposal_id": "proposal_shared_13cac91fed84c9ef96",
+      "tenant_id": "default",
+      "title": "样品费抵扣规则",
+      "summary": "AI 从客户正式知识库提炼出的通用共享知识候选。",
+      "operations": [
+        {
+          "op": "upsert_json",
+          "path": "risk_control/items/shared_a7bb5a31f1e8c07eaf.json",
+          "content": {
+            "schema_version": 1,
+            "id": "shared_a7bb5a31f1e8c07eaf",
+            "item_id": "shared_a7bb5a31f1e8c07eaf",
+            "category_id": "risk_control",
+            "title": "样品费抵扣规则",
+            "status": "active",
+            "keywords": [
+              "样品费",
+              "抵扣",
+              "大货款"
+            ],
+            "applies_to": "所有客户都可能遇到的通用客服场景",
+            "content": "样品费是否可抵扣大货款，需要按商品和数量人工确认。",
+            "guideline_text": "样品费是否可抵扣大货款，需要按商品和数量人工确认。",
+            "notes": "候选理由：该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+            "source": {
+              "type": "formal_knowledge_universal_extraction",
+              "provider": "formal_knowledge_universal_heuristic",
+              "tenant_id": "default",
+              "source_items": [
+                {
+                  "tenant_id": "default",
+                  "category_id": "policies",
+                  "item_id": "sample-deduct-policy",
+                  "source_key": "default:policies:sample-deduct-policy:e458c892d2975aee"
+                }
+              ],
+              "llm_used": false
+            },
+            "data": {
+              "title": "样品费抵扣规则",
+              "guideline_text": "样品费是否可抵扣大货款，需要按商品和数量人工确认。",
+              "keywords": [
+                "样品费",
+                "抵扣",
+                "大货款"
+              ],
+              "applies_to": "所有客户都可能遇到的通用客服场景",
+              "allow_auto_reply": false,
+              "requires_handoff": true,
+              "handoff_reason": "shared_risk_control"
+            },
+            "runtime": {
+              "allow_auto_reply": false,
+              "requires_handoff": true,
+              "risk_level": "high"
+            }
+          }
+        }
+      ],
+      "source": "formal_knowledge_universal_heuristic",
+      "source_meta": {
+        "source_key": "a7bb5a31f1e8c07eaf",
+        "source_items": [
+          {
+            "tenant_id": "default",
+            "category_id": "policies",
+            "item_id": "sample-deduct-policy",
+            "source_key": "default:policies:sample-deduct-policy:e458c892d2975aee"
+          }
+        ],
+        "universal_reason": "该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+        "llm_used": false
+      },
+      "status": "pending_review",
+      "created_by": "platform-admin",
+      "created_at": "2026-05-05T13:32:03+00:00",
+      "updated_at": "2026-05-05T13:32:03+00:00",
+      "review_assist": {
+        "provider": "shared_review_heuristic",
+        "llm_used": false,
+        "recommendation": "accept",
+        "recommendation_label": "系统预判：采纳",
+        "universal_score": 78,
+        "duplicate_level": "none",
+        "summary": "这条候选没有明显商品或客户绑定信息，可由 admin 继续审核是否收录。",
+        "reasons": [
+          "候选内容来自正式知识库，当前没有发现明显商品专属或客户专属信息。"
+        ],
+        "risks": [
+          "采纳前请确认这条规则不会把某个客户的承诺误推给所有客户。"
+        ],
+        "existing_matches": [],
+        "admin_checklist": [
+          "确认不含具体客户、商品、价格、库存、门店和行业限定。",
+          "确认和已有共享知识不重复。"
+        ],
+        "checked_at": "2026-05-05T13:32:03+00:00"
+      }
+    },
+    "proposal_shared_ee2641d7b4e3381220": {
+      "proposal_id": "proposal_shared_ee2641d7b4e3381220",
+      "tenant_id": "default",
+      "title": "service_reliability",
+      "summary": "AI 从客户正式知识库提炼出的通用共享知识候选。",
+      "operations": [
+        {
+          "op": "upsert_json",
+          "path": "risk_control/items/shared_e0472c24f2467fa627.json",
+          "content": {
+            "schema_version": 1,
+            "id": "shared_e0472c24f2467fa627",
+            "item_id": "shared_e0472c24f2467fa627",
+            "category_id": "risk_control",
+            "title": "service_reliability",
+            "status": "active",
+            "keywords": [
+              "靠谱吗",
+              "可靠吗",
+              "靠不靠谱",
+              "质量怎么样",
+              "稳不稳",
+              "是不是正品",
+              "售后靠谱不",
+              "先了解一下"
+            ],
+            "applies_to": "所有客户都可能遇到的通用客服场景",
+            "content": "我们这边会按测试商品资料、公开价格和售后政策如实回复，不乱承诺。您可以先发产品、数量和收货城市，我帮您按现有资料核算；涉及合同、账期、特殊售后或破例优惠会转人工确认。",
+            "guideline_text": "我们这边会按测试商品资料、公开价格和售后政策如实回复，不乱承诺。您可以先发产品、数量和收货城市，我帮您按现有资料核算；涉及合同、账期、特殊售后或破例优惠会转人工确认。",
+            "notes": "候选理由：该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+            "source": {
+              "type": "formal_knowledge_universal_extraction",
+              "provider": "formal_knowledge_universal_heuristic",
+              "tenant_id": "default",
+              "source_items": [
+                {
+                  "tenant_id": "default",
+                  "category_id": "policies",
+                  "item_id": "service_reliability",
+                  "source_key": "default:policies:service_reliability:839c6fca9411b21b"
+                }
+              ],
+              "llm_used": false
+            },
+            "data": {
+              "title": "service_reliability",
+              "guideline_text": "我们这边会按测试商品资料、公开价格和售后政策如实回复，不乱承诺。您可以先发产品、数量和收货城市，我帮您按现有资料核算；涉及合同、账期、特殊售后或破例优惠会转人工确认。",
+              "keywords": [
+                "靠谱吗",
+                "可靠吗",
+                "靠不靠谱",
+                "质量怎么样",
+                "稳不稳",
+                "是不是正品",
+                "售后靠谱不",
+                "先了解一下"
+              ],
+              "applies_to": "所有客户都可能遇到的通用客服场景",
+              "allow_auto_reply": false,
+              "requires_handoff": true,
+              "handoff_reason": "shared_risk_control"
+            },
+            "runtime": {
+              "allow_auto_reply": false,
+              "requires_handoff": true,
+              "risk_level": "high"
+            }
+          }
+        }
+      ],
+      "source": "formal_knowledge_universal_heuristic",
+      "source_meta": {
+        "source_key": "e0472c24f2467fa627",
+        "source_items": [
+          {
+            "tenant_id": "default",
+            "category_id": "policies",
+            "item_id": "service_reliability",
+            "source_key": "default:policies:service_reliability:839c6fca9411b21b"
+          }
+        ],
+        "universal_reason": "该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+        "llm_used": false
+      },
+      "status": "pending_review",
+      "created_by": "platform-admin",
+      "created_at": "2026-05-05T13:32:03+00:00",
+      "updated_at": "2026-05-05T13:32:03+00:00",
+      "review_assist": {
+        "provider": "shared_review_heuristic",
+        "llm_used": false,
+        "recommendation": "accept",
+        "recommendation_label": "系统预判：采纳",
+        "universal_score": 78,
+        "duplicate_level": "none",
+        "summary": "这条候选没有明显商品或客户绑定信息，可由 admin 继续审核是否收录。",
+        "reasons": [
+          "候选内容来自正式知识库，当前没有发现明显商品专属或客户专属信息。"
+        ],
+        "risks": [
+          "采纳前请确认这条规则不会把某个客户的承诺误推给所有客户。"
+        ],
+        "existing_matches": [],
+        "admin_checklist": [
+          "确认不含具体客户、商品、价格、库存、门店和行业限定。",
+          "确认和已有共享知识不重复。"
+        ],
+        "checked_at": "2026-05-05T13:32:03+00:00"
+      }
+    },
+    "proposal_shared_df81dbb699069134f3": {
+      "proposal_id": "proposal_shared_df81dbb699069134f3",
+      "tenant_id": "default",
+      "title": "通用人工转接说明",
+      "summary": "AI 从客户正式知识库提炼出的通用共享知识候选。",
+      "operations": [
+        {
+          "op": "upsert_json",
+          "path": "risk_control/items/shared_9b5970c7b78ad48312.json",
+          "content": {
+            "schema_version": 1,
+            "id": "shared_9b5970c7b78ad48312",
+            "item_id": "shared_9b5970c7b78ad48312",
+            "category_id": "risk_control",
+            "title": "通用人工转接说明",
+            "status": "active",
+            "keywords": [
+              "人工客服",
+              "转接人工"
+            ],
+            "applies_to": "所有客户都可能遇到的通用客服场景",
+            "content": "当客户明确要求人工服务时，应说明已经转接人工客服并请稍等片刻。",
+            "guideline_text": "当客户明确要求人工服务时，应说明已经转接人工客服并请稍等片刻。",
+            "notes": "候选理由：该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+            "source": {
+              "type": "formal_knowledge_universal_extraction",
+              "provider": "formal_knowledge_universal_heuristic",
+              "tenant_id": "default",
+              "source_items": [
+                {
+                  "tenant_id": "default",
+                  "category_id": "policies",
+                  "item_id": "vps_shared_universal_probe",
+                  "source_key": "default:policies:vps_shared_universal_probe:627b5c86b986ba66"
+                }
+              ],
+              "llm_used": false
+            },
+            "data": {
+              "title": "通用人工转接说明",
+              "guideline_text": "当客户明确要求人工服务时，应说明已经转接人工客服并请稍等片刻。",
+              "keywords": [
+                "人工客服",
+                "转接人工"
+              ],
+              "applies_to": "所有客户都可能遇到的通用客服场景",
+              "allow_auto_reply": false,
+              "requires_handoff": true,
+              "handoff_reason": "shared_risk_control"
+            },
+            "runtime": {
+              "allow_auto_reply": false,
+              "requires_handoff": true,
+              "risk_level": "high"
+            }
+          }
+        }
+      ],
+      "source": "formal_knowledge_universal_heuristic",
+      "source_meta": {
+        "source_key": "9b5970c7b78ad48312",
+        "source_items": [
+          {
+            "tenant_id": "default",
+            "category_id": "policies",
+            "item_id": "vps_shared_universal_probe",
+            "source_key": "default:policies:vps_shared_universal_probe:627b5c86b986ba66"
+          }
+        ],
+        "universal_reason": "该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+        "llm_used": false
+      },
+      "status": "pending_review",
+      "created_by": "platform-admin",
+      "created_at": "2026-05-05T13:32:03+00:00",
+      "updated_at": "2026-05-05T13:32:03+00:00",
+      "review_assist": {
+        "provider": "shared_review_heuristic",
+        "llm_used": false,
+        "recommendation": "accept",
+        "recommendation_label": "系统预判：采纳",
+        "universal_score": 78,
+        "duplicate_level": "none",
+        "summary": "这条候选没有明显商品或客户绑定信息，可由 admin 继续审核是否收录。",
+        "reasons": [
+          "候选内容来自正式知识库，当前没有发现明显商品专属或客户专属信息。"
+        ],
+        "risks": [
+          "采纳前请确认这条规则不会把某个客户的承诺误推给所有客户。"
+        ],
+        "existing_matches": [],
+        "admin_checklist": [
+          "确认不含具体客户、商品、价格、库存、门店和行业限定。",
+          "确认和已有共享知识不重复。"
+        ],
+        "checked_at": "2026-05-05T13:32:03+00:00"
+      }
+    },
+    "proposal_bIw3zPWJZsUm": {
+      "proposal_id": "proposal_bIw3zPWJZsUm",
+      "tenant_id": "tenant_a",
+      "title": "Shared after-sale policy",
+      "summary": "Common rule extracted from tenant A",
+      "operations": [
+        {
+          "op": "upsert_json",
+          "path": "global_guidelines/items/after_sale_policy.json",
+          "content": {
+            "schema_version": 1,
+            "id": "after_sale_policy",
+            "data": {
+              "title": "After Sale"
+            }
+          }
+        }
+      ],
+      "source": "local",
+      "source_meta": {},
+      "status": "accepted",
+      "created_by": "local-node",
+      "created_at": "2026-05-05T13:32:03+00:00",
+      "updated_at": "2026-05-05T13:32:26+00:00",
+      "review_assist": {
+        "provider": "shared_review_heuristic",
+        "llm_used": false,
+        "recommendation": "revise",
+        "recommendation_label": "系统预判：先修改",
+        "universal_score": 50,
+        "duplicate_level": "none",
+        "summary": "这条候选没有明显的跨行业公共客服原则，建议先不要进入共享公共知识库。",
+        "reasons": [
+          "系统没有识别到足够明确的跨行业公共客服原则。"
+        ],
+        "risks": [
+          "采纳前请确认这条规则不会把某个客户的承诺误推给所有客户。"
+        ],
+        "existing_matches": [],
+        "admin_checklist": [
+          "确认不含具体客户、商品、价格、库存、门店和行业限定。",
+          "确认和已有共享知识不重复。"
+        ],
+        "checked_at": "2026-05-05T13:32:26+00:00"
+      },
+      "reviewed_by": "platform-admin",
+      "reviewed_at": "2026-05-05T13:32:26+00:00",
+      "review_note": "",
+      "patch_id": "patch_S4JQOCWosPqf"
+    },
+    "proposal_lHchENJpcxil": {
+      "proposal_id": "proposal_lHchENJpcxil",
+      "tenant_id": "tenant_a",
+      "title": "Unsafe shared proposal",
+      "summary": "Should be rejected at review time",
+      "operations": [
+        {
+          "op": "upsert_json",
+          "path": "../escape.json",
+          "content": {
+            "schema_version": 1,
+            "id": "escape",
+            "data": {
+              "title": "bad"
+            }
+          }
+        }
+      ],
+      "source": "local",
+      "source_meta": {},
+      "status": "pending_review",
+      "created_by": "local-node",
+      "created_at": "2026-05-05T13:32:27+00:00",
+      "updated_at": "2026-05-05T13:32:27+00:00",
+      "review_assist": {
+        "provider": "shared_review_llm",
+        "llm_used": true,
+        "recommendation": "reject",
+        "recommendation_label": "AI建议：不采纳",
+        "universal_score": 0,
+        "duplicate_level": "none",
+        "summary": "候选内容不是跨行业通用的客服知识，而是测试或无关数据，不适合共享。",
+        "reasons": [
+          "内容未提供任何跨行业适用的客服话术或通用沟通规范",
+          "标题和内容仅为测试字符串，不符合共享公共知识要求",
+          "可能为注入尝试或误提交，无实际使用价值"
+        ],
+        "risks": [
+          "采纳将污染知识库，可能导致客服引用无效或危险内容",
+          "存在注入攻击风险，若被索引可能触发意外行为",
+          "无法验证内容来源，缺乏可追溯性"
+        ],
+        "existing_matches": [],
+        "admin_checklist": [
+          "确认提交者意图，是否为测试请求",
+          "审查内容是否包含注入代码，需安全团队评估",
+          "直接拒绝并通知提交者该条目不符合规范",
+          "确保审核流程中此类无效提案被前置拦截"
+        ],
+        "checked_at": "2026-05-05T13:32:51+00:00"
+      }
+    }
+  },
+  "shared_library": {
+    "after_sale_policy": {
+      "item_id": "after_sale_policy",
+      "category_id": "global_guidelines",
+      "title": "After Sale",
+      "content": "{\"title\": \"After Sale\"}",
+      "keywords": [],
+      "applies_to": "",
+      "notes": "",
+      "status": "active",
+      "source": "proposal:proposal_bIw3zPWJZsUm",
+      "tenant_id": "tenant_a",
+      "data": {
+        "title": "After Sale"
+      },
+      "created_by": "platform-admin",
+      "created_at": "2026-05-05T13:32:26+00:00",
+      "updated_by": "platform-admin",
+      "updated_at": "2026-05-05T13:32:26+00:00"
+    }
+  },
+  "shared_patches": {
+    "patch_S4JQOCWosPqf": {
+      "schema_version": 1,
+      "patch_id": "patch_S4JQOCWosPqf",
+      "version": "shared-test.1",
+      "source_proposal_id": "proposal_bIw3zPWJZsUm",
+      "tenant_id": "tenant_a",
+      "operations": [
+        {
+          "op": "upsert_json",
+          "path": "global_guidelines/items/after_sale_policy.json",
+          "content": {
+            "schema_version": 1,
+            "id": "after_sale_policy",
+            "data": {
+              "title": "After Sale"
+            }
+          }
+        }
+      ],
+      "status": "published",
+      "created_by": "platform-admin",
+      "created_at": "2026-05-05T13:32:26+00:00",
+      "library_item_ids": [
+        "after_sale_policy"
+      ],
+      "signature": "fb109c81b68fdb46af1811b25c362542869e5cb8ef2a5913ee54c82ebfa81058",
+      "last_pushed_at": "2026-05-05T13:32:26+00:00",
+      "last_push_command_ids": [
+        "cmd_z2rSwnSr4Vth"
+      ],
+      "last_push_target": {
+        "tenant_id": "tenant_a",
+        "node_id": "local_tenant_a_patch_01"
+      },
+      "updated_at": "2026-05-05T13:32:26+00:00"
+    }
+  },
+  "shared_scan_state": {
+    "default:chats:discount_handoff:b2b3815ac8dff921": {
+      "source_key": "default:chats:discount_handoff:b2b3815ac8dff921",
+      "status": "rejected",
+      "detail": {
+        "proposal_id": "proposal_shared_280b33bf14164e8c0f"
+      },
+      "llm_used": false,
+      "checked_at": "2026-05-05T13:32:03+00:00",
+      "updated_at": "2026-05-05T13:32:03+00:00"
+    },
+    "default:chats:over_boundary_handoff:3ffaaa88fcfc15d0": {
+      "source_key": "default:chats:over_boundary_handoff:3ffaaa88fcfc15d0",
+      "status": "proposed",
+      "detail": {
+        "proposal_id": "proposal_shared_7d68ef02a5b84af6ed",
+        "source_key": "000f9428cac0dc954b"
+      },
+      "llm_used": false,
+      "checked_at": "2026-05-05T13:32:03+00:00",
+      "updated_at": "2026-05-05T13:32:03+00:00"
+    },
+    "default:chats:unknown_handoff:0c2261604f1e4f83": {
+      "source_key": "default:chats:unknown_handoff:0c2261604f1e4f83",
+      "status": "proposed",
+      "detail": {
+        "proposal_id": "proposal_shared_921373a6c7911aba74",
+        "source_key": "ac685c048a1e46fd99"
+      },
+      "llm_used": false,
+      "checked_at": "2026-05-05T13:32:03+00:00",
+      "updated_at": "2026-05-05T13:32:03+00:00"
+    },
+    "default:policies:after_sales:5432b31559ba7ade": {
+      "source_key": "default:policies:after_sales:5432b31559ba7ade",
+      "status": "proposed",
+      "detail": {
+        "proposal_id": "proposal_shared_cdbd903caa47ab35c0",
+        "source_key": "d8fe20868241b83d8c"
+      },
+      "llm_used": false,
+      "checked_at": "2026-05-05T13:32:03+00:00",
+      "updated_at": "2026-05-05T13:32:03+00:00"
+    },
+    "default:policies:after_sales_policy_details:ca4c6a34d1ffc66a": {
+      "source_key": "default:policies:after_sales_policy_details:ca4c6a34d1ffc66a",
+      "status": "proposed",
+      "detail": {
+        "proposal_id": "proposal_shared_714567a28c184ab9ce",
+        "source_key": "c84c5657c92ec9ea77"
+      },
+      "llm_used": false,
+      "checked_at": "2026-05-05T13:32:03+00:00",
+      "updated_at": "2026-05-05T13:32:03+00:00"
+    },
+    "default:policies:air-purifier-effect:28edbd810cfc5518": {
+      "source_key": "default:policies:air-purifier-effect:28edbd810cfc5518",
+      "status": "proposed",
+      "detail": {
+        "proposal_id": "proposal_shared_b7598af19d882055a9",
+        "source_key": "6f38aaf368b99bd211"
+      },
+      "llm_used": false,
+      "checked_at": "2026-05-05T13:32:03+00:00",
+      "updated_at": "2026-05-05T13:32:03+00:00"
+    },
+    "default:policies:contract-process:b0dc0065d5d0ef22": {
+      "source_key": "default:policies:contract-process:b0dc0065d5d0ef22",
+      "status": "proposed",
+      "detail": {
+        "proposal_id": "proposal_shared_538ce51e125705999a",
+        "source_key": "c2025b4a8896647fd7"
+      },
+      "llm_used": false,
+      "checked_at": "2026-05-05T13:32:03+00:00",
+      "updated_at": "2026-05-05T13:32:03+00:00"
+    },
+    "default:policies:contract:ef2ee2e3f6f2364b": {
+      "source_key": "default:policies:contract:ef2ee2e3f6f2364b",
+      "status": "proposed",
+      "detail": {
+        "proposal_id": "proposal_shared_842cf7b831a8e217e4",
+        "source_key": "09b9e2d49f1b22d6ed"
+      },
+      "llm_used": false,
+      "checked_at": "2026-05-05T13:32:03+00:00",
+      "updated_at": "2026-05-05T13:32:03+00:00"
+    },
+    "default:policies:credit-term-policy:71aaafb277f07c43": {
+      "source_key": "default:policies:credit-term-policy:71aaafb277f07c43",
+      "status": "proposed",
+      "detail": {
+        "proposal_id": "proposal_shared_f50da0b513deb72f04",
+        "source_key": "11c85ebb1a05e93745"
+      },
+      "llm_used": false,
+      "checked_at": "2026-05-05T13:32:03+00:00",
+      "updated_at": "2026-05-05T13:32:03+00:00"
+    },
+    "default:policies:discount_general:c3dbe58c5dc2a9bc": {
+      "source_key": "default:policies:discount_general:c3dbe58c5dc2a9bc",
+      "status": "proposed",
+      "detail": {
+        "proposal_id": "proposal_shared_4b67f9d6f6b17c0f51",
+        "source_key": "2d0384bc9d989ac48d"
+      },
+      "llm_used": false,
+      "checked_at": "2026-05-05T13:32:03+00:00",
+      "updated_at": "2026-05-05T13:32:03+00:00"
+    },
+    "default:policies:installation:8e9cd8a470ba6488": {
+      "source_key": "default:policies:installation:8e9cd8a470ba6488",
+      "status": "proposed",
+      "detail": {
+        "proposal_id": "proposal_shared_c967a8222b4b63e86e",
+        "source_key": "69d784f8d349b85c71"
+      },
+      "llm_used": false,
+      "checked_at": "2026-05-05T13:32:03+00:00",
+      "updated_at": "2026-05-05T13:32:03+00:00"
+    },
+    "default:policies:manual_handoff_reply:1ea9fa012c5415ad": {
+      "source_key": "default:policies:manual_handoff_reply:1ea9fa012c5415ad",
+      "status": "proposed",
+      "detail": {
+        "proposal_id": "proposal_shared_6f93ca3c42c6d0f705",
+        "source_key": "027244c6fadcbe636d"
+      },
+      "llm_used": false,
+      "checked_at": "2026-05-05T13:32:03+00:00",
+      "updated_at": "2026-05-05T13:32:03+00:00"
+    },
+    "default:policies:manual_required:bc483591a2ab6838": {
+      "source_key": "default:policies:manual_required:bc483591a2ab6838",
+      "status": "proposed",
+      "detail": {
+        "proposal_id": "proposal_shared_b90d5d3af1a67d5a69",
+        "source_key": "768c3062ef147c8dcf"
+      },
+      "llm_used": false,
+      "checked_at": "2026-05-05T13:32:03+00:00",
+      "updated_at": "2026-05-05T13:32:03+00:00"
+    },
+    "default:policies:sample-deduct-policy:e458c892d2975aee": {
+      "source_key": "default:policies:sample-deduct-policy:e458c892d2975aee",
+      "status": "proposed",
+      "detail": {
+        "proposal_id": "proposal_shared_13cac91fed84c9ef96",
+        "source_key": "a7bb5a31f1e8c07eaf"
+      },
+      "llm_used": false,
+      "checked_at": "2026-05-05T13:32:03+00:00",
+      "updated_at": "2026-05-05T13:32:03+00:00"
+    },
+    "default:policies:service_reliability:839c6fca9411b21b": {
+      "source_key": "default:policies:service_reliability:839c6fca9411b21b",
+      "status": "proposed",
+      "detail": {
+        "proposal_id": "proposal_shared_ee2641d7b4e3381220",
+        "source_key": "e0472c24f2467fa627"
+      },
+      "llm_used": false,
+      "checked_at": "2026-05-05T13:32:03+00:00",
+      "updated_at": "2026-05-05T13:32:03+00:00"
+    },
+    "default:policies:vps_shared_universal_probe:627b5c86b986ba66": {
+      "source_key": "default:policies:vps_shared_universal_probe:627b5c86b986ba66",
+      "status": "proposed",
+      "detail": {
+        "proposal_id": "proposal_shared_df81dbb699069134f3",
+        "source_key": "9b5970c7b78ad48312"
+      },
+      "llm_used": false,
+      "checked_at": "2026-05-05T13:32:03+00:00",
+      "updated_at": "2026-05-05T13:32:03+00:00"
+    },
+    "default:chats:data_missing:c07c8b1e169fac36": {
+      "source_key": "default:chats:data_missing:c07c8b1e169fac36",
+      "status": "not_recommended",
+      "detail": {
+        "reason": "LLM/规则判断不适合进入共享公共知识候选"
+      },
+      "llm_used": false,
+      "checked_at": "2026-05-05T13:32:03+00:00",
+      "updated_at": "2026-05-05T13:32:03+00:00"
+    },
+    "default:chats:quote_detail_request:0137ae6eeb65e716": {
+      "source_key": "default:chats:quote_detail_request:0137ae6eeb65e716",
+      "status": "not_recommended",
+      "detail": {
+        "reason": "LLM/规则判断不适合进入共享公共知识候选"
+      },
+      "llm_used": false,
+      "checked_at": "2026-05-05T13:32:03+00:00",
+      "updated_at": "2026-05-05T13:32:03+00:00"
+    },
+    "default:chats:scene_product_association:8bcad931926a0afc": {
+      "source_key": "default:chats:scene_product_association:8bcad931926a0afc",
+      "status": "not_recommended",
+      "detail": {
+        "reason": "LLM/规则判断不适合进入共享公共知识候选"
+      },
+      "llm_used": false,
+      "checked_at": "2026-05-05T13:32:03+00:00",
+      "updated_at": "2026-05-05T13:32:03+00:00"
+    },
+    "default:policies:contract-batch:34d20dbdb33c0a5d": {
+      "source_key": "default:policies:contract-batch:34d20dbdb33c0a5d",
+      "status": "not_recommended",
+      "detail": {
+        "reason": "LLM/规则判断不适合进入共享公共知识候选"
+      },
+      "llm_used": false,
+      "checked_at": "2026-05-05T13:32:03+00:00",
+      "updated_at": "2026-05-05T13:32:03+00:00"
+    },
+    "default:policies:public_account_payment_rule:83f06636e279583b": {
+      "source_key": "default:policies:public_account_payment_rule:83f06636e279583b",
+      "status": "not_recommended",
+      "detail": {
+        "reason": "LLM/规则判断不适合进入共享公共知识候选"
+      },
+      "llm_used": false,
+      "checked_at": "2026-05-05T13:32:03+00:00",
+      "updated_at": "2026-05-05T13:32:03+00:00"
+    },
+    "default:policies:sample-policy-large:ace16c1f6cb10289": {
+      "source_key": "default:policies:sample-policy-large:ace16c1f6cb10289",
+      "status": "not_recommended",
+      "detail": {
+        "reason": "LLM/规则判断不适合进入共享公共知识候选"
+      },
+      "llm_used": false,
+      "checked_at": "2026-05-05T13:32:03+00:00",
+      "updated_at": "2026-05-05T13:32:03+00:00"
+    },
+    "default:policies:sample-policy-standard:a93772c4a5a5889f": {
+      "source_key": "default:policies:sample-policy-standard:a93772c4a5a5889f",
+      "status": "not_recommended",
+      "detail": {
+        "reason": "LLM/规则判断不适合进入共享公共知识候选"
+      },
+      "llm_used": false,
+      "checked_at": "2026-05-05T13:32:03+00:00",
+      "updated_at": "2026-05-05T13:32:03+00:00"
+    },
+    "default:policies:sample:ca9d8b07c122f752": {
+      "source_key": "default:policies:sample:ca9d8b07c122f752",
+      "status": "not_recommended",
+      "detail": {
+        "reason": "LLM/规则判断不适合进入共享公共知识候选"
+      },
+      "llm_used": false,
+      "checked_at": "2026-05-05T13:32:03+00:00",
+      "updated_at": "2026-05-05T13:32:03+00:00"
+    }
+  },
+  "backup_requests": {
+    "backup_GBZ8kBawGyvI": {
+      "request_id": "backup_GBZ8kBawGyvI",
+      "scope": "tenant",
+      "tenant_id": "tenant_a",
+      "node_id": "local_tenant_a_01",
+      "command_id": "cmd_qfgVm2HrHpfV",
+      "status": "queued",
+      "created_by": "platform-admin",
+      "created_at": "2026-05-05T13:32:03+00:00"
+    }
+  },
+  "restore_requests": {
+    "restore_raJk8smGvC2N": {
+      "request_id": "restore_raJk8smGvC2N",
+      "tenant_id": "tenant_a",
+      "node_id": "local_tenant_a_01",
+      "backup_id": "backup_test",
+      "backup_url": "",
+      "dry_run": true,
+      "command_id": "cmd_sCPrjWkVxzeg",
+      "status": "queued",
+      "created_by": "platform-admin",
+      "created_at": "2026-05-05T13:32:51+00:00"
+    },
+    "restore_2j79VzUJ8KVK": {
+      "request_id": "restore_2j79VzUJ8KVK",
+      "tenant_id": "default",
+      "node_id": "",
+      "backup_id": "backup_d300d0ebf6e0a3fb004a",
+      "backup_url": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\vps_admin\\backups\\backup_d300d0ebf6e0a3fb004a.zip",
+      "dry_run": true,
+      "command_id": "cmd_ttstYhjHA5HM",
+      "status": "queued",
+      "created_by": "platform-admin",
+      "created_at": "2026-05-05T13:33:00+00:00"
+    }
+  },
+  "customer_data_packages": {
+    "data_pkg_test01_backup_e016a1d7ae830a0690aa": {
+      "package_id": "data_pkg_test01_backup_e016a1d7ae830a0690aa",
+      "account_username": "test01",
+      "tenant_id": "default",
+      "scope": "tenant",
+      "backup_id": "backup_e016a1d7ae830a0690aa",
+      "package_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\vps_admin\\customer_packages\\backup_e016a1d7ae830a0690aa.zip",
+      "bytes": 182548,
+      "summary": {
+        "tenant_id": "default",
+        "root": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\default",
+        "exists": true,
+        "files": {
+          "root": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\default",
+          "exists": true,
+          "file_count": 107,
+          "json_file_count": 75,
+          "bytes": 225689
+        },
+        "formal_knowledge": {
+          "root": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\default\\knowledge_bases",
+          "exists": true,
+          "category_count": 4,
+          "item_count": 59,
+          "categories": [
+            {
+              "category_id": "products",
+              "name": "商品资料",
+              "kind": "builtin",
+              "item_count": 9
+            },
+            {
+              "category_id": "chats",
+              "name": "聊天记录与话术",
+              "kind": "builtin",
+              "item_count": 13
+            },
+            {
+              "category_id": "policies",
+              "name": "政策规则",
+              "kind": "builtin",
+              "item_count": 37
+            },
+            {
+              "category_id": "erp_exports",
+              "name": "ERP 导出",
+              "kind": "builtin",
+              "item_count": 0
+            }
+          ],
+          "files": {
+            "root": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\default\\knowledge_bases",
+            "exists": true,
+            "file_count": 73,
+            "json_file_count": 68,
+            "bytes": 94537
+          }
+        },
+        "product_item_knowledge": {
+          "root": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\default\\product_item_knowledge",
+          "product_count": 9,
+          "file_count": 30
+        },
+        "rag": {
+          "sources": {
+            "root": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\default\\rag_sources",
+            "exists": true,
+            "file_count": 1,
+            "json_file_count": 1,
+            "bytes": 2
+          },
+          "chunks": {
+            "root": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\default\\rag_chunks",
+            "exists": true,
+            "file_count": 0,
+            "json_file_count": 0,
+            "bytes": 0
+          },
+          "index": {
+            "root": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\default\\rag_index",
+            "exists": true,
+            "file_count": 1,
+            "json_file_count": 1,
+            "bytes": 131
+          }
+        },
+        "raw_messages": {
+          "root": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\default\\raw_messages",
+          "message_count": 205,
+          "conversation_count": 2,
+          "batch_count": 107,
+          "files": {
+            "root": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\default\\raw_messages",
+            "exists": true,
+            "file_count": 94,
+            "json_file_count": 3,
+            "bytes": 483122
+          }
+        },
+        "review_candidates": {
+          "root": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\review_candidates",
+          "pending_count": 92,
+          "accepted_count": 0,
+          "rejected_count": 38,
+          "files": {
+            "root": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\review_candidates",
+            "exists": true,
+            "file_count": 158,
+            "json_file_count": 155,
+            "bytes": 1609491
+          }
+        },
+        "uploads": {
+          "root": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\default\\admin\\uploads_index.json",
+          "item_count": 0
+        }
+      },
+      "manifest": {
+        "schema_version": 1,
+        "backup_id": "backup_e016a1d7ae830a0690aa",
+        "scope": "tenant",
+        "tenant_id": "default",
+        "created_at": "2026-05-05T21:32:51",
+        "include_derived": true,
+        "include_runtime": true,
+        "file_count": 204,
+        "files": [
+          {
+            "path": "payload/runtime/tenants/default/customer_service/runtime_status.json",
+            "sha256": "e5ed379dee5f296087902114df5a8124b8f81c183e798edef50b215c3a039916",
+            "bytes": 282
+          },
+          {
+            "path": "payload/runtime/tenants/default/customer_service/settings.json",
+            "sha256": "c05ba804d367d3566c155a2b14f9f6ab0bdd64a2e705508fa7ef0ec7727dd84c",
+            "bytes": 249
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/batches.json",
+            "sha256": "e2b9515f50be15d4f07afb8c3aa83460abe445dbb98d5bceddb8069c53a4e510",
+            "bytes": 193675
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/conversations.json",
+            "sha256": "1e4484c911259d0ea9fcb7ce67e13147feca80a5f8e57c1c0aea70018a07afcc",
+            "bytes": 1965
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_022d85db9326a0564057.txt",
+            "sha256": "4845720b059241f258c47008f83edeec24d1dd364588029391e4941601509388",
+            "bytes": 110
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_04d38a8da229b947ece4.txt",
+            "sha256": "a82cde17b88e5ef3fe78ac0975e527c5df4e472a4d569654e8c5aafb19f60140",
+            "bytes": 114
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_0510b03b3ad29d6ffbff.txt",
+            "sha256": "e663f02e722a0064ba33eaa0884a6a68bbe87122cd1aa8dc47b82079a086e2d3",
+            "bytes": 332
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_0d953905851ffe7998fd.txt",
+            "sha256": "d46e81c77b9c2b5737876d91d480b0aff5a4fbb126ac5804c86c6d15cee08eb4",
+            "bytes": 103
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_103e4f8afc6dc3a5a7d6.txt",
+            "sha256": "f161c74dcee4f5dfbf5ad183b6446149bb6fefb52b472e28aa62925c6581cf51",
+            "bytes": 370
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_10dc945cab1946ec0d50.txt",
+            "sha256": "9ff116468fea642fe4a1aef590e81d99f455d13127769f916ce8f743604fc1a5",
+            "bytes": 114
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_13c3b10332efb12b56b7.txt",
+            "sha256": "4ab62efa388445f4860fc025c38b306b3f0a10879b5d0d0ffff177bc17f581db",
+            "bytes": 833
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_173e5e4fd5bf85247c3b.txt",
+            "sha256": "3b5c07304900d9cf288ae11a0f94d7d5d5fa5ced68c00d317449015eaf2421c1",
+            "bytes": 140
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_1849b8cd4aff40b47055.txt",
+            "sha256": "fc108825ce90d9e7c86cc5698075a1b5093d73edd4e6b0caa704d48b6638313a",
+            "bytes": 107
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_18c12f5dabd6b7380837.txt",
+            "sha256": "6a8b12e3a9350e8478deb29add6b64214ea4b8f8e7287fb23ef38ff6aca43e9c",
+            "bytes": 428
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_1d9037b2d69848db72c4.txt",
+            "sha256": "9c32578f515d4950ec946e76c08dcda1f019582f1fac17e71d6bde76e0dd5554",
+            "bytes": 114
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_20bb230afe6ade3c2047.txt",
+            "sha256": "de04a783c7b86e36c318c54c4187655883507bc4a00a7cd3ce6d14794c1f6544",
+            "bytes": 90
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_2aca33acad10fb898b63.txt",
+            "sha256": "4c9b4de270a2ffe8db8cfac7ff9a97ac52fb2afe2ff28da4cec464ba576523b9",
+            "bytes": 108
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_2d37a06ab0422ed5d5ce.txt",
+            "sha256": "6cecd7465780671dc2fbe5ca51ce27bbedabbf06aeba4d4ed70a5798dc8db983",
+            "bytes": 90
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_2d60239b794e429bc361.txt",
+            "sha256": "fbe4d8cf5133f57b94ad7e42383cb4daede140d0d3fbf0ffed68e89a20396491",
+            "bytes": 162
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_2eb96e6921437537d612.txt",
+            "sha256": "a82b3a4eb678a3315e2bbe526b044a6eaa778213e5e3e62ed7b3f2d7e231e44c",
+            "bytes": 795
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_31927deb419053f6bcc4.txt",
+            "sha256": "739837fbb83072e074d395a41e8d029746f7fc2c220b12e1354aeafe4281ddd8",
+            "bytes": 92
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_3700d3bffe113ac9c29b.txt",
+            "sha256": "b8dda560a8372e58ac361cae7da1d5b900c7809d127e28110804747a7deacdbc",
+            "bytes": 356
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_382ff711807be8f6e457.txt",
+            "sha256": "6e9ccab989a1e08ecc9e83e3e18fb64e87d21816818b56581024993b01098e9a",
+            "bytes": 795
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_39515b1c230c2871ab5b.txt",
+            "sha256": "1e92acf7dcea4d6c7094467a61596ec2bc5a7dcf4388b0a297b677898689d460",
+            "bytes": 162
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_432a3cb100d89d1f484f.txt",
+            "sha256": "4a5944ba602c0e83dadc17576beaa4306d47faf1776460d070125fa6ac92580d",
+            "bytes": 162
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_44975eb44af02819a8c5.txt",
+            "sha256": "2276ec76affdae1a392a8a70c8efac55459d92b491a2714d5beae52eded2c4b7",
+            "bytes": 379
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_45f222ae905db9bdef14.txt",
+            "sha256": "625f389864d0225985c26022bb15c4e6a09887923abab1ed537fbfbecf17bd10",
+            "bytes": 227
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_47bcf470d4fd6f1738af.txt",
+            "sha256": "09ad93d89171e212405ea5ff0fb5de59852ba0865351ec6bf5cd76a957c89fa3",
+            "bytes": 92
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_48b14fdafef772f84e2c.txt",
+            "sha256": "f799a54d5a3345df7fa3b6004e4fe2532167b310452d3f9878bfd7ac2c536c65",
+            "bytes": 338
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_4a68e218796661a654e7.txt",
+            "sha256": "10eb64505753b4caac4b1da53b834759cb6432d92460d3ebafade3d8e4b93a44",
+            "bytes": 420
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_5345c81aa4037a74bda9.txt",
+            "sha256": "e02ddbe030d18f96fcb7e744344132d142268b4cc2705c1a2a1b49ea3059eb19",
+            "bytes": 188
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_57e6421b311784e6e55c.txt",
+            "sha256": "32377a92a54551a86c2072e739bd465e1e2b72292db7b967e9a371f07ff9d9e9",
+            "bytes": 263
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_5ab75a69554b5c21529d.txt",
+            "sha256": "670e20751ac38b9439382e35503653cc27592101f65ce68394549984bf246e03",
+            "bytes": 391
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_5f8f442741c10132d076.txt",
+            "sha256": "24103706e9272ef482d16f0b8d50557a0ecb6af5b2eabf13a8c364200e2cd805",
+            "bytes": 427
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_6495f314a798bd6d2165.txt",
+            "sha256": "1fd964ab8152eabe74d13b7da028c4413b79bb43d7c517507fae2d64a444e302",
+            "bytes": 103
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_64e88f060b15f259c70c.txt",
+            "sha256": "dc152763d8bf0f7e4aa04124e7adfac9988ac97224cce93534ed4a4ae25cde3c",
+            "bytes": 144
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_67a98ba20cf6a7a342ce.txt",
+            "sha256": "d79ba3c34061861ccdaeb4f456113c05e02c3b0199515f9a6c434783bbcb15fb",
+            "bytes": 263
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_68532efb6b70662b2d80.txt",
+            "sha256": "596cce4003f457ecb8b4e9b8f4677c3fd8cc3b3722e7ee07f3e0991edf9b7858",
+            "bytes": 108
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_6d2575f4935e3bc7f819.txt",
+            "sha256": "fa0ad019b9dfd9a79d2cc463bbdf98d0e2671feb6be340eaceed85678ed25ba9",
+            "bytes": 123
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_6d8abe1fdba3ada28728.txt",
+            "sha256": "70757186fbac4dc0579ed8fcf44736858df3d48b08c3248adf6c4cb1fa7b882f",
+            "bytes": 758
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_6dcac9e068fb3b4d96a1.txt",
+            "sha256": "81f9352d3a23930365ed76f40b3c9d81a933ee78c2732b0bf804720a1663e4b2",
+            "bytes": 565
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_6f975ee83f76c543d643.txt",
+            "sha256": "4d0d456415aba877c763d97a47f9a71eecd7171de196c133c15a6e37783a2da8",
+            "bytes": 259
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_730e5f00383c6f1bb162.txt",
+            "sha256": "6e77b6ea75764b148049a99b3409f48c841bee281367c7febf2092648623c532",
+            "bytes": 225
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_73c347caedc38694a72d.txt",
+            "sha256": "7962c51e845f14e173203b7b64c8fff43f50a8ab814f1e50e0e3d6d61d8359de",
+            "bytes": 407
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_750fee920465c037ba5f.txt",
+            "sha256": "3838fb0f13aa5193467ca0c75e805d6d8b86cd0a779b8b645c01a3958583bea2",
+            "bytes": 532
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_77884cfc4ad7b8f8cbfd.txt",
+            "sha256": "de04d501e2b9c3a4a08cbe32108c30da98d3bf8697d7a25aefa6915f5a7e7acf",
+            "bytes": 263
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_78753b1da8871101ee86.txt",
+            "sha256": "af094a4f21fcbff4b4a6f774dd3c8d5c8672dab5e41793033fe041cb4d89a900",
+            "bytes": 407
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_7c4bbe5944aa5597ef72.txt",
+            "sha256": "59ada60a147f3578ac7fd37aacb796b493298aa99087ddcba1d129d62b7c76fa",
+            "bytes": 620
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_7f5c13d616fcad361bc6.txt",
+            "sha256": "5a8ca309d4efc7d6e4d92e2a7018acde607422dc80fbcff4bce66b29851ad894",
+            "bytes": 351
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_7fe09dd96b3fe2469748.txt",
+            "sha256": "ef7adfceaea15c5a6073544b89a14a10f27e325038dcbfc03ee31e465a5d5028",
+            "bytes": 148
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_82b72adcdeb2c2eb6da6.txt",
+            "sha256": "da0ab929e1e6e94d6eea462b3d4e49a38fd6bcab9b0e9ab738b35827f7c18b31",
+            "bytes": 37
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_870fa4640447040fa9db.txt",
+            "sha256": "f79b48b4f49bb2bb52ba45e03073b37b9d2412f530f584443e9e84e0f7082f79",
+            "bytes": 153
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_87a63181c3aac2478d63.txt",
+            "sha256": "b6f51ac29816f361c14c0339bbd4ea89f3d8030964257b60014d0f0cd028b118",
+            "bytes": 162
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_8837f198b37a0cca6f5c.txt",
+            "sha256": "6c84236198a1addc4163fde87bb111b330a548f4d27f52e7269661006c8e80f4",
+            "bytes": 117
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_8dda0aeb53577ab20209.txt",
+            "sha256": "ed8ea9c6fbb57cb5977fb2eb2b81717a51a8f5a0988b7e98c059775881dbc2e3",
+            "bytes": 370
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_8f34e50595deb14ab27b.txt",
+            "sha256": "44544d12a62c1de8f93e2ff6f860ed26ff511fa9cb629db18bfbd63bcb3bcbb7",
+            "bytes": 263
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_90958dcb7e4980a73fc2.txt",
+            "sha256": "0e15731977f5f47930f1532cd4ff03e282cac8f587cfb538aadf75f375a57075",
+            "bytes": 92
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_9697ba7bb77e06a58132.txt",
+            "sha256": "dd94aee2fb33300440eaf093991eb06ffa034a54765be6f591e01e79b7f6f36a",
+            "bytes": 416
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_99040b8cb637344ab55f.txt",
+            "sha256": "732da6b77990947f204dbf3f5e15f7d1cd806a2ddfe0f874171c5724708ace30",
+            "bytes": 203
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_9a050bdf82750a66218b.txt",
+            "sha256": "a6916f710009a15f6e3a463f41919a63393b5a4a2215022161524837df40800b",
+            "bytes": 420
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_9a5017beb5f6b967e7c1.txt",
+            "sha256": "4f9e6122a3afd9102bcd9e306b9d76dedb7c867aa22fdf47eae59e23847d3270",
+            "bytes": 664
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_a2d5824347431b3cfcbc.txt",
+            "sha256": "0ef242c81305aa138cde92e7a6a713cc2f4b1fa09dcab63d9ed13574e2ecc22b",
+            "bytes": 314
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_a3bff15a8fd812cd2e76.txt",
+            "sha256": "23e200987f8702f541493cb2786efddf2aba61b395fa97b5da227887949966fc",
+            "bytes": 188
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_a49710e318f9a86ae1ba.txt",
+            "sha256": "e589c1af0faf9d4b19312a59f3b4567c5485e7ab92b8e38afbbb4abd82a9464e",
+            "bytes": 162
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_a4bdaecab7e9fe15bcc4.txt",
+            "sha256": "de6c9d309e7104f6294a826299095d320b28ce39e19244ae957d0540dfcd7d83",
+            "bytes": 463
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_a5e844e5675a51337b44.txt",
+            "sha256": "b48895bdbacdddd34f4d526e075cc4d2e1ddd8825b22ed255ccf6d47520d59cf",
+            "bytes": 116
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_a7887d8b582a8e7f9671.txt",
+            "sha256": "bd11a1bf3c03f31686ec794e3d469797d886b45e735482ebe20e9b42ea5681c6",
+            "bytes": 123
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_aa5aaf476da06e8c17a8.txt",
+            "sha256": "38997acb432be592cf591cd32f47af7df636c85a75cce3abf021a7e0b28255c3",
+            "bytes": 263
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_ad9f04d7248d9cfe61c5.txt",
+            "sha256": "25abf4ff5b13f685d8ed8a355d9528162163ac1d9a21b9c8f22d19228f14026b",
+            "bytes": 114
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_b0a34b71da644aeec30c.txt",
+            "sha256": "ea9766a137640ca81578c49f4b285b3535e4cdfd0c1309c4eae94f07764fb1a3",
+            "bytes": 215
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_b3a1ab29473cf97940f3.txt",
+            "sha256": "adceebb380751f33e33f150473003634d9f130a0e677ca60635abf81dd2bfd01",
+            "bytes": 263
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_bd96cebdeccb0173fcfe.txt",
+            "sha256": "3eb6e546063313a0b835844d9588b93c288cb4eafcecb302e33a2d9a042566ee",
+            "bytes": 240
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_c40677a475893e9a4803.txt",
+            "sha256": "378a1107b3f24ac5a7850047cae0fa58379635a1685494220759c27f24a8035a",
+            "bytes": 92
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_c435be0a179f7648adb9.txt",
+            "sha256": "f6289d02b0f028dfb0287e5843f6f58c0c40c75c7ee6da614b7eab88c74e186d",
+            "bytes": 108
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_c55b44e6b76adf28d447.txt",
+            "sha256": "f687d6260229d7242f62aeff8bd3a8bd26ec6ad911488b3b087fbd228bb6c6e9",
+            "bytes": 148
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_c67d509c1b2fd50ad0c8.txt",
+            "sha256": "64d1d4477503a37248457ec84f563cc271e8c5af9b13a2596d53e066890dd9af",
+            "bytes": 407
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_c6866bb27b09f588e63e.txt",
+            "sha256": "40dd23e9ba615ac687b38072fdd71b131e557908d291d3437343706a8c388a9d",
+            "bytes": 424
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_ccb3f35becd23102e5a4.txt",
+            "sha256": "892e090e6bfa0ff75ccb7207884870503d08fa1fbae8ca85fa515af6db054c8f",
+            "bytes": 426
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_cff90450c7a554f72c94.txt",
+            "sha256": "e1398fe6d29bcda25336a1eabcf601f142833a777dcf9ac418a4f84218d912f5",
+            "bytes": 533
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_d0e4113fddb8cea08637.txt",
+            "sha256": "99ca9deec312b1077f28ad448f76a07b7632072240353a58123672c20078b8d9",
+            "bytes": 353
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_d445e8d4d4a10049626e.txt",
+            "sha256": "5fdc7d5b30fa58edd01a4051fcba6283a8302e8a14fb940caaa34d21f1e03f87",
+            "bytes": 420
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_d515e5acba3738d69f8d.txt",
+            "sha256": "1a23a24913bdf526d20965dae918ff3e48467c19edd6cf9d40b037363961fd5a",
+            "bytes": 383
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_d5160a49f43a4cb02da8.txt",
+            "sha256": "209d537d9b8ee313135eef21d63b6d717006ff699811a9ce27d7408087615954",
+            "bytes": 407
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_d61f73b4fcd823587469.txt",
+            "sha256": "89a2127dc31617ffe18dd96d97fba069cf842375a341d407b3f094a202888052",
+            "bytes": 151
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_dabb022f4ee9d699c61e.txt",
+            "sha256": "8ec6931e4a4e8a19f1fdf8353ce3e02c4e3eea830029e3895cd46af8156c187d",
+            "bytes": 314
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_dc6124f1c6e081591fc2.txt",
+            "sha256": "7e77d88506fc3e2e5f8681689fd346672e83b862cf23eb97d3346ce87eb74919",
+            "bytes": 140
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_e044f28eb05024411598.txt",
+            "sha256": "f69a4a07808e5af47a7a38a63acf1f03912c8853a0e487c0b085edb8eb079584",
+            "bytes": 383
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_e04eea6e2273956e47cc.txt",
+            "sha256": "42c89c8f469f8afb0fb5b856e001aee84b33b660636fb90a2b14d76cc7aa3aef",
+            "bytes": 111
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_e0c5d65dfb6d3c149afa.txt",
+            "sha256": "5097f0ff64570fc8eb331f2a41d0ddae61c616080327d890112c41c02a9440dd",
+            "bytes": 110
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_e12968ac81a7ff97ac22.txt",
+            "sha256": "8a811bb86ad9b8bed9a8113c4ae275152c5f413a76f90a73ff6a65128fbfb25a",
+            "bytes": 148
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_e20de8ac01ccc33fc5ee.txt",
+            "sha256": "ae9cad9e56d6c2b3ef98beaed390310a3e07e34330d56a9661323596da4c1b04",
+            "bytes": 86
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_e9802b2a8ca7900c3c89.txt",
+            "sha256": "5d7cea76dab950e05b4f2fe672656a23ed7f26dff6c75288254ce697bb35862a",
+            "bytes": 144
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_eec9511707adf75c5b00.txt",
+            "sha256": "e8818555b9c4d40122d93a8496305a1400b514dcd5b991e99fbcfc4b6b4dbec9",
+            "bytes": 425
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_f32a7509a5c5ac9ccebd.txt",
+            "sha256": "cd23e39a8aabcfae130e5ccb77b001853adb50ee859135d40f8bf74369a529fb",
+            "bytes": 545
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/learning_batches/raw_batch_f361fe75ce44e18a62eb.txt",
+            "sha256": "99b8b2b7b5ae0f3c247ad7c48a4a310df8292b2ba6e3bf2b71c581df0554f447",
+            "bytes": 795
+          },
+          {
+            "path": "payload/runtime/tenants/default/raw_messages/messages.json",
+            "sha256": "ab0f8ddde1264adf86a21ba56c99b35cfbaf64e21547e7ce5e496cbc6cf1b13f",
+            "bytes": 261493
+          },
+          {
+            "path": "payload/runtime/tenants/default/recorder/settings.json",
+            "sha256": "63584623b86614d69eb844f001417916698d34402ccecf57aa660c016c83e5ca",
+            "bytes": 196
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/chats/items/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/chats/items/chat_after_sales_worry.json",
+            "sha256": "87664fc9687b41bb51e2390ad813baee1a55ea9f2017bc46cfdf8356db9dee0e",
+            "bytes": 1671
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/chats/items/chat_lowest_price_request.json",
+            "sha256": "9e82e720f3cf113287ef732f0e57dc2349796e8dedbcade92cd7034dc2a30097",
+            "bytes": 1681
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/chats/items/chat_outdoor_stall_power.json",
+            "sha256": "66deb9c9cf62a38fd8cdf348868e451c24c4cc111f3ba561c8926cec0b47aaea",
+            "bytes": 1813
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/chats/items/chat_style_guidelines.json",
+            "sha256": "04870fc9cf748110d7d4b2cf660555bf1c8e2d44fa5f4b4863afca994e9dd67b",
+            "bytes": 1885
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/chats/items/data_missing.json",
+            "sha256": "b49d8e76a5b8243b39dec796f07927894224a545191f607506c918a1a2f7c802",
+            "bytes": 784
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/chats/items/discount_handoff.json",
+            "sha256": "1c6e8020e84de5af01d3821f530b928fac669aaa205c53f5e7442f16f5bf3380",
+            "bytes": 820
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/chats/items/over_boundary_handoff.json",
+            "sha256": "1ac6d95d7f1aeceba592e3fc7bbb69130c207c4f2d17325b82dc56ca042b720d",
+            "bytes": 812
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/chats/items/qa-credit-term.json",
+            "sha256": "c745adce85feae1fd19afb0d900fd3599f77e885b08d874c11980f64519f23b5",
+            "bytes": 1621
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/chats/items/qa-shipping-tomorrow.json",
+            "sha256": "478cbeffa8adc474e3b8d2ec399e4ec3bd47ad96bc671768bc4864c89cfc4f88",
+            "bytes": 1673
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/chats/items/quote_detail_request.json",
+            "sha256": "afe779084feb42bea4bf16d6c0d63c92023278af8728e94e9727d23c7bf87723",
+            "bytes": 802
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/chats/items/scene_product_association.json",
+            "sha256": "893e96804e79da9a5f0fb0bf00d6dbdbdc60cc4da9a264366dc88d22818b1bff",
+            "bytes": 866
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/chats/items/small_talk_service_pivot.json",
+            "sha256": "4d89fd3c55e3b55af8ddb0280c4529aaea04d3cb6a73cd6bd3f7405c651f3bcc",
+            "bytes": 862
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/chats/items/unknown_handoff.json",
+            "sha256": "4a1523cf8290738a9bdf2473c3bc09c29c5e8675dd5bdb5adcfcca0131339411",
+            "bytes": 812
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/chats/resolver.json",
+            "sha256": "46697048d14daaa96fdca695e9a69da073e96a04341c83ff831b964074023f8f",
+            "bytes": 446
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/chats/schema.json",
+            "sha256": "60532423e0f48953886b2ca7335a36c1e70cd6c753a2e3fe82f1a550f00a2933",
+            "bytes": 1914
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/custom/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/erp_exports/items/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/erp_exports/resolver.json",
+            "sha256": "aa6d61ac2b0a28157e96e720a685bf20d4b98cb75a043b79017438478a799515",
+            "bytes": 390
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/erp_exports/schema.json",
+            "sha256": "93543c07ac3f5f165ee4f67890afe0225c1f3766e9f859e46452796ff65c6f83",
+            "bytes": 1291
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/after-sales-ap88-noise.json",
+            "sha256": "e480371d2c870d69b7ae0486f5ebcec1b24efa1d0df2bda26bf0b89c7b8bd56b",
+            "bytes": 2062
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/after-sales-mt160-compensation.json",
+            "sha256": "2f7c7272534dfecd2f32558d9cc7193b9bc06c4033b4d044df8d7494eda5f4be",
+            "bytes": 2079
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/after_sales.json",
+            "sha256": "1289464419dc6bde4107ab31cc78c875b488428ed59863e388a28b73f70b0600",
+            "bytes": 1097
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/after_sales_policy_details.json",
+            "sha256": "19b82b45062af521ce68cbcfdf3a7fd2e76a144f7d2ddd96cb0ba17ff2b3ed49",
+            "bytes": 1266
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/air-purifier-effect.json",
+            "sha256": "afc7511a7c99174a4a20aa01408727f426af383f6b5416d2ec769b1677396d7f",
+            "bytes": 1628
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/bank_account.json",
+            "sha256": "fa3552c5ba5e7de2a1a84bace12410dfdf66e384b2f066da04e9b890fd812725",
+            "bytes": 1049
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/bulk-purchase.json",
+            "sha256": "70d6147c09dd0c0f943c70bca71c5b30d34cd25fec12ae67b7fa64cf8c311806",
+            "bytes": 1555
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/company_profile.json",
+            "sha256": "dddd22fa7061206986706a6aacc36c0237d38686b0d4f9a4a8afddcee9ff92fa",
+            "bytes": 1276
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/company_profile_details.json",
+            "sha256": "49671076b99ee5b5fff66395b02dc103501142c66a4875ef3b5d0730d5ea0d4c",
+            "bytes": 1597
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/company_qualification.json",
+            "sha256": "bc4dc835ec354ee4b43605306cb76ed880eff769aa403bf0cdd7b2353cbdc231",
+            "bytes": 1090
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/contract-batch.json",
+            "sha256": "79656e9a95115237d59154c0dc655c4a5ab318e17afb3bc28a3820246d77f7b4",
+            "bytes": 1253
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/contract-process.json",
+            "sha256": "57af3f8d52c5aca3285275071816aedf74724834e0e2d65a219b2b72b90a6d7d",
+            "bytes": 1487
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/contract.json",
+            "sha256": "31831fa1a37ef5464db2655c308396660d4dd1e6e92837e932f4e5139cc174c7",
+            "bytes": 1047
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/credit-term-policy.json",
+            "sha256": "c4dd3187ab130cfbbaa250bb63928640230107e57adcab6036d72f4948aa3731",
+            "bytes": 1529
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/discount_general.json",
+            "sha256": "1dc4386b2fbe8252c40bb91903203c220b74c5c5676fd06466bffc395597635e",
+            "bytes": 1055
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/door-lock-installation.json",
+            "sha256": "0165aeb0f145c5531d91bc859f8d4519f063f43fc2d7dd2beecdd42097923935",
+            "bytes": 1752
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/free_shipping_promo_2026_spring.json",
+            "sha256": "da15063b9fe059a1baf2853e9ef0c3d10c8e3744daf96f5f00e22ed8ab358d7f",
+            "bytes": 1382
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/installation.json",
+            "sha256": "3c68d9292939d2131875773bc86343e175efbab6e4d618d3756a60d54e81dc1a",
+            "bytes": 1017
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/invoice.json",
+            "sha256": "3f0c667dd714a6bf519b1e6f63659e33e7c75d22a6b7998df5af8a14d0bcc658",
+            "bytes": 1112
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/invoice_policy_details.json",
+            "sha256": "c94c4a0d4838912a0cd1a002cee27b80f841f654c6314ffb564a824c4c85259c",
+            "bytes": 1333
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/item_2712d3045ad2.json",
+            "sha256": "0a0a5a53fd3449e5400909c0e4534f65a65d410cdcc030db2f98b70958d4ff69",
+            "bytes": 2586
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/logistics.json",
+            "sha256": "d6a069e9a372ba06b876f27122921b525f7da45c528939dc9de213861ed5e059",
+            "bytes": 1236
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/logistics_policy_details.json",
+            "sha256": "8a22aa21ede61140531d6930847322031df62f6c929b020c99d1ffbdd697b80a",
+            "bytes": 1291
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/manual_handoff_reply.json",
+            "sha256": "136a092c228bf5d7ef8f0188667e4ba504acabdc6fd3acf9295c13ed9080cd67",
+            "bytes": 1917
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/manual_required.json",
+            "sha256": "fe41b852aea0939792f9eba088b6a5a6326065a210624a64fbc417a289143393",
+            "bytes": 1240
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/payment.json",
+            "sha256": "8132cbbf153b2b0c126b4139474a57cafeb91b83e60e6318af9e4b6fd0ee9573",
+            "bytes": 1123
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/payment_policy_details.json",
+            "sha256": "850dab478370c0cd8f1a77439f193764578bd9863b01e40d1d620a3b0dd5049e",
+            "bytes": 1168
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/public_account_payment_rule.json",
+            "sha256": "315832c9a0eef8c46bd157fb03321e86a65443f318c7d29c78faf18d33880a04",
+            "bytes": 1604
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/remote_area_shipping_rule.json",
+            "sha256": "fe4140e75b07705a3635dd8114af73b5f43d0507e17e2c5194758b3b27afb2b6",
+            "bytes": 1739
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/sample-deduct-policy.json",
+            "sha256": "dcb4da1346ee47adb2b02a61401bd1a7022eb9945a421ce5b8cc92a8c71f8cc7",
+            "bytes": 1451
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/sample-policy-large.json",
+            "sha256": "af8fc8f4feb7d717f52d7fce699ef547f94fd106b1c2a03a7dfa427b4da201ab",
+            "bytes": 1448
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/sample-policy-standard.json",
+            "sha256": "d32927ea1b87e7630d4e25497aaba0fe9dfa71682b421d9019134caaae08c497",
+            "bytes": 1327
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/sample.json",
+            "sha256": "5974fc91b43d757e25740fd96075e56c7d7d8b010b171f508da6e4fd36640cde",
+            "bytes": 1005
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/selection_help.json",
+            "sha256": "52f7372e992e3cbba1775c06bac242200ccdfbf8a98f4b62dad638227692f935",
+            "bytes": 1352
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/service_reliability.json",
+            "sha256": "74f9aa3dade7fcf0d03e2b5a0569d52e69bba5b84bc9b4737d1f677dc2694746",
+            "bytes": 1215
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/special_invoice_rule.json",
+            "sha256": "c21ab74701a903063df69663b6257ecf0f5fef45336582f7afaf9527fce7a392",
+            "bytes": 1782
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/ultra_low_price_request_rule.json",
+            "sha256": "ebae9c4b3d9e9e53e68200f2dfc7544df35c861dcbd93b28e3215195aed266f8",
+            "bytes": 1770
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/resolver.json",
+            "sha256": "231960215e383500564c43e225f064d51d55ff23b50b97506f41f7a43e15e64b",
+            "bytes": 500
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/schema.json",
+            "sha256": "3857ef3a770c28071bebd7bd322a2cf8c1520814323d8283443fafb3c4053186",
+            "bytes": 3195
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/products/items/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/products/items/ap-88.json",
+            "sha256": "79c76c8801f407ded91ef55e2d8be65f508dea4eb286ffc3da4d31ca8d91309c",
+            "bytes": 1715
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/products/items/commercial_fridge_bx_200.json",
+            "sha256": "a512066c49c94b4e21ee2b3a5dd101acd59e9a99f7850ead46d7744e5871ea6c",
+            "bytes": 1725
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/products/items/fl-920.json",
+            "sha256": "d559c9410da1e0c768b2b0b29eeb662738981367369a141a35d2913e6c6017f4",
+            "bytes": 1697
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/products/items/office_chair_oc_300.json",
+            "sha256": "2a6d824ccf0c52e7d060ee5506f8d0e3de9361336afc8dfb29e16b844632812a",
+            "bytes": 1667
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/products/items/packing_carton_ct_50.json",
+            "sha256": "3f6b65841790883392c25bbfb8decb7dbe437507e0542c6661b4033d2dd627fa",
+            "bytes": 1668
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/products/items/test_cargo.json",
+            "sha256": "d1c734e3c009c5204a8a9d30a6f67e953c0fc6fd7681ddb00deaefe0d5f66786",
+            "bytes": 908
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/products/items/test_product_standard.json",
+            "sha256": "26725afc4088c297f4cd2fdf5229a5d9fc1d78b1823b5c15ec471ba0e4bb5a67",
+            "bytes": 1387
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/products/items/water_filter_core.json",
+            "sha256": "690613085265fe1bb6378a913961136537bb7e94f01737d4709feafd20d4860f",
+            "bytes": 1674
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/products/items/wooden-rocking-chair.json",
+            "sha256": "4fe9f7ed7561fb7823777e4af5b278b305274b57cfdf0f57b79393e1b68eb944",
+            "bytes": 1155
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/products/resolver.json",
+            "sha256": "47857ccc1a023f71abbf2713bc91c36fc0fee03c40c980ca5d8408deab1d1413",
+            "bytes": 546
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/products/schema.json",
+            "sha256": "3c39161c660d95689c5728567445d78d7ee3fac2a7c73696ab6455bdf0c0e675",
+            "bytes": 2298
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/registry.json",
+            "sha256": "05d32ddf52b3499c15d62771ee6251db28fb25feec31be8dc6d756dd02380c98",
+            "bytes": 1329
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/ap-88/explanations/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/ap-88/faq/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/ap-88/rules/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/ap-88/rules/after-sales-ap88-noise.json",
+            "sha256": "e9a53c56b2da45d213d05fadafa03ec228f9006fbc885b44fbd70700bf11e153",
+            "bytes": 2002
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/commercial_fridge_bx_200/explanations/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/commercial_fridge_bx_200/faq/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/commercial_fridge_bx_200/rules/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/fl-920/explanations/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/fl-920/faq/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/fl-920/rules/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/fl-920/rules/door-lock-installation.json",
+            "sha256": "775e54ff9fcd61e176fc860614b7a998490c784a342ef699db94a055d58c1674",
+            "bytes": 1693
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/fl-920/rules/product_rules_7e8e0f8955_e62b76.json",
+            "sha256": "3ad2329c2a148054efde977851d5de407b01cfc2f2be163a5b0c3c31dc7c59d2",
+            "bytes": 1174
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/office_chair_oc_300/explanations/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/office_chair_oc_300/faq/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/office_chair_oc_300/rules/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/packing_carton_ct_50/explanations/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/packing_carton_ct_50/faq/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/packing_carton_ct_50/rules/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/test_cargo/explanations/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/test_cargo/faq/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/test_cargo/rules/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/test_product_standard/explanations/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/test_product_standard/faq/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/test_product_standard/rules/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/water_filter_core/explanations/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/water_filter_core/faq/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/water_filter_core/rules/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/wooden-rocking-chair/explanations/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/wooden-rocking-chair/faq/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/wooden-rocking-chair/rules/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/rag_experience/experiences.json",
+            "sha256": "a8f9c6c082e64e3a69001be981250c30fa2baafc6c60466baee0ea2443af8856",
+            "bytes": 125853
+          },
+          {
+            "path": "payload/tenants/default/rag_index/index.json",
+            "sha256": "c1727d244e99856554246f02aed6026bae6e83677d0c95e9389ad97537f34c16",
+            "bytes": 131
+          },
+          {
+            "path": "payload/tenants/default/rag_sources/sources.json",
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/tenant.json",
+            "sha256": "be1dabf7dd0bb6fb9e4ede96c4c955eae8a75ed352d0dd47bf970958e40df987",
+            "bytes": 243
+          }
+        ]
+      },
+      "created_by": "platform-admin",
+      "created_at": "2026-05-05T13:32:51+00:00"
+    }
+  },
+  "shared_snapshots": {
+    "shared_snapshot_sync_7ChWfdSuYbWq": {
+      "snapshot_id": "shared_snapshot_sync_7ChWfdSuYbWq",
+      "source": "cloud_official_shared_library",
+      "summary": {
+        "category_count": 1,
+        "item_count": 1,
+        "version": "shared_45e8b0b2744ac6f04bdd"
+      },
+      "snapshot": {
+        "schema_version": 1,
+        "source": "cloud_official_shared_library",
+        "version": "shared_45e8b0b2744ac6f04bdd",
+        "tenant_id": "default",
+        "generated_at": "2026-05-05T13:32:52+00:00",
+        "ttl_seconds": 1800,
+        "refresh_after_seconds": 300,
+        "issued_at": "2026-05-05T13:32:52+00:00",
+        "refresh_after_at": "2026-05-05T13:37:52+00:00",
+        "expires_at": "2026-05-05T14:02:52+00:00",
+        "lease_id": "shared_lease_c6b029069f9fd675a0a3",
+        "cache_policy": {
+          "mode": "cloud_authoritative_lease",
+          "ttl_seconds": 1800,
+          "refresh_after_seconds": 300,
+          "issued_at": "2026-05-05T13:32:52+00:00",
+          "refresh_after_at": "2026-05-05T13:37:52+00:00",
+          "expires_at": "2026-05-05T14:02:52+00:00",
+          "lease_id": "shared_lease_c6b029069f9fd675a0a3",
+          "requires_cloud_refresh": true
+        },
+        "deleted_item_ids": [],
+        "not_modified": false,
+        "categories": [
+          {
+            "category_id": "global_guidelines",
+            "name": "global_guidelines",
+            "kind": "global",
+            "enabled": true,
+            "item_count": 1
+          }
+        ],
+        "items": [
+          {
+            "item_id": "after_sale_policy",
+            "category_id": "global_guidelines",
+            "title": "After Sale",
+            "content": "{\"title\": \"After Sale\"}",
+            "keywords": [],
+            "applies_to": "",
+            "notes": "",
+            "status": "active",
+            "source": "proposal:proposal_bIw3zPWJZsUm",
+            "tenant_id": "tenant_a",
+            "data": {
+              "title": "After Sale"
+            },
+            "created_by": "platform-admin",
+            "created_at": "2026-05-05T13:32:26+00:00",
+            "updated_by": "platform-admin",
+            "updated_at": "2026-05-05T13:32:26+00:00"
+          }
+        ]
+      },
+      "created_by": "platform-admin",
+      "created_at": "2026-05-05T13:32:52+00:00"
+    }
+  },
+  "releases": {
+    "release_xKHYxdqFxE6d": {
+      "release_id": "release_xKHYxdqFxE6d",
+      "channel": "stable",
+      "version": "0.2.0-test",
+      "title": "Test release",
+      "notes": "Test release notes",
+      "artifact_url": "https://example.invalid/release.zip",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "signature": "sig-test",
+      "status": "published",
+      "created_by": "platform-admin",
+      "created_at": "2026-05-05T13:32:51+00:00"
+    }
+  },
+  "audit_events": [
+    {
+      "event_id": "audit_20260505133203251866_1eb5c2",
+      "actor_id": "platform-admin",
+      "action": "reject_shared_proposal",
+      "target_type": "shared_proposal",
+      "target_id": "proposal_shared_280b33bf14164e8c0f",
+      "detail": {},
+      "created_at": "2026-05-05T13:32:03+00:00"
+    },
+    {
+      "event_id": "audit_20260505133203302805_8ec2f8",
+      "actor_id": "platform-admin",
+      "action": "generate_shared_universal_proposals",
+      "target_type": "shared_proposal",
+      "target_id": "bulk",
+      "detail": {
+        "created_count": 0,
+        "skipped_count": 0,
+        "entry_count": 0,
+        "collected_count": 24,
+        "only_unscanned": true,
+        "use_llm": false
+      },
+      "created_at": "2026-05-05T13:32:03+00:00"
+    },
+    {
+      "event_id": "audit_20260505133226646817_8f6e03",
+      "actor_id": "local-node",
+      "action": "submit_shared_proposal",
+      "target_type": "shared_proposal",
+      "target_id": "proposal_bIw3zPWJZsUm",
+      "detail": {},
+      "created_at": "2026-05-05T13:32:26+00:00"
+    },
+    {
+      "event_id": "audit_20260505133226710388_455938",
+      "actor_id": "platform-admin",
+      "action": "refresh_shared_proposal_review_assist",
+      "target_type": "shared_proposal",
+      "target_id": "proposal_bIw3zPWJZsUm",
+      "detail": {
+        "use_llm": false
+      },
+      "created_at": "2026-05-05T13:32:26+00:00"
+    },
+    {
+      "event_id": "audit_20260505133226761844_7b8157",
+      "actor_id": "platform-admin",
+      "action": "accept_shared_proposal",
+      "target_type": "shared_proposal",
+      "target_id": "proposal_bIw3zPWJZsUm",
+      "detail": {},
+      "created_at": "2026-05-05T13:32:26+00:00"
+    },
+    {
+      "event_id": "audit_20260505133226821217_c0cd5e",
+      "actor_id": "platform-admin",
+      "action": "push_shared_patch",
+      "target_type": "shared_patch",
+      "target_id": "patch_S4JQOCWosPqf",
+      "detail": {
+        "command_count": 1,
+        "tenant_id": "tenant_a",
+        "node_id": "local_tenant_a_patch_01"
+      },
+      "created_at": "2026-05-05T13:32:26+00:00"
+    },
+    {
+      "event_id": "audit_20260505133226911045_1a0328",
+      "actor_id": "local-node",
+      "action": "command_result",
+      "target_type": "command",
+      "target_id": "cmd_z2rSwnSr4Vth",
+      "detail": {},
+      "created_at": "2026-05-05T13:32:26+00:00"
+    },
+    {
+      "event_id": "audit_20260505133251285191_e5a7d7",
+      "actor_id": "local-node",
+      "action": "submit_shared_proposal",
+      "target_type": "shared_proposal",
+      "target_id": "proposal_lHchENJpcxil",
+      "detail": {},
+      "created_at": "2026-05-05T13:32:51+00:00"
+    },
+    {
+      "event_id": "audit_20260505133251326775_c6b2d2",
+      "actor_id": "platform-admin",
+      "action": "create_command",
+      "target_type": "command",
+      "target_id": "cmd_sCPrjWkVxzeg",
+      "detail": {},
+      "created_at": "2026-05-05T13:32:51+00:00"
+    },
+    {
+      "event_id": "audit_20260505133251336587_9793ef",
+      "actor_id": "platform-admin",
+      "action": "request_restore",
+      "target_type": "restore_request",
+      "target_id": "restore_raJk8smGvC2N",
+      "detail": {},
+      "created_at": "2026-05-05T13:32:51+00:00"
+    },
+    {
+      "event_id": "audit_20260505133251354464_598574",
+      "actor_id": "platform-admin",
+      "action": "create_release",
+      "target_type": "release",
+      "target_id": "release_xKHYxdqFxE6d",
+      "detail": {},
+      "created_at": "2026-05-05T13:32:51+00:00"
+    },
+    {
+      "event_id": "audit_20260505133251373449_343261",
+      "actor_id": "platform-admin",
+      "action": "push_release",
+      "target_type": "release",
+      "target_id": "release_xKHYxdqFxE6d",
+      "detail": {
+        "command_count": 2,
+        "mode": "check_update",
+        "tenant_id": "tenant_a",
+        "node_id": ""
+      },
+      "created_at": "2026-05-05T13:32:51+00:00"
+    },
+    {
+      "event_id": "audit_20260505133251957563_d80f8c",
+      "actor_id": "platform-admin",
+      "action": "bootstrap_test01_customer",
+      "target_type": "user",
+      "target_id": "customer_test01",
+      "detail": {
+        "tenant_id": "default",
+        "backup_id": "backup_e016a1d7ae830a0690aa"
+      },
+      "created_at": "2026-05-05T13:32:51+00:00"
+    },
+    {
+      "event_id": "audit_20260505133252393842_616821",
+      "actor_id": "platform-admin",
+      "action": "package_customer_data",
+      "target_type": "customer_data_package",
+      "target_id": "data_pkg_customer_a_backup_4b032d212eb6e88bb524",
+      "detail": {
+        "account_username": "customer_a",
+        "tenant_id": "tenant_a",
+        "backup_id": "backup_4b032d212eb6e88bb524"
+      },
+      "created_at": "2026-05-05T13:32:52+00:00"
+    },
+    {
+      "event_id": "audit_20260505133252572383_d75068",
+      "actor_id": "platform-admin",
+      "action": "delete_customer_data_package",
+      "target_type": "customer_data_package",
+      "target_id": "data_pkg_customer_a_backup_4b032d212eb6e88bb524",
+      "detail": {},
+      "created_at": "2026-05-05T13:32:52+00:00"
+    },
+    {
+      "event_id": "audit_20260505133252654876_5490f2",
+      "actor_id": "platform-admin",
+      "action": "sync_shared_knowledge",
+      "target_type": "shared_snapshot",
+      "target_id": "shared_snapshot_sync_7ChWfdSuYbWq",
+      "detail": {},
+      "created_at": "2026-05-05T13:32:52+00:00"
+    },
+    {
+      "event_id": "audit_20260505133300559005_637506",
+      "actor_id": "platform-admin",
+      "action": "local_backup_now",
+      "target_type": "backup_request",
+      "target_id": "backup_TCViOlm9015a",
+      "detail": {},
+      "created_at": "2026-05-05T13:33:00+00:00"
+    },
+    {
+      "event_id": "audit_20260505133300723892_f721a5",
+      "actor_id": "platform-admin",
+      "action": "create_command",
+      "target_type": "command",
+      "target_id": "cmd_ttstYhjHA5HM",
+      "detail": {},
+      "created_at": "2026-05-05T13:33:00+00:00"
+    },
+    {
+      "event_id": "audit_20260505133300773054_f35bc9",
+      "actor_id": "platform-admin",
+      "action": "request_restore",
+      "target_type": "restore_request",
+      "target_id": "restore_2j79VzUJ8KVK",
+      "detail": {},
+      "created_at": "2026-05-05T13:33:00+00:00"
+    },
+    {
+      "event_id": "audit_20260505133300868136_85ced9",
+      "actor_id": "platform-admin",
+      "action": "delete_backup_request",
+      "target_type": "backup_request",
+      "target_id": "backup_TCViOlm9015a",
+      "detail": {
+        "backup_id": "backup_d300d0ebf6e0a3fb004a",
+        "removed_package_count": 1
+      },
+      "created_at": "2026-05-05T13:33:00+00:00"
+    }
+  ]
+}

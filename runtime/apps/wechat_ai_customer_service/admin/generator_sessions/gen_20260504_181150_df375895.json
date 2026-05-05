@@ -1,0 +1,100 @@
+{
+  "session_id": "gen_20260504_181150_df375895",
+  "status": "collecting",
+  "created_at": "2026-05-04T18:11:50",
+  "updated_at": "2026-05-04T18:11:50",
+  "history": [
+    {
+      "role": "user",
+      "content": "请把下面资料只整理成商品库主数据。不要生成客服话术、政策规则或候选知识。\n如果商品名称、价格、库存、类目、单位等主字段不完整，请保留草稿并提示用户补充。\n??????????\nSKU?SMOKE-CAR-001\n??????/??\n???9.8\n????\n???1\n????????????\n????????????",
+      "created_at": "2026-05-04T18:11:50"
+    }
+  ],
+  "category_id": "products",
+  "category_name": "商品资料",
+  "confidence": 0.62,
+  "provider": "heuristic",
+  "draft_item": {
+    "schema_version": 1,
+    "category_id": "products",
+    "id": "products_bea5887b51",
+    "status": "active",
+    "source": {
+      "type": "ai_generator",
+      "session_id": "gen_20260504_181150_df375895"
+    },
+    "data": {
+      "name": "、",
+      "sku": "",
+      "category": "",
+      "aliases": [],
+      "specs": "",
+      "price": null,
+      "unit": "件",
+      "price_tiers": [],
+      "inventory": null,
+      "shipping_policy": "",
+      "warranty_policy": "",
+      "reply_templates": {},
+      "risk_rules": [],
+      "additional_details": {
+        "用户原始描述": "请把下面资料只整理成商品库主数据。不要生成客服话术、政策规则或候选知识。 如果商品名称、价格、库存、类目、单位等主字段不完整，请保留草稿并提示用户补充。 ?????????? SKU?SMOKE-CAR-001 ??????/?? ???9.8 ???? ???1 ???????????? ????????????"
+      }
+    },
+    "runtime": {
+      "allow_auto_reply": true,
+      "requires_handoff": false,
+      "risk_level": "normal"
+    },
+    "metadata": {}
+  },
+  "missing_fields": [
+    "price"
+  ],
+  "question": "还需要补充：基础价格。请补齐后再应用入库。",
+  "warnings": [],
+  "summary_rows": [
+    {
+      "label": "知识 ID",
+      "value": "products_bea5887b51"
+    },
+    {
+      "label": "商品名称",
+      "value": "、"
+    },
+    {
+      "label": "计价单位",
+      "value": "件"
+    },
+    {
+      "label": "补充信息",
+      "value": "用户原始描述: 请把下面资料只整理成商品库主数据。不要生成客服话术、政策规则或候选知识。 如果商品名称、价格、库存、类目、单位等主字段不完整，请保留草稿并提示用户补充。 ?????????? SKU?SMOKE-CAR-001 ??????/?? ???9.8 ???? ???1 ???????????? ????????????"
+    }
+  ],
+  "intake": {
+    "status": "needs_more_info",
+    "ok": false,
+    "confidence": 0.62,
+    "missing_fields": [
+      "price"
+    ],
+    "missing_labels": [
+      "基础价格"
+    ],
+    "question": "还需要补充：基础价格。请补齐后再应用入库。",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "用户原始描述"
+    ]
+  },
+  "llm_assist": {
+    "policy_version": "knowledge_llm_assist_v1",
+    "stage": "manual_description_to_draft_knowledge",
+    "attempted": false,
+    "provider": "",
+    "status": "rule_only_disabled_by_request",
+    "reason": "llm_disabled_by_caller",
+    "fallback_allowed": true,
+    "human_approval_required": true
+  }
+}

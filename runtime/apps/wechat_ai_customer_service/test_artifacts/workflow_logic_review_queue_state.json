@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "targets": {
+    "文件传输助手": {
+      "processed_message_ids": [],
+      "handoff_message_ids": [
+        "risk-1"
+      ],
+      "pending_customer_data": [
+        {
+          "status": "waiting_for_fields",
+          "missing_required_fields": [
+            "name"
+          ],
+          "missing_required_labels": [
+            "姓名"
+          ],
+          "message_ids": [
+            "lead-1"
+          ],
+          "raw_text": "电话：13900001111",
+          "fields": {
+            "phone": "13900001111"
+          },
+          "updated_at": "2026-05-06T02:46:46"
+        }
+      ],
+      "handoff_events": [
+        {
+          "status": "open",
+          "reason": "approval_required",
+          "message_ids": [
+            "risk-1"
+          ],
+          "message_contents": [
+            "能不能直接按 20 台价格给我？"
+          ],
+          "created_at": "2026-05-06T02:46:46"
+        }
+      ]
+    }
+  }
+}

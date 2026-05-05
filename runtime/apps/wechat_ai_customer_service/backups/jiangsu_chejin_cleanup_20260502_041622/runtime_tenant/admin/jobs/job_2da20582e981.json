@@ -1,0 +1,51 @@
+{
+  "job_id": "job_2da20582e981",
+  "created_at": "2026-05-01T23:00:10",
+  "status": "completed",
+  "upload_ids": [
+    "upload_68e13671c352b41f"
+  ],
+  "use_llm": false,
+  "candidate_ids": [],
+  "candidate_count": 0,
+  "rag_experience_ids": [],
+  "skipped_duplicate_count": 3,
+  "skipped_duplicates": [
+    {
+      "candidate_id": "raw_12c57db3d1b03e33",
+      "upload_id": "upload_68e13671c352b41f",
+      "duplicate": {
+        "duplicate": true,
+        "reason": "highly_similar_content",
+        "source": "review_candidate:raw_bca7298d6ffa33a3",
+        "existing_item_id": "item_ba587e0d0de9",
+        "similarity": 0.969,
+        "message": "检测到与现有知识或候选高度重复，已跳过去重。"
+      }
+    },
+    {
+      "candidate_id": "raw_26632728841309ab",
+      "upload_id": "upload_68e13671c352b41f",
+      "duplicate": {
+        "duplicate": true,
+        "reason": "highly_similar_content",
+        "source": "review_candidate:raw_6149fcb173a5f4ff",
+        "existing_item_id": "item_485cf1a1e978",
+        "similarity": 0.969,
+        "message": "检测到与现有知识或候选高度重复，已跳过去重。"
+      }
+    },
+    {
+      "candidate_id": "raw_8e3247ad9b7e9d47",
+      "upload_id": "upload_68e13671c352b41f",
+      "duplicate": {
+        "duplicate": true,
+        "reason": "highly_similar_content",
+        "source": "review_candidate:raw_0809d2e9da576fc7",
+        "existing_item_id": "item_77c9163c1a45",
+        "similarity": 0.957,
+        "message": "检测到与现有知识或候选高度重复，已跳过去重。"
+      }
+    }
+  ]
+}

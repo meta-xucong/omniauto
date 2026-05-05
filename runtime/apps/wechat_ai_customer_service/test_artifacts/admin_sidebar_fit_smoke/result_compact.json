@@ -1,0 +1,54 @@
+{
+  "ok": true,
+  "results": [
+    {
+      "sidebarBottom": 876,
+      "navBottom": 851,
+      "settingsBottom": 843,
+      "sharedVisible": true,
+      "settingsWithinSidebar": true,
+      "settingsVisibleAtTop": true,
+      "navClipsInsideSidebar": true,
+      "navScrollable": false,
+      "navOverflowY": "auto",
+      "pageOverflowX": false,
+      "navScrollHeight": 730,
+      "navClientHeight": 730,
+      "height": 900,
+      "ok": true
+    },
+    {
+      "sidebarBottom": 696,
+      "navBottom": 671,
+      "settingsBottom": 663,
+      "sharedVisible": true,
+      "settingsWithinSidebar": true,
+      "settingsVisibleAtTop": true,
+      "navClipsInsideSidebar": true,
+      "navScrollable": false,
+      "navOverflowY": "auto",
+      "pageOverflowX": false,
+      "navScrollHeight": 550,
+      "navClientHeight": 550,
+      "height": 720,
+      "ok": true
+    },
+    {
+      "sidebarBottom": 616,
+      "navBottom": 591,
+      "settingsBottom": 629,
+      "sharedVisible": true,
+      "settingsWithinSidebar": false,
+      "settingsVisibleAtTop": false,
+      "navClipsInsideSidebar": true,
+      "navScrollable": true,
+      "navOverflowY": "auto",
+      "pageOverflowX": false,
+      "navScrollHeight": 516,
+      "navClientHeight": 470,
+      "height": 640,
+      "ok": true
+    }
+  ],
+  "artifact": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\admin_sidebar_fit_smoke"
+}

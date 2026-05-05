@@ -1,0 +1,64 @@
+[
+  {
+    "tenant_id": "workflow_switch_probe",
+    "raw_message_id": "raw_msg_12989bdd46f068ea8f3b",
+    "conversation_id": "conv_189fb62f858b7a3b2f",
+    "conversation_type": "file_transfer",
+    "target_name": "文件传输助手",
+    "group_name": "",
+    "message_id": "record-1",
+    "sender": "self",
+    "sender_role": "self",
+    "group_member_name": "",
+    "content_type": "text",
+    "content": "商用冰箱多少钱",
+    "message_time": "",
+    "message_fingerprint": "781f1b206fc5e762e86fb580a1677284",
+    "observed_at": "2026-05-02T17:24:00",
+    "updated_at": "2026-05-06T02:46:08",
+    "source_modules": [
+      "customer_service"
+    ],
+    "source_adapter": "wxauto4",
+    "learning_enabled": true,
+    "excluded_reason": "",
+    "dedupe_key": "12989bdd46f068ea8f3b22b7357e1815",
+    "raw_payload": {
+      "id": "record-1",
+      "type": "text",
+      "content": "商用冰箱多少钱",
+      "sender": "self"
+    }
+  },
+  {
+    "tenant_id": "workflow_switch_probe",
+    "raw_message_id": "raw_msg_e672cd90493c83afcf5c",
+    "conversation_id": "conv_189fb62f858b7a3b2f",
+    "conversation_type": "file_transfer",
+    "target_name": "文件传输助手",
+    "group_name": "",
+    "message_id": "risk-1",
+    "sender": "self",
+    "sender_role": "self",
+    "group_member_name": "",
+    "content_type": "text",
+    "content": "买10台冰箱能按20台价格吗？",
+    "message_time": "",
+    "message_fingerprint": "30119d9bc9ea5901f14c49cf85a1059a",
+    "observed_at": "2026-05-02T17:24:00",
+    "updated_at": "2026-05-06T02:46:08",
+    "source_modules": [
+      "customer_service"
+    ],
+    "source_adapter": "wxauto4",
+    "learning_enabled": true,
+    "excluded_reason": "",
+    "dedupe_key": "e672cd90493c83afcf5cafe69c054bf2",
+    "raw_payload": {
+      "id": "risk-1",
+      "type": "text",
+      "content": "买10台冰箱能按20台价格吗？",
+      "sender": "self"
+    }
+  }
+]

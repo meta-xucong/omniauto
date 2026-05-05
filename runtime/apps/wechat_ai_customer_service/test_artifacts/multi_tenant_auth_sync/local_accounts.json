@@ -1,0 +1,18 @@
+{
+  "accounts": {
+    "guest": {
+      "username": "guest",
+      "email": "guest@example.local",
+      "password_hash": "pbkdf2_sha256$120000$5a9d54aa6842908946d05cb4a02629de$Oz/lTdH69dPmGTnYgAELkXON3OVCaZL0bTrcvX57EOw=",
+      "initialized_at": "2026-05-05T13:44:52+00:00",
+      "updated_at": "2026-05-05T13:44:52+00:00"
+    },
+    "customer": {
+      "username": "customer",
+      "email": "customer@example.local",
+      "password_hash": "pbkdf2_sha256$120000$bbc0810a8eacd751c5c5dc7842e9d6b5$r+nrxyJvvRvp2Fj4oKT/lfwKPu/haXhC1bfrA4/i9Gc=",
+      "initialized_at": "2026-05-05T13:44:54+00:00",
+      "updated_at": "2026-05-05T13:44:54+00:00"
+    }
+  }
+}

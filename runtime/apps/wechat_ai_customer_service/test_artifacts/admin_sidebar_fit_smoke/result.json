@@ -1,0 +1,63 @@
+{
+  "ok": true,
+  "results": [
+    {
+      "sidebarTop": 24,
+      "sidebarBottom": 876,
+      "navTop": 127,
+      "navBottom": 851,
+      "settingsTop": 799,
+      "settingsBottom": 843,
+      "sharedVisible": true,
+      "settingsWithinSidebar": true,
+      "navClipsInsideSidebar": true,
+      "navScrollable": true,
+      "navOverflowY": "auto",
+      "pageOverflowX": false,
+      "navScrollHeight": 724,
+      "navClientHeight": 724,
+      "settingsVisibleAtTop": true,
+      "height": 900,
+      "ok": true
+    },
+    {
+      "sidebarTop": 24,
+      "sidebarBottom": 696,
+      "navTop": 127,
+      "navBottom": 671,
+      "settingsTop": 646,
+      "settingsBottom": 678,
+      "sharedVisible": true,
+      "settingsWithinSidebar": true,
+      "navClipsInsideSidebar": true,
+      "navScrollable": true,
+      "navOverflowY": "auto",
+      "pageOverflowX": false,
+      "navScrollHeight": 559,
+      "navClientHeight": 544,
+      "settingsVisibleAtTop": false,
+      "height": 720,
+      "ok": true
+    },
+    {
+      "sidebarTop": 24,
+      "sidebarBottom": 616,
+      "navTop": 127,
+      "navBottom": 591,
+      "settingsTop": 646,
+      "settingsBottom": 678,
+      "sharedVisible": true,
+      "settingsWithinSidebar": false,
+      "navClipsInsideSidebar": true,
+      "navScrollable": true,
+      "navOverflowY": "auto",
+      "pageOverflowX": false,
+      "navScrollHeight": 559,
+      "navClientHeight": 464,
+      "settingsVisibleAtTop": false,
+      "height": 640,
+      "ok": true
+    }
+  ],
+  "artifact": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\admin_sidebar_fit_smoke"
+}

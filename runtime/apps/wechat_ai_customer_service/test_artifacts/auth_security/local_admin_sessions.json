@@ -1,0 +1,17 @@
+[
+  {
+    "session_id": "stale-local-admin",
+    "token": "stale-local-admin",
+    "user": {
+      "user_id": "local-admin",
+      "role": "admin",
+      "tenant_ids": [
+        "*"
+      ],
+      "display_name": "Local Admin",
+      "username": "admin"
+    },
+    "active_tenant_id": "default",
+    "source": "local"
+  }
+]

@@ -1,0 +1,130 @@
+{
+  "ok": true,
+  "send": true,
+  "config_path": "apps\\wechat_ai_customer_service\\configs\\file_transfer_rag_enterprise.example.json",
+  "scenario_path": "apps\\wechat_ai_customer_service\\tests\\scenarios\\file_transfer_rag_enterprise.json",
+  "rag_seed": {
+    "enabled": true,
+    "ok": true,
+    "count": 1,
+    "failures": [],
+    "results": [
+      {
+        "ok": true,
+        "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\tests\\fixtures\\rag_enterprise_live_reference.txt",
+        "source_id": "source_656d2c93ceb6432b"
+      }
+    ]
+  },
+  "live_run_id": "20260429153752",
+  "bootstrap": {
+    "ok": true,
+    "dry_run": true,
+    "iterations": 1,
+    "status": {
+      "login_window_exists": false,
+      "online": true,
+      "my_info": {
+        "display_name": "Meta_xc",
+        "id": "sepulianmeng"
+      },
+      "state": "main_window",
+      "ok": true,
+      "library_stdout": "初始化成功，获取到已登录窗口：Meta_xc"
+    },
+    "targets": [
+      "文件传输助手"
+    ],
+    "events": [
+      {
+        "ok": true,
+        "created_at": "2026-04-29T15:37:59",
+        "target": "文件传输助手",
+        "action": "bootstrapped",
+        "marked_message_ids": [
+          "4c3401827f9e61cb02821cb0b16278e0",
+          "34de0774ca98d0d400a9c3e82f967e92"
+        ],
+        "marked_count": 2,
+        "iteration": 1
+      }
+    ]
+  },
+  "count": 2,
+  "failures": [],
+  "results": [
+    {
+      "name": "rag_hybrid_synonym_live",
+      "ok": true,
+      "output": {
+        "action": "sent",
+        "message_ids": [
+          "0258b17e5f71a2b36f13022a25233d66"
+        ],
+        "reply_text": "[OmniAuto RAG企业测] 我查到资料里有一条相关说明：RAG经验概括：客户问法：民宿客房智能锁安装前要不要确认供电？；命中资料：智能指纹门锁 FL-920 适合酒店公寓、民宿客房和办公室门禁场景。 安装前建议确认门厚、开孔尺寸、开门方向和供电方式。客户如果只是想…；回复要点：我查到资料里有一条相关说明：智能指纹…。这部分可以先作为参考；如果您要确认价格、库存、发货或售后承诺，我再按正式规则核对。",
+        "rule_name": "rag_context_reply",
+        "reason": "safe_rag_context_reply",
+        "handoff_reason": null,
+        "data_complete": false,
+        "data_write_ok": false,
+        "intent": "product_detail",
+        "needs_handoff": false,
+        "llm_applied": false,
+        "llm_reason": "skipped_after_rag_reply",
+        "rag_applied": true,
+        "rag_reason": "safe_rag_context_reply",
+        "rag_retrieval_mode": "hybrid_lexical_semantic",
+        "rag_experience_id": "rag_exp_fe81438b83e8dec3de13",
+        "safety": {
+          "must_handoff": false,
+          "reasons": [],
+          "allowed_auto_reply": true,
+          "discount_check": {
+            "detected": false
+          },
+          "rag_soft_installation_reference_allowed": true,
+          "rag_soft_reference_allowed": true
+        },
+        "verified": true
+      }
+    },
+    {
+      "name": "rag_risk_boundary_live",
+      "ok": true,
+      "output": {
+        "action": "handoff_sent",
+        "message_ids": [
+          "2b41414ae17301a674c69aaf5dac5519"
+        ],
+        "reply_text": "[OmniAuto RAG企业测] 这个问题我当前无法直接确认，我先帮您记录并请示上级，稍后给您准确回复。",
+        "rule_name": null,
+        "reason": "no_rule_matched",
+        "handoff_reason": "evidence_safety:handoff_intent_detected,matched_faq_requires_handoff,contract_or_credit_requires_manual_review,需要人工审核账期条件",
+        "data_complete": false,
+        "data_write_ok": false,
+        "intent": "logistics_policy",
+        "needs_handoff": true,
+        "llm_applied": false,
+        "llm_reason": "llm_disabled",
+        "rag_applied": false,
+        "rag_reason": "evidence_safety_requires_handoff",
+        "rag_retrieval_mode": null,
+        "rag_experience_id": null,
+        "safety": {
+          "must_handoff": true,
+          "reasons": [
+            "handoff_intent_detected",
+            "matched_faq_requires_handoff",
+            "contract_or_credit_requires_manual_review",
+            "需要人工审核账期条件"
+          ],
+          "allowed_auto_reply": false,
+          "discount_check": {
+            "detected": false
+          }
+        },
+        "verified": true
+      }
+    }
+  ]
+}

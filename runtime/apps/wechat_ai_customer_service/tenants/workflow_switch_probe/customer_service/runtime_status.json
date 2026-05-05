@@ -1,0 +1,12 @@
+{
+  "ok": true,
+  "state": "thinking",
+  "message": "正在处理「文件传输助手」的 1 条新消息。",
+  "updated_at": "2026-05-06T02:46:08",
+  "tenant_id": "workflow_switch_probe",
+  "target": "文件传输助手",
+  "message_count": 1,
+  "message_ids": [
+    "risk-1"
+  ]
+}

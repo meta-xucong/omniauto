@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "category_id": "risk_control",
+  "display_name": "共享风险边界",
+  "item_title_field": "title",
+  "fields": [
+    {
+      "id": "title",
+      "label": "标题",
+      "type": "short_text",
+      "required": true
+    },
+    {
+      "id": "keywords",
+      "label": "风险关键词",
+      "type": "tags",
+      "required": false
+    },
+    {
+      "id": "guideline_text",
+      "label": "处理规则",
+      "type": "long_text",
+      "required": true
+    },
+    {
+      "id": "applies_to",
+      "label": "适用场景",
+      "type": "long_text",
+      "required": false
+    },
+    {
+      "id": "handoff_reason",
+      "label": "转人工原因",
+      "type": "short_text",
+      "required": false
+    }
+  ]
+}

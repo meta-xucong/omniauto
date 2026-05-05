@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "category_id": "risk_control",
+  "match_fields": [
+    "title",
+    "keywords",
+    "guideline_text",
+    "applies_to",
+    "handoff_reason"
+  ],
+  "intent_fields": [
+    "keywords"
+  ],
+  "risk_fields": [
+    "keywords",
+    "guideline_text",
+    "handoff_reason"
+  ],
+  "reply_fields": [
+    "guideline_text",
+    "handoff_reason"
+  ],
+  "minimum_confidence": 0.34,
+  "default_action": "shared_risk_control"
+}

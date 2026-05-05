@@ -1,0 +1,173 @@
+INFO:     127.0.0.1:21938 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:21947 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:22142 - "GET /static/styles.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:22709 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:22709 - "GET /static/styles.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:22709 - "GET /static/app.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:22709 - "GET /api/auth/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:22710 - "GET /api/tenants HTTP/1.1" 200 OK
+INFO:     127.0.0.1:22713 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:22711 - "GET /api/sync/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:22710 - "GET /favicon.ico HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:22712 - "GET /api/auth/security HTTP/1.1" 200 OK
+INFO:     127.0.0.1:22712 - "POST /api/sync/register-node HTTP/1.1" 200 OK
+INFO:     127.0.0.1:22711 - "GET /api/knowledge/categories HTTP/1.1" 200 OK
+INFO:     127.0.0.1:22711 - "GET /api/knowledge/categories/products/items HTTP/1.1" 200 OK
+INFO:     127.0.0.1:22712 - "GET /api/knowledge/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:22710 - "GET /api/system/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:22712 - "GET /favicon.ico HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:22710 - "GET /api/knowledge/categories HTTP/1.1" 200 OK
+INFO:     127.0.0.1:22712 - "GET /api/knowledge/categories/products/items HTTP/1.1" 200 OK
+INFO:     127.0.0.1:22710 - "GET /api/knowledge/categories HTTP/1.1" 200 OK
+INFO:     127.0.0.1:22710 - "GET /api/knowledge/categories/products/items HTTP/1.1" 200 OK
+INFO:     127.0.0.1:22711 - "GET /favicon.ico HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:22710 - "GET /api/uploads HTTP/1.1" 200 OK
+INFO:     127.0.0.1:22710 - "GET /api/uploads HTTP/1.1" 200 OK
+INFO:     127.0.0.1:22712 - "GET /api/candidates?status=pending HTTP/1.1" 200 OK
+INFO:     127.0.0.1:22712 - "GET /api/candidates?status=pending HTTP/1.1" 200 OK
+INFO:     127.0.0.1:22709 - "GET /favicon.ico HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:22711 - "GET /api/rag/sources?limit=80 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:22712 - "GET /api/rag/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:22711 - "GET /api/rag/sources?limit=80 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:22710 - "GET /api/rag/analytics HTTP/1.1" 200 OK
+INFO:     127.0.0.1:22712 - "GET /api/rag/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:22710 - "GET /api/rag/analytics HTTP/1.1" 200 OK
+INFO:     127.0.0.1:22713 - "GET /api/rag/experiences?status=all&limit=200 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:22713 - "GET /api/rag/experiences?status=all&limit=200 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:22726 - "GET /favicon.ico HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:22729 - "GET /favicon.ico HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:22726 - "GET /api/versions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:22726 - "GET /api/versions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:22730 - "GET /favicon.ico HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:34084 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34084 - "GET /static/styles.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34085 - "GET /static/app.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34085 - "GET /api/auth/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34088 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34086 - "GET /api/sync/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34084 - "GET /api/tenants HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34087 - "GET /api/auth/security HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34084 - "GET /favicon.ico HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:34087 - "POST /api/sync/register-node HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34084 - "GET /api/knowledge/categories HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34084 - "GET /api/knowledge/categories/products/items HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34086 - "GET /api/knowledge/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34087 - "GET /api/system/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34087 - "GET /api/recorder/summary HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:34086 - "GET /api/recorder/conversations?conversation_type=group&status=all HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:34086 - "GET /favicon.ico HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:34087 - "GET /api/recorder/summary HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:34084 - "GET /api/recorder/conversations?conversation_type=group&status=all HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:34094 - "PUT /api/recorder/settings HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:34099 - "GET /favicon.ico HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:34097 - "GET /api/uploads HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34097 - "GET /api/uploads HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34098 - "GET /api/candidates?status=pending HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34098 - "GET /api/candidates?status=pending HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34098 - "GET /api/recorder/summary HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:34097 - "GET /api/recorder/conversations?conversation_type=group&status=all HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:34098 - "GET /favicon.ico HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:34099 - "GET /api/recorder/summary HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:34100 - "GET /api/recorder/conversations?conversation_type=group&status=all HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:34103 - "POST /api/recorder/discover HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:34141 - "GET /favicon.ico HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:34137 - "GET /api/rag/sources?limit=80 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34138 - "GET /api/rag/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34137 - "GET /api/rag/sources?limit=80 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34140 - "GET /api/rag/analytics HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34138 - "GET /api/rag/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34140 - "GET /api/rag/analytics HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34139 - "GET /api/rag/experiences?status=all&limit=200 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34139 - "GET /api/rag/experiences?status=all&limit=200 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34139 - "GET /api/uploads HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34138 - "GET /favicon.ico HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:34139 - "GET /api/uploads HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34140 - "GET /api/candidates?status=pending HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34140 - "GET /api/candidates?status=pending HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34140 - "GET /api/recorder/summary HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:34138 - "GET /favicon.ico HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:34139 - "GET /api/recorder/conversations?conversation_type=group&status=all HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:34144 - "GET /api/recorder/summary HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:34139 - "GET /api/recorder/conversations?conversation_type=group&status=all HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:34350 - "GET /favicon.ico HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:34348 - "GET /api/uploads HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34348 - "GET /api/uploads HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34349 - "GET /api/candidates?status=pending HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34349 - "GET /api/candidates?status=pending HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34349 - "GET /api/uploads HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55079 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55079 - "GET /static/styles.css HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:55080 - "GET /static/app.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55080 - "GET /api/auth/me HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:55079 - "GET /api/tenants HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:55081 - "GET /api/sync/status HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:55082 - "GET /api/auth/security HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:55082 - "GET /api/knowledge/overview HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:55081 - "GET /api/system/status HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:55079 - "GET /api/knowledge/categories HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:55083 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55084 - "GET /static/logo.png HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:55083 - "GET /api/candidates?status=pending HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:55079 - "GET /api/uploads HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:55079 - "GET /favicon.ico HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:55079 - "GET /api/recorder/summary HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:55083 - "GET /api/recorder/conversations?status=all HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:55084 - "GET /favicon.ico HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:55079 - "GET /api/recorder/summary HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:55081 - "GET /api/recorder/conversations?status=all HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:55173 - "POST /api/auth/logout HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55176 - "POST /api/auth/login/start HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55176 - "GET /api/auth/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55178 - "GET /api/tenants HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55179 - "GET /api/sync/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55180 - "GET /api/auth/security HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55180 - "POST /api/sync/register-node HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55178 - "GET /api/knowledge/categories HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55178 - "GET /api/knowledge/categories/products/items HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55180 - "GET /api/knowledge/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55179 - "GET /api/system/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55179 - "GET /api/recorder/summary HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:55180 - "GET /api/recorder/conversations?status=all HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:55180 - "GET /api/uploads HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55178 - "GET /favicon.ico HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:55176 - "GET /api/uploads HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55179 - "GET /api/candidates?status=pending HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55176 - "GET /api/candidates?status=pending HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55176 - "GET /api/recorder/summary HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:55179 - "GET /api/recorder/conversations?status=all HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:55176 - "GET /favicon.ico HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:55178 - "GET /api/recorder/summary HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:55179 - "GET /api/recorder/conversations?status=all HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:55218 - "GET /favicon.ico HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:55216 - "GET /api/rag/sources?limit=80 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55214 - "GET /api/rag/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55216 - "GET /api/rag/sources?limit=80 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55217 - "GET /api/rag/experiences?status=all&limit=200 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55215 - "GET /api/rag/analytics HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55214 - "GET /api/rag/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55217 - "GET /api/rag/experiences?status=all&limit=200 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55215 - "GET /api/rag/analytics HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10255 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10255 - "GET /static/styles.css HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:10256 - "GET /static/app.js HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:10256 - "GET /api/auth/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10257 - "GET /api/sync/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10259 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10260 - "GET /static/logo.png HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:10255 - "GET /api/tenants HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10258 - "GET /api/auth/security HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10255 - "GET /favicon.ico HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:10258 - "POST /api/sync/register-node HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10260 - "GET /api/knowledge/categories HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10260 - "GET /api/knowledge/categories/products/items HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10260 - "POST /api/auth/logout HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10258 - "GET /api/knowledge/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10255 - "GET /api/system/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10255 - "GET /api/rag/status HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:10258 - "GET /api/rag/analytics HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:10260 - "GET /api/rag/sources?limit=80 HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:10259 - "GET /api/rag/experiences?status=all&limit=200 HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:10293 - "POST /api/auth/login/start HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:11250 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:11250 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:11250 - "GET /favicon.ico HTTP/1.1" 401 Unauthorized

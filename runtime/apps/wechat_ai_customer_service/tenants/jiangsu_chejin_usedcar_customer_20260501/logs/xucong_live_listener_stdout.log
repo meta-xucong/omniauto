@@ -1,0 +1,4 @@
+{
+  "ok": false,
+  "error": "TimeoutError('Workflow state is locked: D:\\\\AI\\\\AI_RPA\\\\runtime\\\\apps\\\\wechat_ai_customer_service\\\\tenants\\\\jiangsu_chejin_usedcar_customer_20260501\\\\state\\\\xucong_live_customer_service_state.json.lock')"
+}

@@ -1,0 +1,26 @@
+[
+  {
+    "batch_id": "raw_batch_5e8ffde57b8eb65d8eb6",
+    "tenant_id": "workflow_switch_probe",
+    "conversation_id": "conv_189fb62f858b7a3b2f",
+    "message_ids": [
+      "raw_msg_e672cd90493c83afcf5c"
+    ],
+    "reason": "customer_service_poll",
+    "source_module": "customer_service",
+    "status": "pending",
+    "created_at": "2026-05-02T17:24:00"
+  },
+  {
+    "batch_id": "raw_batch_10d8e9004103c8448784",
+    "tenant_id": "workflow_switch_probe",
+    "conversation_id": "conv_189fb62f858b7a3b2f",
+    "message_ids": [
+      "raw_msg_12989bdd46f068ea8f3b"
+    ],
+    "reason": "customer_service_poll",
+    "source_module": "customer_service",
+    "status": "pending",
+    "created_at": "2026-05-02T17:24:00"
+  }
+]

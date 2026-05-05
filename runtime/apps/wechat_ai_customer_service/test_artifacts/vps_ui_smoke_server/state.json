@@ -1,0 +1,622 @@
+{
+  "schema_version": 1,
+  "tenants": {
+    "tenant_ui": {
+      "tenant_id": "tenant_ui",
+      "display_name": "??????",
+      "status": "active",
+      "sync_enabled": false,
+      "metadata": {},
+      "created_at": "2026-05-01T21:01:00+00:00",
+      "updated_at": "2026-05-01T21:01:00+00:00"
+    }
+  },
+  "users": {},
+  "sessions": {
+    "vps_figxulZjqEDASruX94q9RlFo-8zQrToi3Eom1mCLwlM": {
+      "session_id": "vps_figxulZjqEDASruX94q9RlFo-8zQrToi3Eom1mCLwlM",
+      "user": {
+        "user_id": "platform-admin",
+        "role": "admin",
+        "tenant_ids": [
+          "*"
+        ],
+        "display_name": "Platform Admin",
+        "username": "admin",
+        "resource_scopes": [
+          "*"
+        ]
+      },
+      "active_tenant_id": "default",
+      "issued_at": "2026-05-01T21:01:00+00:00",
+      "expires_at": "2026-05-02T09:01:00+00:00",
+      "source": "vps",
+      "token": "vps_figxulZjqEDASruX94q9RlFo-8zQrToi3Eom1mCLwlM"
+    },
+    "vps_TX0884dnUz63QC1KBPm0C6r50XQ4o2GCp-As6lM3144": {
+      "session_id": "vps_TX0884dnUz63QC1KBPm0C6r50XQ4o2GCp-As6lM3144",
+      "user": {
+        "user_id": "platform-admin",
+        "role": "admin",
+        "tenant_ids": [
+          "*"
+        ],
+        "display_name": "Platform Admin",
+        "username": "admin",
+        "resource_scopes": [
+          "*"
+        ]
+      },
+      "active_tenant_id": "default",
+      "issued_at": "2026-05-01T21:01:28+00:00",
+      "expires_at": "2026-05-02T09:01:28+00:00",
+      "source": "vps",
+      "token": "vps_TX0884dnUz63QC1KBPm0C6r50XQ4o2GCp-As6lM3144"
+    },
+    "vps_AzZdxGQvSGVSLsSh6DewRGcGEgu92eWLsuPjwiNdvxg": {
+      "session_id": "vps_AzZdxGQvSGVSLsSh6DewRGcGEgu92eWLsuPjwiNdvxg",
+      "user": {
+        "user_id": "platform-admin",
+        "role": "admin",
+        "tenant_ids": [
+          "*"
+        ],
+        "display_name": "Platform Admin",
+        "username": "admin",
+        "resource_scopes": [
+          "*"
+        ]
+      },
+      "active_tenant_id": "default",
+      "issued_at": "2026-05-01T21:02:12+00:00",
+      "expires_at": "2026-05-02T09:02:12+00:00",
+      "source": "vps",
+      "token": "vps_AzZdxGQvSGVSLsSh6DewRGcGEgu92eWLsuPjwiNdvxg"
+    },
+    "vps_9RqgVn-JlhTw2Dd4YZO-k8-sBj02x9nXBCuMPOV9vZg": {
+      "session_id": "vps_9RqgVn-JlhTw2Dd4YZO-k8-sBj02x9nXBCuMPOV9vZg",
+      "user": {
+        "user_id": "platform-admin",
+        "role": "admin",
+        "tenant_ids": [
+          "*"
+        ],
+        "display_name": "Platform Admin",
+        "username": "admin",
+        "resource_scopes": [
+          "*"
+        ]
+      },
+      "active_tenant_id": "default",
+      "issued_at": "2026-05-01T21:02:35+00:00",
+      "expires_at": "2026-05-02T09:02:35+00:00",
+      "source": "vps",
+      "token": "vps_9RqgVn-JlhTw2Dd4YZO-k8-sBj02x9nXBCuMPOV9vZg"
+    },
+    "vps_d8rPGTWIVjaQ8OCESBl2q-jgboL8aKi_2POIz_SLQ5s": {
+      "session_id": "vps_d8rPGTWIVjaQ8OCESBl2q-jgboL8aKi_2POIz_SLQ5s",
+      "user": {
+        "user_id": "platform-admin",
+        "role": "admin",
+        "tenant_ids": [
+          "*"
+        ],
+        "display_name": "Platform Admin",
+        "username": "admin",
+        "resource_scopes": [
+          "*"
+        ]
+      },
+      "active_tenant_id": "default",
+      "issued_at": "2026-05-01T21:03:17+00:00",
+      "expires_at": "2026-05-02T09:03:17+00:00",
+      "source": "vps",
+      "token": "vps_d8rPGTWIVjaQ8OCESBl2q-jgboL8aKi_2POIz_SLQ5s"
+    },
+    "vps_ldSTFobWzt3AsNzdop4cOm2FBKbUYJAbAgOQaLi51gs": {
+      "session_id": "vps_ldSTFobWzt3AsNzdop4cOm2FBKbUYJAbAgOQaLi51gs",
+      "user": {
+        "user_id": "platform-admin",
+        "role": "admin",
+        "tenant_ids": [
+          "*"
+        ],
+        "display_name": "Platform Admin",
+        "username": "admin",
+        "resource_scopes": [
+          "*"
+        ]
+      },
+      "active_tenant_id": "default",
+      "issued_at": "2026-05-01T21:04:12+00:00",
+      "expires_at": "2026-05-02T09:04:12+00:00",
+      "source": "vps",
+      "token": "vps_ldSTFobWzt3AsNzdop4cOm2FBKbUYJAbAgOQaLi51gs"
+    }
+  },
+  "admin_credentials": {
+    "platform-admin": {
+      "user_id": "platform-admin",
+      "username": "admin",
+      "email": "admin@example.local",
+      "password_hash": "pbkdf2_sha256$120000$d930f428960b377680f123894f41972e$unF20hJT9RDcutJEh7VC8ILZ5gWcJv0GUZAh3tmVTLg=",
+      "initialized_at": "2026-05-01T21:01:00+00:00",
+      "updated_at": "2026-05-01T21:01:00+00:00"
+    }
+  },
+  "auth_challenges": {},
+  "trusted_devices": {
+    "dfe3181aa6c59e4a3529d6406a47a83e1b008b7118f2a03990071d1974b0951b": {
+      "fingerprint": "dfe3181aa6c59e4a3529d6406a47a83e1b008b7118f2a03990071d1974b0951b",
+      "user_id": "platform-admin",
+      "device_name": "当前设备",
+      "ip_address": "127.0.0.1",
+      "trusted_until": "2026-05-31T21:01:00+00:00",
+      "created_at": "2026-05-01T21:01:00+00:00",
+      "last_seen_at": "2026-05-01T21:01:00+00:00"
+    },
+    "3d22d8c729ef59bc3706c484dcbd885bcf473e3b85cea95f1ff1fa117d3c0d98": {
+      "fingerprint": "3d22d8c729ef59bc3706c484dcbd885bcf473e3b85cea95f1ff1fa117d3c0d98",
+      "user_id": "platform-admin",
+      "device_name": "当前设备",
+      "ip_address": "127.0.0.1",
+      "trusted_until": "2026-05-31T21:01:28+00:00",
+      "created_at": "2026-05-01T21:01:28+00:00",
+      "last_seen_at": "2026-05-01T21:01:28+00:00"
+    },
+    "a1ead000b1368fab742695b2eb8d12046a3bc117dcf1c82bd4a5473f57ebe89c": {
+      "fingerprint": "a1ead000b1368fab742695b2eb8d12046a3bc117dcf1c82bd4a5473f57ebe89c",
+      "user_id": "platform-admin",
+      "device_name": "当前设备",
+      "ip_address": "127.0.0.1",
+      "trusted_until": "2026-05-31T21:02:12+00:00",
+      "created_at": "2026-05-01T21:02:12+00:00",
+      "last_seen_at": "2026-05-01T21:02:12+00:00"
+    },
+    "fc5e2f86e7eb1d68f8afa8a015a070c93ade9d382b760f87abc2e75d45b79d84": {
+      "fingerprint": "fc5e2f86e7eb1d68f8afa8a015a070c93ade9d382b760f87abc2e75d45b79d84",
+      "user_id": "platform-admin",
+      "device_name": "当前设备",
+      "ip_address": "127.0.0.1",
+      "trusted_until": "2026-05-31T21:02:35+00:00",
+      "created_at": "2026-05-01T21:02:35+00:00",
+      "last_seen_at": "2026-05-01T21:02:35+00:00"
+    },
+    "a02ba8cef4c12f7458e4d3d3724179908547b08c91e9f18a7382ebf2ba9edc69": {
+      "fingerprint": "a02ba8cef4c12f7458e4d3d3724179908547b08c91e9f18a7382ebf2ba9edc69",
+      "user_id": "platform-admin",
+      "device_name": "当前设备",
+      "ip_address": "127.0.0.1",
+      "trusted_until": "2026-05-31T21:03:17+00:00",
+      "created_at": "2026-05-01T21:03:17+00:00",
+      "last_seen_at": "2026-05-01T21:03:17+00:00"
+    },
+    "6350a7346ab22da725faf23f58ea011d75f27be77d63029a365343713cc00c13": {
+      "fingerprint": "6350a7346ab22da725faf23f58ea011d75f27be77d63029a365343713cc00c13",
+      "user_id": "platform-admin",
+      "device_name": "当前设备",
+      "ip_address": "127.0.0.1",
+      "trusted_until": "2026-05-31T21:04:12+00:00",
+      "created_at": "2026-05-01T21:04:12+00:00",
+      "last_seen_at": "2026-05-01T21:04:12+00:00"
+    }
+  },
+  "smtp_config": {
+    "server": "",
+    "port": 465,
+    "use_ssl": true,
+    "use_tls": false,
+    "username": "",
+    "password": "",
+    "from_email": "admin@example.local",
+    "sender_name": "OmniAuto",
+    "otp_required": true,
+    "code_length": 4,
+    "ttl_minutes": 15,
+    "resend_seconds": 60,
+    "trusted_device_days": 30,
+    "initialized_at": "2026-05-01T21:01:00+00:00",
+    "updated_at": "2026-05-01T21:01:00+00:00"
+  },
+  "local_nodes": {
+    "node_ui": {
+      "node_id": "node_ui",
+      "display_name": "????????",
+      "tenant_ids": [
+        "tenant_ui"
+      ],
+      "status": "online",
+      "version": "ui-test",
+      "capabilities": [
+        "pull_shared_patch",
+        "check_update"
+      ],
+      "node_token": "node_9rGkRjG9n6SOALVy4Ko8YQ2zsKK8zjGU",
+      "registered_at": "2026-05-01T21:01:00+00:00",
+      "last_seen_at": "2026-05-01T21:01:00+00:00",
+      "metadata": {}
+    }
+  },
+  "commands": {},
+  "command_results": [],
+  "shared_proposals": {
+    "proposal_gPkrjbxFr3g4": {
+      "proposal_id": "proposal_gPkrjbxFr3g4",
+      "tenant_id": "tenant_ui",
+      "title": "????????",
+      "summary": "???????????????",
+      "operations": [
+        {
+          "op": "upsert_json",
+          "path": "global_guidelines/items/ui_shared_rule.json",
+          "content": {
+            "schema_version": 1,
+            "id": "ui_shared_rule",
+            "data": {
+              "title": "????????",
+              "guideline_text": "????????????????????????????????"
+            }
+          }
+        }
+      ],
+      "source": "local",
+      "status": "accepted",
+      "created_by": "local-node",
+      "created_at": "2026-05-01T21:01:00+00:00",
+      "updated_at": "2026-05-01T21:01:00+00:00",
+      "reviewed_by": "platform-admin",
+      "reviewed_at": "2026-05-01T21:01:00+00:00",
+      "review_note": "",
+      "patch_id": "patch_ngUoAx97E9ib"
+    }
+  },
+  "shared_library": {
+    "customer_service_style_guidelines": {
+      "item_id": "customer_service_style_guidelines",
+      "category_id": "global_guidelines",
+      "title": "客服通用表达与边界原则",
+      "content": "回复要自然，先接住客户使用场景，再问关键参数。对功率、续航、最低价等不确定内容，不能凭空承诺。适合自动回复的内容：参数收集、常规质保说明、使用场景推荐。需要转人工的内容：最低价、特殊补偿、先发货后付款。",
+      "keywords": [],
+      "applies_to": "",
+      "notes": "",
+      "status": "active",
+      "source": "local_shared_snapshot",
+      "tenant_id": "default",
+      "data": {
+        "schema_version": 1,
+        "category_id": "global_guidelines",
+        "id": "customer_service_style_guidelines",
+        "status": "active",
+        "source": {
+          "type": "three_layer_migration"
+        },
+        "data": {
+          "title": "客服通用表达与边界原则",
+          "guideline_text": "回复要自然，先接住客户使用场景，再问关键参数。对功率、续航、最低价等不确定内容，不能凭空承诺。适合自动回复的内容：参数收集、常规质保说明、使用场景推荐。需要转人工的内容：最低价、特殊补偿、先发货后付款。",
+          "intent_tags": [
+            "greeting",
+            "small_talk",
+            "scene_product",
+            "quote",
+            "discount",
+            "handoff"
+          ],
+          "tone_tags": [
+            "natural",
+            "truthful",
+            "safe"
+          ],
+          "priority": 100,
+          "always_include": true,
+          "additional_details": {
+            "source": "three_layer_migration",
+            "migrated_from": "tenant.chats.chat_style_guidelines"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        },
+        "metadata": {
+          "updated_at": "2026-04-27T03:15:56",
+          "updated_by": "three_layer_migration"
+        }
+      },
+      "created_by": "system",
+      "created_at": "2026-05-01T21:01:00+00:00",
+      "updated_by": "system",
+      "updated_at": "2026-05-01T21:01:00+00:00"
+    },
+    "ui_shared_rule": {
+      "item_id": "ui_shared_rule",
+      "category_id": "global_guidelines",
+      "title": "????????",
+      "content": "????????????????????????????????",
+      "keywords": [],
+      "applies_to": "",
+      "notes": "",
+      "status": "active",
+      "source": "proposal:proposal_gPkrjbxFr3g4",
+      "tenant_id": "tenant_ui",
+      "data": {
+        "title": "????????",
+        "guideline_text": "????????????????????????????????"
+      },
+      "created_by": "platform-admin",
+      "created_at": "2026-05-01T21:01:00+00:00",
+      "updated_by": "platform-admin",
+      "updated_at": "2026-05-01T21:01:00+00:00"
+    }
+  },
+  "shared_patches": {
+    "patch_ngUoAx97E9ib": {
+      "schema_version": 1,
+      "patch_id": "patch_ngUoAx97E9ib",
+      "version": "ui.1",
+      "source_proposal_id": "proposal_gPkrjbxFr3g4",
+      "tenant_id": "tenant_ui",
+      "operations": [
+        {
+          "op": "upsert_json",
+          "path": "global_guidelines/items/ui_shared_rule.json",
+          "content": {
+            "schema_version": 1,
+            "id": "ui_shared_rule",
+            "data": {
+              "title": "????????",
+              "guideline_text": "????????????????????????????????"
+            }
+          }
+        }
+      ],
+      "status": "published",
+      "created_by": "platform-admin",
+      "created_at": "2026-05-01T21:01:00+00:00",
+      "library_item_ids": [
+        "ui_shared_rule"
+      ]
+    }
+  },
+  "backup_requests": {},
+  "restore_requests": {},
+  "customer_data_packages": {},
+  "shared_snapshots": {},
+  "releases": {
+    "release_548WAQNDTaCm": {
+      "release_id": "release_548WAQNDTaCm",
+      "channel": "stable",
+      "version": "0.3.0-ui",
+      "title": "??????",
+      "notes": "?????????????",
+      "artifact_url": "https://example.invalid/ui.zip",
+      "sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+      "signature": "sig-ui",
+      "status": "published",
+      "created_by": "platform-admin",
+      "created_at": "2026-05-01T21:01:00+00:00"
+    }
+  },
+  "audit_events": [
+    {
+      "event_id": "audit_20260501210128243024_31e740",
+      "actor_id": "platform-admin",
+      "action": "start_email_login",
+      "target_type": "auth_challenge",
+      "target_id": "otp_c8J8LUSBe0xM3O9c2GtwuaHvJNYfyW1d",
+      "detail": {
+        "username": "admin",
+        "email": "ad***n@example.local"
+      },
+      "created_at": "2026-05-01T21:01:28+00:00"
+    },
+    {
+      "event_id": "audit_20260501210128382741_27114b",
+      "actor_id": "platform-admin",
+      "action": "verify_login",
+      "target_type": "auth_challenge",
+      "target_id": "otp_c8J8LUSBe0xM3O9c2GtwuaHvJNYfyW1d",
+      "detail": {
+        "email": "ad***n@example.local"
+      },
+      "created_at": "2026-05-01T21:01:28+00:00"
+    },
+    {
+      "event_id": "audit_20260501210128387211_c7f33b",
+      "actor_id": "platform-admin",
+      "action": "trust_device",
+      "target_type": "trusted_device",
+      "target_id": "3d22d8c729ef59bc3706c484dcbd885bcf473e3b85cea95f1ff1fa117d3c0d98",
+      "detail": {
+        "device_name": "当前设备",
+        "days": 30
+      },
+      "created_at": "2026-05-01T21:01:28+00:00"
+    },
+    {
+      "event_id": "audit_20260501210128389544_e1e52a",
+      "actor_id": "platform-admin",
+      "action": "login",
+      "target_type": "session",
+      "target_id": "vps_TX0884dnUz63QC1KBPm0C6r50XQ4o2GCp-As6lM3144",
+      "detail": {},
+      "created_at": "2026-05-01T21:01:28+00:00"
+    },
+    {
+      "event_id": "audit_20260501210212071525_d92b60",
+      "actor_id": "platform-admin",
+      "action": "start_email_login",
+      "target_type": "auth_challenge",
+      "target_id": "otp_zxDPJuSyoNxbQW5Gt9ogm1aZMcxj_bAM",
+      "detail": {
+        "username": "admin",
+        "email": "ad***n@example.local"
+      },
+      "created_at": "2026-05-01T21:02:12+00:00"
+    },
+    {
+      "event_id": "audit_20260501210212213995_bf6309",
+      "actor_id": "platform-admin",
+      "action": "verify_login",
+      "target_type": "auth_challenge",
+      "target_id": "otp_zxDPJuSyoNxbQW5Gt9ogm1aZMcxj_bAM",
+      "detail": {
+        "email": "ad***n@example.local"
+      },
+      "created_at": "2026-05-01T21:02:12+00:00"
+    },
+    {
+      "event_id": "audit_20260501210212217692_7f1179",
+      "actor_id": "platform-admin",
+      "action": "trust_device",
+      "target_type": "trusted_device",
+      "target_id": "a1ead000b1368fab742695b2eb8d12046a3bc117dcf1c82bd4a5473f57ebe89c",
+      "detail": {
+        "device_name": "当前设备",
+        "days": 30
+      },
+      "created_at": "2026-05-01T21:02:12+00:00"
+    },
+    {
+      "event_id": "audit_20260501210212219920_da2b05",
+      "actor_id": "platform-admin",
+      "action": "login",
+      "target_type": "session",
+      "target_id": "vps_AzZdxGQvSGVSLsSh6DewRGcGEgu92eWLsuPjwiNdvxg",
+      "detail": {},
+      "created_at": "2026-05-01T21:02:12+00:00"
+    },
+    {
+      "event_id": "audit_20260501210234981997_3180d7",
+      "actor_id": "platform-admin",
+      "action": "start_email_login",
+      "target_type": "auth_challenge",
+      "target_id": "otp_iuVjD3ezV8LfJ0kVbw65dL0kNGDos3nU",
+      "detail": {
+        "username": "admin",
+        "email": "ad***n@example.local"
+      },
+      "created_at": "2026-05-01T21:02:34+00:00"
+    },
+    {
+      "event_id": "audit_20260501210235149628_5b44d0",
+      "actor_id": "platform-admin",
+      "action": "verify_login",
+      "target_type": "auth_challenge",
+      "target_id": "otp_iuVjD3ezV8LfJ0kVbw65dL0kNGDos3nU",
+      "detail": {
+        "email": "ad***n@example.local"
+      },
+      "created_at": "2026-05-01T21:02:35+00:00"
+    },
+    {
+      "event_id": "audit_20260501210235152947_bcd0db",
+      "actor_id": "platform-admin",
+      "action": "trust_device",
+      "target_type": "trusted_device",
+      "target_id": "fc5e2f86e7eb1d68f8afa8a015a070c93ade9d382b760f87abc2e75d45b79d84",
+      "detail": {
+        "device_name": "当前设备",
+        "days": 30
+      },
+      "created_at": "2026-05-01T21:02:35+00:00"
+    },
+    {
+      "event_id": "audit_20260501210235155132_179632",
+      "actor_id": "platform-admin",
+      "action": "login",
+      "target_type": "session",
+      "target_id": "vps_9RqgVn-JlhTw2Dd4YZO-k8-sBj02x9nXBCuMPOV9vZg",
+      "detail": {},
+      "created_at": "2026-05-01T21:02:35+00:00"
+    },
+    {
+      "event_id": "audit_20260501210317140885_47f133",
+      "actor_id": "platform-admin",
+      "action": "start_email_login",
+      "target_type": "auth_challenge",
+      "target_id": "otp_yTHD6f2XA-YmINR2qgoKoJJB8RgtD71H",
+      "detail": {
+        "username": "admin",
+        "email": "ad***n@example.local"
+      },
+      "created_at": "2026-05-01T21:03:17+00:00"
+    },
+    {
+      "event_id": "audit_20260501210317273500_25bd0c",
+      "actor_id": "platform-admin",
+      "action": "verify_login",
+      "target_type": "auth_challenge",
+      "target_id": "otp_yTHD6f2XA-YmINR2qgoKoJJB8RgtD71H",
+      "detail": {
+        "email": "ad***n@example.local"
+      },
+      "created_at": "2026-05-01T21:03:17+00:00"
+    },
+    {
+      "event_id": "audit_20260501210317277746_d85b8c",
+      "actor_id": "platform-admin",
+      "action": "trust_device",
+      "target_type": "trusted_device",
+      "target_id": "a02ba8cef4c12f7458e4d3d3724179908547b08c91e9f18a7382ebf2ba9edc69",
+      "detail": {
+        "device_name": "当前设备",
+        "days": 30
+      },
+      "created_at": "2026-05-01T21:03:17+00:00"
+    },
+    {
+      "event_id": "audit_20260501210317281533_638a6b",
+      "actor_id": "platform-admin",
+      "action": "login",
+      "target_type": "session",
+      "target_id": "vps_d8rPGTWIVjaQ8OCESBl2q-jgboL8aKi_2POIz_SLQ5s",
+      "detail": {},
+      "created_at": "2026-05-01T21:03:17+00:00"
+    },
+    {
+      "event_id": "audit_20260501210412682385_632c84",
+      "actor_id": "platform-admin",
+      "action": "start_email_login",
+      "target_type": "auth_challenge",
+      "target_id": "otp_u1C6nwPaIdsXPrlSSr5xbWzR7pjBnNS_",
+      "detail": {
+        "username": "admin",
+        "email": "ad***n@example.local"
+      },
+      "created_at": "2026-05-01T21:04:12+00:00"
+    },
+    {
+      "event_id": "audit_20260501210412831457_10b7bb",
+      "actor_id": "platform-admin",
+      "action": "verify_login",
+      "target_type": "auth_challenge",
+      "target_id": "otp_u1C6nwPaIdsXPrlSSr5xbWzR7pjBnNS_",
+      "detail": {
+        "email": "ad***n@example.local"
+      },
+      "created_at": "2026-05-01T21:04:12+00:00"
+    },
+    {
+      "event_id": "audit_20260501210412835809_a2d1ba",
+      "actor_id": "platform-admin",
+      "action": "trust_device",
+      "target_type": "trusted_device",
+      "target_id": "6350a7346ab22da725faf23f58ea011d75f27be77d63029a365343713cc00c13",
+      "detail": {
+        "device_name": "当前设备",
+        "days": 30
+      },
+      "created_at": "2026-05-01T21:04:12+00:00"
+    },
+    {
+      "event_id": "audit_20260501210412838181_5e8833",
+      "actor_id": "platform-admin",
+      "action": "login",
+      "target_type": "session",
+      "target_id": "vps_ldSTFobWzt3AsNzdop4cOm2FBKbUYJAbAgOQaLi51gs",
+      "detail": {},
+      "created_at": "2026-05-01T21:04:12+00:00"
+    }
+  ]
+}

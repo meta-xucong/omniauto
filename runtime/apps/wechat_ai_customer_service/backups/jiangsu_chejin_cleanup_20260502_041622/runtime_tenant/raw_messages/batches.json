@@ -1,0 +1,3105 @@
+[
+  {
+    "batch_id": "raw_batch_2b62cab3026302357552",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_87036d2253c2c945ed",
+    "message_ids": [
+      "raw_msg_a9297e4017d083fd537e"
+    ],
+    "reason": "offline_recorder",
+    "source_module": "jiangsu_chejin_recorder_test",
+    "status": "processed",
+    "created_at": "2026-05-01T23:31:09",
+    "processed_at": "2026-05-01T23:31:10",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_2b62cab3026302357552.txt",
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "skipped_duplicate_count": 1,
+    "skipped_duplicates": [
+      {
+        "candidate_id": "raw_95f0ace769583640",
+        "duplicate": {
+          "duplicate": true,
+          "reason": "same_id_same_content",
+          "source": "review_candidate:raw_a2e5568c0835112c",
+          "existing_item_id": "chat_6e519c33e4",
+          "similarity": 1.0,
+          "message": "检测到与现有知识或候选高度重复，已跳过去重。"
+        }
+      }
+    ],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_19e9204ad67c91b4",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "file_transfer",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_2b62cab3026302357552.txt",
+        "content_hash": "0198d1e81f7ab31581a05a16eaf98404",
+        "status": "active",
+        "created_at": "2026-05-01T23:31:10",
+        "updated_at": "2026-05-01T23:31:10"
+      },
+      "source_id": "source_19e9204ad67c91b4",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_19e9204ad67c91b4.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 16
+      }
+    },
+    "rag_experience_id": "rag_exp_75fc44e13ffa4a78fa07",
+    "updated_at": "2026-05-01T23:31:10"
+  },
+  {
+    "batch_id": "raw_batch_1641b4d7d3a5930a7e45",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_8022f0948f611f15b4",
+    "message_ids": [
+      "raw_msg_b4d3e70f865e5ab8ee37",
+      "raw_msg_e667458ce58fd1cc382c",
+      "raw_msg_c292b2477bfdf4aa850b"
+    ],
+    "reason": "offline_recorder",
+    "source_module": "jiangsu_chejin_recorder_test",
+    "status": "processed",
+    "created_at": "2026-05-01T23:31:09",
+    "processed_at": "2026-05-01T23:31:10",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_1641b4d7d3a5930a7e45.txt",
+    "candidate_ids": [
+      "raw_24bf1ef8615bf153"
+    ],
+    "candidate_count": 1,
+    "skipped_duplicate_count": 1,
+    "skipped_duplicates": [
+      {
+        "candidate_id": "raw_ad4c4543e2e5d7c6",
+        "duplicate": {
+          "duplicate": true,
+          "reason": "highly_similar_content",
+          "source": "review_candidate:raw_bc13307ef1e16310",
+          "existing_item_id": "item_2c4bf2a4852b",
+          "similarity": 0.938,
+          "message": "检测到与现有知识或候选高度重复，已跳过去重。"
+        }
+      }
+    ],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_90303763d54f6c3e",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "group",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_1641b4d7d3a5930a7e45.txt",
+        "content_hash": "629c531c17b55b0d743f616d7724cc2c",
+        "status": "active",
+        "created_at": "2026-05-01T23:31:09",
+        "updated_at": "2026-05-01T23:31:09"
+      },
+      "source_id": "source_90303763d54f6c3e",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_90303763d54f6c3e.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 15
+      }
+    },
+    "rag_experience_id": "rag_exp_8246cde36960e07ad01f",
+    "updated_at": "2026-05-01T23:31:10"
+  },
+  {
+    "batch_id": "raw_batch_818e2f280e9a3df08d90",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_54a96e57c70563ab9c",
+    "message_ids": [
+      "raw_msg_69fd3b2072d7ec8dce95"
+    ],
+    "reason": "customer_service_poll",
+    "source_module": "customer_service",
+    "status": "processed",
+    "created_at": "2026-05-01T23:31:08",
+    "processed_at": "2026-05-01T23:31:09",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_818e2f280e9a3df08d90.txt",
+    "candidate_ids": [
+      "raw_969af3c1672a13b7"
+    ],
+    "candidate_count": 1,
+    "skipped_duplicate_count": 0,
+    "skipped_duplicates": [],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_a3ec0da9fde77c4a",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "private",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_818e2f280e9a3df08d90.txt",
+        "content_hash": "e2f920dfab0fbdd2bc74a34322e50b41",
+        "status": "active",
+        "created_at": "2026-05-01T23:31:08",
+        "updated_at": "2026-05-01T23:31:08"
+      },
+      "source_id": "source_a3ec0da9fde77c4a",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_a3ec0da9fde77c4a.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 14
+      }
+    },
+    "rag_experience_id": "rag_exp_30bd6821b0e31d95ed89",
+    "updated_at": "2026-05-01T23:31:09"
+  },
+  {
+    "batch_id": "raw_batch_d7c685d6b0da20f0c178",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_54a96e57c70563ab9c",
+    "message_ids": [
+      "raw_msg_c0770a2e386660df8d1e"
+    ],
+    "reason": "customer_service_poll",
+    "source_module": "customer_service",
+    "status": "processed",
+    "created_at": "2026-05-01T23:31:08",
+    "processed_at": "2026-05-01T23:31:08",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_d7c685d6b0da20f0c178.txt",
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "skipped_duplicate_count": 1,
+    "skipped_duplicates": [
+      {
+        "candidate_id": "raw_d93176fec0695b31",
+        "duplicate": {
+          "duplicate": true,
+          "reason": "highly_similar_content",
+          "source": "review_candidate:raw_a99d75e30007f382",
+          "existing_item_id": "item_0f98bb578f54",
+          "similarity": 0.926,
+          "message": "检测到与现有知识或候选高度重复，已跳过去重。"
+        }
+      }
+    ],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_4ae04f0884d2e0da",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "private",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_d7c685d6b0da20f0c178.txt",
+        "content_hash": "3d622bf2dc0622bfd8d30c493e7779f7",
+        "status": "active",
+        "created_at": "2026-05-01T23:31:08",
+        "updated_at": "2026-05-01T23:31:08"
+      },
+      "source_id": "source_4ae04f0884d2e0da",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_4ae04f0884d2e0da.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 13
+      }
+    },
+    "rag_experience_id": "rag_exp_df15109fb2b4e8cfc8d6",
+    "updated_at": "2026-05-01T23:31:08"
+  },
+  {
+    "batch_id": "raw_batch_4aa6a617c694b36b9cfa",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_87036d2253c2c945ed",
+    "message_ids": [
+      "raw_msg_9029889a2d0a8217dca0"
+    ],
+    "reason": "offline_recorder",
+    "source_module": "jiangsu_chejin_recorder_test",
+    "status": "processed",
+    "created_at": "2026-05-01T23:20:15",
+    "processed_at": "2026-05-01T23:20:15",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_4aa6a617c694b36b9cfa.txt",
+    "candidate_ids": [
+      "raw_a2e5568c0835112c"
+    ],
+    "candidate_count": 1,
+    "skipped_duplicate_count": 0,
+    "skipped_duplicates": [],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_9066812f956318fc",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "file_transfer",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_4aa6a617c694b36b9cfa.txt",
+        "content_hash": "0fadf1c0efb0c3457c3525e92c77565b",
+        "status": "active",
+        "created_at": "2026-05-01T23:20:15",
+        "updated_at": "2026-05-01T23:20:15"
+      },
+      "source_id": "source_9066812f956318fc",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_9066812f956318fc.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 8
+      }
+    },
+    "rag_experience_id": "rag_exp_37e6dfc22a78bf242b30",
+    "updated_at": "2026-05-01T23:20:15"
+  },
+  {
+    "batch_id": "raw_batch_c88d3dba0b527eebb4f8",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_8022f0948f611f15b4",
+    "message_ids": [
+      "raw_msg_756e7793f831444613d9",
+      "raw_msg_a3fe6a6c4571b423fd92",
+      "raw_msg_5cd76726ab567c159d84"
+    ],
+    "reason": "offline_recorder",
+    "source_module": "jiangsu_chejin_recorder_test",
+    "status": "processed",
+    "created_at": "2026-05-01T23:20:15",
+    "processed_at": "2026-05-01T23:20:15",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_c88d3dba0b527eebb4f8.txt",
+    "candidate_ids": [
+      "raw_fa68acfcd8c8a979",
+      "raw_bc13307ef1e16310"
+    ],
+    "candidate_count": 2,
+    "skipped_duplicate_count": 0,
+    "skipped_duplicates": [],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_f856526078c13e27",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "group",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_c88d3dba0b527eebb4f8.txt",
+        "content_hash": "696d4276d72aec400b1590519ded4c13",
+        "status": "active",
+        "created_at": "2026-05-01T23:20:15",
+        "updated_at": "2026-05-01T23:20:15"
+      },
+      "source_id": "source_f856526078c13e27",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_f856526078c13e27.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 7
+      }
+    },
+    "rag_experience_id": "rag_exp_05218faf812ed6ad2296",
+    "updated_at": "2026-05-01T23:20:15"
+  },
+  {
+    "batch_id": "raw_batch_db32a31f2264abbd6698",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_54a96e57c70563ab9c",
+    "message_ids": [
+      "raw_msg_a57a5fdb2d742dde3a0e"
+    ],
+    "reason": "customer_service_poll",
+    "source_module": "customer_service",
+    "status": "processed",
+    "created_at": "2026-05-01T23:20:14",
+    "processed_at": "2026-05-01T23:20:14",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_db32a31f2264abbd6698.txt",
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "skipped_duplicate_count": 1,
+    "skipped_duplicates": [
+      {
+        "candidate_id": "raw_836491c9ab1b5c97",
+        "duplicate": {
+          "duplicate": true,
+          "reason": "same_business_key_similar_content",
+          "source": "review_candidate:raw_a99d75e30007f382",
+          "existing_item_id": "item_0f98bb578f54",
+          "similarity": 0.819,
+          "message": "检测到与现有知识或候选高度重复，已跳过去重。"
+        }
+      }
+    ],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_c93064edd40b4e13",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "private",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_db32a31f2264abbd6698.txt",
+        "content_hash": "8c3c3d3a777518eecb9058586d6a8cae",
+        "status": "active",
+        "created_at": "2026-05-01T23:20:14",
+        "updated_at": "2026-05-01T23:20:14"
+      },
+      "source_id": "source_c93064edd40b4e13",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_c93064edd40b4e13.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 6
+      }
+    },
+    "rag_experience_id": "rag_exp_7839071df7804490b25e",
+    "updated_at": "2026-05-01T23:20:14"
+  },
+  {
+    "batch_id": "raw_batch_022a1592ba4de629dc13",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_54a96e57c70563ab9c",
+    "message_ids": [
+      "raw_msg_50f1830fed7e9f8c358f"
+    ],
+    "reason": "customer_service_poll",
+    "source_module": "customer_service",
+    "status": "processed",
+    "created_at": "2026-05-01T23:20:14",
+    "processed_at": "2026-05-01T23:20:14",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_022a1592ba4de629dc13.txt",
+    "candidate_ids": [
+      "raw_a99d75e30007f382"
+    ],
+    "candidate_count": 1,
+    "skipped_duplicate_count": 0,
+    "skipped_duplicates": [],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_d7bb205bbdf7a3e6",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "private",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_022a1592ba4de629dc13.txt",
+        "content_hash": "b78d6a7a862be5b3ae6875ef6184c53f",
+        "status": "active",
+        "created_at": "2026-05-01T23:20:14",
+        "updated_at": "2026-05-01T23:20:14"
+      },
+      "source_id": "source_d7bb205bbdf7a3e6",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_d7bb205bbdf7a3e6.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 5
+      }
+    },
+    "rag_experience_id": "rag_exp_57090087e98a0b2aeaa2",
+    "updated_at": "2026-05-01T23:20:14"
+  },
+  {
+    "batch_id": "raw_batch_97c1f2171b6dbc545677",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_87036d2253c2c945ed",
+    "message_ids": [
+      "raw_msg_213a539a0519889c92af"
+    ],
+    "reason": "offline_recorder",
+    "source_module": "jiangsu_chejin_recorder_test",
+    "status": "processed",
+    "created_at": "2026-05-01T23:18:15",
+    "processed_at": "2026-05-01T23:18:21",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_97c1f2171b6dbc545677.txt",
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "skipped_duplicate_count": 1,
+    "skipped_duplicates": [
+      {
+        "candidate_id": "raw_64f1e6d439fc015c",
+        "duplicate": {
+          "duplicate": true,
+          "reason": "same_id_same_content",
+          "source": "review_candidate:raw_a4dd6dba2914d03c",
+          "existing_item_id": "chat_6e519c33e4",
+          "similarity": 1.0,
+          "message": "检测到与现有知识或候选高度重复，已跳过去重。"
+        }
+      }
+    ],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_d1d513c40e0decb0",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "file_transfer",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_97c1f2171b6dbc545677.txt",
+        "content_hash": "8e5145aefa33ae28c36253f844f99699",
+        "status": "active",
+        "created_at": "2026-05-01T23:18:18",
+        "updated_at": "2026-05-01T23:18:18"
+      },
+      "source_id": "source_d1d513c40e0decb0",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_d1d513c40e0decb0.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 111
+      }
+    },
+    "rag_experience_id": "rag_exp_610e851715734e90d93d",
+    "updated_at": "2026-05-01T23:18:21"
+  },
+  {
+    "batch_id": "raw_batch_f6d5be87ecaecaa2f0f0",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_8022f0948f611f15b4",
+    "message_ids": [
+      "raw_msg_76f43bd34dc32ec34ea5",
+      "raw_msg_1b3d8445f527ef6ae71c",
+      "raw_msg_9ee0d21bb0e4e47f01ac"
+    ],
+    "reason": "offline_recorder",
+    "source_module": "jiangsu_chejin_recorder_test",
+    "status": "processed",
+    "created_at": "2026-05-01T23:18:15",
+    "processed_at": "2026-05-01T23:18:18",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_f6d5be87ecaecaa2f0f0.txt",
+    "candidate_ids": [
+      "raw_d06df81d6fd8d43e"
+    ],
+    "candidate_count": 1,
+    "skipped_duplicate_count": 1,
+    "skipped_duplicates": [
+      {
+        "candidate_id": "raw_bc8b9fc9f495641b",
+        "duplicate": {
+          "duplicate": true,
+          "reason": "highly_similar_content",
+          "source": "review_candidate:raw_1359a6f9327411c7",
+          "existing_item_id": "item_fe35df52b7cb",
+          "similarity": 0.922,
+          "message": "检测到与现有知识或候选高度重复，已跳过去重。"
+        }
+      }
+    ],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_deeb0f781858b16d",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "group",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_f6d5be87ecaecaa2f0f0.txt",
+        "content_hash": "a9b20c4acd7a1baaa3b3f169c1d9dca5",
+        "status": "active",
+        "created_at": "2026-05-01T23:18:15",
+        "updated_at": "2026-05-01T23:18:15"
+      },
+      "source_id": "source_deeb0f781858b16d",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_deeb0f781858b16d.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 110
+      }
+    },
+    "rag_experience_id": "rag_exp_7cba7803e71dfcbf05d0",
+    "updated_at": "2026-05-01T23:18:18"
+  },
+  {
+    "batch_id": "raw_batch_cf0d0e876d67be376322",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_54a96e57c70563ab9c",
+    "message_ids": [
+      "raw_msg_cd47a9fedb3141b125e7"
+    ],
+    "reason": "customer_service_poll",
+    "source_module": "customer_service",
+    "status": "pending",
+    "created_at": "2026-05-01T23:18:11"
+  },
+  {
+    "batch_id": "raw_batch_1d63206f211c7f357ccf",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_54a96e57c70563ab9c",
+    "message_ids": [
+      "raw_msg_4141b582880e74734cbd"
+    ],
+    "reason": "customer_service_poll",
+    "source_module": "customer_service",
+    "status": "processed",
+    "created_at": "2026-05-01T23:18:08",
+    "processed_at": "2026-05-01T23:18:11",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_1d63206f211c7f357ccf.txt",
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "skipped_duplicate_count": 1,
+    "skipped_duplicates": [
+      {
+        "candidate_id": "raw_4db6407e1671ddae",
+        "duplicate": {
+          "duplicate": true,
+          "reason": "same_business_key_similar_content",
+          "source": "review_candidate:raw_05d6ecaa6bf5f04c",
+          "existing_item_id": "item_2c51deaa6211",
+          "similarity": 0.901,
+          "message": "检测到与现有知识或候选高度重复，已跳过去重。"
+        }
+      }
+    ],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_d3589f1da199cd0e",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "private",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_1d63206f211c7f357ccf.txt",
+        "content_hash": "d7191192758b7ff5eba90367784dacb4",
+        "status": "active",
+        "created_at": "2026-05-01T23:18:08",
+        "updated_at": "2026-05-01T23:18:08"
+      },
+      "source_id": "source_d3589f1da199cd0e",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_d3589f1da199cd0e.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 109
+      }
+    },
+    "rag_experience_id": "rag_exp_0e7e36b054104253872b",
+    "updated_at": "2026-05-01T23:18:11"
+  },
+  {
+    "batch_id": "raw_batch_4f88a5d5e83f627413cc",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_87036d2253c2c945ed",
+    "message_ids": [
+      "raw_msg_7e8058bc63802335f557"
+    ],
+    "reason": "offline_recorder",
+    "source_module": "jiangsu_chejin_recorder_test",
+    "status": "processed",
+    "created_at": "2026-05-01T23:00:16",
+    "processed_at": "2026-05-01T23:00:19",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_4f88a5d5e83f627413cc.txt",
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "skipped_duplicate_count": 1,
+    "skipped_duplicates": [
+      {
+        "candidate_id": "raw_1206225c5434a529",
+        "duplicate": {
+          "duplicate": true,
+          "reason": "same_id_same_content",
+          "source": "review_candidate:raw_a4dd6dba2914d03c",
+          "existing_item_id": "chat_6e519c33e4",
+          "similarity": 1.0,
+          "message": "检测到与现有知识或候选高度重复，已跳过去重。"
+        }
+      }
+    ],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_f080835bdbde45bc",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "file_transfer",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_4f88a5d5e83f627413cc.txt",
+        "content_hash": "8cd8f5637aa0885d6d5dc16f136918c1",
+        "status": "active",
+        "created_at": "2026-05-01T23:00:18",
+        "updated_at": "2026-05-01T23:00:18"
+      },
+      "source_id": "source_f080835bdbde45bc",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_f080835bdbde45bc.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 104
+      }
+    },
+    "rag_experience_id": "rag_exp_33a911e29e67d243e669",
+    "updated_at": "2026-05-01T23:00:19"
+  },
+  {
+    "batch_id": "raw_batch_be642e90cf66b1239a9e",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_8022f0948f611f15b4",
+    "message_ids": [
+      "raw_msg_7d7f41d87614e9a53751",
+      "raw_msg_7b4991b0f1d57c91c804",
+      "raw_msg_5dd941caad0b21ac1adb"
+    ],
+    "reason": "offline_recorder",
+    "source_module": "jiangsu_chejin_recorder_test",
+    "status": "processed",
+    "created_at": "2026-05-01T23:00:16",
+    "processed_at": "2026-05-01T23:00:18",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_be642e90cf66b1239a9e.txt",
+    "candidate_ids": [
+      "raw_016451e29731260c"
+    ],
+    "candidate_count": 1,
+    "skipped_duplicate_count": 1,
+    "skipped_duplicates": [
+      {
+        "candidate_id": "raw_cd11f3e5e054e7ed",
+        "duplicate": {
+          "duplicate": true,
+          "reason": "highly_similar_content",
+          "source": "review_candidate:raw_1359a6f9327411c7",
+          "existing_item_id": "item_fe35df52b7cb",
+          "similarity": 0.922,
+          "message": "检测到与现有知识或候选高度重复，已跳过去重。"
+        }
+      }
+    ],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_f8e32202f2916c24",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "group",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_be642e90cf66b1239a9e.txt",
+        "content_hash": "0ba7bcc15540e07f43a6e2d1564d3471",
+        "status": "active",
+        "created_at": "2026-05-01T23:00:16",
+        "updated_at": "2026-05-01T23:00:16"
+      },
+      "source_id": "source_f8e32202f2916c24",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_f8e32202f2916c24.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 103
+      }
+    },
+    "rag_experience_id": "rag_exp_b10aa519b1546ac29454",
+    "updated_at": "2026-05-01T23:00:18"
+  },
+  {
+    "batch_id": "raw_batch_1e0de2fcc68649876f24",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_54a96e57c70563ab9c",
+    "message_ids": [
+      "raw_msg_2b6cb209a96ece056b81"
+    ],
+    "reason": "customer_service_poll",
+    "source_module": "customer_service",
+    "status": "processed",
+    "created_at": "2026-05-01T23:00:13",
+    "processed_at": "2026-05-01T23:00:16",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_1e0de2fcc68649876f24.txt",
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "skipped_duplicate_count": 1,
+    "skipped_duplicates": [
+      {
+        "candidate_id": "raw_2d225fd018de82aa",
+        "duplicate": {
+          "duplicate": true,
+          "reason": "same_business_key_similar_content",
+          "source": "review_candidate:raw_167090f847f95c65",
+          "existing_item_id": "item_488bc1190168",
+          "similarity": 0.906,
+          "message": "检测到与现有知识或候选高度重复，已跳过去重。"
+        }
+      }
+    ],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_7d70f1d2bef4cc5f",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "private",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_1e0de2fcc68649876f24.txt",
+        "content_hash": "39156d48d8f5302e752d115c9eb3b108",
+        "status": "active",
+        "created_at": "2026-05-01T23:00:13",
+        "updated_at": "2026-05-01T23:00:13"
+      },
+      "source_id": "source_7d70f1d2bef4cc5f",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_7d70f1d2bef4cc5f.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 102
+      }
+    },
+    "rag_experience_id": "rag_exp_5d260b4bc31f51bf62f7",
+    "updated_at": "2026-05-01T23:00:16"
+  },
+  {
+    "batch_id": "raw_batch_51732d270df42f5e3b15",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_54a96e57c70563ab9c",
+    "message_ids": [
+      "raw_msg_9a18042718a974eb243e"
+    ],
+    "reason": "customer_service_poll",
+    "source_module": "customer_service",
+    "status": "processed",
+    "created_at": "2026-05-01T23:00:11",
+    "processed_at": "2026-05-01T23:00:13",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_51732d270df42f5e3b15.txt",
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "skipped_duplicate_count": 1,
+    "skipped_duplicates": [
+      {
+        "candidate_id": "raw_7e5fa32442e95660",
+        "duplicate": {
+          "duplicate": true,
+          "reason": "highly_similar_content",
+          "source": "review_candidate:raw_05d6ecaa6bf5f04c",
+          "existing_item_id": "item_2c51deaa6211",
+          "similarity": 0.926,
+          "message": "检测到与现有知识或候选高度重复，已跳过去重。"
+        }
+      }
+    ],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_cfbff922f499ff12",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "private",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_51732d270df42f5e3b15.txt",
+        "content_hash": "1caa694d987fce31cd9447d05b6fdc50",
+        "status": "active",
+        "created_at": "2026-05-01T23:00:11",
+        "updated_at": "2026-05-01T23:00:11"
+      },
+      "source_id": "source_cfbff922f499ff12",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_cfbff922f499ff12.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 101
+      }
+    },
+    "rag_experience_id": "rag_exp_be9fccb4ec8104a92f54",
+    "updated_at": "2026-05-01T23:00:13"
+  },
+  {
+    "batch_id": "raw_batch_b93bf7f7d2f0c6d73b3b",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_87036d2253c2c945ed",
+    "message_ids": [
+      "raw_msg_489bed4dbd714dfbb76b"
+    ],
+    "reason": "offline_recorder",
+    "source_module": "jiangsu_chejin_recorder_test",
+    "status": "processed",
+    "created_at": "2026-05-01T22:58:04",
+    "processed_at": "2026-05-01T22:58:07",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_b93bf7f7d2f0c6d73b3b.txt",
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "skipped_duplicate_count": 1,
+    "skipped_duplicates": [
+      {
+        "candidate_id": "raw_5740620431ddb7b2",
+        "duplicate": {
+          "duplicate": true,
+          "reason": "same_id_same_content",
+          "source": "review_candidate:raw_a4dd6dba2914d03c",
+          "existing_item_id": "chat_6e519c33e4",
+          "similarity": 1.0,
+          "message": "检测到与现有知识或候选高度重复，已跳过去重。"
+        }
+      }
+    ],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_afbcd73e7bb30488",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "file_transfer",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_b93bf7f7d2f0c6d73b3b.txt",
+        "content_hash": "122eef37756f1ce9beab37e16c74ee91",
+        "status": "active",
+        "created_at": "2026-05-01T22:58:05",
+        "updated_at": "2026-05-01T22:58:05"
+      },
+      "source_id": "source_afbcd73e7bb30488",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_afbcd73e7bb30488.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 96
+      }
+    },
+    "rag_experience_id": "rag_exp_fe59328859c0add76d1b",
+    "updated_at": "2026-05-01T22:58:07"
+  },
+  {
+    "batch_id": "raw_batch_9d4dce6419bf6649b2b5",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_8022f0948f611f15b4",
+    "message_ids": [
+      "raw_msg_49e793a4441687866c9f",
+      "raw_msg_ae594871eb6fdcd81132",
+      "raw_msg_0d89431110039e6a20a2"
+    ],
+    "reason": "offline_recorder",
+    "source_module": "jiangsu_chejin_recorder_test",
+    "status": "processed",
+    "created_at": "2026-05-01T22:58:04",
+    "processed_at": "2026-05-01T22:58:05",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_9d4dce6419bf6649b2b5.txt",
+    "candidate_ids": [
+      "raw_7eecd9b1fb28cba3"
+    ],
+    "candidate_count": 1,
+    "skipped_duplicate_count": 1,
+    "skipped_duplicates": [
+      {
+        "candidate_id": "raw_8df1bd1011cbddc5",
+        "duplicate": {
+          "duplicate": true,
+          "reason": "highly_similar_content",
+          "source": "review_candidate:raw_1359a6f9327411c7",
+          "existing_item_id": "item_fe35df52b7cb",
+          "similarity": 0.938,
+          "message": "检测到与现有知识或候选高度重复，已跳过去重。"
+        }
+      }
+    ],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_6599e0d9657532fa",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "group",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_9d4dce6419bf6649b2b5.txt",
+        "content_hash": "437dea35722e05a8f8d5d58496b1cbef",
+        "status": "active",
+        "created_at": "2026-05-01T22:58:04",
+        "updated_at": "2026-05-01T22:58:04"
+      },
+      "source_id": "source_6599e0d9657532fa",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_6599e0d9657532fa.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 95
+      }
+    },
+    "rag_experience_id": "rag_exp_1d2197443879204970c4",
+    "updated_at": "2026-05-01T22:58:05"
+  },
+  {
+    "batch_id": "raw_batch_a3cd2e8c0528a1fc166f",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_54a96e57c70563ab9c",
+    "message_ids": [
+      "raw_msg_61a2618dcf50451a537e"
+    ],
+    "reason": "customer_service_poll",
+    "source_module": "customer_service",
+    "status": "processed",
+    "created_at": "2026-05-01T22:58:02",
+    "processed_at": "2026-05-01T22:58:03",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_a3cd2e8c0528a1fc166f.txt",
+    "candidate_ids": [
+      "raw_167090f847f95c65"
+    ],
+    "candidate_count": 1,
+    "skipped_duplicate_count": 0,
+    "skipped_duplicates": [],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_8cdfbc6dacfe39b0",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "private",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_a3cd2e8c0528a1fc166f.txt",
+        "content_hash": "3eccb76bcc3c5747b9136d6a32510f0a",
+        "status": "active",
+        "created_at": "2026-05-01T22:58:02",
+        "updated_at": "2026-05-01T22:58:02"
+      },
+      "source_id": "source_8cdfbc6dacfe39b0",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_8cdfbc6dacfe39b0.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 94
+      }
+    },
+    "rag_experience_id": "rag_exp_76675b81b7e35fd98783",
+    "updated_at": "2026-05-01T22:58:03"
+  },
+  {
+    "batch_id": "raw_batch_08c1b76a5a7d9fdf8906",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_54a96e57c70563ab9c",
+    "message_ids": [
+      "raw_msg_ec597437efd098e2e2e6"
+    ],
+    "reason": "customer_service_poll",
+    "source_module": "customer_service",
+    "status": "processed",
+    "created_at": "2026-05-01T22:58:01",
+    "processed_at": "2026-05-01T22:58:02",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_08c1b76a5a7d9fdf8906.txt",
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "skipped_duplicate_count": 1,
+    "skipped_duplicates": [
+      {
+        "candidate_id": "raw_d21eebe0bf9ff898",
+        "duplicate": {
+          "duplicate": true,
+          "reason": "highly_similar_content",
+          "source": "review_candidate:raw_05d6ecaa6bf5f04c",
+          "existing_item_id": "item_2c51deaa6211",
+          "similarity": 0.926,
+          "message": "检测到与现有知识或候选高度重复，已跳过去重。"
+        }
+      }
+    ],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_81a28099b1218047",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "private",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_08c1b76a5a7d9fdf8906.txt",
+        "content_hash": "8b64fc1a3d6c42752c943b2064142840",
+        "status": "active",
+        "created_at": "2026-05-01T22:58:01",
+        "updated_at": "2026-05-01T22:58:01"
+      },
+      "source_id": "source_81a28099b1218047",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_81a28099b1218047.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 93
+      }
+    },
+    "rag_experience_id": "rag_exp_2c9c9849e54f6a3bf622",
+    "updated_at": "2026-05-01T22:58:02"
+  },
+  {
+    "batch_id": "raw_batch_bfcc0f895bdf20627afe",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_87036d2253c2c945ed",
+    "message_ids": [
+      "raw_msg_93f81d725786de4b0b96"
+    ],
+    "reason": "offline_recorder",
+    "source_module": "jiangsu_chejin_recorder_test",
+    "status": "processed",
+    "created_at": "2026-05-01T22:07:08",
+    "processed_at": "2026-05-01T22:07:11",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_bfcc0f895bdf20627afe.txt",
+    "candidate_ids": [
+      "raw_a4dd6dba2914d03c"
+    ],
+    "candidate_count": 1,
+    "skipped_duplicate_count": 0,
+    "skipped_duplicates": [],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_bf9c060e251a6505",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "file_transfer",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_bfcc0f895bdf20627afe.txt",
+        "content_hash": "43776dd2b2efea088650f9ed20c7231d",
+        "status": "active",
+        "created_at": "2026-05-01T22:07:10",
+        "updated_at": "2026-05-01T22:07:10"
+      },
+      "source_id": "source_bf9c060e251a6505",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_bf9c060e251a6505.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 88
+      }
+    },
+    "updated_at": "2026-05-01T22:07:11"
+  },
+  {
+    "batch_id": "raw_batch_af9b26795648b27ce724",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_8022f0948f611f15b4",
+    "message_ids": [
+      "raw_msg_75c9d7890adb549e74c9",
+      "raw_msg_39ca69ce70dd24b925e4",
+      "raw_msg_69965b267796db049c69"
+    ],
+    "reason": "offline_recorder",
+    "source_module": "jiangsu_chejin_recorder_test",
+    "status": "processed",
+    "created_at": "2026-05-01T22:07:08",
+    "processed_at": "2026-05-01T22:07:10",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_af9b26795648b27ce724.txt",
+    "candidate_ids": [
+      "raw_976286d07ef386a2",
+      "raw_1359a6f9327411c7"
+    ],
+    "candidate_count": 2,
+    "skipped_duplicate_count": 0,
+    "skipped_duplicates": [],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_b6a1218a920567e6",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "group",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_af9b26795648b27ce724.txt",
+        "content_hash": "e65a296a4028f93a47e0802eae7eb237",
+        "status": "active",
+        "created_at": "2026-05-01T22:07:08",
+        "updated_at": "2026-05-01T22:07:08"
+      },
+      "source_id": "source_b6a1218a920567e6",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_b6a1218a920567e6.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 87
+      }
+    },
+    "updated_at": "2026-05-01T22:07:10"
+  },
+  {
+    "batch_id": "raw_batch_7a40a74c8e25fd881616",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_54a96e57c70563ab9c",
+    "message_ids": [
+      "raw_msg_5cb1ebe242fee2a02a58"
+    ],
+    "reason": "customer_service_poll",
+    "source_module": "customer_service",
+    "status": "processed",
+    "created_at": "2026-05-01T22:07:07",
+    "processed_at": "2026-05-01T22:07:07",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_7a40a74c8e25fd881616.txt",
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "skipped_duplicate_count": 1,
+    "skipped_duplicates": [
+      {
+        "candidate_id": "raw_290e4a2a39770cac",
+        "duplicate": {
+          "duplicate": true,
+          "reason": "same_business_key_similar_content",
+          "source": "review_candidate:raw_05d6ecaa6bf5f04c",
+          "existing_item_id": "item_2c51deaa6211",
+          "similarity": 0.807,
+          "message": "检测到与现有知识或候选高度重复，已跳过去重。"
+        }
+      }
+    ],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_4b5733674bb1d257",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "private",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_7a40a74c8e25fd881616.txt",
+        "content_hash": "64760bf9cf58fb6da1be99dc5d8e9592",
+        "status": "active",
+        "created_at": "2026-05-01T22:07:07",
+        "updated_at": "2026-05-01T22:07:07"
+      },
+      "source_id": "source_4b5733674bb1d257",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_4b5733674bb1d257.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 86
+      }
+    },
+    "updated_at": "2026-05-01T22:07:07"
+  },
+  {
+    "batch_id": "raw_batch_e944b2d32095e138ca0c",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_54a96e57c70563ab9c",
+    "message_ids": [
+      "raw_msg_4d14193a5bcb8998fa53"
+    ],
+    "reason": "customer_service_poll",
+    "source_module": "customer_service",
+    "status": "processed",
+    "created_at": "2026-05-01T22:07:06",
+    "processed_at": "2026-05-01T22:07:07",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_e944b2d32095e138ca0c.txt",
+    "candidate_ids": [
+      "raw_05d6ecaa6bf5f04c"
+    ],
+    "candidate_count": 1,
+    "skipped_duplicate_count": 0,
+    "skipped_duplicates": [],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_8d43ca05a0970c6e",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "private",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_e944b2d32095e138ca0c.txt",
+        "content_hash": "2317a2e8e2f07363704d75086d3f523d",
+        "status": "active",
+        "created_at": "2026-05-01T22:07:06",
+        "updated_at": "2026-05-01T22:07:06"
+      },
+      "source_id": "source_8d43ca05a0970c6e",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_8d43ca05a0970c6e.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 85
+      }
+    },
+    "updated_at": "2026-05-01T22:07:07"
+  },
+  {
+    "batch_id": "raw_batch_29c293e3913bbfe576c1",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_54a96e57c70563ab9c",
+    "message_ids": [
+      "raw_msg_0ee6d984d3838716607f"
+    ],
+    "reason": "customer_service_poll",
+    "source_module": "customer_service",
+    "status": "processed",
+    "created_at": "2026-05-01T22:06:15",
+    "processed_at": "2026-05-01T22:06:15",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_29c293e3913bbfe576c1.txt",
+    "candidate_ids": [
+      "raw_8eaa215a4ca82490"
+    ],
+    "candidate_count": 1,
+    "skipped_duplicate_count": 0,
+    "skipped_duplicates": [],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_dc9feb4b5b33c42d",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "private",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_29c293e3913bbfe576c1.txt",
+        "content_hash": "a15cb9d48ffcc7a5deb615e488f2e5a8",
+        "status": "active",
+        "created_at": "2026-05-01T22:06:15",
+        "updated_at": "2026-05-01T22:06:15"
+      },
+      "source_id": "source_dc9feb4b5b33c42d",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_dc9feb4b5b33c42d.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 80
+      }
+    },
+    "updated_at": "2026-05-01T22:06:15"
+  },
+  {
+    "batch_id": "raw_batch_d78cb8134d88f947c093",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_376a9c7df7cd80d69b",
+    "message_ids": [
+      "raw_msg_e6da77b1da23e6231da2"
+    ],
+    "reason": "recorder_capture",
+    "source_module": "smart_recorder",
+    "status": "processed",
+    "created_at": "2026-05-01T16:24:26",
+    "processed_at": "2026-05-01T16:24:26",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_d78cb8134d88f947c093.txt",
+    "candidate_ids": [
+      "raw_199a1e10d52ffd64"
+    ],
+    "candidate_count": 1,
+    "skipped_duplicate_count": 0,
+    "skipped_duplicates": [],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_be58fab3d7381f97",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "group",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_d78cb8134d88f947c093.txt",
+        "content_hash": "17705152c3cb8a9068f3d7b50d04d1b4",
+        "status": "active",
+        "created_at": "2026-05-01T16:24:26",
+        "updated_at": "2026-05-01T16:24:26"
+      },
+      "source_id": "source_be58fab3d7381f97",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_be58fab3d7381f97.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 75
+      }
+    },
+    "updated_at": "2026-05-01T16:24:26"
+  },
+  {
+    "batch_id": "raw_batch_3f8328428f5fee9d50cd",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_376a9c7df7cd80d69b",
+    "message_ids": [
+      "raw_msg_63609e513054af252916",
+      "raw_msg_f41835cb221393a47f52",
+      "raw_msg_2ff1d521b994df78b185",
+      "raw_msg_b1502b11a8dded18bdf7"
+    ],
+    "reason": "recorder_capture",
+    "source_module": "smart_recorder",
+    "status": "processed",
+    "created_at": "2026-05-01T16:23:58",
+    "processed_at": "2026-05-01T16:23:59",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_3f8328428f5fee9d50cd.txt",
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "skipped_duplicate_count": 1,
+    "skipped_duplicates": [
+      {
+        "candidate_id": "raw_7b37c95eafea0227",
+        "duplicate": {
+          "duplicate": true,
+          "reason": "same_id_same_content",
+          "source": "review_candidate:raw_6e5b9047b47533b7",
+          "existing_item_id": "chat_2a9aca944b",
+          "similarity": 1.0,
+          "message": "检测到与现有知识或候选高度重复，已跳过去重。"
+        }
+      }
+    ],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_af34568c76ccca52",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "group",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_3f8328428f5fee9d50cd.txt",
+        "content_hash": "904ecbdf722a9eed1f0ef26c93f40f42",
+        "status": "active",
+        "created_at": "2026-05-01T16:23:58",
+        "updated_at": "2026-05-01T16:23:58"
+      },
+      "source_id": "source_af34568c76ccca52",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_af34568c76ccca52.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 74
+      }
+    },
+    "updated_at": "2026-05-01T16:23:59"
+  },
+  {
+    "batch_id": "raw_batch_15d9f3bf17c554cd1673",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_87036d2253c2c945ed",
+    "message_ids": [
+      "raw_msg_7e364d6ecb8924a61016",
+      "raw_msg_bfdc04a5c3b73c36e9e4",
+      "raw_msg_750601f1e7159201a12c",
+      "raw_msg_9228769d4252b07becaa"
+    ],
+    "reason": "recorder_capture",
+    "source_module": "smart_recorder",
+    "status": "processed",
+    "created_at": "2026-05-01T16:23:50",
+    "processed_at": "2026-05-01T16:23:50",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_15d9f3bf17c554cd1673.txt",
+    "candidate_ids": [
+      "raw_6e5b9047b47533b7"
+    ],
+    "candidate_count": 1,
+    "skipped_duplicate_count": 0,
+    "skipped_duplicates": [],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_531d508b4a1178b7",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "file_transfer",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_15d9f3bf17c554cd1673.txt",
+        "content_hash": "d24c76252acdc3f36354f88e2a3b6f4a",
+        "status": "active",
+        "created_at": "2026-05-01T16:23:50",
+        "updated_at": "2026-05-01T16:23:50"
+      },
+      "source_id": "source_531d508b4a1178b7",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_531d508b4a1178b7.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 73
+      }
+    },
+    "updated_at": "2026-05-01T16:23:50"
+  },
+  {
+    "batch_id": "raw_batch_43594db1b204767e4ca0",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_1c4c2bfac8a6d1ae7d",
+    "message_ids": [
+      "raw_msg_e24e9cc42f965341345c",
+      "raw_msg_6d1352cbdedce1d4eb56",
+      "raw_msg_6dfe5982867799ab7dc5",
+      "raw_msg_3a3dddaf4e3010b3a7e1"
+    ],
+    "reason": "recorder_capture",
+    "source_module": "smart_recorder",
+    "status": "processed",
+    "created_at": "2026-05-01T16:23:43",
+    "processed_at": "2026-05-01T16:23:43",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_43594db1b204767e4ca0.txt",
+    "candidate_ids": [
+      "raw_d6c5f7d0364d6e9c"
+    ],
+    "candidate_count": 1,
+    "skipped_duplicate_count": 0,
+    "skipped_duplicates": [],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_72410d5752cb809d",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "group",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_43594db1b204767e4ca0.txt",
+        "content_hash": "d4e016bcac1f36b0223306f6008caae1",
+        "status": "active",
+        "created_at": "2026-05-01T16:23:43",
+        "updated_at": "2026-05-01T16:23:43"
+      },
+      "source_id": "source_72410d5752cb809d",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_72410d5752cb809d.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 72
+      }
+    },
+    "updated_at": "2026-05-01T16:23:43"
+  },
+  {
+    "batch_id": "raw_batch_9f196c9901f186690562",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_87036d2253c2c945ed",
+    "message_ids": [
+      "raw_msg_8fbd350c09cd646804c7"
+    ],
+    "reason": "offline_recorder",
+    "source_module": "jiangsu_chejin_recorder_test",
+    "status": "processed",
+    "created_at": "2026-05-01T16:23:07",
+    "processed_at": "2026-05-01T16:23:08",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_9f196c9901f186690562.txt",
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "skipped_duplicate_count": 1,
+    "skipped_duplicates": [
+      {
+        "candidate_id": "raw_9e72eeec56ef5541",
+        "duplicate": {
+          "duplicate": true,
+          "reason": "same_id_same_content",
+          "source": "review_candidate:raw_bd5f2f804f7a9604",
+          "existing_item_id": "chat_93935ef27b",
+          "similarity": 1.0,
+          "message": "检测到与现有知识或候选高度重复，已跳过去重。"
+        }
+      }
+    ],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_2d3c80bcf7814806",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "file_transfer",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_9f196c9901f186690562.txt",
+        "content_hash": "80c2d79184fe0d965b802176cc6c136f",
+        "status": "active",
+        "created_at": "2026-05-01T16:23:07",
+        "updated_at": "2026-05-01T16:23:07"
+      },
+      "source_id": "source_2d3c80bcf7814806",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_2d3c80bcf7814806.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 71
+      }
+    },
+    "updated_at": "2026-05-01T16:23:08"
+  },
+  {
+    "batch_id": "raw_batch_f6fe6cdc0ec6e30a79a5",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_376a9c7df7cd80d69b",
+    "message_ids": [
+      "raw_msg_142a7faaf317463346a0",
+      "raw_msg_fb17388034b1589ee236",
+      "raw_msg_5aa85adad032f9264d11"
+    ],
+    "reason": "offline_recorder",
+    "source_module": "jiangsu_chejin_recorder_test",
+    "status": "processed",
+    "created_at": "2026-05-01T16:23:07",
+    "processed_at": "2026-05-01T16:23:07",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_f6fe6cdc0ec6e30a79a5.txt",
+    "candidate_ids": [
+      "raw_9bbc3fd112e0cd64"
+    ],
+    "candidate_count": 1,
+    "skipped_duplicate_count": 1,
+    "skipped_duplicates": [
+      {
+        "candidate_id": "raw_b3f33b40713a45b8",
+        "duplicate": {
+          "duplicate": true,
+          "reason": "highly_similar_content",
+          "source": "review_candidate:raw_ffc901c260e3d293",
+          "existing_item_id": "item_59f34070c692",
+          "similarity": 0.938,
+          "message": "检测到与现有知识或候选高度重复，已跳过去重。"
+        }
+      }
+    ],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_951eaef520f56265",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "group",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_f6fe6cdc0ec6e30a79a5.txt",
+        "content_hash": "a0a6b611da3af62ac2082dd416a2b97b",
+        "status": "active",
+        "created_at": "2026-05-01T16:23:07",
+        "updated_at": "2026-05-01T16:23:07"
+      },
+      "source_id": "source_951eaef520f56265",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_951eaef520f56265.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 70
+      }
+    },
+    "updated_at": "2026-05-01T16:23:07"
+  },
+  {
+    "batch_id": "raw_batch_400d0fcfcda8acd48f1f",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_54a96e57c70563ab9c",
+    "message_ids": [
+      "raw_msg_7582710839ff6f28b20b"
+    ],
+    "reason": "customer_service_poll",
+    "source_module": "customer_service",
+    "status": "processed",
+    "created_at": "2026-05-01T16:23:06",
+    "processed_at": "2026-05-01T16:23:06",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_400d0fcfcda8acd48f1f.txt",
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "skipped_duplicate_count": 1,
+    "skipped_duplicates": [
+      {
+        "candidate_id": "raw_f59b2e28e87b33d3",
+        "duplicate": {
+          "duplicate": true,
+          "reason": "same_business_key_similar_content",
+          "source": "review_candidate:raw_696ba36e28b0c668",
+          "existing_item_id": "item_12273253033c",
+          "similarity": 0.918,
+          "message": "检测到与现有知识或候选高度重复，已跳过去重。"
+        }
+      }
+    ],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_7d3384ed72fde206",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "private",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_400d0fcfcda8acd48f1f.txt",
+        "content_hash": "cce2ec3b5063d1a3772abfdab8682b5e",
+        "status": "active",
+        "created_at": "2026-05-01T16:23:06",
+        "updated_at": "2026-05-01T16:23:06"
+      },
+      "source_id": "source_7d3384ed72fde206",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_7d3384ed72fde206.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 69
+      }
+    },
+    "updated_at": "2026-05-01T16:23:06"
+  },
+  {
+    "batch_id": "raw_batch_3f7e52a315c4dd720c12",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_54a96e57c70563ab9c",
+    "message_ids": [
+      "raw_msg_fb0cdd809333077ec00b"
+    ],
+    "reason": "customer_service_poll",
+    "source_module": "customer_service",
+    "status": "processed",
+    "created_at": "2026-05-01T16:23:05",
+    "processed_at": "2026-05-01T16:23:05",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_3f7e52a315c4dd720c12.txt",
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "skipped_duplicate_count": 1,
+    "skipped_duplicates": [
+      {
+        "candidate_id": "raw_5d607f28dbb51b13",
+        "duplicate": {
+          "duplicate": true,
+          "reason": "highly_similar_content",
+          "source": "review_candidate:raw_2f9451572a2e3df1",
+          "existing_item_id": "item_ae79f0846884",
+          "similarity": 0.938,
+          "message": "检测到与现有知识或候选高度重复，已跳过去重。"
+        }
+      }
+    ],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_03a73fd71ebba4f5",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "private",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_3f7e52a315c4dd720c12.txt",
+        "content_hash": "3b01161e76acdcb55b2f6aca8211160b",
+        "status": "active",
+        "created_at": "2026-05-01T16:23:05",
+        "updated_at": "2026-05-01T16:23:05"
+      },
+      "source_id": "source_03a73fd71ebba4f5",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_03a73fd71ebba4f5.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 68
+      }
+    },
+    "updated_at": "2026-05-01T16:23:05"
+  },
+  {
+    "batch_id": "raw_batch_c6f9b051b6b3a6471f14",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_87036d2253c2c945ed",
+    "message_ids": [
+      "raw_msg_da7ef18c9b31a9b5ae33"
+    ],
+    "reason": "offline_recorder",
+    "source_module": "jiangsu_chejin_recorder_test",
+    "status": "processed",
+    "created_at": "2026-05-01T16:21:47",
+    "processed_at": "2026-05-01T16:21:48",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_c6f9b051b6b3a6471f14.txt",
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "skipped_duplicate_count": 1,
+    "skipped_duplicates": [
+      {
+        "candidate_id": "raw_dfaa96855b7f64c0",
+        "duplicate": {
+          "duplicate": true,
+          "reason": "same_id_same_content",
+          "source": "review_candidate:raw_bd5f2f804f7a9604",
+          "existing_item_id": "chat_93935ef27b",
+          "similarity": 1.0,
+          "message": "检测到与现有知识或候选高度重复，已跳过去重。"
+        }
+      }
+    ],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_38bb1e8815415788",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "file_transfer",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_c6f9b051b6b3a6471f14.txt",
+        "content_hash": "84cf010d627f31e1bf5ed8af522d04fb",
+        "status": "active",
+        "created_at": "2026-05-01T16:21:47",
+        "updated_at": "2026-05-01T16:21:47"
+      },
+      "source_id": "source_38bb1e8815415788",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_38bb1e8815415788.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 63
+      }
+    },
+    "updated_at": "2026-05-01T16:21:48"
+  },
+  {
+    "batch_id": "raw_batch_b6593cec05a82e9185bc",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_376a9c7df7cd80d69b",
+    "message_ids": [
+      "raw_msg_87816419539eded34e41",
+      "raw_msg_cb4b72cb86351cb5bede",
+      "raw_msg_279f99f00dce35e08fe7"
+    ],
+    "reason": "offline_recorder",
+    "source_module": "jiangsu_chejin_recorder_test",
+    "status": "processed",
+    "created_at": "2026-05-01T16:21:47",
+    "processed_at": "2026-05-01T16:21:47",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_b6593cec05a82e9185bc.txt",
+    "candidate_ids": [
+      "raw_210a1b1a6ceec965"
+    ],
+    "candidate_count": 1,
+    "skipped_duplicate_count": 1,
+    "skipped_duplicates": [
+      {
+        "candidate_id": "raw_ef158d0d265f5899",
+        "duplicate": {
+          "duplicate": true,
+          "reason": "highly_similar_content",
+          "source": "review_candidate:raw_ffc901c260e3d293",
+          "existing_item_id": "item_59f34070c692",
+          "similarity": 0.953,
+          "message": "检测到与现有知识或候选高度重复，已跳过去重。"
+        }
+      }
+    ],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_fc03bc299265cb1c",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "group",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_b6593cec05a82e9185bc.txt",
+        "content_hash": "7fdc97f7178eb6834026d51c5b23a398",
+        "status": "active",
+        "created_at": "2026-05-01T16:21:47",
+        "updated_at": "2026-05-01T16:21:47"
+      },
+      "source_id": "source_fc03bc299265cb1c",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_fc03bc299265cb1c.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 62
+      }
+    },
+    "updated_at": "2026-05-01T16:21:47"
+  },
+  {
+    "batch_id": "raw_batch_c259410cd3dc1df6b2de",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_54a96e57c70563ab9c",
+    "message_ids": [
+      "raw_msg_e4007ae6313479d4fc57"
+    ],
+    "reason": "customer_service_poll",
+    "source_module": "customer_service",
+    "status": "processed",
+    "created_at": "2026-05-01T16:21:46",
+    "processed_at": "2026-05-01T16:21:46",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_c259410cd3dc1df6b2de.txt",
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "skipped_duplicate_count": 1,
+    "skipped_duplicates": [
+      {
+        "candidate_id": "raw_35e40dce88fef564",
+        "duplicate": {
+          "duplicate": true,
+          "reason": "highly_similar_content",
+          "source": "review_candidate:raw_696ba36e28b0c668",
+          "existing_item_id": "item_12273253033c",
+          "similarity": 0.965,
+          "message": "检测到与现有知识或候选高度重复，已跳过去重。"
+        }
+      }
+    ],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_8a2242f70005d3df",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "private",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_c259410cd3dc1df6b2de.txt",
+        "content_hash": "320328e166d8d1e7b050b2442cc5dbff",
+        "status": "active",
+        "created_at": "2026-05-01T16:21:46",
+        "updated_at": "2026-05-01T16:21:46"
+      },
+      "source_id": "source_8a2242f70005d3df",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_8a2242f70005d3df.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 61
+      }
+    },
+    "updated_at": "2026-05-01T16:21:46"
+  },
+  {
+    "batch_id": "raw_batch_cb47ded06e2e021bd8f4",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_54a96e57c70563ab9c",
+    "message_ids": [
+      "raw_msg_efee71a263ad683a8ff6"
+    ],
+    "reason": "customer_service_poll",
+    "source_module": "customer_service",
+    "status": "processed",
+    "created_at": "2026-05-01T16:21:45",
+    "processed_at": "2026-05-01T16:21:46",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_cb47ded06e2e021bd8f4.txt",
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "skipped_duplicate_count": 1,
+    "skipped_duplicates": [
+      {
+        "candidate_id": "raw_24abedc9ea4a2446",
+        "duplicate": {
+          "duplicate": true,
+          "reason": "highly_similar_content",
+          "source": "review_candidate:raw_2f9451572a2e3df1",
+          "existing_item_id": "item_ae79f0846884",
+          "similarity": 0.926,
+          "message": "检测到与现有知识或候选高度重复，已跳过去重。"
+        }
+      }
+    ],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_77d58c682ea59395",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "private",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_cb47ded06e2e021bd8f4.txt",
+        "content_hash": "20942169ebeac2cccdab3cd4663578e8",
+        "status": "active",
+        "created_at": "2026-05-01T16:21:45",
+        "updated_at": "2026-05-01T16:21:45"
+      },
+      "source_id": "source_77d58c682ea59395",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_77d58c682ea59395.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 60
+      }
+    },
+    "updated_at": "2026-05-01T16:21:46"
+  },
+  {
+    "batch_id": "raw_batch_315396d7c70d79dbe948",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_87036d2253c2c945ed",
+    "message_ids": [
+      "raw_msg_5927894f9b6f92128269"
+    ],
+    "reason": "offline_recorder",
+    "source_module": "jiangsu_chejin_recorder_test",
+    "status": "processed",
+    "created_at": "2026-05-01T16:20:53",
+    "processed_at": "2026-05-01T16:20:54",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_315396d7c70d79dbe948.txt",
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "skipped_duplicate_count": 1,
+    "skipped_duplicates": [
+      {
+        "candidate_id": "raw_36d37d735d423175",
+        "duplicate": {
+          "duplicate": true,
+          "reason": "same_id_same_content",
+          "source": "review_candidate:raw_bd5f2f804f7a9604",
+          "existing_item_id": "chat_93935ef27b",
+          "similarity": 1.0,
+          "message": "检测到与现有知识或候选高度重复，已跳过去重。"
+        }
+      }
+    ],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_0756948fb074eb16",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "file_transfer",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_315396d7c70d79dbe948.txt",
+        "content_hash": "719d38442129067145fd78e101fd7b18",
+        "status": "active",
+        "created_at": "2026-05-01T16:20:54",
+        "updated_at": "2026-05-01T16:20:54"
+      },
+      "source_id": "source_0756948fb074eb16",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_0756948fb074eb16.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 55
+      }
+    },
+    "updated_at": "2026-05-01T16:20:54"
+  },
+  {
+    "batch_id": "raw_batch_a810e8b162f913be1572",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_376a9c7df7cd80d69b",
+    "message_ids": [
+      "raw_msg_c1d1553fba9ba3aa613c",
+      "raw_msg_7b3c43c2e4843d886b1b",
+      "raw_msg_1ae965873706d1334969"
+    ],
+    "reason": "offline_recorder",
+    "source_module": "jiangsu_chejin_recorder_test",
+    "status": "processed",
+    "created_at": "2026-05-01T16:20:53",
+    "processed_at": "2026-05-01T16:20:54",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_a810e8b162f913be1572.txt",
+    "candidate_ids": [
+      "raw_166a09f28e6401c6"
+    ],
+    "candidate_count": 1,
+    "skipped_duplicate_count": 1,
+    "skipped_duplicates": [
+      {
+        "candidate_id": "raw_720e153dff574ef1",
+        "duplicate": {
+          "duplicate": true,
+          "reason": "highly_similar_content",
+          "source": "review_candidate:raw_ffc901c260e3d293",
+          "existing_item_id": "item_59f34070c692",
+          "similarity": 0.938,
+          "message": "检测到与现有知识或候选高度重复，已跳过去重。"
+        }
+      }
+    ],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_adea621c3dee4933",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "group",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_a810e8b162f913be1572.txt",
+        "content_hash": "c4eb54f62514825845334f9319619c43",
+        "status": "active",
+        "created_at": "2026-05-01T16:20:53",
+        "updated_at": "2026-05-01T16:20:53"
+      },
+      "source_id": "source_adea621c3dee4933",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_adea621c3dee4933.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 54
+      }
+    },
+    "updated_at": "2026-05-01T16:20:54"
+  },
+  {
+    "batch_id": "raw_batch_0dab53699c61e693855c",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_54a96e57c70563ab9c",
+    "message_ids": [
+      "raw_msg_f1d8a6f6334f20f60fce"
+    ],
+    "reason": "customer_service_poll",
+    "source_module": "customer_service",
+    "status": "processed",
+    "created_at": "2026-05-01T16:20:53",
+    "processed_at": "2026-05-01T16:20:53",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_0dab53699c61e693855c.txt",
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "skipped_duplicate_count": 1,
+    "skipped_duplicates": [
+      {
+        "candidate_id": "raw_29c73b6744919f12",
+        "duplicate": {
+          "duplicate": true,
+          "reason": "same_business_key_similar_content",
+          "source": "review_candidate:raw_696ba36e28b0c668",
+          "existing_item_id": "item_12273253033c",
+          "similarity": 0.918,
+          "message": "检测到与现有知识或候选高度重复，已跳过去重。"
+        }
+      }
+    ],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_d3300086386453f8",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "private",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_0dab53699c61e693855c.txt",
+        "content_hash": "ae35e2b697ba45e17e0082148fd87de0",
+        "status": "active",
+        "created_at": "2026-05-01T16:20:53",
+        "updated_at": "2026-05-01T16:20:53"
+      },
+      "source_id": "source_d3300086386453f8",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_d3300086386453f8.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 53
+      }
+    },
+    "updated_at": "2026-05-01T16:20:53"
+  },
+  {
+    "batch_id": "raw_batch_7a5b3ddbf454ec1bfb07",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_54a96e57c70563ab9c",
+    "message_ids": [
+      "raw_msg_8627505be349c83c6188"
+    ],
+    "reason": "customer_service_poll",
+    "source_module": "customer_service",
+    "status": "processed",
+    "created_at": "2026-05-01T16:20:52",
+    "processed_at": "2026-05-01T16:20:52",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_7a5b3ddbf454ec1bfb07.txt",
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "skipped_duplicate_count": 1,
+    "skipped_duplicates": [
+      {
+        "candidate_id": "raw_cc4f5e1dad36644d",
+        "duplicate": {
+          "duplicate": true,
+          "reason": "highly_similar_content",
+          "source": "review_candidate:raw_2f9451572a2e3df1",
+          "existing_item_id": "item_ae79f0846884",
+          "similarity": 0.938,
+          "message": "检测到与现有知识或候选高度重复，已跳过去重。"
+        }
+      }
+    ],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_d42dc1ed86b61e86",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "private",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_7a5b3ddbf454ec1bfb07.txt",
+        "content_hash": "3f0033883686386af2179f182193faac",
+        "status": "active",
+        "created_at": "2026-05-01T16:20:52",
+        "updated_at": "2026-05-01T16:20:52"
+      },
+      "source_id": "source_d42dc1ed86b61e86",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_d42dc1ed86b61e86.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 52
+      }
+    },
+    "updated_at": "2026-05-01T16:20:52"
+  },
+  {
+    "batch_id": "raw_batch_7834d4e229094caabf49",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_87036d2253c2c945ed",
+    "message_ids": [
+      "raw_msg_32f4ef9d1faf6a0d9de1"
+    ],
+    "reason": "offline_recorder",
+    "source_module": "jiangsu_chejin_recorder_test",
+    "status": "processed",
+    "created_at": "2026-05-01T16:17:57",
+    "processed_at": "2026-05-01T16:17:57",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_7834d4e229094caabf49.txt",
+    "candidate_ids": [
+      "raw_bd5f2f804f7a9604"
+    ],
+    "candidate_count": 1,
+    "skipped_duplicate_count": 0,
+    "skipped_duplicates": [],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_907c413e54ebb142",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "file_transfer",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_7834d4e229094caabf49.txt",
+        "content_hash": "baadf1f517508f0309d6cfcb03a3c8c8",
+        "status": "active",
+        "created_at": "2026-05-01T16:17:57",
+        "updated_at": "2026-05-01T16:17:57"
+      },
+      "source_id": "source_907c413e54ebb142",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_907c413e54ebb142.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 47
+      }
+    },
+    "updated_at": "2026-05-01T16:17:57"
+  },
+  {
+    "batch_id": "raw_batch_a80a481ce4a4b817226f",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_376a9c7df7cd80d69b",
+    "message_ids": [
+      "raw_msg_788eb308001e306fc0a1",
+      "raw_msg_f87f90372ea195884b6b",
+      "raw_msg_18eaa2017e2455c62a0d"
+    ],
+    "reason": "offline_recorder",
+    "source_module": "jiangsu_chejin_recorder_test",
+    "status": "processed",
+    "created_at": "2026-05-01T16:17:57",
+    "processed_at": "2026-05-01T16:17:57",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_a80a481ce4a4b817226f.txt",
+    "candidate_ids": [
+      "raw_de81c8f0b3058f7b",
+      "raw_ffc901c260e3d293"
+    ],
+    "candidate_count": 2,
+    "skipped_duplicate_count": 0,
+    "skipped_duplicates": [],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_55d432643f9f369b",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "group",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_a80a481ce4a4b817226f.txt",
+        "content_hash": "f0738e6da750b4477508fa9ea6878571",
+        "status": "active",
+        "created_at": "2026-05-01T16:17:57",
+        "updated_at": "2026-05-01T16:17:57"
+      },
+      "source_id": "source_55d432643f9f369b",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_55d432643f9f369b.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 46
+      }
+    },
+    "updated_at": "2026-05-01T16:17:57"
+  },
+  {
+    "batch_id": "raw_batch_83bbdbe378e1380f7abf",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_54a96e57c70563ab9c",
+    "message_ids": [
+      "raw_msg_c1f11ba308c62fb0f49d",
+      "raw_msg_c30bd44537748f3346c5"
+    ],
+    "reason": "customer_service_poll",
+    "source_module": "customer_service",
+    "status": "processed",
+    "created_at": "2026-05-01T16:17:56",
+    "processed_at": "2026-05-01T16:17:56",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_83bbdbe378e1380f7abf.txt",
+    "candidate_ids": [
+      "raw_cad98bce5fa29c18"
+    ],
+    "candidate_count": 1,
+    "skipped_duplicate_count": 0,
+    "skipped_duplicates": [],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_7937dc8bfe228cf8",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "private",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_83bbdbe378e1380f7abf.txt",
+        "content_hash": "cec32018c0d27bdd3336e7ec179902f1",
+        "status": "active",
+        "created_at": "2026-05-01T16:17:56",
+        "updated_at": "2026-05-01T16:17:56"
+      },
+      "source_id": "source_7937dc8bfe228cf8",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_7937dc8bfe228cf8.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 45
+      }
+    },
+    "updated_at": "2026-05-01T16:17:56"
+  },
+  {
+    "batch_id": "raw_batch_eb7e77e2e53aa3ec53e5",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_54a96e57c70563ab9c",
+    "message_ids": [
+      "raw_msg_c41073c4485d04c75492"
+    ],
+    "reason": "customer_service_poll",
+    "source_module": "customer_service",
+    "status": "processed",
+    "created_at": "2026-05-01T16:17:55",
+    "processed_at": "2026-05-01T16:17:56",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_eb7e77e2e53aa3ec53e5.txt",
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "skipped_duplicate_count": 1,
+    "skipped_duplicates": [
+      {
+        "candidate_id": "raw_52c31d7476d36259",
+        "duplicate": {
+          "duplicate": true,
+          "reason": "highly_similar_content",
+          "source": "review_candidate:raw_696ba36e28b0c668",
+          "existing_item_id": "item_12273253033c",
+          "similarity": 0.941,
+          "message": "检测到与现有知识或候选高度重复，已跳过去重。"
+        }
+      }
+    ],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_74c80d400ef2a97f",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "private",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_eb7e77e2e53aa3ec53e5.txt",
+        "content_hash": "9da939e878ebf81bdd38cb1f17f37def",
+        "status": "active",
+        "created_at": "2026-05-01T16:17:55",
+        "updated_at": "2026-05-01T16:17:55"
+      },
+      "source_id": "source_74c80d400ef2a97f",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_74c80d400ef2a97f.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 44
+      }
+    },
+    "updated_at": "2026-05-01T16:17:56"
+  },
+  {
+    "batch_id": "raw_batch_57ec8e96b09e22bf05a0",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_54a96e57c70563ab9c",
+    "message_ids": [
+      "raw_msg_0cb8abb25f57335bd8c8"
+    ],
+    "reason": "customer_service_poll",
+    "source_module": "customer_service",
+    "status": "processed",
+    "created_at": "2026-05-01T16:17:55",
+    "processed_at": "2026-05-01T16:17:55",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_57ec8e96b09e22bf05a0.txt",
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "skipped_duplicate_count": 1,
+    "skipped_duplicates": [
+      {
+        "candidate_id": "raw_b47b93d109ff7276",
+        "duplicate": {
+          "duplicate": true,
+          "reason": "same_business_key_similar_content",
+          "source": "review_candidate:raw_2f9451572a2e3df1",
+          "existing_item_id": "item_ae79f0846884",
+          "similarity": 0.914,
+          "message": "检测到与现有知识或候选高度重复，已跳过去重。"
+        }
+      }
+    ],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_a3b62b21fb62c224",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "private",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_57ec8e96b09e22bf05a0.txt",
+        "content_hash": "21fb20ef867a26c154d521be3319c24b",
+        "status": "active",
+        "created_at": "2026-05-01T16:17:55",
+        "updated_at": "2026-05-01T16:17:55"
+      },
+      "source_id": "source_a3b62b21fb62c224",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_a3b62b21fb62c224.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 43
+      }
+    },
+    "updated_at": "2026-05-01T16:17:55"
+  },
+  {
+    "batch_id": "raw_batch_d9edf40cbaa763ecf239",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_54a96e57c70563ab9c",
+    "message_ids": [
+      "raw_msg_2118519d8e52c387b596"
+    ],
+    "reason": "customer_service_poll",
+    "source_module": "customer_service",
+    "status": "processed",
+    "created_at": "2026-05-01T16:16:28",
+    "processed_at": "2026-05-01T16:16:28",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_d9edf40cbaa763ecf239.txt",
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "skipped_duplicate_count": 1,
+    "skipped_duplicates": [
+      {
+        "candidate_id": "raw_3b6cb605748da0a9",
+        "duplicate": {
+          "duplicate": true,
+          "reason": "same_business_key_similar_content",
+          "source": "review_candidate:raw_3561708d2d6c8eee",
+          "existing_item_id": "item_773ebc7f76ba",
+          "similarity": 0.817,
+          "message": "检测到与现有知识或候选高度重复，已跳过去重。"
+        }
+      }
+    ],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_2c1ff561b77aeee5",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "private",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_d9edf40cbaa763ecf239.txt",
+        "content_hash": "bb3f24cd61b5f91d63b0ab0cf3bed2d7",
+        "status": "active",
+        "created_at": "2026-05-01T16:16:28",
+        "updated_at": "2026-05-01T16:16:28"
+      },
+      "source_id": "source_2c1ff561b77aeee5",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_2c1ff561b77aeee5.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 38
+      }
+    },
+    "updated_at": "2026-05-01T16:16:28"
+  },
+  {
+    "batch_id": "raw_batch_978e8ff41b88e3cb0e27",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_54a96e57c70563ab9c",
+    "message_ids": [
+      "raw_msg_4a071ebb5582edc45fe6"
+    ],
+    "reason": "customer_service_poll",
+    "source_module": "customer_service",
+    "status": "processed",
+    "created_at": "2026-05-01T16:16:28",
+    "processed_at": "2026-05-01T16:16:28",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_978e8ff41b88e3cb0e27.txt",
+    "candidate_ids": [
+      "raw_3561708d2d6c8eee"
+    ],
+    "candidate_count": 1,
+    "skipped_duplicate_count": 0,
+    "skipped_duplicates": [],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_c1a953fdb6019e66",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "private",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_978e8ff41b88e3cb0e27.txt",
+        "content_hash": "56712ac10cf0a78b85bc292c3d63947b",
+        "status": "active",
+        "created_at": "2026-05-01T16:16:28",
+        "updated_at": "2026-05-01T16:16:28"
+      },
+      "source_id": "source_c1a953fdb6019e66",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_c1a953fdb6019e66.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 37
+      }
+    },
+    "updated_at": "2026-05-01T16:16:28"
+  },
+  {
+    "batch_id": "raw_batch_ab55003148829c44b38f",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_54a96e57c70563ab9c",
+    "message_ids": [
+      "raw_msg_5296eeedfc100d2727db"
+    ],
+    "reason": "customer_service_poll",
+    "source_module": "customer_service",
+    "status": "processed",
+    "created_at": "2026-05-01T16:16:27",
+    "processed_at": "2026-05-01T16:16:28",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_ab55003148829c44b38f.txt",
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "skipped_duplicate_count": 1,
+    "skipped_duplicates": [
+      {
+        "candidate_id": "raw_8b79f99e0637b9cb",
+        "duplicate": {
+          "duplicate": true,
+          "reason": "highly_similar_content",
+          "source": "review_candidate:raw_696ba36e28b0c668",
+          "existing_item_id": "item_12273253033c",
+          "similarity": 0.953,
+          "message": "检测到与现有知识或候选高度重复，已跳过去重。"
+        }
+      }
+    ],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_7afed3e1a9119502",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "private",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_ab55003148829c44b38f.txt",
+        "content_hash": "cc793cb523be0fffed8757b032879ebb",
+        "status": "active",
+        "created_at": "2026-05-01T16:16:27",
+        "updated_at": "2026-05-01T16:16:27"
+      },
+      "source_id": "source_7afed3e1a9119502",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_7afed3e1a9119502.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 36
+      }
+    },
+    "updated_at": "2026-05-01T16:16:28"
+  },
+  {
+    "batch_id": "raw_batch_20e096a604e3ea167849",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_54a96e57c70563ab9c",
+    "message_ids": [
+      "raw_msg_35890ca7d98cf08909bb"
+    ],
+    "reason": "customer_service_poll",
+    "source_module": "customer_service",
+    "status": "processed",
+    "created_at": "2026-05-01T16:16:27",
+    "processed_at": "2026-05-01T16:16:27",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_20e096a604e3ea167849.txt",
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "skipped_duplicate_count": 1,
+    "skipped_duplicates": [
+      {
+        "candidate_id": "raw_a0ac2759dbf99820",
+        "duplicate": {
+          "duplicate": true,
+          "reason": "same_business_key_similar_content",
+          "source": "review_candidate:raw_2f9451572a2e3df1",
+          "existing_item_id": "item_ae79f0846884",
+          "similarity": 0.901,
+          "message": "检测到与现有知识或候选高度重复，已跳过去重。"
+        }
+      }
+    ],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_470d40445d06c477",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "private",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_20e096a604e3ea167849.txt",
+        "content_hash": "48e61b2612e66696539cfda74b082130",
+        "status": "active",
+        "created_at": "2026-05-01T16:16:27",
+        "updated_at": "2026-05-01T16:16:27"
+      },
+      "source_id": "source_470d40445d06c477",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_470d40445d06c477.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 35
+      }
+    },
+    "updated_at": "2026-05-01T16:16:27"
+  },
+  {
+    "batch_id": "raw_batch_5de09e0c91daf4365be2",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_54a96e57c70563ab9c",
+    "message_ids": [
+      "raw_msg_91335b4075c3852a26f1"
+    ],
+    "reason": "customer_service_poll",
+    "source_module": "customer_service",
+    "status": "processed",
+    "created_at": "2026-05-01T16:16:03",
+    "processed_at": "2026-05-01T16:16:03",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_5de09e0c91daf4365be2.txt",
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "skipped_duplicate_count": 1,
+    "skipped_duplicates": [
+      {
+        "candidate_id": "raw_479202f719e12784",
+        "duplicate": {
+          "duplicate": true,
+          "reason": "same_business_key_similar_content",
+          "source": "review_candidate:raw_1771c8b1f9a4dee1",
+          "existing_item_id": "item_b954522014d6",
+          "similarity": 0.787,
+          "message": "检测到与现有知识或候选高度重复，已跳过去重。"
+        }
+      }
+    ],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_bf5dc6fc8db8abfc",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "private",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_5de09e0c91daf4365be2.txt",
+        "content_hash": "13737cc2121709a86327420ef10308cb",
+        "status": "active",
+        "created_at": "2026-05-01T16:16:03",
+        "updated_at": "2026-05-01T16:16:03"
+      },
+      "source_id": "source_bf5dc6fc8db8abfc",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_bf5dc6fc8db8abfc.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 30
+      }
+    },
+    "updated_at": "2026-05-01T16:16:03"
+  },
+  {
+    "batch_id": "raw_batch_4d7bc1a7dcf4800c8b5e",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_54a96e57c70563ab9c",
+    "message_ids": [
+      "raw_msg_182bbacf69f83431c25c"
+    ],
+    "reason": "customer_service_poll",
+    "source_module": "customer_service",
+    "status": "processed",
+    "created_at": "2026-05-01T16:16:03",
+    "processed_at": "2026-05-01T16:16:03",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_4d7bc1a7dcf4800c8b5e.txt",
+    "candidate_ids": [
+      "raw_1771c8b1f9a4dee1"
+    ],
+    "candidate_count": 1,
+    "skipped_duplicate_count": 0,
+    "skipped_duplicates": [],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_d8c8dfe8d0c4d7d0",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "private",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_4d7bc1a7dcf4800c8b5e.txt",
+        "content_hash": "3ccc4c3047232f9b9b3b1f3b6313c5cb",
+        "status": "active",
+        "created_at": "2026-05-01T16:16:03",
+        "updated_at": "2026-05-01T16:16:03"
+      },
+      "source_id": "source_d8c8dfe8d0c4d7d0",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_d8c8dfe8d0c4d7d0.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 29
+      }
+    },
+    "updated_at": "2026-05-01T16:16:03"
+  },
+  {
+    "batch_id": "raw_batch_466b67e23e22033d71bb",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_54a96e57c70563ab9c",
+    "message_ids": [
+      "raw_msg_b08f5195fd651cda5c51"
+    ],
+    "reason": "customer_service_poll",
+    "source_module": "customer_service",
+    "status": "processed",
+    "created_at": "2026-05-01T16:16:02",
+    "processed_at": "2026-05-01T16:16:02",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_466b67e23e22033d71bb.txt",
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "skipped_duplicate_count": 1,
+    "skipped_duplicates": [
+      {
+        "candidate_id": "raw_4565084b433d2096",
+        "duplicate": {
+          "duplicate": true,
+          "reason": "highly_similar_content",
+          "source": "review_candidate:raw_696ba36e28b0c668",
+          "existing_item_id": "item_12273253033c",
+          "similarity": 0.941,
+          "message": "检测到与现有知识或候选高度重复，已跳过去重。"
+        }
+      }
+    ],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_98bf6855b3027aee",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "private",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_466b67e23e22033d71bb.txt",
+        "content_hash": "35c6d7d30adae3ba32b63f973ac18e1b",
+        "status": "active",
+        "created_at": "2026-05-01T16:16:02",
+        "updated_at": "2026-05-01T16:16:02"
+      },
+      "source_id": "source_98bf6855b3027aee",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_98bf6855b3027aee.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 28
+      }
+    },
+    "updated_at": "2026-05-01T16:16:02"
+  },
+  {
+    "batch_id": "raw_batch_30ba7d7fdda5990cfea3",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_54a96e57c70563ab9c",
+    "message_ids": [
+      "raw_msg_e73b60ebecca614fe83f"
+    ],
+    "reason": "customer_service_poll",
+    "source_module": "customer_service",
+    "status": "processed",
+    "created_at": "2026-05-01T16:16:02",
+    "processed_at": "2026-05-01T16:16:02",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_30ba7d7fdda5990cfea3.txt",
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "skipped_duplicate_count": 1,
+    "skipped_duplicates": [
+      {
+        "candidate_id": "raw_128b13784b7e7aac",
+        "duplicate": {
+          "duplicate": true,
+          "reason": "highly_similar_content",
+          "source": "review_candidate:raw_2f9451572a2e3df1",
+          "existing_item_id": "item_ae79f0846884",
+          "similarity": 0.926,
+          "message": "检测到与现有知识或候选高度重复，已跳过去重。"
+        }
+      }
+    ],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_e4c3eff2b6745405",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "private",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_30ba7d7fdda5990cfea3.txt",
+        "content_hash": "e234e7888ebf5bfbb78e34d3baf544bf",
+        "status": "active",
+        "created_at": "2026-05-01T16:16:02",
+        "updated_at": "2026-05-01T16:16:02"
+      },
+      "source_id": "source_e4c3eff2b6745405",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_e4c3eff2b6745405.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 27
+      }
+    },
+    "updated_at": "2026-05-01T16:16:02"
+  },
+  {
+    "batch_id": "raw_batch_8ae03238cec159eebee0",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_54a96e57c70563ab9c",
+    "message_ids": [
+      "raw_msg_bb88773edf26c6e8cb69"
+    ],
+    "reason": "customer_service_poll",
+    "source_module": "customer_service",
+    "status": "processed",
+    "created_at": "2026-05-01T16:14:17",
+    "processed_at": "2026-05-01T16:14:17",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_8ae03238cec159eebee0.txt",
+    "candidate_ids": [
+      "raw_52696f15bb66af24"
+    ],
+    "candidate_count": 1,
+    "skipped_duplicate_count": 0,
+    "skipped_duplicates": [],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_96f411ec1e7343e7",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "private",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_8ae03238cec159eebee0.txt",
+        "content_hash": "bf1e954373488b55891e4ed968274375",
+        "status": "active",
+        "created_at": "2026-05-01T16:14:17",
+        "updated_at": "2026-05-01T16:14:17"
+      },
+      "source_id": "source_96f411ec1e7343e7",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_96f411ec1e7343e7.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 18
+      }
+    },
+    "updated_at": "2026-05-01T16:14:17"
+  },
+  {
+    "batch_id": "raw_batch_27c2af5d7166ac8e4fa7",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_54a96e57c70563ab9c",
+    "message_ids": [
+      "raw_msg_521c4851889a8796f47b"
+    ],
+    "reason": "customer_service_poll",
+    "source_module": "customer_service",
+    "status": "processed",
+    "created_at": "2026-05-01T16:14:16",
+    "processed_at": "2026-05-01T16:14:17",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_27c2af5d7166ac8e4fa7.txt",
+    "candidate_ids": [
+      "raw_fd4532fb5bdf9a7c"
+    ],
+    "candidate_count": 1,
+    "skipped_duplicate_count": 0,
+    "skipped_duplicates": [],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_a7b20c695b939c39",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "private",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_27c2af5d7166ac8e4fa7.txt",
+        "content_hash": "2d9c6c94c42c193dc299c1ca9ebdb2fb",
+        "status": "active",
+        "created_at": "2026-05-01T16:14:16",
+        "updated_at": "2026-05-01T16:14:16"
+      },
+      "source_id": "source_a7b20c695b939c39",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_a7b20c695b939c39.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 17
+      }
+    },
+    "updated_at": "2026-05-01T16:14:17"
+  },
+  {
+    "batch_id": "raw_batch_13801f5ff9e56704ad69",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_54a96e57c70563ab9c",
+    "message_ids": [
+      "raw_msg_3aff3e3d9a9637d0576b"
+    ],
+    "reason": "customer_service_poll",
+    "source_module": "customer_service",
+    "status": "processed",
+    "created_at": "2026-05-01T16:14:16",
+    "processed_at": "2026-05-01T16:14:16",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_13801f5ff9e56704ad69.txt",
+    "candidate_ids": [
+      "raw_696ba36e28b0c668"
+    ],
+    "candidate_count": 1,
+    "skipped_duplicate_count": 0,
+    "skipped_duplicates": [],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_3a03b56e3a0d72b6",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "private",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_13801f5ff9e56704ad69.txt",
+        "content_hash": "10904fbbc3801c0f3077601b1a8f4201",
+        "status": "active",
+        "created_at": "2026-05-01T16:14:16",
+        "updated_at": "2026-05-01T16:14:16"
+      },
+      "source_id": "source_3a03b56e3a0d72b6",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_3a03b56e3a0d72b6.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 16
+      }
+    },
+    "updated_at": "2026-05-01T16:14:16"
+  },
+  {
+    "batch_id": "raw_batch_11fef63a6f22f6a71071",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_54a96e57c70563ab9c",
+    "message_ids": [
+      "raw_msg_d07d7a564ca5d96530d2"
+    ],
+    "reason": "customer_service_poll",
+    "source_module": "customer_service",
+    "status": "processed",
+    "created_at": "2026-05-01T16:14:16",
+    "processed_at": "2026-05-01T16:14:16",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_11fef63a6f22f6a71071.txt",
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "skipped_duplicate_count": 1,
+    "skipped_duplicates": [
+      {
+        "candidate_id": "raw_ad70943a4cd84966",
+        "duplicate": {
+          "duplicate": true,
+          "reason": "same_business_key_similar_content",
+          "source": "review_candidate:raw_2f9451572a2e3df1",
+          "existing_item_id": "item_ae79f0846884",
+          "similarity": 0.914,
+          "message": "检测到与现有知识或候选高度重复，已跳过去重。"
+        }
+      }
+    ],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_5c2de5009086be72",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "private",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_11fef63a6f22f6a71071.txt",
+        "content_hash": "c97c2ff76bc411e69b0103f8d1ae292e",
+        "status": "active",
+        "created_at": "2026-05-01T16:14:16",
+        "updated_at": "2026-05-01T16:14:16"
+      },
+      "source_id": "source_5c2de5009086be72",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_5c2de5009086be72.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 15
+      }
+    },
+    "updated_at": "2026-05-01T16:14:16"
+  },
+  {
+    "batch_id": "raw_batch_d4b71294a90d5f7dabd8",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_54a96e57c70563ab9c",
+    "message_ids": [
+      "raw_msg_dc21d8b766e3a1318d12"
+    ],
+    "reason": "customer_service_poll",
+    "source_module": "customer_service",
+    "status": "processed",
+    "created_at": "2026-05-01T16:09:50",
+    "processed_at": "2026-05-01T16:09:50",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_d4b71294a90d5f7dabd8.txt",
+    "candidate_ids": [
+      "raw_2f9451572a2e3df1"
+    ],
+    "candidate_count": 1,
+    "skipped_duplicate_count": 0,
+    "skipped_duplicates": [],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_e7690910d83d89bb",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "private",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_d4b71294a90d5f7dabd8.txt",
+        "content_hash": "ca7107ed7caf4eba1a250ae19d172aea",
+        "status": "active",
+        "created_at": "2026-05-01T16:09:50",
+        "updated_at": "2026-05-01T16:09:50"
+      },
+      "source_id": "source_e7690910d83d89bb",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_e7690910d83d89bb.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 6
+      }
+    },
+    "updated_at": "2026-05-01T16:09:50"
+  },
+  {
+    "batch_id": "raw_batch_a6d33ca7ddf2864a22f7",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "conversation_id": "conv_54a96e57c70563ab9c",
+    "message_ids": [
+      "raw_msg_9bff3db81d3d1741cf44"
+    ],
+    "reason": "customer_service_poll",
+    "source_module": "customer_service",
+    "status": "processed",
+    "created_at": "2026-05-01T16:09:50",
+    "processed_at": "2026-05-01T16:09:50",
+    "transcript_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_a6d33ca7ddf2864a22f7.txt",
+    "candidate_ids": [
+      "raw_08751d9db293a83e"
+    ],
+    "candidate_count": 1,
+    "skipped_duplicate_count": 0,
+    "skipped_duplicates": [],
+    "rag_ingest": {
+      "ok": true,
+      "source": {
+        "source_id": "source_4ad2653fbb5e29fa",
+        "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+        "layer": "tenant",
+        "source_type": "wechat_raw_message",
+        "category": "private",
+        "product_id": "",
+        "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_a6d33ca7ddf2864a22f7.txt",
+        "content_hash": "f7fc5bc31d5059135bbe6e2fd20d6dfd",
+        "status": "active",
+        "created_at": "2026-05-01T16:09:50",
+        "updated_at": "2026-05-01T16:09:50"
+      },
+      "source_id": "source_4ad2653fbb5e29fa",
+      "chunk_count": 1,
+      "chunks_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_chunks\\source_4ad2653fbb5e29fa.json",
+      "index": {
+        "ok": true,
+        "index_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\rag_index\\index.json",
+        "entry_count": 5
+      }
+    },
+    "updated_at": "2026-05-01T16:09:50"
+  }
+]

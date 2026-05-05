@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "test_risk_control",
+  "category_id": "risk_control",
+  "status": "active",
+  "data": {
+    "title": "shared risk control test",
+    "keywords": [
+      "risk"
+    ],
+    "guideline_text": "handoff"
+  },
+  "runtime": {
+    "requires_handoff": true,
+    "allow_auto_reply": false
+  }
+}

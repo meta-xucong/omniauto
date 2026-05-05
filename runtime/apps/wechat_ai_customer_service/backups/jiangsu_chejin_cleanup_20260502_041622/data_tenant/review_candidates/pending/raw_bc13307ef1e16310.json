@@ -1,0 +1,314 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_bc13307ef1e16310",
+  "generated_at": "2026-05-01T23:20:15",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_c88d3dba0b527eebb4f8.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "title: 售后规则；answer: 政策规则：江苏车金记录员风控 CHEJIN_20260501_232013 规则名称：保证无事故转人工 CHEJIN_20260501_232013 规则类型：contract 触发关键词：保证无事故,赔偿,CHEJIN_20260501_232013 答案：此类问题必须让销售人工按检测报告和合同回复。；keywords: ['after_sales', 'policie', 'product', 'quote', 'shipping']",
+    "content_sha256": "9d848253d7f701f2f9fdbf19371408f92e8a7e44d1b5daf8a7c05748b9ce2d8f",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_c88d3dba0b527eebb4f8",
+    "conversation_id": "conv_8022f0948f611f15b4",
+    "raw_message_ids": [
+      "raw_msg_756e7793f831444613d9",
+      "raw_msg_a3fe6a6c4571b423fd92",
+      "raw_msg_5cd76726ab567c159d84"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_e9a7e5761cb31d84",
+        "source_id": "source_f856526078c13e27",
+        "score": 0.8835,
+        "category": "group",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.5458,
+          "semantic": 0.2877,
+          "vector": 0.14,
+          "vector_similarity": 0.8774,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.08,
+          "final": 0.8835
+        },
+        "text": "[2026-05-01 16:00:00] 销售A: 商品资料：江苏车金记录员完整车源 CHEJIN_20260501_232013\n商品名称：记录员测试别克GL8商务七座 CHEJIN_20260501_232013\n型号：REC-GL8-CHEJIN_20260501_232013\n商品类目：二手车/MPV\n价格：17.60万\n单位：台\n库存：1\n发货：南京门店可看车，商务客户试乘需人工确认\n售后：车况以检测报告为准\n[2026-05-01 16:01:00] 销售B: 政策规则：江苏车金记录员风控 CHEJI"
+      },
+      {
+        "chunk_id": "chunk_c30a17b45741f125",
+        "source_id": "source_6c42af6ef26e713d",
+        "score": 0.6414,
+        "category": "policies",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.3618,
+          "semantic": 0.2077,
+          "vector": 0.1368,
+          "vector_similarity": 0.7602,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.015,
+          "risk_penalty": 0.08,
+          "final": 0.6414
+        },
+        "text": "政策规则：江苏车金高意向转人工 CHEJIN_20260501_232013\n规则名称：试驾到店与订金转人工 CHEJIN_20260501_232013\n规则类型：manual_required\n触发关键词：试驾,到店,订金,定金,今天看车,明天看车,销售联系,企业微信群\n答案：客户明确要求试驾、到店、订金、销售联系时，AI只做确认和记录，必须转人工或企业微信群承接，不能自行承诺车源保留和最终价格。\n允许自动回复：false\n必须转人工：true\n提醒人工客服：true\n风险等级：high\n政策规则：江苏车金金融"
+      },
+      {
+        "chunk_id": "chunk_a7db78a913637434",
+        "source_id": "source_394a878d33feda9f",
+        "score": 0.5436,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2312,
+          "semantic": 0.151,
+          "vector": 0.1364,
+          "vector_similarity": 0.7578,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.025,
+          "risk_penalty": 0.0,
+          "final": 0.5436
+        },
+        "text": "3系,320Li,试驾,精品车况\n规格参数：2019年上牌，表显5.6万公里，2.0T自动挡，一手车源，支持到店试驾。\n价格：12.80万\n单位：台\n库存：1\n发货：高意向试驾需转人工确认门店和时间。\n售后：精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。\n商品资料：江苏车金二手车车源 CHEJIN_20260501_232013\n商品名称：2022款比亚迪秦PLUS DM-i 55KM CHEJIN_20260501_232013\n型号：CHEJIN-QINPLUS-CHEJIN_20260501_2"
+      },
+      {
+        "chunk_id": "chunk_8e316937658670ae",
+        "source_id": "source_394a878d33feda9f",
+        "score": 0.4978,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2579,
+          "semantic": 0.1626,
+          "vector": 0.1323,
+          "vector_similarity": 0.735,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.025,
+          "risk_penalty": 0.08,
+          "final": 0.4978
+        },
+        "text": "商品资料：江苏车金二手车车源 CHEJIN_20260501_232013\n商品名称：2021款丰田凯美瑞2.0G豪华版 CHEJIN_20260501_232013\n型号：CHEJIN-CAMRY-CHEJIN_20260501_232013\n商品类目：二手车/中级轿车\n别名关键词：凯美瑞,丰田凯美瑞,8万预算,自动挡,省油,通勤\n规格参数：2021年上牌，表显4.8万公里，2.0L自动挡，南京现车，一手车，支持第三方检测。\n价格：8.98万\n单位：台\n库存：1\n发货：南京门店可看车，异地客户需人工确认物流与提档"
+      }
+    ],
+    "original_type": "raw_wechat_group",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_05218faf812ed6ad2296",
+    "experience_id": "rag_exp_05218faf812ed6ad2296"
+  },
+  "detected_tags": [
+    "after_sales",
+    "policie",
+    "product",
+    "quote",
+    "rag_experience",
+    "shipping",
+    "wechat_group_chat"
+  ],
+  "proposal": {
+    "target_category": "policies",
+    "change_type": "upsert_policy",
+    "summary": "建议新增/更新政策规则：售后规则",
+    "suggested_fields": {
+      "title": "售后规则",
+      "policy_type": "after_sales",
+      "keywords": [
+        "after_sales",
+        "policie",
+        "product",
+        "quote",
+        "shipping"
+      ],
+      "answer": "政策规则：江苏车金记录员风控 CHEJIN_20260501_232013 规则名称：保证无事故转人工 CHEJIN_20260501_232013 规则类型：contract 触发关键词：保证无事故,赔偿,CHEJIN_20260501_232013 答案：此类问题必须让销售人工按检测报告和合同回复。",
+      "allow_auto_reply": false,
+      "requires_handoff": true,
+      "operator_alert": true,
+      "risk_level": "warning",
+      "additional_details": {
+        "原始资料摘录": "title: 售后规则；answer: 政策规则：江苏车金记录员风控 CHEJIN_20260501_232013 规则名称：保证无事故转人工 CHEJIN_20260501_232013 规则类型：contract 触发关键词：保证无事故,赔偿,CHEJIN_20260501_232013 答案：此类问题必须让销售人工按检测报告和合同回复。；keywords: ['after_sales', 'policie', 'product', 'quote', 'shipping']"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [
+      "包含高风险关键词：赔偿"
+    ],
+    "formal_patch": {
+      "target_category": "policies",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "policies",
+        "id": "item_2c4bf2a4852b",
+        "status": "active",
+        "source": {
+          "type": "raw_upload",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_c88d3dba0b527eebb4f8.txt",
+          "candidate_id": "raw_bc13307ef1e16310",
+          "rag_experience_id": "rag_exp_05218faf812ed6ad2296",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_group"
+        },
+        "data": {
+          "title": "售后规则",
+          "policy_type": "after_sales",
+          "keywords": [
+            "after_sales",
+            "policie",
+            "product",
+            "quote",
+            "shipping"
+          ],
+          "answer": "政策规则：江苏车金记录员风控 CHEJIN_20260501_232013 规则名称：保证无事故转人工 CHEJIN_20260501_232013 规则类型：contract 触发关键词：保证无事故,赔偿,CHEJIN_20260501_232013 答案：此类问题必须让销售人工按检测报告和合同回复。",
+          "allow_auto_reply": false,
+          "requires_handoff": true,
+          "operator_alert": true,
+          "risk_level": "warning",
+          "additional_details": {
+            "原始资料摘录": "title: 售后规则；answer: 政策规则：江苏车金记录员风控 CHEJIN_20260501_232013 规则名称：保证无事故转人工 CHEJIN_20260501_232013 规则类型：contract 触发关键词：保证无事故,赔偿,CHEJIN_20260501_232013 答案：此类问题必须让销售人工按检测报告和合同回复。；keywords: ['after_sales', 'policie', 'product', 'quote', 'shipping']"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": false,
+          "requires_handoff": true,
+          "risk_level": "warning"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [
+      "包含高风险关键词：赔偿"
+    ],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "pending",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "source_raw_batch_id": "raw_batch_c88d3dba0b527eebb4f8",
+    "source_raw_message_ids": [
+      "raw_msg_756e7793f831444613d9",
+      "raw_msg_a3fe6a6c4571b423fd92",
+      "raw_msg_5cd76726ab567c159d84"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_f856526078c13e27",
+      "chunk_count": 1,
+      "query": "建议新增/更新政策规则：售后规则\ntitle: 售后规则；answer: 政策规则：江苏车金记录员风控 CHEJIN_20260501_232013 规则名称：保证无事故转人工 CHEJIN_20260501_232013 规则类型：contract 触发关键词：保证无事故,赔偿,CHEJIN_20260501_232013 答案：此类问题必须让销售人工按检测报告和合同回复。；keywords: ['after_sales', 'policie', 'product', 'quote', 'shipping']\n售后规则\n政策规则：江苏车金记录员风控 CHEJIN_20260501_232013 规则名称：保证无事故转人工 CHEJIN_20260501_232013 规则类型：contract 触发关键词：保证无事故,赔偿,CHEJIN_20260501_232013 答案：此类问题必须让销售人工按检测报告和合同回复。",
+      "hits": [
+        {
+          "chunk_id": "chunk_e9a7e5761cb31d84",
+          "source_id": "source_f856526078c13e27",
+          "score": 0.8835,
+          "category": "group",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.5458,
+            "semantic": 0.2877,
+            "vector": 0.14,
+            "vector_similarity": 0.8774,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.08,
+            "final": 0.8835
+          },
+          "text": "[2026-05-01 16:00:00] 销售A: 商品资料：江苏车金记录员完整车源 CHEJIN_20260501_232013\n商品名称：记录员测试别克GL8商务七座 CHEJIN_20260501_232013\n型号：REC-GL8-CHEJIN_20260501_232013\n商品类目：二手车/MPV\n价格：17.60万\n单位：台\n库存：1\n发货：南京门店可看车，商务客户试乘需人工确认\n售后：车况以检测报告为准\n[2026-05-01 16:01:00] 销售B: 政策规则：江苏车金记录员风控 CHEJI"
+        },
+        {
+          "chunk_id": "chunk_c30a17b45741f125",
+          "source_id": "source_6c42af6ef26e713d",
+          "score": 0.6414,
+          "category": "policies",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.3618,
+            "semantic": 0.2077,
+            "vector": 0.1368,
+            "vector_similarity": 0.7602,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.015,
+            "risk_penalty": 0.08,
+            "final": 0.6414
+          },
+          "text": "政策规则：江苏车金高意向转人工 CHEJIN_20260501_232013\n规则名称：试驾到店与订金转人工 CHEJIN_20260501_232013\n规则类型：manual_required\n触发关键词：试驾,到店,订金,定金,今天看车,明天看车,销售联系,企业微信群\n答案：客户明确要求试驾、到店、订金、销售联系时，AI只做确认和记录，必须转人工或企业微信群承接，不能自行承诺车源保留和最终价格。\n允许自动回复：false\n必须转人工：true\n提醒人工客服：true\n风险等级：high\n政策规则：江苏车金金融"
+        },
+        {
+          "chunk_id": "chunk_a7db78a913637434",
+          "source_id": "source_394a878d33feda9f",
+          "score": 0.5436,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2312,
+            "semantic": 0.151,
+            "vector": 0.1364,
+            "vector_similarity": 0.7578,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.025,
+            "risk_penalty": 0.0,
+            "final": 0.5436
+          },
+          "text": "3系,320Li,试驾,精品车况\n规格参数：2019年上牌，表显5.6万公里，2.0T自动挡，一手车源，支持到店试驾。\n价格：12.80万\n单位：台\n库存：1\n发货：高意向试驾需转人工确认门店和时间。\n售后：精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。\n商品资料：江苏车金二手车车源 CHEJIN_20260501_232013\n商品名称：2022款比亚迪秦PLUS DM-i 55KM CHEJIN_20260501_232013\n型号：CHEJIN-QINPLUS-CHEJIN_20260501_2"
+        },
+        {
+          "chunk_id": "chunk_8e316937658670ae",
+          "source_id": "source_394a878d33feda9f",
+          "score": 0.4978,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2579,
+            "semantic": 0.1626,
+            "vector": 0.1323,
+            "vector_similarity": 0.735,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.025,
+            "risk_penalty": 0.08,
+            "final": 0.4978
+          },
+          "text": "商品资料：江苏车金二手车车源 CHEJIN_20260501_232013\n商品名称：2021款丰田凯美瑞2.0G豪华版 CHEJIN_20260501_232013\n型号：CHEJIN-CAMRY-CHEJIN_20260501_232013\n商品类目：二手车/中级轿车\n别名关键词：凯美瑞,丰田凯美瑞,8万预算,自动挡,省油,通勤\n规格参数：2021年上牌，表显4.8万公里，2.0L自动挡，南京现车，一手车，支持第三方检测。\n价格：8.98万\n单位：台\n库存：1\n发货：南京门店可看车，异地客户需人工确认物流与提档"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_05218faf812ed6ad2296",
+    "source_chain": [
+      "raw_wechat_group",
+      "rag_experience",
+      "review_candidate"
+    ]
+  },
+  "suggested_tests": [
+    {
+      "scenario": "after_sales",
+      "assertion": "入库后应能按关键词回答该政策；高风险内容必须转人工。"
+    }
+  ]
+}

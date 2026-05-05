@@ -1,0 +1,37 @@
+{
+  "title": "缺少关键信息时先补问",
+  "guideline_text": "客户提供的信息不完整时，AI客服应直接说明还缺哪些关键信息，并请客户补充；不要编造缺失资料。",
+  "keywords": [
+    "缺少信息",
+    "补充资料",
+    "不编造"
+  ],
+  "applies_to": "所有行业都可能遇到的通用 AI 客服场景",
+  "schema_version": 1,
+  "id": "shared_23d1898820124cbcff",
+  "item_id": "shared_23d1898820124cbcff",
+  "category_id": "reply_style",
+  "status": "active",
+  "content": "客户提供的信息不完整时，AI客服应直接说明还缺哪些关键信息，并请客户补充；不要编造缺失资料。",
+  "data": {
+    "title": "缺少关键信息时先补问",
+    "guideline_text": "客户提供的信息不完整时，AI客服应直接说明还缺哪些关键信息，并请客户补充；不要编造缺失资料。",
+    "keywords": [
+      "缺少信息",
+      "补充资料",
+      "不编造"
+    ],
+    "applies_to": "所有行业都可能遇到的通用 AI 客服场景"
+  },
+  "runtime": {},
+  "source": {
+    "type": "cloud_official_shared_library",
+    "item_id": "shared_23d1898820124cbcff",
+    "version": ""
+  },
+  "metadata": {
+    "knowledge_layer": "shared",
+    "cloud_item_id": "shared_23d1898820124cbcff",
+    "cloud_updated_at": "2026-05-02T20:07:56+00:00"
+  }
+}

@@ -1,0 +1,1681 @@
+{
+  "schema_version": 1,
+  "tenants": {
+    "default": {
+      "tenant_id": "default",
+      "display_name": "测试客户 test01（当前客户端数据）",
+      "status": "active",
+      "sync_enabled": true,
+      "metadata": {
+        "source": "local_current_client",
+        "account_username": "test01"
+      },
+      "created_at": "2026-04-30T16:23:32+00:00",
+      "updated_at": "2026-04-30T16:23:32+00:00"
+    }
+  },
+  "users": {
+    "customer_test01": {
+      "user_id": "customer_test01",
+      "username": "test01",
+      "display_name": "测试客户 test01",
+      "role": "customer",
+      "tenant_ids": [
+        "default"
+      ],
+      "resource_scopes": [
+        "*"
+      ],
+      "status": "active",
+      "email": "test01@example.local",
+      "password_hash": "pbkdf2_sha256$120000$3d524435e1d3b8501be726175bec5077$VsJNA30+p4+0P5MTpSIcfpw5kWXfjfIpjZTATq7jD2o=",
+      "created_at": "2026-04-30T16:23:32+00:00",
+      "updated_at": "2026-04-30T16:23:32+00:00"
+    }
+  },
+  "sessions": {
+    "vps_9IQP-NJu7FGZEt5WNxlDmlZ_SzZYMh-hqEzZN1N95S0": {
+      "session_id": "vps_9IQP-NJu7FGZEt5WNxlDmlZ_SzZYMh-hqEzZN1N95S0",
+      "user": {
+        "user_id": "platform-admin",
+        "role": "admin",
+        "tenant_ids": [
+          "*"
+        ],
+        "display_name": "Platform Admin",
+        "username": "admin",
+        "resource_scopes": [
+          "*"
+        ]
+      },
+      "active_tenant_id": "default",
+      "issued_at": "2026-04-30T16:23:32+00:00",
+      "expires_at": "2026-05-01T04:23:32+00:00",
+      "source": "vps",
+      "token": "vps_9IQP-NJu7FGZEt5WNxlDmlZ_SzZYMh-hqEzZN1N95S0"
+    }
+  },
+  "admin_credentials": {
+    "platform-admin": {
+      "user_id": "platform-admin",
+      "username": "admin",
+      "email": "admin@example.local",
+      "password_hash": "pbkdf2_sha256$120000$0dba96ac6d241fccb78ec4f8f3b4969b$qYae4JuIsUbeTHvltZ6ik9jEwJa3xOV43R/LjaL/gUU=",
+      "initialized_at": "2026-04-30T16:23:31+00:00",
+      "updated_at": "2026-04-30T16:23:31+00:00"
+    }
+  },
+  "auth_challenges": {},
+  "trusted_devices": {
+    "0b50d00c6b87db1d2c577e7ce2875bb0b688068097b09b715def6ea9ae098b84": {
+      "fingerprint": "0b50d00c6b87db1d2c577e7ce2875bb0b688068097b09b715def6ea9ae098b84",
+      "user_id": "platform-admin",
+      "device_name": "seed_vps_test_customer.py",
+      "ip_address": "testclient",
+      "trusted_until": "2026-05-30T16:23:32+00:00",
+      "created_at": "2026-04-30T16:23:32+00:00",
+      "last_seen_at": "2026-04-30T16:23:32+00:00"
+    }
+  },
+  "smtp_config": {
+    "server": "",
+    "port": 465,
+    "use_ssl": true,
+    "use_tls": false,
+    "username": "",
+    "password": "",
+    "from_email": "admin@example.local",
+    "sender_name": "OmniAuto",
+    "otp_required": true,
+    "code_length": 4,
+    "ttl_minutes": 15,
+    "resend_seconds": 60,
+    "trusted_device_days": 30,
+    "initialized_at": "2026-04-30T16:23:31+00:00",
+    "updated_at": "2026-04-30T16:23:31+00:00"
+  },
+  "local_nodes": {},
+  "commands": {},
+  "command_results": [],
+  "shared_proposals": {},
+  "shared_library": {},
+  "shared_patches": {},
+  "backup_requests": {
+    "backup_2rGq7Z5Wr7Wo": {
+      "request_id": "backup_2rGq7Z5Wr7Wo",
+      "scope": "all",
+      "tenant_id": "default",
+      "node_id": "",
+      "command_id": "",
+      "status": "succeeded",
+      "mode": "local_immediate",
+      "backup_id": "backup_d2d99489102ab80f64d7",
+      "package_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\vps_admin\\backups\\backup_d2d99489102ab80f64d7.zip",
+      "bytes": 78895,
+      "created_by": "platform-admin",
+      "created_at": "2026-04-30T16:23:32+00:00"
+    }
+  },
+  "restore_requests": {},
+  "customer_data_packages": {
+    "data_pkg_test01_backup_0a37c3856d4f77cbbdc7": {
+      "package_id": "data_pkg_test01_backup_0a37c3856d4f77cbbdc7",
+      "account_username": "test01",
+      "tenant_id": "default",
+      "scope": "tenant",
+      "backup_id": "backup_0a37c3856d4f77cbbdc7",
+      "package_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\vps_admin\\customer_packages\\backup_0a37c3856d4f77cbbdc7.zip",
+      "bytes": 76242,
+      "summary": {
+        "tenant_id": "default",
+        "root": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\default",
+        "exists": true,
+        "files": {
+          "root": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\default",
+          "exists": true,
+          "file_count": 109,
+          "json_file_count": 77,
+          "bytes": 132503
+        },
+        "formal_knowledge": {
+          "root": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\default\\knowledge_bases",
+          "exists": true,
+          "category_count": 4,
+          "item_count": 59,
+          "categories": [
+            {
+              "category_id": "products",
+              "name": "商品资料",
+              "kind": "builtin",
+              "item_count": 9
+            },
+            {
+              "category_id": "chats",
+              "name": "聊天记录与话术",
+              "kind": "builtin",
+              "item_count": 13
+            },
+            {
+              "category_id": "policies",
+              "name": "政策规则",
+              "kind": "builtin",
+              "item_count": 37
+            },
+            {
+              "category_id": "erp_exports",
+              "name": "ERP 导出",
+              "kind": "builtin",
+              "item_count": 0
+            }
+          ],
+          "files": {
+            "root": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\default\\knowledge_bases",
+            "exists": true,
+            "file_count": 73,
+            "json_file_count": 68,
+            "bytes": 92635
+          }
+        },
+        "product_item_knowledge": {
+          "root": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\default\\product_item_knowledge",
+          "product_count": 9,
+          "file_count": 29
+        },
+        "rag": {
+          "sources": {
+            "root": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\default\\rag_sources",
+            "exists": true,
+            "file_count": 1,
+            "json_file_count": 1,
+            "bytes": 2
+          },
+          "chunks": {
+            "root": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\default\\rag_chunks",
+            "exists": true,
+            "file_count": 3,
+            "json_file_count": 3,
+            "bytes": 4473
+          },
+          "index": {
+            "root": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\default\\rag_index",
+            "exists": true,
+            "file_count": 1,
+            "json_file_count": 1,
+            "bytes": 24179
+          }
+        }
+      },
+      "manifest": {
+        "schema_version": 1,
+        "backup_id": "backup_0a37c3856d4f77cbbdc7",
+        "scope": "tenant",
+        "tenant_id": "default",
+        "created_at": "2026-05-01T00:23:32",
+        "include_derived": false,
+        "include_runtime": false,
+        "file_count": 105,
+        "files": [
+          {
+            "path": "payload/tenants/default/knowledge_bases/chats/items/.gitkeep",
+            "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+            "bytes": 1
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/chats/items/chat_after_sales_worry.json",
+            "sha256": "87664fc9687b41bb51e2390ad813baee1a55ea9f2017bc46cfdf8356db9dee0e",
+            "bytes": 1671
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/chats/items/chat_lowest_price_request.json",
+            "sha256": "9e82e720f3cf113287ef732f0e57dc2349796e8dedbcade92cd7034dc2a30097",
+            "bytes": 1681
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/chats/items/chat_outdoor_stall_power.json",
+            "sha256": "66deb9c9cf62a38fd8cdf348868e451c24c4cc111f3ba561c8926cec0b47aaea",
+            "bytes": 1813
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/chats/items/chat_style_guidelines.json",
+            "sha256": "04870fc9cf748110d7d4b2cf660555bf1c8e2d44fa5f4b4863afca994e9dd67b",
+            "bytes": 1885
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/chats/items/data_missing.json",
+            "sha256": "b49d8e76a5b8243b39dec796f07927894224a545191f607506c918a1a2f7c802",
+            "bytes": 784
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/chats/items/discount_handoff.json",
+            "sha256": "1c6e8020e84de5af01d3821f530b928fac669aaa205c53f5e7442f16f5bf3380",
+            "bytes": 820
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/chats/items/over_boundary_handoff.json",
+            "sha256": "1ac6d95d7f1aeceba592e3fc7bbb69130c207c4f2d17325b82dc56ca042b720d",
+            "bytes": 812
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/chats/items/qa-credit-term.json",
+            "sha256": "c745adce85feae1fd19afb0d900fd3599f77e885b08d874c11980f64519f23b5",
+            "bytes": 1621
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/chats/items/qa-shipping-tomorrow.json",
+            "sha256": "478cbeffa8adc474e3b8d2ec399e4ec3bd47ad96bc671768bc4864c89cfc4f88",
+            "bytes": 1673
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/chats/items/quote_detail_request.json",
+            "sha256": "afe779084feb42bea4bf16d6c0d63c92023278af8728e94e9727d23c7bf87723",
+            "bytes": 802
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/chats/items/scene_product_association.json",
+            "sha256": "893e96804e79da9a5f0fb0bf00d6dbdbdc60cc4da9a264366dc88d22818b1bff",
+            "bytes": 866
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/chats/items/small_talk_service_pivot.json",
+            "sha256": "4d89fd3c55e3b55af8ddb0280c4529aaea04d3cb6a73cd6bd3f7405c651f3bcc",
+            "bytes": 862
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/chats/items/unknown_handoff.json",
+            "sha256": "4a1523cf8290738a9bdf2473c3bc09c29c5e8675dd5bdb5adcfcca0131339411",
+            "bytes": 812
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/chats/resolver.json",
+            "sha256": "18daae72f9dadb07831d1e838615f59727811befc188014a50a1c74b889654ca",
+            "bytes": 436
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/chats/schema.json",
+            "sha256": "6b817ece1b20ae7d3dddfbaaea6c1ab2ec6a9ab5d060f18bf67e933f6ff85dbb",
+            "bytes": 1412
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/custom/.gitkeep",
+            "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+            "bytes": 1
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/erp_exports/items/.gitkeep",
+            "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+            "bytes": 1
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/erp_exports/resolver.json",
+            "sha256": "85b595f35bee4bb1a650457c1f79e6d803afebc1d370f191f2cc648ecb84ec0c",
+            "bytes": 380
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/erp_exports/schema.json",
+            "sha256": "28608ce42dc5ce6e006480b0c125960383d578fb7ffefb31ad1f5b7d6a7cebce",
+            "bytes": 1271
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/.gitkeep",
+            "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+            "bytes": 1
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/after-sales-ap88-noise.json",
+            "sha256": "e480371d2c870d69b7ae0486f5ebcec1b24efa1d0df2bda26bf0b89c7b8bd56b",
+            "bytes": 2062
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/after-sales-mt160-compensation.json",
+            "sha256": "2f7c7272534dfecd2f32558d9cc7193b9bc06c4033b4d044df8d7494eda5f4be",
+            "bytes": 2079
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/after_sales.json",
+            "sha256": "1289464419dc6bde4107ab31cc78c875b488428ed59863e388a28b73f70b0600",
+            "bytes": 1097
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/after_sales_policy_details.json",
+            "sha256": "19b82b45062af521ce68cbcfdf3a7fd2e76a144f7d2ddd96cb0ba17ff2b3ed49",
+            "bytes": 1266
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/air-purifier-effect.json",
+            "sha256": "afc7511a7c99174a4a20aa01408727f426af383f6b5416d2ec769b1677396d7f",
+            "bytes": 1628
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/bank_account.json",
+            "sha256": "fa3552c5ba5e7de2a1a84bace12410dfdf66e384b2f066da04e9b890fd812725",
+            "bytes": 1049
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/bulk-purchase.json",
+            "sha256": "70d6147c09dd0c0f943c70bca71c5b30d34cd25fec12ae67b7fa64cf8c311806",
+            "bytes": 1555
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/company_profile.json",
+            "sha256": "dddd22fa7061206986706a6aacc36c0237d38686b0d4f9a4a8afddcee9ff92fa",
+            "bytes": 1276
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/company_profile_details.json",
+            "sha256": "49671076b99ee5b5fff66395b02dc103501142c66a4875ef3b5d0730d5ea0d4c",
+            "bytes": 1597
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/company_qualification.json",
+            "sha256": "bc4dc835ec354ee4b43605306cb76ed880eff769aa403bf0cdd7b2353cbdc231",
+            "bytes": 1090
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/contract-batch.json",
+            "sha256": "79656e9a95115237d59154c0dc655c4a5ab318e17afb3bc28a3820246d77f7b4",
+            "bytes": 1253
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/contract-process.json",
+            "sha256": "57af3f8d52c5aca3285275071816aedf74724834e0e2d65a219b2b72b90a6d7d",
+            "bytes": 1487
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/contract.json",
+            "sha256": "31831fa1a37ef5464db2655c308396660d4dd1e6e92837e932f4e5139cc174c7",
+            "bytes": 1047
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/credit-term-policy.json",
+            "sha256": "c4dd3187ab130cfbbaa250bb63928640230107e57adcab6036d72f4948aa3731",
+            "bytes": 1529
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/discount_general.json",
+            "sha256": "1dc4386b2fbe8252c40bb91903203c220b74c5c5676fd06466bffc395597635e",
+            "bytes": 1055
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/door-lock-installation.json",
+            "sha256": "0165aeb0f145c5531d91bc859f8d4519f063f43fc2d7dd2beecdd42097923935",
+            "bytes": 1752
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/free_shipping_promo_2026_spring.json",
+            "sha256": "da15063b9fe059a1baf2853e9ef0c3d10c8e3744daf96f5f00e22ed8ab358d7f",
+            "bytes": 1382
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/installation.json",
+            "sha256": "3c68d9292939d2131875773bc86343e175efbab6e4d618d3756a60d54e81dc1a",
+            "bytes": 1017
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/invoice.json",
+            "sha256": "3f0c667dd714a6bf519b1e6f63659e33e7c75d22a6b7998df5af8a14d0bcc658",
+            "bytes": 1112
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/invoice_policy_details.json",
+            "sha256": "c94c4a0d4838912a0cd1a002cee27b80f841f654c6314ffb564a824c4c85259c",
+            "bytes": 1333
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/item_2712d3045ad2.json",
+            "sha256": "0a0a5a53fd3449e5400909c0e4534f65a65d410cdcc030db2f98b70958d4ff69",
+            "bytes": 2586
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/logistics.json",
+            "sha256": "d6a069e9a372ba06b876f27122921b525f7da45c528939dc9de213861ed5e059",
+            "bytes": 1236
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/logistics_policy_details.json",
+            "sha256": "8a22aa21ede61140531d6930847322031df62f6c929b020c99d1ffbdd697b80a",
+            "bytes": 1291
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/manual_handoff_reply.json",
+            "sha256": "136a092c228bf5d7ef8f0188667e4ba504acabdc6fd3acf9295c13ed9080cd67",
+            "bytes": 1917
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/manual_required.json",
+            "sha256": "fe41b852aea0939792f9eba088b6a5a6326065a210624a64fbc417a289143393",
+            "bytes": 1240
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/payment.json",
+            "sha256": "8132cbbf153b2b0c126b4139474a57cafeb91b83e60e6318af9e4b6fd0ee9573",
+            "bytes": 1123
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/payment_policy_details.json",
+            "sha256": "850dab478370c0cd8f1a77439f193764578bd9863b01e40d1d620a3b0dd5049e",
+            "bytes": 1168
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/public_account_payment_rule.json",
+            "sha256": "ead858fd4270055c771f3a197103ccecc8be7bfc1203c76c60cd515b87c16b61",
+            "bytes": 1599
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/remote_area_shipping_rule.json",
+            "sha256": "fe4140e75b07705a3635dd8114af73b5f43d0507e17e2c5194758b3b27afb2b6",
+            "bytes": 1739
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/sample-deduct-policy.json",
+            "sha256": "dcb4da1346ee47adb2b02a61401bd1a7022eb9945a421ce5b8cc92a8c71f8cc7",
+            "bytes": 1451
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/sample-policy-large.json",
+            "sha256": "af8fc8f4feb7d717f52d7fce699ef547f94fd106b1c2a03a7dfa427b4da201ab",
+            "bytes": 1448
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/sample-policy-standard.json",
+            "sha256": "d32927ea1b87e7630d4e25497aaba0fe9dfa71682b421d9019134caaae08c497",
+            "bytes": 1327
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/sample.json",
+            "sha256": "5974fc91b43d757e25740fd96075e56c7d7d8b010b171f508da6e4fd36640cde",
+            "bytes": 1005
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/selection_help.json",
+            "sha256": "52f7372e992e3cbba1775c06bac242200ccdfbf8a98f4b62dad638227692f935",
+            "bytes": 1352
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/service_reliability.json",
+            "sha256": "74f9aa3dade7fcf0d03e2b5a0569d52e69bba5b84bc9b4737d1f677dc2694746",
+            "bytes": 1215
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/special_invoice_rule.json",
+            "sha256": "c21ab74701a903063df69663b6257ecf0f5fef45336582f7afaf9527fce7a392",
+            "bytes": 1782
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/ultra_low_price_request_rule.json",
+            "sha256": "ebae9c4b3d9e9e53e68200f2dfc7544df35c861dcbd93b28e3215195aed266f8",
+            "bytes": 1770
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/resolver.json",
+            "sha256": "37f803ee3914506aace81da05c5f78701c6c7c42ab83510d43523b408d05dd56",
+            "bytes": 490
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/schema.json",
+            "sha256": "919f338fca8295d2bf5e0d739c4e71faa376d1ee599685f68abeeab32825ee99",
+            "bytes": 1945
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/products/items/.gitkeep",
+            "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+            "bytes": 1
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/products/items/ap-88.json",
+            "sha256": "79c76c8801f407ded91ef55e2d8be65f508dea4eb286ffc3da4d31ca8d91309c",
+            "bytes": 1715
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/products/items/commercial_fridge_bx_200.json",
+            "sha256": "15278818daefa2326a11a6b921d232f0ec8fd573a3ba3fbc77004f4e10c7a025",
+            "bytes": 1725
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/products/items/fl-920.json",
+            "sha256": "d559c9410da1e0c768b2b0b29eeb662738981367369a141a35d2913e6c6017f4",
+            "bytes": 1697
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/products/items/office_chair_oc_300.json",
+            "sha256": "2a6d824ccf0c52e7d060ee5506f8d0e3de9361336afc8dfb29e16b844632812a",
+            "bytes": 1667
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/products/items/packing_carton_ct_50.json",
+            "sha256": "3f6b65841790883392c25bbfb8decb7dbe437507e0542c6661b4033d2dd627fa",
+            "bytes": 1668
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/products/items/test_cargo.json",
+            "sha256": "d1c734e3c009c5204a8a9d30a6f67e953c0fc6fd7681ddb00deaefe0d5f66786",
+            "bytes": 908
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/products/items/test_product_standard.json",
+            "sha256": "26725afc4088c297f4cd2fdf5229a5d9fc1d78b1823b5c15ec471ba0e4bb5a67",
+            "bytes": 1387
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/products/items/water_filter_core.json",
+            "sha256": "690613085265fe1bb6378a913961136537bb7e94f01737d4709feafd20d4860f",
+            "bytes": 1674
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/products/items/wooden-rocking-chair.json",
+            "sha256": "4fe9f7ed7561fb7823777e4af5b278b305274b57cfdf0f57b79393e1b68eb944",
+            "bytes": 1155
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/products/resolver.json",
+            "sha256": "cdd911588311fa55a89728a56ee3a57b935ab0e5bc4a259528d1e893040c15aa",
+            "bytes": 536
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/products/schema.json",
+            "sha256": "425d68a7f05099cce3a8b6a1d894b2c4b7c3ed7a52dc8a03ae7f4c27f381f4eb",
+            "bytes": 2269
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/registry.json",
+            "sha256": "4f1cd45e1983a7551568962294aa5d9caff2e53e3aa8f3a4948146497ec688c6",
+            "bytes": 1278
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/ap-88/explanations/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/ap-88/faq/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/ap-88/rules/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/ap-88/rules/after-sales-ap88-noise.json",
+            "sha256": "e9a53c56b2da45d213d05fadafa03ec228f9006fbc885b44fbd70700bf11e153",
+            "bytes": 2002
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/commercial_fridge_bx_200/explanations/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/commercial_fridge_bx_200/faq/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/commercial_fridge_bx_200/rules/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/fl-920/explanations/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/fl-920/faq/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/fl-920/rules/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/fl-920/rules/door-lock-installation.json",
+            "sha256": "775e54ff9fcd61e176fc860614b7a998490c784a342ef699db94a055d58c1674",
+            "bytes": 1693
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/office_chair_oc_300/explanations/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/office_chair_oc_300/faq/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/office_chair_oc_300/rules/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/packing_carton_ct_50/explanations/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/packing_carton_ct_50/faq/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/packing_carton_ct_50/rules/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/test_cargo/explanations/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/test_cargo/faq/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/test_cargo/rules/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/test_product_standard/explanations/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/test_product_standard/faq/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/test_product_standard/rules/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/water_filter_core/explanations/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/water_filter_core/faq/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/water_filter_core/rules/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/wooden-rocking-chair/explanations/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/wooden-rocking-chair/faq/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/wooden-rocking-chair/rules/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/rag_experience/experiences.json",
+            "sha256": "7031c4adde7e295d896459afa07d15e4b1ca1ad28b2be0bd2d88ef4913943de7",
+            "bytes": 7222
+          },
+          {
+            "path": "payload/tenants/default/rag_sources/sources.json",
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/tenant.json",
+            "sha256": "be1dabf7dd0bb6fb9e4ede96c4c955eae8a75ed352d0dd47bf970958e40df987",
+            "bytes": 243
+          }
+        ]
+      },
+      "created_by": "platform-admin",
+      "created_at": "2026-04-30T16:23:32+00:00"
+    },
+    "data_pkg_backup_d2d99489102ab80f64d7": {
+      "package_id": "data_pkg_backup_d2d99489102ab80f64d7",
+      "account_username": "",
+      "tenant_id": "default",
+      "scope": "all",
+      "backup_id": "backup_d2d99489102ab80f64d7",
+      "package_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\vps_admin\\backups\\backup_d2d99489102ab80f64d7.zip",
+      "bytes": 78895,
+      "summary": {
+        "tenant_id": "default",
+        "root": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\default",
+        "exists": true,
+        "files": {
+          "root": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\default",
+          "exists": true,
+          "file_count": 109,
+          "json_file_count": 77,
+          "bytes": 132503
+        },
+        "formal_knowledge": {
+          "root": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\default\\knowledge_bases",
+          "exists": true,
+          "category_count": 4,
+          "item_count": 59,
+          "categories": [
+            {
+              "category_id": "products",
+              "name": "商品资料",
+              "kind": "builtin",
+              "item_count": 9
+            },
+            {
+              "category_id": "chats",
+              "name": "聊天记录与话术",
+              "kind": "builtin",
+              "item_count": 13
+            },
+            {
+              "category_id": "policies",
+              "name": "政策规则",
+              "kind": "builtin",
+              "item_count": 37
+            },
+            {
+              "category_id": "erp_exports",
+              "name": "ERP 导出",
+              "kind": "builtin",
+              "item_count": 0
+            }
+          ],
+          "files": {
+            "root": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\default\\knowledge_bases",
+            "exists": true,
+            "file_count": 73,
+            "json_file_count": 68,
+            "bytes": 92635
+          }
+        },
+        "product_item_knowledge": {
+          "root": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\default\\product_item_knowledge",
+          "product_count": 9,
+          "file_count": 29
+        },
+        "rag": {
+          "sources": {
+            "root": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\default\\rag_sources",
+            "exists": true,
+            "file_count": 1,
+            "json_file_count": 1,
+            "bytes": 2
+          },
+          "chunks": {
+            "root": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\default\\rag_chunks",
+            "exists": true,
+            "file_count": 3,
+            "json_file_count": 3,
+            "bytes": 4473
+          },
+          "index": {
+            "root": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\default\\rag_index",
+            "exists": true,
+            "file_count": 1,
+            "json_file_count": 1,
+            "bytes": 24179
+          }
+        }
+      },
+      "manifest": {
+        "schema_version": 1,
+        "backup_id": "backup_d2d99489102ab80f64d7",
+        "scope": "all",
+        "tenant_id": "default",
+        "created_at": "2026-05-01T00:23:32",
+        "include_derived": false,
+        "include_runtime": false,
+        "file_count": 109,
+        "files": [
+          {
+            "path": "payload/shared_knowledge/global_guidelines/items/customer_service_style_guidelines.json",
+            "sha256": "9bc2bee20cbf4d7a5b0b789c9d9d53b07f31a533d0e8e5c00c130f5607e8895a",
+            "bytes": 1231
+          },
+          {
+            "path": "payload/shared_knowledge/global_guidelines/resolver.json",
+            "sha256": "8edd16054ff5f8f53fbeb4e9e2063d54bba7927937a9a3b73337a4ea177c8b22",
+            "bytes": 457
+          },
+          {
+            "path": "payload/shared_knowledge/global_guidelines/schema.json",
+            "sha256": "8e4aecbf45f02dcb165d46911a032c759454abb5beada4821fc2ee3c27b49a5c",
+            "bytes": 1531
+          },
+          {
+            "path": "payload/shared_knowledge/registry.json",
+            "sha256": "5bd6f89ac3e300e79b4a5e451b64712ce4c7e2f43546484dfca74c2c4d9db119",
+            "bytes": 469
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/chats/items/.gitkeep",
+            "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+            "bytes": 1
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/chats/items/chat_after_sales_worry.json",
+            "sha256": "87664fc9687b41bb51e2390ad813baee1a55ea9f2017bc46cfdf8356db9dee0e",
+            "bytes": 1671
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/chats/items/chat_lowest_price_request.json",
+            "sha256": "9e82e720f3cf113287ef732f0e57dc2349796e8dedbcade92cd7034dc2a30097",
+            "bytes": 1681
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/chats/items/chat_outdoor_stall_power.json",
+            "sha256": "66deb9c9cf62a38fd8cdf348868e451c24c4cc111f3ba561c8926cec0b47aaea",
+            "bytes": 1813
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/chats/items/chat_style_guidelines.json",
+            "sha256": "04870fc9cf748110d7d4b2cf660555bf1c8e2d44fa5f4b4863afca994e9dd67b",
+            "bytes": 1885
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/chats/items/data_missing.json",
+            "sha256": "b49d8e76a5b8243b39dec796f07927894224a545191f607506c918a1a2f7c802",
+            "bytes": 784
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/chats/items/discount_handoff.json",
+            "sha256": "1c6e8020e84de5af01d3821f530b928fac669aaa205c53f5e7442f16f5bf3380",
+            "bytes": 820
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/chats/items/over_boundary_handoff.json",
+            "sha256": "1ac6d95d7f1aeceba592e3fc7bbb69130c207c4f2d17325b82dc56ca042b720d",
+            "bytes": 812
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/chats/items/qa-credit-term.json",
+            "sha256": "c745adce85feae1fd19afb0d900fd3599f77e885b08d874c11980f64519f23b5",
+            "bytes": 1621
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/chats/items/qa-shipping-tomorrow.json",
+            "sha256": "478cbeffa8adc474e3b8d2ec399e4ec3bd47ad96bc671768bc4864c89cfc4f88",
+            "bytes": 1673
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/chats/items/quote_detail_request.json",
+            "sha256": "afe779084feb42bea4bf16d6c0d63c92023278af8728e94e9727d23c7bf87723",
+            "bytes": 802
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/chats/items/scene_product_association.json",
+            "sha256": "893e96804e79da9a5f0fb0bf00d6dbdbdc60cc4da9a264366dc88d22818b1bff",
+            "bytes": 866
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/chats/items/small_talk_service_pivot.json",
+            "sha256": "4d89fd3c55e3b55af8ddb0280c4529aaea04d3cb6a73cd6bd3f7405c651f3bcc",
+            "bytes": 862
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/chats/items/unknown_handoff.json",
+            "sha256": "4a1523cf8290738a9bdf2473c3bc09c29c5e8675dd5bdb5adcfcca0131339411",
+            "bytes": 812
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/chats/resolver.json",
+            "sha256": "18daae72f9dadb07831d1e838615f59727811befc188014a50a1c74b889654ca",
+            "bytes": 436
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/chats/schema.json",
+            "sha256": "6b817ece1b20ae7d3dddfbaaea6c1ab2ec6a9ab5d060f18bf67e933f6ff85dbb",
+            "bytes": 1412
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/custom/.gitkeep",
+            "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+            "bytes": 1
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/erp_exports/items/.gitkeep",
+            "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+            "bytes": 1
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/erp_exports/resolver.json",
+            "sha256": "85b595f35bee4bb1a650457c1f79e6d803afebc1d370f191f2cc648ecb84ec0c",
+            "bytes": 380
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/erp_exports/schema.json",
+            "sha256": "28608ce42dc5ce6e006480b0c125960383d578fb7ffefb31ad1f5b7d6a7cebce",
+            "bytes": 1271
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/.gitkeep",
+            "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+            "bytes": 1
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/after-sales-ap88-noise.json",
+            "sha256": "e480371d2c870d69b7ae0486f5ebcec1b24efa1d0df2bda26bf0b89c7b8bd56b",
+            "bytes": 2062
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/after-sales-mt160-compensation.json",
+            "sha256": "2f7c7272534dfecd2f32558d9cc7193b9bc06c4033b4d044df8d7494eda5f4be",
+            "bytes": 2079
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/after_sales.json",
+            "sha256": "1289464419dc6bde4107ab31cc78c875b488428ed59863e388a28b73f70b0600",
+            "bytes": 1097
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/after_sales_policy_details.json",
+            "sha256": "19b82b45062af521ce68cbcfdf3a7fd2e76a144f7d2ddd96cb0ba17ff2b3ed49",
+            "bytes": 1266
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/air-purifier-effect.json",
+            "sha256": "afc7511a7c99174a4a20aa01408727f426af383f6b5416d2ec769b1677396d7f",
+            "bytes": 1628
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/bank_account.json",
+            "sha256": "fa3552c5ba5e7de2a1a84bace12410dfdf66e384b2f066da04e9b890fd812725",
+            "bytes": 1049
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/bulk-purchase.json",
+            "sha256": "70d6147c09dd0c0f943c70bca71c5b30d34cd25fec12ae67b7fa64cf8c311806",
+            "bytes": 1555
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/company_profile.json",
+            "sha256": "dddd22fa7061206986706a6aacc36c0237d38686b0d4f9a4a8afddcee9ff92fa",
+            "bytes": 1276
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/company_profile_details.json",
+            "sha256": "49671076b99ee5b5fff66395b02dc103501142c66a4875ef3b5d0730d5ea0d4c",
+            "bytes": 1597
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/company_qualification.json",
+            "sha256": "bc4dc835ec354ee4b43605306cb76ed880eff769aa403bf0cdd7b2353cbdc231",
+            "bytes": 1090
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/contract-batch.json",
+            "sha256": "79656e9a95115237d59154c0dc655c4a5ab318e17afb3bc28a3820246d77f7b4",
+            "bytes": 1253
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/contract-process.json",
+            "sha256": "57af3f8d52c5aca3285275071816aedf74724834e0e2d65a219b2b72b90a6d7d",
+            "bytes": 1487
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/contract.json",
+            "sha256": "31831fa1a37ef5464db2655c308396660d4dd1e6e92837e932f4e5139cc174c7",
+            "bytes": 1047
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/credit-term-policy.json",
+            "sha256": "c4dd3187ab130cfbbaa250bb63928640230107e57adcab6036d72f4948aa3731",
+            "bytes": 1529
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/discount_general.json",
+            "sha256": "1dc4386b2fbe8252c40bb91903203c220b74c5c5676fd06466bffc395597635e",
+            "bytes": 1055
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/door-lock-installation.json",
+            "sha256": "0165aeb0f145c5531d91bc859f8d4519f063f43fc2d7dd2beecdd42097923935",
+            "bytes": 1752
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/free_shipping_promo_2026_spring.json",
+            "sha256": "da15063b9fe059a1baf2853e9ef0c3d10c8e3744daf96f5f00e22ed8ab358d7f",
+            "bytes": 1382
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/installation.json",
+            "sha256": "3c68d9292939d2131875773bc86343e175efbab6e4d618d3756a60d54e81dc1a",
+            "bytes": 1017
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/invoice.json",
+            "sha256": "3f0c667dd714a6bf519b1e6f63659e33e7c75d22a6b7998df5af8a14d0bcc658",
+            "bytes": 1112
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/invoice_policy_details.json",
+            "sha256": "c94c4a0d4838912a0cd1a002cee27b80f841f654c6314ffb564a824c4c85259c",
+            "bytes": 1333
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/item_2712d3045ad2.json",
+            "sha256": "0a0a5a53fd3449e5400909c0e4534f65a65d410cdcc030db2f98b70958d4ff69",
+            "bytes": 2586
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/logistics.json",
+            "sha256": "d6a069e9a372ba06b876f27122921b525f7da45c528939dc9de213861ed5e059",
+            "bytes": 1236
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/logistics_policy_details.json",
+            "sha256": "8a22aa21ede61140531d6930847322031df62f6c929b020c99d1ffbdd697b80a",
+            "bytes": 1291
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/manual_handoff_reply.json",
+            "sha256": "136a092c228bf5d7ef8f0188667e4ba504acabdc6fd3acf9295c13ed9080cd67",
+            "bytes": 1917
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/manual_required.json",
+            "sha256": "fe41b852aea0939792f9eba088b6a5a6326065a210624a64fbc417a289143393",
+            "bytes": 1240
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/payment.json",
+            "sha256": "8132cbbf153b2b0c126b4139474a57cafeb91b83e60e6318af9e4b6fd0ee9573",
+            "bytes": 1123
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/payment_policy_details.json",
+            "sha256": "850dab478370c0cd8f1a77439f193764578bd9863b01e40d1d620a3b0dd5049e",
+            "bytes": 1168
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/public_account_payment_rule.json",
+            "sha256": "ead858fd4270055c771f3a197103ccecc8be7bfc1203c76c60cd515b87c16b61",
+            "bytes": 1599
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/remote_area_shipping_rule.json",
+            "sha256": "fe4140e75b07705a3635dd8114af73b5f43d0507e17e2c5194758b3b27afb2b6",
+            "bytes": 1739
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/sample-deduct-policy.json",
+            "sha256": "dcb4da1346ee47adb2b02a61401bd1a7022eb9945a421ce5b8cc92a8c71f8cc7",
+            "bytes": 1451
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/sample-policy-large.json",
+            "sha256": "af8fc8f4feb7d717f52d7fce699ef547f94fd106b1c2a03a7dfa427b4da201ab",
+            "bytes": 1448
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/sample-policy-standard.json",
+            "sha256": "d32927ea1b87e7630d4e25497aaba0fe9dfa71682b421d9019134caaae08c497",
+            "bytes": 1327
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/sample.json",
+            "sha256": "5974fc91b43d757e25740fd96075e56c7d7d8b010b171f508da6e4fd36640cde",
+            "bytes": 1005
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/selection_help.json",
+            "sha256": "52f7372e992e3cbba1775c06bac242200ccdfbf8a98f4b62dad638227692f935",
+            "bytes": 1352
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/service_reliability.json",
+            "sha256": "74f9aa3dade7fcf0d03e2b5a0569d52e69bba5b84bc9b4737d1f677dc2694746",
+            "bytes": 1215
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/special_invoice_rule.json",
+            "sha256": "c21ab74701a903063df69663b6257ecf0f5fef45336582f7afaf9527fce7a392",
+            "bytes": 1782
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/items/ultra_low_price_request_rule.json",
+            "sha256": "ebae9c4b3d9e9e53e68200f2dfc7544df35c861dcbd93b28e3215195aed266f8",
+            "bytes": 1770
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/resolver.json",
+            "sha256": "37f803ee3914506aace81da05c5f78701c6c7c42ab83510d43523b408d05dd56",
+            "bytes": 490
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/policies/schema.json",
+            "sha256": "919f338fca8295d2bf5e0d739c4e71faa376d1ee599685f68abeeab32825ee99",
+            "bytes": 1945
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/products/items/.gitkeep",
+            "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+            "bytes": 1
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/products/items/ap-88.json",
+            "sha256": "79c76c8801f407ded91ef55e2d8be65f508dea4eb286ffc3da4d31ca8d91309c",
+            "bytes": 1715
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/products/items/commercial_fridge_bx_200.json",
+            "sha256": "15278818daefa2326a11a6b921d232f0ec8fd573a3ba3fbc77004f4e10c7a025",
+            "bytes": 1725
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/products/items/fl-920.json",
+            "sha256": "d559c9410da1e0c768b2b0b29eeb662738981367369a141a35d2913e6c6017f4",
+            "bytes": 1697
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/products/items/office_chair_oc_300.json",
+            "sha256": "2a6d824ccf0c52e7d060ee5506f8d0e3de9361336afc8dfb29e16b844632812a",
+            "bytes": 1667
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/products/items/packing_carton_ct_50.json",
+            "sha256": "3f6b65841790883392c25bbfb8decb7dbe437507e0542c6661b4033d2dd627fa",
+            "bytes": 1668
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/products/items/test_cargo.json",
+            "sha256": "d1c734e3c009c5204a8a9d30a6f67e953c0fc6fd7681ddb00deaefe0d5f66786",
+            "bytes": 908
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/products/items/test_product_standard.json",
+            "sha256": "26725afc4088c297f4cd2fdf5229a5d9fc1d78b1823b5c15ec471ba0e4bb5a67",
+            "bytes": 1387
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/products/items/water_filter_core.json",
+            "sha256": "690613085265fe1bb6378a913961136537bb7e94f01737d4709feafd20d4860f",
+            "bytes": 1674
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/products/items/wooden-rocking-chair.json",
+            "sha256": "4fe9f7ed7561fb7823777e4af5b278b305274b57cfdf0f57b79393e1b68eb944",
+            "bytes": 1155
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/products/resolver.json",
+            "sha256": "cdd911588311fa55a89728a56ee3a57b935ab0e5bc4a259528d1e893040c15aa",
+            "bytes": 536
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/products/schema.json",
+            "sha256": "425d68a7f05099cce3a8b6a1d894b2c4b7c3ed7a52dc8a03ae7f4c27f381f4eb",
+            "bytes": 2269
+          },
+          {
+            "path": "payload/tenants/default/knowledge_bases/registry.json",
+            "sha256": "4f1cd45e1983a7551568962294aa5d9caff2e53e3aa8f3a4948146497ec688c6",
+            "bytes": 1278
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/ap-88/explanations/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/ap-88/faq/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/ap-88/rules/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/ap-88/rules/after-sales-ap88-noise.json",
+            "sha256": "e9a53c56b2da45d213d05fadafa03ec228f9006fbc885b44fbd70700bf11e153",
+            "bytes": 2002
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/commercial_fridge_bx_200/explanations/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/commercial_fridge_bx_200/faq/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/commercial_fridge_bx_200/rules/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/fl-920/explanations/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/fl-920/faq/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/fl-920/rules/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/fl-920/rules/door-lock-installation.json",
+            "sha256": "775e54ff9fcd61e176fc860614b7a998490c784a342ef699db94a055d58c1674",
+            "bytes": 1693
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/office_chair_oc_300/explanations/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/office_chair_oc_300/faq/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/office_chair_oc_300/rules/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/packing_carton_ct_50/explanations/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/packing_carton_ct_50/faq/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/packing_carton_ct_50/rules/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/test_cargo/explanations/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/test_cargo/faq/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/test_cargo/rules/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/test_product_standard/explanations/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/test_product_standard/faq/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/test_product_standard/rules/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/water_filter_core/explanations/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/water_filter_core/faq/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/water_filter_core/rules/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/wooden-rocking-chair/explanations/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/wooden-rocking-chair/faq/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/product_item_knowledge/wooden-rocking-chair/rules/.gitkeep",
+            "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/rag_experience/experiences.json",
+            "sha256": "7031c4adde7e295d896459afa07d15e4b1ca1ad28b2be0bd2d88ef4913943de7",
+            "bytes": 7222
+          },
+          {
+            "path": "payload/tenants/default/rag_sources/sources.json",
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "bytes": 2
+          },
+          {
+            "path": "payload/tenants/default/tenant.json",
+            "sha256": "be1dabf7dd0bb6fb9e4ede96c4c955eae8a75ed352d0dd47bf970958e40df987",
+            "bytes": 243
+          }
+        ]
+      },
+      "created_by": "platform-admin",
+      "created_at": "2026-04-30T16:23:32+00:00"
+    }
+  },
+  "shared_snapshots": {
+    "shared_snapshot_sync_H8JKdLsOuqMw": {
+      "snapshot_id": "shared_snapshot_sync_H8JKdLsOuqMw",
+      "source": "local_shared_knowledge",
+      "summary": {
+        "category_count": 1,
+        "item_count": 1,
+        "file_count": 4,
+        "json_file_count": 4
+      },
+      "snapshot": {
+        "root": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\shared_knowledge",
+        "exists": true,
+        "registry": {
+          "schema_version": 1,
+          "scope": "wechat_ai_customer_service_shared",
+          "updated_at": "2026-04-27T03:15:56",
+          "categories": [
+            {
+              "id": "global_guidelines",
+              "name": "Global Assistant Guidelines",
+              "kind": "global",
+              "path": "global_guidelines",
+              "enabled": true,
+              "participates_in_reply": true,
+              "participates_in_learning": false,
+              "participates_in_diagnostics": true,
+              "sort_order": 10
+            }
+          ]
+        },
+        "categories": [
+          {
+            "category_id": "global_guidelines",
+            "name": "Global Assistant Guidelines",
+            "kind": "global",
+            "enabled": true,
+            "item_count": 1,
+            "items": [
+              {
+                "item_id": "customer_service_style_guidelines",
+                "category_id": "global_guidelines",
+                "status": "active",
+                "title": "客服通用表达与边界原则",
+                "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\shared_knowledge\\global_guidelines\\items\\customer_service_style_guidelines.json",
+                "digest": "d019019b215f7391",
+                "payload": {
+                  "schema_version": 1,
+                  "category_id": "global_guidelines",
+                  "id": "customer_service_style_guidelines",
+                  "status": "active",
+                  "source": {
+                    "type": "three_layer_migration"
+                  },
+                  "data": {
+                    "title": "客服通用表达与边界原则",
+                    "guideline_text": "回复要自然，先接住客户使用场景，再问关键参数。对功率、续航、最低价等不确定内容，不能凭空承诺。适合自动回复的内容：参数收集、常规质保说明、使用场景推荐。需要转人工的内容：最低价、特殊补偿、先发货后付款。",
+                    "intent_tags": [
+                      "greeting",
+                      "small_talk",
+                      "scene_product",
+                      "quote",
+                      "discount",
+                      "handoff"
+                    ],
+                    "tone_tags": [
+                      "natural",
+                      "truthful",
+                      "safe"
+                    ],
+                    "priority": 100,
+                    "always_include": true,
+                    "additional_details": {
+                      "source": "three_layer_migration",
+                      "migrated_from": "tenant.chats.chat_style_guidelines"
+                    }
+                  },
+                  "runtime": {
+                    "allow_auto_reply": true,
+                    "requires_handoff": false,
+                    "risk_level": "normal"
+                  },
+                  "metadata": {
+                    "updated_at": "2026-04-27T03:15:56",
+                    "updated_by": "three_layer_migration"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "items": [
+          {
+            "item_id": "customer_service_style_guidelines",
+            "category_id": "global_guidelines",
+            "status": "active",
+            "title": "客服通用表达与边界原则",
+            "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\shared_knowledge\\global_guidelines\\items\\customer_service_style_guidelines.json",
+            "digest": "d019019b215f7391",
+            "payload": {
+              "schema_version": 1,
+              "category_id": "global_guidelines",
+              "id": "customer_service_style_guidelines",
+              "status": "active",
+              "source": {
+                "type": "three_layer_migration"
+              },
+              "data": {
+                "title": "客服通用表达与边界原则",
+                "guideline_text": "回复要自然，先接住客户使用场景，再问关键参数。对功率、续航、最低价等不确定内容，不能凭空承诺。适合自动回复的内容：参数收集、常规质保说明、使用场景推荐。需要转人工的内容：最低价、特殊补偿、先发货后付款。",
+                "intent_tags": [
+                  "greeting",
+                  "small_talk",
+                  "scene_product",
+                  "quote",
+                  "discount",
+                  "handoff"
+                ],
+                "tone_tags": [
+                  "natural",
+                  "truthful",
+                  "safe"
+                ],
+                "priority": 100,
+                "always_include": true,
+                "additional_details": {
+                  "source": "three_layer_migration",
+                  "migrated_from": "tenant.chats.chat_style_guidelines"
+                }
+              },
+              "runtime": {
+                "allow_auto_reply": true,
+                "requires_handoff": false,
+                "risk_level": "normal"
+              },
+              "metadata": {
+                "updated_at": "2026-04-27T03:15:56",
+                "updated_by": "three_layer_migration"
+              }
+            }
+          }
+        ],
+        "file_summary": {
+          "root": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\shared_knowledge",
+          "exists": true,
+          "file_count": 4,
+          "json_file_count": 4,
+          "bytes": 3688
+        },
+        "structure": {
+          "shared_root": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\shared_knowledge",
+          "tenant_formal_root_example": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\default\\knowledge_bases",
+          "product_item_root_example": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\default\\product_item_knowledge",
+          "separated": true,
+          "explanation": "共享公共知识在 data/shared_knowledge；客户专业知识在 data/tenants/<tenant>/knowledge_bases；商品专属知识在 data/tenants/<tenant>/product_item_knowledge。"
+        }
+      },
+      "created_by": "platform-admin",
+      "created_at": "2026-04-30T16:23:32+00:00"
+    }
+  },
+  "releases": {},
+  "audit_events": [
+    {
+      "event_id": "audit_00000001",
+      "actor_id": "platform-admin",
+      "action": "start_account_initialization",
+      "target_type": "auth_challenge",
+      "target_id": "init_ZfqA7U-rALDRgTQWEh6IY0xMeVGGy5AB",
+      "detail": {
+        "username": "admin",
+        "role": "admin"
+      },
+      "created_at": "2026-04-30T16:23:31+00:00"
+    },
+    {
+      "event_id": "audit_00000002",
+      "actor_id": "platform-admin",
+      "action": "send_initialization_code",
+      "target_type": "auth_challenge",
+      "target_id": "init_ZfqA7U-rALDRgTQWEh6IY0xMeVGGy5AB",
+      "detail": {
+        "email": "ad***n@example.local",
+        "role": "admin"
+      },
+      "created_at": "2026-04-30T16:23:31+00:00"
+    },
+    {
+      "event_id": "audit_00000003",
+      "actor_id": "platform-admin",
+      "action": "verify_initialize_account",
+      "target_type": "auth_challenge",
+      "target_id": "init_ZfqA7U-rALDRgTQWEh6IY0xMeVGGy5AB",
+      "detail": {
+        "email": "ad***n@example.local"
+      },
+      "created_at": "2026-04-30T16:23:31+00:00"
+    },
+    {
+      "event_id": "audit_00000004",
+      "actor_id": "platform-admin",
+      "action": "complete_account_initialization",
+      "target_type": "admin",
+      "target_id": "platform-admin",
+      "detail": {
+        "email": "ad***n@example.local",
+        "revoked_sessions": 0
+      },
+      "created_at": "2026-04-30T16:23:31+00:00"
+    },
+    {
+      "event_id": "audit_00000005",
+      "actor_id": "platform-admin",
+      "action": "start_email_login",
+      "target_type": "auth_challenge",
+      "target_id": "otp_nqDhxPQljXQLqdrSfdLCa6EPdNzGNLYv",
+      "detail": {
+        "username": "admin",
+        "email": "ad***n@example.local"
+      },
+      "created_at": "2026-04-30T16:23:31+00:00"
+    },
+    {
+      "event_id": "audit_00000006",
+      "actor_id": "platform-admin",
+      "action": "verify_login",
+      "target_type": "auth_challenge",
+      "target_id": "otp_nqDhxPQljXQLqdrSfdLCa6EPdNzGNLYv",
+      "detail": {
+        "email": "ad***n@example.local"
+      },
+      "created_at": "2026-04-30T16:23:32+00:00"
+    },
+    {
+      "event_id": "audit_00000007",
+      "actor_id": "platform-admin",
+      "action": "trust_device",
+      "target_type": "trusted_device",
+      "target_id": "0b50d00c6b87db1d2c577e7ce2875bb0b688068097b09b715def6ea9ae098b84",
+      "detail": {
+        "device_name": "seed_vps_test_customer.py",
+        "days": 30
+      },
+      "created_at": "2026-04-30T16:23:32+00:00"
+    },
+    {
+      "event_id": "audit_00000008",
+      "actor_id": "platform-admin",
+      "action": "login",
+      "target_type": "session",
+      "target_id": "vps_9IQP-NJu7FGZEt5WNxlDmlZ_SzZYMh-hqEzZN1N95S0",
+      "detail": {},
+      "created_at": "2026-04-30T16:23:32+00:00"
+    },
+    {
+      "event_id": "audit_00000009",
+      "actor_id": "platform-admin",
+      "action": "bootstrap_test01_customer",
+      "target_type": "user",
+      "target_id": "customer_test01",
+      "detail": {
+        "tenant_id": "default",
+        "backup_id": "backup_0a37c3856d4f77cbbdc7"
+      },
+      "created_at": "2026-04-30T16:23:32+00:00"
+    },
+    {
+      "event_id": "audit_00000010",
+      "actor_id": "platform-admin",
+      "action": "sync_shared_knowledge",
+      "target_type": "shared_snapshot",
+      "target_id": "shared_snapshot_sync_H8JKdLsOuqMw",
+      "detail": {},
+      "created_at": "2026-04-30T16:23:32+00:00"
+    },
+    {
+      "event_id": "audit_00000011",
+      "actor_id": "platform-admin",
+      "action": "local_backup_now",
+      "target_type": "backup_request",
+      "target_id": "backup_2rGq7Z5Wr7Wo",
+      "detail": {},
+      "created_at": "2026-04-30T16:23:32+00:00"
+    }
+  ]
+}

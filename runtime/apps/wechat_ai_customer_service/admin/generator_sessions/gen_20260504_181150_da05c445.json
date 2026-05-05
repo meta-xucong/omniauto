@@ -1,0 +1,120 @@
+{
+  "session_id": "gen_20260504_181150_da05c445",
+  "status": "sent_to_rag_experience",
+  "created_at": "2026-05-04T18:11:50",
+  "updated_at": "2026-05-04T18:11:51",
+  "history": [
+    {
+      "role": "user",
+      "content": "???????????????????????????????",
+      "created_at": "2026-05-04T18:11:50"
+    }
+  ],
+  "category_id": "policies",
+  "category_name": "政策规则",
+  "confidence": 0.62,
+  "provider": "heuristic",
+  "draft_item": {
+    "schema_version": 1,
+    "category_id": "policies",
+    "id": "policies_030292cfa6",
+    "status": "active",
+    "source": {
+      "type": "ai_generator",
+      "session_id": "gen_20260504_181150_da05c445"
+    },
+    "data": {
+      "title": "???????????????????????????????",
+      "policy_type": "other",
+      "keywords": [],
+      "applicability_scope": "global",
+      "product_id": "",
+      "product_category": "",
+      "answer": "???????????????????????????????",
+      "allow_auto_reply": true,
+      "requires_handoff": false,
+      "handoff_reason": "",
+      "operator_alert": false,
+      "risk_level": "normal",
+      "additional_details": {
+        "user_original_description": "???????????????????????????????",
+        "用户原始描述": "???????????????????????????????"
+      }
+    },
+    "runtime": {
+      "allow_auto_reply": true,
+      "requires_handoff": false,
+      "risk_level": "normal"
+    },
+    "metadata": {}
+  },
+  "missing_fields": [],
+  "question": "",
+  "warnings": [],
+  "summary_rows": [
+    {
+      "label": "知识 ID",
+      "value": "policies_030292cfa6"
+    },
+    {
+      "label": "规则名称",
+      "value": "???????????????????????????????"
+    },
+    {
+      "label": "规则类别",
+      "value": "other"
+    },
+    {
+      "label": "适用范围",
+      "value": "global"
+    },
+    {
+      "label": "标准回复",
+      "value": "???????????????????????????????"
+    },
+    {
+      "label": "允许自动回复",
+      "value": "True"
+    },
+    {
+      "label": "需要人工确认",
+      "value": "False"
+    },
+    {
+      "label": "提醒人工客服",
+      "value": "False"
+    },
+    {
+      "label": "风险等级",
+      "value": "normal"
+    },
+    {
+      "label": "补充信息",
+      "value": "user_original_description: ???????????????????????????????；用户原始描述: ???????????????????????????????"
+    }
+  ],
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.62,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "user_original_description",
+      "用户原始描述"
+    ]
+  },
+  "llm_assist": {
+    "policy_version": "knowledge_llm_assist_v1",
+    "stage": "manual_description_to_draft_knowledge",
+    "attempted": false,
+    "provider": "",
+    "status": "rule_only_disabled_by_request",
+    "reason": "llm_disabled_by_caller",
+    "fallback_allowed": true,
+    "human_approval_required": true
+  },
+  "rag_experience_id": "rag_exp_6680f508f2e251776ef6"
+}

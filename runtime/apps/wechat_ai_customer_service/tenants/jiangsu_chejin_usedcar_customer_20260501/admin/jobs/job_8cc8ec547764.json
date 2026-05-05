@@ -1,0 +1,58 @@
+{
+  "job_id": "job_8cc8ec547764",
+  "created_at": "2026-05-03T08:28:05",
+  "status": "completed",
+  "upload_ids": [
+    "upload_6ec8fd869afc404f"
+  ],
+  "use_llm": false,
+  "llm_assist_policy": {
+    "policy_version": "knowledge_llm_assist_v1",
+    "stage": "upload_to_review_candidate",
+    "requested": false,
+    "rule_fallback_allowed": true,
+    "human_approval_required": true
+  },
+  "candidate_ids": [],
+  "candidate_count": 0,
+  "rag_experience_ids": [],
+  "skipped_duplicate_count": 3,
+  "skipped_duplicates": [
+    {
+      "candidate_id": "raw_11b1fcdbf58bd9fc",
+      "upload_id": "upload_6ec8fd869afc404f",
+      "duplicate": {
+        "duplicate": true,
+        "reason": "same_id_same_content",
+        "source": "review_candidate:raw_d3355ed983d06299",
+        "existing_item_id": "chat_30cbc9db7e",
+        "similarity": 1.0,
+        "message": "检测到与现有知识或候选高度重复，已跳过去重。"
+      }
+    },
+    {
+      "candidate_id": "raw_2be85dab734032ad",
+      "upload_id": "upload_6ec8fd869afc404f",
+      "duplicate": {
+        "duplicate": true,
+        "reason": "same_id_same_content",
+        "source": "review_candidate:raw_442041fc302bd308",
+        "existing_item_id": "chat_36ee1c31de",
+        "similarity": 1.0,
+        "message": "检测到与现有知识或候选高度重复，已跳过去重。"
+      }
+    },
+    {
+      "candidate_id": "raw_c3cfb1caa226d57c",
+      "upload_id": "upload_6ec8fd869afc404f",
+      "duplicate": {
+        "duplicate": true,
+        "reason": "same_id_same_content",
+        "source": "review_candidate:raw_c7523b6b1b55b7f0",
+        "existing_item_id": "chat_9a89c1243e",
+        "similarity": 1.0,
+        "message": "检测到与现有知识或候选高度重复，已跳过去重。"
+      }
+    }
+  ]
+}

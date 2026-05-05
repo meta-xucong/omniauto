@@ -1,0 +1,43 @@
+{
+  "title": "没有足够依据的问题转人工",
+  "guideline_text": "没有足够依据回答的问题，AI客服应避免猜测，先记录客户问题并转人工处理。",
+  "keywords": [
+    "没有依据",
+    "不猜测",
+    "转人工"
+  ],
+  "applies_to": "所有行业都可能遇到的通用 AI 客服场景",
+  "schema_version": 1,
+  "id": "shared_ac685c048a1e46fd99",
+  "item_id": "shared_ac685c048a1e46fd99",
+  "category_id": "risk_control",
+  "status": "active",
+  "content": "没有足够依据回答的问题，AI客服应避免猜测，先记录客户问题并转人工处理。",
+  "data": {
+    "title": "没有足够依据的问题转人工",
+    "guideline_text": "没有足够依据回答的问题，AI客服应避免猜测，先记录客户问题并转人工处理。",
+    "keywords": [
+      "没有依据",
+      "不猜测",
+      "转人工"
+    ],
+    "applies_to": "所有行业都可能遇到的通用 AI 客服场景",
+    "allow_auto_reply": false,
+    "requires_handoff": true
+  },
+  "runtime": {
+    "allow_auto_reply": false,
+    "requires_handoff": true,
+    "risk_level": "high"
+  },
+  "source": {
+    "type": "cloud_official_shared_library",
+    "item_id": "shared_ac685c048a1e46fd99",
+    "version": ""
+  },
+  "metadata": {
+    "knowledge_layer": "shared",
+    "cloud_item_id": "shared_ac685c048a1e46fd99",
+    "cloud_updated_at": "2026-05-02T20:08:03+00:00"
+  }
+}

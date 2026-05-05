@@ -1,0 +1,49 @@
+{
+  "title": "高风险诉求必须人工处理",
+  "guideline_text": "投诉、退款、赔偿、法务、违规或伪造资料等高风险诉求必须转人工，AI客服只能记录和安抚，不能直接承诺结果。",
+  "keywords": [
+    "投诉",
+    "退款",
+    "赔偿",
+    "法务",
+    "风险",
+    "转人工"
+  ],
+  "applies_to": "所有行业都可能遇到的通用 AI 客服场景",
+  "schema_version": 1,
+  "id": "shared_768c3062ef147c8dcf",
+  "item_id": "shared_768c3062ef147c8dcf",
+  "category_id": "risk_control",
+  "status": "active",
+  "content": "投诉、退款、赔偿、法务、违规或伪造资料等高风险诉求必须转人工，AI客服只能记录和安抚，不能直接承诺结果。",
+  "data": {
+    "title": "高风险诉求必须人工处理",
+    "guideline_text": "投诉、退款、赔偿、法务、违规或伪造资料等高风险诉求必须转人工，AI客服只能记录和安抚，不能直接承诺结果。",
+    "keywords": [
+      "投诉",
+      "退款",
+      "赔偿",
+      "法务",
+      "风险",
+      "转人工"
+    ],
+    "applies_to": "所有行业都可能遇到的通用 AI 客服场景",
+    "allow_auto_reply": false,
+    "requires_handoff": true
+  },
+  "runtime": {
+    "allow_auto_reply": false,
+    "requires_handoff": true,
+    "risk_level": "high"
+  },
+  "source": {
+    "type": "cloud_official_shared_library",
+    "item_id": "shared_768c3062ef147c8dcf",
+    "version": ""
+  },
+  "metadata": {
+    "knowledge_layer": "shared",
+    "cloud_item_id": "shared_768c3062ef147c8dcf",
+    "cloud_updated_at": "2026-05-02T20:07:53+00:00"
+  }
+}

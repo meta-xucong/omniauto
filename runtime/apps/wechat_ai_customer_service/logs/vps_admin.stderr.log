@@ -1,0 +1,5 @@
+<frozen runpy>:128: RuntimeWarning: 'apps.wechat_ai_customer_service.vps_admin.app' found in sys.modules after import of package 'apps.wechat_ai_customer_service.vps_admin', but prior to execution of 'apps.wechat_ai_customer_service.vps_admin.app'; this may result in unpredictable behaviour
+INFO:     Started server process [23624]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8766 (Press CTRL+C to quit)

@@ -1,0 +1,9 @@
+{
+    "pid":  3548,
+    "started_at":  "2026-05-03T19:19:29+08:00",
+    "result_path":  "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\file_transfer_live_full_guarded_20260503_191929.json",
+    "summary_path":  "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\file_transfer_live_full_guarded_20260503_191929_summary.json",
+    "guard_path":  "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\file_transfer_live_full_guarded_20260503_191929_status.json",
+    "stdout_path":  "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\file_transfer_live_full_guarded_20260503_191929.stdout.log",
+    "stderr_path":  "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\file_transfer_live_full_guarded_20260503_191929.stderr.log"
+}

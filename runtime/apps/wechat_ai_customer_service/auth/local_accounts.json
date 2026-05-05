@@ -1,0 +1,38 @@
+{
+  "accounts": {
+    "recorder_live_customer_20260501": {
+      "user_id": "recorder_live_customer_20260501",
+      "username": "recorder_live_customer_20260501",
+      "display_name": "记录员真机测试客户 2026-05-01",
+      "role": "customer",
+      "email": "recorder_live_customer_20260501@example.local",
+      "password_hash": "pbkdf2_sha256$120000$825711a1858b2cff14e6761691c2c219$8aiK5rQCjZwplTGKshncM7fAmS23chVUu72DFRX0m9U=",
+      "tenant_ids": [
+        "recorder_live_customer_20260501"
+      ],
+      "active_tenant_id": "recorder_live_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ],
+      "initialized_at": "2026-05-01T07:31:51+00:00",
+      "updated_at": "2026-05-01T07:32:21+00:00"
+    },
+    "jiangsu_chejin_usedcar_customer_20260501": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "role": "customer",
+      "email": "jiangsu-chejin-usedcar@example.local",
+      "password_hash": "pbkdf2_sha256$120000$ea2a34bddd6780c95e14d681ff2d4483$uZCwJDlp14/fe9jtUdr7bWDiV/Q+4HyshYTaYzPPJOs=",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ],
+      "initialized_at": "2026-05-01T08:09:49+00:00",
+      "updated_at": "2026-05-05T13:42:57+00:00"
+    }
+  }
+}

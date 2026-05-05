@@ -1,0 +1,18 @@
+{
+  "bf2e6976879a7998f6e8d73943b78a8cad804ffa3016cfd4d8e937daaeb32944": {
+    "fingerprint": "bf2e6976879a7998f6e8d73943b78a8cad804ffa3016cfd4d8e937daaeb32944",
+    "user_id": "guest",
+    "device_name": "当前设备",
+    "trusted_until": "2026-06-04T13:44:53+00:00",
+    "created_at": "2026-05-05T13:44:53+00:00",
+    "last_seen_at": "2026-05-05T13:44:53+00:00"
+  },
+  "fd5216f9f0d90991dbc14d57413f72a5af17111f3a410d59e7ff98a20f6ea0be": {
+    "fingerprint": "fd5216f9f0d90991dbc14d57413f72a5af17111f3a410d59e7ff98a20f6ea0be",
+    "user_id": "customer",
+    "device_name": "当前设备",
+    "trusted_until": "2026-06-04T13:44:54+00:00",
+    "created_at": "2026-05-05T13:44:54+00:00",
+    "last_seen_at": "2026-05-05T13:44:54+00:00"
+  }
+}

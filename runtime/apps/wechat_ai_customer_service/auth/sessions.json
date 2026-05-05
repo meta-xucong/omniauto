@@ -1,0 +1,2083 @@
+[
+  {
+    "session_id": "sess_zs3o1S27dqKMPXqQAjIPN-gxO6yDL0V7",
+    "user": {
+      "user_id": "admin",
+      "role": "admin",
+      "tenant_ids": [
+        "*"
+      ],
+      "display_name": "admin",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "default",
+    "issued_at": "2026-04-29T07:16:03.701067+00:00",
+    "expires_at": "2026-04-29T19:16:03.701067+00:00",
+    "source": "local",
+    "token": "sess_zs3o1S27dqKMPXqQAjIPN-gxO6yDL0V7"
+  },
+  {
+    "session_id": "sess_Vdz1RV61QY34ZJ99IwTRKZmzznFJbEig",
+    "user": {
+      "user_id": "guest",
+      "role": "guest",
+      "tenant_ids": [
+        "default"
+      ],
+      "display_name": "guest",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "default",
+    "issued_at": "2026-04-29T07:16:03.716674+00:00",
+    "expires_at": "2026-04-29T19:16:03.716674+00:00",
+    "source": "local",
+    "token": "sess_Vdz1RV61QY34ZJ99IwTRKZmzznFJbEig"
+  },
+  {
+    "session_id": "sess_0V8O8bSgC5Q_z-9vAMdiAnDx9ZxpwNMk",
+    "user": {
+      "user_id": "customer",
+      "role": "customer",
+      "tenant_ids": [
+        "default"
+      ],
+      "display_name": "customer",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "default",
+    "issued_at": "2026-04-29T07:16:04.041354+00:00",
+    "expires_at": "2026-04-29T19:16:04.041354+00:00",
+    "source": "local",
+    "token": "sess_0V8O8bSgC5Q_z-9vAMdiAnDx9ZxpwNMk"
+  },
+  {
+    "session_id": "sess_18FmYgofV0DYyH553vQXox1FTrUVqRN_",
+    "user": {
+      "user_id": "admin",
+      "role": "admin",
+      "tenant_ids": [
+        "*"
+      ],
+      "display_name": "admin",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "default",
+    "issued_at": "2026-04-29T07:21:40.501256+00:00",
+    "expires_at": "2026-04-29T19:21:40.501256+00:00",
+    "source": "local",
+    "token": "sess_18FmYgofV0DYyH553vQXox1FTrUVqRN_"
+  },
+  {
+    "session_id": "sess_odPbf8QITte_Ppv9RYcjvz0x-9VZiqDY",
+    "user": {
+      "user_id": "guest",
+      "role": "guest",
+      "tenant_ids": [
+        "default"
+      ],
+      "display_name": "guest",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "default",
+    "issued_at": "2026-04-29T07:21:40.521562+00:00",
+    "expires_at": "2026-04-29T19:21:40.521562+00:00",
+    "source": "local",
+    "token": "sess_odPbf8QITte_Ppv9RYcjvz0x-9VZiqDY"
+  },
+  {
+    "session_id": "sess_VmrniqRkwRCJTw8P1Rb4x1Fb8tsYFCFb",
+    "user": {
+      "user_id": "customer",
+      "role": "customer",
+      "tenant_ids": [
+        "default"
+      ],
+      "display_name": "customer",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "default",
+    "issued_at": "2026-04-29T07:21:40.887209+00:00",
+    "expires_at": "2026-04-29T19:21:40.887209+00:00",
+    "source": "local",
+    "token": "sess_VmrniqRkwRCJTw8P1Rb4x1Fb8tsYFCFb"
+  },
+  {
+    "session_id": "sess_a9ZVux3AYhRJyjGRtrn1O7_q4gssjjDl",
+    "user": {
+      "user_id": "admin",
+      "role": "admin",
+      "tenant_ids": [
+        "*"
+      ],
+      "display_name": "admin",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "default",
+    "issued_at": "2026-04-29T07:39:21.212058+00:00",
+    "expires_at": "2026-04-29T19:39:21.212058+00:00",
+    "source": "local",
+    "token": "sess_a9ZVux3AYhRJyjGRtrn1O7_q4gssjjDl"
+  },
+  {
+    "session_id": "sess_Mve3fgp5UHLC7H_s_ZztRmHpPRI30J2J",
+    "user": {
+      "user_id": "guest",
+      "role": "guest",
+      "tenant_ids": [
+        "default"
+      ],
+      "display_name": "guest",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "default",
+    "issued_at": "2026-04-29T07:39:21.237551+00:00",
+    "expires_at": "2026-04-29T19:39:21.237551+00:00",
+    "source": "local",
+    "token": "sess_Mve3fgp5UHLC7H_s_ZztRmHpPRI30J2J"
+  },
+  {
+    "session_id": "sess_auLZ_xdio15_sBIVy6_KSbVeA3N5eXFX",
+    "user": {
+      "user_id": "customer",
+      "role": "customer",
+      "tenant_ids": [
+        "default"
+      ],
+      "display_name": "customer",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "default",
+    "issued_at": "2026-04-29T07:39:21.640030+00:00",
+    "expires_at": "2026-04-29T19:39:21.640030+00:00",
+    "source": "local",
+    "token": "sess_auLZ_xdio15_sBIVy6_KSbVeA3N5eXFX"
+  },
+  {
+    "session_id": "sess_karEq1z1IqWkWLlPDVcFth_8W8ULRUWH",
+    "user": {
+      "user_id": "admin",
+      "role": "admin",
+      "tenant_ids": [
+        "*"
+      ],
+      "display_name": "admin",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "default",
+    "issued_at": "2026-04-29T08:20:58.125162+00:00",
+    "expires_at": "2026-04-29T20:20:58.125162+00:00",
+    "source": "local",
+    "token": "sess_karEq1z1IqWkWLlPDVcFth_8W8ULRUWH"
+  },
+  {
+    "session_id": "sess_5Q4O3yYs0aH47PE1EGmwa3oma6PxNfNF",
+    "user": {
+      "user_id": "guest",
+      "role": "guest",
+      "tenant_ids": [
+        "default"
+      ],
+      "display_name": "guest",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "default",
+    "issued_at": "2026-04-29T08:20:58.141280+00:00",
+    "expires_at": "2026-04-29T20:20:58.141280+00:00",
+    "source": "local",
+    "token": "sess_5Q4O3yYs0aH47PE1EGmwa3oma6PxNfNF"
+  },
+  {
+    "session_id": "sess_Isx-2UnasVv1n8RBTUX00joEmId4dS7N",
+    "user": {
+      "user_id": "customer",
+      "role": "customer",
+      "tenant_ids": [
+        "default"
+      ],
+      "display_name": "customer",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "default",
+    "issued_at": "2026-04-29T08:20:58.466061+00:00",
+    "expires_at": "2026-04-29T20:20:58.466061+00:00",
+    "source": "local",
+    "token": "sess_Isx-2UnasVv1n8RBTUX00joEmId4dS7N"
+  },
+  {
+    "session_id": "sess_YGqkVSzv5ercb6qj6MAJn7yGH4E6U_Vf",
+    "user": {
+      "user_id": "admin",
+      "role": "admin",
+      "tenant_ids": [
+        "*"
+      ],
+      "display_name": "admin",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "default",
+    "issued_at": "2026-04-29T08:50:23.380140+00:00",
+    "expires_at": "2026-04-29T20:50:23.380140+00:00",
+    "source": "local",
+    "token": "sess_YGqkVSzv5ercb6qj6MAJn7yGH4E6U_Vf"
+  },
+  {
+    "session_id": "sess_dygIWZvr-4FaKnd6TE95Aw02BszblFmI",
+    "user": {
+      "user_id": "guest",
+      "role": "guest",
+      "tenant_ids": [
+        "default"
+      ],
+      "display_name": "guest",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "default",
+    "issued_at": "2026-04-29T08:50:23.397967+00:00",
+    "expires_at": "2026-04-29T20:50:23.397967+00:00",
+    "source": "local",
+    "token": "sess_dygIWZvr-4FaKnd6TE95Aw02BszblFmI"
+  },
+  {
+    "session_id": "sess__S8J50UDrvjfDlFJif6k9klti8cLRvIR",
+    "user": {
+      "user_id": "customer",
+      "role": "customer",
+      "tenant_ids": [
+        "default"
+      ],
+      "display_name": "customer",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "default",
+    "issued_at": "2026-04-29T08:50:23.701307+00:00",
+    "expires_at": "2026-04-29T20:50:23.701307+00:00",
+    "source": "local",
+    "token": "sess__S8J50UDrvjfDlFJif6k9klti8cLRvIR"
+  },
+  {
+    "session_id": "sess_Vbe7pjqwxmxxgrUhO5av46knDySL4fQ-",
+    "user": {
+      "user_id": "customer_test01",
+      "role": "customer",
+      "tenant_ids": [
+        "default"
+      ],
+      "display_name": "test01",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "default",
+    "issued_at": "2026-04-29T17:52:02.789345+00:00",
+    "expires_at": "2026-04-30T05:52:02.789345+00:00",
+    "source": "local",
+    "token": "sess_Vbe7pjqwxmxxgrUhO5av46knDySL4fQ-"
+  },
+  {
+    "session_id": "sess_VQsz8CyvMryI3J1mxwXp0V51BykbVuYu",
+    "user": {
+      "user_id": "admin",
+      "role": "admin",
+      "tenant_ids": [
+        "*"
+      ],
+      "display_name": "admin",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "default",
+    "issued_at": "2026-04-29T17:52:02.802616+00:00",
+    "expires_at": "2026-04-30T05:52:02.802616+00:00",
+    "source": "local",
+    "token": "sess_VQsz8CyvMryI3J1mxwXp0V51BykbVuYu"
+  },
+  {
+    "session_id": "sess__8ICxvu5KD1mUxBtLAQeGuoHXPPGomkm",
+    "user": {
+      "user_id": "guest",
+      "role": "guest",
+      "tenant_ids": [
+        "default"
+      ],
+      "display_name": "guest",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "default",
+    "issued_at": "2026-04-29T17:52:02.822635+00:00",
+    "expires_at": "2026-04-30T05:52:02.822635+00:00",
+    "source": "local",
+    "token": "sess__8ICxvu5KD1mUxBtLAQeGuoHXPPGomkm"
+  },
+  {
+    "session_id": "sess_jAi5EXCrYMN2yJs-Rd4YINGExP5K0h9g",
+    "user": {
+      "user_id": "customer",
+      "role": "customer",
+      "tenant_ids": [
+        "default"
+      ],
+      "display_name": "customer",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "default",
+    "issued_at": "2026-04-29T17:52:03.150493+00:00",
+    "expires_at": "2026-04-30T05:52:03.150493+00:00",
+    "source": "local",
+    "token": "sess_jAi5EXCrYMN2yJs-Rd4YINGExP5K0h9g"
+  },
+  {
+    "session_id": "sess_w5CIWHjf6dh93PsMUQzQGvn-whuZQ4g3",
+    "user": {
+      "user_id": "recorder_live_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "recorder_live_customer_20260501"
+      ],
+      "display_name": "记录员真机测试客户 2026-05-01",
+      "username": "recorder_live_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "recorder_live_customer_20260501",
+    "issued_at": "2026-05-01T07:32:38.029485+00:00",
+    "expires_at": "2026-05-01T19:32:38.029485+00:00",
+    "source": "local",
+    "token": "sess_w5CIWHjf6dh93PsMUQzQGvn-whuZQ4g3"
+  },
+  {
+    "session_id": "sess_V13ld4X7RcUFMbGG3YR-b0hi3gH1ETxJ",
+    "user": {
+      "user_id": "recorder_live_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "recorder_live_customer_20260501"
+      ],
+      "display_name": "记录员真机测试客户 2026-05-01",
+      "username": "recorder_live_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "recorder_live_customer_20260501",
+    "issued_at": "2026-05-01T07:36:04.564639+00:00",
+    "expires_at": "2026-05-01T19:36:04.564639+00:00",
+    "source": "local",
+    "token": "sess_V13ld4X7RcUFMbGG3YR-b0hi3gH1ETxJ"
+  },
+  {
+    "session_id": "sess_5XYV72nb9tcjyvVz6FYvKGcHuYTBMth7",
+    "user": {
+      "user_id": "recorder_live_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "recorder_live_customer_20260501"
+      ],
+      "display_name": "记录员真机测试客户 2026-05-01",
+      "username": "recorder_live_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "recorder_live_customer_20260501",
+    "issued_at": "2026-05-01T07:41:33.138689+00:00",
+    "expires_at": "2026-05-01T19:41:33.138689+00:00",
+    "source": "local",
+    "token": "sess_5XYV72nb9tcjyvVz6FYvKGcHuYTBMth7"
+  },
+  {
+    "session_id": "sess_6L1kanJSlsSu9TMO512qJmmOly_hhsfb",
+    "user": {
+      "user_id": "recorder_live_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "recorder_live_customer_20260501"
+      ],
+      "display_name": "记录员真机测试客户 2026-05-01",
+      "username": "recorder_live_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "recorder_live_customer_20260501",
+    "issued_at": "2026-05-01T07:42:03.932533+00:00",
+    "expires_at": "2026-05-01T19:42:03.932533+00:00",
+    "source": "local",
+    "token": "sess_6L1kanJSlsSu9TMO512qJmmOly_hhsfb"
+  },
+  {
+    "session_id": "sess_WNXS-DJp0SDUXukspcYj1yaAxtXs1yId",
+    "user": {
+      "user_id": "recorder_live_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "recorder_live_customer_20260501"
+      ],
+      "display_name": "记录员真机测试客户 2026-05-01",
+      "username": "recorder_live_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "recorder_live_customer_20260501",
+    "issued_at": "2026-05-01T07:42:17.989226+00:00",
+    "expires_at": "2026-05-01T19:42:17.989226+00:00",
+    "source": "local",
+    "token": "sess_WNXS-DJp0SDUXukspcYj1yaAxtXs1yId"
+  },
+  {
+    "session_id": "sess_qVXHgf4MmSjaFCdXjmR1cqn69BEP693m",
+    "user": {
+      "user_id": "recorder_live_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "recorder_live_customer_20260501"
+      ],
+      "display_name": "记录员真机测试客户 2026-05-01",
+      "username": "recorder_live_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "recorder_live_customer_20260501",
+    "issued_at": "2026-05-01T07:43:17.748315+00:00",
+    "expires_at": "2026-05-01T19:43:17.748315+00:00",
+    "source": "local",
+    "token": "sess_qVXHgf4MmSjaFCdXjmR1cqn69BEP693m"
+  },
+  {
+    "session_id": "sess_67JcvGuumrSIPZyNY6E4QvKDVWSwp71v",
+    "user": {
+      "user_id": "recorder_live_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "recorder_live_customer_20260501"
+      ],
+      "display_name": "记录员真机测试客户 2026-05-01",
+      "username": "recorder_live_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "recorder_live_customer_20260501",
+    "issued_at": "2026-05-01T07:44:04.329099+00:00",
+    "expires_at": "2026-05-01T19:44:04.329099+00:00",
+    "source": "local",
+    "token": "sess_67JcvGuumrSIPZyNY6E4QvKDVWSwp71v"
+  },
+  {
+    "session_id": "sess_UVSOiAKYPIYlXvgFzqIxBBJOU-e4wztt",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T08:09:49.912579+00:00",
+    "expires_at": "2026-05-01T20:09:49.912579+00:00",
+    "source": "local",
+    "token": "sess_UVSOiAKYPIYlXvgFzqIxBBJOU-e4wztt"
+  },
+  {
+    "session_id": "sess_t5Iwsuuaa00hXEaawcmtb-szxuWgib7I",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T08:11:59.715900+00:00",
+    "expires_at": "2026-05-01T20:11:59.715900+00:00",
+    "source": "local",
+    "token": "sess_t5Iwsuuaa00hXEaawcmtb-szxuWgib7I"
+  },
+  {
+    "session_id": "sess_QxqIdbVgjhTuU5OWIymr9Wg5razpfm0W",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T08:14:15.857408+00:00",
+    "expires_at": "2026-05-01T20:14:15.857408+00:00",
+    "source": "local",
+    "token": "sess_QxqIdbVgjhTuU5OWIymr9Wg5razpfm0W"
+  },
+  {
+    "session_id": "sess_8O2IL2GUk2ldGHhkKpDerdcnDgljYg6j",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T08:15:29.813222+00:00",
+    "expires_at": "2026-05-01T20:15:29.813222+00:00",
+    "source": "local",
+    "token": "sess_8O2IL2GUk2ldGHhkKpDerdcnDgljYg6j"
+  },
+  {
+    "session_id": "sess_1pXsSsqsOpTVjgKV1Xn2rR2GSTM5ylhO",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T08:16:01.338137+00:00",
+    "expires_at": "2026-05-01T20:16:01.338137+00:00",
+    "source": "local",
+    "token": "sess_1pXsSsqsOpTVjgKV1Xn2rR2GSTM5ylhO"
+  },
+  {
+    "session_id": "sess_axWdkAd3LaRvYCUB_VtNphE9ZAiCQq6Y",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T08:16:26.077770+00:00",
+    "expires_at": "2026-05-01T20:16:26.077770+00:00",
+    "source": "local",
+    "token": "sess_axWdkAd3LaRvYCUB_VtNphE9ZAiCQq6Y"
+  },
+  {
+    "session_id": "sess_TZC22lBfEKB-PTT51NQnJ3hO2-qvjPX8",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T08:17:54.123153+00:00",
+    "expires_at": "2026-05-01T20:17:54.123153+00:00",
+    "source": "local",
+    "token": "sess_TZC22lBfEKB-PTT51NQnJ3hO2-qvjPX8"
+  },
+  {
+    "session_id": "sess_zpqIa8lA2QQVZehOf65K2FK6AjXdP1Wb",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T08:20:50.932103+00:00",
+    "expires_at": "2026-05-01T20:20:50.932103+00:00",
+    "source": "local",
+    "token": "sess_zpqIa8lA2QQVZehOf65K2FK6AjXdP1Wb"
+  },
+  {
+    "session_id": "sess_pXqPIvo1oaIgMkiczcV1syF4_0rE-1Fw",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T08:21:43.703395+00:00",
+    "expires_at": "2026-05-01T20:21:43.703395+00:00",
+    "source": "local",
+    "token": "sess_pXqPIvo1oaIgMkiczcV1syF4_0rE-1Fw"
+  },
+  {
+    "session_id": "sess_4xjxi8RGc6-cLuRnVj5fm7CdZqn5JFdj",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T08:23:03.378070+00:00",
+    "expires_at": "2026-05-01T20:23:03.378070+00:00",
+    "source": "local",
+    "token": "sess_4xjxi8RGc6-cLuRnVj5fm7CdZqn5JFdj"
+  },
+  {
+    "session_id": "sess_E2_hq7Ih-fcvKuREEx_PRk5XNylNE82M",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T08:25:57.448091+00:00",
+    "expires_at": "2026-05-01T20:25:57.448091+00:00",
+    "source": "local",
+    "token": "sess_E2_hq7Ih-fcvKuREEx_PRk5XNylNE82M"
+  },
+  {
+    "session_id": "sess_MHAtZ_1rtxTjtmWMtHPkEjPsv4_R-MZi",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "default",
+    "issued_at": "2026-05-01T13:17:21.800872+00:00",
+    "expires_at": "2026-05-02T01:17:21.800872+00:00",
+    "source": "local",
+    "token": "sess_MHAtZ_1rtxTjtmWMtHPkEjPsv4_R-MZi"
+  },
+  {
+    "session_id": "sess_bX5p9v4lwKkzw4PtcZxyvnIkJfVdMjZo",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T13:22:54.904313+00:00",
+    "expires_at": "2026-05-02T01:22:54.904313+00:00",
+    "source": "local",
+    "token": "sess_bX5p9v4lwKkzw4PtcZxyvnIkJfVdMjZo"
+  },
+  {
+    "session_id": "sess_R2rXu8vfyw7BaulwvAkdTRY5L0ITjd2X",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "default",
+    "issued_at": "2026-05-01T13:22:55.029865+00:00",
+    "expires_at": "2026-05-02T01:22:55.029865+00:00",
+    "source": "local",
+    "token": "sess_R2rXu8vfyw7BaulwvAkdTRY5L0ITjd2X"
+  },
+  {
+    "session_id": "sess_M5cZlbK6E4zPyCuvRH9qRHuA-CKhihwp",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T13:22:55.156599+00:00",
+    "expires_at": "2026-05-02T01:22:55.156599+00:00",
+    "source": "local",
+    "token": "sess_M5cZlbK6E4zPyCuvRH9qRHuA-CKhihwp"
+  },
+  {
+    "session_id": "sess_OM7-Oe-lGHWNboA4bkMOqGBvjHSRhqBk",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T13:25:45.384861+00:00",
+    "expires_at": "2026-05-02T01:25:45.384861+00:00",
+    "source": "local",
+    "token": "sess_OM7-Oe-lGHWNboA4bkMOqGBvjHSRhqBk"
+  },
+  {
+    "session_id": "sess_bpiLEYI_TArACAvZ2hLCqID9MZawV8Lu",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T13:25:47.800958+00:00",
+    "expires_at": "2026-05-02T01:25:47.800958+00:00",
+    "source": "local",
+    "token": "sess_bpiLEYI_TArACAvZ2hLCqID9MZawV8Lu"
+  },
+  {
+    "session_id": "sess_nW0qLk6HIWBjiMALKH7oU0U44RYtpnLd",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T13:27:03.706460+00:00",
+    "expires_at": "2026-05-02T01:27:03.706460+00:00",
+    "source": "local",
+    "token": "sess_nW0qLk6HIWBjiMALKH7oU0U44RYtpnLd"
+  },
+  {
+    "session_id": "sess_StRD6KTKEXFOP6TNYEpPAK_h47kOiNhT",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T13:27:54.051981+00:00",
+    "expires_at": "2026-05-02T01:27:54.051981+00:00",
+    "source": "local",
+    "token": "sess_StRD6KTKEXFOP6TNYEpPAK_h47kOiNhT"
+  },
+  {
+    "session_id": "sess_VJ1gGOl3dUuxZ-2rsb4CLXDbdfH2WPOq",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T13:28:09.244079+00:00",
+    "expires_at": "2026-05-02T01:28:09.244079+00:00",
+    "source": "local",
+    "token": "sess_VJ1gGOl3dUuxZ-2rsb4CLXDbdfH2WPOq"
+  },
+  {
+    "session_id": "sess_u4de8nb39uTm3BesE8jHAKgwidlYCGzB",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T13:28:54.056166+00:00",
+    "expires_at": "2026-05-02T01:28:54.056166+00:00",
+    "source": "local",
+    "token": "sess_u4de8nb39uTm3BesE8jHAKgwidlYCGzB"
+  },
+  {
+    "session_id": "sess_xtVILGZuu1Vy1lRpHWoNEBNzHi6NRmnf",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T14:06:11.361229+00:00",
+    "expires_at": "2026-05-02T02:06:11.361229+00:00",
+    "source": "local",
+    "token": "sess_xtVILGZuu1Vy1lRpHWoNEBNzHi6NRmnf"
+  },
+  {
+    "session_id": "sess_388dI6LZ_UJAR00jlvTiV3fkD7tk8Kyp",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T14:07:04.144837+00:00",
+    "expires_at": "2026-05-02T02:07:04.144837+00:00",
+    "source": "local",
+    "token": "sess_388dI6LZ_UJAR00jlvTiV3fkD7tk8Kyp"
+  },
+  {
+    "session_id": "sess_35_urxsr-KGj0raSc68fsmj993u2qnrw",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T14:09:24.870963+00:00",
+    "expires_at": "2026-05-02T02:09:24.870963+00:00",
+    "source": "local",
+    "token": "sess_35_urxsr-KGj0raSc68fsmj993u2qnrw"
+  },
+  {
+    "session_id": "sess_F79PWwP_UtS5V6XLhtI3Thnrc0BqO3XM",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T14:10:00.974477+00:00",
+    "expires_at": "2026-05-02T02:10:00.974477+00:00",
+    "source": "local",
+    "token": "sess_F79PWwP_UtS5V6XLhtI3Thnrc0BqO3XM"
+  },
+  {
+    "session_id": "sess_HjcdGyDTUqzdzTiTzC6u_Cb7fav7iPCX",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T14:10:20.072145+00:00",
+    "expires_at": "2026-05-02T02:10:20.072145+00:00",
+    "source": "local",
+    "token": "sess_HjcdGyDTUqzdzTiTzC6u_Cb7fav7iPCX"
+  },
+  {
+    "session_id": "sess_Hck2xx8vB9iTbrZ7CrgDStmtoFDVNhSQ",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T14:13:47.297808+00:00",
+    "expires_at": "2026-05-02T02:13:47.297808+00:00",
+    "source": "local",
+    "token": "sess_Hck2xx8vB9iTbrZ7CrgDStmtoFDVNhSQ"
+  },
+  {
+    "session_id": "sess_OE0_APWULu0V0tyFajVaI1kwtRP90kav",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T14:14:51.895462+00:00",
+    "expires_at": "2026-05-02T02:14:51.895462+00:00",
+    "source": "local",
+    "token": "sess_OE0_APWULu0V0tyFajVaI1kwtRP90kav"
+  },
+  {
+    "session_id": "sess_BCBcLvYeF8bnxBsEG3cSiohpbo0DuH9s",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T14:15:11.488533+00:00",
+    "expires_at": "2026-05-02T02:15:11.488533+00:00",
+    "source": "local",
+    "token": "sess_BCBcLvYeF8bnxBsEG3cSiohpbo0DuH9s"
+  },
+  {
+    "session_id": "sess_Mahr9gvUk_A2iLcZYO1Iged0wu4pYJAa",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T14:15:38.651121+00:00",
+    "expires_at": "2026-05-02T02:15:38.651121+00:00",
+    "source": "local",
+    "token": "sess_Mahr9gvUk_A2iLcZYO1Iged0wu4pYJAa"
+  },
+  {
+    "session_id": "sess_E6OpuXec4gvTA5ierN_K188vhJbPHQ76",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T14:15:42.419114+00:00",
+    "expires_at": "2026-05-02T02:15:42.419114+00:00",
+    "source": "local",
+    "token": "sess_E6OpuXec4gvTA5ierN_K188vhJbPHQ76"
+  },
+  {
+    "session_id": "sess_TRDt-ofIwvrgJWZ99CSUgRLGwk55L-f6",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T14:16:03.248371+00:00",
+    "expires_at": "2026-05-02T02:16:03.248371+00:00",
+    "source": "local",
+    "token": "sess_TRDt-ofIwvrgJWZ99CSUgRLGwk55L-f6"
+  },
+  {
+    "session_id": "sess_xkEkxv-NaYO5EHGMeYLJ9TXleIN4u740",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T14:16:35.142259+00:00",
+    "expires_at": "2026-05-02T02:16:35.142259+00:00",
+    "source": "local",
+    "token": "sess_xkEkxv-NaYO5EHGMeYLJ9TXleIN4u740"
+  },
+  {
+    "session_id": "sess_ptd4IBRV9KjTv6JDhBHyVS3h3vHNgHyT",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T14:16:38.744222+00:00",
+    "expires_at": "2026-05-02T02:16:38.744222+00:00",
+    "source": "local",
+    "token": "sess_ptd4IBRV9KjTv6JDhBHyVS3h3vHNgHyT"
+  },
+  {
+    "session_id": "sess_OZR5SHj9_PTYsH9QddoomgYBf_gfwl7q",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T14:16:51.769358+00:00",
+    "expires_at": "2026-05-02T02:16:51.769358+00:00",
+    "source": "local",
+    "token": "sess_OZR5SHj9_PTYsH9QddoomgYBf_gfwl7q"
+  },
+  {
+    "session_id": "sess_OuBkqEq54hrFrJEkyfNvoS9RjxtHDzgH",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T14:17:03.282463+00:00",
+    "expires_at": "2026-05-02T02:17:03.282463+00:00",
+    "source": "local",
+    "token": "sess_OuBkqEq54hrFrJEkyfNvoS9RjxtHDzgH"
+  },
+  {
+    "session_id": "sess_9R4UKRy90HWEr5ciuMqEKMSO-kfG16bf",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T14:57:55.756677+00:00",
+    "expires_at": "2026-05-02T02:57:55.756677+00:00",
+    "source": "local",
+    "token": "sess_9R4UKRy90HWEr5ciuMqEKMSO-kfG16bf"
+  },
+  {
+    "session_id": "sess_VlDjMTw5Qhmq1xciAdBpsWdlenfo2gDS",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T15:00:08.136448+00:00",
+    "expires_at": "2026-05-02T03:00:08.136448+00:00",
+    "source": "local",
+    "token": "sess_VlDjMTw5Qhmq1xciAdBpsWdlenfo2gDS"
+  },
+  {
+    "session_id": "sess_RwaJPUb3YvtsEEQoKa4pZ2CrwY_uqfh7",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T15:18:02.593995+00:00",
+    "expires_at": "2026-05-02T03:18:02.593995+00:00",
+    "source": "local",
+    "token": "sess_RwaJPUb3YvtsEEQoKa4pZ2CrwY_uqfh7"
+  },
+  {
+    "session_id": "sess_8eh1BrYJnMXbzTVELnXH17ZeNkNgmKDC",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T15:20:14.205864+00:00",
+    "expires_at": "2026-05-02T03:20:14.205864+00:00",
+    "source": "local",
+    "token": "sess_8eh1BrYJnMXbzTVELnXH17ZeNkNgmKDC"
+  },
+  {
+    "session_id": "sess_NqOhmSHOtybHVVyRGCSq3FI6Zrl-W6JN",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T15:21:53.825873+00:00",
+    "expires_at": "2026-05-02T03:21:53.825873+00:00",
+    "source": "local",
+    "token": "sess_NqOhmSHOtybHVVyRGCSq3FI6Zrl-W6JN"
+  },
+  {
+    "session_id": "sess_E2u067oqX8uhnMTE248UdWL7XGjBotEJ",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T15:27:11.725727+00:00",
+    "expires_at": "2026-05-02T03:27:11.725727+00:00",
+    "source": "local",
+    "token": "sess_E2u067oqX8uhnMTE248UdWL7XGjBotEJ"
+  },
+  {
+    "session_id": "sess_9ODSgbMQY1YTI6eWaLDevwR_ufaL7Dx7",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T15:28:08.997422+00:00",
+    "expires_at": "2026-05-02T03:28:08.997422+00:00",
+    "source": "local",
+    "token": "sess_9ODSgbMQY1YTI6eWaLDevwR_ufaL7Dx7"
+  },
+  {
+    "session_id": "sess_uqcd7L2SvYaH8DjxHMYvvU4CoxC4rHmx",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T15:29:13.227897+00:00",
+    "expires_at": "2026-05-02T03:29:13.227897+00:00",
+    "source": "local",
+    "token": "sess_uqcd7L2SvYaH8DjxHMYvvU4CoxC4rHmx"
+  },
+  {
+    "session_id": "sess_4-JdUi9dacahGl0jZJxBAONqq3PrfMRk",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T15:31:07.265777+00:00",
+    "expires_at": "2026-05-02T03:31:07.265777+00:00",
+    "source": "local",
+    "token": "sess_4-JdUi9dacahGl0jZJxBAONqq3PrfMRk"
+  },
+  {
+    "session_id": "sess_9ocCeGmyQcIkh1wulBN2qC9WQJTEJguO",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T15:31:51.707014+00:00",
+    "expires_at": "2026-05-02T03:31:51.707014+00:00",
+    "source": "local",
+    "token": "sess_9ocCeGmyQcIkh1wulBN2qC9WQJTEJguO"
+  },
+  {
+    "session_id": "sess_gZpwwoucFnZNhrEj8VCjnTC7FTXP0ZaO",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T19:20:50.784096+00:00",
+    "expires_at": "2026-05-02T07:20:50.784096+00:00",
+    "source": "local",
+    "token": "sess_gZpwwoucFnZNhrEj8VCjnTC7FTXP0ZaO"
+  },
+  {
+    "session_id": "sess_Y4v9zbNeW-e7YpPDn8z069sukz5zKrxP",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T20:21:03.918164+00:00",
+    "expires_at": "2026-05-02T08:21:03.918164+00:00",
+    "source": "local",
+    "token": "sess_Y4v9zbNeW-e7YpPDn8z069sukz5zKrxP"
+  },
+  {
+    "session_id": "sess_sAU0D8kMXUEcUNMLQh7fNzmGxvTWtcZA",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T20:22:27.195583+00:00",
+    "expires_at": "2026-05-02T08:22:27.195583+00:00",
+    "source": "local",
+    "token": "sess_sAU0D8kMXUEcUNMLQh7fNzmGxvTWtcZA"
+  },
+  {
+    "session_id": "sess_rMHI0e5ObXN-yrZRvo_OQRR2qVqbf4fB",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T20:31:05.808864+00:00",
+    "expires_at": "2026-05-02T08:31:05.808864+00:00",
+    "source": "local",
+    "token": "sess_rMHI0e5ObXN-yrZRvo_OQRR2qVqbf4fB"
+  },
+  {
+    "session_id": "sess_5FeQBl_gPzLjlmWAvNmBL621ytiQPmvf",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T20:35:30.045596+00:00",
+    "expires_at": "2026-05-02T08:35:30.045596+00:00",
+    "source": "local",
+    "token": "sess_5FeQBl_gPzLjlmWAvNmBL621ytiQPmvf"
+  },
+  {
+    "session_id": "sess_xDpD9_wHqn6onJ_QX50_DBaIGyW83yho",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T20:36:22.149794+00:00",
+    "expires_at": "2026-05-02T08:36:22.149794+00:00",
+    "source": "local",
+    "token": "sess_xDpD9_wHqn6onJ_QX50_DBaIGyW83yho"
+  },
+  {
+    "session_id": "sess_QIUv2wvEbY229Ab9bzlszlN79U3EFSr-",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T20:36:44.427908+00:00",
+    "expires_at": "2026-05-02T08:36:44.427908+00:00",
+    "source": "local",
+    "token": "sess_QIUv2wvEbY229Ab9bzlszlN79U3EFSr-"
+  },
+  {
+    "session_id": "sess_nuFf_XOtD1Ps0OmpySYu-OWhd0lvUtt4",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T20:37:07.946419+00:00",
+    "expires_at": "2026-05-02T08:37:07.946419+00:00",
+    "source": "local",
+    "token": "sess_nuFf_XOtD1Ps0OmpySYu-OWhd0lvUtt4"
+  },
+  {
+    "session_id": "sess_VQYFyJv4w8ss7YRo76kXlsiuLFqI8TXu",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T20:38:03.245689+00:00",
+    "expires_at": "2026-05-02T08:38:03.245689+00:00",
+    "source": "local",
+    "token": "sess_VQYFyJv4w8ss7YRo76kXlsiuLFqI8TXu"
+  },
+  {
+    "session_id": "sess_99_xO_l3qUZe9RJMKGO2TenEiUw9Re-S",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T20:38:11.080104+00:00",
+    "expires_at": "2026-05-02T08:38:11.080104+00:00",
+    "source": "local",
+    "token": "sess_99_xO_l3qUZe9RJMKGO2TenEiUw9Re-S"
+  },
+  {
+    "session_id": "sess_pZmyYjI3Df8Y4mofgnpcRt8SRLlEtQSz",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T20:38:43.791964+00:00",
+    "expires_at": "2026-05-02T08:38:43.791964+00:00",
+    "source": "local",
+    "token": "sess_pZmyYjI3Df8Y4mofgnpcRt8SRLlEtQSz"
+  },
+  {
+    "session_id": "sess_svn7Wq-WaJ3xp1T9YF24Om9ZuGplH6Xt",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T20:40:20.296674+00:00",
+    "expires_at": "2026-05-02T08:40:20.296674+00:00",
+    "source": "local",
+    "token": "sess_svn7Wq-WaJ3xp1T9YF24Om9ZuGplH6Xt"
+  },
+  {
+    "session_id": "sess_vs3Dw_-X-yrx1cgEsE6gGB9a3Ls6jtbP",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-01T20:40:28.991025+00:00",
+    "expires_at": "2026-05-02T08:40:28.991025+00:00",
+    "source": "local",
+    "token": "sess_vs3Dw_-X-yrx1cgEsE6gGB9a3Ls6jtbP"
+  },
+  {
+    "session_id": "sess_urN8nWK5v5cvvafT5di6RZX2P5PLrDtc",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-02T13:43:07.869443+00:00",
+    "expires_at": "2026-05-03T01:43:07.869443+00:00",
+    "source": "local",
+    "token": "sess_urN8nWK5v5cvvafT5di6RZX2P5PLrDtc"
+  },
+  {
+    "session_id": "vps_Uxphvhdbczm0aiSfwuOoPhr5QtEOBqSEq-coJCRcsiY",
+    "user": {
+      "user_id": "platform-admin",
+      "role": "admin",
+      "tenant_ids": [
+        "*"
+      ],
+      "display_name": "Platform Admin",
+      "username": "admin",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "default",
+    "issued_at": "2026-05-02T16:49:04+00:00",
+    "expires_at": "2026-05-03T04:49:04+00:00",
+    "source": "vps",
+    "token": "vps_Uxphvhdbczm0aiSfwuOoPhr5QtEOBqSEq-coJCRcsiY"
+  },
+  {
+    "session_id": "sess_yhMssonfctd5DrE7sKnQZGii86CXgH_l",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-02T20:39:22.721184+00:00",
+    "expires_at": "2026-05-03T08:39:22.721184+00:00",
+    "source": "local",
+    "token": "sess_yhMssonfctd5DrE7sKnQZGii86CXgH_l"
+  },
+  {
+    "session_id": "sess_-_dec9bLn3lx7zq5JygzD4pKwOnbDYZd",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-03T00:28:04.909186+00:00",
+    "expires_at": "2026-05-03T12:28:04.909186+00:00",
+    "source": "local",
+    "token": "sess_-_dec9bLn3lx7zq5JygzD4pKwOnbDYZd"
+  },
+  {
+    "session_id": "sess_dwAok0Oap6v4h35pH3dP4_PCCQh73AeQ",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-03T00:47:12.644783+00:00",
+    "expires_at": "2026-05-03T12:47:12.644783+00:00",
+    "source": "local",
+    "token": "sess_dwAok0Oap6v4h35pH3dP4_PCCQh73AeQ"
+  },
+  {
+    "session_id": "",
+    "user": {
+      "user_id": "",
+      "role": "customer",
+      "tenant_ids": [
+        "default"
+      ],
+      "display_name": "",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "default",
+    "issued_at": "",
+    "expires_at": "2026-05-03T01:19:26+00:00",
+    "source": "vps",
+    "token": ""
+  },
+  {
+    "session_id": "sess_OOHbnR4Jf435kAPS-8zDBbcG625qVxvd",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-03T12:48:01.904456+00:00",
+    "expires_at": "2026-05-04T00:48:01.904456+00:00",
+    "source": "local",
+    "token": "sess_OOHbnR4Jf435kAPS-8zDBbcG625qVxvd"
+  },
+  {
+    "session_id": "sess_X9ehydBlzxcNh6CD7sAAQOFa9GKpHdVk",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-03T12:48:24.291905+00:00",
+    "expires_at": "2026-05-04T00:48:24.291905+00:00",
+    "source": "local",
+    "token": "sess_X9ehydBlzxcNh6CD7sAAQOFa9GKpHdVk"
+  },
+  {
+    "session_id": "sess_MFNLgXEA9PD_T7USF0qz7TbjOY0lAClw",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-03T12:55:42.226630+00:00",
+    "expires_at": "2026-05-04T00:55:42.226630+00:00",
+    "source": "local",
+    "token": "sess_MFNLgXEA9PD_T7USF0qz7TbjOY0lAClw"
+  },
+  {
+    "session_id": "sess_2U0NGnzSVcn6tDymOvbF8lGE1XtbohGp",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-03T13:47:07.578870+00:00",
+    "expires_at": "2026-05-04T01:47:07.578870+00:00",
+    "source": "local",
+    "token": "sess_2U0NGnzSVcn6tDymOvbF8lGE1XtbohGp"
+  },
+  {
+    "session_id": "sess_Z-dh-VSydkpqC0zRKqFldMhikk3dgPuJ",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-04T18:41:33.905383+00:00",
+    "expires_at": "2026-05-05T06:41:33.905383+00:00",
+    "source": "local",
+    "token": "sess_Z-dh-VSydkpqC0zRKqFldMhikk3dgPuJ"
+  },
+  {
+    "session_id": "sess_gKDHOCqUScNIp7lOa8-inXBGN0khn1nq",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-04T18:42:32.276777+00:00",
+    "expires_at": "2026-05-05T06:42:32.276777+00:00",
+    "source": "local",
+    "token": "sess_gKDHOCqUScNIp7lOa8-inXBGN0khn1nq"
+  },
+  {
+    "session_id": "sess_-iV4ogmEjc8nynIJ13AmAOlMmYtbT7z-",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-04T18:43:18.415746+00:00",
+    "expires_at": "2026-05-05T06:43:18.415746+00:00",
+    "source": "local",
+    "token": "sess_-iV4ogmEjc8nynIJ13AmAOlMmYtbT7z-"
+  },
+  {
+    "session_id": "sess_3Afe-uVdJLbHy1qsJXOb4vWUlC7uasuW",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-04T18:44:18.541846+00:00",
+    "expires_at": "2026-05-05T06:44:18.541846+00:00",
+    "source": "local",
+    "token": "sess_3Afe-uVdJLbHy1qsJXOb4vWUlC7uasuW"
+  },
+  {
+    "session_id": "sess_xls6GlPnEfuRJ_Vx4W_g-PUPqzCW7uuu",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-05T12:52:51.490038+00:00",
+    "expires_at": "2026-05-06T00:52:51.490038+00:00",
+    "source": "local",
+    "token": "sess_xls6GlPnEfuRJ_Vx4W_g-PUPqzCW7uuu"
+  },
+  {
+    "session_id": "sess_Ha3p8YiHD-dQdSFNLmTY2Rbba_m2j8Ht",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-05T12:55:39.880634+00:00",
+    "expires_at": "2026-05-06T00:55:39.880634+00:00",
+    "source": "local",
+    "token": "sess_Ha3p8YiHD-dQdSFNLmTY2Rbba_m2j8Ht"
+  },
+  {
+    "session_id": "sess_DND1gLxs8neXhCMetWQBD0uvGJTfLEAr",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-05T12:57:30.041142+00:00",
+    "expires_at": "2026-05-06T00:57:30.041142+00:00",
+    "source": "local",
+    "token": "sess_DND1gLxs8neXhCMetWQBD0uvGJTfLEAr"
+  },
+  {
+    "session_id": "sess_K5a_5SaGZ2QdjMEGiLaU_KvHWcZfjdDe",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-05T12:58:54.498966+00:00",
+    "expires_at": "2026-05-06T00:58:54.498966+00:00",
+    "source": "local",
+    "token": "sess_K5a_5SaGZ2QdjMEGiLaU_KvHWcZfjdDe"
+  },
+  {
+    "session_id": "sess_x8H-NCjEXMYNAPiFuZTBd0sQCYVaRNa3",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-05T13:29:10.713179+00:00",
+    "expires_at": "2026-05-06T01:29:10.713179+00:00",
+    "source": "local",
+    "token": "sess_x8H-NCjEXMYNAPiFuZTBd0sQCYVaRNa3"
+  },
+  {
+    "session_id": "sess_lWt3Zrivi6_UH7j_B_6-B9fJyl7Zog4H",
+    "user": {
+      "user_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "role": "customer",
+      "tenant_ids": [
+        "jiangsu_chejin_usedcar_customer_20260501"
+      ],
+      "display_name": "江苏车金二手车测试客户 2026-05-01",
+      "username": "jiangsu_chejin_usedcar_customer_20260501",
+      "resource_scopes": [
+        "*"
+      ]
+    },
+    "active_tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "issued_at": "2026-05-05T13:42:58.397916+00:00",
+    "expires_at": "2026-05-06T01:42:58.397916+00:00",
+    "source": "local",
+    "token": "sess_lWt3Zrivi6_UH7j_B_6-B9fJyl7Zog4H"
+  }
+]

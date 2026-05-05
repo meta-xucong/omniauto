@@ -1,0 +1,138 @@
+{
+  "version": 1,
+  "targets": {
+    "文件传输助手": {
+      "processed_message_ids": [
+        "4c3401827f9e61cb02821cb0b16278e0",
+        "34de0774ca98d0d400a9c3e82f967e92",
+        "0258b17e5f71a2b36f13022a25233d66",
+        "2b41414ae17301a674c69aaf5dac5519"
+      ],
+      "handoff_message_ids": [
+        "2b41414ae17301a674c69aaf5dac5519"
+      ],
+      "sent_replies": [
+        {
+          "message_ids": [
+            "0258b17e5f71a2b36f13022a25233d66"
+          ],
+          "message_contents": [
+            "民宿客房智能锁安装前要不要确认供电？\n[live-regression:20260429153752:1:1]"
+          ],
+          "reply_text": "[OmniAuto RAG企业测] 我查到资料里有一条相关说明：RAG经验概括：客户问法：民宿客房智能锁安装前要不要确认供电？；命中资料：智能指纹门锁 FL-920 适合酒店公寓、民宿客房和办公室门禁场景。 安装前建议确认门厚、开孔尺寸、开门方向和供电方式。客户如果只是想…；回复要点：我查到资料里有一条相关说明：智能指纹…。这部分可以先作为参考；如果您要确认价格、库存、发货或售后承诺，我再按正式规则核对。",
+          "processed_at": "2026-04-29T15:38:29"
+        },
+        {
+          "message_ids": [
+            "2b41414ae17301a674c69aaf5dac5519"
+          ],
+          "message_contents": [
+            "老客户能不能月结先发货？\n[live-regression:20260429153752:2:1]"
+          ],
+          "reply_text": "[OmniAuto RAG企业测] 这个问题我当前无法直接确认，我先帮您记录并请示上级，稍后给您准确回复。",
+          "processed_at": "2026-04-29T15:38:59"
+        }
+      ],
+      "reply_timestamps": [
+        "2026-04-29T15:38:10",
+        "2026-04-29T15:38:29",
+        "2026-04-29T15:38:40",
+        "2026-04-29T15:38:59"
+      ],
+      "bootstrap_events": [
+        {
+          "message_ids": [
+            "4c3401827f9e61cb02821cb0b16278e0",
+            "34de0774ca98d0d400a9c3e82f967e92"
+          ],
+          "created_at": "2026-04-29T15:37:59"
+        }
+      ],
+      "outbound_sends": [
+        {
+          "text": "民宿客房智能锁安装前要不要确认供电？\n[live-regression:20260429153752:1:1]",
+          "reason": "live_regression:1:rag_hybrid_synonym_live:1",
+          "sent_at": "2026-04-29T15:38:10",
+          "verified": true
+        },
+        {
+          "text": "老客户能不能月结先发货？\n[live-regression:20260429153752:2:1]",
+          "reason": "live_regression:2:rag_risk_boundary_live:1",
+          "sent_at": "2026-04-29T15:38:40",
+          "verified": true
+        }
+      ],
+      "operator_alerts": [
+        {
+          "created_at": "2026-04-29T15:38:59",
+          "target": "文件传输助手",
+          "message_ids": [
+            "2b41414ae17301a674c69aaf5dac5519"
+          ],
+          "message_contents": [
+            "老客户能不能月结先发货？\n[live-regression:20260429153752:2:1]"
+          ],
+          "combined_content": "老客户能不能月结先发货？\n[live-regression:20260429153752:2:1]",
+          "reason": "evidence_safety:handoff_intent_detected,matched_faq_requires_handoff,contract_or_credit_requires_manual_review,需要人工审核账期条件",
+          "reply_text": "[OmniAuto RAG企业测] 这个问题我当前无法直接确认，我先帮您记录并请示上级，稍后给您准确回复。",
+          "product_knowledge": {
+            "enabled": false
+          },
+          "status": "open",
+          "delivery": {
+            "type": "jsonl",
+            "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\logs\\file_transfer_rag_enterprise_operator_alerts.jsonl",
+            "ok": true
+          },
+          "case_store": {
+            "enabled": true,
+            "ok": true,
+            "case_id": "handoff_3c13bc5df166669bb9ab",
+            "status": "open"
+          }
+        }
+      ],
+      "handoff_events": [
+        {
+          "message_ids": [
+            "2b41414ae17301a674c69aaf5dac5519"
+          ],
+          "message_contents": [
+            "老客户能不能月结先发货？\n[live-regression:20260429153752:2:1]"
+          ],
+          "reason": "evidence_safety:handoff_intent_detected,matched_faq_requires_handoff,contract_or_credit_requires_manual_review,需要人工审核账期条件",
+          "status": "open",
+          "created_at": "2026-04-29T15:38:59",
+          "operator_alert": {
+            "created_at": "2026-04-29T15:38:59",
+            "target": "文件传输助手",
+            "message_ids": [
+              "2b41414ae17301a674c69aaf5dac5519"
+            ],
+            "message_contents": [
+              "老客户能不能月结先发货？\n[live-regression:20260429153752:2:1]"
+            ],
+            "combined_content": "老客户能不能月结先发货？\n[live-regression:20260429153752:2:1]",
+            "reason": "evidence_safety:handoff_intent_detected,matched_faq_requires_handoff,contract_or_credit_requires_manual_review,需要人工审核账期条件",
+            "reply_text": "[OmniAuto RAG企业测] 这个问题我当前无法直接确认，我先帮您记录并请示上级，稍后给您准确回复。",
+            "product_knowledge": {
+              "enabled": false
+            },
+            "status": "open",
+            "delivery": {
+              "type": "jsonl",
+              "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\logs\\file_transfer_rag_enterprise_operator_alerts.jsonl",
+              "ok": true
+            },
+            "case_store": {
+              "enabled": true,
+              "ok": true,
+              "case_id": "handoff_3c13bc5df166669bb9ab",
+              "status": "open"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

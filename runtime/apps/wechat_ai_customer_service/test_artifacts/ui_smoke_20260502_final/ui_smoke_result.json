@@ -1,0 +1,728 @@
+{
+  "ok": true,
+  "count": 30,
+  "failures": [],
+  "results": [
+    {
+      "app": "client",
+      "viewport": "desktop",
+      "view": "customer_service",
+      "overflow": false,
+      "metrics": {
+        "scrollWidth": 1366,
+        "bodyScrollWidth": 1366,
+        "innerWidth": 1366,
+        "viewTitle": "微信智能客服",
+        "visiblePanels": [
+          "customer_service"
+        ],
+        "offenders": [],
+        "hasTenantSelector": false,
+        "hasCurrentAccountSpace": true,
+        "hasSharedCandidateButton": false,
+        "systemSettingsText": [
+          "备份还原\n                  仅保留最近 20 条备份快照，超过数量的旧备份会自动清理。\n                \n          ",
+          "账号安全\n                  维护当前账号的登录密码和验证码邮箱。\n                \n              \n      ",
+          "修改密码\n                    保存后请用新密码重新登录\n                  \n                  \n    ",
+          "绑定邮箱\n                    用于登录和改密验证码\n                  \n                  \n      ",
+          "后续设置\n              后续可以在这里加入界面风格、日志清理、端口检查等辅助功能。"
+        ]
+      },
+      "screenshot": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\ui_smoke_20260502_final\\client_desktop_customer_service.png"
+    },
+    {
+      "app": "client",
+      "viewport": "desktop",
+      "view": "recorder",
+      "overflow": false,
+      "metrics": {
+        "scrollWidth": 1366,
+        "bodyScrollWidth": 1366,
+        "innerWidth": 1366,
+        "viewTitle": "AI智能记录员",
+        "visiblePanels": [
+          "recorder"
+        ],
+        "offenders": [],
+        "hasTenantSelector": false,
+        "hasCurrentAccountSpace": true,
+        "hasSharedCandidateButton": false,
+        "systemSettingsText": [
+          "备份还原\n                  仅保留最近 20 条备份快照，超过数量的旧备份会自动清理。\n                \n          ",
+          "账号安全\n                  维护当前账号的登录密码和验证码邮箱。\n                \n              \n      ",
+          "修改密码\n                    保存后请用新密码重新登录\n                  \n                  \n    ",
+          "绑定邮箱\n                    用于登录和改密验证码\n                  \n                  \n      ",
+          "后续设置\n              后续可以在这里加入界面风格、日志清理、端口检查等辅助功能。"
+        ]
+      },
+      "screenshot": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\ui_smoke_20260502_final\\client_desktop_recorder.png"
+    },
+    {
+      "app": "client",
+      "viewport": "desktop",
+      "view": "knowledge_center",
+      "overflow": false,
+      "metrics": {
+        "scrollWidth": 1366,
+        "bodyScrollWidth": 1366,
+        "innerWidth": 1366,
+        "viewTitle": "知识成长中心",
+        "visiblePanels": [
+          "knowledge_center"
+        ],
+        "offenders": [],
+        "hasTenantSelector": false,
+        "hasCurrentAccountSpace": true,
+        "hasSharedCandidateButton": false,
+        "systemSettingsText": [
+          "备份还原\n                  仅保留最近 20 条备份快照，超过数量的旧备份会自动清理。\n                \n          ",
+          "账号安全\n                  维护当前账号的登录密码和验证码邮箱。\n                \n              \n      ",
+          "修改密码\n                    保存后请用新密码重新登录\n                  \n                  \n    ",
+          "绑定邮箱\n                    用于登录和改密验证码\n                  \n                  \n      ",
+          "后续设置\n              后续可以在这里加入界面风格、日志清理、端口检查等辅助功能。"
+        ]
+      },
+      "screenshot": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\ui_smoke_20260502_final\\client_desktop_knowledge_center.png"
+    },
+    {
+      "app": "client",
+      "viewport": "desktop",
+      "view": "product_catalog",
+      "overflow": false,
+      "metrics": {
+        "scrollWidth": 1366,
+        "bodyScrollWidth": 1366,
+        "innerWidth": 1366,
+        "viewTitle": "商品库",
+        "visiblePanels": [
+          "product_catalog"
+        ],
+        "offenders": [],
+        "hasTenantSelector": false,
+        "hasCurrentAccountSpace": true,
+        "hasSharedCandidateButton": false,
+        "systemSettingsText": [
+          "备份还原\n                  仅保留最近 20 条备份快照，超过数量的旧备份会自动清理。\n                \n          ",
+          "账号安全\n                  维护当前账号的登录密码和验证码邮箱。\n                \n              \n      ",
+          "修改密码\n                    保存后请用新密码重新登录\n                  \n                  \n    ",
+          "绑定邮箱\n                    用于登录和改密验证码\n                  \n                  \n      ",
+          "后续设置\n              后续可以在这里加入界面风格、日志清理、端口检查等辅助功能。"
+        ]
+      },
+      "screenshot": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\ui_smoke_20260502_final\\client_desktop_product_catalog.png"
+    },
+    {
+      "app": "client",
+      "viewport": "desktop",
+      "view": "intake",
+      "overflow": false,
+      "metrics": {
+        "scrollWidth": 1366,
+        "bodyScrollWidth": 1366,
+        "innerWidth": 1366,
+        "viewTitle": "资料导入与待确认知识",
+        "visiblePanels": [
+          "intake"
+        ],
+        "offenders": [],
+        "hasTenantSelector": false,
+        "hasCurrentAccountSpace": true,
+        "hasSharedCandidateButton": false,
+        "systemSettingsText": [
+          "备份还原\n                  仅保留最近 20 条备份快照，超过数量的旧备份会自动清理。\n                \n          ",
+          "账号安全\n                  维护当前账号的登录密码和验证码邮箱。\n                \n              \n      ",
+          "修改密码\n                    保存后请用新密码重新登录\n                  \n                  \n    ",
+          "绑定邮箱\n                    用于登录和改密验证码\n                  \n                  \n      ",
+          "后续设置\n              后续可以在这里加入界面风格、日志清理、端口检查等辅助功能。"
+        ]
+      },
+      "screenshot": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\ui_smoke_20260502_final\\client_desktop_intake.png"
+    },
+    {
+      "app": "client",
+      "viewport": "desktop",
+      "view": "ai_reference",
+      "overflow": false,
+      "metrics": {
+        "scrollWidth": 1366,
+        "bodyScrollWidth": 1366,
+        "innerWidth": 1366,
+        "viewTitle": "AI经验池",
+        "visiblePanels": [
+          "ai_reference"
+        ],
+        "offenders": [],
+        "hasTenantSelector": false,
+        "hasCurrentAccountSpace": true,
+        "hasSharedCandidateButton": false,
+        "systemSettingsText": [
+          "备份还原\n                  仅保留最近 20 条备份快照，超过数量的旧备份会自动清理。\n                \n          ",
+          "账号安全\n                  维护当前账号的登录密码和验证码邮箱。\n                \n              \n      ",
+          "修改密码\n                    保存后请用新密码重新登录\n                  \n                  \n    ",
+          "绑定邮箱\n                    用于登录和改密验证码\n                  \n                  \n      ",
+          "后续设置\n              后续可以在这里加入界面风格、日志清理、端口检查等辅助功能。"
+        ]
+      },
+      "screenshot": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\ui_smoke_20260502_final\\client_desktop_ai_reference.png"
+    },
+    {
+      "app": "client",
+      "viewport": "desktop",
+      "view": "knowledge",
+      "overflow": false,
+      "metrics": {
+        "scrollWidth": 1366,
+        "bodyScrollWidth": 1366,
+        "innerWidth": 1366,
+        "viewTitle": "正式知识库",
+        "visiblePanels": [
+          "knowledge"
+        ],
+        "offenders": [],
+        "hasTenantSelector": false,
+        "hasCurrentAccountSpace": true,
+        "hasSharedCandidateButton": false,
+        "systemSettingsText": [
+          "备份还原\n                  仅保留最近 20 条备份快照，超过数量的旧备份会自动清理。\n                \n          ",
+          "账号安全\n                  维护当前账号的登录密码和验证码邮箱。\n                \n              \n      ",
+          "修改密码\n                    保存后请用新密码重新登录\n                  \n                  \n    ",
+          "绑定邮箱\n                    用于登录和改密验证码\n                  \n                  \n      ",
+          "后续设置\n              后续可以在这里加入界面风格、日志清理、端口检查等辅助功能。"
+        ]
+      },
+      "screenshot": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\ui_smoke_20260502_final\\client_desktop_knowledge.png"
+    },
+    {
+      "app": "client",
+      "viewport": "desktop",
+      "view": "diagnostics",
+      "overflow": false,
+      "metrics": {
+        "scrollWidth": 1366,
+        "bodyScrollWidth": 1366,
+        "innerWidth": 1366,
+        "viewTitle": "知识检测",
+        "visiblePanels": [
+          "diagnostics"
+        ],
+        "offenders": [],
+        "hasTenantSelector": false,
+        "hasCurrentAccountSpace": true,
+        "hasSharedCandidateButton": false,
+        "systemSettingsText": [
+          "备份还原\n                  仅保留最近 20 条备份快照，超过数量的旧备份会自动清理。\n                \n          ",
+          "账号安全\n                  维护当前账号的登录密码和验证码邮箱。\n                \n              \n      ",
+          "修改密码\n                    保存后请用新密码重新登录\n                  \n                  \n    ",
+          "绑定邮箱\n                    用于登录和改密验证码\n                  \n                  \n      ",
+          "后续设置\n              后续可以在这里加入界面风格、日志清理、端口检查等辅助功能。"
+        ]
+      },
+      "screenshot": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\ui_smoke_20260502_final\\client_desktop_diagnostics.png"
+    },
+    {
+      "app": "client",
+      "viewport": "desktop",
+      "view": "settings",
+      "overflow": false,
+      "metrics": {
+        "scrollWidth": 1366,
+        "bodyScrollWidth": 1366,
+        "innerWidth": 1366,
+        "viewTitle": "系统设置",
+        "visiblePanels": [
+          "settings"
+        ],
+        "offenders": [],
+        "hasTenantSelector": false,
+        "hasCurrentAccountSpace": true,
+        "hasSharedCandidateButton": false,
+        "systemSettingsText": [
+          "备份还原\n                  仅保留最近 20 条备份快照，超过数量的旧备份会自动清理。\n                \n          ",
+          "账号安全\n                  维护当前账号的登录密码和验证码邮箱。\n                \n              \n      ",
+          "修改密码\n                    保存后请用新密码重新登录\n                  \n                  \n    ",
+          "绑定邮箱\n                    用于登录和改密验证码\n                  \n                  \n      ",
+          "后续设置\n              后续可以在这里加入界面风格、日志清理、端口检查等辅助功能。"
+        ]
+      },
+      "screenshot": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\ui_smoke_20260502_final\\client_desktop_settings.png"
+    },
+    {
+      "app": "client",
+      "viewport": "mobile",
+      "view": "customer_service",
+      "overflow": false,
+      "metrics": {
+        "scrollWidth": 390,
+        "bodyScrollWidth": 390,
+        "innerWidth": 390,
+        "viewTitle": "微信智能客服",
+        "visiblePanels": [
+          "customer_service"
+        ],
+        "offenders": [],
+        "hasTenantSelector": false,
+        "hasCurrentAccountSpace": true,
+        "hasSharedCandidateButton": false,
+        "systemSettingsText": [
+          "备份还原\n                  仅保留最近 20 条备份快照，超过数量的旧备份会自动清理。\n                \n          ",
+          "账号安全\n                  维护当前账号的登录密码和验证码邮箱。\n                \n              \n      ",
+          "修改密码\n                    保存后请用新密码重新登录\n                  \n                  \n    ",
+          "绑定邮箱\n                    用于登录和改密验证码\n                  \n                  \n      ",
+          "后续设置\n              后续可以在这里加入界面风格、日志清理、端口检查等辅助功能。"
+        ]
+      },
+      "screenshot": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\ui_smoke_20260502_final\\client_mobile_customer_service.png"
+    },
+    {
+      "app": "client",
+      "viewport": "mobile",
+      "view": "recorder",
+      "overflow": false,
+      "metrics": {
+        "scrollWidth": 390,
+        "bodyScrollWidth": 390,
+        "innerWidth": 390,
+        "viewTitle": "AI智能记录员",
+        "visiblePanels": [
+          "recorder"
+        ],
+        "offenders": [],
+        "hasTenantSelector": false,
+        "hasCurrentAccountSpace": true,
+        "hasSharedCandidateButton": false,
+        "systemSettingsText": [
+          "备份还原\n                  仅保留最近 20 条备份快照，超过数量的旧备份会自动清理。\n                \n          ",
+          "账号安全\n                  维护当前账号的登录密码和验证码邮箱。\n                \n              \n      ",
+          "修改密码\n                    保存后请用新密码重新登录\n                  \n                  \n    ",
+          "绑定邮箱\n                    用于登录和改密验证码\n                  \n                  \n      ",
+          "后续设置\n              后续可以在这里加入界面风格、日志清理、端口检查等辅助功能。"
+        ]
+      },
+      "screenshot": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\ui_smoke_20260502_final\\client_mobile_recorder.png"
+    },
+    {
+      "app": "client",
+      "viewport": "mobile",
+      "view": "product_catalog",
+      "overflow": false,
+      "metrics": {
+        "scrollWidth": 390,
+        "bodyScrollWidth": 390,
+        "innerWidth": 390,
+        "viewTitle": "商品库",
+        "visiblePanels": [
+          "product_catalog"
+        ],
+        "offenders": [],
+        "hasTenantSelector": false,
+        "hasCurrentAccountSpace": true,
+        "hasSharedCandidateButton": false,
+        "systemSettingsText": [
+          "备份还原\n                  仅保留最近 20 条备份快照，超过数量的旧备份会自动清理。\n                \n          ",
+          "账号安全\n                  维护当前账号的登录密码和验证码邮箱。\n                \n              \n      ",
+          "修改密码\n                    保存后请用新密码重新登录\n                  \n                  \n    ",
+          "绑定邮箱\n                    用于登录和改密验证码\n                  \n                  \n      ",
+          "后续设置\n              后续可以在这里加入界面风格、日志清理、端口检查等辅助功能。"
+        ]
+      },
+      "screenshot": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\ui_smoke_20260502_final\\client_mobile_product_catalog.png"
+    },
+    {
+      "app": "client",
+      "viewport": "mobile",
+      "view": "intake",
+      "overflow": false,
+      "metrics": {
+        "scrollWidth": 390,
+        "bodyScrollWidth": 390,
+        "innerWidth": 390,
+        "viewTitle": "资料导入与待确认知识",
+        "visiblePanels": [
+          "intake"
+        ],
+        "offenders": [],
+        "hasTenantSelector": false,
+        "hasCurrentAccountSpace": true,
+        "hasSharedCandidateButton": false,
+        "systemSettingsText": [
+          "备份还原\n                  仅保留最近 20 条备份快照，超过数量的旧备份会自动清理。\n                \n          ",
+          "账号安全\n                  维护当前账号的登录密码和验证码邮箱。\n                \n              \n      ",
+          "修改密码\n                    保存后请用新密码重新登录\n                  \n                  \n    ",
+          "绑定邮箱\n                    用于登录和改密验证码\n                  \n                  \n      ",
+          "后续设置\n              后续可以在这里加入界面风格、日志清理、端口检查等辅助功能。"
+        ]
+      },
+      "screenshot": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\ui_smoke_20260502_final\\client_mobile_intake.png"
+    },
+    {
+      "app": "client",
+      "viewport": "mobile",
+      "view": "ai_reference",
+      "overflow": false,
+      "metrics": {
+        "scrollWidth": 390,
+        "bodyScrollWidth": 390,
+        "innerWidth": 390,
+        "viewTitle": "AI经验池",
+        "visiblePanels": [
+          "ai_reference"
+        ],
+        "offenders": [],
+        "hasTenantSelector": false,
+        "hasCurrentAccountSpace": true,
+        "hasSharedCandidateButton": false,
+        "systemSettingsText": [
+          "备份还原\n                  仅保留最近 20 条备份快照，超过数量的旧备份会自动清理。\n                \n          ",
+          "账号安全\n                  维护当前账号的登录密码和验证码邮箱。\n                \n              \n      ",
+          "修改密码\n                    保存后请用新密码重新登录\n                  \n                  \n    ",
+          "绑定邮箱\n                    用于登录和改密验证码\n                  \n                  \n      ",
+          "后续设置\n              后续可以在这里加入界面风格、日志清理、端口检查等辅助功能。"
+        ]
+      },
+      "screenshot": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\ui_smoke_20260502_final\\client_mobile_ai_reference.png"
+    },
+    {
+      "app": "client",
+      "viewport": "mobile",
+      "view": "settings",
+      "overflow": false,
+      "metrics": {
+        "scrollWidth": 390,
+        "bodyScrollWidth": 390,
+        "innerWidth": 390,
+        "viewTitle": "系统设置",
+        "visiblePanels": [
+          "settings"
+        ],
+        "offenders": [],
+        "hasTenantSelector": false,
+        "hasCurrentAccountSpace": true,
+        "hasSharedCandidateButton": false,
+        "systemSettingsText": [
+          "备份还原\n                  仅保留最近 20 条备份快照，超过数量的旧备份会自动清理。\n                \n          ",
+          "账号安全\n                  维护当前账号的登录密码和验证码邮箱。\n                \n              \n      ",
+          "修改密码\n                    保存后请用新密码重新登录\n                  \n                  \n    ",
+          "绑定邮箱\n                    用于登录和改密验证码\n                  \n                  \n      ",
+          "后续设置\n              后续可以在这里加入界面风格、日志清理、端口检查等辅助功能。"
+        ]
+      },
+      "screenshot": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\ui_smoke_20260502_final\\client_mobile_settings.png"
+    },
+    {
+      "app": "vps",
+      "viewport": "desktop",
+      "view": "overview",
+      "overflow": false,
+      "metrics": {
+        "scrollWidth": 1366,
+        "bodyScrollWidth": 1366,
+        "innerWidth": 1366,
+        "viewTitle": "????",
+        "visiblePanels": [
+          "overview"
+        ],
+        "offenders": [],
+        "hasTenantSelector": false,
+        "hasCurrentAccountSpace": false,
+        "hasSharedCandidateButton": true,
+        "systemSettingsText": []
+      },
+      "screenshot": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\ui_smoke_20260502_final\\vps_desktop_overview.png"
+    },
+    {
+      "app": "vps",
+      "viewport": "desktop",
+      "view": "accounts",
+      "overflow": false,
+      "metrics": {
+        "scrollWidth": 1366,
+        "bodyScrollWidth": 1366,
+        "innerWidth": 1366,
+        "viewTitle": "?????",
+        "visiblePanels": [
+          "accounts"
+        ],
+        "offenders": [],
+        "hasTenantSelector": false,
+        "hasCurrentAccountSpace": false,
+        "hasSharedCandidateButton": true,
+        "systemSettingsText": []
+      },
+      "screenshot": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\ui_smoke_20260502_final\\vps_desktop_accounts.png"
+    },
+    {
+      "app": "vps",
+      "viewport": "desktop",
+      "view": "customerData",
+      "overflow": false,
+      "metrics": {
+        "scrollWidth": 1366,
+        "bodyScrollWidth": 1366,
+        "innerWidth": 1366,
+        "viewTitle": "????",
+        "visiblePanels": [
+          "customerData"
+        ],
+        "offenders": [],
+        "hasTenantSelector": false,
+        "hasCurrentAccountSpace": false,
+        "hasSharedCandidateButton": true,
+        "systemSettingsText": []
+      },
+      "screenshot": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\ui_smoke_20260502_final\\vps_desktop_customerData.png"
+    },
+    {
+      "app": "vps",
+      "viewport": "desktop",
+      "view": "sharedKnowledge",
+      "overflow": false,
+      "metrics": {
+        "scrollWidth": 1366,
+        "bodyScrollWidth": 1366,
+        "innerWidth": 1366,
+        "viewTitle": "??????",
+        "visiblePanels": [
+          "sharedKnowledge"
+        ],
+        "offenders": [],
+        "hasTenantSelector": false,
+        "hasCurrentAccountSpace": false,
+        "hasSharedCandidateButton": true,
+        "systemSettingsText": []
+      },
+      "screenshot": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\ui_smoke_20260502_final\\vps_desktop_sharedKnowledge.png"
+    },
+    {
+      "app": "vps",
+      "viewport": "desktop",
+      "view": "sharedCandidates",
+      "overflow": false,
+      "metrics": {
+        "scrollWidth": 1366,
+        "bodyScrollWidth": 1366,
+        "innerWidth": 1366,
+        "viewTitle": "?????????",
+        "visiblePanels": [
+          "sharedCandidates"
+        ],
+        "offenders": [],
+        "hasTenantSelector": false,
+        "hasCurrentAccountSpace": false,
+        "hasSharedCandidateButton": true,
+        "systemSettingsText": []
+      },
+      "screenshot": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\ui_smoke_20260502_final\\vps_desktop_sharedCandidates.png"
+    },
+    {
+      "app": "vps",
+      "viewport": "desktop",
+      "view": "nodes",
+      "overflow": false,
+      "metrics": {
+        "scrollWidth": 1366,
+        "bodyScrollWidth": 1366,
+        "innerWidth": 1366,
+        "viewTitle": "??????",
+        "visiblePanels": [
+          "nodes"
+        ],
+        "offenders": [],
+        "hasTenantSelector": false,
+        "hasCurrentAccountSpace": false,
+        "hasSharedCandidateButton": true,
+        "systemSettingsText": []
+      },
+      "screenshot": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\ui_smoke_20260502_final\\vps_desktop_nodes.png"
+    },
+    {
+      "app": "vps",
+      "viewport": "desktop",
+      "view": "backupRestore",
+      "overflow": false,
+      "metrics": {
+        "scrollWidth": 1366,
+        "bodyScrollWidth": 1366,
+        "innerWidth": 1366,
+        "viewTitle": "?????",
+        "visiblePanels": [
+          "backupRestore"
+        ],
+        "offenders": [],
+        "hasTenantSelector": false,
+        "hasCurrentAccountSpace": false,
+        "hasSharedCandidateButton": true,
+        "systemSettingsText": []
+      },
+      "screenshot": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\ui_smoke_20260502_final\\vps_desktop_backupRestore.png"
+    },
+    {
+      "app": "vps",
+      "viewport": "desktop",
+      "view": "updates",
+      "overflow": false,
+      "metrics": {
+        "scrollWidth": 1366,
+        "bodyScrollWidth": 1366,
+        "innerWidth": 1366,
+        "viewTitle": "????",
+        "visiblePanels": [
+          "updates"
+        ],
+        "offenders": [],
+        "hasTenantSelector": false,
+        "hasCurrentAccountSpace": false,
+        "hasSharedCandidateButton": true,
+        "systemSettingsText": []
+      },
+      "screenshot": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\ui_smoke_20260502_final\\vps_desktop_updates.png"
+    },
+    {
+      "app": "vps",
+      "viewport": "desktop",
+      "view": "security",
+      "overflow": false,
+      "metrics": {
+        "scrollWidth": 1366,
+        "bodyScrollWidth": 1366,
+        "innerWidth": 1366,
+        "viewTitle": "????",
+        "visiblePanels": [
+          "security"
+        ],
+        "offenders": [],
+        "hasTenantSelector": false,
+        "hasCurrentAccountSpace": false,
+        "hasSharedCandidateButton": true,
+        "systemSettingsText": []
+      },
+      "screenshot": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\ui_smoke_20260502_final\\vps_desktop_security.png"
+    },
+    {
+      "app": "vps",
+      "viewport": "desktop",
+      "view": "audit",
+      "overflow": false,
+      "metrics": {
+        "scrollWidth": 1366,
+        "bodyScrollWidth": 1366,
+        "innerWidth": 1366,
+        "viewTitle": "????",
+        "visiblePanels": [
+          "audit"
+        ],
+        "offenders": [],
+        "hasTenantSelector": false,
+        "hasCurrentAccountSpace": false,
+        "hasSharedCandidateButton": true,
+        "systemSettingsText": []
+      },
+      "screenshot": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\ui_smoke_20260502_final\\vps_desktop_audit.png"
+    },
+    {
+      "app": "vps",
+      "viewport": "mobile",
+      "view": "overview",
+      "overflow": false,
+      "metrics": {
+        "scrollWidth": 390,
+        "bodyScrollWidth": 390,
+        "innerWidth": 390,
+        "viewTitle": "????",
+        "visiblePanels": [
+          "overview"
+        ],
+        "offenders": [],
+        "hasTenantSelector": false,
+        "hasCurrentAccountSpace": false,
+        "hasSharedCandidateButton": true,
+        "systemSettingsText": []
+      },
+      "screenshot": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\ui_smoke_20260502_final\\vps_mobile_overview.png"
+    },
+    {
+      "app": "vps",
+      "viewport": "mobile",
+      "view": "customerData",
+      "overflow": false,
+      "metrics": {
+        "scrollWidth": 390,
+        "bodyScrollWidth": 390,
+        "innerWidth": 390,
+        "viewTitle": "????",
+        "visiblePanels": [
+          "customerData"
+        ],
+        "offenders": [],
+        "hasTenantSelector": false,
+        "hasCurrentAccountSpace": false,
+        "hasSharedCandidateButton": true,
+        "systemSettingsText": []
+      },
+      "screenshot": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\ui_smoke_20260502_final\\vps_mobile_customerData.png"
+    },
+    {
+      "app": "vps",
+      "viewport": "mobile",
+      "view": "sharedCandidates",
+      "overflow": false,
+      "metrics": {
+        "scrollWidth": 390,
+        "bodyScrollWidth": 390,
+        "innerWidth": 390,
+        "viewTitle": "?????????",
+        "visiblePanels": [
+          "sharedCandidates"
+        ],
+        "offenders": [],
+        "hasTenantSelector": false,
+        "hasCurrentAccountSpace": false,
+        "hasSharedCandidateButton": true,
+        "systemSettingsText": []
+      },
+      "screenshot": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\ui_smoke_20260502_final\\vps_mobile_sharedCandidates.png"
+    },
+    {
+      "app": "vps",
+      "viewport": "mobile",
+      "view": "security",
+      "overflow": false,
+      "metrics": {
+        "scrollWidth": 390,
+        "bodyScrollWidth": 390,
+        "innerWidth": 390,
+        "viewTitle": "????",
+        "visiblePanels": [
+          "security"
+        ],
+        "offenders": [],
+        "hasTenantSelector": false,
+        "hasCurrentAccountSpace": false,
+        "hasSharedCandidateButton": true,
+        "systemSettingsText": []
+      },
+      "screenshot": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\ui_smoke_20260502_final\\vps_mobile_security.png"
+    },
+    {
+      "app": "vps",
+      "viewport": "mobile",
+      "view": "audit",
+      "overflow": false,
+      "metrics": {
+        "scrollWidth": 390,
+        "bodyScrollWidth": 390,
+        "innerWidth": 390,
+        "viewTitle": "????",
+        "visiblePanels": [
+          "audit"
+        ],
+        "offenders": [],
+        "hasTenantSelector": false,
+        "hasCurrentAccountSpace": false,
+        "hasSharedCandidateButton": true,
+        "systemSettingsText": []
+      },
+      "screenshot": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\ui_smoke_20260502_final\\vps_mobile_audit.png"
+    }
+  ],
+  "artifact": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\ui_smoke_20260502_final"
+}

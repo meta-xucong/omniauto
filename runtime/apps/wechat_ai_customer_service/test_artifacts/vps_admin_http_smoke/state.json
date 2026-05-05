@@ -1,0 +1,194 @@
+{
+  "schema_version": 1,
+  "tenants": {
+    "tenant_http": {
+      "tenant_id": "tenant_http",
+      "display_name": "Tenant HTTP",
+      "status": "active",
+      "sync_enabled": false,
+      "metadata": {},
+      "created_at": "2026-04-29T08:22:01+00:00",
+      "updated_at": "2026-04-29T08:22:01+00:00"
+    }
+  },
+  "users": {},
+  "sessions": {
+    "vps_QU0Lt9wUyckQHJX7DwYiwaycdhtmT5-ueClVAy1Pp5s": {
+      "session_id": "vps_QU0Lt9wUyckQHJX7DwYiwaycdhtmT5-ueClVAy1Pp5s",
+      "user": {
+        "user_id": "platform-admin",
+        "role": "admin",
+        "tenant_ids": [
+          "*"
+        ],
+        "display_name": "Platform Admin",
+        "resource_scopes": [
+          "*"
+        ]
+      },
+      "active_tenant_id": "default",
+      "issued_at": "2026-04-29T08:22:01+00:00",
+      "expires_at": "2026-04-29T20:22:01+00:00",
+      "source": "vps",
+      "token": "vps_QU0Lt9wUyckQHJX7DwYiwaycdhtmT5-ueClVAy1Pp5s"
+    }
+  },
+  "local_nodes": {
+    "node_http": {
+      "node_id": "node_http",
+      "display_name": "node_http",
+      "tenant_ids": [
+        "tenant_http"
+      ],
+      "status": "online",
+      "version": "",
+      "capabilities": [
+        "backup_tenant"
+      ],
+      "node_token": "node_CayL9iyxcqooPB8jF4qagnF6PKaPylYM",
+      "registered_at": "2026-04-29T08:22:01+00:00",
+      "last_seen_at": "2026-04-29T08:22:01+00:00",
+      "metadata": {}
+    }
+  },
+  "commands": {
+    "cmd_PFz1pVNbbPxR": {
+      "command_id": "cmd_PFz1pVNbbPxR",
+      "type": "backup_tenant",
+      "tenant_id": "tenant_http",
+      "node_id": "node_http",
+      "payload": {},
+      "status": "succeeded",
+      "attempts": 1,
+      "created_by": "platform-admin",
+      "created_at": "2026-04-29T08:22:01+00:00",
+      "updated_at": "2026-04-29T08:22:01+00:00",
+      "sent_at": "2026-04-29T08:22:01+00:00",
+      "result": {
+        "ok": true,
+        "backup_id": "backup_955e78f07b48829fdc32",
+        "scope": "tenant",
+        "tenant_id": "tenant_http",
+        "package_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\vps_admin_http_smoke\\backups\\backup_955e78f07b48829fdc32.zip",
+        "bytes": 282,
+        "manifest": {
+          "schema_version": 1,
+          "backup_id": "backup_955e78f07b48829fdc32",
+          "scope": "tenant",
+          "tenant_id": "tenant_http",
+          "created_at": "2026-04-29T16:22:01",
+          "include_derived": false,
+          "include_runtime": false,
+          "file_count": 0,
+          "files": []
+        }
+      },
+      "error": "",
+      "completed_at": "2026-04-29T08:22:01+00:00"
+    }
+  },
+  "command_results": [
+    {
+      "command_id": "cmd_PFz1pVNbbPxR",
+      "status": "succeeded",
+      "tenant_id": "tenant_http",
+      "node_id": "node_http",
+      "payload": {
+        "command_id": "cmd_PFz1pVNbbPxR",
+        "accepted": true,
+        "result": {
+          "ok": true,
+          "backup_id": "backup_955e78f07b48829fdc32",
+          "scope": "tenant",
+          "tenant_id": "tenant_http",
+          "package_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\vps_admin_http_smoke\\backups\\backup_955e78f07b48829fdc32.zip",
+          "bytes": 282,
+          "manifest": {
+            "schema_version": 1,
+            "backup_id": "backup_955e78f07b48829fdc32",
+            "scope": "tenant",
+            "tenant_id": "tenant_http",
+            "created_at": "2026-04-29T16:22:01",
+            "include_derived": false,
+            "include_runtime": false,
+            "file_count": 0,
+            "files": []
+          }
+        }
+      },
+      "created_at": "2026-04-29T08:22:01+00:00"
+    }
+  ],
+  "shared_proposals": {},
+  "shared_patches": {},
+  "backup_requests": {
+    "backup_0plbLerx5sEM": {
+      "request_id": "backup_0plbLerx5sEM",
+      "scope": "tenant",
+      "tenant_id": "tenant_http",
+      "node_id": "node_http",
+      "command_id": "cmd_PFz1pVNbbPxR",
+      "status": "queued",
+      "created_by": "platform-admin",
+      "created_at": "2026-04-29T08:22:01+00:00"
+    }
+  },
+  "restore_requests": {},
+  "releases": {},
+  "audit_events": [
+    {
+      "event_id": "audit_00000001",
+      "actor_id": "platform-admin",
+      "action": "login",
+      "target_type": "session",
+      "target_id": "vps_QU0Lt9wUyckQHJX7DwYiwaycdhtmT5-ueClVAy1Pp5s",
+      "detail": {},
+      "created_at": "2026-04-29T08:22:01+00:00"
+    },
+    {
+      "event_id": "audit_00000002",
+      "actor_id": "platform-admin",
+      "action": "create_tenant",
+      "target_type": "tenant",
+      "target_id": "tenant_http",
+      "detail": {},
+      "created_at": "2026-04-29T08:22:01+00:00"
+    },
+    {
+      "event_id": "audit_00000003",
+      "actor_id": "local-node",
+      "action": "register_node",
+      "target_type": "local_node",
+      "target_id": "node_http",
+      "detail": {},
+      "created_at": "2026-04-29T08:22:01+00:00"
+    },
+    {
+      "event_id": "audit_00000004",
+      "actor_id": "platform-admin",
+      "action": "create_command",
+      "target_type": "command",
+      "target_id": "cmd_PFz1pVNbbPxR",
+      "detail": {},
+      "created_at": "2026-04-29T08:22:01+00:00"
+    },
+    {
+      "event_id": "audit_00000005",
+      "actor_id": "platform-admin",
+      "action": "request_backup",
+      "target_type": "backup_request",
+      "target_id": "backup_0plbLerx5sEM",
+      "detail": {},
+      "created_at": "2026-04-29T08:22:01+00:00"
+    },
+    {
+      "event_id": "audit_00000006",
+      "actor_id": "local-node",
+      "action": "command_result",
+      "target_type": "command",
+      "target_id": "cmd_PFz1pVNbbPxR",
+      "detail": {},
+      "created_at": "2026-04-29T08:22:01+00:00"
+    }
+  ]
+}

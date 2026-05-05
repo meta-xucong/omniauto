@@ -1,0 +1,37 @@
+{
+  "title": "客户要求人工时及时转接",
+  "guideline_text": "客户明确要求人工服务时，AI客服应及时说明正在转接，并提醒客户稍候。",
+  "keywords": [
+    "转人工",
+    "人工服务",
+    "稍候"
+  ],
+  "applies_to": "所有行业都可能遇到的通用 AI 客服场景",
+  "schema_version": 1,
+  "id": "shared_027244c6fadcbe636d",
+  "item_id": "shared_027244c6fadcbe636d",
+  "category_id": "reply_style",
+  "status": "active",
+  "content": "客户明确要求人工服务时，AI客服应及时说明正在转接，并提醒客户稍候。",
+  "data": {
+    "title": "客户要求人工时及时转接",
+    "guideline_text": "客户明确要求人工服务时，AI客服应及时说明正在转接，并提醒客户稍候。",
+    "keywords": [
+      "转人工",
+      "人工服务",
+      "稍候"
+    ],
+    "applies_to": "所有行业都可能遇到的通用 AI 客服场景"
+  },
+  "runtime": {},
+  "source": {
+    "type": "cloud_official_shared_library",
+    "item_id": "shared_027244c6fadcbe636d",
+    "version": ""
+  },
+  "metadata": {
+    "knowledge_layer": "shared",
+    "cloud_item_id": "shared_027244c6fadcbe636d",
+    "cloud_updated_at": "2026-05-02T20:07:45+00:00"
+  }
+}

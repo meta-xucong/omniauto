@@ -1,0 +1,11 @@
+{
+  "accounts": {
+    "test01": {
+      "username": "test01",
+      "email": "test01@example.local",
+      "password_hash": "pbkdf2_sha256$120000$41309e514199c408fb35a10e186bfb6a$tKAeGt3JAJUSmx8s16Q/RJwX4Cf9phqW1B3Azg2Vqus=",
+      "initialized_at": "2026-05-05T13:31:53+00:00",
+      "updated_at": "2026-05-05T13:31:53+00:00"
+    }
+  }
+}

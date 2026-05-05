@@ -1,0 +1,147 @@
+{
+  "ok": false,
+  "run_id": "diag_20260504_153646_cc70d8",
+  "mode": "full",
+  "status": "error",
+  "created_at": "2026-05-04T15:37:15",
+  "checks": [
+    {
+      "name": "quick_knowledge_validation",
+      "ok": true,
+      "issues": [
+        {
+          "code": "knowledge_token_budget_large",
+          "severity": "info",
+          "title": "知识体积较大",
+          "detail": "当前分类知识库总量估算约 42480 token。这不是知识格式故障，也没有某条知识需要立即删除；它提醒后续继续按客户问题检索相关知识，避免一次性加载全部知识。",
+          "target_label": "全局知识库",
+          "details": [
+            {
+              "label": "问题性质",
+              "value": "容量提示，不是知识格式故障",
+              "level": "normal"
+            },
+            {
+              "label": "估算总量",
+              "value": "约 42480 token",
+              "level": "warning"
+            },
+            {
+              "label": "检测阈值",
+              "value": "超过 7000 token 时提示",
+              "level": "normal"
+            },
+            {
+              "label": "文件数量",
+              "value": "67 个 JSON 文件",
+              "level": "normal"
+            },
+            {
+              "label": "chats",
+              "value": "约 8443 token / 15 个文件",
+              "level": "normal"
+            },
+            {
+              "label": "erp_exports",
+              "value": "约 860 token / 2 个文件",
+              "level": "normal"
+            },
+            {
+              "label": "policies",
+              "value": "约 24976 token / 39 个文件",
+              "level": "normal"
+            },
+            {
+              "label": "products",
+              "value": "约 7508 token / 11 个文件",
+              "level": "normal"
+            }
+          ],
+          "suggestions": [
+            {
+              "title": "不建议自动删除知识",
+              "detail": "当前没有发现哪一条知识错误，系统不能为了降低体积擅自删内容。",
+              "level": "danger"
+            },
+            {
+              "title": "继续保持按门类和问题范围检索",
+              "detail": "客服运行时应只取相关商品、政策、话术和上下文证据，不要把全库一次性塞给大模型。",
+              "level": "normal"
+            },
+            {
+              "title": "如果后续继续变大",
+              "detail": "优先拆分过长政策、归档过期商品、把重复话术合并为模板，再重新检测。",
+              "level": "warning"
+            }
+          ],
+          "repairable": false
+        }
+      ],
+      "token_budget_estimate": 42480,
+      "recent_only": false
+    },
+    {
+      "name": "knowledge_runtime",
+      "ok": false,
+      "returncode": 1,
+      "stdout_tail": " 'chat_style_or_intent', 'confidence': 0.55, 'knowledge_layer': 'tenant', 'reply_excerpt': '这个已经超出我能直接确认的范围，我先帮您记录下来，稍后请示后给您准话。', 'allow_auto_reply': False, 'requires_handoff': True, 'risk_level': 'high', 'handoff_reason': 'high_risk_item'}, {'category_id': 'chats', 'item_id': 'unknown_handoff', 'title': 'unknown_handoff', 'matched_fields': ['intent_tags'], 'match_reason': 'chat_style_or_intent', 'confidence': 0.55, 'knowledge_layer': 'tenant', 'reply_excerpt': '这个问题我当前没有足够依据直接确认，我先帮您记录并转人工处理。', 'allow_auto_reply': False, 'requires_handoff': True, 'risk_level': 'high', 'handoff_reason': 'high_risk_item'}, {'category_id': 'policies', 'item_id': 'door-lock-installation', 'title': '门锁安装政策', 'matched_fields': ['answer'], 'match_reason': 'resolver_match_fields', 'confidence': 0.5, 'knowledge_layer': 'tenant', 'reply_excerpt': '智能门锁可提供安装服务，但安装费用和上门时间需要按城市、门型和订单数量确认。', 'allow_auto_reply': False, 'requires_handoff': True, 'risk_level': 'warning', 'handoff_reason': '安装费用、上门时间、特殊门型必须人工确认'}], 'safety': {'allowed_auto_reply': False, 'must_handoff': True, 'reasons': ['handoff_intent_detected', 'installation_requires_manual_confirmation', '安装费用、上门时间、特殊门型必须人工确认']}, 'context': {}}\\\")\"\n    }\n  ]\n}\n",
+      "stderr_tail": "",
+      "issues": [
+        {
+          "severity": "error",
+          "title": "knowledge_runtime 未通过",
+          "detail": " 'resolver_match_fields', 'confidence': 0.6, 'knowledge_layer': 'tenant', 'reply_excerpt': '安装和上门调试要看产品、城市和现场条件，我当前不能直接承诺。我先帮您记录需求并请同事确认。', 'allow_auto_reply': False, 'requires_handoff': True, 'risk_level': 'high', 'handoff_reason': 'installation_requires_manual_confirmation'}, {'category_id': 'chats', 'item_id': 'discount_handoff', 'title': 'discount_handoff', 'matched_fields': ['intent_tags'], 'match_reason': 'chat_style_or_intent', 'confidence': 0.55, 'knowledge_layer': 'tenant', 'reply_excerpt': '这个价格我这边不能直接拍板，我先帮您记录一下，稍后请示后给您准话。', 'allow_auto_reply': False, 'requires_handoff': True, 'risk_level': 'high', 'handoff_reason': 'high_risk_item'}, {'category_id': 'chats', 'item_id': 'over_boundary_handoff', 'title': 'over_boundary_handoff', 'matched_fields': ['intent_tags'], 'match_reason': 'chat_style_or_intent', 'confidence': 0.55, 'knowledge_layer': 'tenant', 'reply_excerpt': '这个已经超出我能直接确认的范围，我先帮您记录下来，稍后请示后给您准话。', 'allow_auto_reply': False, 'requires_handoff': True, 'risk_level': 'high', 'handoff_reason': 'high_risk_item'}, {'category_id': 'chats', 'item_id': 'unknown_handoff', 'title': 'unknown_handoff', 'matched_fields': ['intent_tags'], 'match_reason': 'chat_style_or_intent', 'confidence': 0.55, 'knowledge_layer': 'tenant', 'reply_excerpt': '这个问题我当前没有足够依据直接确认，我先帮您记录并转人工处理。', 'allow_auto_reply': False, 'requires_handoff': True, 'risk_level': 'high', 'handoff_reason': 'high_risk_item'}, {'category_id': 'policies', 'item_id': 'door-lock-installation', 'title': '门锁安装政策', 'matched_fields': ['answer'], 'match_reason': 'resolver_match_fields', 'confidence': 0.5, 'knowledge_layer': 'tenant', 'reply_excerpt': '智能门锁可提供安装服务，但安装费用和上门时间需要按城市、门型和订单数量确认。', 'allow_auto_reply': False, 'requires_handoff': True, 'risk_level': 'warning', 'handoff_reason': '安装费用、上门时间、特殊门型必须人工确认'}], 'safety': {'allowed_auto_reply': False, 'must_handoff': True, 'reasons': ['handoff_intent_detected', 'installation_requires_manual_confirmation', '安装费用、上门时间、特殊门型必须人工确认']}, 'context': {}}\\\")\"\n    }\n  ]\n}\n\n"
+        }
+      ]
+    },
+    {
+      "name": "knowledge_compiler",
+      "ok": true,
+      "returncode": 0,
+      "stdout_tail": "{\n  \"ok\": true,\n  \"count\": 3,\n  \"failures\": [],\n  \"results\": [\n    {\n      \"name\": \"check_compile_to_disk_writes_expected_files\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"check_compiled_counts_match_category_source\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"check_compiled_product_knowledge_is_legacy_compatible\",\n      \"ok\": true\n    }\n  ]\n}\n",
+      "stderr_tail": "",
+      "issues": []
+    },
+    {
+      "name": "offline_regression",
+      "ok": true,
+      "returncode": 0,
+      "stdout_tail": "{\n  \"ok\": true,\n  \"scenario_path\": \"D:\\\\AI\\\\AI_RPA\\\\apps\\\\wechat_ai_customer_service\\\\tests\\\\scenarios\\\\offline_regression.json\",\n  \"count\": 11,\n  \"failures\": [],\n  \"results\": [\n    {\n      \"name\": \"catalog_request\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"product_quote\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"below_tier_discount_handoff\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"invoice_policy\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"company_info\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"context_shipping\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"evidence_discount_handoff\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"customer_data_complete\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"greeting_not_customer_data\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"manual_handoff_contract\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"no_relevant_business_evidence\",\n      \"ok\": true\n    }\n  ]\n}\n",
+      "stderr_tail": "",
+      "issues": []
+    },
+    {
+      "name": "workflow_logic",
+      "ok": true,
+      "returncode": 0,
+      "stdout_tail": "\": [],\n  \"results\": [\n    {\n      \"name\": \"check_configured_bot_prefix_is_skipped\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"check_mixed_safety_batch_forces_handoff\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"check_incomplete_customer_data_is_completed_and_written\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"check_rate_limit_notice_and_backoff\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"check_auto_reply_disabled_blocks_runtime_send\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"check_customer_service_console_switches_take_effect\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"check_deepseek_v4_pro_is_default\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"check_llm_reply_application_guards\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"check_llm_boundary_fallback_on_invalid_model_output\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"check_review_queue_reports_pending_and_handoff_items\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"check_evidence_boundary_cases\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"check_after_sales_intent_preempts_duration_logistics\",\n      \"ok\": true\n    },\n    {\n      \"name\": \"check_wechat_main_window_recognition\",\n      \"ok\": true\n    }\n  ]\n}\n",
+      "stderr_tail": "",
+      "issues": []
+    }
+  ],
+  "issues": [
+    {
+      "severity": "error",
+      "title": "knowledge_runtime 未通过",
+      "detail": " 'resolver_match_fields', 'confidence': 0.6, 'knowledge_layer': 'tenant', 'reply_excerpt': '安装和上门调试要看产品、城市和现场条件，我当前不能直接承诺。我先帮您记录需求并请同事确认。', 'allow_auto_reply': False, 'requires_handoff': True, 'risk_level': 'high', 'handoff_reason': 'installation_requires_manual_confirmation'}, {'category_id': 'chats', 'item_id': 'discount_handoff', 'title': 'discount_handoff', 'matched_fields': ['intent_tags'], 'match_reason': 'chat_style_or_intent', 'confidence': 0.55, 'knowledge_layer': 'tenant', 'reply_excerpt': '这个价格我这边不能直接拍板，我先帮您记录一下，稍后请示后给您准话。', 'allow_auto_reply': False, 'requires_handoff': True, 'risk_level': 'high', 'handoff_reason': 'high_risk_item'}, {'category_id': 'chats', 'item_id': 'over_boundary_handoff', 'title': 'over_boundary_handoff', 'matched_fields': ['intent_tags'], 'match_reason': 'chat_style_or_intent', 'confidence': 0.55, 'knowledge_layer': 'tenant', 'reply_excerpt': '这个已经超出我能直接确认的范围，我先帮您记录下来，稍后请示后给您准话。', 'allow_auto_reply': False, 'requires_handoff': True, 'risk_level': 'high', 'handoff_reason': 'high_risk_item'}, {'category_id': 'chats', 'item_id': 'unknown_handoff', 'title': 'unknown_handoff', 'matched_fields': ['intent_tags'], 'match_reason': 'chat_style_or_intent', 'confidence': 0.55, 'knowledge_layer': 'tenant', 'reply_excerpt': '这个问题我当前没有足够依据直接确认，我先帮您记录并转人工处理。', 'allow_auto_reply': False, 'requires_handoff': True, 'risk_level': 'high', 'handoff_reason': 'high_risk_item'}, {'category_id': 'policies', 'item_id': 'door-lock-installation', 'title': '门锁安装政策', 'matched_fields': ['answer'], 'match_reason': 'resolver_match_fields', 'confidence': 0.5, 'knowledge_layer': 'tenant', 'reply_excerpt': '智能门锁可提供安装服务，但安装费用和上门时间需要按城市、门型和订单数量确认。', 'allow_auto_reply': False, 'requires_handoff': True, 'risk_level': 'warning', 'handoff_reason': '安装费用、上门时间、特殊门型必须人工确认'}], 'safety': {'allowed_auto_reply': False, 'must_handoff': True, 'reasons': ['handoff_intent_detected', 'installation_requires_manual_confirmation', '安装费用、上门时间、特殊门型必须人工确认']}, 'context': {}}\\\")\"\n    }\n  ]\n}\n\n",
+      "target_label": "未指定位置",
+      "repairable": false,
+      "fingerprint": "2a7834256b289e04cf929136",
+      "suggestions": [
+        {
+          "title": "建议优先修复",
+          "detail": "该问题可能影响知识入库、检索或客服回答。请点击查看位置进入对应知识，按提示补齐或修正字段。",
+          "level": "danger"
+        }
+      ]
+    }
+  ],
+  "ignored_count": 0,
+  "summary": {
+    "error_count": 1,
+    "warning_count": 0,
+    "info_count": 0,
+    "ignored_count": 0,
+    "hidden_notice_count": 1
+  }
+}

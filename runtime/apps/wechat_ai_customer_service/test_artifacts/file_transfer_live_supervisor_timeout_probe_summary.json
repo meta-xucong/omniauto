@@ -1,0 +1,55 @@
+{
+  "ok": false,
+  "started_at": "2026-05-03T13:13:59+0800",
+  "finished_at": "2026-05-03T13:14:00+0800",
+  "send": false,
+  "temporary_full_auto": false,
+  "scenario_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\tests\\scenarios\\file_transfer_live_regression.json",
+  "result_path": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\file_transfer_live_supervisor_timeout_probe_result.json",
+  "summary_path": "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\file_transfer_live_supervisor_timeout_probe_summary.json",
+  "selected_count": 1,
+  "passed_count": 0,
+  "failed_count": 0,
+  "pending_count": 1,
+  "pending": [
+    "greeting"
+  ],
+  "failures": [],
+  "invocation_count": 1,
+  "timed_out_count": 1,
+  "invocations": [
+    {
+      "command": [
+        "D:\\AI\\AI_RPA\\.venv\\Scripts\\python.exe",
+        "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\tests\\run_file_transfer_live_regression.py",
+        "--config",
+        "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\configs\\file_transfer_live_regression.example.json",
+        "--scenarios",
+        "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\tests\\scenarios\\file_transfer_live_regression.json",
+        "--result-path",
+        "runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\file_transfer_live_supervisor_timeout_probe_result.json",
+        "--delay-seconds",
+        "0.6",
+        "--start-index",
+        "1",
+        "--end-index",
+        "1",
+        "--resume"
+      ],
+      "returncode": 1,
+      "timed_out": true,
+      "duration_seconds": 1.2,
+      "stdout_tail": "",
+      "stderr_tail": "",
+      "chunk_start": 1,
+      "chunk_end": 1,
+      "attempt": 1,
+      "lock_cleanup": {
+        "ok": true,
+        "removed": true,
+        "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\state\\file_transfer_live_regression_state.json.lock"
+      }
+    }
+  ],
+  "error": "chunk 1-1 did not finish after 1 attempts"
+}

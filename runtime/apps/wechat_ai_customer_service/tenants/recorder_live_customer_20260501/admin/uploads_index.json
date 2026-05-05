@@ -1,0 +1,32 @@
+[
+  {
+    "upload_id": "upload_6ebe922e6cded7b0",
+    "filename": "UPLOAD_RECORDER_20260501_154203.txt",
+    "kind": "products",
+    "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\recorder_live_customer_20260501\\raw_inbox\\products\\upload_6ebe922e6cded7b0_UPLOAD_RECORDER_20260501_154203.txt",
+    "original_suffix": ".txt",
+    "stored_suffix": ".txt",
+    "normalized_from": "",
+    "sha256": "6ebe922e6cded7b0e5027002b8801f8e497fb64d3876c13a69ead95f79a90512",
+    "size": 194,
+    "uploaded_at": "2026-05-01T15:42:03",
+    "learned": false
+  },
+  {
+    "upload_id": "upload_46b673e46b159c63",
+    "filename": "UPLOAD_RECORDER_ZH_20260501_154317.txt",
+    "kind": "products",
+    "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\recorder_live_customer_20260501\\raw_inbox\\products\\upload_46b673e46b159c63_UPLOAD_RECORDER_ZH_20260501_154317.txt",
+    "original_suffix": ".txt",
+    "stored_suffix": ".txt",
+    "normalized_from": "",
+    "sha256": "46b673e46b159c63fd6a9b6b41a23104033c7e8e6dcfa524f60cf4583833280d",
+    "size": 359,
+    "uploaded_at": "2026-05-01T15:43:17",
+    "learned": true,
+    "candidate_ids": [
+      "raw_70308b816f0cecfa"
+    ],
+    "learned_at": "2026-05-01T15:43:17"
+  }
+]

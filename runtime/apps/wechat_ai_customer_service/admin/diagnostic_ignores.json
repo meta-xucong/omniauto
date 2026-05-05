@@ -1,0 +1,11 @@
+{
+  "9e6d9af12cc59fb3388217ba": {
+    "code": "knowledge_token_budget_large",
+    "reason": "已彻底隐藏该容量提示。",
+    "silent": true,
+    "source": "diagnostic_notice_suppressed",
+    "cleared_at": "2026-04-26T22:47:08",
+    "ignored_at": "2026-04-26T22:47:08",
+    "fingerprint": "9e6d9af12cc59fb3388217ba"
+  }
+}
