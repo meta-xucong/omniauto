@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_e6897fc4eb9fff13",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_9933045ea7e82ec8808c.txt",
+    "content_hash": "49592a43c923dfeb3d387f29a558355b",
+    "status": "active",
+    "created_at": "2026-05-04T02:00:09",
+    "updated_at": "2026-05-04T02:00:09"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_43ec093587fb7a6c",
+      "source_id": "source_e6897fc4eb9fff13",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_9933045ea7e82ec8808c.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-04T02:00:08] self: [车金AI] 凯美瑞那台还在的，2021款2.0G豪华版，8.98万，南京现车，4.8万公里，家用省油很合适。方便问一下您是在南京看车还是有置换需求？",
+      "char_count": 103,
+      "status": "active",
+      "created_at": "2026-05-04T02:00:09"
+    }
+  ]
+}

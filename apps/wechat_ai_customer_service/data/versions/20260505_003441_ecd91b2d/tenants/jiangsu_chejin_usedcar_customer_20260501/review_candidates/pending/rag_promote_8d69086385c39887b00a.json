@@ -1,0 +1,122 @@
+{
+  "schema_version": 1,
+  "candidate_id": "rag_promote_8d69086385c39887b00a",
+  "generated_at": "2026-05-05T00:07:43",
+  "source": {
+    "type": "rag_experience",
+    "experience_id": "rag_exp_92fa7509a7f1a8562d70",
+    "rag_hit": {},
+    "evidence_excerpt": "Intake -> RAG experience: raw_wechat_private/private, candidates=1, evidence={\"customer_message\": \"我之前问过的那种省油代步车，现在还有类似的吗？\", \"service_reply\": \"许哥，正常流程一般先确认意向车型，然后安排看实车、验车，销…\n{\"customer_message\": \"我之前问过的那种省油代步车，现在还有类似的吗？\", \"service_reply\": \"许哥，正常流程一般先确认意向车型，然后安排看实车、验车，销售同事也会提供检测报告和合同条款。您方便的话，我直接让销售加您微信具体沟通？或者您先留个电话，他联系您？\", \"intent_tags\": [\"询问车型\", \"寻找省油代步车\", \"解释购车流程\", \"转接销售\"], \"tone_tags\": [\"礼貌\", \"友好\", \"引导\"], \"linked_categories\": [\"products\", \"policies\"], \"linked_item_ids\": [], \"applicability_scope\": \"product_category\", \"product_c"
+  },
+  "detected_tags": [
+    "rag_experience",
+    "chats"
+  ],
+  "proposal": {
+    "target_category": "chats",
+    "change_type": "rag_experience_promote",
+    "summary": "从AI经验整理：如果今天聊得差不多，下一步正常怎么走？（聊天话术）",
+    "suggested_fields": {
+      "customer_message": "如果今天聊得差不多，下一步正常怎么走？",
+      "service_reply": "许哥，正常流程一般先确认意向车型，然后安排看实车、验车，销售同事也会提供检测报告和合同条款。您方便的话，我直接让销售加您微信具体沟通？或者您先留个电话，他联系您？",
+      "intent_tags": [
+        "rag_experience"
+      ],
+      "tone_tags": [
+        "rag_reference"
+      ],
+      "additional_details": {
+        "rag_experience_id": "rag_exp_92fa7509a7f1a8562d70",
+        "source_chunk_id": null,
+        "source_id": null,
+        "source_text": ""
+      }
+    },
+    "formal_patch": {
+      "target_category": "chats",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "chats",
+        "id": "rag_item_c8680ac63435",
+        "status": "active",
+        "source": {
+          "type": "rag_experience",
+          "experience_id": "rag_exp_92fa7509a7f1a8562d70"
+        },
+        "data": {
+          "customer_message": "如果今天聊得差不多，下一步正常怎么走？",
+          "service_reply": "许哥，正常流程一般先确认意向车型，然后安排看实车、验车，销售同事也会提供检测报告和合同条款。您方便的话，我直接让销售加您微信具体沟通？或者您先留个电话，他联系您？",
+          "intent_tags": [
+            "rag_experience"
+          ],
+          "tone_tags": [
+            "rag_reference"
+          ],
+          "additional_details": {
+            "rag_experience_id": "rag_exp_92fa7509a7f1a8562d70",
+            "source_chunk_id": null,
+            "source_id": null,
+            "source_text": ""
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "review": {
+    "status": "pending",
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "completeness_status": "ready",
+    "rag_experience_id": "rag_exp_92fa7509a7f1a8562d70",
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "rag_experience_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "model": "deepseek-v4-pro",
+      "status": "model_generated",
+      "reason": "model_generated",
+      "recommended_action": "promote_to_pending",
+      "formal_knowledge_comparison": {
+        "overlap_level": "none",
+        "matched_title": "",
+        "matched_category": "",
+        "matched_item_id": "",
+        "similarity": null,
+        "same_points": [],
+        "differences": [
+          "完全新增，无现有正式知识可对比。"
+        ],
+        "conclusion": "未被现有正式知识覆盖，应作为新候选经验进行人工审核。"
+      },
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_authority": {
+      "allowed": true,
+      "category": "chats",
+      "source_types": [
+        "intake",
+        "private",
+        "raw_wechat_private"
+      ],
+      "observed_wechat": true,
+      "contains_model_reply": false,
+      "policy_version": "source_authority_v1"
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "missing_fields": [],
+    "missing_labels": [],
+    "warnings": [],
+    "confidence": 0.72,
+    "question": ""
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_c3ad65db513a6c27",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_e58ae030df8e83496276.txt",
+    "content_hash": "61d2b7fdc17aca26dd49903c8c5a06b5",
+    "status": "active",
+    "created_at": "2026-05-04T03:43:48",
+    "updated_at": "2026-05-04T03:43:48"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_2a36017605ce6c47",
+      "source_id": "source_c3ad65db513a6c27",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_e58ae030df8e83496276.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-04 03:42:00] system: 03:42\n[2026-05-04T03:43:47] 许聪: 你们有奥德赛吗？我想看日系MPV\n[2026-05-04T03:43:47] self: [车金AI] 许哥，合同价格得依据实际成交金额开具，我没法直接答应写成别的价格。这事牵涉到合同、开票和交易流程，只能由销售同事核实后处理，我这就帮您转过去。",
+      "char_count": 185,
+      "status": "active",
+      "created_at": "2026-05-04T03:43:48"
+    }
+  ]
+}

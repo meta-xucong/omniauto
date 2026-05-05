@@ -1,0 +1,324 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_b5e5debc1622935a",
+  "generated_at": "2026-05-04T02:01:52",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_f87affd273bbf1037d4f.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"customer_message\": \"雅阁和凯美瑞哪个更适合家用加偶尔商务？\", \"intent_tags\": [\"产品对比\", \"选购建议\"], \"tone_tags\": [], \"linked_categories\": [\"汽车\"], \"applicability_scope\": \"global\", \"additional_details\": {\"missing_service_reply\": true}, \"product_id\": \"\", \"product_category\": \"\"}",
+    "content_sha256": "c0326b5b634b56b7a601f3bc7069ffded616d09618412e0f77d120a2f8f31e1d",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_f87affd273bbf1037d4f",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_6455fd00ba7c876aac1a",
+      "raw_msg_4166fc5af8dd18dd28be"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_28cd8d883667a590",
+        "source_id": "source_6fa462ce6e8de220",
+        "score": 0.5992,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.3154,
+          "semantic": 0.1657,
+          "vector": 0.1281,
+          "vector_similarity": 0.7117,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.5992
+        },
+        "text": "[2026-05-04 02:01:00] system: 02:01\n[2026-05-04T02:01:34] 许聪: 雅阁和凯美瑞哪个更适合家用加偶尔商务？"
+      },
+      {
+        "chunk_id": "chunk_b73fd7e249648300",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5318,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1917,
+          "semantic": 0.1312,
+          "vector": 0.1388,
+          "vector_similarity": 0.7713,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5318
+        },
+        "text": "。\n商品名称：2022款五菱宏光MINIEV马卡龙臻享款\n型号/SKU：CHEJIN-MINIEV-2022\n类目：二手车/微型电动车\n关键词：宏光MINIEV、五菱mini、代步电车、练手车\n规格：2022年上牌，表显1.6万公里，纯电微型车，粉色，城市通勤。\n价格：2.88万，库存：1台\n物流/过户：微型电动车跨城运输和充电条件需人工确认。\n售后/风险：续航、电池和低温表现以检测报告和使用场景说明为准。\n推荐话术：适合短途通勤、练手、接送孩子，长途或高速需求不推荐。\n商品名称：2020款本田雅阁260TURBO"
+      },
+      {
+        "chunk_id": "chunk_58029d4057022265",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5234,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1854,
+          "semantic": 0.1303,
+          "vector": 0.1377,
+          "vector_similarity": 0.7651,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5234
+        },
+        "text": "险：电池、增程器、官方权益和保养记录以检测报告和人工核验为准。\n推荐话术：适合家庭六座、长途和新能源体验需求。\n商品名称：2021款长安CS75 PLUS 1.5T自动尊贵型\n型号/SKU：CHEJIN-CS75PLUS-2021\n类目：二手车/SUV\n关键词：CS75PLUS、长安CS75、国产SUV、家用SUV\n规格：2021年上牌，表显4.4万公里，1.5T自动挡，白色，配置高。\n价格：6.88万，库存：2台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后"
+      },
+      {
+        "chunk_id": "chunk_bd5bc67861c08740",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5213,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1822,
+          "semantic": 0.1295,
+          "vector": 0.1396,
+          "vector_similarity": 0.7754,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5213
+        },
+        "text": "品名称：2021款捷达VS5 280TSI自动荣耀型\n型号/SKU：CHEJIN-JETTAVS5-2021\n类目：二手车/SUV\n关键词：捷达VS5、VS5、德系SUV、预算SUV\n规格：2021年上牌，表显3.8万公里，1.4T自动挡，白色。\n价格：6.38万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：涡轮、变速箱和保养以检测报告为准。\n推荐话术：适合预算6到7万、想买合资SUV的客户。\n商品名称：2017款福特福克斯1.6L自动风尚"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_3186e0101f7fe657c0a7",
+    "experience_id": "rag_exp_3186e0101f7fe657c0a7"
+  },
+  "detected_tags": [
+    "llm",
+    "rag_experience",
+    "unknown",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "chats",
+    "change_type": "llm_upsert_chats",
+    "summary": "客户咨询雅阁与凯美瑞在家用兼商务场景下的对比建议，缺少客服回复。",
+    "suggested_fields": {
+      "customer_message": "雅阁和凯美瑞哪个更适合家用加偶尔商务？",
+      "intent_tags": [
+        "产品对比",
+        "选购建议"
+      ],
+      "tone_tags": [],
+      "linked_categories": [
+        "汽车"
+      ],
+      "applicability_scope": "global",
+      "product_id": "",
+      "product_category": "",
+      "additional_details": {
+        "missing_service_reply": true,
+        "原始资料摘录": "{\"customer_message\": \"雅阁和凯美瑞哪个更适合家用加偶尔商务？\", \"intent_tags\": [\"产品对比\", \"选购建议\"], \"tone_tags\": [], \"linked_categories\": [\"汽车\"], \"applicability_scope\": \"global\", \"additional_details\": {\"missing_service_reply\": true}, \"product_id\": \"\", \"product_category\": \"\"}"
+      }
+    },
+    "missing_fields": [
+      "service_reply"
+    ],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "chats",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "chats",
+        "id": "chat_accord_camry_comparison_20260504020134",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_f87affd273bbf1037d4f.txt",
+          "candidate_id": "raw_b5e5debc1622935a",
+          "rag_experience_id": "rag_exp_3186e0101f7fe657c0a7",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "customer_message": "雅阁和凯美瑞哪个更适合家用加偶尔商务？",
+          "intent_tags": [
+            "产品对比",
+            "选购建议"
+          ],
+          "tone_tags": [],
+          "linked_categories": [
+            "汽车"
+          ],
+          "applicability_scope": "global",
+          "product_id": "",
+          "product_category": "",
+          "additional_details": {
+            "missing_service_reply": true,
+            "原始资料摘录": "{\"customer_message\": \"雅阁和凯美瑞哪个更适合家用加偶尔商务？\", \"intent_tags\": [\"产品对比\", \"选购建议\"], \"tone_tags\": [], \"linked_categories\": [\"汽车\"], \"applicability_scope\": \"global\", \"additional_details\": {\"missing_service_reply\": true}, \"product_id\": \"\", \"product_category\": \"\"}"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "needs_more_info",
+    "ok": false,
+    "confidence": 0.72,
+    "missing_fields": [
+      "service_reply"
+    ],
+    "missing_labels": [
+      "客服回复"
+    ],
+    "question": "还需要补充：客服回复。请补齐后再应用入库。",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "missing_service_reply",
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "rejected",
+    "completeness_status": "needs_more_info",
+    "missing_fields": [
+      "service_reply"
+    ],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_f87affd273bbf1037d4f",
+    "source_raw_message_ids": [
+      "raw_msg_6455fd00ba7c876aac1a",
+      "raw_msg_4166fc5af8dd18dd28be"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_6fa462ce6e8de220",
+      "chunk_count": 1,
+      "query": "客户咨询雅阁与凯美瑞在家用兼商务场景下的对比建议，缺少客服回复。\n{\"customer_message\": \"雅阁和凯美瑞哪个更适合家用加偶尔商务？\", \"intent_tags\": [\"产品对比\", \"选购建议\"], \"tone_tags\": [], \"linked_categories\": [\"汽车\"], \"applicability_scope\": \"global\", \"additional_details\": {\"missing_service_reply\": true}, \"product_id\": \"\", \"product_category\": \"\"}",
+      "hits": [
+        {
+          "chunk_id": "chunk_28cd8d883667a590",
+          "source_id": "source_6fa462ce6e8de220",
+          "score": 0.5992,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.3154,
+            "semantic": 0.1657,
+            "vector": 0.1281,
+            "vector_similarity": 0.7117,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.5992
+          },
+          "text": "[2026-05-04 02:01:00] system: 02:01\n[2026-05-04T02:01:34] 许聪: 雅阁和凯美瑞哪个更适合家用加偶尔商务？"
+        },
+        {
+          "chunk_id": "chunk_b73fd7e249648300",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5318,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1917,
+            "semantic": 0.1312,
+            "vector": 0.1388,
+            "vector_similarity": 0.7713,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5318
+          },
+          "text": "。\n商品名称：2022款五菱宏光MINIEV马卡龙臻享款\n型号/SKU：CHEJIN-MINIEV-2022\n类目：二手车/微型电动车\n关键词：宏光MINIEV、五菱mini、代步电车、练手车\n规格：2022年上牌，表显1.6万公里，纯电微型车，粉色，城市通勤。\n价格：2.88万，库存：1台\n物流/过户：微型电动车跨城运输和充电条件需人工确认。\n售后/风险：续航、电池和低温表现以检测报告和使用场景说明为准。\n推荐话术：适合短途通勤、练手、接送孩子，长途或高速需求不推荐。\n商品名称：2020款本田雅阁260TURBO"
+        },
+        {
+          "chunk_id": "chunk_58029d4057022265",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5234,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1854,
+            "semantic": 0.1303,
+            "vector": 0.1377,
+            "vector_similarity": 0.7651,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5234
+          },
+          "text": "险：电池、增程器、官方权益和保养记录以检测报告和人工核验为准。\n推荐话术：适合家庭六座、长途和新能源体验需求。\n商品名称：2021款长安CS75 PLUS 1.5T自动尊贵型\n型号/SKU：CHEJIN-CS75PLUS-2021\n类目：二手车/SUV\n关键词：CS75PLUS、长安CS75、国产SUV、家用SUV\n规格：2021年上牌，表显4.4万公里，1.5T自动挡，白色，配置高。\n价格：6.88万，库存：2台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后"
+        },
+        {
+          "chunk_id": "chunk_bd5bc67861c08740",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5213,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1822,
+            "semantic": 0.1295,
+            "vector": 0.1396,
+            "vector_similarity": 0.7754,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5213
+          },
+          "text": "品名称：2021款捷达VS5 280TSI自动荣耀型\n型号/SKU：CHEJIN-JETTAVS5-2021\n类目：二手车/SUV\n关键词：捷达VS5、VS5、德系SUV、预算SUV\n规格：2021年上牌，表显3.8万公里，1.4T自动挡，白色。\n价格：6.38万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：涡轮、变速箱和保养以检测报告为准。\n推荐话术：适合预算6到7万、想买合资SUV的客户。\n商品名称：2017款福特福克斯1.6L自动风尚"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_3186e0101f7fe657c0a7",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "rejected_at": "2026-05-04T18:41:18",
+    "reason": "legacy_auto_candidate_cleanup_20260504: ???????????????????????RAG?????????????????"
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

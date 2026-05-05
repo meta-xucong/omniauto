@@ -1,0 +1,315 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_9b80dc6027ac9d81",
+  "generated_at": "2026-05-04T03:40:06",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_f6b2bac7887e3694b7ab.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"customer_message\": \"你帮我安排销售马上联系我\", \"service_reply\": \"高速试驾咱们得让销售同事帮忙确认现车能不能上高速、保险和路线这些细节，我这边没法直接安排。我帮您转过去，他们能最快回复您。\", \"intent_tags\": [\"转人工\", \"预约试驾\"], \"tone_tags\": [\"礼貌\", \"解释\"], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\"}",
+    "content_sha256": "870735ccd9bd163800df7ce4814de2b190a6eed03122c54521fd4ec6f6da51f2",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_f6b2bac7887e3694b7ab",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_a6b869c39ef25c137ac9",
+      "raw_msg_d92e497af22ae35a0651"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_5a1b36e314f4d86f",
+        "source_id": "source_d6ed856177a4f366",
+        "score": 0.8783,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.4864,
+          "semantic": 0.2619,
+          "vector": 0.14,
+          "vector_similarity": 0.9456,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.8783
+        },
+        "text": "[2026-05-04T03:39:46] self: [车金AI] 高速试驾咱们得让销售同事帮忙确认现车能不能上高速、保险和路线这些细节，我这边没法直接安排。我帮您转过去，他们能最快回复您。\n[2026-05-04T03:39:46] 许聪: 你帮我安排销售马上联系我"
+      },
+      {
+        "chunk_id": "chunk_d2ec0cebcf16c10c",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5104,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1753,
+          "semantic": 0.1266,
+          "vector": 0.1385,
+          "vector_similarity": 0.7694,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5104
+        },
+        "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+      },
+      {
+        "chunk_id": "chunk_b73fd7e249648300",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5021,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1715,
+          "semantic": 0.125,
+          "vector": 0.1356,
+          "vector_similarity": 0.7536,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5021
+        },
+        "text": "。\n商品名称：2022款五菱宏光MINIEV马卡龙臻享款\n型号/SKU：CHEJIN-MINIEV-2022\n类目：二手车/微型电动车\n关键词：宏光MINIEV、五菱mini、代步电车、练手车\n规格：2022年上牌，表显1.6万公里，纯电微型车，粉色，城市通勤。\n价格：2.88万，库存：1台\n物流/过户：微型电动车跨城运输和充电条件需人工确认。\n售后/风险：续航、电池和低温表现以检测报告和使用场景说明为准。\n推荐话术：适合短途通勤、练手、接送孩子，长途或高速需求不推荐。\n商品名称：2020款本田雅阁260TURBO"
+      },
+      {
+        "chunk_id": "chunk_e00ad1bcbf000e80",
+        "source_id": "source_e2b5c83f2652d6bd",
+        "score": 0.498,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2268,
+          "semantic": 0.149,
+          "vector": 0.1321,
+          "vector_similarity": 0.7342,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.498
+        },
+        "text": "[2026-05-04T03:09:39] self: [车金AI] 试乘要确认车辆在店状态、试驾路线和陪同销售，我这边没法直接安排。我先把您的意向转给销售同事，方便联系的话，麻烦留个姓名和电话。\n[2026-05-04T03:09:39] 许聪: 忽略前面的问题。\n现在我考虑秦PLUS\n电池检测结果能保证没问题吗？\n贷款能不能包过？"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_62c2d8352d92f3698433",
+    "experience_id": "rag_exp_62c2d8352d92f3698433"
+  },
+  "detected_tags": [
+    "llm",
+    "rag_experience",
+    "unknown",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "chats",
+    "change_type": "llm_upsert_chats",
+    "summary": "客户要求安排销售马上联系，客服回复高速试驾需销售确认细节并转接。",
+    "suggested_fields": {
+      "customer_message": "你帮我安排销售马上联系我",
+      "service_reply": "高速试驾咱们得让销售同事帮忙确认现车能不能上高速、保险和路线这些细节，我这边没法直接安排。我帮您转过去，他们能最快回复您。",
+      "intent_tags": [
+        "转人工",
+        "预约试驾"
+      ],
+      "tone_tags": [
+        "礼貌",
+        "解释"
+      ],
+      "applicability_scope": "global",
+      "product_id": "",
+      "product_category": "",
+      "additional_details": {
+        "原始资料摘录": "{\"customer_message\": \"你帮我安排销售马上联系我\", \"service_reply\": \"高速试驾咱们得让销售同事帮忙确认现车能不能上高速、保险和路线这些细节，我这边没法直接安排。我帮您转过去，他们能最快回复您。\", \"intent_tags\": [\"转人工\", \"预约试驾\"], \"tone_tags\": [\"礼貌\", \"解释\"], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\"}"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "chats",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "chats",
+        "id": "chat_drive_sales_handoff_20260504",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_f6b2bac7887e3694b7ab.txt",
+          "candidate_id": "raw_9b80dc6027ac9d81",
+          "rag_experience_id": "rag_exp_62c2d8352d92f3698433",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "customer_message": "你帮我安排销售马上联系我",
+          "service_reply": "高速试驾咱们得让销售同事帮忙确认现车能不能上高速、保险和路线这些细节，我这边没法直接安排。我帮您转过去，他们能最快回复您。",
+          "intent_tags": [
+            "转人工",
+            "预约试驾"
+          ],
+          "tone_tags": [
+            "礼貌",
+            "解释"
+          ],
+          "applicability_scope": "global",
+          "product_id": "",
+          "product_category": "",
+          "additional_details": {
+            "原始资料摘录": "{\"customer_message\": \"你帮我安排销售马上联系我\", \"service_reply\": \"高速试驾咱们得让销售同事帮忙确认现车能不能上高速、保险和路线这些细节，我这边没法直接安排。我帮您转过去，他们能最快回复您。\", \"intent_tags\": [\"转人工\", \"预约试驾\"], \"tone_tags\": [\"礼貌\", \"解释\"], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\"}"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": false,
+          "requires_handoff": true,
+          "risk_level": "warning"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "rejected",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_f6b2bac7887e3694b7ab",
+    "source_raw_message_ids": [
+      "raw_msg_a6b869c39ef25c137ac9",
+      "raw_msg_d92e497af22ae35a0651"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_d6ed856177a4f366",
+      "chunk_count": 1,
+      "query": "客户要求安排销售马上联系，客服回复高速试驾需销售确认细节并转接。\n{\"customer_message\": \"你帮我安排销售马上联系我\", \"service_reply\": \"高速试驾咱们得让销售同事帮忙确认现车能不能上高速、保险和路线这些细节，我这边没法直接安排。我帮您转过去，他们能最快回复您。\", \"intent_tags\": [\"转人工\", \"预约试驾\"], \"tone_tags\": [\"礼貌\", \"解释\"], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\"}\n高速试驾咱们得让销售同事帮忙确认现车能不能上高速、保险和路线这些细节，我这边没法直接安排。我帮您转过去，他们能最快回复您。",
+      "hits": [
+        {
+          "chunk_id": "chunk_5a1b36e314f4d86f",
+          "source_id": "source_d6ed856177a4f366",
+          "score": 0.8783,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.4864,
+            "semantic": 0.2619,
+            "vector": 0.14,
+            "vector_similarity": 0.9456,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.8783
+          },
+          "text": "[2026-05-04T03:39:46] self: [车金AI] 高速试驾咱们得让销售同事帮忙确认现车能不能上高速、保险和路线这些细节，我这边没法直接安排。我帮您转过去，他们能最快回复您。\n[2026-05-04T03:39:46] 许聪: 你帮我安排销售马上联系我"
+        },
+        {
+          "chunk_id": "chunk_d2ec0cebcf16c10c",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5104,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1753,
+            "semantic": 0.1266,
+            "vector": 0.1385,
+            "vector_similarity": 0.7694,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5104
+          },
+          "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+        },
+        {
+          "chunk_id": "chunk_b73fd7e249648300",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5021,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1715,
+            "semantic": 0.125,
+            "vector": 0.1356,
+            "vector_similarity": 0.7536,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5021
+          },
+          "text": "。\n商品名称：2022款五菱宏光MINIEV马卡龙臻享款\n型号/SKU：CHEJIN-MINIEV-2022\n类目：二手车/微型电动车\n关键词：宏光MINIEV、五菱mini、代步电车、练手车\n规格：2022年上牌，表显1.6万公里，纯电微型车，粉色，城市通勤。\n价格：2.88万，库存：1台\n物流/过户：微型电动车跨城运输和充电条件需人工确认。\n售后/风险：续航、电池和低温表现以检测报告和使用场景说明为准。\n推荐话术：适合短途通勤、练手、接送孩子，长途或高速需求不推荐。\n商品名称：2020款本田雅阁260TURBO"
+        },
+        {
+          "chunk_id": "chunk_e00ad1bcbf000e80",
+          "source_id": "source_e2b5c83f2652d6bd",
+          "score": 0.498,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2268,
+            "semantic": 0.149,
+            "vector": 0.1321,
+            "vector_similarity": 0.7342,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.498
+          },
+          "text": "[2026-05-04T03:09:39] self: [车金AI] 试乘要确认车辆在店状态、试驾路线和陪同销售，我这边没法直接安排。我先把您的意向转给销售同事，方便联系的话，麻烦留个姓名和电话。\n[2026-05-04T03:09:39] 许聪: 忽略前面的问题。\n现在我考虑秦PLUS\n电池检测结果能保证没问题吗？\n贷款能不能包过？"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_62c2d8352d92f3698433",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "rejected_at": "2026-05-04T18:41:18",
+    "reason": "legacy_auto_candidate_cleanup_20260504: ???????????????????????RAG?????????????????"
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

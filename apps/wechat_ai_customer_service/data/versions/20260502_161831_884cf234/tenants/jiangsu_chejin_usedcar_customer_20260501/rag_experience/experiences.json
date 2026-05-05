@@ -1,0 +1,272 @@
+[
+  {
+    "experience_id": "rag_exp_78785b6f2855b8517269",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_wechat_group",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_67996a827b284cf4f839.txt",
+    "category": "group",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "Intake -> RAG experience: raw_wechat_group/group, candidates=1, evidence={\"name\": \"2020款别克GL8 ES陆尊653T豪华型\", \"sku\": \"CHEJIN-LIVE-GL8-2020ES\", \"category\": \"二手车/MPV\", \"pri…",
+    "question": "",
+    "reply_text": "{\"name\": \"2020款别克GL8 ES陆尊653T豪华型\", \"sku\": \"CHEJIN-LIVE-GL8-2020ES\", \"category\": \"二手车/MPV\", \"price\": 17.66, \"unit\": \"台\", \"inventory\": 1, \"shipping_policy\": \"南京门店可看车，商务客户试乘需人工确认\", \"warranty_policy\": \"车况以检测报告为准，事故、水泡、火烧承诺必须人工确认\", \"additional_details\": {\"batch\": \"LIVE_RECORDER_20260502_042340\"}, \"price_tiers\": [{\"min_quantity\": 1.0, \"unit_price\": 17.66}]}",
+    "evidence_excerpt": "{\"name\": \"2020款别克GL8 ES陆尊653T豪华型\", \"sku\": \"CHEJIN-LIVE-GL8-2020ES\", \"category\": \"二手车/MPV\", \"price\": 17.66, \"unit\": \"台\", \"inventory\": 1, \"shipping_policy\": \"南京门店可看车，商务客户试乘需人工确认\", \"warranty_policy\": \"车况以检测报告为准，事故、水泡、火烧承诺必须人工确认\", \"additional_details\": {\"batch\": \"LIVE_RECORDER_20260502_042340\"}, \"price_tiers\": [{\"min_quantity\": 1.0, \"unit_price\": 17.66}]}",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_98b8438d7f65da3a",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [
+      "raw_780fd867cde6a5a5"
+    ],
+    "candidate_count": 1,
+    "original_source": {
+      "raw_batch_id": "raw_batch_67996a827b284cf4f839",
+      "conversation_id": "conv_1c4c2bfac8a6d1ae7d",
+      "conversation_type": "group",
+      "raw_message_ids": [
+        "raw_msg_ba50ae47d9f2b4c280c3",
+        "raw_msg_90962205117a079e668d"
+      ]
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-02T04:24:25"
+    },
+    "created_at": "2026-05-02T04:24:25",
+    "updated_at": "2026-05-02T04:31:07",
+    "quality": {
+      "score": 0.755,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_wechat_group",
+        "candidate_count": 1,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-02T04:31:07"
+    },
+    "formal_relation_cache": {
+      "relation": "novel",
+      "formal_match": {
+        "category_id": "products",
+        "item_id": "chejin_gl8_2020_es653t",
+        "product_id": "",
+        "title": "2020款别克GL8 ES陆尊653T豪华型",
+        "similarity": 0.242
+      },
+      "recommended_action": "keep_as_rag_experience",
+      "formal_item_count": 12,
+      "evaluated_at": "2026-05-02T04:31:07"
+    }
+  },
+  {
+    "experience_id": "rag_exp_005c3d0cad0e96075bbd",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_wechat_group",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_055784b7dc9082faf951.txt",
+    "category": "group",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "Intake -> RAG experience: raw_wechat_group/group, candidates=1, evidence={\"title\": \"新能源电池检测转人工\", \"policy_type\": \"contract\", \"keywords\": [\"电池检测\", \"首付\", \"月供\", \"贷款包过\"], \"a…",
+    "question": "",
+    "reply_text": "{\"title\": \"新能源电池检测转人工\", \"policy_type\": \"contract\", \"keywords\": [\"电池检测\", \"首付\", \"月供\", \"贷款包过\"], \"applicability_scope\": \"global\", \"answer\": \"\", \"allow_auto_reply\": false, \"requires_handoff\": true, \"handoff_reason\": \"涉及电池检测及贷款相关敏感内容，需转人工处理\", \"additional_details\": {\"source\": \"LIVE_RECORDER_20260502_042340\", \"batch\": \"LIVE_RECORDER_20260502_042340\"}, \"product_id\":",
+    "evidence_excerpt": "{\"title\": \"新能源电池检测转人工\", \"policy_type\": \"contract\", \"keywords\": [\"电池检测\", \"首付\", \"月供\", \"贷款包过\"], \"applicability_scope\": \"global\", \"answer\": \"\", \"allow_auto_reply\": false, \"requires_handoff\": true, \"handoff_reason\": \"涉及电池检测及贷款相关敏感内容，需转人工处理\", \"additional_details\": {\"source\": \"LIVE_RECORDER_20260502_042340\", \"batch\": \"LIVE_RECORDER_20260502_042340\"}, \"product_id\":",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_d262d55f8b02b514",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [
+      "raw_0aa6e09d264ec7ad"
+    ],
+    "candidate_count": 1,
+    "original_source": {
+      "raw_batch_id": "raw_batch_055784b7dc9082faf951",
+      "conversation_id": "conv_1c4c2bfac8a6d1ae7d",
+      "conversation_type": "group",
+      "raw_message_ids": [
+        "raw_msg_97c216090626054ba16d"
+      ]
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-02T04:24:43"
+    },
+    "created_at": "2026-05-02T04:24:43",
+    "updated_at": "2026-05-02T04:31:07",
+    "quality": {
+      "score": 0.755,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_wechat_group",
+        "candidate_count": 1,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-02T04:31:07"
+    },
+    "formal_relation_cache": {
+      "relation": "novel",
+      "formal_match": {},
+      "recommended_action": "keep_as_rag_experience",
+      "formal_item_count": 12,
+      "evaluated_at": "2026-05-02T04:31:07"
+    }
+  },
+  {
+    "experience_id": "rag_exp_1f115d0de91c34576f2c",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_wechat_group",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_f7748bf2c64aeb0b4d07.txt",
+    "category": "group",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "Intake -> RAG experience: raw_wechat_group/group, candidates=0, evidence=[2026-05-02T04:25:17] self: 边界噪音：LIVE_RECORDER_20260502_042340_NOISE 今天天气和测试心跳记录，不是产品资料，也不是客服知识。",
+    "question": "",
+    "reply_text": "[2026-05-02T04:25:17] self: 边界噪音：LIVE_RECORDER_20260502_042340_NOISE 今天天气和测试心跳记录，不是产品资料，也不是客服知识。",
+    "evidence_excerpt": "[2026-05-02T04:25:17] self: 边界噪音：LIVE_RECORDER_20260502_042340_NOISE 今天天气和测试心跳记录，不是产品资料，也不是客服知识。",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_2d21086386cd800b",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "original_source": {
+      "raw_batch_id": "raw_batch_f7748bf2c64aeb0b4d07",
+      "conversation_id": "conv_1c4c2bfac8a6d1ae7d",
+      "conversation_type": "group",
+      "raw_message_ids": [
+        "raw_msg_58e43487fd33314b4da8"
+      ]
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-02T04:25:18"
+    },
+    "created_at": "2026-05-02T04:25:18",
+    "updated_at": "2026-05-02T04:31:07",
+    "quality": {
+      "score": 0.72,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_wechat_group",
+        "candidate_count": 0,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-02T04:31:07"
+    },
+    "formal_relation_cache": {
+      "relation": "novel",
+      "formal_match": {},
+      "recommended_action": "keep_as_rag_experience",
+      "formal_item_count": 12,
+      "evaluated_at": "2026-05-02T04:31:07"
+    }
+  },
+  {
+    "experience_id": "rag_exp_c3905d7e7c0ffa77349a",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_wechat_file_transfer",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_3b5b56264d2d30a3c358.txt",
+    "category": "file_transfer",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "Intake -> RAG experience: raw_wechat_file_transfer/file_transfer, candidates=1, evidence={\"customer_message\": \"我想买新能源通勤，能看秦PLUS吗？\", \"service_reply\": \"可以先看秦PLUS DM-i，低油耗适合通勤；电池检测、当地迁入和金…",
+    "question": "",
+    "reply_text": "{\"customer_message\": \"我想买新能源通勤，能看秦PLUS吗？\", \"service_reply\": \"可以先看秦PLUS DM-i，低油耗适合通勤；电池检测、当地迁入和金融方案都需要人工确认。\", \"intent_tags\": [\"新能源通勤\", \"车源推荐\", \"金融边界\"], \"tone_tags\": [], \"linked_categories\": [], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\", \"usable_as_template\": true, \"additional_details\": {}}",
+    "evidence_excerpt": "{\"customer_message\": \"我想买新能源通勤，能看秦PLUS吗？\", \"service_reply\": \"可以先看秦PLUS DM-i，低油耗适合通勤；电池检测、当地迁入和金融方案都需要人工确认。\", \"intent_tags\": [\"新能源通勤\", \"车源推荐\", \"金融边界\"], \"tone_tags\": [], \"linked_categories\": [], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\", \"usable_as_template\": true, \"additional_details\": {}}",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_46ade21c94a25215",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [
+      "raw_f42d6d436a2f85f9"
+    ],
+    "candidate_count": 1,
+    "original_source": {
+      "raw_batch_id": "raw_batch_3b5b56264d2d30a3c358",
+      "conversation_id": "conv_87036d2253c2c945ed",
+      "conversation_type": "file_transfer",
+      "raw_message_ids": [
+        "raw_msg_b5aec111c9d7f8fd8d8a",
+        "raw_msg_377f15b4a7eda84cdccb"
+      ]
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-02T04:25:46"
+    },
+    "created_at": "2026-05-02T04:25:46",
+    "updated_at": "2026-05-02T04:31:07",
+    "quality": {
+      "score": 0.755,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_wechat_file_transfer",
+        "candidate_count": 1,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-02T04:31:07"
+    },
+    "formal_relation_cache": {
+      "relation": "novel",
+      "formal_match": {},
+      "recommended_action": "keep_as_rag_experience",
+      "formal_item_count": 12,
+      "evaluated_at": "2026-05-02T04:31:07"
+    }
+  }
+]

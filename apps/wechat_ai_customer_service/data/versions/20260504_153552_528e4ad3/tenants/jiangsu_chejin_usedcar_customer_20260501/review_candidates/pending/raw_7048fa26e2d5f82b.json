@@ -1,0 +1,323 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_7048fa26e2d5f82b",
+  "generated_at": "2026-05-04T04:12:02",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_6f0484accba6982fe559.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"customer_message\": \"你觉得股票明天买哪个能涨？\", \"service_reply\": \"\", \"intent_tags\": [\"投资咨询\", \"股票\"], \"tone_tags\": [\"询问\"], \"applicability_scope\": \"global\", \"additional_details\": {\"customer_name\": \"许聪\", \"timestamp\": \"2026-05-04T04:11:39\"}, \"product_id\": \"\", \"product_category\": \"\"}",
+    "content_sha256": "4956bbd4dbe9ae375434854e80c622204e7bdaf71bc5191b1dc667050419409a",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_6f0484accba6982fe559",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_b22a2a2d02470ada7e05"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_29062838f60962a4",
+        "source_id": "source_3c753f41a0c05c0d",
+        "score": 0.6988,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.3613,
+          "semantic": 0.2075,
+          "vector": 0.14,
+          "vector_similarity": 0.7825,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.6988
+        },
+        "text": "[2026-05-04T04:11:39] 许聪: 你觉得股票明天买哪个能涨？"
+      },
+      {
+        "chunk_id": "chunk_d2ec0cebcf16c10c",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.4224,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1266,
+          "semantic": 0.116,
+          "vector": 0.1097,
+          "vector_similarity": 0.6096,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.4224
+        },
+        "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+      },
+      {
+        "chunk_id": "chunk_4a6a5bac215a4fdd",
+        "source_id": "source_132731aa3f41ea1f",
+        "score": 0.3949,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1773,
+          "semantic": 0.1275,
+          "vector": 0.1002,
+          "vector_similarity": 0.5564,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.3949
+        },
+        "text": "[2026-05-04T03:16:53] self: [车金AI] 您好，二手车过户通常需要买卖双方身份证、机动车登记证书、行驶证、号牌等材料。不过各地车管所要求可能略有不同，具体以当地办理窗口为准。您是在哪个城市办理过户？需要我让销售同事帮您确认当地的具体流程吗？\n[2026-05-04T03:16:53] 许聪: 异地客户能不能提档到安徽？"
+      },
+      {
+        "chunk_id": "chunk_bd5bc67861c08740",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.3943,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1123,
+          "semantic": 0.1048,
+          "vector": 0.1073,
+          "vector_similarity": 0.5962,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.3943
+        },
+        "text": "品名称：2021款捷达VS5 280TSI自动荣耀型\n型号/SKU：CHEJIN-JETTAVS5-2021\n类目：二手车/SUV\n关键词：捷达VS5、VS5、德系SUV、预算SUV\n规格：2021年上牌，表显3.8万公里，1.4T自动挡，白色。\n价格：6.38万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：涡轮、变速箱和保养以检测报告为准。\n推荐话术：适合预算6到7万、想买合资SUV的客户。\n商品名称：2017款福特福克斯1.6L自动风尚"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_c1c1747bc1f599ff0463",
+    "experience_id": "rag_exp_c1c1747bc1f599ff0463"
+  },
+  "detected_tags": [
+    "llm",
+    "rag_experience",
+    "unknown",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "chats",
+    "change_type": "llm_upsert_chats",
+    "summary": "客户许聪询问股票投资建议",
+    "suggested_fields": {
+      "customer_message": "你觉得股票明天买哪个能涨？",
+      "service_reply": "",
+      "intent_tags": [
+        "投资咨询",
+        "股票"
+      ],
+      "tone_tags": [
+        "询问"
+      ],
+      "applicability_scope": "global",
+      "product_id": "",
+      "product_category": "",
+      "additional_details": {
+        "customer_name": "许聪",
+        "timestamp": "2026-05-04T04:11:39",
+        "原始资料摘录": "{\"customer_message\": \"你觉得股票明天买哪个能涨？\", \"service_reply\": \"\", \"intent_tags\": [\"投资咨询\", \"股票\"], \"tone_tags\": [\"询问\"], \"applicability_scope\": \"global\", \"additional_details\": {\"customer_name\": \"许聪\", \"timestamp\": \"2026-05-04T04:11:39\"}, \"product_id\": \"\", \"product_category\": \"\"}"
+      }
+    },
+    "missing_fields": [
+      "service_reply"
+    ],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "chats",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "chats",
+        "id": "stock_tip_query_20260504",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_6f0484accba6982fe559.txt",
+          "candidate_id": "raw_7048fa26e2d5f82b",
+          "rag_experience_id": "rag_exp_c1c1747bc1f599ff0463",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "customer_message": "你觉得股票明天买哪个能涨？",
+          "service_reply": "",
+          "intent_tags": [
+            "投资咨询",
+            "股票"
+          ],
+          "tone_tags": [
+            "询问"
+          ],
+          "applicability_scope": "global",
+          "product_id": "",
+          "product_category": "",
+          "additional_details": {
+            "customer_name": "许聪",
+            "timestamp": "2026-05-04T04:11:39",
+            "原始资料摘录": "{\"customer_message\": \"你觉得股票明天买哪个能涨？\", \"service_reply\": \"\", \"intent_tags\": [\"投资咨询\", \"股票\"], \"tone_tags\": [\"询问\"], \"applicability_scope\": \"global\", \"additional_details\": {\"customer_name\": \"许聪\", \"timestamp\": \"2026-05-04T04:11:39\"}, \"product_id\": \"\", \"product_category\": \"\"}"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "needs_more_info",
+    "ok": false,
+    "confidence": 0.72,
+    "missing_fields": [
+      "service_reply"
+    ],
+    "missing_labels": [
+      "客服回复"
+    ],
+    "question": "还需要补充：客服回复。请补齐后再应用入库。",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "customer_name",
+      "timestamp",
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "pending",
+    "completeness_status": "needs_more_info",
+    "missing_fields": [
+      "service_reply"
+    ],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_6f0484accba6982fe559",
+    "source_raw_message_ids": [
+      "raw_msg_b22a2a2d02470ada7e05"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_3c753f41a0c05c0d",
+      "chunk_count": 1,
+      "query": "客户许聪询问股票投资建议\n{\"customer_message\": \"你觉得股票明天买哪个能涨？\", \"service_reply\": \"\", \"intent_tags\": [\"投资咨询\", \"股票\"], \"tone_tags\": [\"询问\"], \"applicability_scope\": \"global\", \"additional_details\": {\"customer_name\": \"许聪\", \"timestamp\": \"2026-05-04T04:11:39\"}, \"product_id\": \"\", \"product_category\": \"\"}",
+      "hits": [
+        {
+          "chunk_id": "chunk_29062838f60962a4",
+          "source_id": "source_3c753f41a0c05c0d",
+          "score": 0.6988,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.3613,
+            "semantic": 0.2075,
+            "vector": 0.14,
+            "vector_similarity": 0.7825,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.6988
+          },
+          "text": "[2026-05-04T04:11:39] 许聪: 你觉得股票明天买哪个能涨？"
+        },
+        {
+          "chunk_id": "chunk_d2ec0cebcf16c10c",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.4224,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1266,
+            "semantic": 0.116,
+            "vector": 0.1097,
+            "vector_similarity": 0.6096,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.4224
+          },
+          "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+        },
+        {
+          "chunk_id": "chunk_4a6a5bac215a4fdd",
+          "source_id": "source_132731aa3f41ea1f",
+          "score": 0.3949,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1773,
+            "semantic": 0.1275,
+            "vector": 0.1002,
+            "vector_similarity": 0.5564,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.3949
+          },
+          "text": "[2026-05-04T03:16:53] self: [车金AI] 您好，二手车过户通常需要买卖双方身份证、机动车登记证书、行驶证、号牌等材料。不过各地车管所要求可能略有不同，具体以当地办理窗口为准。您是在哪个城市办理过户？需要我让销售同事帮您确认当地的具体流程吗？\n[2026-05-04T03:16:53] 许聪: 异地客户能不能提档到安徽？"
+        },
+        {
+          "chunk_id": "chunk_bd5bc67861c08740",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.3943,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1123,
+            "semantic": 0.1048,
+            "vector": 0.1073,
+            "vector_similarity": 0.5962,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.3943
+          },
+          "text": "品名称：2021款捷达VS5 280TSI自动荣耀型\n型号/SKU：CHEJIN-JETTAVS5-2021\n类目：二手车/SUV\n关键词：捷达VS5、VS5、德系SUV、预算SUV\n规格：2021年上牌，表显3.8万公里，1.4T自动挡，白色。\n价格：6.38万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：涡轮、变速箱和保养以检测报告为准。\n推荐话术：适合预算6到7万、想买合资SUV的客户。\n商品名称：2017款福特福克斯1.6L自动风尚"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_c1c1747bc1f599ff0463",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ]
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

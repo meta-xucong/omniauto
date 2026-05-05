@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "category_id": "policies",
+  "id": "chejin_condition_report_rule",
+  "status": "active",
+  "source": {
+    "type": "demo_fixture",
+    "batch_token": "CHEJIN_DEMO_20260503_203628",
+    "domain": "used_car"
+  },
+  "data": {
+    "title": "车况检测报告解释规则",
+    "policy_type": "after_sales",
+    "keywords": [
+      "检测报告",
+      "第三方检测",
+      "车况",
+      "保养记录",
+      "CHEJIN_DEMO_20260503_203628"
+    ],
+    "applicability_scope": "global",
+    "product_category": "",
+    "answer": "AI 可以提示车况以检测报告和合同为准，但不能口头承诺无任何瑕疵；客户要求详细解释检测报告时转人工。",
+    "allow_auto_reply": false,
+    "requires_handoff": true,
+    "handoff_reason": "condition_report_detail",
+    "operator_alert": true,
+    "risk_level": "high",
+    "additional_details": {
+      "演示批次": "CHEJIN_DEMO_20260503_203628",
+      "面向客户解释": "前台可直接按自然语言理解，不需要客户理解技术字段。"
+    }
+  },
+  "runtime": {
+    "allow_auto_reply": false,
+    "requires_handoff": true,
+    "risk_level": "high",
+    "operator_alert": true
+  },
+  "review_state": {
+    "is_new": true,
+    "new_reason": "newly_added_formal_knowledge",
+    "marked_at": "2026-05-03T20:36:28",
+    "updated_at": "2026-05-03T20:36:28",
+    "read_at": "",
+    "read_by": "",
+    "source": {
+      "source_module": "jiangsu_chejin_demo_seed",
+      "target_category": "policies",
+      "item_id": "chejin_condition_report_rule"
+    }
+  },
+  "metadata": {
+    "created_at": "2026-05-03T20:36:28",
+    "updated_at": "2026-05-03T20:36:28",
+    "created_by": "admin",
+    "updated_by": "admin"
+  }
+}

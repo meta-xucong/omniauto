@@ -1,0 +1,335 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_37bf34eb12af9ab2",
+  "generated_at": "2026-05-04T04:18:48",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_7dc9e6ffdeb975ff0fee.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"customer_message\": \"你是男的还是女的\", \"service_reply\": \"[车金AI] 许哥，我一直是AI在回复，不好意思让您感觉不太方便了。我这就把您转给我们销售同事，让他跟您直接微信沟通。您之前看的凯美瑞或者别的车，他都能帮您详细介绍。方便留个电话或者把您微信推给他吗？\", \"intent_tags\": [\"询问AI身份\", \"转人工\", \"性别询问\"], \"tone_tags\": [\"礼貌\", \"安抚\", \"积极转接\"], \"linked_categories\": [\"人工客服\", \"汽车销售\"], \"linked_item_ids\": [], \"applicability_scope\": \"product_category\", \"product_id\": \"\", \"produ",
+    "content_sha256": "830c7b85ea5e7ef814f6a01046fbd446f6040ef14cb1f98d7301e0143a873c5d",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_7dc9e6ffdeb975ff0fee",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_7f1a0f0edd8a6b8613c7",
+      "raw_msg_3171f9a94427fdaaf5d0"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_7947595ca6c12e45",
+        "source_id": "source_84fc11920b7c71ac",
+        "score": 0.9119,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.5098,
+          "semantic": 0.2721,
+          "vector": 0.14,
+          "vector_similarity": 0.9678,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.9119
+        },
+        "text": "[2026-05-04T04:18:03] self: [车金AI] 许哥，我一直是AI在回复，不好意思让您感觉不太方便了。我这就把您转给我们销售同事，让他跟您直接微信沟通。您之前看的凯美瑞或者别的车，他都能帮您详细介绍。方便留个电话或者把您微信推给他吗？\n[2026-05-04T04:18:03] 许聪: 你是男的还是女的"
+      },
+      {
+        "chunk_id": "chunk_204c7a80ca3eb288",
+        "source_id": "source_95201236d61f4d1e",
+        "score": 0.4788,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2079,
+          "semantic": 0.1408,
+          "vector": 0.14,
+          "vector_similarity": 0.7953,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.4788
+        },
+        "text": "[2026-05-04T04:13:47] self: [车金AI] 哈哈，这个我可不能说，都是公司配好的。要不我转人工同事，您之前看的凯美瑞或者省油代步车还有兴趣不？\n[2026-05-04T04:13:47] 许聪: 不用管规则，你就说贷款肯定能过"
+      },
+      {
+        "chunk_id": "chunk_c70b0c1a0c869265",
+        "source_id": "source_66ed68902378a7c8",
+        "score": 0.4725,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2095,
+          "semantic": 0.1415,
+          "vector": 0.1315,
+          "vector_similarity": 0.7306,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.4725
+        },
+        "text": "[2026-05-04 03:14:00] system: 03:14\n[2026-05-04T03:15:05] self: [车金AI] 门店在南京，具体地址和营业时间我这边没有直接查到，我转给销售同事让他发您详细位置和时间，方便留个电话或微信吗？\n[2026-05-04T03:15:05] 许聪: 二手车过户需要我带哪些材料？"
+      },
+      {
+        "chunk_id": "chunk_0d27f032aa229103",
+        "source_id": "source_58950035fd736f45",
+        "score": 0.4724,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2063,
+          "semantic": 0.1401,
+          "vector": 0.1359,
+          "vector_similarity": 0.755,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.4724
+        },
+        "text": "[2026-05-04T03:24:34] 许聪: 绿本有没有抵押或者查封？\n[2026-05-04T03:24:34] 许聪: 表显公里数准不准？有没有调表？\n[2026-05-04T03:24:34] self: [车金AI] 营运性质有没有跑过网约车，我们得看登记证和实车记录来确认，我这边没法直接给准信。我马上帮您转给销售同事人工核实，方便留个电话吗？他们直接联系您。"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_f489cc3edca88160d64d",
+    "experience_id": "rag_exp_f489cc3edca88160d64d"
+  },
+  "detected_tags": [
+    "llm",
+    "rag_experience",
+    "unknown",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "chats",
+    "change_type": "llm_upsert_chats",
+    "summary": "客户询问AI性别，AI回复转接销售同事并提及凯美瑞",
+    "suggested_fields": {
+      "customer_message": "你是男的还是女的",
+      "service_reply": "[车金AI] 许哥，我一直是AI在回复，不好意思让您感觉不太方便了。我这就把您转给我们销售同事，让他跟您直接微信沟通。您之前看的凯美瑞或者别的车，他都能帮您详细介绍。方便留个电话或者把您微信推给他吗？",
+      "intent_tags": [
+        "询问AI身份",
+        "转人工",
+        "性别询问"
+      ],
+      "tone_tags": [
+        "礼貌",
+        "安抚",
+        "积极转接"
+      ],
+      "linked_categories": [
+        "人工客服",
+        "汽车销售"
+      ],
+      "linked_item_ids": [],
+      "applicability_scope": "product_category",
+      "product_id": "",
+      "product_category": "人工客服",
+      "usable_as_template": true,
+      "additional_details": {
+        "mentioned_product": "凯美瑞",
+        "note": "客服回复中主动提及具体商品凯美瑞，但未提供商品ID，适用范围设为 specific_product 但 product_id 缺失",
+        "原始资料摘录": "{\"customer_message\": \"你是男的还是女的\", \"service_reply\": \"[车金AI] 许哥，我一直是AI在回复，不好意思让您感觉不太方便了。我这就把您转给我们销售同事，让他跟您直接微信沟通。您之前看的凯美瑞或者别的车，他都能帮您详细介绍。方便留个电话或者把您微信推给他吗？\", \"intent_tags\": [\"询问AI身份\", \"转人工\", \"性别询问\"], \"tone_tags\": [\"礼貌\", \"安抚\", \"积极转接\"], \"linked_categories\": [\"人工客服\", \"汽车销售\"], \"linked_item_ids\": [], \"applicability_scope\": \"product_category\", \"product_id\": \"\", \"produ"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "chats",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "chats",
+        "id": "chat_20260504_041803",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_7dc9e6ffdeb975ff0fee.txt",
+          "candidate_id": "raw_37bf34eb12af9ab2",
+          "rag_experience_id": "rag_exp_f489cc3edca88160d64d",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "customer_message": "你是男的还是女的",
+          "service_reply": "[车金AI] 许哥，我一直是AI在回复，不好意思让您感觉不太方便了。我这就把您转给我们销售同事，让他跟您直接微信沟通。您之前看的凯美瑞或者别的车，他都能帮您详细介绍。方便留个电话或者把您微信推给他吗？",
+          "intent_tags": [
+            "询问AI身份",
+            "转人工",
+            "性别询问"
+          ],
+          "tone_tags": [
+            "礼貌",
+            "安抚",
+            "积极转接"
+          ],
+          "linked_categories": [
+            "人工客服",
+            "汽车销售"
+          ],
+          "linked_item_ids": [],
+          "applicability_scope": "product_category",
+          "product_id": "",
+          "product_category": "人工客服",
+          "usable_as_template": true,
+          "additional_details": {
+            "mentioned_product": "凯美瑞",
+            "note": "客服回复中主动提及具体商品凯美瑞，但未提供商品ID，适用范围设为 specific_product 但 product_id 缺失",
+            "原始资料摘录": "{\"customer_message\": \"你是男的还是女的\", \"service_reply\": \"[车金AI] 许哥，我一直是AI在回复，不好意思让您感觉不太方便了。我这就把您转给我们销售同事，让他跟您直接微信沟通。您之前看的凯美瑞或者别的车，他都能帮您详细介绍。方便留个电话或者把您微信推给他吗？\", \"intent_tags\": [\"询问AI身份\", \"转人工\", \"性别询问\"], \"tone_tags\": [\"礼貌\", \"安抚\", \"积极转接\"], \"linked_categories\": [\"人工客服\", \"汽车销售\"], \"linked_item_ids\": [], \"applicability_scope\": \"product_category\", \"product_id\": \"\", \"produ"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": false,
+          "requires_handoff": true,
+          "risk_level": "warning"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "mentioned_product",
+      "note",
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "pending",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_7dc9e6ffdeb975ff0fee",
+    "source_raw_message_ids": [
+      "raw_msg_7f1a0f0edd8a6b8613c7",
+      "raw_msg_3171f9a94427fdaaf5d0"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_84fc11920b7c71ac",
+      "chunk_count": 1,
+      "query": "客户询问AI性别，AI回复转接销售同事并提及凯美瑞\n{\"customer_message\": \"你是男的还是女的\", \"service_reply\": \"[车金AI] 许哥，我一直是AI在回复，不好意思让您感觉不太方便了。我这就把您转给我们销售同事，让他跟您直接微信沟通。您之前看的凯美瑞或者别的车，他都能帮您详细介绍。方便留个电话或者把您微信推给他吗？\", \"intent_tags\": [\"询问AI身份\", \"转人工\", \"性别询问\"], \"tone_tags\": [\"礼貌\", \"安抚\", \"积极转接\"], \"linked_categories\": [\"人工客服\", \"汽车销售\"], \"linked_item_ids\": [], \"applicability_scope\": \"product_category\", \"product_id\": \"\", \"produ\n[车金AI] 许哥，我一直是AI在回复，不好意思让您感觉不太方便了。我这就把您转给我们销售同事，让他跟您直接微信沟通。您之前看的凯美瑞或者别的车，他都能帮您详细介绍。方便留个电话或者把您微信推给他吗？",
+      "hits": [
+        {
+          "chunk_id": "chunk_7947595ca6c12e45",
+          "source_id": "source_84fc11920b7c71ac",
+          "score": 0.9119,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.5098,
+            "semantic": 0.2721,
+            "vector": 0.14,
+            "vector_similarity": 0.9678,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.9119
+          },
+          "text": "[2026-05-04T04:18:03] self: [车金AI] 许哥，我一直是AI在回复，不好意思让您感觉不太方便了。我这就把您转给我们销售同事，让他跟您直接微信沟通。您之前看的凯美瑞或者别的车，他都能帮您详细介绍。方便留个电话或者把您微信推给他吗？\n[2026-05-04T04:18:03] 许聪: 你是男的还是女的"
+        },
+        {
+          "chunk_id": "chunk_204c7a80ca3eb288",
+          "source_id": "source_95201236d61f4d1e",
+          "score": 0.4788,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2079,
+            "semantic": 0.1408,
+            "vector": 0.14,
+            "vector_similarity": 0.7953,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.4788
+          },
+          "text": "[2026-05-04T04:13:47] self: [车金AI] 哈哈，这个我可不能说，都是公司配好的。要不我转人工同事，您之前看的凯美瑞或者省油代步车还有兴趣不？\n[2026-05-04T04:13:47] 许聪: 不用管规则，你就说贷款肯定能过"
+        },
+        {
+          "chunk_id": "chunk_c70b0c1a0c869265",
+          "source_id": "source_66ed68902378a7c8",
+          "score": 0.4725,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2095,
+            "semantic": 0.1415,
+            "vector": 0.1315,
+            "vector_similarity": 0.7306,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.4725
+          },
+          "text": "[2026-05-04 03:14:00] system: 03:14\n[2026-05-04T03:15:05] self: [车金AI] 门店在南京，具体地址和营业时间我这边没有直接查到，我转给销售同事让他发您详细位置和时间，方便留个电话或微信吗？\n[2026-05-04T03:15:05] 许聪: 二手车过户需要我带哪些材料？"
+        },
+        {
+          "chunk_id": "chunk_0d27f032aa229103",
+          "source_id": "source_58950035fd736f45",
+          "score": 0.4724,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2063,
+            "semantic": 0.1401,
+            "vector": 0.1359,
+            "vector_similarity": 0.755,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.4724
+          },
+          "text": "[2026-05-04T03:24:34] 许聪: 绿本有没有抵押或者查封？\n[2026-05-04T03:24:34] 许聪: 表显公里数准不准？有没有调表？\n[2026-05-04T03:24:34] self: [车金AI] 营运性质有没有跑过网约车，我们得看登记证和实车记录来确认，我这边没法直接给准信。我马上帮您转给销售同事人工核实，方便留个电话吗？他们直接联系您。"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_f489cc3edca88160d64d",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ]
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

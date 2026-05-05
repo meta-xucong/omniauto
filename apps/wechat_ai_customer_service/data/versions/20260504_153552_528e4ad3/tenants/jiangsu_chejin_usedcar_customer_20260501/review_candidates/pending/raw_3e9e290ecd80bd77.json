@@ -1,0 +1,305 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_3e9e290ecd80bd77",
+  "generated_at": "2026-05-03T04:39:25",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_929e067becf36abde4f9.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "customer_message: 想买新能源通勤，能看秦PLUS吗？；service_reply: 可以先看秦PLUS DM-i，低油耗适合通勤；但电池检测、当地迁入和金融方案都需要人工确认。",
+    "content_sha256": "1e0c602d573e1d905c95c91e4f360cbf3896e3844ecb4138f9b8fd04f314e454",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_929e067becf36abde4f9",
+    "conversation_id": "conv_87036d2253c2c945ed",
+    "raw_message_ids": [
+      "raw_msg_3bad64166d79edbd43e2"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_8c391139b89c4cda",
+        "source_id": "source_11de52216d0df1cf",
+        "score": 0.8593,
+        "category": "file_transfer",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.5111,
+          "semantic": 0.2182,
+          "vector": 0.14,
+          "vector_similarity": 0.8769,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.8593
+        },
+        "text": "[2026-05-01 16:03:00] self: 聊天记录：江苏车金记录员话术 CHEJIN_20260503_043922\n客户：想买新能源通勤，能看秦PLUS吗？\n客服：可以先看秦PLUS DM-i，低油耗适合通勤；但电池检测、当地迁入和金融方案都需要人工确认。"
+      },
+      {
+        "chunk_id": "chunk_9c80524ef6f05098",
+        "source_id": "source_46ade21c94a25215",
+        "score": 0.8373,
+        "category": "file_transfer",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.4936,
+          "semantic": 0.2137,
+          "vector": 0.14,
+          "vector_similarity": 0.8479,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.8373
+        },
+        "text": "[2026-05-02 04:25:00] system: 04:25\n[2026-05-02T04:25:43] self: 聊天记录：记录员文件传输助手话术 LIVE_RECORDER_20260502_042340\n客户：我想买新能源通勤，能看秦PLUS吗？批次 LIVE_RECORDER_20260502_042340\n客服：可以先看秦PLUS DM-i，低油耗适合通勤；电池检测、当地迁入和金融方案都需要人工确认。\n意图标签：新能源通勤,车源推荐,金融边界"
+      },
+      {
+        "chunk_id": "chunk_320caa1062c4cf21",
+        "source_id": "source_55cce0d21fe7898c",
+        "score": 0.5891,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2724,
+          "semantic": 0.1569,
+          "vector": 0.1348,
+          "vector_similarity": 0.7489,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.025,
+          "risk_penalty": 0.0,
+          "final": 0.5891
+        },
+        "text": "公里，2.0T自动挡，一手车源，支持到店试驾。\n价格：12.80万\n单位：台\n库存：1\n发货：高意向试驾需转人工确认门店和时间。\n售后：精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。\n商品资料：江苏车金二手车车源 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_043922\n商品名称：2022款比亚迪秦PLUS DM-i 55KM\n型号：CHEJIN-QINPLUS-2022DMI\n商品类目：二手车/新能源轿车\n别名关键词：秦PLUS,比亚迪秦,新能源,绿牌,混"
+      },
+      {
+        "chunk_id": "chunk_98d495755714a154",
+        "source_id": "source_25f67e9fcaeb0195",
+        "score": 0.4995,
+        "category": "chats",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2197,
+          "semantic": 0.1398,
+          "vector": 0.14,
+          "vector_similarity": 0.7926,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.0,
+          "risk_penalty": 0.0,
+          "final": 0.4995
+        },
+        "text": "聊天记录：江苏车金预算推荐话术 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_043922\n客户：我从抖音直播来的，8万左右想买自动挡省油代步车，有什么推荐？\n客服：您这个预算可以先看凯美瑞、思域和秦PLUS DM-i。凯美瑞偏家用稳、省心；思域更年轻；秦PLUS更省油。您是在南京看车吗？是否考虑贷款或置换？\n意图标签：预算推荐,车源推荐,抖音线索\n聊天记录：江苏车金置换话术 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_04392"
+      }
+    ],
+    "original_type": "raw_wechat_file_transfer",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_7fba4d7cb89d0fa987b1",
+    "experience_id": "rag_exp_7fba4d7cb89d0fa987b1"
+  },
+  "detected_tags": [
+    "chat",
+    "rag_experience",
+    "style",
+    "wechat_file_transfer"
+  ],
+  "proposal": {
+    "target_category": "chats",
+    "change_type": "upsert_chat_example",
+    "summary": "建议沉淀一条客服话术样例",
+    "suggested_fields": {
+      "customer_message": "想买新能源通勤，能看秦PLUS吗？",
+      "service_reply": "可以先看秦PLUS DM-i，低油耗适合通勤；但电池检测、当地迁入和金融方案都需要人工确认。",
+      "intent_tags": [
+        "chat"
+      ],
+      "tone_tags": [
+        "真实客服话术"
+      ],
+      "usable_as_template": true,
+      "applicability_scope": "global",
+      "additional_details": {
+        "原始资料摘录": "customer_message: 想买新能源通勤，能看秦PLUS吗？；service_reply: 可以先看秦PLUS DM-i，低油耗适合通勤；但电池检测、当地迁入和金融方案都需要人工确认。"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "chats",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "chats",
+        "id": "chat_6e519c33e4",
+        "status": "active",
+        "source": {
+          "type": "raw_upload",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_929e067becf36abde4f9.txt",
+          "candidate_id": "raw_3e9e290ecd80bd77",
+          "rag_experience_id": "rag_exp_7fba4d7cb89d0fa987b1",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_file_transfer"
+        },
+        "data": {
+          "customer_message": "想买新能源通勤，能看秦PLUS吗？",
+          "service_reply": "可以先看秦PLUS DM-i，低油耗适合通勤；但电池检测、当地迁入和金融方案都需要人工确认。",
+          "intent_tags": [
+            "chat"
+          ],
+          "tone_tags": [
+            "真实客服话术"
+          ],
+          "usable_as_template": true,
+          "applicability_scope": "global",
+          "additional_details": {
+            "原始资料摘录": "customer_message: 想买新能源通勤，能看秦PLUS吗？；service_reply: 可以先看秦PLUS DM-i，低油耗适合通勤；但电池检测、当地迁入和金融方案都需要人工确认。"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": false,
+          "requires_handoff": true,
+          "risk_level": "warning"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "pending",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": false,
+      "provider": "",
+      "status": "rule_only_disabled_by_request",
+      "reason": "llm_disabled_by_caller",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_929e067becf36abde4f9",
+    "source_raw_message_ids": [
+      "raw_msg_3bad64166d79edbd43e2"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_11de52216d0df1cf",
+      "chunk_count": 1,
+      "query": "建议沉淀一条客服话术样例\ncustomer_message: 想买新能源通勤，能看秦PLUS吗？；service_reply: 可以先看秦PLUS DM-i，低油耗适合通勤；但电池检测、当地迁入和金融方案都需要人工确认。\n可以先看秦PLUS DM-i，低油耗适合通勤；但电池检测、当地迁入和金融方案都需要人工确认。",
+      "hits": [
+        {
+          "chunk_id": "chunk_8c391139b89c4cda",
+          "source_id": "source_11de52216d0df1cf",
+          "score": 0.8593,
+          "category": "file_transfer",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.5111,
+            "semantic": 0.2182,
+            "vector": 0.14,
+            "vector_similarity": 0.8769,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.8593
+          },
+          "text": "[2026-05-01 16:03:00] self: 聊天记录：江苏车金记录员话术 CHEJIN_20260503_043922\n客户：想买新能源通勤，能看秦PLUS吗？\n客服：可以先看秦PLUS DM-i，低油耗适合通勤；但电池检测、当地迁入和金融方案都需要人工确认。"
+        },
+        {
+          "chunk_id": "chunk_9c80524ef6f05098",
+          "source_id": "source_46ade21c94a25215",
+          "score": 0.8373,
+          "category": "file_transfer",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.4936,
+            "semantic": 0.2137,
+            "vector": 0.14,
+            "vector_similarity": 0.8479,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.8373
+          },
+          "text": "[2026-05-02 04:25:00] system: 04:25\n[2026-05-02T04:25:43] self: 聊天记录：记录员文件传输助手话术 LIVE_RECORDER_20260502_042340\n客户：我想买新能源通勤，能看秦PLUS吗？批次 LIVE_RECORDER_20260502_042340\n客服：可以先看秦PLUS DM-i，低油耗适合通勤；电池检测、当地迁入和金融方案都需要人工确认。\n意图标签：新能源通勤,车源推荐,金融边界"
+        },
+        {
+          "chunk_id": "chunk_320caa1062c4cf21",
+          "source_id": "source_55cce0d21fe7898c",
+          "score": 0.5891,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2724,
+            "semantic": 0.1569,
+            "vector": 0.1348,
+            "vector_similarity": 0.7489,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.025,
+            "risk_penalty": 0.0,
+            "final": 0.5891
+          },
+          "text": "公里，2.0T自动挡，一手车源，支持到店试驾。\n价格：12.80万\n单位：台\n库存：1\n发货：高意向试驾需转人工确认门店和时间。\n售后：精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。\n商品资料：江苏车金二手车车源 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_043922\n商品名称：2022款比亚迪秦PLUS DM-i 55KM\n型号：CHEJIN-QINPLUS-2022DMI\n商品类目：二手车/新能源轿车\n别名关键词：秦PLUS,比亚迪秦,新能源,绿牌,混"
+        },
+        {
+          "chunk_id": "chunk_98d495755714a154",
+          "source_id": "source_25f67e9fcaeb0195",
+          "score": 0.4995,
+          "category": "chats",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2197,
+            "semantic": 0.1398,
+            "vector": 0.14,
+            "vector_similarity": 0.7926,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.0,
+            "risk_penalty": 0.0,
+            "final": 0.4995
+          },
+          "text": "聊天记录：江苏车金预算推荐话术 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_043922\n客户：我从抖音直播来的，8万左右想买自动挡省油代步车，有什么推荐？\n客服：您这个预算可以先看凯美瑞、思域和秦PLUS DM-i。凯美瑞偏家用稳、省心；思域更年轻；秦PLUS更省油。您是在南京看车吗？是否考虑贷款或置换？\n意图标签：预算推荐,车源推荐,抖音线索\n聊天记录：江苏车金置换话术 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_04392"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_7fba4d7cb89d0fa987b1",
+    "source_chain": [
+      "raw_wechat_file_transfer",
+      "rag_experience",
+      "review_candidate"
+    ]
+  },
+  "suggested_tests": [
+    {
+      "scenario": "style",
+      "assertion": "入库后应只影响回复风格或类似场景表达，不改变事实依据。"
+    }
+  ]
+}

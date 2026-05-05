@@ -1,0 +1,327 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_e00055add3db07c0",
+  "generated_at": "2026-05-04T03:17:32",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_7caa97b2077d3915264f.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"customer_message\": \"异地客户能不能提档到安徽？\", \"service_reply\": \"您好，二手车过户通常需要买卖双方身份证、机动车登记证书、行驶证、号牌等材料。不过各地车管所要求可能略有不同，具体以当地办理窗口为准。您是在哪个城市办理过户？需要我让销售同事帮您确认当地的具体流程吗？\", \"intent_tags\": [\"过户咨询\", \"异地提档\", \"材料咨询\"], \"tone_tags\": [\"友好\", \"专业\"], \"linked_categories\": [], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\", \"usable_as_",
+    "content_sha256": "fb442a98a5c0a9e6746b52b0403d35f9166a156a0fa47fa209ac212466010ff8",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_7caa97b2077d3915264f",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_83895f712ddbdde44774",
+      "raw_msg_8d4840784315f20bfca2"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_4a6a5bac215a4fdd",
+        "source_id": "source_132731aa3f41ea1f",
+        "score": 0.8735,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.483,
+          "semantic": 0.2604,
+          "vector": 0.14,
+          "vector_similarity": 0.9597,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.8735
+        },
+        "text": "[2026-05-04T03:16:53] self: [车金AI] 您好，二手车过户通常需要买卖双方身份证、机动车登记证书、行驶证、号牌等材料。不过各地车管所要求可能略有不同，具体以当地办理窗口为准。您是在哪个城市办理过户？需要我让销售同事帮您确认当地的具体流程吗？\n[2026-05-04T03:16:53] 许聪: 异地客户能不能提档到安徽？"
+      },
+      {
+        "chunk_id": "chunk_754ecf131d7858cd",
+        "source_id": "source_bb395d5ecba99f8b",
+        "score": 0.5278,
+        "category": "policies",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2595,
+          "semantic": 0.1633,
+          "vector": 0.14,
+          "vector_similarity": 0.8827,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.045,
+          "risk_penalty": 0.08,
+          "final": 0.5278
+        },
+        "text": "# 二手车交易规则手册\n演示批次：CHEJIN_DEMO_20260503_203628\n二手车行业演示规则：所有成交、过户、金融、售后和车况承诺均以合同、检测报告和人工确认为准。\n规则：江苏车金门店介绍\n触发词：江苏车金、门店、地址、营业时间、CHEJIN_DEMO_20260503_203628\n标准说明：江苏车金二手车演示账号默认说明：客户可以预约南京门店看车，AI 只做初步接待、资料收集和风险提醒，成交条件由人工确认。\n规则：看车预约与到店规则\n触发词：看车、到店、试驾、试乘、预约、CHEJIN_DEMO_"
+      },
+      {
+        "chunk_id": "chunk_bd5bc67861c08740",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5215,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.182,
+          "semantic": 0.1296,
+          "vector": 0.14,
+          "vector_similarity": 0.811,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5215
+        },
+        "text": "品名称：2021款捷达VS5 280TSI自动荣耀型\n型号/SKU：CHEJIN-JETTAVS5-2021\n类目：二手车/SUV\n关键词：捷达VS5、VS5、德系SUV、预算SUV\n规格：2021年上牌，表显3.8万公里，1.4T自动挡，白色。\n价格：6.38万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：涡轮、变速箱和保养以检测报告为准。\n推荐话术：适合预算6到7万、想买合资SUV的客户。\n商品名称：2017款福特福克斯1.6L自动风尚"
+      },
+      {
+        "chunk_id": "chunk_d2ec0cebcf16c10c",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5197,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1807,
+          "semantic": 0.129,
+          "vector": 0.14,
+          "vector_similarity": 0.8389,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5197
+        },
+        "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_a66149f6919983971544",
+    "experience_id": "rag_exp_a66149f6919983971544"
+  },
+  "detected_tags": [
+    "llm",
+    "rag_experience",
+    "unknown",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "chats",
+    "change_type": "llm_upsert_chats",
+    "summary": "客户询问异地客户能否提档到安徽，客服回复二手车过户所需材料并主动提供进一步确认帮助",
+    "suggested_fields": {
+      "customer_message": "异地客户能不能提档到安徽？",
+      "service_reply": "您好，二手车过户通常需要买卖双方身份证、机动车登记证书、行驶证、号牌等材料。不过各地车管所要求可能略有不同，具体以当地办理窗口为准。您是在哪个城市办理过户？需要我让销售同事帮您确认当地的具体流程吗？",
+      "intent_tags": [
+        "过户咨询",
+        "异地提档",
+        "材料咨询"
+      ],
+      "tone_tags": [
+        "友好",
+        "专业"
+      ],
+      "linked_categories": [],
+      "linked_item_ids": [],
+      "applicability_scope": "global",
+      "product_id": "",
+      "product_category": "",
+      "usable_as_template": true,
+      "additional_details": {
+        "timestamp": "2026-05-04T03:16:53",
+        "customer_name": "许聪",
+        "原始资料摘录": "{\"customer_message\": \"异地客户能不能提档到安徽？\", \"service_reply\": \"您好，二手车过户通常需要买卖双方身份证、机动车登记证书、行驶证、号牌等材料。不过各地车管所要求可能略有不同，具体以当地办理窗口为准。您是在哪个城市办理过户？需要我让销售同事帮您确认当地的具体流程吗？\", \"intent_tags\": [\"过户咨询\", \"异地提档\", \"材料咨询\"], \"tone_tags\": [\"友好\", \"专业\"], \"linked_categories\": [], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\", \"usable_as_"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "chats",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "chats",
+        "id": "chat_used_car_transfer_materials",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_7caa97b2077d3915264f.txt",
+          "candidate_id": "raw_e00055add3db07c0",
+          "rag_experience_id": "rag_exp_a66149f6919983971544",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "customer_message": "异地客户能不能提档到安徽？",
+          "service_reply": "您好，二手车过户通常需要买卖双方身份证、机动车登记证书、行驶证、号牌等材料。不过各地车管所要求可能略有不同，具体以当地办理窗口为准。您是在哪个城市办理过户？需要我让销售同事帮您确认当地的具体流程吗？",
+          "intent_tags": [
+            "过户咨询",
+            "异地提档",
+            "材料咨询"
+          ],
+          "tone_tags": [
+            "友好",
+            "专业"
+          ],
+          "linked_categories": [],
+          "linked_item_ids": [],
+          "applicability_scope": "global",
+          "product_id": "",
+          "product_category": "",
+          "usable_as_template": true,
+          "additional_details": {
+            "timestamp": "2026-05-04T03:16:53",
+            "customer_name": "许聪",
+            "原始资料摘录": "{\"customer_message\": \"异地客户能不能提档到安徽？\", \"service_reply\": \"您好，二手车过户通常需要买卖双方身份证、机动车登记证书、行驶证、号牌等材料。不过各地车管所要求可能略有不同，具体以当地办理窗口为准。您是在哪个城市办理过户？需要我让销售同事帮您确认当地的具体流程吗？\", \"intent_tags\": [\"过户咨询\", \"异地提档\", \"材料咨询\"], \"tone_tags\": [\"友好\", \"专业\"], \"linked_categories\": [], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\", \"usable_as_"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "customer_name",
+      "timestamp",
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "pending",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_7caa97b2077d3915264f",
+    "source_raw_message_ids": [
+      "raw_msg_83895f712ddbdde44774",
+      "raw_msg_8d4840784315f20bfca2"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_132731aa3f41ea1f",
+      "chunk_count": 1,
+      "query": "客户询问异地客户能否提档到安徽，客服回复二手车过户所需材料并主动提供进一步确认帮助\n{\"customer_message\": \"异地客户能不能提档到安徽？\", \"service_reply\": \"您好，二手车过户通常需要买卖双方身份证、机动车登记证书、行驶证、号牌等材料。不过各地车管所要求可能略有不同，具体以当地办理窗口为准。您是在哪个城市办理过户？需要我让销售同事帮您确认当地的具体流程吗？\", \"intent_tags\": [\"过户咨询\", \"异地提档\", \"材料咨询\"], \"tone_tags\": [\"友好\", \"专业\"], \"linked_categories\": [], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\", \"usable_as_\n您好，二手车过户通常需要买卖双方身份证、机动车登记证书、行驶证、号牌等材料。不过各地车管所要求可能略有不同，具体以当地办理窗口为准。您是在哪个城市办理过户？需要我让销售同事帮您确认当地的具体流程吗？",
+      "hits": [
+        {
+          "chunk_id": "chunk_4a6a5bac215a4fdd",
+          "source_id": "source_132731aa3f41ea1f",
+          "score": 0.8735,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.483,
+            "semantic": 0.2604,
+            "vector": 0.14,
+            "vector_similarity": 0.9597,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.8735
+          },
+          "text": "[2026-05-04T03:16:53] self: [车金AI] 您好，二手车过户通常需要买卖双方身份证、机动车登记证书、行驶证、号牌等材料。不过各地车管所要求可能略有不同，具体以当地办理窗口为准。您是在哪个城市办理过户？需要我让销售同事帮您确认当地的具体流程吗？\n[2026-05-04T03:16:53] 许聪: 异地客户能不能提档到安徽？"
+        },
+        {
+          "chunk_id": "chunk_754ecf131d7858cd",
+          "source_id": "source_bb395d5ecba99f8b",
+          "score": 0.5278,
+          "category": "policies",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2595,
+            "semantic": 0.1633,
+            "vector": 0.14,
+            "vector_similarity": 0.8827,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.045,
+            "risk_penalty": 0.08,
+            "final": 0.5278
+          },
+          "text": "# 二手车交易规则手册\n演示批次：CHEJIN_DEMO_20260503_203628\n二手车行业演示规则：所有成交、过户、金融、售后和车况承诺均以合同、检测报告和人工确认为准。\n规则：江苏车金门店介绍\n触发词：江苏车金、门店、地址、营业时间、CHEJIN_DEMO_20260503_203628\n标准说明：江苏车金二手车演示账号默认说明：客户可以预约南京门店看车，AI 只做初步接待、资料收集和风险提醒，成交条件由人工确认。\n规则：看车预约与到店规则\n触发词：看车、到店、试驾、试乘、预约、CHEJIN_DEMO_"
+        },
+        {
+          "chunk_id": "chunk_bd5bc67861c08740",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5215,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.182,
+            "semantic": 0.1296,
+            "vector": 0.14,
+            "vector_similarity": 0.811,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5215
+          },
+          "text": "品名称：2021款捷达VS5 280TSI自动荣耀型\n型号/SKU：CHEJIN-JETTAVS5-2021\n类目：二手车/SUV\n关键词：捷达VS5、VS5、德系SUV、预算SUV\n规格：2021年上牌，表显3.8万公里，1.4T自动挡，白色。\n价格：6.38万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：涡轮、变速箱和保养以检测报告为准。\n推荐话术：适合预算6到7万、想买合资SUV的客户。\n商品名称：2017款福特福克斯1.6L自动风尚"
+        },
+        {
+          "chunk_id": "chunk_d2ec0cebcf16c10c",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5197,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1807,
+            "semantic": 0.129,
+            "vector": 0.14,
+            "vector_similarity": 0.8389,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5197
+          },
+          "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_a66149f6919983971544",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ]
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

@@ -1,0 +1,313 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_9d64b30ebe0d1b38",
+  "generated_at": "2026-05-04T02:04:22",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_bda7434bd5e2140e372a.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"product_id\": \"honda_accord\", \"title\": \"雅阁家用与商务特点及价格\", \"keywords\": [\"雅阁\", \"本田雅阁\", \"商务\", \"空间\", \"动力\", \"预算\", \"价格\"], \"question\": \"雅阁家用怎么样？预算多少？\", \"answer\": \"雅阁会更兼顾商务一些，空间和动力感强一点，预算大概10到12万。\"}",
+    "content_sha256": "f5021115781d36e7b17252d8c211f184b6da30d28f19faa6dd603736debe36fa",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_bda7434bd5e2140e372a",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_d4f21aab29676d3ac8c4"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_6da7a50a91cbaaa3",
+        "source_id": "source_150f197649e109c9",
+        "score": 0.6967,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.3613,
+          "semantic": 0.2075,
+          "vector": 0.1379,
+          "vector_similarity": 0.7662,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.6967
+        },
+        "text": "[2026-05-04T02:02:41] self: [车金AI] 两台车家用都挺合适的。雅阁会更兼顾商务一些，空间和动力感强一点，预算大概10到12万；凯美瑞偏家用稳定、省心，更侧重家用通勤，您之前看的凯美瑞8.98万就在预算内。您目前预算还是8到10万吗？我帮您看看哪台更合适。"
+      },
+      {
+        "chunk_id": "chunk_b73fd7e249648300",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5912,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2355,
+          "semantic": 0.1528,
+          "vector": 0.1329,
+          "vector_similarity": 0.7385,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5912
+        },
+        "text": "。\n商品名称：2022款五菱宏光MINIEV马卡龙臻享款\n型号/SKU：CHEJIN-MINIEV-2022\n类目：二手车/微型电动车\n关键词：宏光MINIEV、五菱mini、代步电车、练手车\n规格：2022年上牌，表显1.6万公里，纯电微型车，粉色，城市通勤。\n价格：2.88万，库存：1台\n物流/过户：微型电动车跨城运输和充电条件需人工确认。\n售后/风险：续航、电池和低温表现以检测报告和使用场景说明为准。\n推荐话术：适合短途通勤、练手、接送孩子，长途或高速需求不推荐。\n商品名称：2020款本田雅阁260TURBO"
+      },
+      {
+        "chunk_id": "chunk_58029d4057022265",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5243,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1959,
+          "semantic": 0.1356,
+          "vector": 0.1227,
+          "vector_similarity": 0.6817,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5243
+        },
+        "text": "险：电池、增程器、官方权益和保养记录以检测报告和人工核验为准。\n推荐话术：适合家庭六座、长途和新能源体验需求。\n商品名称：2021款长安CS75 PLUS 1.5T自动尊贵型\n型号/SKU：CHEJIN-CS75PLUS-2021\n类目：二手车/SUV\n关键词：CS75PLUS、长安CS75、国产SUV、家用SUV\n规格：2021年上牌，表显4.4万公里，1.5T自动挡，白色，配置高。\n价格：6.88万，库存：2台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后"
+      },
+      {
+        "chunk_id": "chunk_99cc4e7f8c7061b0",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5161,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1888,
+          "semantic": 0.1325,
+          "vector": 0.1249,
+          "vector_similarity": 0.6939,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5161
+        },
+        "text": "、提档、当地新能源指标和运输方式。\n售后/风险：电池健康、辅助驾驶功能和官方权益以检测报告及账号核验为准。\n推荐话术：适合想体验纯电、智能化和低用车成本的客户，电池和权益必须人工确认。\n商品名称：2020款奥迪A4L 40TFSI时尚动感型\n型号/SKU：CHEJIN-A4L-2020\n类目：二手车/豪华轿车\n关键词：奥迪A4L、A4L、豪华轿车、婚庆、商务\n规格：2020年上牌，表显6.8万公里，2.0T自动挡，黑色，保养记录较完整。\n价格：15.88万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_2bf21a1353b6a208fdbe",
+    "experience_id": "rag_exp_2bf21a1353b6a208fdbe"
+  },
+  "detected_tags": [
+    "llm",
+    "rag_experience",
+    "unknown",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "product_faq",
+    "change_type": "llm_upsert_product_faq",
+    "summary": "雅阁家用商务特点及预算价格（10-12万）",
+    "suggested_fields": {
+      "product_id": "honda_accord",
+      "title": "雅阁家用与商务特点及价格",
+      "keywords": [
+        "雅阁",
+        "本田雅阁",
+        "商务",
+        "空间",
+        "动力",
+        "预算",
+        "价格"
+      ],
+      "question": "雅阁家用怎么样？预算多少？",
+      "answer": "雅阁会更兼顾商务一些，空间和动力感强一点，预算大概10到12万。",
+      "additional_details": {
+        "原始资料摘录": "{\"product_id\": \"honda_accord\", \"title\": \"雅阁家用与商务特点及价格\", \"keywords\": [\"雅阁\", \"本田雅阁\", \"商务\", \"空间\", \"动力\", \"预算\", \"价格\"], \"question\": \"雅阁家用怎么样？预算多少？\", \"answer\": \"雅阁会更兼顾商务一些，空间和动力感强一点，预算大概10到12万。\"}"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "product_faq",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "product_faq",
+        "id": "honda_accord_faq_price",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_bda7434bd5e2140e372a.txt",
+          "candidate_id": "raw_9d64b30ebe0d1b38",
+          "rag_experience_id": "rag_exp_2bf21a1353b6a208fdbe",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "product_id": "honda_accord",
+          "title": "雅阁家用与商务特点及价格",
+          "keywords": [
+            "雅阁",
+            "本田雅阁",
+            "商务",
+            "空间",
+            "动力",
+            "预算",
+            "价格"
+          ],
+          "question": "雅阁家用怎么样？预算多少？",
+          "answer": "雅阁会更兼顾商务一些，空间和动力感强一点，预算大概10到12万。",
+          "additional_details": {
+            "原始资料摘录": "{\"product_id\": \"honda_accord\", \"title\": \"雅阁家用与商务特点及价格\", \"keywords\": [\"雅阁\", \"本田雅阁\", \"商务\", \"空间\", \"动力\", \"预算\", \"价格\"], \"question\": \"雅阁家用怎么样？预算多少？\", \"answer\": \"雅阁会更兼顾商务一些，空间和动力感强一点，预算大概10到12万。\"}"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "rejected",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_bda7434bd5e2140e372a",
+    "source_raw_message_ids": [
+      "raw_msg_d4f21aab29676d3ac8c4"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_150f197649e109c9",
+      "chunk_count": 1,
+      "query": "雅阁家用商务特点及预算价格（10-12万）\n{\"product_id\": \"honda_accord\", \"title\": \"雅阁家用与商务特点及价格\", \"keywords\": [\"雅阁\", \"本田雅阁\", \"商务\", \"空间\", \"动力\", \"预算\", \"价格\"], \"question\": \"雅阁家用怎么样？预算多少？\", \"answer\": \"雅阁会更兼顾商务一些，空间和动力感强一点，预算大概10到12万。\"}\n雅阁家用与商务特点及价格\n雅阁会更兼顾商务一些，空间和动力感强一点，预算大概10到12万。",
+      "hits": [
+        {
+          "chunk_id": "chunk_6da7a50a91cbaaa3",
+          "source_id": "source_150f197649e109c9",
+          "score": 0.6967,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.3613,
+            "semantic": 0.2075,
+            "vector": 0.1379,
+            "vector_similarity": 0.7662,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.6967
+          },
+          "text": "[2026-05-04T02:02:41] self: [车金AI] 两台车家用都挺合适的。雅阁会更兼顾商务一些，空间和动力感强一点，预算大概10到12万；凯美瑞偏家用稳定、省心，更侧重家用通勤，您之前看的凯美瑞8.98万就在预算内。您目前预算还是8到10万吗？我帮您看看哪台更合适。"
+        },
+        {
+          "chunk_id": "chunk_b73fd7e249648300",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5912,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2355,
+            "semantic": 0.1528,
+            "vector": 0.1329,
+            "vector_similarity": 0.7385,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5912
+          },
+          "text": "。\n商品名称：2022款五菱宏光MINIEV马卡龙臻享款\n型号/SKU：CHEJIN-MINIEV-2022\n类目：二手车/微型电动车\n关键词：宏光MINIEV、五菱mini、代步电车、练手车\n规格：2022年上牌，表显1.6万公里，纯电微型车，粉色，城市通勤。\n价格：2.88万，库存：1台\n物流/过户：微型电动车跨城运输和充电条件需人工确认。\n售后/风险：续航、电池和低温表现以检测报告和使用场景说明为准。\n推荐话术：适合短途通勤、练手、接送孩子，长途或高速需求不推荐。\n商品名称：2020款本田雅阁260TURBO"
+        },
+        {
+          "chunk_id": "chunk_58029d4057022265",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5243,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1959,
+            "semantic": 0.1356,
+            "vector": 0.1227,
+            "vector_similarity": 0.6817,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5243
+          },
+          "text": "险：电池、增程器、官方权益和保养记录以检测报告和人工核验为准。\n推荐话术：适合家庭六座、长途和新能源体验需求。\n商品名称：2021款长安CS75 PLUS 1.5T自动尊贵型\n型号/SKU：CHEJIN-CS75PLUS-2021\n类目：二手车/SUV\n关键词：CS75PLUS、长安CS75、国产SUV、家用SUV\n规格：2021年上牌，表显4.4万公里，1.5T自动挡，白色，配置高。\n价格：6.88万，库存：2台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后"
+        },
+        {
+          "chunk_id": "chunk_99cc4e7f8c7061b0",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5161,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1888,
+            "semantic": 0.1325,
+            "vector": 0.1249,
+            "vector_similarity": 0.6939,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5161
+          },
+          "text": "、提档、当地新能源指标和运输方式。\n售后/风险：电池健康、辅助驾驶功能和官方权益以检测报告及账号核验为准。\n推荐话术：适合想体验纯电、智能化和低用车成本的客户，电池和权益必须人工确认。\n商品名称：2020款奥迪A4L 40TFSI时尚动感型\n型号/SKU：CHEJIN-A4L-2020\n类目：二手车/豪华轿车\n关键词：奥迪A4L、A4L、豪华轿车、婚庆、商务\n规格：2020年上牌，表显6.8万公里，2.0T自动挡，黑色，保养记录较完整。\n价格：15.88万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_2bf21a1353b6a208fdbe",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "rejected_at": "2026-05-04T15:24:47",
+    "reason": "?????????????AI/??????????????????????????????????????????AI????"
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

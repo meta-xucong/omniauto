@@ -1,0 +1,332 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_7e9278063e366526",
+  "generated_at": "2026-05-04T02:40:06",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_76097e2b29089de04b63.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"name\": \"2022款五菱MINIEV马卡龙\", \"sku\": \"2022_MINIEV_MACARON\", \"category\": \"二手电动车\", \"aliases\": [\"五菱MINIEV\", \"马卡龙\"], \"specs\": \"纯电动，具体参数未知\", \"price\": 28800.0, \"unit\": \"台\", \"inventory\": 1, \"additional_details\": {\"description\": \"短途代步非常省钱\", \"参考价\": \"2.88万\", \"年份\": \"2022款\"}, \"price_tiers\": [{\"min_quantity\": 1.0, \"unit_price\": 28800.0}]}",
+    "content_sha256": "b446ed92e142855af56f78a5452c97860e184b6644a4d5c7d32357f7b52ab232",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_76097e2b29089de04b63",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_72f960702c803c173706",
+      "raw_msg_b8daa5476522b56f45d4"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_da3e3ad044140f04",
+        "source_id": "source_b98f68610260f140",
+        "score": 0.6399,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.3312,
+          "semantic": 0.1944,
+          "vector": 0.1243,
+          "vector_similarity": 0.6906,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.6399
+        },
+        "text": "[2026-05-04T02:38:18] self: [车金AI] 6万左右预算，省油代步的话，店里有一台2021款日产轩逸1.6L自动挡，表显4.2万公里，参考价6.88万，家用代步很省油；还有一台2020款丰田卡罗拉1.2T自动挡，5万公里，参考价6.98万，同样省油保值。如果接受纯电，还有台2022款五菱MINIEV马卡龙，2.88万，短途代步非常省钱。您更倾向油车还是电车？方便告知所在城市和是否贷款/置换，我帮您细看。\n[2026-05-04T02:38:18] 许聪: 家里两个小孩，周末出去玩，想要空间"
+      },
+      {
+        "chunk_id": "chunk_b73fd7e249648300",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.6155,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2563,
+          "semantic": 0.1619,
+          "vector": 0.1274,
+          "vector_similarity": 0.7076,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.6155
+        },
+        "text": "。\n商品名称：2022款五菱宏光MINIEV马卡龙臻享款\n型号/SKU：CHEJIN-MINIEV-2022\n类目：二手车/微型电动车\n关键词：宏光MINIEV、五菱mini、代步电车、练手车\n规格：2022年上牌，表显1.6万公里，纯电微型车，粉色，城市通勤。\n价格：2.88万，库存：1台\n物流/过户：微型电动车跨城运输和充电条件需人工确认。\n售后/风险：续航、电池和低温表现以检测报告和使用场景说明为准。\n推荐话术：适合短途通勤、练手、接送孩子，长途或高速需求不推荐。\n商品名称：2020款本田雅阁260TURBO"
+      },
+      {
+        "chunk_id": "chunk_9a0d34760ad6ccae",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.6013,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2456,
+          "semantic": 0.1572,
+          "vector": 0.1285,
+          "vector_similarity": 0.7137,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.6013
+        },
+        "text": "工确认。\n售后/风险：CVT变速箱状态、保养和车况以检测报告为准。\n推荐话术：适合6到7万预算、练手、家用代步和省油需求。\n商品名称：2019款大众朗逸1.5L自动舒适版\n型号/SKU：CHEJIN-LAVIDA-2019\n类目：二手车/紧凑型轿车\n关键词：朗逸、大众朗逸、德系代步、置换\n规格：2019年上牌，表显6.9万公里，1.5L自动挡，白色，通勤耐用。\n价格：5.98万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：易损件和保养历史以"
+      },
+      {
+        "chunk_id": "chunk_99cc4e7f8c7061b0",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5141,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1867,
+          "semantic": 0.1316,
+          "vector": 0.1257,
+          "vector_similarity": 0.6983,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5141
+        },
+        "text": "、提档、当地新能源指标和运输方式。\n售后/风险：电池健康、辅助驾驶功能和官方权益以检测报告及账号核验为准。\n推荐话术：适合想体验纯电、智能化和低用车成本的客户，电池和权益必须人工确认。\n商品名称：2020款奥迪A4L 40TFSI时尚动感型\n型号/SKU：CHEJIN-A4L-2020\n类目：二手车/豪华轿车\n关键词：奥迪A4L、A4L、豪华轿车、婚庆、商务\n规格：2020年上牌，表显6.8万公里，2.0T自动挡，黑色，保养记录较完整。\n价格：15.88万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_58379183c51d57620f8d",
+    "experience_id": "rag_exp_58379183c51d57620f8d"
+  },
+  "detected_tags": [
+    "llm",
+    "rag_experience",
+    "unknown",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "products",
+    "change_type": "llm_upsert_products",
+    "summary": "2022款五菱MINIEV马卡龙纯电动汽车，参考价2.88万",
+    "suggested_fields": {
+      "name": "2022款五菱MINIEV马卡龙",
+      "sku": "2022_MINIEV_MACARON",
+      "category": "二手电动车",
+      "aliases": [
+        "五菱MINIEV",
+        "马卡龙"
+      ],
+      "specs": "纯电动，具体参数未知",
+      "price": 28800.0,
+      "unit": "台",
+      "inventory": 1,
+      "price_tiers": [
+        {
+          "min_quantity": 1.0,
+          "unit_price": 28800.0
+        }
+      ],
+      "additional_details": {
+        "description": "短途代步非常省钱",
+        "参考价": "2.88万",
+        "年份": "2022款",
+        "原始资料摘录": "{\"name\": \"2022款五菱MINIEV马卡龙\", \"sku\": \"2022_MINIEV_MACARON\", \"category\": \"二手电动车\", \"aliases\": [\"五菱MINIEV\", \"马卡龙\"], \"specs\": \"纯电动，具体参数未知\", \"price\": 28800.0, \"unit\": \"台\", \"inventory\": 1, \"additional_details\": {\"description\": \"短途代步非常省钱\", \"参考价\": \"2.88万\", \"年份\": \"2022款\"}, \"price_tiers\": [{\"min_quantity\": 1.0, \"unit_price\": 28800.0}]}"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "products",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "products",
+        "id": "wuling_miniev_2022",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_76097e2b29089de04b63.txt",
+          "candidate_id": "raw_7e9278063e366526",
+          "rag_experience_id": "rag_exp_58379183c51d57620f8d",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "name": "2022款五菱MINIEV马卡龙",
+          "sku": "2022_MINIEV_MACARON",
+          "category": "二手电动车",
+          "aliases": [
+            "五菱MINIEV",
+            "马卡龙"
+          ],
+          "specs": "纯电动，具体参数未知",
+          "price": 28800.0,
+          "unit": "台",
+          "inventory": 1,
+          "price_tiers": [
+            {
+              "min_quantity": 1.0,
+              "unit_price": 28800.0
+            }
+          ],
+          "additional_details": {
+            "description": "短途代步非常省钱",
+            "参考价": "2.88万",
+            "年份": "2022款",
+            "原始资料摘录": "{\"name\": \"2022款五菱MINIEV马卡龙\", \"sku\": \"2022_MINIEV_MACARON\", \"category\": \"二手电动车\", \"aliases\": [\"五菱MINIEV\", \"马卡龙\"], \"specs\": \"纯电动，具体参数未知\", \"price\": 28800.0, \"unit\": \"台\", \"inventory\": 1, \"additional_details\": {\"description\": \"短途代步非常省钱\", \"参考价\": \"2.88万\", \"年份\": \"2022款\"}, \"price_tiers\": [{\"min_quantity\": 1.0, \"unit_price\": 28800.0}]}"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "description",
+      "原始资料摘录",
+      "参考价",
+      "年份"
+    ]
+  },
+  "review": {
+    "status": "rejected",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_76097e2b29089de04b63",
+    "source_raw_message_ids": [
+      "raw_msg_72f960702c803c173706",
+      "raw_msg_b8daa5476522b56f45d4"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_b98f68610260f140",
+      "chunk_count": 1,
+      "query": "2022款五菱MINIEV马卡龙纯电动汽车，参考价2.88万\n{\"name\": \"2022款五菱MINIEV马卡龙\", \"sku\": \"2022_MINIEV_MACARON\", \"category\": \"二手电动车\", \"aliases\": [\"五菱MINIEV\", \"马卡龙\"], \"specs\": \"纯电动，具体参数未知\", \"price\": 28800.0, \"unit\": \"台\", \"inventory\": 1, \"additional_details\": {\"description\": \"短途代步非常省钱\", \"参考价\": \"2.88万\", \"年份\": \"2022款\"}, \"price_tiers\": [{\"min_quantity\": 1.0, \"unit_price\": 28800.0}]}\n2022款五菱MINIEV马卡龙",
+      "hits": [
+        {
+          "chunk_id": "chunk_da3e3ad044140f04",
+          "source_id": "source_b98f68610260f140",
+          "score": 0.6399,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.3312,
+            "semantic": 0.1944,
+            "vector": 0.1243,
+            "vector_similarity": 0.6906,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.6399
+          },
+          "text": "[2026-05-04T02:38:18] self: [车金AI] 6万左右预算，省油代步的话，店里有一台2021款日产轩逸1.6L自动挡，表显4.2万公里，参考价6.88万，家用代步很省油；还有一台2020款丰田卡罗拉1.2T自动挡，5万公里，参考价6.98万，同样省油保值。如果接受纯电，还有台2022款五菱MINIEV马卡龙，2.88万，短途代步非常省钱。您更倾向油车还是电车？方便告知所在城市和是否贷款/置换，我帮您细看。\n[2026-05-04T02:38:18] 许聪: 家里两个小孩，周末出去玩，想要空间"
+        },
+        {
+          "chunk_id": "chunk_b73fd7e249648300",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.6155,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2563,
+            "semantic": 0.1619,
+            "vector": 0.1274,
+            "vector_similarity": 0.7076,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.6155
+          },
+          "text": "。\n商品名称：2022款五菱宏光MINIEV马卡龙臻享款\n型号/SKU：CHEJIN-MINIEV-2022\n类目：二手车/微型电动车\n关键词：宏光MINIEV、五菱mini、代步电车、练手车\n规格：2022年上牌，表显1.6万公里，纯电微型车，粉色，城市通勤。\n价格：2.88万，库存：1台\n物流/过户：微型电动车跨城运输和充电条件需人工确认。\n售后/风险：续航、电池和低温表现以检测报告和使用场景说明为准。\n推荐话术：适合短途通勤、练手、接送孩子，长途或高速需求不推荐。\n商品名称：2020款本田雅阁260TURBO"
+        },
+        {
+          "chunk_id": "chunk_9a0d34760ad6ccae",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.6013,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2456,
+            "semantic": 0.1572,
+            "vector": 0.1285,
+            "vector_similarity": 0.7137,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.6013
+          },
+          "text": "工确认。\n售后/风险：CVT变速箱状态、保养和车况以检测报告为准。\n推荐话术：适合6到7万预算、练手、家用代步和省油需求。\n商品名称：2019款大众朗逸1.5L自动舒适版\n型号/SKU：CHEJIN-LAVIDA-2019\n类目：二手车/紧凑型轿车\n关键词：朗逸、大众朗逸、德系代步、置换\n规格：2019年上牌，表显6.9万公里，1.5L自动挡，白色，通勤耐用。\n价格：5.98万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：易损件和保养历史以"
+        },
+        {
+          "chunk_id": "chunk_99cc4e7f8c7061b0",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5141,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1867,
+            "semantic": 0.1316,
+            "vector": 0.1257,
+            "vector_similarity": 0.6983,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5141
+          },
+          "text": "、提档、当地新能源指标和运输方式。\n售后/风险：电池健康、辅助驾驶功能和官方权益以检测报告及账号核验为准。\n推荐话术：适合想体验纯电、智能化和低用车成本的客户，电池和权益必须人工确认。\n商品名称：2020款奥迪A4L 40TFSI时尚动感型\n型号/SKU：CHEJIN-A4L-2020\n类目：二手车/豪华轿车\n关键词：奥迪A4L、A4L、豪华轿车、婚庆、商务\n规格：2020年上牌，表显6.8万公里，2.0T自动挡，黑色，保养记录较完整。\n价格：15.88万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_58379183c51d57620f8d",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "rejected_at": "2026-05-04T15:03:49",
+    "reason": "???????????????????????????????????????????????????"
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

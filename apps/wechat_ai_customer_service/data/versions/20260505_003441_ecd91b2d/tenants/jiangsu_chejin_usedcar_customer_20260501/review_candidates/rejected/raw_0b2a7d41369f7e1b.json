@@ -1,0 +1,337 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_0b2a7d41369f7e1b",
+  "generated_at": "2026-05-03T20:39:34",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_fb0b11ed5534bfa774fb.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"title\": \"金融贷款不承诺包过\", \"policy_type\": \"credit\", \"keywords\": [\"贷款\", \"首付\", \"月供\", \"包过\", \"征信\"], \"applicability_scope\": \"global\", \"answer\": \"首付月供需要金融专员测算，我先记录预算、车型和征信大致情况，不能承诺包过。\", \"allow_auto_reply\": true, \"requires_handoff\": false, \"operator_alert\": true, \"risk_level\": \"medium\", \"additional_details\": {\"source_batch\": \"CHEJIN_DEMO_20260503_203628\", \"note\": \"客服需记",
+    "content_sha256": "bc78b9cc88ba231832f6e32d9a4f6450fb6abcdfc731494b904baf8ece1da54d",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_fb0b11ed5534bfa774fb",
+    "conversation_id": "chejin_demo_private_zhang_chejin_demo_20260503_203628",
+    "raw_message_ids": [
+      "raw_msg_1231489305db04721e33",
+      "raw_msg_e3901ad7a28119658bcf",
+      "raw_msg_bdcc77bc6c45435cc81e",
+      "raw_msg_ad553e7c1176bddf5049",
+      "raw_msg_6f2890dc1bb4f44f3577",
+      "raw_msg_f9e0c8431d69ed4f4a53"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_9b1c960bb7c4529b",
+        "source_id": "source_a805e8d8d686b497",
+        "score": 0.8287,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.4547,
+          "semantic": 0.2481,
+          "vector": 0.1359,
+          "vector_similarity": 0.7552,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.8287
+        },
+        "text": "[2026-05-03T19:26:31] 客户: 张先生：我从直播间来的，预算8万，想买省油自动挡，最好南京能看车。\n演示批次：CHEJIN_DEMO_20260503_203628\n[2026-05-03T19:27:31] self: 客服：8万左右可以先看凯美瑞、轩逸、卡罗拉或秦PLUS，您是想燃油还是新能源？\n演示批次：CHEJIN_DEMO_20260503_203628\n[2026-05-03T19:28:31] 客户: 张先生：可以贷款吗，首付三成月供多少？\n演示批次：CHEJIN_DEMO_202"
+      },
+      {
+        "chunk_id": "chunk_d2ec0cebcf16c10c",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5097,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1816,
+          "semantic": 0.1294,
+          "vector": 0.1288,
+          "vector_similarity": 0.7155,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5097
+        },
+        "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+      },
+      {
+        "chunk_id": "chunk_99cc4e7f8c7061b0",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5057,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1744,
+          "semantic": 0.1263,
+          "vector": 0.135,
+          "vector_similarity": 0.7502,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5057
+        },
+        "text": "、提档、当地新能源指标和运输方式。\n售后/风险：电池健康、辅助驾驶功能和官方权益以检测报告及账号核验为准。\n推荐话术：适合想体验纯电、智能化和低用车成本的客户，电池和权益必须人工确认。\n商品名称：2020款奥迪A4L 40TFSI时尚动感型\n型号/SKU：CHEJIN-A4L-2020\n类目：二手车/豪华轿车\n关键词：奥迪A4L、A4L、豪华轿车、婚庆、商务\n规格：2020年上牌，表显6.8万公里，2.0T自动挡，黑色，保养记录较完整。\n价格：15.88万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档"
+      },
+      {
+        "chunk_id": "chunk_c042ee843c5513a9",
+        "source_id": "source_b6382fbc1e2edf58",
+        "score": 0.4832,
+        "category": "chats",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2786,
+          "semantic": 0.1716,
+          "vector": 0.133,
+          "vector_similarity": 0.7389,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.02,
+          "risk_penalty": 0.08,
+          "final": 0.4832
+        },
+        "text": "# 销售对话话术库\n演示批次：CHEJIN_DEMO_20260503_203628\n真实客服话术样例：\n客户：8万左右想买省油自动挡代步\n客服：8万左右可以优先看凯美瑞、轩逸、卡罗拉或秦PLUS。燃油车更省心，插混更省油；我先帮您确认城市、到店时间、是否贷款和置换。\n标签：预算推荐、代步、CHEJIN_DEMO_20260503_203628\n客户：秦PLUS和Model 3怎么选\n客服：秦PLUS偏低油耗和家用成本，Model 3偏纯电驾驶和智能化。新能源车我会先提醒电池检测、官方权益和当地政策需要人工确认。\n"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_bcfba2812ed56b2a9444",
+    "experience_id": "rag_exp_bcfba2812ed56b2a9444"
+  },
+  "detected_tags": [
+    "llm",
+    "rag_experience",
+    "style",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "policies",
+    "change_type": "llm_upsert_policies",
+    "summary": "金融贷款不承诺包过的政策",
+    "suggested_fields": {
+      "title": "金融贷款不承诺包过",
+      "policy_type": "credit",
+      "keywords": [
+        "贷款",
+        "首付",
+        "月供",
+        "包过",
+        "征信"
+      ],
+      "applicability_scope": "global",
+      "answer": "首付月供需要金融专员测算，我先记录预算、车型和征信大致情况，不能承诺包过。",
+      "allow_auto_reply": true,
+      "requires_handoff": false,
+      "operator_alert": true,
+      "risk_level": "medium",
+      "product_id": "",
+      "product_category": "",
+      "additional_details": {
+        "source_batch": "CHEJIN_DEMO_20260503_203628",
+        "note": "客服需记录客户信息并转交金融专员，不可承诺贷款审批结果",
+        "原始资料摘录": "{\"title\": \"金融贷款不承诺包过\", \"policy_type\": \"credit\", \"keywords\": [\"贷款\", \"首付\", \"月供\", \"包过\", \"征信\"], \"applicability_scope\": \"global\", \"answer\": \"首付月供需要金融专员测算，我先记录预算、车型和征信大致情况，不能承诺包过。\", \"allow_auto_reply\": true, \"requires_handoff\": false, \"operator_alert\": true, \"risk_level\": \"medium\", \"additional_details\": {\"source_batch\": \"CHEJIN_DEMO_20260503_203628\", \"note\": \"客服需记"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "policies",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "policies",
+        "id": "policy_no_finance_guarantee",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_fb0b11ed5534bfa774fb.txt",
+          "candidate_id": "raw_0b2a7d41369f7e1b",
+          "rag_experience_id": "rag_exp_bcfba2812ed56b2a9444",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "title": "金融贷款不承诺包过",
+          "policy_type": "credit",
+          "keywords": [
+            "贷款",
+            "首付",
+            "月供",
+            "包过",
+            "征信"
+          ],
+          "applicability_scope": "global",
+          "answer": "首付月供需要金融专员测算，我先记录预算、车型和征信大致情况，不能承诺包过。",
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "operator_alert": true,
+          "risk_level": "medium",
+          "product_id": "",
+          "product_category": "",
+          "additional_details": {
+            "source_batch": "CHEJIN_DEMO_20260503_203628",
+            "note": "客服需记录客户信息并转交金融专员，不可承诺贷款审批结果",
+            "原始资料摘录": "{\"title\": \"金融贷款不承诺包过\", \"policy_type\": \"credit\", \"keywords\": [\"贷款\", \"首付\", \"月供\", \"包过\", \"征信\"], \"applicability_scope\": \"global\", \"answer\": \"首付月供需要金融专员测算，我先记录预算、车型和征信大致情况，不能承诺包过。\", \"allow_auto_reply\": true, \"requires_handoff\": false, \"operator_alert\": true, \"risk_level\": \"medium\", \"additional_details\": {\"source_batch\": \"CHEJIN_DEMO_20260503_203628\", \"note\": \"客服需记"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "note",
+      "source_batch",
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "rejected",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_fb0b11ed5534bfa774fb",
+    "source_raw_message_ids": [
+      "raw_msg_1231489305db04721e33",
+      "raw_msg_e3901ad7a28119658bcf",
+      "raw_msg_bdcc77bc6c45435cc81e",
+      "raw_msg_ad553e7c1176bddf5049",
+      "raw_msg_6f2890dc1bb4f44f3577",
+      "raw_msg_f9e0c8431d69ed4f4a53"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_a805e8d8d686b497",
+      "chunk_count": 1,
+      "query": "金融贷款不承诺包过的政策\n{\"title\": \"金融贷款不承诺包过\", \"policy_type\": \"credit\", \"keywords\": [\"贷款\", \"首付\", \"月供\", \"包过\", \"征信\"], \"applicability_scope\": \"global\", \"answer\": \"首付月供需要金融专员测算，我先记录预算、车型和征信大致情况，不能承诺包过。\", \"allow_auto_reply\": true, \"requires_handoff\": false, \"operator_alert\": true, \"risk_level\": \"medium\", \"additional_details\": {\"source_batch\": \"CHEJIN_DEMO_20260503_203628\", \"note\": \"客服需记\n金融贷款不承诺包过\n首付月供需要金融专员测算，我先记录预算、车型和征信大致情况，不能承诺包过。",
+      "hits": [
+        {
+          "chunk_id": "chunk_9b1c960bb7c4529b",
+          "source_id": "source_a805e8d8d686b497",
+          "score": 0.8287,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.4547,
+            "semantic": 0.2481,
+            "vector": 0.1359,
+            "vector_similarity": 0.7552,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.8287
+          },
+          "text": "[2026-05-03T19:26:31] 客户: 张先生：我从直播间来的，预算8万，想买省油自动挡，最好南京能看车。\n演示批次：CHEJIN_DEMO_20260503_203628\n[2026-05-03T19:27:31] self: 客服：8万左右可以先看凯美瑞、轩逸、卡罗拉或秦PLUS，您是想燃油还是新能源？\n演示批次：CHEJIN_DEMO_20260503_203628\n[2026-05-03T19:28:31] 客户: 张先生：可以贷款吗，首付三成月供多少？\n演示批次：CHEJIN_DEMO_202"
+        },
+        {
+          "chunk_id": "chunk_d2ec0cebcf16c10c",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5097,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1816,
+            "semantic": 0.1294,
+            "vector": 0.1288,
+            "vector_similarity": 0.7155,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5097
+          },
+          "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+        },
+        {
+          "chunk_id": "chunk_99cc4e7f8c7061b0",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5057,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1744,
+            "semantic": 0.1263,
+            "vector": 0.135,
+            "vector_similarity": 0.7502,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5057
+          },
+          "text": "、提档、当地新能源指标和运输方式。\n售后/风险：电池健康、辅助驾驶功能和官方权益以检测报告及账号核验为准。\n推荐话术：适合想体验纯电、智能化和低用车成本的客户，电池和权益必须人工确认。\n商品名称：2020款奥迪A4L 40TFSI时尚动感型\n型号/SKU：CHEJIN-A4L-2020\n类目：二手车/豪华轿车\n关键词：奥迪A4L、A4L、豪华轿车、婚庆、商务\n规格：2020年上牌，表显6.8万公里，2.0T自动挡，黑色，保养记录较完整。\n价格：15.88万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档"
+        },
+        {
+          "chunk_id": "chunk_c042ee843c5513a9",
+          "source_id": "source_b6382fbc1e2edf58",
+          "score": 0.4832,
+          "category": "chats",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2786,
+            "semantic": 0.1716,
+            "vector": 0.133,
+            "vector_similarity": 0.7389,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.02,
+            "risk_penalty": 0.08,
+            "final": 0.4832
+          },
+          "text": "# 销售对话话术库\n演示批次：CHEJIN_DEMO_20260503_203628\n真实客服话术样例：\n客户：8万左右想买省油自动挡代步\n客服：8万左右可以优先看凯美瑞、轩逸、卡罗拉或秦PLUS。燃油车更省心，插混更省油；我先帮您确认城市、到店时间、是否贷款和置换。\n标签：预算推荐、代步、CHEJIN_DEMO_20260503_203628\n客户：秦PLUS和Model 3怎么选\n客服：秦PLUS偏低油耗和家用成本，Model 3偏纯电驾驶和智能化。新能源车我会先提醒电池检测、官方权益和当地政策需要人工确认。\n"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_bcfba2812ed56b2a9444",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "rejected_at": "2026-05-04T15:24:46",
+    "reason": "?????????????AI/??????????????????????????????????????????AI????"
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

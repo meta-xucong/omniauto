@@ -1,0 +1,239 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_2fe282d42a027cbb",
+  "generated_at": "2026-05-03T04:39:22",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\products\\upload_b0c2187cf4155ad0_chejin_vehicles_CHEJIN_20260503_043922.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "name: 2021款丰田凯美瑞2.0G豪华版；sku: CHEJIN-CAMRY-2021G；category: 二手车/中级轿车；price: 8.98；unit: 台；inventory: 1.0；shipping_policy: 南京门店可看车，异地客户需人工确认物流与提档。；warranty_policy: 非重大事故、非水泡、非火烧以合同和检测报告为准。；raw_text: 商品资料：江苏车金二手车车源 CHEJIN_20260503_043922 测试批次：CHEJIN_20260503_043922 商品名称：2021款丰田凯美瑞2.0G豪华版 型号：CHEJIN-CAMRY-2021G 商品类目：二手车/中级轿车 别名关键词：凯美瑞,丰田凯美瑞,8万预算,自动挡,省油,通勤 规格参数：2021",
+    "content_sha256": "fe7b774890b0f2157de52401b0c0a9908d1d1372616d411edd326ddfae417fe6",
+    "type": "rag_experience",
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_e750e77934a2a280",
+        "source_id": "source_55cce0d21fe7898c",
+        "score": 0.9533,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.5778,
+          "semantic": 0.2905,
+          "vector": 0.14,
+          "vector_similarity": 0.8847,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.025,
+          "risk_penalty": 0.08,
+          "final": 0.9533
+        },
+        "text": "商品资料：江苏车金二手车车源 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_043922\n商品名称：2021款丰田凯美瑞2.0G豪华版\n型号：CHEJIN-CAMRY-2021G\n商品类目：二手车/中级轿车\n别名关键词：凯美瑞,丰田凯美瑞,8万预算,自动挡,省油,通勤\n规格参数：2021年上牌，表显4.8万公里，2.0L自动挡，南京现车，一手车，支持第三方检测。\n价格：8.98万\n单位：台\n库存：1\n发货：南京门店可看车，异地客户需人工确认物流与提档。\n售后：非重大事故、非"
+      },
+      {
+        "chunk_id": "chunk_320caa1062c4cf21",
+        "source_id": "source_55cce0d21fe7898c",
+        "score": 0.7201,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.3541,
+          "semantic": 0.201,
+          "vector": 0.14,
+          "vector_similarity": 0.867,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.025,
+          "risk_penalty": 0.0,
+          "final": 0.7201
+        },
+        "text": "公里，2.0T自动挡，一手车源，支持到店试驾。\n价格：12.80万\n单位：台\n库存：1\n发货：高意向试驾需转人工确认门店和时间。\n售后：精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。\n商品资料：江苏车金二手车车源 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_043922\n商品名称：2022款比亚迪秦PLUS DM-i 55KM\n型号：CHEJIN-QINPLUS-2022DMI\n商品类目：二手车/新能源轿车\n别名关键词：秦PLUS,比亚迪秦,新能源,绿牌,混"
+      }
+    ],
+    "original_type": "raw_upload",
+    "original_channel": "knowledge_upload",
+    "rag_experience_id": "rag_exp_7fd6524087a9f6126c91",
+    "experience_id": "rag_exp_7fd6524087a9f6126c91"
+  },
+  "detected_tags": [
+    "after_sales",
+    "company",
+    "product",
+    "quote",
+    "rag_experience",
+    "shipping",
+    "style"
+  ],
+  "proposal": {
+    "target_category": "products",
+    "change_type": "upsert_product",
+    "summary": "建议新增/更新商品：2021款丰田凯美瑞2.0G豪华版",
+    "suggested_fields": {
+      "name": "2021款丰田凯美瑞2.0G豪华版",
+      "sku": "CHEJIN-CAMRY-2021G",
+      "category": "二手车/中级轿车",
+      "price": 8.98,
+      "unit": "台",
+      "inventory": 1.0,
+      "shipping_policy": "南京门店可看车，异地客户需人工确认物流与提档。",
+      "warranty_policy": "非重大事故、非水泡、非火烧以合同和检测报告为准。",
+      "price_tiers": [
+        {
+          "min_quantity": 1.0,
+          "unit_price": 8.98
+        }
+      ],
+      "additional_details": {
+        "原始资料摘录": "name: 2021款丰田凯美瑞2.0G豪华版；sku: CHEJIN-CAMRY-2021G；category: 二手车/中级轿车；price: 8.98；unit: 台；inventory: 1.0；shipping_policy: 南京门店可看车，异地客户需人工确认物流与提档。；warranty_policy: 非重大事故、非水泡、非火烧以合同和检测报告为准。；raw_text: 商品资料：江苏车金二手车车源 CHEJIN_20260503_043922 测试批次：CHEJIN_20260503_043922 商品名称：2021款丰田凯美瑞2.0G豪华版 型号：CHEJIN-CAMRY-2021G 商品类目：二手车/中级轿车 别名关键词：凯美瑞,丰田凯美瑞,8万预算,自动挡,省油,通勤 规格参数：2021"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "products",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "products",
+        "id": "chejin-camry-2021g",
+        "status": "active",
+        "source": {
+          "type": "raw_upload",
+          "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\products\\upload_b0c2187cf4155ad0_chejin_vehicles_CHEJIN_20260503_043922.txt",
+          "candidate_id": "raw_2fe282d42a027cbb",
+          "rag_experience_id": "rag_exp_7fd6524087a9f6126c91",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_upload"
+        },
+        "data": {
+          "name": "2021款丰田凯美瑞2.0G豪华版",
+          "sku": "CHEJIN-CAMRY-2021G",
+          "category": "二手车/中级轿车",
+          "price": 8.98,
+          "unit": "台",
+          "inventory": 1.0,
+          "shipping_policy": "南京门店可看车，异地客户需人工确认物流与提档。",
+          "warranty_policy": "非重大事故、非水泡、非火烧以合同和检测报告为准。",
+          "price_tiers": [
+            {
+              "min_quantity": 1.0,
+              "unit_price": 8.98
+            }
+          ],
+          "additional_details": {
+            "原始资料摘录": "name: 2021款丰田凯美瑞2.0G豪华版；sku: CHEJIN-CAMRY-2021G；category: 二手车/中级轿车；price: 8.98；unit: 台；inventory: 1.0；shipping_policy: 南京门店可看车，异地客户需人工确认物流与提档。；warranty_policy: 非重大事故、非水泡、非火烧以合同和检测报告为准。；raw_text: 商品资料：江苏车金二手车车源 CHEJIN_20260503_043922 测试批次：CHEJIN_20260503_043922 商品名称：2021款丰田凯美瑞2.0G豪华版 型号：CHEJIN-CAMRY-2021G 商品类目：二手车/中级轿车 别名关键词：凯美瑞,丰田凯美瑞,8万预算,自动挡,省油,通勤 规格参数：2021"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "warning"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "rejected",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": false,
+      "provider": "",
+      "status": "rule_only_disabled_by_request",
+      "reason": "llm_disabled_by_caller",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_upload_id": "upload_b0c2187cf4155ad0",
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_55cce0d21fe7898c",
+      "chunk_count": 2,
+      "query": "建议新增/更新商品：2021款丰田凯美瑞2.0G豪华版\nname: 2021款丰田凯美瑞2.0G豪华版；sku: CHEJIN-CAMRY-2021G；category: 二手车/中级轿车；price: 8.98；unit: 台；inventory: 1.0；shipping_policy: 南京门店可看车，异地客户需人工确认物流与提档。；warranty_policy: 非重大事故、非水泡、非火烧以合同和检测报告为准。；raw_text: 商品资料：江苏车金二手车车源 CHEJIN_20260503_043922 测试批次：CHEJIN_20260503_043922 商品名称：2021款丰田凯美瑞2.0G豪华版 型号：CHEJIN-CAMRY-2021G 商品类目：二手车/中级轿车 别名关键词：凯美瑞,丰田凯美瑞,8万预算,自动挡,省油,通勤 规格参数：2021\n2021款丰田凯美瑞2.0G豪华版",
+      "hits": [
+        {
+          "chunk_id": "chunk_e750e77934a2a280",
+          "source_id": "source_55cce0d21fe7898c",
+          "score": 0.9533,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.5778,
+            "semantic": 0.2905,
+            "vector": 0.14,
+            "vector_similarity": 0.8847,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.025,
+            "risk_penalty": 0.08,
+            "final": 0.9533
+          },
+          "text": "商品资料：江苏车金二手车车源 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_043922\n商品名称：2021款丰田凯美瑞2.0G豪华版\n型号：CHEJIN-CAMRY-2021G\n商品类目：二手车/中级轿车\n别名关键词：凯美瑞,丰田凯美瑞,8万预算,自动挡,省油,通勤\n规格参数：2021年上牌，表显4.8万公里，2.0L自动挡，南京现车，一手车，支持第三方检测。\n价格：8.98万\n单位：台\n库存：1\n发货：南京门店可看车，异地客户需人工确认物流与提档。\n售后：非重大事故、非"
+        },
+        {
+          "chunk_id": "chunk_320caa1062c4cf21",
+          "source_id": "source_55cce0d21fe7898c",
+          "score": 0.7201,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.3541,
+            "semantic": 0.201,
+            "vector": 0.14,
+            "vector_similarity": 0.867,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.025,
+            "risk_penalty": 0.0,
+            "final": 0.7201
+          },
+          "text": "公里，2.0T自动挡，一手车源，支持到店试驾。\n价格：12.80万\n单位：台\n库存：1\n发货：高意向试驾需转人工确认门店和时间。\n售后：精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。\n商品资料：江苏车金二手车车源 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_043922\n商品名称：2022款比亚迪秦PLUS DM-i 55KM\n型号：CHEJIN-QINPLUS-2022DMI\n商品类目：二手车/新能源轿车\n别名关键词：秦PLUS,比亚迪秦,新能源,绿牌,混"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_7fd6524087a9f6126c91",
+    "source_chain": [
+      "raw_upload",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "cleanup_notes": [
+      {
+        "at": "2026-05-04T00:00:00",
+        "by": "codex_source_authority_cleanup",
+        "reason": "??/????????????????? RAG ????????????????",
+        "removed_review_hits": 2,
+        "removed_source_hits": 2
+      }
+    ],
+    "rejected_at": "2026-05-04T18:41:18",
+    "reason": "legacy_auto_candidate_cleanup_20260504: ???????????????????????RAG?????????????????"
+  },
+  "suggested_tests": [
+    {
+      "scenario": "product_quote",
+      "assertion": "入库后应能按商品名称、别名或 SKU 回答报价、规格和发货信息。"
+    }
+  ]
+}

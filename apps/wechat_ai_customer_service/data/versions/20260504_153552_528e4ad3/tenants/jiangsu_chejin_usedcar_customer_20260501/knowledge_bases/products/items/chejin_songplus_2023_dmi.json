@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "category_id": "products",
+  "id": "chejin_songplus_2023_dmi",
+  "status": "active",
+  "source": {
+    "type": "demo_fixture",
+    "batch_token": "CHEJIN_DEMO_20260503_203628",
+    "domain": "used_car"
+  },
+  "data": {
+    "name": "2023款比亚迪宋PLUS DM-i冠军版110KM",
+    "sku": "CHEJIN-SONGPLUS-2023DMI",
+    "category": "二手车/新能源SUV",
+    "aliases": [
+      "宋PLUS",
+      "比亚迪宋",
+      "混动SUV",
+      "新能源SUV",
+      "2023款比亚迪宋PLUS DM-i冠军版110KM",
+      "CHEJIN-SONGPLUS-2023DMI",
+      "CHEJIN_DEMO_20260503_203628"
+    ],
+    "specs": "2023年上牌，表显1.9万公里，插混SUV，灰色，配置较新。",
+    "price": 13.28,
+    "unit": "台",
+    "price_tiers": [
+      {
+        "min_quantity": 1,
+        "unit_price": 13.28
+      }
+    ],
+    "inventory": 1,
+    "shipping_policy": "新能源SUV需确认电池检测、充电场景、当地迁入政策。",
+    "warranty_policy": "三电质保、厂家权益和营运属性以人工核验为准。",
+    "reply_templates": {
+      "默认回复": "适合家庭SUV、省油和新能源牌照需求。",
+      "报价回复": "这台车当前演示价约 13.28 万，最终成交价、金融方案和费用明细需要人工确认。",
+      "议价回复": "二手车一车一况，AI 可以说明参考价和看车建议，最终优惠、订金和成交条件必须由销售确认。",
+      "物流回复": "新能源SUV需确认电池检测、充电场景、当地迁入政策。",
+      "售后回复": "三电质保、厂家权益和营运属性以人工核验为准。",
+      "内部备注": "演示资料：用于覆盖二手车常见咨询、风险边界和商品专属知识。"
+    },
+    "risk_rules": [
+      "三电质保转人工",
+      "营运属性转人工"
+    ],
+    "additional_details": {
+      "上牌时间": "2023-08",
+      "表显里程": "1.9万公里",
+      "能源类型": "插电混动",
+      "演示状态": "在售"
+    }
+  },
+  "runtime": {
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "risk_level": "normal"
+  },
+  "review_state": {
+    "is_new": true,
+    "new_reason": "newly_added_formal_knowledge",
+    "marked_at": "2026-05-03T20:36:28",
+    "updated_at": "2026-05-03T20:36:28",
+    "read_at": "",
+    "read_by": "",
+    "source": {
+      "source_module": "jiangsu_chejin_demo_seed",
+      "target_category": "products",
+      "item_id": "chejin_songplus_2023_dmi"
+    }
+  },
+  "metadata": {
+    "created_at": "2026-05-03T20:36:28",
+    "updated_at": "2026-05-03T20:36:28",
+    "created_by": "admin",
+    "updated_by": "admin"
+  }
+}

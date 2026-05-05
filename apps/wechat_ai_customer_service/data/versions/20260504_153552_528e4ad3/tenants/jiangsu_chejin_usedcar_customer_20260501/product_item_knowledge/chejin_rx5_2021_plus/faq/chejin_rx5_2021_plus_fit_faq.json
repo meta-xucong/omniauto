@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "category_id": "product_faq",
+  "id": "chejin_rx5_2021_plus_fit_faq",
+  "status": "active",
+  "source": {
+    "type": "demo_fixture",
+    "batch_token": "CHEJIN_DEMO_20260503_203628",
+    "domain": "used_car"
+  },
+  "data": {
+    "product_id": "chejin_rx5_2021_plus",
+    "title": "荣威RX5 PLUS 330TGI自动国潮智尊版适合什么客户",
+    "keywords": [
+      "2021款荣威RX5 PLUS 330TGI自动国潮智尊版",
+      "荣威RX5",
+      "RX5",
+      "国产SUV",
+      "适合",
+      "CHEJIN_DEMO_20260503_203628"
+    ],
+    "question": "2021款荣威RX5 PLUS 330TGI自动国潮智尊版适合什么客户？",
+    "answer": "适合预算5到6万、想要SUV空间和配置的客户。",
+    "additional_details": {
+      "关联商品": "2021款荣威RX5 PLUS 330TGI自动国潮智尊版",
+      "演示批次": "CHEJIN_DEMO_20260503_203628"
+    }
+  },
+  "runtime": {
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "risk_level": "normal",
+    "operator_alert": false
+  },
+  "review_state": {
+    "is_new": true,
+    "new_reason": "newly_added_formal_knowledge",
+    "marked_at": "2026-05-03T20:36:28",
+    "updated_at": "2026-05-03T20:36:28",
+    "read_at": "",
+    "read_by": "",
+    "source": {
+      "source_module": "jiangsu_chejin_demo_seed",
+      "target_category": "product_faq",
+      "item_id": "chejin_rx5_2021_plus_fit_faq"
+    }
+  },
+  "metadata": {
+    "created_at": "2026-05-03T20:36:28",
+    "updated_at": "2026-05-03T20:36:28",
+    "created_by": "admin",
+    "updated_by": "admin"
+  }
+}

@@ -1,0 +1,323 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_7a2feaed5863b565",
+  "generated_at": "2026-05-04T02:12:37",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_6c6d58c4f8ce772b00a8.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"customer_message\": \"思域首付三成大概能不能看？\", \"intent_tags\": [\"贷款咨询\", \"首付比例\"], \"linked_categories\": [\"汽车金融\"], \"applicability_scope\": \"product_category\", \"product_id\": \"\", \"product_category\": \"汽车\", \"usable_as_template\": false, \"additional_details\": {\"raw_timestamp\": \"2026-05-04T02:12:00\", \"customer_name\": \"许聪\"}}",
+    "content_sha256": "83e9e22d69459d52750507b8d2af6757f68ae6ec85322d9954e02d6e863ba820",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_6c6d58c4f8ce772b00a8",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_5c2041ebc7c1c810201e"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_0ccf76ba40c8c5ba",
+        "source_id": "source_c370178830de0c6b",
+        "score": 0.615,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.3133,
+          "semantic": 0.1867,
+          "vector": 0.125,
+          "vector_similarity": 0.6942,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.615
+        },
+        "text": "[2026-05-04T02:12:00] 许聪: 思域首付三成大概能不能看？"
+      },
+      {
+        "chunk_id": "chunk_d2ec0cebcf16c10c",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5099,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1819,
+          "semantic": 0.1295,
+          "vector": 0.1285,
+          "vector_similarity": 0.7139,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5099
+        },
+        "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+      },
+      {
+        "chunk_id": "chunk_9b1c960bb7c4529b",
+        "source_id": "source_a805e8d8d686b497",
+        "score": 0.4694,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2126,
+          "semantic": 0.1429,
+          "vector": 0.124,
+          "vector_similarity": 0.6887,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.4694
+        },
+        "text": "[2026-05-03T19:26:31] 客户: 张先生：我从直播间来的，预算8万，想买省油自动挡，最好南京能看车。\n演示批次：CHEJIN_DEMO_20260503_203628\n[2026-05-03T19:27:31] self: 客服：8万左右可以先看凯美瑞、轩逸、卡罗拉或秦PLUS，您是想燃油还是新能源？\n演示批次：CHEJIN_DEMO_20260503_203628\n[2026-05-03T19:28:31] 客户: 张先生：可以贷款吗，首付三成月供多少？\n演示批次：CHEJIN_DEMO_202"
+      },
+      {
+        "chunk_id": "chunk_99d098ac348e1842",
+        "source_id": "source_15b34fb11375bd30",
+        "score": 0.4657,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2345,
+          "semantic": 0.1524,
+          "vector": 0.0889,
+          "vector_similarity": 0.4937,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.4657
+        },
+        "text": "[2026-05-03T04:39:23] self: 思域首付三成月供大概多少，贷款能不能包过？"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_fb8d862dce0aed5a3822",
+    "experience_id": "rag_exp_fb8d862dce0aed5a3822"
+  },
+  "detected_tags": [
+    "llm",
+    "rag_experience",
+    "unknown",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "chats",
+    "change_type": "llm_upsert_chats",
+    "summary": "客户许聪询问思域车型三成首付可行性",
+    "suggested_fields": {
+      "customer_message": "思域首付三成大概能不能看？",
+      "intent_tags": [
+        "贷款咨询",
+        "首付比例"
+      ],
+      "linked_categories": [
+        "汽车金融"
+      ],
+      "applicability_scope": "product_category",
+      "product_id": "",
+      "product_category": "汽车",
+      "usable_as_template": false,
+      "additional_details": {
+        "raw_timestamp": "2026-05-04T02:12:00",
+        "customer_name": "许聪",
+        "原始资料摘录": "{\"customer_message\": \"思域首付三成大概能不能看？\", \"intent_tags\": [\"贷款咨询\", \"首付比例\"], \"linked_categories\": [\"汽车金融\"], \"applicability_scope\": \"product_category\", \"product_id\": \"\", \"product_category\": \"汽车\", \"usable_as_template\": false, \"additional_details\": {\"raw_timestamp\": \"2026-05-04T02:12:00\", \"customer_name\": \"许聪\"}}"
+      }
+    },
+    "missing_fields": [
+      "service_reply"
+    ],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "chats",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "chats",
+        "id": "chat_20260504_021200_xucong",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_6c6d58c4f8ce772b00a8.txt",
+          "candidate_id": "raw_7a2feaed5863b565",
+          "rag_experience_id": "rag_exp_fb8d862dce0aed5a3822",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "customer_message": "思域首付三成大概能不能看？",
+          "intent_tags": [
+            "贷款咨询",
+            "首付比例"
+          ],
+          "linked_categories": [
+            "汽车金融"
+          ],
+          "applicability_scope": "product_category",
+          "product_id": "",
+          "product_category": "汽车",
+          "usable_as_template": false,
+          "additional_details": {
+            "raw_timestamp": "2026-05-04T02:12:00",
+            "customer_name": "许聪",
+            "原始资料摘录": "{\"customer_message\": \"思域首付三成大概能不能看？\", \"intent_tags\": [\"贷款咨询\", \"首付比例\"], \"linked_categories\": [\"汽车金融\"], \"applicability_scope\": \"product_category\", \"product_id\": \"\", \"product_category\": \"汽车\", \"usable_as_template\": false, \"additional_details\": {\"raw_timestamp\": \"2026-05-04T02:12:00\", \"customer_name\": \"许聪\"}}"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "needs_more_info",
+    "ok": false,
+    "confidence": 0.72,
+    "missing_fields": [
+      "service_reply"
+    ],
+    "missing_labels": [
+      "客服回复"
+    ],
+    "question": "还需要补充：客服回复。请补齐后再应用入库。",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "customer_name",
+      "raw_timestamp",
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "pending",
+    "completeness_status": "needs_more_info",
+    "missing_fields": [
+      "service_reply"
+    ],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_6c6d58c4f8ce772b00a8",
+    "source_raw_message_ids": [
+      "raw_msg_5c2041ebc7c1c810201e"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_c370178830de0c6b",
+      "chunk_count": 1,
+      "query": "客户许聪询问思域车型三成首付可行性\n{\"customer_message\": \"思域首付三成大概能不能看？\", \"intent_tags\": [\"贷款咨询\", \"首付比例\"], \"linked_categories\": [\"汽车金融\"], \"applicability_scope\": \"product_category\", \"product_id\": \"\", \"product_category\": \"汽车\", \"usable_as_template\": false, \"additional_details\": {\"raw_timestamp\": \"2026-05-04T02:12:00\", \"customer_name\": \"许聪\"}}",
+      "hits": [
+        {
+          "chunk_id": "chunk_0ccf76ba40c8c5ba",
+          "source_id": "source_c370178830de0c6b",
+          "score": 0.615,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.3133,
+            "semantic": 0.1867,
+            "vector": 0.125,
+            "vector_similarity": 0.6942,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.615
+          },
+          "text": "[2026-05-04T02:12:00] 许聪: 思域首付三成大概能不能看？"
+        },
+        {
+          "chunk_id": "chunk_d2ec0cebcf16c10c",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5099,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1819,
+            "semantic": 0.1295,
+            "vector": 0.1285,
+            "vector_similarity": 0.7139,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5099
+          },
+          "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+        },
+        {
+          "chunk_id": "chunk_9b1c960bb7c4529b",
+          "source_id": "source_a805e8d8d686b497",
+          "score": 0.4694,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2126,
+            "semantic": 0.1429,
+            "vector": 0.124,
+            "vector_similarity": 0.6887,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.4694
+          },
+          "text": "[2026-05-03T19:26:31] 客户: 张先生：我从直播间来的，预算8万，想买省油自动挡，最好南京能看车。\n演示批次：CHEJIN_DEMO_20260503_203628\n[2026-05-03T19:27:31] self: 客服：8万左右可以先看凯美瑞、轩逸、卡罗拉或秦PLUS，您是想燃油还是新能源？\n演示批次：CHEJIN_DEMO_20260503_203628\n[2026-05-03T19:28:31] 客户: 张先生：可以贷款吗，首付三成月供多少？\n演示批次：CHEJIN_DEMO_202"
+        },
+        {
+          "chunk_id": "chunk_99d098ac348e1842",
+          "source_id": "source_15b34fb11375bd30",
+          "score": 0.4657,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2345,
+            "semantic": 0.1524,
+            "vector": 0.0889,
+            "vector_similarity": 0.4937,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.4657
+          },
+          "text": "[2026-05-03T04:39:23] self: 思域首付三成月供大概多少，贷款能不能包过？"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_fb8d862dce0aed5a3822",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ]
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

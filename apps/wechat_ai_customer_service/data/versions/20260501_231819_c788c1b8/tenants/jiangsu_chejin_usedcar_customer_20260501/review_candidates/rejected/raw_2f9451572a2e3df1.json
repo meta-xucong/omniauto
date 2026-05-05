@@ -1,0 +1,282 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_2f9451572a2e3df1",
+  "generated_at": "2026-05-01T16:09:50",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_d4b71294a90d5f7dabd8.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "title: 待分类规则；answer: [2026-05-01T16:09:50] self: 8万预算，自动挡省油，通勤代步 CHEJIN_20260501_160949；keywords: ['unknown']",
+    "content_sha256": "ca7107ed7caf4eba1a250ae19d172aea1dbee88e6729c66bc3814e3f5b1dc315",
+    "type": "raw_wechat_private",
+    "raw_batch_id": "raw_batch_d4b71294a90d5f7dabd8",
+    "conversation_id": "conv_54a96e57c70563ab9c",
+    "raw_message_ids": [
+      "raw_msg_dc21d8b766e3a1318d12"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_28ac8e0bbe399eb5",
+        "source_id": "source_e7690910d83d89bb",
+        "score": 0.6904,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.3571,
+          "semantic": 0.2057,
+          "vector": 0.1375,
+          "vector_similarity": 0.764,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.6904
+        },
+        "text": "[2026-05-01T16:09:50] self: 8万预算，自动挡省油，通勤代步 CHEJIN_20260501_160949"
+      },
+      {
+        "chunk_id": "chunk_bb6978d3cfaf8775",
+        "source_id": "source_c54a376f3cca67a7",
+        "score": 0.5157,
+        "category": "chats",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2586,
+          "semantic": 0.1629,
+          "vector": 0.0943,
+          "vector_similarity": 0.5236,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.0,
+          "risk_penalty": 0.0,
+          "final": 0.5157
+        },
+        "text": "聊天记录：江苏车金预算推荐话术 CHEJIN_20260501_160949\n客户：我从抖音直播来的，8万左右想买自动挡省油代步车，有什么推荐？\n客服：您这个预算可以先看凯美瑞、思域和秦PLUS DM-i。凯美瑞偏家用稳、省心；思域更年轻；秦PLUS更省油。您是在南京看车吗？是否考虑贷款或置换？\n意图标签：预算推荐,车源推荐,抖音线索\n聊天记录：江苏车金置换话术 CHEJIN_20260501_160949\n客户：我有一台老朗逸想置换。\n客服：可以的，麻烦补充上牌年份、公里数、车况、所在城市和是否有贷款，我先帮您记"
+      },
+      {
+        "chunk_id": "chunk_29c2cb609680d911",
+        "source_id": "source_d84950464bd03828",
+        "score": 0.4807,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2093,
+          "semantic": 0.1414,
+          "vector": 0.1049,
+          "vector_similarity": 0.583,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.025,
+          "risk_penalty": 0.0,
+          "final": 0.4807
+        },
+        "text": "3系,320Li,试驾,精品车况\n规格参数：2019年上牌，表显5.6万公里，2.0T自动挡，一手车源，支持到店试驾。\n价格：12.80万\n单位：台\n库存：1\n发货：高意向试驾需转人工确认门店和时间。\n售后：精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。\n商品资料：江苏车金二手车车源 CHEJIN_20260501_160949\n商品名称：2022款比亚迪秦PLUS DM-i 55KM CHEJIN_20260501_160949\n型号：CHEJIN-QINPLUS-CHEJIN_20260501_1"
+      },
+      {
+        "chunk_id": "chunk_cdf593aca256afe6",
+        "source_id": "source_d84950464bd03828",
+        "score": 0.4473,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2421,
+          "semantic": 0.1557,
+          "vector": 0.1044,
+          "vector_similarity": 0.5802,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.025,
+          "risk_penalty": 0.08,
+          "final": 0.4473
+        },
+        "text": "商品资料：江苏车金二手车车源 CHEJIN_20260501_160949\n商品名称：2021款丰田凯美瑞2.0G豪华版 CHEJIN_20260501_160949\n型号：CHEJIN-CAMRY-CHEJIN_20260501_160949\n商品类目：二手车/中级轿车\n别名关键词：凯美瑞,丰田凯美瑞,8万预算,自动挡,省油,通勤\n规格参数：2021年上牌，表显4.8万公里，2.0L自动挡，南京现车，一手车，支持第三方检测。\n价格：8.98万\n单位：台\n库存：1\n发货：南京门店可看车，异地客户需人工确认物流与提档"
+      }
+    ]
+  },
+  "detected_tags": [
+    "unknown",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "policies",
+    "change_type": "upsert_policy",
+    "summary": "建议新增/更新政策规则：待分类规则",
+    "suggested_fields": {
+      "title": "待分类规则",
+      "policy_type": "other",
+      "keywords": [
+        "unknown"
+      ],
+      "answer": "[2026-05-01T16:09:50] self: 8万预算，自动挡省油，通勤代步 CHEJIN_20260501_160949",
+      "allow_auto_reply": true,
+      "requires_handoff": false,
+      "operator_alert": false,
+      "risk_level": "normal",
+      "additional_details": {
+        "原始资料摘录": "title: 待分类规则；answer: [2026-05-01T16:09:50] self: 8万预算，自动挡省油，通勤代步 CHEJIN_20260501_160949；keywords: ['unknown']"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "policies",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "policies",
+        "id": "item_ae79f0846884",
+        "status": "active",
+        "source": {
+          "type": "raw_upload",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_d4b71294a90d5f7dabd8.txt",
+          "candidate_id": "raw_2f9451572a2e3df1"
+        },
+        "data": {
+          "title": "待分类规则",
+          "policy_type": "other",
+          "keywords": [
+            "unknown"
+          ],
+          "answer": "[2026-05-01T16:09:50] self: 8万预算，自动挡省油，通勤代步 CHEJIN_20260501_160949",
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "operator_alert": false,
+          "risk_level": "normal",
+          "additional_details": {
+            "原始资料摘录": "title: 待分类规则；answer: [2026-05-01T16:09:50] self: 8万预算，自动挡省油，通勤代步 CHEJIN_20260501_160949；keywords: ['unknown']"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "rejected",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "source_raw_batch_id": "raw_batch_d4b71294a90d5f7dabd8",
+    "source_raw_message_ids": [
+      "raw_msg_dc21d8b766e3a1318d12"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_e7690910d83d89bb",
+      "chunk_count": 1,
+      "query": "建议新增/更新政策规则：待分类规则\ntitle: 待分类规则；answer: [2026-05-01T16:09:50] self: 8万预算，自动挡省油，通勤代步 CHEJIN_20260501_160949；keywords: ['unknown']\n待分类规则\n[2026-05-01T16:09:50] self: 8万预算，自动挡省油，通勤代步 CHEJIN_20260501_160949",
+      "hits": [
+        {
+          "chunk_id": "chunk_28ac8e0bbe399eb5",
+          "source_id": "source_e7690910d83d89bb",
+          "score": 0.6904,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.3571,
+            "semantic": 0.2057,
+            "vector": 0.1375,
+            "vector_similarity": 0.764,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.6904
+          },
+          "text": "[2026-05-01T16:09:50] self: 8万预算，自动挡省油，通勤代步 CHEJIN_20260501_160949"
+        },
+        {
+          "chunk_id": "chunk_bb6978d3cfaf8775",
+          "source_id": "source_c54a376f3cca67a7",
+          "score": 0.5157,
+          "category": "chats",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2586,
+            "semantic": 0.1629,
+            "vector": 0.0943,
+            "vector_similarity": 0.5236,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.0,
+            "risk_penalty": 0.0,
+            "final": 0.5157
+          },
+          "text": "聊天记录：江苏车金预算推荐话术 CHEJIN_20260501_160949\n客户：我从抖音直播来的，8万左右想买自动挡省油代步车，有什么推荐？\n客服：您这个预算可以先看凯美瑞、思域和秦PLUS DM-i。凯美瑞偏家用稳、省心；思域更年轻；秦PLUS更省油。您是在南京看车吗？是否考虑贷款或置换？\n意图标签：预算推荐,车源推荐,抖音线索\n聊天记录：江苏车金置换话术 CHEJIN_20260501_160949\n客户：我有一台老朗逸想置换。\n客服：可以的，麻烦补充上牌年份、公里数、车况、所在城市和是否有贷款，我先帮您记"
+        },
+        {
+          "chunk_id": "chunk_29c2cb609680d911",
+          "source_id": "source_d84950464bd03828",
+          "score": 0.4807,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2093,
+            "semantic": 0.1414,
+            "vector": 0.1049,
+            "vector_similarity": 0.583,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.025,
+            "risk_penalty": 0.0,
+            "final": 0.4807
+          },
+          "text": "3系,320Li,试驾,精品车况\n规格参数：2019年上牌，表显5.6万公里，2.0T自动挡，一手车源，支持到店试驾。\n价格：12.80万\n单位：台\n库存：1\n发货：高意向试驾需转人工确认门店和时间。\n售后：精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。\n商品资料：江苏车金二手车车源 CHEJIN_20260501_160949\n商品名称：2022款比亚迪秦PLUS DM-i 55KM CHEJIN_20260501_160949\n型号：CHEJIN-QINPLUS-CHEJIN_20260501_1"
+        },
+        {
+          "chunk_id": "chunk_cdf593aca256afe6",
+          "source_id": "source_d84950464bd03828",
+          "score": 0.4473,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2421,
+            "semantic": 0.1557,
+            "vector": 0.1044,
+            "vector_similarity": 0.5802,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.025,
+            "risk_penalty": 0.08,
+            "final": 0.4473
+          },
+          "text": "商品资料：江苏车金二手车车源 CHEJIN_20260501_160949\n商品名称：2021款丰田凯美瑞2.0G豪华版 CHEJIN_20260501_160949\n型号：CHEJIN-CAMRY-CHEJIN_20260501_160949\n商品类目：二手车/中级轿车\n别名关键词：凯美瑞,丰田凯美瑞,8万预算,自动挡,省油,通勤\n规格参数：2021年上牌，表显4.8万公里，2.0L自动挡，南京现车，一手车，支持第三方检测。\n价格：8.98万\n单位：台\n库存：1\n发货：南京门店可看车，异地客户需人工确认物流与提档"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rejected_at": "2026-05-01T22:05:56",
+    "reason": "?????????????? rejected ??"
+  },
+  "suggested_tests": [
+    {
+      "scenario": "other",
+      "assertion": "入库后应能按关键词回答该政策；高风险内容必须转人工。"
+    }
+  ]
+}

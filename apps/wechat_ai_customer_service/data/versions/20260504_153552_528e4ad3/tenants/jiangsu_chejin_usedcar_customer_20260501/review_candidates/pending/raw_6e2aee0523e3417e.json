@@ -1,0 +1,329 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_6e2aee0523e3417e",
+  "generated_at": "2026-05-04T03:51:19",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_f1b60e0b7af02873fb8a.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"customer_message\": \"\", \"service_reply\": \"[车金AI] 坦克300的现车我这边暂时没看到准确数据，得让销售同事查一下库存和到店情况。您方便留个电话吗？他查到后第一时间联系您。\", \"intent_tags\": [\"库存查询\", \"留资\"], \"tone_tags\": [\"友好\", \"主动提供帮助\"], \"linked_categories\": [\"chats\"], \"linked_item_ids\": [], \"applicability_scope\": \"specific_product\", \"product_id\": \"tank300\", \"product_category\": \"\", \"usable_as_template\": true, \"additional",
+    "content_sha256": "45fd6ea42f4c59b634d93357ee6b1e67031963ac0295f4b4860fb87b445a81ee",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_f1b60e0b7af02873fb8a",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_740333fc8cca853aeae9",
+      "raw_msg_ed0759cba731f65ce3e6"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_76a8a4fc1bc5a9e9",
+        "source_id": "source_da9bcbdd0cb1be4a",
+        "score": 0.8907,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.495,
+          "semantic": 0.2657,
+          "vector": 0.14,
+          "vector_similarity": 0.9121,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.8907
+        },
+        "text": "[2026-05-04T03:50:27] self: [车金AI] 坦克300的现车我这边暂时没看到准确数据，得让销售同事查一下库存和到店情况。您方便留个电话吗？他查到后第一时间联系您。\n[2026-05-04T03:50:27] 许聪: 我要一台全新未上牌的比亚迪海鸥"
+      },
+      {
+        "chunk_id": "chunk_20b1ed4080531862",
+        "source_id": "source_de4fa2163767901b",
+        "score": 0.7508,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.3975,
+          "semantic": 0.2233,
+          "vector": 0.14,
+          "vector_similarity": 0.8329,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.7508
+        },
+        "text": "[2026-05-04T03:46:11] self: [车金AI] 许哥，奥德赛这款日系MPV我这边暂时没看到现车信息，需要让销售同事查一下库存和具体车况。我马上帮您转过去，您方便留个电话吗？他查到后第一时间联系您。\n[2026-05-04T03:46:11] 许聪: 有没有奔驰E级，最好2021以后的"
+      },
+      {
+        "chunk_id": "chunk_5ce004697dbee133",
+        "source_id": "source_edf4b496ba3529d7",
+        "score": 0.5157,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.25,
+          "semantic": 0.1591,
+          "vector": 0.1165,
+          "vector_similarity": 0.6474,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.5157
+        },
+        "text": "[2026-05-04 03:48:00] system: 03:48\n[2026-05-04T03:48:32] self: [车金AI] 许哥，奔驰E级2021年以后的目前库里没查到现车信息，我帮您转给销售同事核实一下，方便留个电话吗？他查到后直接联系您。\n[2026-05-04T03:48:32] 许聪: 坦克300有现车吗？"
+      },
+      {
+        "chunk_id": "chunk_40e674aac8716b84",
+        "source_id": "source_3255eb23cf1d9e7f",
+        "score": 0.5142,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.24,
+          "semantic": 0.1548,
+          "vector": 0.1294,
+          "vector_similarity": 0.7192,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.5142
+        },
+        "text": "[2026-05-04T03:25:55] self: [车金AI] 绿本是否抵押、查封，以及里程有没有调过，都需要销售同事查登记证和维保记录才能确认，我这边不能直接给结论。我帮您转给负责的销售，方便留个电话吗？他们直接联系您核实。"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_de8d3cd20ff19673b29f",
+    "experience_id": "rag_exp_de8d3cd20ff19673b29f"
+  },
+  "detected_tags": [
+    "llm",
+    "product",
+    "rag_experience",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "chats",
+    "change_type": "llm_upsert_chats",
+    "summary": "坦克300库存查询与留资话术",
+    "suggested_fields": {
+      "customer_message": "",
+      "service_reply": "[车金AI] 坦克300的现车我这边暂时没看到准确数据，得让销售同事查一下库存和到店情况。您方便留个电话吗？他查到后第一时间联系您。",
+      "intent_tags": [
+        "库存查询",
+        "留资"
+      ],
+      "tone_tags": [
+        "友好",
+        "主动提供帮助"
+      ],
+      "linked_categories": [
+        "chats"
+      ],
+      "linked_item_ids": [],
+      "applicability_scope": "specific_product",
+      "product_id": "tank300",
+      "product_category": "",
+      "usable_as_template": true,
+      "additional_details": {
+        "full_context": "客服回复关于坦克300库存后，客户说：“我要一台全新未上牌的比亚迪海鸥”",
+        "customer_follow_up": "我要一台全新未上牌的比亚迪海鸥",
+        "原始资料摘录": "{\"customer_message\": \"\", \"service_reply\": \"[车金AI] 坦克300的现车我这边暂时没看到准确数据，得让销售同事查一下库存和到店情况。您方便留个电话吗？他查到后第一时间联系您。\", \"intent_tags\": [\"库存查询\", \"留资\"], \"tone_tags\": [\"友好\", \"主动提供帮助\"], \"linked_categories\": [\"chats\"], \"linked_item_ids\": [], \"applicability_scope\": \"specific_product\", \"product_id\": \"tank300\", \"product_category\": \"\", \"usable_as_template\": true, \"additional"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "chats",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "chats",
+        "id": "chat_tank300_inventory_check",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_f1b60e0b7af02873fb8a.txt",
+          "candidate_id": "raw_6e2aee0523e3417e",
+          "rag_experience_id": "rag_exp_de8d3cd20ff19673b29f",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "customer_message": "",
+          "service_reply": "[车金AI] 坦克300的现车我这边暂时没看到准确数据，得让销售同事查一下库存和到店情况。您方便留个电话吗？他查到后第一时间联系您。",
+          "intent_tags": [
+            "库存查询",
+            "留资"
+          ],
+          "tone_tags": [
+            "友好",
+            "主动提供帮助"
+          ],
+          "linked_categories": [
+            "chats"
+          ],
+          "linked_item_ids": [],
+          "applicability_scope": "specific_product",
+          "product_id": "tank300",
+          "product_category": "",
+          "usable_as_template": true,
+          "additional_details": {
+            "full_context": "客服回复关于坦克300库存后，客户说：“我要一台全新未上牌的比亚迪海鸥”",
+            "customer_follow_up": "我要一台全新未上牌的比亚迪海鸥",
+            "原始资料摘录": "{\"customer_message\": \"\", \"service_reply\": \"[车金AI] 坦克300的现车我这边暂时没看到准确数据，得让销售同事查一下库存和到店情况。您方便留个电话吗？他查到后第一时间联系您。\", \"intent_tags\": [\"库存查询\", \"留资\"], \"tone_tags\": [\"友好\", \"主动提供帮助\"], \"linked_categories\": [\"chats\"], \"linked_item_ids\": [], \"applicability_scope\": \"specific_product\", \"product_id\": \"tank300\", \"product_category\": \"\", \"usable_as_template\": true, \"additional"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "customer_follow_up",
+      "full_context",
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "pending",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_f1b60e0b7af02873fb8a",
+    "source_raw_message_ids": [
+      "raw_msg_740333fc8cca853aeae9",
+      "raw_msg_ed0759cba731f65ce3e6"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_da9bcbdd0cb1be4a",
+      "chunk_count": 1,
+      "query": "坦克300库存查询与留资话术\n{\"customer_message\": \"\", \"service_reply\": \"[车金AI] 坦克300的现车我这边暂时没看到准确数据，得让销售同事查一下库存和到店情况。您方便留个电话吗？他查到后第一时间联系您。\", \"intent_tags\": [\"库存查询\", \"留资\"], \"tone_tags\": [\"友好\", \"主动提供帮助\"], \"linked_categories\": [\"chats\"], \"linked_item_ids\": [], \"applicability_scope\": \"specific_product\", \"product_id\": \"tank300\", \"product_category\": \"\", \"usable_as_template\": true, \"additional\n[车金AI] 坦克300的现车我这边暂时没看到准确数据，得让销售同事查一下库存和到店情况。您方便留个电话吗？他查到后第一时间联系您。",
+      "hits": [
+        {
+          "chunk_id": "chunk_76a8a4fc1bc5a9e9",
+          "source_id": "source_da9bcbdd0cb1be4a",
+          "score": 0.8907,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.495,
+            "semantic": 0.2657,
+            "vector": 0.14,
+            "vector_similarity": 0.9121,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.8907
+          },
+          "text": "[2026-05-04T03:50:27] self: [车金AI] 坦克300的现车我这边暂时没看到准确数据，得让销售同事查一下库存和到店情况。您方便留个电话吗？他查到后第一时间联系您。\n[2026-05-04T03:50:27] 许聪: 我要一台全新未上牌的比亚迪海鸥"
+        },
+        {
+          "chunk_id": "chunk_20b1ed4080531862",
+          "source_id": "source_de4fa2163767901b",
+          "score": 0.7508,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.3975,
+            "semantic": 0.2233,
+            "vector": 0.14,
+            "vector_similarity": 0.8329,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.7508
+          },
+          "text": "[2026-05-04T03:46:11] self: [车金AI] 许哥，奥德赛这款日系MPV我这边暂时没看到现车信息，需要让销售同事查一下库存和具体车况。我马上帮您转过去，您方便留个电话吗？他查到后第一时间联系您。\n[2026-05-04T03:46:11] 许聪: 有没有奔驰E级，最好2021以后的"
+        },
+        {
+          "chunk_id": "chunk_5ce004697dbee133",
+          "source_id": "source_edf4b496ba3529d7",
+          "score": 0.5157,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.25,
+            "semantic": 0.1591,
+            "vector": 0.1165,
+            "vector_similarity": 0.6474,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.5157
+          },
+          "text": "[2026-05-04 03:48:00] system: 03:48\n[2026-05-04T03:48:32] self: [车金AI] 许哥，奔驰E级2021年以后的目前库里没查到现车信息，我帮您转给销售同事核实一下，方便留个电话吗？他查到后直接联系您。\n[2026-05-04T03:48:32] 许聪: 坦克300有现车吗？"
+        },
+        {
+          "chunk_id": "chunk_40e674aac8716b84",
+          "source_id": "source_3255eb23cf1d9e7f",
+          "score": 0.5142,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.24,
+            "semantic": 0.1548,
+            "vector": 0.1294,
+            "vector_similarity": 0.7192,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.5142
+          },
+          "text": "[2026-05-04T03:25:55] self: [车金AI] 绿本是否抵押、查封，以及里程有没有调过，都需要销售同事查登记证和维保记录才能确认，我这边不能直接给结论。我帮您转给负责的销售，方便留个电话吗？他们直接联系您核实。"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_de8d3cd20ff19673b29f",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ]
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

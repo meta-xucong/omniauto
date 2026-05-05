@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_a7430743de93dc38",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_a142dbad518de5daa9c3.txt",
+    "content_hash": "cfc9812658614e48629149819a063ffb",
+    "status": "active",
+    "created_at": "2026-05-04T02:45:55",
+    "updated_at": "2026-05-04T02:45:55"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_a3b1d42f7ca6ba6d",
+      "source_id": "source_a7430743de93dc38",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_a142dbad518de5daa9c3.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-04T02:45:54] self: [车金AI] 好停好开的新能源，店里有两台挺合适的：一台2021款特斯拉Model 3标准续航，纯电、车身紧凑带辅助驾驶，参考价13.98万；另一台2022款比亚迪秦PLUS DM-i 55KM，插混省油，车身也不大，参考价8.68万。您这次给老婆开，预算大概多少？我帮您细看看哪台更符合。\n[2026-05-04T02:45:54] 许聪: 我想买个年轻点的轿车，别太肉",
+      "char_count": 214,
+      "status": "active",
+      "created_at": "2026-05-04T02:45:55"
+    }
+  ]
+}

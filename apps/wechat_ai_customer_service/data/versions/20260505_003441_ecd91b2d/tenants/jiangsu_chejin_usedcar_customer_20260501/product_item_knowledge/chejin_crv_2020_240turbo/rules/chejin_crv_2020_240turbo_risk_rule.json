@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "category_id": "product_rules",
+  "id": "chejin_crv_2020_240turbo_risk_rule",
+  "status": "active",
+  "source": {
+    "type": "demo_fixture",
+    "batch_token": "CHEJIN_DEMO_20260503_203628",
+    "domain": "used_car"
+  },
+  "data": {
+    "product_id": "chejin_crv_2020_240turbo",
+    "title": "本田CR-V 240TURBO两驱都市版风险边界",
+    "keywords": [
+      "2020款本田CR-V 240TURBO两驱都市版",
+      "底盘异响转人工",
+      "保养记录转人工",
+      "保证",
+      "赔付",
+      "CHEJIN_DEMO_20260503_203628"
+    ],
+    "answer": "2020款本田CR-V 240TURBO两驱都市版 的风险点包括：底盘异响转人工；保养记录转人工。客户要求最终承诺时必须人工确认。",
+    "allow_auto_reply": false,
+    "requires_handoff": true,
+    "handoff_reason": "product_specific_risk_boundary",
+    "additional_details": {
+      "关联商品": "2020款本田CR-V 240TURBO两驱都市版",
+      "演示批次": "CHEJIN_DEMO_20260503_203628"
+    }
+  },
+  "runtime": {
+    "allow_auto_reply": false,
+    "requires_handoff": true,
+    "risk_level": "high",
+    "operator_alert": true
+  },
+  "review_state": {
+    "is_new": false,
+    "new_reason": "newly_added_formal_knowledge",
+    "marked_at": "2026-05-03T20:36:28",
+    "updated_at": "2026-05-04T18:58:39",
+    "read_at": "2026-05-04T18:58:39",
+    "read_by": "codex_test_seed",
+    "source": {
+      "source_module": "jiangsu_chejin_demo_seed",
+      "target_category": "product_rules",
+      "item_id": "chejin_crv_2020_240turbo_risk_rule"
+    }
+  },
+  "metadata": {
+    "created_at": "2026-05-03T20:36:28",
+    "updated_at": "2026-05-04T18:58:39",
+    "created_by": "admin",
+    "updated_by": "admin",
+    "test_seed_direct_fill": true,
+    "test_seed_id": "direct_test_fill_20260504_v1",
+    "test_seed_note": "????????????????????????"
+  }
+}

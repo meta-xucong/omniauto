@@ -1,0 +1,54 @@
+[
+  {
+    "source_id": "source_2d21086386cd800b",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "group",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_f7748bf2c64aeb0b4d07.txt",
+    "content_hash": "0de54943c523401a9828cde21a520309",
+    "status": "active",
+    "created_at": "2026-05-02T04:25:17",
+    "updated_at": "2026-05-02T04:25:17"
+  },
+  {
+    "source_id": "source_46ade21c94a25215",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "file_transfer",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_3b5b56264d2d30a3c358.txt",
+    "content_hash": "7ba8348f71ae3acba110d5141bfe9277",
+    "status": "active",
+    "created_at": "2026-05-02T04:25:43",
+    "updated_at": "2026-05-02T04:25:43"
+  },
+  {
+    "source_id": "source_98b8438d7f65da3a",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "group",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_67996a827b284cf4f839.txt",
+    "content_hash": "82e8be37875f1e1369442c3d4e9a828f",
+    "status": "active",
+    "created_at": "2026-05-02T04:24:20",
+    "updated_at": "2026-05-02T04:24:20"
+  },
+  {
+    "source_id": "source_d262d55f8b02b514",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "group",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_055784b7dc9082faf951.txt",
+    "content_hash": "185b80b74458723e1b368112c690385a",
+    "status": "active",
+    "created_at": "2026-05-02T04:24:40",
+    "updated_at": "2026-05-02T04:24:40"
+  }
+]

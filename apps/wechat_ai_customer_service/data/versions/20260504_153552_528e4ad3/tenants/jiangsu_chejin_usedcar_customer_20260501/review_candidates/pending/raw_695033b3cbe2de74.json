@@ -1,0 +1,327 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_695033b3cbe2de74",
+  "generated_at": "2026-05-04T03:08:48",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_617e7a0544931cc7af81.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"customer_message\": null, \"service_reply\": \"公司买车可以开发票，但开票主体、金额和抬头需要销售同事结合交易方式确认。您是公司户还是个人户？我帮您转给负责的销售处理。\", \"intent_tags\": [\"开票咨询\"], \"tone_tags\": [\"专业\", \"引导\"], \"linked_categories\": [\"policies\"], \"linked_item_ids\": [\"company_invoice_policy\"], \"applicability_scope\": \"specific_product\", \"product_id\": \"company_invoice_policy\", \"product_category\": \"\", \"usable_as_",
+    "content_sha256": "eeb113a93f3cbc9415ca9168dfa78924f2fe1e989dc1abb3016ed775be66da31",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_617e7a0544931cc7af81",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_1813fb41f4da3109643d",
+      "raw_msg_5f16c61be82a9acd21f5",
+      "raw_msg_0ad8e8e480363afab0a5"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_2caefe62ea26da43",
+        "source_id": "source_2affb905bf10a8d4",
+        "score": 0.9395,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.5291,
+          "semantic": 0.2805,
+          "vector": 0.14,
+          "vector_similarity": 0.9046,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.9395
+        },
+        "text": "[2026-05-04 03:07:00] system: 03:07\n[2026-05-04T03:07:29] self: [车金AI] 公司买车可以开发票，但开票主体、金额和抬头需要销售同事结合交易方式确认。您是公司户还是个人户？我帮您转给负责的销售处理。\n[2026-05-04T03:07:29] 许聪: 我明天想试乘一下，可以直接安排吗？"
+      },
+      {
+        "chunk_id": "chunk_c042ee843c5513a9",
+        "source_id": "source_b6382fbc1e2edf58",
+        "score": 0.5502,
+        "category": "chats",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.3205,
+          "semantic": 0.1898,
+          "vector": 0.14,
+          "vector_similarity": 0.8008,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.02,
+          "risk_penalty": 0.08,
+          "final": 0.5502
+        },
+        "text": "# 销售对话话术库\n演示批次：CHEJIN_DEMO_20260503_203628\n真实客服话术样例：\n客户：8万左右想买省油自动挡代步\n客服：8万左右可以优先看凯美瑞、轩逸、卡罗拉或秦PLUS。燃油车更省心，插混更省油；我先帮您确认城市、到店时间、是否贷款和置换。\n标签：预算推荐、代步、CHEJIN_DEMO_20260503_203628\n客户：秦PLUS和Model 3怎么选\n客服：秦PLUS偏低油耗和家用成本，Model 3偏纯电驾驶和智能化。新能源车我会先提醒电池检测、官方权益和当地政策需要人工确认。\n"
+      },
+      {
+        "chunk_id": "chunk_754ecf131d7858cd",
+        "source_id": "source_bb395d5ecba99f8b",
+        "score": 0.5305,
+        "category": "policies",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2616,
+          "semantic": 0.1642,
+          "vector": 0.1397,
+          "vector_similarity": 0.7762,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.045,
+          "risk_penalty": 0.08,
+          "final": 0.5305
+        },
+        "text": "# 二手车交易规则手册\n演示批次：CHEJIN_DEMO_20260503_203628\n二手车行业演示规则：所有成交、过户、金融、售后和车况承诺均以合同、检测报告和人工确认为准。\n规则：江苏车金门店介绍\n触发词：江苏车金、门店、地址、营业时间、CHEJIN_DEMO_20260503_203628\n标准说明：江苏车金二手车演示账号默认说明：客户可以预约南京门店看车，AI 只做初步接待、资料收集和风险提醒，成交条件由人工确认。\n规则：看车预约与到店规则\n触发词：看车、到店、试驾、试乘、预约、CHEJIN_DEMO_"
+      },
+      {
+        "chunk_id": "chunk_0de02f9181cc667a",
+        "source_id": "source_1ad359041dec7fe7",
+        "score": 0.4905,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2188,
+          "semantic": 0.1456,
+          "vector": 0.136,
+          "vector_similarity": 0.7558,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.4905
+        },
+        "text": "[2026-05-04 03:00:00] system: 03:00\n[2026-05-04T03:01:04] self: [车金AI] 异地提档要看您所在城市的排放和迁入政策，还有车辆档案状态，我这边没法直接给您准话。我这就转给负责的销售同事帮您核实，您方便留个电话或者告诉我所在城市吗？\n[2026-05-04T03:01:04] 许聪: 如果我有旧车置换，需要准备什么？"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_a815f7fe52c26362d6a6",
+    "experience_id": "rag_exp_a815f7fe52c26362d6a6"
+  },
+  "detected_tags": [
+    "invoice",
+    "llm",
+    "rag_experience",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "chats",
+    "change_type": "llm_upsert_chats",
+    "summary": "开票咨询话术模板",
+    "suggested_fields": {
+      "customer_message": null,
+      "service_reply": "公司买车可以开发票，但开票主体、金额和抬头需要销售同事结合交易方式确认。您是公司户还是个人户？我帮您转给负责的销售处理。",
+      "intent_tags": [
+        "开票咨询"
+      ],
+      "tone_tags": [
+        "专业",
+        "引导"
+      ],
+      "linked_categories": [
+        "policies"
+      ],
+      "linked_item_ids": [
+        "company_invoice_policy"
+      ],
+      "applicability_scope": "specific_product",
+      "product_id": "company_invoice_policy",
+      "product_category": "",
+      "usable_as_template": true,
+      "additional_details": {
+        "原始资料摘录": "{\"customer_message\": null, \"service_reply\": \"公司买车可以开发票，但开票主体、金额和抬头需要销售同事结合交易方式确认。您是公司户还是个人户？我帮您转给负责的销售处理。\", \"intent_tags\": [\"开票咨询\"], \"tone_tags\": [\"专业\", \"引导\"], \"linked_categories\": [\"policies\"], \"linked_item_ids\": [\"company_invoice_policy\"], \"applicability_scope\": \"specific_product\", \"product_id\": \"company_invoice_policy\", \"product_category\": \"\", \"usable_as_"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "chats",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "chats",
+        "id": "invoice_chat_template",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_617e7a0544931cc7af81.txt",
+          "candidate_id": "raw_695033b3cbe2de74",
+          "rag_experience_id": "rag_exp_a815f7fe52c26362d6a6",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "customer_message": null,
+          "service_reply": "公司买车可以开发票，但开票主体、金额和抬头需要销售同事结合交易方式确认。您是公司户还是个人户？我帮您转给负责的销售处理。",
+          "intent_tags": [
+            "开票咨询"
+          ],
+          "tone_tags": [
+            "专业",
+            "引导"
+          ],
+          "linked_categories": [
+            "policies"
+          ],
+          "linked_item_ids": [
+            "company_invoice_policy"
+          ],
+          "applicability_scope": "specific_product",
+          "product_id": "company_invoice_policy",
+          "product_category": "",
+          "usable_as_template": true,
+          "additional_details": {
+            "原始资料摘录": "{\"customer_message\": null, \"service_reply\": \"公司买车可以开发票，但开票主体、金额和抬头需要销售同事结合交易方式确认。您是公司户还是个人户？我帮您转给负责的销售处理。\", \"intent_tags\": [\"开票咨询\"], \"tone_tags\": [\"专业\", \"引导\"], \"linked_categories\": [\"policies\"], \"linked_item_ids\": [\"company_invoice_policy\"], \"applicability_scope\": \"specific_product\", \"product_id\": \"company_invoice_policy\", \"product_category\": \"\", \"usable_as_"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "pending",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_617e7a0544931cc7af81",
+    "source_raw_message_ids": [
+      "raw_msg_1813fb41f4da3109643d",
+      "raw_msg_5f16c61be82a9acd21f5",
+      "raw_msg_0ad8e8e480363afab0a5"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_2affb905bf10a8d4",
+      "chunk_count": 1,
+      "query": "开票咨询话术模板\n{\"customer_message\": null, \"service_reply\": \"公司买车可以开发票，但开票主体、金额和抬头需要销售同事结合交易方式确认。您是公司户还是个人户？我帮您转给负责的销售处理。\", \"intent_tags\": [\"开票咨询\"], \"tone_tags\": [\"专业\", \"引导\"], \"linked_categories\": [\"policies\"], \"linked_item_ids\": [\"company_invoice_policy\"], \"applicability_scope\": \"specific_product\", \"product_id\": \"company_invoice_policy\", \"product_category\": \"\", \"usable_as_\n公司买车可以开发票，但开票主体、金额和抬头需要销售同事结合交易方式确认。您是公司户还是个人户？我帮您转给负责的销售处理。",
+      "hits": [
+        {
+          "chunk_id": "chunk_2caefe62ea26da43",
+          "source_id": "source_2affb905bf10a8d4",
+          "score": 0.9395,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.5291,
+            "semantic": 0.2805,
+            "vector": 0.14,
+            "vector_similarity": 0.9046,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.9395
+          },
+          "text": "[2026-05-04 03:07:00] system: 03:07\n[2026-05-04T03:07:29] self: [车金AI] 公司买车可以开发票，但开票主体、金额和抬头需要销售同事结合交易方式确认。您是公司户还是个人户？我帮您转给负责的销售处理。\n[2026-05-04T03:07:29] 许聪: 我明天想试乘一下，可以直接安排吗？"
+        },
+        {
+          "chunk_id": "chunk_c042ee843c5513a9",
+          "source_id": "source_b6382fbc1e2edf58",
+          "score": 0.5502,
+          "category": "chats",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.3205,
+            "semantic": 0.1898,
+            "vector": 0.14,
+            "vector_similarity": 0.8008,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.02,
+            "risk_penalty": 0.08,
+            "final": 0.5502
+          },
+          "text": "# 销售对话话术库\n演示批次：CHEJIN_DEMO_20260503_203628\n真实客服话术样例：\n客户：8万左右想买省油自动挡代步\n客服：8万左右可以优先看凯美瑞、轩逸、卡罗拉或秦PLUS。燃油车更省心，插混更省油；我先帮您确认城市、到店时间、是否贷款和置换。\n标签：预算推荐、代步、CHEJIN_DEMO_20260503_203628\n客户：秦PLUS和Model 3怎么选\n客服：秦PLUS偏低油耗和家用成本，Model 3偏纯电驾驶和智能化。新能源车我会先提醒电池检测、官方权益和当地政策需要人工确认。\n"
+        },
+        {
+          "chunk_id": "chunk_754ecf131d7858cd",
+          "source_id": "source_bb395d5ecba99f8b",
+          "score": 0.5305,
+          "category": "policies",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2616,
+            "semantic": 0.1642,
+            "vector": 0.1397,
+            "vector_similarity": 0.7762,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.045,
+            "risk_penalty": 0.08,
+            "final": 0.5305
+          },
+          "text": "# 二手车交易规则手册\n演示批次：CHEJIN_DEMO_20260503_203628\n二手车行业演示规则：所有成交、过户、金融、售后和车况承诺均以合同、检测报告和人工确认为准。\n规则：江苏车金门店介绍\n触发词：江苏车金、门店、地址、营业时间、CHEJIN_DEMO_20260503_203628\n标准说明：江苏车金二手车演示账号默认说明：客户可以预约南京门店看车，AI 只做初步接待、资料收集和风险提醒，成交条件由人工确认。\n规则：看车预约与到店规则\n触发词：看车、到店、试驾、试乘、预约、CHEJIN_DEMO_"
+        },
+        {
+          "chunk_id": "chunk_0de02f9181cc667a",
+          "source_id": "source_1ad359041dec7fe7",
+          "score": 0.4905,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2188,
+            "semantic": 0.1456,
+            "vector": 0.136,
+            "vector_similarity": 0.7558,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.4905
+          },
+          "text": "[2026-05-04 03:00:00] system: 03:00\n[2026-05-04T03:01:04] self: [车金AI] 异地提档要看您所在城市的排放和迁入政策，还有车辆档案状态，我这边没法直接给您准话。我这就转给负责的销售同事帮您核实，您方便留个电话或者告诉我所在城市吗？\n[2026-05-04T03:01:04] 许聪: 如果我有旧车置换，需要准备什么？"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_a815f7fe52c26362d6a6",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ]
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

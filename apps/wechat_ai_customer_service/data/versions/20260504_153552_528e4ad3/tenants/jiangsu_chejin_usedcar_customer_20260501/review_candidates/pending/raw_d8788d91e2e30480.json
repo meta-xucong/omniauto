@@ -1,0 +1,322 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_d8788d91e2e30480",
+  "generated_at": "2026-05-04T03:03:23",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_7c0d0285a8928312a033.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"service_reply\": \"置换没问题的，我先帮您登记旧车信息。麻烦提供：品牌车型、上牌年份、公里数、车况、所在城市、有没有贷款，以及期望的估价范围。最终收车价需要人工复核。方便先告诉我几项吗？\", \"intent_tags\": [\"车辆置换\", \"旧车评估\", \"信息收集\"], \"tone_tags\": [\"友好\", \"专业\", \"引导性\"], \"linked_categories\": [], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\", \"usable_as_template\": true, \"additional_details\": {\"purpo",
+    "content_sha256": "a3daceaf85d5912571a3bd2b829cd493f1c5a876e1ec603798e6f2bb2b2f939b",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_7c0d0285a8928312a033",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_ff5b78e0ff696ac228f5"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_0c5ae5a4020b118d",
+        "source_id": "source_ec4f052cbb8e8e58",
+        "score": 0.8865,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.4921,
+          "semantic": 0.2644,
+          "vector": 0.14,
+          "vector_similarity": 0.9444,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.8865
+        },
+        "text": "[2026-05-04T03:02:47] self: [车金AI] 置换没问题的，我先帮您登记旧车信息。麻烦提供：品牌车型、上牌年份、公里数、车况、所在城市、有没有贷款，以及期望的估价范围。最终收车价需要人工复核。方便先告诉我几项吗？"
+      },
+      {
+        "chunk_id": "chunk_b7acad9cd8df8d8d",
+        "source_id": "source_0ca4e6c116479753",
+        "score": 0.5939,
+        "category": "chats",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2812,
+          "semantic": 0.1727,
+          "vector": 0.14,
+          "vector_similarity": 0.793,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.0,
+          "risk_penalty": 0.0,
+          "final": 0.5939
+        },
+        "text": "聊天记录：江苏车金预算推荐话术 CHEJIN_20260503_204823\n测试批次：CHEJIN_20260503_204823\n客户：我从抖音直播来的，8万左右想买自动挡省油代步车，有什么推荐？\n客服：您这个预算可以先看凯美瑞、思域和秦PLUS DM-i。凯美瑞偏家用稳、省心；思域更年轻；秦PLUS更省油。您是在南京看车吗？是否考虑贷款或置换？\n意图标签：预算推荐,车源推荐,抖音线索\n聊天记录：江苏车金置换话术 CHEJIN_20260503_204823\n测试批次：CHEJIN_20260503_20482"
+      },
+      {
+        "chunk_id": "chunk_98d495755714a154",
+        "source_id": "source_25f67e9fcaeb0195",
+        "score": 0.5939,
+        "category": "chats",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2812,
+          "semantic": 0.1727,
+          "vector": 0.14,
+          "vector_similarity": 0.7895,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.0,
+          "risk_penalty": 0.0,
+          "final": 0.5939
+        },
+        "text": "聊天记录：江苏车金预算推荐话术 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_043922\n客户：我从抖音直播来的，8万左右想买自动挡省油代步车，有什么推荐？\n客服：您这个预算可以先看凯美瑞、思域和秦PLUS DM-i。凯美瑞偏家用稳、省心；思域更年轻；秦PLUS更省油。您是在南京看车吗？是否考虑贷款或置换？\n意图标签：预算推荐,车源推荐,抖音线索\n聊天记录：江苏车金置换话术 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_04392"
+      },
+      {
+        "chunk_id": "chunk_2031352fa3820870",
+        "source_id": "source_32f31fde87e58a32",
+        "score": 0.5939,
+        "category": "chats",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2812,
+          "semantic": 0.1727,
+          "vector": 0.14,
+          "vector_similarity": 0.7887,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.0,
+          "risk_penalty": 0.0,
+          "final": 0.5939
+        },
+        "text": "聊天记录：江苏车金预算推荐话术 CHEJIN_20260503_214706\n测试批次：CHEJIN_20260503_214706\n客户：我从抖音直播来的，8万左右想买自动挡省油代步车，有什么推荐？\n客服：您这个预算可以先看凯美瑞、思域和秦PLUS DM-i。凯美瑞偏家用稳、省心；思域更年轻；秦PLUS更省油。您是在南京看车吗？是否考虑贷款或置换？\n意图标签：预算推荐,车源推荐,抖音线索\n聊天记录：江苏车金置换话术 CHEJIN_20260503_214706\n测试批次：CHEJIN_20260503_21470"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_3f6b76c4e604f6d9697e",
+    "experience_id": "rag_exp_3f6b76c4e604f6d9697e"
+  },
+  "detected_tags": [
+    "llm",
+    "rag_experience",
+    "unknown",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "chats",
+    "change_type": "llm_upsert_chats",
+    "summary": "车辆置换话术：引导客户提供旧车信息",
+    "suggested_fields": {
+      "service_reply": "置换没问题的，我先帮您登记旧车信息。麻烦提供：品牌车型、上牌年份、公里数、车况、所在城市、有没有贷款，以及期望的估价范围。最终收车价需要人工复核。方便先告诉我几项吗？",
+      "intent_tags": [
+        "车辆置换",
+        "旧车评估",
+        "信息收集"
+      ],
+      "tone_tags": [
+        "友好",
+        "专业",
+        "引导性"
+      ],
+      "linked_categories": [],
+      "linked_item_ids": [],
+      "applicability_scope": "global",
+      "product_id": "",
+      "product_category": "",
+      "usable_as_template": true,
+      "additional_details": {
+        "purpose": "标准化引导话术，明确需要收集的旧车信息字段",
+        "原始资料摘录": "{\"service_reply\": \"置换没问题的，我先帮您登记旧车信息。麻烦提供：品牌车型、上牌年份、公里数、车况、所在城市、有没有贷款，以及期望的估价范围。最终收车价需要人工复核。方便先告诉我几项吗？\", \"intent_tags\": [\"车辆置换\", \"旧车评估\", \"信息收集\"], \"tone_tags\": [\"友好\", \"专业\", \"引导性\"], \"linked_categories\": [], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\", \"usable_as_template\": true, \"additional_details\": {\"purpo"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "chats",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "chats",
+        "id": "chat_vehicle_trade_in_guide_reply",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_7c0d0285a8928312a033.txt",
+          "candidate_id": "raw_d8788d91e2e30480",
+          "rag_experience_id": "rag_exp_3f6b76c4e604f6d9697e",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "service_reply": "置换没问题的，我先帮您登记旧车信息。麻烦提供：品牌车型、上牌年份、公里数、车况、所在城市、有没有贷款，以及期望的估价范围。最终收车价需要人工复核。方便先告诉我几项吗？",
+          "intent_tags": [
+            "车辆置换",
+            "旧车评估",
+            "信息收集"
+          ],
+          "tone_tags": [
+            "友好",
+            "专业",
+            "引导性"
+          ],
+          "linked_categories": [],
+          "linked_item_ids": [],
+          "applicability_scope": "global",
+          "product_id": "",
+          "product_category": "",
+          "usable_as_template": true,
+          "additional_details": {
+            "purpose": "标准化引导话术，明确需要收集的旧车信息字段",
+            "原始资料摘录": "{\"service_reply\": \"置换没问题的，我先帮您登记旧车信息。麻烦提供：品牌车型、上牌年份、公里数、车况、所在城市、有没有贷款，以及期望的估价范围。最终收车价需要人工复核。方便先告诉我几项吗？\", \"intent_tags\": [\"车辆置换\", \"旧车评估\", \"信息收集\"], \"tone_tags\": [\"友好\", \"专业\", \"引导性\"], \"linked_categories\": [], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\", \"usable_as_template\": true, \"additional_details\": {\"purpo"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": false,
+          "requires_handoff": true,
+          "risk_level": "warning"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "purpose",
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "pending",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_7c0d0285a8928312a033",
+    "source_raw_message_ids": [
+      "raw_msg_ff5b78e0ff696ac228f5"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_ec4f052cbb8e8e58",
+      "chunk_count": 1,
+      "query": "车辆置换话术：引导客户提供旧车信息\n{\"service_reply\": \"置换没问题的，我先帮您登记旧车信息。麻烦提供：品牌车型、上牌年份、公里数、车况、所在城市、有没有贷款，以及期望的估价范围。最终收车价需要人工复核。方便先告诉我几项吗？\", \"intent_tags\": [\"车辆置换\", \"旧车评估\", \"信息收集\"], \"tone_tags\": [\"友好\", \"专业\", \"引导性\"], \"linked_categories\": [], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\", \"usable_as_template\": true, \"additional_details\": {\"purpo\n置换没问题的，我先帮您登记旧车信息。麻烦提供：品牌车型、上牌年份、公里数、车况、所在城市、有没有贷款，以及期望的估价范围。最终收车价需要人工复核。方便先告诉我几项吗？",
+      "hits": [
+        {
+          "chunk_id": "chunk_0c5ae5a4020b118d",
+          "source_id": "source_ec4f052cbb8e8e58",
+          "score": 0.8865,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.4921,
+            "semantic": 0.2644,
+            "vector": 0.14,
+            "vector_similarity": 0.9444,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.8865
+          },
+          "text": "[2026-05-04T03:02:47] self: [车金AI] 置换没问题的，我先帮您登记旧车信息。麻烦提供：品牌车型、上牌年份、公里数、车况、所在城市、有没有贷款，以及期望的估价范围。最终收车价需要人工复核。方便先告诉我几项吗？"
+        },
+        {
+          "chunk_id": "chunk_b7acad9cd8df8d8d",
+          "source_id": "source_0ca4e6c116479753",
+          "score": 0.5939,
+          "category": "chats",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2812,
+            "semantic": 0.1727,
+            "vector": 0.14,
+            "vector_similarity": 0.793,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.0,
+            "risk_penalty": 0.0,
+            "final": 0.5939
+          },
+          "text": "聊天记录：江苏车金预算推荐话术 CHEJIN_20260503_204823\n测试批次：CHEJIN_20260503_204823\n客户：我从抖音直播来的，8万左右想买自动挡省油代步车，有什么推荐？\n客服：您这个预算可以先看凯美瑞、思域和秦PLUS DM-i。凯美瑞偏家用稳、省心；思域更年轻；秦PLUS更省油。您是在南京看车吗？是否考虑贷款或置换？\n意图标签：预算推荐,车源推荐,抖音线索\n聊天记录：江苏车金置换话术 CHEJIN_20260503_204823\n测试批次：CHEJIN_20260503_20482"
+        },
+        {
+          "chunk_id": "chunk_98d495755714a154",
+          "source_id": "source_25f67e9fcaeb0195",
+          "score": 0.5939,
+          "category": "chats",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2812,
+            "semantic": 0.1727,
+            "vector": 0.14,
+            "vector_similarity": 0.7895,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.0,
+            "risk_penalty": 0.0,
+            "final": 0.5939
+          },
+          "text": "聊天记录：江苏车金预算推荐话术 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_043922\n客户：我从抖音直播来的，8万左右想买自动挡省油代步车，有什么推荐？\n客服：您这个预算可以先看凯美瑞、思域和秦PLUS DM-i。凯美瑞偏家用稳、省心；思域更年轻；秦PLUS更省油。您是在南京看车吗？是否考虑贷款或置换？\n意图标签：预算推荐,车源推荐,抖音线索\n聊天记录：江苏车金置换话术 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_04392"
+        },
+        {
+          "chunk_id": "chunk_2031352fa3820870",
+          "source_id": "source_32f31fde87e58a32",
+          "score": 0.5939,
+          "category": "chats",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2812,
+            "semantic": 0.1727,
+            "vector": 0.14,
+            "vector_similarity": 0.7887,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.0,
+            "risk_penalty": 0.0,
+            "final": 0.5939
+          },
+          "text": "聊天记录：江苏车金预算推荐话术 CHEJIN_20260503_214706\n测试批次：CHEJIN_20260503_214706\n客户：我从抖音直播来的，8万左右想买自动挡省油代步车，有什么推荐？\n客服：您这个预算可以先看凯美瑞、思域和秦PLUS DM-i。凯美瑞偏家用稳、省心；思域更年轻；秦PLUS更省油。您是在南京看车吗？是否考虑贷款或置换？\n意图标签：预算推荐,车源推荐,抖音线索\n聊天记录：江苏车金置换话术 CHEJIN_20260503_214706\n测试批次：CHEJIN_20260503_21470"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_3f6b76c4e604f6d9697e",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ]
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

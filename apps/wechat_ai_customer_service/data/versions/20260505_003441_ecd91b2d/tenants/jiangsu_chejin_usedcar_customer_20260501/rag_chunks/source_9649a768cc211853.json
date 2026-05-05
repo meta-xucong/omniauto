@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_9649a768cc211853",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_ab3ae00279bde2be8b5f.txt",
+    "content_hash": "7fdf5e2ad8a69794d224049fb2b1dd10",
+    "status": "active",
+    "created_at": "2026-05-04T03:21:45",
+    "updated_at": "2026-05-04T03:21:45"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_b9b52a7623216465",
+      "source_id": "source_9649a768cc211853",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_ab3ae00279bde2be8b5f.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-04T03:21:44] 许聪: 车况检测报告能发我看看吗？\n[2026-05-04T03:21:44] 许聪: 保养记录和出险记录能查吗？",
+      "char_count": 79,
+      "status": "active",
+      "created_at": "2026-05-04T03:21:45"
+    }
+  ]
+}

@@ -1,0 +1,3817 @@
+[
+  {
+    "experience_id": "rag_exp_66380df76e5ce81aaaa7",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_upload",
+    "source_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\products\\upload_44f4cdc134b123b8_chejin_vehicles_CHEJIN_20260505_205249.txt",
+    "category": "products",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "RAG经验：raw_upload/products，摘要=商品资料：江苏车金二手车车源 CHEJIN_20260505_205249 测试批次：CHEJIN_20260505_205249 商品名称：2021款丰田凯美瑞2.0G豪华版 型号：CHE…",
+    "question": "",
+    "reply_text": "商品资料：江苏车金二手车车源 CHEJIN_20260505_205249 测试批次：CHEJIN_20260505_205249 商品名称：2021款丰田凯美瑞2.0G豪华版 型号：CHEJIN-CAMRY-2021G 商品类目：二手车/中级轿车 别名关键词：凯美瑞,丰田凯美瑞,8万预算,自动挡,省油,通勤 规格参数：2021年上牌，表显4.8万公里，2.0L自动挡，南京现车，一手车，支持第三方检测。 价格：8.98万 单位：台 库存：1 发货：南京门店可看车，异地客户需人工确认物流与提档。 售后：非重大事故、非水泡、非火烧以合同和检测报告为准。 标准回复：这台凯美瑞适合8到10万预算、家用通勤和省油需求，建议先确认到店时间、是否置换、是否贷款。 商品资料：江苏车金二手车车源 CHEJIN_20260505_205249 测试批次：CHEJIN_20260505_205249 商品名称：2020款本田思域220TURBO劲动版 型号：CHEJIN-CIVIC-2020T 商品类目：二手车/紧凑型轿车 别名关键词：思域,本田思域,年轻客户,按揭,首付三成 规格参数：2020年上牌，表显6.1万公里，1.5T自动挡，外观轻微补漆，支持按揭初审。 价格：7.58万 单位：台 库存：1 发货：门店看车后可协助过户，金融结果以资方审批为准。 售后：车况以检测报告和合同约定为准，不承诺贷款必过。 商品资料：江苏车金二手车车源 CHEJIN_20260505_205249 测试批次：CHEJIN_20260505_205249 商品名称：2019款宝马320Li M运动套装 型号：CHEJIN-BMW320-2019M 商品类目：二手车/豪华轿车 别名关键词：宝马320,宝马3系,320Li,试驾,精品车况 规格参数：2019年上牌，表显5.6万公里，2.0T自动挡，一手车源，支持到店试驾。 价格：12.80万 单位：台 库存：1 发货：高意向试驾需转人工确认门店和时间。 售后：精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。 商品资料：江苏车金二手车车源 CHEJIN_20260505_205249 测试批次：CHEJIN_20260505_205249 商品名称：2022款比亚迪秦PLUS DM-i 55KM 型号：CHEJIN-QINPLUS-2022DMI 商品类目：二手车/新能源轿车 别名关键词：秦PLUS,比亚迪秦,新能源,绿牌,混动,网约车 规格参数：2022年上牌，表显3.2万公里，插混，低油耗，适合通勤和网约车。 价格：8.68万 单位：台 库存：1 发货：新能源车需人工确认电池检测和当地迁入政策。 售后：电池和三电政策以厂家与检测报告为准。",
+    "evidence_excerpt": "商品资料：江苏车金二手车车源 CHEJIN_20260505_205249 测试批次：CHEJIN_20260505_205249 商品名称：2021款丰田凯美瑞2.0G豪华版 型号：CHEJIN-CAMRY-2021G 商品类目：二手车/中级轿车 别名关键词：凯美瑞,丰田凯美瑞,8万预算,自动挡,省油,通勤 规格参数：2021年上牌，表显4.8万公里，2.0L自动挡，南京现车，一手车，支持第三方检测。 价格：8.98万 单位：台 库存：1 发货：南京门店可看车，异地客户需人工确认物流与提档。 售后：非重大事故、非水泡、非火烧以合同和检测报告为准。 标准回复：这台凯美瑞适合8到10万预算、家用通勤和省油需求，建议先确认到店时间、是否置换、是否贷款。 商品资料：江苏车金二手车车源 CHEJIN_20260505_205249 测试批次：CHEJIN_20260505_205249 商品名称：2020款本田思域220TURBO劲动版 型号：CHEJIN-CIVIC-2020T 商品类目：二手车/紧凑型轿车 别名关键词：思域,本田思域,年轻客户,按揭,首付三成 规格参数：2020年上牌，表显6.1万公里，1.5T自动挡，外观轻微补漆，支持按揭初审。 价格：7.58万 单位：台 库存：1 发货：门店看车后可协助过户，金融结果以资方审批为准。 售后：车况以检测报告和合同约定为准，不承诺贷款必过。 商品资料：江苏车金二手车车源 CHEJIN_20260505_205249 测试批次：CHEJIN_20260505_205249 商品名称：2019款宝马320Li M运动套装 型号：CHEJIN-BMW320-2019M 商品类目：二手车/豪华轿车 别名关键词：宝马320,宝马3系,320Li,试驾,精品车况 规格参数：2019年上牌，表显5.6万公里，2.0T自动挡，一手车源，支持到店试驾。 价格：12.80万 单位：台 库存：1 发货：高意向试驾需转人工确认门店和时间。 售后：精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。 商品资料：江苏车金二手车车源 CHEJIN_20260505_205249 测试批次：CHEJIN_20260505_205249 商品名称：2022款比亚迪秦PLUS DM-i 55KM 型号：CHEJIN-QINPLUS-2022DMI 商品类目：二手车/新能源轿车 别名关键词：秦PLUS,比亚迪秦,新能源,绿牌,混动,网约车 规格参数：2022年上牌，表显3.2万公里，插混，低油耗，适合通勤和网约车。 价格：8.68万 单位：台 库存：1 发货：新能源车需人工确认电池检测和当地迁入政策。 售后：电池和三电政策以厂家与检测报告为准。",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_929e1fc1408d014e",
+      "chunk_count": 2,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "original_source": {
+      "upload_id": "upload_44f4cdc134b123b8",
+      "file_name": "upload_44f4cdc134b123b8_chejin_vehicles_CHEJIN_20260505_205249.txt",
+      "kind": "products"
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-05T20:52:51"
+    },
+    "created_at": "2026-05-05T20:52:51",
+    "updated_at": "2026-05-06T02:32:48",
+    "quality": {
+      "score": 0.74,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_upload",
+        "candidate_count": 0,
+        "rag_ingest_ok": true,
+        "chunk_count": 2,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-06T02:32:48"
+    },
+    "ai_interpretation": {
+      "version": "rag_experience_interpretation_v3",
+      "source_fingerprint": "dea992ce6e050b09817e2d74",
+      "content_fingerprint": "7bb9d167f82f62d8e840c972",
+      "formal_revision": "",
+      "generated_at": "2026-05-05T20:52:51",
+      "provider": "local_fallback",
+      "model": "",
+      "status": "fallback",
+      "fallback_reason": "llm_disabled_by_request",
+      "business_type": "商品资料",
+      "meaning": "系统从资料或聊天记录里识别到一条商品资料。",
+      "recommended_action": "manual_review",
+      "action_label": "建议人工检查",
+      "action_reason": "内容可能涉及承诺、风险或不完整信息，需要人工先看。",
+      "formal_knowledge_comparison": {
+        "overlap_level": "none",
+        "matched_title": "",
+        "matched_category": "",
+        "matched_item_id": "",
+        "similarity": null,
+        "same_points": [],
+        "differences": [],
+        "conclusion": "暂未发现明显重合的正式知识。"
+      },
+      "what_to_check": [
+        "核对价格是否准确、是否仍有效",
+        "核对库存或在售状态",
+        "核对金融方案是否必须转人工",
+        "核对车况承诺是否有检测报告依据"
+      ],
+      "risk_notes": [
+        "金融和贷款相关内容不要自动承诺",
+        "车况承诺必须以检测报告或人工确认为准"
+      ],
+      "confidence": "low",
+      "promotion_allowed": false,
+      "auto_triage": {
+        "recommended": false,
+        "reason_code": "",
+        "reason": "内容可能涉及承诺、风险或不完整信息，需要人工先看。"
+      }
+    },
+    "formal_relation_cache": {
+      "relation": "kept_experience",
+      "formal_match": {},
+      "recommended_action": "kept_as_experience",
+      "formal_item_count": 25,
+      "formal_revision": "6bd5a24a67f53ddc015b4da7",
+      "evaluated_at": "2026-05-06T02:32:48"
+    },
+    "experience_review": {
+      "status": "kept",
+      "kept_at": "2026-05-06T02:31:36",
+      "kept_reason": "kept in experience layer"
+    },
+    "reviewed_by_user": true
+  },
+  {
+    "experience_id": "rag_exp_4caf5450bf3b4b4dc7ac",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "promoted",
+    "source": "intake",
+    "source_type": "raw_upload",
+    "source_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\policies\\upload_09bf842c181476be_chejin_policies_CHEJIN_20260505_205249.txt",
+    "category": "policies",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "RAG经验：raw_upload/policies，摘要=政策规则：江苏车金高意向转人工 CHEJIN_20260505_205249 测试批次：CHEJIN_20260505_205249 规则名称：试驾到店与订金转人工 规则类型：manual_…",
+    "question": "",
+    "reply_text": "政策规则：江苏车金高意向转人工 CHEJIN_20260505_205249 测试批次：CHEJIN_20260505_205249 规则名称：试驾到店与订金转人工 规则类型：manual_required 触发关键词：试驾,到店,订金,定金,今天看车,明天看车,销售联系,企业微信群 答案：客户明确要求试驾、到店、订金、销售联系时，AI只做确认和记录，必须转人工或企业微信群承接，不能自行承诺车源保留和最终价格。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high 政策规则：江苏车金金融与车况合规 CHEJIN_20260505_205249 测试批次：CHEJIN_20260505_205249 规则名称：金融审批与车况承诺边界 规则类型：contract 触发关键词：贷款,按揭,首付,月供,征信,保证无事故,水泡,火烧,赔偿,退款 答案：金融方案只能做初步说明，审批结果、利率、月供以资方审核为准；车况承诺必须以检测报告和合同为准，涉及赔偿、退款、纠纷必须转人工。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high 政策规则：江苏车金沉睡客户唤醒 CHEJIN_20260505_205249 测试批次：CHEJIN_20260505_205249 规则名称：沉睡客户递减唤醒策略 规则类型：other 触发关键词：沉睡客户,唤醒,老线索,新车源,还在看车 答案：首次唤醒只做轻提醒；3天未回复推同预算新车源；7天未回复询问需求是否变化；客户回复后停止自动唤醒并转入正常接待。 允许自动回复：true 必须转人工：false 风险等级：normal",
+    "evidence_excerpt": "政策规则：江苏车金高意向转人工 CHEJIN_20260505_205249 测试批次：CHEJIN_20260505_205249 规则名称：试驾到店与订金转人工 规则类型：manual_required 触发关键词：试驾,到店,订金,定金,今天看车,明天看车,销售联系,企业微信群 答案：客户明确要求试驾、到店、订金、销售联系时，AI只做确认和记录，必须转人工或企业微信群承接，不能自行承诺车源保留和最终价格。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high 政策规则：江苏车金金融与车况合规 CHEJIN_20260505_205249 测试批次：CHEJIN_20260505_205249 规则名称：金融审批与车况承诺边界 规则类型：contract 触发关键词：贷款,按揭,首付,月供,征信,保证无事故,水泡,火烧,赔偿,退款 答案：金融方案只能做初步说明，审批结果、利率、月供以资方审核为准；车况承诺必须以检测报告和合同为准，涉及赔偿、退款、纠纷必须转人工。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high 政策规则：江苏车金沉睡客户唤醒 CHEJIN_20260505_205249 测试批次：CHEJIN_20260505_205249 规则名称：沉睡客户递减唤醒策略 规则类型：other 触发关键词：沉睡客户,唤醒,老线索,新车源,还在看车 答案：首次唤醒只做轻提醒；3天未回复推同预算新车源；7天未回复询问需求是否变化；客户回复后停止自动唤醒并转入正常接待。 允许自动回复：true 必须转人工：false 风险等级：normal",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_4f6dd13e3401509a",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "original_source": {
+      "upload_id": "upload_09bf842c181476be",
+      "file_name": "upload_09bf842c181476be_chejin_policies_CHEJIN_20260505_205249.txt",
+      "kind": "policies"
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-05T20:52:51"
+    },
+    "created_at": "2026-05-05T20:52:51",
+    "updated_at": "2026-05-06T02:33:45",
+    "quality": {
+      "score": 0.72,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_upload",
+        "candidate_count": 0,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-06T02:33:45"
+    },
+    "ai_interpretation": {
+      "version": "rag_experience_interpretation_v3",
+      "source_fingerprint": "15795c19c00dac71fa13666f",
+      "content_fingerprint": "5e93938e3edb24015e0d435c",
+      "formal_revision": "6bd5a24a67f53ddc015b4da7",
+      "generated_at": "2026-05-06T02:32:39",
+      "provider": "deepseek",
+      "model": "deepseek-v4-pro",
+      "status": "model_generated",
+      "business_type": "政策规则",
+      "meaning": "这是江苏车金公司内部的一套客服规则，规定了什么时候必须把客户转给人工客服、AI不能自己瞎承诺金融和车况、以及怎么温柔地唤醒很久没联系的老客户，避免惹出客诉。",
+      "recommended_action": "promote_to_pending",
+      "action_label": "建议升级为待确认知识",
+      "action_reason": "经验内容清晰、业务价值高，虽然知识库已有一条相似的经验，但相似度只有0.61，未达到高度重合阈值，可以升级成待审核的正式知识让运营再确认一次。",
+      "formal_knowledge_comparison": {
+        "overlap_level": "medium",
+        "matched_title": "这条经验是江苏车金公司的客服政策规则，规定了什么时候必须转人工、哪些事情AI不能自己承诺、怎么唤醒老客户等，用来防止AI乱答应客户要求，避免客诉和风险。",
+        "matched_category": "chats",
+        "matched_item_id": "ai-ai",
+        "similarity": 0.61,
+        "same_points": [
+          "都包含转人工触发条件（试驾、到店、订金等）",
+          "都强调金融方案只能初步说明，以资方审核为准",
+          "都包含沉睡客户唤醒策略的步骤"
+        ],
+        "differences": [
+          "当前经验是分条列出三条明确的规则（转人工、金融合规、唤醒），已有知识是概括性描述",
+          "当前经验有具体的批次号、触发关键词和风险等级，已有知识没有这些执行细节",
+          "当前经验明确区分了允许自动回复和必须转人工的规则，已有知识没做这种粒度区分"
+        ],
+        "conclusion": "两条经验内容方向相同但细节粒度不同，当前经验更偏向可直接执行的规则清单，不应被已有知识完全覆盖，建议作为待审核知识让运营确认合并或替换。"
+      },
+      "what_to_check": [
+        "确认这三条规则的适用范围是否真的是‘江苏车金’所有门店，有没有区域或品牌限制",
+        "核实触发关键词是否完整，有没有遗漏常见的客户说法",
+        "检查风险等级‘high’和‘normal’划分是否合理",
+        "确认沉睡唤醒策略中的时间间隔（3天、7天）是否符合业务实际"
+      ],
+      "risk_notes": [
+        "规则中明确禁止AI自动承诺车源保留和最终价格，升级后必须确保模型严格遵循，否则会造成客诉",
+        "金融规则严禁自行给出审批结果，哪怕客户催促也不能越权，否则有合规风险",
+        "唤醒策略自动回复可能被客户认为是骚扰，需要保留人工介入的入口"
+      ],
+      "confidence": "high",
+      "promotion_allowed": true,
+      "auto_triage": {
+        "recommended": false,
+        "reason_code": "",
+        "reason": "经验内容清晰、业务价值高，虽然知识库已有一条相似的经验，但相似度只有0.61，未达到高度重合阈值，可以升级成待审核的正式知识让运营再确认一次。"
+      },
+      "auto_keep": {
+        "recommended": false,
+        "reason_code": "",
+        "reason": ""
+      }
+    },
+    "formal_relation_cache": {
+      "relation": "supports_formal",
+      "formal_match": {
+        "category_id": "chats",
+        "item_id": "ai-ai",
+        "product_id": "",
+        "title": "这条经验是江苏车金公司的客服政策规则，规定了什么时候必须转人工、哪些事情AI不能自己承诺、怎么唤醒老客户等，用来防止AI乱答应客户要求，避免客诉和风险。",
+        "similarity": 0.61,
+        "excerpt": "{\"data\": {\"additional_details\": {\"rag_experience_id\": \"rag_exp_816a8be10cee4fd1f666\", \"source_chunk_id\": null, \"source_id\": null, \"source_text\": \"\"}, \"customer_message\": \"这条经验是江苏车金公司的客服政策规则，规定了什么时候必须转人工、哪些事情AI不能自己承诺、怎么唤醒老客户等，用来防止AI乱答应客户要求，避免客诉和风险。\", \"intent_tags\": [\"rag_experience\"], \"service_reply\": \"true 风险等级：high 政策规则：江苏车金金融与车况合规 CHEJIN_20260505_205853 测试批次：CHEJIN_20260505_205853 规则名称：金融审批与车况承诺边界 规则类型：contract 触发关键词：贷款,按揭,首付,月供,征信,保证无事故,水泡,火烧,赔偿,退款 答案：金融方案只能做初步说明，审批结果、利率、月供以资方审核为准；车况承诺必须以检测报告和合同为准，涉及赔偿、退款、纠纷必须转人工。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high 政策规则：江苏车金沉睡客户唤醒 CHEJIN_20260505_205853 测试批次：CHEJIN_20260505_205853 规则名称：沉睡客户递减唤醒策略 规则类型：other 触发关键词：沉睡客户,唤醒,老线索,新车源,还在看车 答案：首次唤醒只做轻提醒；3天未回复推同预算新车源；7天未回复询问需求是否变化；客户回复后停止自动唤醒并转入正常接待。 允许自动回复：true 必须转人工：false 风险等级：normal\", \"tone_tags\": [\"rag_reference\"]}, \"id\": \"ai-ai\", \"runtime\": {\"allow_auto_reply\": true, \"requires_handoff\": false…"
+      },
+      "recommended_action": "keep_as_supporting_expression",
+      "formal_item_count": 25,
+      "formal_revision": "6bd5a24a67f53ddc015b4da7",
+      "evaluated_at": "2026-05-06T02:28:31"
+    },
+    "promoted_reason": "promoted_to_review_candidate",
+    "promoted_at": "2026-05-06T02:33:45",
+    "promoted_candidate_id": "rag_promote_7ae8a7770cab5f04f450"
+  },
+  {
+    "experience_id": "rag_exp_ffd1ef904ee06cc548b9",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_upload",
+    "source_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\chats\\upload_f2472d027641f28f_chejin_chats_CHEJIN_20260505_205249.txt",
+    "category": "chats",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "RAG经验：raw_upload/chats，摘要=聊天记录：江苏车金预算推荐话术 CHEJIN_20260505_205249 测试批次：CHEJIN_20260505_205249 客户：我从抖音直播来的，8万左右想买自动挡省油代步车，有…",
+    "question": "",
+    "reply_text": "聊天记录：江苏车金预算推荐话术 CHEJIN_20260505_205249 测试批次：CHEJIN_20260505_205249 客户：我从抖音直播来的，8万左右想买自动挡省油代步车，有什么推荐？ 客服：您这个预算可以先看凯美瑞、思域和秦PLUS DM-i。凯美瑞偏家用稳、省心；思域更年轻；秦PLUS更省油。您是在南京看车吗？是否考虑贷款或置换？ 意图标签：预算推荐,车源推荐,抖音线索 聊天记录：江苏车金置换话术 CHEJIN_20260505_205249 测试批次：CHEJIN_20260505_205249 客户：我有一台老朗逸想置换。 客服：可以的，麻烦补充上牌年份、公里数、车况、所在城市和是否有贷款，我先帮您记录，评估价需要人工复核。 意图标签：置换,线索采集 聊天记录：江苏车金睡客唤醒话术 CHEJIN_20260505_205249 测试批次：CHEJIN_20260505_205249 客户：之前那台没买，现在还有新车源吗？ 客服：有的，我先按您之前的预算和用途筛一遍；如果预算或车型变了，直接告诉我，我会按新需求推荐更合适的车。 意图标签：沉睡客户,唤醒,二次转化",
+    "evidence_excerpt": "聊天记录：江苏车金预算推荐话术 CHEJIN_20260505_205249 测试批次：CHEJIN_20260505_205249 客户：我从抖音直播来的，8万左右想买自动挡省油代步车，有什么推荐？ 客服：您这个预算可以先看凯美瑞、思域和秦PLUS DM-i。凯美瑞偏家用稳、省心；思域更年轻；秦PLUS更省油。您是在南京看车吗？是否考虑贷款或置换？ 意图标签：预算推荐,车源推荐,抖音线索 聊天记录：江苏车金置换话术 CHEJIN_20260505_205249 测试批次：CHEJIN_20260505_205249 客户：我有一台老朗逸想置换。 客服：可以的，麻烦补充上牌年份、公里数、车况、所在城市和是否有贷款，我先帮您记录，评估价需要人工复核。 意图标签：置换,线索采集 聊天记录：江苏车金睡客唤醒话术 CHEJIN_20260505_205249 测试批次：CHEJIN_20260505_205249 客户：之前那台没买，现在还有新车源吗？ 客服：有的，我先按您之前的预算和用途筛一遍；如果预算或车型变了，直接告诉我，我会按新需求推荐更合适的车。 意图标签：沉睡客户,唤醒,二次转化",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_a79ad4ee5fd8f21d",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "original_source": {
+      "upload_id": "upload_f2472d027641f28f",
+      "file_name": "upload_f2472d027641f28f_chejin_chats_CHEJIN_20260505_205249.txt",
+      "kind": "chats"
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-05T20:52:52"
+    },
+    "created_at": "2026-05-05T20:52:52",
+    "updated_at": "2026-05-06T02:29:42",
+    "quality": {
+      "score": 0.72,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_upload",
+        "candidate_count": 0,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-06T02:29:42"
+    },
+    "ai_interpretation": {
+      "version": "rag_experience_interpretation_v3",
+      "source_fingerprint": "b5e87a148dd8c508da989438",
+      "content_fingerprint": "aecf2c9633433924d49f8d50",
+      "formal_revision": "",
+      "generated_at": "2026-05-05T20:52:52",
+      "provider": "local_fallback",
+      "model": "",
+      "status": "fallback",
+      "fallback_reason": "llm_disabled_by_request",
+      "business_type": "商品资料",
+      "meaning": "系统从资料或聊天记录里识别到一条商品资料。",
+      "recommended_action": "promote_to_pending",
+      "action_label": "建议升级为待确认知识",
+      "action_reason": "内容看起来可以整理成结构化知识，但仍需要人工确认字段。",
+      "formal_knowledge_comparison": {
+        "overlap_level": "none",
+        "matched_title": "",
+        "matched_category": "",
+        "matched_item_id": "",
+        "similarity": null,
+        "same_points": [],
+        "differences": [],
+        "conclusion": "暂未发现明显重合的正式知识。"
+      },
+      "what_to_check": [
+        "核对金融方案是否必须转人工",
+        "核对车况承诺是否有检测报告依据"
+      ],
+      "risk_notes": [],
+      "confidence": "low",
+      "promotion_allowed": true,
+      "auto_triage": {
+        "recommended": false,
+        "reason_code": "",
+        "reason": "内容看起来可以整理成结构化知识，但仍需要人工确认字段。"
+      }
+    },
+    "formal_relation_cache": {
+      "relation": "kept_experience",
+      "formal_match": {},
+      "recommended_action": "kept_as_experience",
+      "formal_item_count": 25,
+      "formal_revision": "6bd5a24a67f53ddc015b4da7",
+      "evaluated_at": "2026-05-06T02:29:42"
+    },
+    "experience_review": {
+      "status": "kept",
+      "kept_at": "2026-05-06T02:29:14",
+      "kept_reason": "kept in experience layer"
+    },
+    "reviewed_by_user": true
+  },
+  {
+    "experience_id": "rag_exp_c85a88ad457124dfa6b9",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_upload",
+    "source_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\products\\upload_260aa4f94c3ef6a5_chejin_vehicles_CHEJIN_20260505_205539.txt",
+    "category": "products",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "RAG经验：raw_upload/products，摘要=商品资料：江苏车金二手车车源 CHEJIN_20260505_205539 测试批次：CHEJIN_20260505_205539 商品名称：2021款丰田凯美瑞2.0G豪华版 型号：CHE…",
+    "question": "",
+    "reply_text": "商品资料：江苏车金二手车车源 CHEJIN_20260505_205539 测试批次：CHEJIN_20260505_205539 商品名称：2021款丰田凯美瑞2.0G豪华版 型号：CHEJIN-CAMRY-2021G 商品类目：二手车/中级轿车 别名关键词：凯美瑞,丰田凯美瑞,8万预算,自动挡,省油,通勤 规格参数：2021年上牌，表显4.8万公里，2.0L自动挡，南京现车，一手车，支持第三方检测。 价格：8.98万 单位：台 库存：1 发货：南京门店可看车，异地客户需人工确认物流与提档。 售后：非重大事故、非水泡、非火烧以合同和检测报告为准。 标准回复：这台凯美瑞适合8到10万预算、家用通勤和省油需求，建议先确认到店时间、是否置换、是否贷款。 商品资料：江苏车金二手车车源 CHEJIN_20260505_205539 测试批次：CHEJIN_20260505_205539 商品名称：2020款本田思域220TURBO劲动版 型号：CHEJIN-CIVIC-2020T 商品类目：二手车/紧凑型轿车 别名关键词：思域,本田思域,年轻客户,按揭,首付三成 规格参数：2020年上牌，表显6.1万公里，1.5T自动挡，外观轻微补漆，支持按揭初审。 价格：7.58万 单位：台 库存：1 发货：门店看车后可协助过户，金融结果以资方审批为准。 售后：车况以检测报告和合同约定为准，不承诺贷款必过。 商品资料：江苏车金二手车车源 CHEJIN_20260505_205539 测试批次：CHEJIN_20260505_205539 商品名称：2019款宝马320Li M运动套装 型号：CHEJIN-BMW320-2019M 商品类目：二手车/豪华轿车 别名关键词：宝马320,宝马3系,320Li,试驾,精品车况 规格参数：2019年上牌，表显5.6万公里，2.0T自动挡，一手车源，支持到店试驾。 价格：12.80万 单位：台 库存：1 发货：高意向试驾需转人工确认门店和时间。 售后：精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。 商品资料：江苏车金二手车车源 CHEJIN_20260505_205539 测试批次：CHEJIN_20260505_205539 商品名称：2022款比亚迪秦PLUS DM-i 55KM 型号：CHEJIN-QINPLUS-2022DMI 商品类目：二手车/新能源轿车 别名关键词：秦PLUS,比亚迪秦,新能源,绿牌,混动,网约车 规格参数：2022年上牌，表显3.2万公里，插混，低油耗，适合通勤和网约车。 价格：8.68万 单位：台 库存：1 发货：新能源车需人工确认电池检测和当地迁入政策。 售后：电池和三电政策以厂家与检测报告为准。",
+    "evidence_excerpt": "商品资料：江苏车金二手车车源 CHEJIN_20260505_205539 测试批次：CHEJIN_20260505_205539 商品名称：2021款丰田凯美瑞2.0G豪华版 型号：CHEJIN-CAMRY-2021G 商品类目：二手车/中级轿车 别名关键词：凯美瑞,丰田凯美瑞,8万预算,自动挡,省油,通勤 规格参数：2021年上牌，表显4.8万公里，2.0L自动挡，南京现车，一手车，支持第三方检测。 价格：8.98万 单位：台 库存：1 发货：南京门店可看车，异地客户需人工确认物流与提档。 售后：非重大事故、非水泡、非火烧以合同和检测报告为准。 标准回复：这台凯美瑞适合8到10万预算、家用通勤和省油需求，建议先确认到店时间、是否置换、是否贷款。 商品资料：江苏车金二手车车源 CHEJIN_20260505_205539 测试批次：CHEJIN_20260505_205539 商品名称：2020款本田思域220TURBO劲动版 型号：CHEJIN-CIVIC-2020T 商品类目：二手车/紧凑型轿车 别名关键词：思域,本田思域,年轻客户,按揭,首付三成 规格参数：2020年上牌，表显6.1万公里，1.5T自动挡，外观轻微补漆，支持按揭初审。 价格：7.58万 单位：台 库存：1 发货：门店看车后可协助过户，金融结果以资方审批为准。 售后：车况以检测报告和合同约定为准，不承诺贷款必过。 商品资料：江苏车金二手车车源 CHEJIN_20260505_205539 测试批次：CHEJIN_20260505_205539 商品名称：2019款宝马320Li M运动套装 型号：CHEJIN-BMW320-2019M 商品类目：二手车/豪华轿车 别名关键词：宝马320,宝马3系,320Li,试驾,精品车况 规格参数：2019年上牌，表显5.6万公里，2.0T自动挡，一手车源，支持到店试驾。 价格：12.80万 单位：台 库存：1 发货：高意向试驾需转人工确认门店和时间。 售后：精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。 商品资料：江苏车金二手车车源 CHEJIN_20260505_205539 测试批次：CHEJIN_20260505_205539 商品名称：2022款比亚迪秦PLUS DM-i 55KM 型号：CHEJIN-QINPLUS-2022DMI 商品类目：二手车/新能源轿车 别名关键词：秦PLUS,比亚迪秦,新能源,绿牌,混动,网约车 规格参数：2022年上牌，表显3.2万公里，插混，低油耗，适合通勤和网约车。 价格：8.68万 单位：台 库存：1 发货：新能源车需人工确认电池检测和当地迁入政策。 售后：电池和三电政策以厂家与检测报告为准。",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_e2eb154a7ac4c6c1",
+      "chunk_count": 2,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "original_source": {
+      "upload_id": "upload_260aa4f94c3ef6a5",
+      "file_name": "upload_260aa4f94c3ef6a5_chejin_vehicles_CHEJIN_20260505_205539.txt",
+      "kind": "products"
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-05T20:55:39"
+    },
+    "created_at": "2026-05-05T20:55:39",
+    "updated_at": "2026-05-06T02:30:36",
+    "quality": {
+      "score": 0.74,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_upload",
+        "candidate_count": 0,
+        "rag_ingest_ok": true,
+        "chunk_count": 2,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-06T02:30:36"
+    },
+    "ai_interpretation": {
+      "version": "rag_experience_interpretation_v3",
+      "source_fingerprint": "c444dc524ca09b87cdcc6b2a",
+      "content_fingerprint": "6a0b9002eaeb6e100692ceff",
+      "formal_revision": "6bd5a24a67f53ddc015b4da7",
+      "generated_at": "2026-05-06T02:29:16",
+      "provider": "deepseek",
+      "model": "deepseek-v4-pro",
+      "status": "model_generated",
+      "business_type": "商品资料",
+      "meaning": "这是江苏车金二手车行上传的4条在售车源信息，包含车型、价格、库存、看车方式等详细销售资料，可用作客服回答客户咨询的参考。",
+      "recommended_action": "keep_as_experience",
+      "action_label": "建议保留为经验",
+      "action_reason": "这些属于具体车源的时效性信息，不宜直接升级为正式知识库固定条目，但可作为客服经验保留，供后续人工参考或定期更新。",
+      "formal_knowledge_comparison": {
+        "overlap_level": "none",
+        "matched_title": "",
+        "matched_category": "",
+        "matched_item_id": "",
+        "similarity": null,
+        "same_points": [],
+        "differences": [],
+        "conclusion": "正式知识库中无重合内容，本条经验为全新上传。"
+      },
+      "what_to_check": [
+        "确认这些车源是否仍为该商户当前在售商品",
+        "核对价格、库存和看车流程是否已经更新",
+        "检查异地物流和电池检测说明是否与实际政策一致"
+      ],
+      "risk_notes": [
+        "商品库存、价格、过户政策可能随时变化，不能作为固定承诺",
+        "贷款审批结果以资方为准，客服回复不可自行承诺必过",
+        "新能源车的电池和三电政策需以最新厂家公告为准"
+      ],
+      "confidence": "medium",
+      "promotion_allowed": false,
+      "auto_triage": {
+        "recommended": false,
+        "reason_code": "",
+        "reason": "这些属于具体车源的时效性信息，不宜直接升级为正式知识库固定条目，但可作为客服经验保留，供后续人工参考或定期更新。"
+      },
+      "auto_keep": {
+        "recommended": false,
+        "reason_code": "intake_requires_human_review",
+        "reason": "资料导入线索仍需人工判断，不能自动保留为可参与回答的RAG经验。"
+      }
+    },
+    "formal_relation_cache": {
+      "relation": "kept_experience",
+      "formal_match": {},
+      "recommended_action": "kept_as_experience",
+      "formal_item_count": 25,
+      "formal_revision": "6bd5a24a67f53ddc015b4da7",
+      "evaluated_at": "2026-05-06T02:30:36"
+    },
+    "experience_review": {
+      "status": "kept",
+      "kept_at": "2026-05-06T02:30:06",
+      "kept_reason": "kept in experience layer"
+    },
+    "reviewed_by_user": true
+  },
+  {
+    "experience_id": "rag_exp_6b2a3f3db4e7d4c9383f",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "discarded",
+    "source": "intake",
+    "source_type": "raw_upload",
+    "source_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\policies\\upload_7f04f06dbbc84369_chejin_policies_CHEJIN_20260505_205539.txt",
+    "category": "policies",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "RAG经验：raw_upload/policies，摘要=政策规则：江苏车金高意向转人工 CHEJIN_20260505_205539 测试批次：CHEJIN_20260505_205539 规则名称：试驾到店与订金转人工 规则类型：manual_…",
+    "question": "",
+    "reply_text": "政策规则：江苏车金高意向转人工 CHEJIN_20260505_205539 测试批次：CHEJIN_20260505_205539 规则名称：试驾到店与订金转人工 规则类型：manual_required 触发关键词：试驾,到店,订金,定金,今天看车,明天看车,销售联系,企业微信群 答案：客户明确要求试驾、到店、订金、销售联系时，AI只做确认和记录，必须转人工或企业微信群承接，不能自行承诺车源保留和最终价格。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high 政策规则：江苏车金金融与车况合规 CHEJIN_20260505_205539 测试批次：CHEJIN_20260505_205539 规则名称：金融审批与车况承诺边界 规则类型：contract 触发关键词：贷款,按揭,首付,月供,征信,保证无事故,水泡,火烧,赔偿,退款 答案：金融方案只能做初步说明，审批结果、利率、月供以资方审核为准；车况承诺必须以检测报告和合同为准，涉及赔偿、退款、纠纷必须转人工。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high 政策规则：江苏车金沉睡客户唤醒 CHEJIN_20260505_205539 测试批次：CHEJIN_20260505_205539 规则名称：沉睡客户递减唤醒策略 规则类型：other 触发关键词：沉睡客户,唤醒,老线索,新车源,还在看车 答案：首次唤醒只做轻提醒；3天未回复推同预算新车源；7天未回复询问需求是否变化；客户回复后停止自动唤醒并转入正常接待。 允许自动回复：true 必须转人工：false 风险等级：normal",
+    "evidence_excerpt": "政策规则：江苏车金高意向转人工 CHEJIN_20260505_205539 测试批次：CHEJIN_20260505_205539 规则名称：试驾到店与订金转人工 规则类型：manual_required 触发关键词：试驾,到店,订金,定金,今天看车,明天看车,销售联系,企业微信群 答案：客户明确要求试驾、到店、订金、销售联系时，AI只做确认和记录，必须转人工或企业微信群承接，不能自行承诺车源保留和最终价格。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high 政策规则：江苏车金金融与车况合规 CHEJIN_20260505_205539 测试批次：CHEJIN_20260505_205539 规则名称：金融审批与车况承诺边界 规则类型：contract 触发关键词：贷款,按揭,首付,月供,征信,保证无事故,水泡,火烧,赔偿,退款 答案：金融方案只能做初步说明，审批结果、利率、月供以资方审核为准；车况承诺必须以检测报告和合同为准，涉及赔偿、退款、纠纷必须转人工。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high 政策规则：江苏车金沉睡客户唤醒 CHEJIN_20260505_205539 测试批次：CHEJIN_20260505_205539 规则名称：沉睡客户递减唤醒策略 规则类型：other 触发关键词：沉睡客户,唤醒,老线索,新车源,还在看车 答案：首次唤醒只做轻提醒；3天未回复推同预算新车源；7天未回复询问需求是否变化；客户回复后停止自动唤醒并转入正常接待。 允许自动回复：true 必须转人工：false 风险等级：normal",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_78c21bc6cff3241a",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "original_source": {
+      "upload_id": "upload_7f04f06dbbc84369",
+      "file_name": "upload_7f04f06dbbc84369_chejin_policies_CHEJIN_20260505_205539.txt",
+      "kind": "policies"
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-05T20:55:40"
+    },
+    "created_at": "2026-05-05T20:55:40",
+    "updated_at": "2026-05-06T02:42:55",
+    "quality": {
+      "score": 0.72,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_upload",
+        "candidate_count": 0,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-06T02:42:55"
+    },
+    "ai_interpretation": {
+      "version": "rag_experience_interpretation_v3",
+      "source_fingerprint": "dfbb1cf7bf1b5fe113607a73",
+      "content_fingerprint": "525124131a97a1e4dcba52cc",
+      "formal_revision": "",
+      "generated_at": "2026-05-05T20:55:40",
+      "provider": "local_fallback",
+      "model": "",
+      "status": "fallback",
+      "fallback_reason": "llm_disabled_by_request",
+      "business_type": "商品资料",
+      "meaning": "系统从资料或聊天记录里识别到一条商品资料。",
+      "recommended_action": "manual_review",
+      "action_label": "建议人工检查",
+      "action_reason": "内容可能涉及承诺、风险或不完整信息，需要人工先看。",
+      "formal_knowledge_comparison": {
+        "overlap_level": "none",
+        "matched_title": "",
+        "matched_category": "",
+        "matched_item_id": "",
+        "similarity": null,
+        "same_points": [],
+        "differences": [],
+        "conclusion": "暂未发现明显重合的正式知识。"
+      },
+      "what_to_check": [
+        "核对价格是否准确、是否仍有效",
+        "核对金融方案是否必须转人工",
+        "核对车况承诺是否有检测报告依据"
+      ],
+      "risk_notes": [
+        "金融和贷款相关内容不要自动承诺",
+        "车况承诺必须以检测报告或人工确认为准"
+      ],
+      "confidence": "low",
+      "promotion_allowed": false,
+      "auto_triage": {
+        "recommended": false,
+        "reason_code": "",
+        "reason": "内容可能涉及承诺、风险或不完整信息，需要人工先看。"
+      }
+    },
+    "formal_relation_cache": {
+      "relation": "supports_formal",
+      "formal_match": {
+        "category_id": "chats",
+        "item_id": "ai-ai",
+        "product_id": "",
+        "title": "这条经验是江苏车金公司的客服政策规则，规定了什么时候必须转人工、哪些事情AI不能自己承诺、怎么唤醒老客户等，用来防止AI乱答应客户要求，避免客诉和风险。",
+        "similarity": 0.616,
+        "excerpt": "{\"data\": {\"additional_details\": {\"rag_experience_id\": \"rag_exp_816a8be10cee4fd1f666\", \"source_chunk_id\": null, \"source_id\": null, \"source_text\": \"\"}, \"customer_message\": \"这条经验是江苏车金公司的客服政策规则，规定了什么时候必须转人工、哪些事情AI不能自己承诺、怎么唤醒老客户等，用来防止AI乱答应客户要求，避免客诉和风险。\", \"intent_tags\": [\"rag_experience\"], \"service_reply\": \"true 风险等级：high 政策规则：江苏车金金融与车况合规 CHEJIN_20260505_205853 测试批次：CHEJIN_20260505_205853 规则名称：金融审批与车况承诺边界 规则类型：contract 触发关键词：贷款,按揭,首付,月供,征信,保证无事故,水泡,火烧,赔偿,退款 答案：金融方案只能做初步说明，审批结果、利率、月供以资方审核为准；车况承诺必须以检测报告和合同为准，涉及赔偿、退款、纠纷必须转人工。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high 政策规则：江苏车金沉睡客户唤醒 CHEJIN_20260505_205853 测试批次：CHEJIN_20260505_205853 规则名称：沉睡客户递减唤醒策略 规则类型：other 触发关键词：沉睡客户,唤醒,老线索,新车源,还在看车 答案：首次唤醒只做轻提醒；3天未回复推同预算新车源；7天未回复询问需求是否变化；客户回复后停止自动唤醒并转入正常接待。 允许自动回复：true 必须转人工：false 风险等级：normal\", \"tone_tags\": [\"rag_reference\"]}, \"id\": \"ai-ai\", \"runtime\": {\"allow_auto_reply\": true, \"requires_handoff\": false…"
+      },
+      "recommended_action": "keep_as_supporting_expression",
+      "formal_item_count": 25,
+      "formal_revision": "6bd5a24a67f53ddc015b4da7",
+      "evaluated_at": "2026-05-06T02:28:30"
+    },
+    "discarded_reason": "discarded in admin",
+    "discard_reason": "discarded in admin",
+    "discarded_at": "2026-05-06T02:42:55"
+  },
+  {
+    "experience_id": "rag_exp_1150320c24be4fb8d92f",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "discarded",
+    "source": "intake",
+    "source_type": "raw_upload",
+    "source_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\chats\\upload_09c7b449751a3201_chejin_chats_CHEJIN_20260505_205539.txt",
+    "category": "chats",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "RAG经验：raw_upload/chats，摘要=聊天记录：江苏车金预算推荐话术 CHEJIN_20260505_205539 测试批次：CHEJIN_20260505_205539 客户：我从抖音直播来的，8万左右想买自动挡省油代步车，有…",
+    "question": "",
+    "reply_text": "聊天记录：江苏车金预算推荐话术 CHEJIN_20260505_205539 测试批次：CHEJIN_20260505_205539 客户：我从抖音直播来的，8万左右想买自动挡省油代步车，有什么推荐？ 客服：您这个预算可以先看凯美瑞、思域和秦PLUS DM-i。凯美瑞偏家用稳、省心；思域更年轻；秦PLUS更省油。您是在南京看车吗？是否考虑贷款或置换？ 意图标签：预算推荐,车源推荐,抖音线索 聊天记录：江苏车金置换话术 CHEJIN_20260505_205539 测试批次：CHEJIN_20260505_205539 客户：我有一台老朗逸想置换。 客服：可以的，麻烦补充上牌年份、公里数、车况、所在城市和是否有贷款，我先帮您记录，评估价需要人工复核。 意图标签：置换,线索采集 聊天记录：江苏车金睡客唤醒话术 CHEJIN_20260505_205539 测试批次：CHEJIN_20260505_205539 客户：之前那台没买，现在还有新车源吗？ 客服：有的，我先按您之前的预算和用途筛一遍；如果预算或车型变了，直接告诉我，我会按新需求推荐更合适的车。 意图标签：沉睡客户,唤醒,二次转化",
+    "evidence_excerpt": "聊天记录：江苏车金预算推荐话术 CHEJIN_20260505_205539 测试批次：CHEJIN_20260505_205539 客户：我从抖音直播来的，8万左右想买自动挡省油代步车，有什么推荐？ 客服：您这个预算可以先看凯美瑞、思域和秦PLUS DM-i。凯美瑞偏家用稳、省心；思域更年轻；秦PLUS更省油。您是在南京看车吗？是否考虑贷款或置换？ 意图标签：预算推荐,车源推荐,抖音线索 聊天记录：江苏车金置换话术 CHEJIN_20260505_205539 测试批次：CHEJIN_20260505_205539 客户：我有一台老朗逸想置换。 客服：可以的，麻烦补充上牌年份、公里数、车况、所在城市和是否有贷款，我先帮您记录，评估价需要人工复核。 意图标签：置换,线索采集 聊天记录：江苏车金睡客唤醒话术 CHEJIN_20260505_205539 测试批次：CHEJIN_20260505_205539 客户：之前那台没买，现在还有新车源吗？ 客服：有的，我先按您之前的预算和用途筛一遍；如果预算或车型变了，直接告诉我，我会按新需求推荐更合适的车。 意图标签：沉睡客户,唤醒,二次转化",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_37352d4f33c1c189",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "original_source": {
+      "upload_id": "upload_09c7b449751a3201",
+      "file_name": "upload_09c7b449751a3201_chejin_chats_CHEJIN_20260505_205539.txt",
+      "kind": "chats"
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-05T20:55:40"
+    },
+    "created_at": "2026-05-05T20:55:40",
+    "updated_at": "2026-05-06T02:43:07",
+    "quality": {
+      "score": 0.72,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_upload",
+        "candidate_count": 0,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-06T02:43:07"
+    },
+    "ai_interpretation": {
+      "version": "rag_experience_interpretation_v3",
+      "source_fingerprint": "950dc98b2ccfa792a30b5065",
+      "content_fingerprint": "baaa2d6ca8e67bda45c20cc2",
+      "formal_revision": "",
+      "generated_at": "2026-05-05T20:55:40",
+      "provider": "local_fallback",
+      "model": "",
+      "status": "fallback",
+      "fallback_reason": "llm_disabled_by_request",
+      "business_type": "商品资料",
+      "meaning": "系统从资料或聊天记录里识别到一条商品资料。",
+      "recommended_action": "promote_to_pending",
+      "action_label": "建议升级为待确认知识",
+      "action_reason": "内容看起来可以整理成结构化知识，但仍需要人工确认字段。",
+      "formal_knowledge_comparison": {
+        "overlap_level": "none",
+        "matched_title": "",
+        "matched_category": "",
+        "matched_item_id": "",
+        "similarity": null,
+        "same_points": [],
+        "differences": [],
+        "conclusion": "暂未发现明显重合的正式知识。"
+      },
+      "what_to_check": [
+        "核对金融方案是否必须转人工",
+        "核对车况承诺是否有检测报告依据"
+      ],
+      "risk_notes": [],
+      "confidence": "low",
+      "promotion_allowed": true,
+      "auto_triage": {
+        "recommended": false,
+        "reason_code": "",
+        "reason": "内容看起来可以整理成结构化知识，但仍需要人工确认字段。"
+      }
+    },
+    "formal_relation_cache": {
+      "relation": "novel",
+      "formal_match": {},
+      "recommended_action": "keep_as_rag_experience",
+      "formal_item_count": 25,
+      "formal_revision": "6bd5a24a67f53ddc015b4da7",
+      "evaluated_at": "2026-05-06T02:28:30"
+    },
+    "discarded_reason": "discarded in admin",
+    "discard_reason": "discarded in admin",
+    "discarded_at": "2026-05-06T02:43:07"
+  },
+  {
+    "experience_id": "rag_exp_5083471a57aa7df08a63",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_wechat_private",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_1e2ea3c61bb08c2f96dc.txt",
+    "category": "private",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "RAG经验：raw_wechat_private/private，摘要=[2026-05-05T20:55:40] self: 8万预算，自动挡省油，通勤代步 CHEJIN_20260505_205539",
+    "question": "",
+    "reply_text": "[2026-05-05T20:55:40] self: 8万预算，自动挡省油，通勤代步 CHEJIN_20260505_205539",
+    "evidence_excerpt": "[2026-05-05T20:55:40] self: 8万预算，自动挡省油，通勤代步 CHEJIN_20260505_205539",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_1b465965b3d08cdd",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "original_source": {
+      "raw_batch_id": "raw_batch_1e2ea3c61bb08c2f96dc",
+      "conversation_id": "conv_54a96e57c70563ab9c",
+      "conversation_type": "private",
+      "raw_message_ids": [
+        "raw_msg_1f5a5fd367da5f3efded"
+      ]
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-05T20:55:40"
+    },
+    "created_at": "2026-05-05T20:55:40",
+    "updated_at": "2026-05-06T02:28:30",
+    "quality": {
+      "score": 0.64,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_wechat_private",
+        "candidate_count": 0,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-06T02:28:30"
+    },
+    "ai_interpretation": {
+      "version": "rag_experience_interpretation_v3",
+      "source_fingerprint": "a64d858cf77492523b450e28",
+      "content_fingerprint": "d0efc8392a0d5ab807a30d6b",
+      "formal_revision": "",
+      "generated_at": "2026-05-05T20:55:41",
+      "provider": "local_fallback",
+      "model": "",
+      "status": "fallback",
+      "fallback_reason": "llm_disabled_by_request",
+      "business_type": "无效内容",
+      "meaning": "这条内容看起来不像可入库的业务知识，可能只是测试、闲聊或噪音。",
+      "recommended_action": "discard",
+      "action_label": "建议废弃",
+      "action_reason": "内容缺少业务价值，继续保留会增加审核噪音。",
+      "formal_knowledge_comparison": {
+        "overlap_level": "none",
+        "matched_title": "",
+        "matched_category": "",
+        "matched_item_id": "",
+        "similarity": null,
+        "same_points": [],
+        "differences": [],
+        "conclusion": "暂未发现明显重合的正式知识。"
+      },
+      "what_to_check": [
+        "核对这条内容是否真实、完整、值得入库"
+      ],
+      "risk_notes": [
+        "没有识别到可沉淀的业务知识，自动从待处理提醒中降噪。"
+      ],
+      "confidence": "low",
+      "promotion_allowed": false,
+      "auto_triage": {
+        "recommended": true,
+        "reason_code": "no_business_value",
+        "reason": "没有识别到可沉淀的业务知识，自动从待处理提醒中降噪。"
+      }
+    },
+    "experience_review": {
+      "status": "auto_triaged",
+      "auto_triaged_at": "2026-05-05T20:55:41",
+      "auto_triage_action": "discard",
+      "auto_triage_reason": "没有识别到可沉淀的业务知识，自动从待处理提醒中降噪。",
+      "auto_triage_reason_code": "no_business_value"
+    },
+    "reviewed_by_user": false,
+    "formal_relation_cache": {
+      "relation": "novel",
+      "formal_match": {},
+      "recommended_action": "keep_as_rag_experience",
+      "formal_item_count": 25,
+      "formal_revision": "6bd5a24a67f53ddc015b4da7",
+      "evaluated_at": "2026-05-06T02:28:30"
+    }
+  },
+  {
+    "experience_id": "rag_exp_2ce4ea80bcbae934df01",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_wechat_private",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_4fe025d1d2a6570f71cf.txt",
+    "category": "private",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "RAG经验：raw_wechat_private/private，摘要=[2026-05-05T20:55:41] self: 宝马320Li那台今天能到店试驾吗 CHEJIN_20260505_205539",
+    "question": "",
+    "reply_text": "[2026-05-05T20:55:41] self: 宝马320Li那台今天能到店试驾吗 CHEJIN_20260505_205539",
+    "evidence_excerpt": "[2026-05-05T20:55:41] self: 宝马320Li那台今天能到店试驾吗 CHEJIN_20260505_205539",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_dd8c65b03356b256",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "original_source": {
+      "raw_batch_id": "raw_batch_4fe025d1d2a6570f71cf",
+      "conversation_id": "conv_54a96e57c70563ab9c",
+      "conversation_type": "private",
+      "raw_message_ids": [
+        "raw_msg_7d6ddff5e75cc3ca5437"
+      ]
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-05T20:55:41"
+    },
+    "created_at": "2026-05-05T20:55:41",
+    "updated_at": "2026-05-06T02:28:30",
+    "quality": {
+      "score": 0.64,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_wechat_private",
+        "candidate_count": 0,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-06T02:28:30"
+    },
+    "ai_interpretation": {
+      "version": "rag_experience_interpretation_v3",
+      "source_fingerprint": "f08cd23d065ae939786e99ce",
+      "content_fingerprint": "594a6ceebd23efdb47c2cf26",
+      "formal_revision": "",
+      "generated_at": "2026-05-05T20:55:41",
+      "provider": "local_fallback",
+      "model": "",
+      "status": "fallback",
+      "fallback_reason": "llm_disabled_by_request",
+      "business_type": "无效内容",
+      "meaning": "这条内容看起来不像可入库的业务知识，可能只是测试、闲聊或噪音。",
+      "recommended_action": "discard",
+      "action_label": "建议废弃",
+      "action_reason": "内容缺少业务价值，继续保留会增加审核噪音。",
+      "formal_knowledge_comparison": {
+        "overlap_level": "none",
+        "matched_title": "",
+        "matched_category": "",
+        "matched_item_id": "",
+        "similarity": null,
+        "same_points": [],
+        "differences": [],
+        "conclusion": "暂未发现明显重合的正式知识。"
+      },
+      "what_to_check": [
+        "核对这条内容是否真实、完整、值得入库"
+      ],
+      "risk_notes": [
+        "没有识别到可沉淀的业务知识，自动从待处理提醒中降噪。"
+      ],
+      "confidence": "low",
+      "promotion_allowed": false,
+      "auto_triage": {
+        "recommended": true,
+        "reason_code": "no_business_value",
+        "reason": "没有识别到可沉淀的业务知识，自动从待处理提醒中降噪。"
+      }
+    },
+    "experience_review": {
+      "status": "auto_triaged",
+      "auto_triaged_at": "2026-05-05T20:55:41",
+      "auto_triage_action": "discard",
+      "auto_triage_reason": "没有识别到可沉淀的业务知识，自动从待处理提醒中降噪。",
+      "auto_triage_reason_code": "no_business_value"
+    },
+    "reviewed_by_user": false,
+    "formal_relation_cache": {
+      "relation": "novel",
+      "formal_match": {},
+      "recommended_action": "keep_as_rag_experience",
+      "formal_item_count": 25,
+      "formal_revision": "6bd5a24a67f53ddc015b4da7",
+      "evaluated_at": "2026-05-06T02:28:30"
+    }
+  },
+  {
+    "experience_id": "rag_exp_351fa58ff874d3d92ce8",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_upload",
+    "source_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\products\\upload_d4dc6b22168b2ae1_chejin_vehicles_CHEJIN_20260505_205729.txt",
+    "category": "products",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "RAG经验：raw_upload/products，摘要=商品资料：江苏车金二手车车源 CHEJIN_20260505_205729 测试批次：CHEJIN_20260505_205729 商品名称：2021款丰田凯美瑞2.0G豪华版 型号：CHE…",
+    "question": "",
+    "reply_text": "商品资料：江苏车金二手车车源 CHEJIN_20260505_205729 测试批次：CHEJIN_20260505_205729 商品名称：2021款丰田凯美瑞2.0G豪华版 型号：CHEJIN-CAMRY-2021G 商品类目：二手车/中级轿车 别名关键词：凯美瑞,丰田凯美瑞,8万预算,自动挡,省油,通勤 规格参数：2021年上牌，表显4.8万公里，2.0L自动挡，南京现车，一手车，支持第三方检测。 价格：8.98万 单位：台 库存：1 发货：南京门店可看车，异地客户需人工确认物流与提档。 售后：非重大事故、非水泡、非火烧以合同和检测报告为准。 标准回复：这台凯美瑞适合8到10万预算、家用通勤和省油需求，建议先确认到店时间、是否置换、是否贷款。 商品资料：江苏车金二手车车源 CHEJIN_20260505_205729 测试批次：CHEJIN_20260505_205729 商品名称：2020款本田思域220TURBO劲动版 型号：CHEJIN-CIVIC-2020T 商品类目：二手车/紧凑型轿车 别名关键词：思域,本田思域,年轻客户,按揭,首付三成 规格参数：2020年上牌，表显6.1万公里，1.5T自动挡，外观轻微补漆，支持按揭初审。 价格：7.58万 单位：台 库存：1 发货：门店看车后可协助过户，金融结果以资方审批为准。 售后：车况以检测报告和合同约定为准，不承诺贷款必过。 商品资料：江苏车金二手车车源 CHEJIN_20260505_205729 测试批次：CHEJIN_20260505_205729 商品名称：2019款宝马320Li M运动套装 型号：CHEJIN-BMW320-2019M 商品类目：二手车/豪华轿车 别名关键词：宝马320,宝马3系,320Li,试驾,精品车况 规格参数：2019年上牌，表显5.6万公里，2.0T自动挡，一手车源，支持到店试驾。 价格：12.80万 单位：台 库存：1 发货：高意向试驾需转人工确认门店和时间。 售后：精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。 商品资料：江苏车金二手车车源 CHEJIN_20260505_205729 测试批次：CHEJIN_20260505_205729 商品名称：2022款比亚迪秦PLUS DM-i 55KM 型号：CHEJIN-QINPLUS-2022DMI 商品类目：二手车/新能源轿车 别名关键词：秦PLUS,比亚迪秦,新能源,绿牌,混动,网约车 规格参数：2022年上牌，表显3.2万公里，插混，低油耗，适合通勤和网约车。 价格：8.68万 单位：台 库存：1 发货：新能源车需人工确认电池检测和当地迁入政策。 售后：电池和三电政策以厂家与检测报告为准。",
+    "evidence_excerpt": "商品资料：江苏车金二手车车源 CHEJIN_20260505_205729 测试批次：CHEJIN_20260505_205729 商品名称：2021款丰田凯美瑞2.0G豪华版 型号：CHEJIN-CAMRY-2021G 商品类目：二手车/中级轿车 别名关键词：凯美瑞,丰田凯美瑞,8万预算,自动挡,省油,通勤 规格参数：2021年上牌，表显4.8万公里，2.0L自动挡，南京现车，一手车，支持第三方检测。 价格：8.98万 单位：台 库存：1 发货：南京门店可看车，异地客户需人工确认物流与提档。 售后：非重大事故、非水泡、非火烧以合同和检测报告为准。 标准回复：这台凯美瑞适合8到10万预算、家用通勤和省油需求，建议先确认到店时间、是否置换、是否贷款。 商品资料：江苏车金二手车车源 CHEJIN_20260505_205729 测试批次：CHEJIN_20260505_205729 商品名称：2020款本田思域220TURBO劲动版 型号：CHEJIN-CIVIC-2020T 商品类目：二手车/紧凑型轿车 别名关键词：思域,本田思域,年轻客户,按揭,首付三成 规格参数：2020年上牌，表显6.1万公里，1.5T自动挡，外观轻微补漆，支持按揭初审。 价格：7.58万 单位：台 库存：1 发货：门店看车后可协助过户，金融结果以资方审批为准。 售后：车况以检测报告和合同约定为准，不承诺贷款必过。 商品资料：江苏车金二手车车源 CHEJIN_20260505_205729 测试批次：CHEJIN_20260505_205729 商品名称：2019款宝马320Li M运动套装 型号：CHEJIN-BMW320-2019M 商品类目：二手车/豪华轿车 别名关键词：宝马320,宝马3系,320Li,试驾,精品车况 规格参数：2019年上牌，表显5.6万公里，2.0T自动挡，一手车源，支持到店试驾。 价格：12.80万 单位：台 库存：1 发货：高意向试驾需转人工确认门店和时间。 售后：精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。 商品资料：江苏车金二手车车源 CHEJIN_20260505_205729 测试批次：CHEJIN_20260505_205729 商品名称：2022款比亚迪秦PLUS DM-i 55KM 型号：CHEJIN-QINPLUS-2022DMI 商品类目：二手车/新能源轿车 别名关键词：秦PLUS,比亚迪秦,新能源,绿牌,混动,网约车 规格参数：2022年上牌，表显3.2万公里，插混，低油耗，适合通勤和网约车。 价格：8.68万 单位：台 库存：1 发货：新能源车需人工确认电池检测和当地迁入政策。 售后：电池和三电政策以厂家与检测报告为准。",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_d28ec65c406ad2d0",
+      "chunk_count": 2,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "original_source": {
+      "upload_id": "upload_d4dc6b22168b2ae1",
+      "file_name": "upload_d4dc6b22168b2ae1_chejin_vehicles_CHEJIN_20260505_205729.txt",
+      "kind": "products"
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-05T20:57:30"
+    },
+    "created_at": "2026-05-05T20:57:30",
+    "updated_at": "2026-05-06T02:42:11",
+    "quality": {
+      "score": 0.74,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_upload",
+        "candidate_count": 0,
+        "rag_ingest_ok": true,
+        "chunk_count": 2,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-06T02:42:11"
+    },
+    "ai_interpretation": {
+      "version": "rag_experience_interpretation_v3",
+      "source_fingerprint": "51dbc48cf6c78a83ac5e7cc3",
+      "content_fingerprint": "cdaa4b925a825149698f1f21",
+      "formal_revision": "",
+      "generated_at": "2026-05-05T20:57:30",
+      "provider": "local_fallback",
+      "model": "",
+      "status": "fallback",
+      "fallback_reason": "llm_disabled_by_request",
+      "business_type": "商品资料",
+      "meaning": "系统从资料或聊天记录里识别到一条商品资料。",
+      "recommended_action": "manual_review",
+      "action_label": "建议人工检查",
+      "action_reason": "内容可能涉及承诺、风险或不完整信息，需要人工先看。",
+      "formal_knowledge_comparison": {
+        "overlap_level": "none",
+        "matched_title": "",
+        "matched_category": "",
+        "matched_item_id": "",
+        "similarity": null,
+        "same_points": [],
+        "differences": [],
+        "conclusion": "暂未发现明显重合的正式知识。"
+      },
+      "what_to_check": [
+        "核对价格是否准确、是否仍有效",
+        "核对库存或在售状态",
+        "核对金融方案是否必须转人工",
+        "核对车况承诺是否有检测报告依据"
+      ],
+      "risk_notes": [
+        "金融和贷款相关内容不要自动承诺",
+        "车况承诺必须以检测报告或人工确认为准"
+      ],
+      "confidence": "low",
+      "promotion_allowed": false,
+      "auto_triage": {
+        "recommended": false,
+        "reason_code": "",
+        "reason": "内容可能涉及承诺、风险或不完整信息，需要人工先看。"
+      }
+    },
+    "formal_relation_cache": {
+      "relation": "kept_experience",
+      "formal_match": {},
+      "recommended_action": "kept_as_experience",
+      "formal_item_count": 25,
+      "formal_revision": "6bd5a24a67f53ddc015b4da7",
+      "evaluated_at": "2026-05-06T02:42:11"
+    },
+    "experience_review": {
+      "status": "kept",
+      "kept_at": "2026-05-06T02:41:54",
+      "kept_reason": "kept in experience layer"
+    },
+    "reviewed_by_user": true
+  },
+  {
+    "experience_id": "rag_exp_a3cb853544af4332468c",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_upload",
+    "source_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\policies\\upload_147fce8b9f4c3023_chejin_policies_CHEJIN_20260505_205729.txt",
+    "category": "policies",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "RAG经验：raw_upload/policies，摘要=政策规则：江苏车金高意向转人工 CHEJIN_20260505_205729 测试批次：CHEJIN_20260505_205729 规则名称：试驾到店与订金转人工 规则类型：manual_…",
+    "question": "",
+    "reply_text": "政策规则：江苏车金高意向转人工 CHEJIN_20260505_205729 测试批次：CHEJIN_20260505_205729 规则名称：试驾到店与订金转人工 规则类型：manual_required 触发关键词：试驾,到店,订金,定金,今天看车,明天看车,销售联系,企业微信群 答案：客户明确要求试驾、到店、订金、销售联系时，AI只做确认和记录，必须转人工或企业微信群承接，不能自行承诺车源保留和最终价格。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high 政策规则：江苏车金金融与车况合规 CHEJIN_20260505_205729 测试批次：CHEJIN_20260505_205729 规则名称：金融审批与车况承诺边界 规则类型：contract 触发关键词：贷款,按揭,首付,月供,征信,保证无事故,水泡,火烧,赔偿,退款 答案：金融方案只能做初步说明，审批结果、利率、月供以资方审核为准；车况承诺必须以检测报告和合同为准，涉及赔偿、退款、纠纷必须转人工。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high 政策规则：江苏车金沉睡客户唤醒 CHEJIN_20260505_205729 测试批次：CHEJIN_20260505_205729 规则名称：沉睡客户递减唤醒策略 规则类型：other 触发关键词：沉睡客户,唤醒,老线索,新车源,还在看车 答案：首次唤醒只做轻提醒；3天未回复推同预算新车源；7天未回复询问需求是否变化；客户回复后停止自动唤醒并转入正常接待。 允许自动回复：true 必须转人工：false 风险等级：normal",
+    "evidence_excerpt": "政策规则：江苏车金高意向转人工 CHEJIN_20260505_205729 测试批次：CHEJIN_20260505_205729 规则名称：试驾到店与订金转人工 规则类型：manual_required 触发关键词：试驾,到店,订金,定金,今天看车,明天看车,销售联系,企业微信群 答案：客户明确要求试驾、到店、订金、销售联系时，AI只做确认和记录，必须转人工或企业微信群承接，不能自行承诺车源保留和最终价格。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high 政策规则：江苏车金金融与车况合规 CHEJIN_20260505_205729 测试批次：CHEJIN_20260505_205729 规则名称：金融审批与车况承诺边界 规则类型：contract 触发关键词：贷款,按揭,首付,月供,征信,保证无事故,水泡,火烧,赔偿,退款 答案：金融方案只能做初步说明，审批结果、利率、月供以资方审核为准；车况承诺必须以检测报告和合同为准，涉及赔偿、退款、纠纷必须转人工。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high 政策规则：江苏车金沉睡客户唤醒 CHEJIN_20260505_205729 测试批次：CHEJIN_20260505_205729 规则名称：沉睡客户递减唤醒策略 规则类型：other 触发关键词：沉睡客户,唤醒,老线索,新车源,还在看车 答案：首次唤醒只做轻提醒；3天未回复推同预算新车源；7天未回复询问需求是否变化；客户回复后停止自动唤醒并转入正常接待。 允许自动回复：true 必须转人工：false 风险等级：normal",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_fcf01fd22b4b7dc6",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "original_source": {
+      "upload_id": "upload_147fce8b9f4c3023",
+      "file_name": "upload_147fce8b9f4c3023_chejin_policies_CHEJIN_20260505_205729.txt",
+      "kind": "policies"
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-05T20:57:31"
+    },
+    "created_at": "2026-05-05T20:57:31",
+    "updated_at": "2026-05-06T02:42:11",
+    "quality": {
+      "score": 0.72,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_upload",
+        "candidate_count": 0,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-06T02:42:11"
+    },
+    "ai_interpretation": {
+      "version": "rag_experience_interpretation_v3",
+      "source_fingerprint": "11caa9611064336dce3d7e18",
+      "content_fingerprint": "9be273e9f8a6666c2d228a32",
+      "formal_revision": "6bd5a24a67f53ddc015b4da7",
+      "generated_at": "2026-05-06T02:41:27",
+      "provider": "local_fallback",
+      "model": "",
+      "status": "fallback",
+      "fallback_reason": "model_response_was_not_json_object",
+      "business_type": "商品资料",
+      "meaning": "系统从资料或聊天记录里识别到一条商品资料。",
+      "recommended_action": "manual_review",
+      "action_label": "建议人工检查",
+      "action_reason": "内容可能涉及承诺、风险或不完整信息，需要人工先看。",
+      "formal_knowledge_comparison": {
+        "overlap_level": "medium",
+        "matched_title": "这条经验是江苏车金公司的客服政策规则，规定了什么时候必须转人工、哪些事情AI不能自己承诺、怎么唤醒老客户等，用来防止AI乱答应客户要求，避免客诉和风险。",
+        "matched_category": "chats",
+        "matched_item_id": "ai-ai",
+        "similarity": 0.61,
+        "same_points": [
+          "系统检索到正式知识库中已有相近内容"
+        ],
+        "differences": [],
+        "conclusion": "这条经验和正式知识库有部分相近内容，建议只核对差异点。"
+      },
+      "what_to_check": [
+        "核对价格是否准确、是否仍有效",
+        "核对金融方案是否必须转人工",
+        "核对车况承诺是否有检测报告依据"
+      ],
+      "risk_notes": [
+        "这类高风险承诺不要自动答应",
+        "车况承诺必须以检测报告或人工确认为准"
+      ],
+      "confidence": "low",
+      "promotion_allowed": false,
+      "auto_triage": {
+        "recommended": false,
+        "reason_code": "",
+        "reason": "内容可能涉及承诺、风险或不完整信息，需要人工先看。"
+      },
+      "auto_keep": {
+        "recommended": false,
+        "reason_code": "",
+        "reason": ""
+      }
+    },
+    "formal_relation_cache": {
+      "relation": "kept_experience",
+      "formal_match": {
+        "category_id": "chats",
+        "item_id": "ai-ai",
+        "product_id": "",
+        "title": "这条经验是江苏车金公司的客服政策规则，规定了什么时候必须转人工、哪些事情AI不能自己承诺、怎么唤醒老客户等，用来防止AI乱答应客户要求，避免客诉和风险。",
+        "similarity": 0.61,
+        "excerpt": "{\"data\": {\"additional_details\": {\"rag_experience_id\": \"rag_exp_816a8be10cee4fd1f666\", \"source_chunk_id\": null, \"source_id\": null, \"source_text\": \"\"}, \"customer_message\": \"这条经验是江苏车金公司的客服政策规则，规定了什么时候必须转人工、哪些事情AI不能自己承诺、怎么唤醒老客户等，用来防止AI乱答应客户要求，避免客诉和风险。\", \"intent_tags\": [\"rag_experience\"], \"service_reply\": \"true 风险等级：high 政策规则：江苏车金金融与车况合规 CHEJIN_20260505_205853 测试批次：CHEJIN_20260505_205853 规则名称：金融审批与车况承诺边界 规则类型：contract 触发关键词：贷款,按揭,首付,月供,征信,保证无事故,水泡,火烧,赔偿,退款 答案：金融方案只能做初步说明，审批结果、利率、月供以资方审核为准；车况承诺必须以检测报告和合同为准，涉及赔偿、退款、纠纷必须转人工。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high 政策规则：江苏车金沉睡客户唤醒 CHEJIN_20260505_205853 测试批次：CHEJIN_20260505_205853 规则名称：沉睡客户递减唤醒策略 规则类型：other 触发关键词：沉睡客户,唤醒,老线索,新车源,还在看车 答案：首次唤醒只做轻提醒；3天未回复推同预算新车源；7天未回复询问需求是否变化；客户回复后停止自动唤醒并转入正常接待。 允许自动回复：true 必须转人工：false 风险等级：normal\", \"tone_tags\": [\"rag_reference\"]}, \"id\": \"ai-ai\", \"runtime\": {\"allow_auto_reply\": true, \"requires_handoff\": false…"
+      },
+      "recommended_action": "kept_as_experience",
+      "formal_item_count": 25,
+      "formal_revision": "6bd5a24a67f53ddc015b4da7",
+      "evaluated_at": "2026-05-06T02:42:11"
+    },
+    "experience_review": {
+      "status": "kept",
+      "kept_at": "2026-05-06T02:41:35",
+      "kept_reason": "kept in experience layer"
+    },
+    "reviewed_by_user": true
+  },
+  {
+    "experience_id": "rag_exp_33d4477961974cf9fd06",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_upload",
+    "source_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\chats\\upload_393c5f9d2fe67cac_chejin_chats_CHEJIN_20260505_205729.txt",
+    "category": "chats",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "RAG经验：raw_upload/chats，摘要=聊天记录：江苏车金预算推荐话术 CHEJIN_20260505_205729 测试批次：CHEJIN_20260505_205729 客户：我从抖音直播来的，8万左右想买自动挡省油代步车，有…",
+    "question": "",
+    "reply_text": "聊天记录：江苏车金预算推荐话术 CHEJIN_20260505_205729 测试批次：CHEJIN_20260505_205729 客户：我从抖音直播来的，8万左右想买自动挡省油代步车，有什么推荐？ 客服：您这个预算可以先看凯美瑞、思域和秦PLUS DM-i。凯美瑞偏家用稳、省心；思域更年轻；秦PLUS更省油。您是在南京看车吗？是否考虑贷款或置换？ 意图标签：预算推荐,车源推荐,抖音线索 聊天记录：江苏车金置换话术 CHEJIN_20260505_205729 测试批次：CHEJIN_20260505_205729 客户：我有一台老朗逸想置换。 客服：可以的，麻烦补充上牌年份、公里数、车况、所在城市和是否有贷款，我先帮您记录，评估价需要人工复核。 意图标签：置换,线索采集 聊天记录：江苏车金睡客唤醒话术 CHEJIN_20260505_205729 测试批次：CHEJIN_20260505_205729 客户：之前那台没买，现在还有新车源吗？ 客服：有的，我先按您之前的预算和用途筛一遍；如果预算或车型变了，直接告诉我，我会按新需求推荐更合适的车。 意图标签：沉睡客户,唤醒,二次转化",
+    "evidence_excerpt": "聊天记录：江苏车金预算推荐话术 CHEJIN_20260505_205729 测试批次：CHEJIN_20260505_205729 客户：我从抖音直播来的，8万左右想买自动挡省油代步车，有什么推荐？ 客服：您这个预算可以先看凯美瑞、思域和秦PLUS DM-i。凯美瑞偏家用稳、省心；思域更年轻；秦PLUS更省油。您是在南京看车吗？是否考虑贷款或置换？ 意图标签：预算推荐,车源推荐,抖音线索 聊天记录：江苏车金置换话术 CHEJIN_20260505_205729 测试批次：CHEJIN_20260505_205729 客户：我有一台老朗逸想置换。 客服：可以的，麻烦补充上牌年份、公里数、车况、所在城市和是否有贷款，我先帮您记录，评估价需要人工复核。 意图标签：置换,线索采集 聊天记录：江苏车金睡客唤醒话术 CHEJIN_20260505_205729 测试批次：CHEJIN_20260505_205729 客户：之前那台没买，现在还有新车源吗？ 客服：有的，我先按您之前的预算和用途筛一遍；如果预算或车型变了，直接告诉我，我会按新需求推荐更合适的车。 意图标签：沉睡客户,唤醒,二次转化",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_ff49693499ceacc4",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "original_source": {
+      "upload_id": "upload_393c5f9d2fe67cac",
+      "file_name": "upload_393c5f9d2fe67cac_chejin_chats_CHEJIN_20260505_205729.txt",
+      "kind": "chats"
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-05T20:57:31"
+    },
+    "created_at": "2026-05-05T20:57:31",
+    "updated_at": "2026-05-06T02:41:21",
+    "quality": {
+      "score": 0.72,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_upload",
+        "candidate_count": 0,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-06T02:41:21"
+    },
+    "ai_interpretation": {
+      "version": "rag_experience_interpretation_v3",
+      "source_fingerprint": "297969cacb7297d10c6f1e39",
+      "content_fingerprint": "0b1b319749df70b1d048be2c",
+      "formal_revision": "",
+      "generated_at": "2026-05-05T20:57:32",
+      "provider": "local_fallback",
+      "model": "",
+      "status": "fallback",
+      "fallback_reason": "llm_disabled_by_request",
+      "business_type": "商品资料",
+      "meaning": "系统从资料或聊天记录里识别到一条商品资料。",
+      "recommended_action": "promote_to_pending",
+      "action_label": "建议升级为待确认知识",
+      "action_reason": "内容看起来可以整理成结构化知识，但仍需要人工确认字段。",
+      "formal_knowledge_comparison": {
+        "overlap_level": "none",
+        "matched_title": "",
+        "matched_category": "",
+        "matched_item_id": "",
+        "similarity": null,
+        "same_points": [],
+        "differences": [],
+        "conclusion": "暂未发现明显重合的正式知识。"
+      },
+      "what_to_check": [
+        "核对金融方案是否必须转人工",
+        "核对车况承诺是否有检测报告依据"
+      ],
+      "risk_notes": [],
+      "confidence": "low",
+      "promotion_allowed": true,
+      "auto_triage": {
+        "recommended": false,
+        "reason_code": "",
+        "reason": "内容看起来可以整理成结构化知识，但仍需要人工确认字段。"
+      }
+    },
+    "formal_relation_cache": {
+      "relation": "kept_experience",
+      "formal_match": {},
+      "recommended_action": "kept_as_experience",
+      "formal_item_count": 25,
+      "formal_revision": "6bd5a24a67f53ddc015b4da7",
+      "evaluated_at": "2026-05-06T02:41:21"
+    },
+    "experience_review": {
+      "status": "kept",
+      "kept_at": "2026-05-06T02:40:52",
+      "kept_reason": "kept in experience layer"
+    },
+    "reviewed_by_user": true
+  },
+  {
+    "experience_id": "rag_exp_06b43f8903704e05377e",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_wechat_private",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_f751490cbe964fcafcdb.txt",
+    "category": "private",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "RAG经验：raw_wechat_private/private，摘要=[2026-05-05T20:57:32] self: 8万预算，自动挡省油，通勤代步 CHEJIN_20260505_205729",
+    "question": "",
+    "reply_text": "[2026-05-05T20:57:32] self: 8万预算，自动挡省油，通勤代步 CHEJIN_20260505_205729",
+    "evidence_excerpt": "[2026-05-05T20:57:32] self: 8万预算，自动挡省油，通勤代步 CHEJIN_20260505_205729",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_f0c4d9875de893cb",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "original_source": {
+      "raw_batch_id": "raw_batch_f751490cbe964fcafcdb",
+      "conversation_id": "conv_54a96e57c70563ab9c",
+      "conversation_type": "private",
+      "raw_message_ids": [
+        "raw_msg_bca3205bd68523aec6a2"
+      ]
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-05T20:57:33"
+    },
+    "created_at": "2026-05-05T20:57:33",
+    "updated_at": "2026-05-06T02:28:30",
+    "quality": {
+      "score": 0.64,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_wechat_private",
+        "candidate_count": 0,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-06T02:28:30"
+    },
+    "ai_interpretation": {
+      "version": "rag_experience_interpretation_v3",
+      "source_fingerprint": "4f92a79570bbf44b376b3711",
+      "content_fingerprint": "5ba3b8212e305753fc32bd55",
+      "formal_revision": "",
+      "generated_at": "2026-05-05T20:57:33",
+      "provider": "local_fallback",
+      "model": "",
+      "status": "fallback",
+      "fallback_reason": "llm_disabled_by_request",
+      "business_type": "无效内容",
+      "meaning": "这条内容看起来不像可入库的业务知识，可能只是测试、闲聊或噪音。",
+      "recommended_action": "discard",
+      "action_label": "建议废弃",
+      "action_reason": "内容缺少业务价值，继续保留会增加审核噪音。",
+      "formal_knowledge_comparison": {
+        "overlap_level": "none",
+        "matched_title": "",
+        "matched_category": "",
+        "matched_item_id": "",
+        "similarity": null,
+        "same_points": [],
+        "differences": [],
+        "conclusion": "暂未发现明显重合的正式知识。"
+      },
+      "what_to_check": [
+        "核对这条内容是否真实、完整、值得入库"
+      ],
+      "risk_notes": [
+        "没有识别到可沉淀的业务知识，自动从待处理提醒中降噪。"
+      ],
+      "confidence": "low",
+      "promotion_allowed": false,
+      "auto_triage": {
+        "recommended": true,
+        "reason_code": "no_business_value",
+        "reason": "没有识别到可沉淀的业务知识，自动从待处理提醒中降噪。"
+      }
+    },
+    "experience_review": {
+      "status": "auto_triaged",
+      "auto_triaged_at": "2026-05-05T20:57:33",
+      "auto_triage_action": "discard",
+      "auto_triage_reason": "没有识别到可沉淀的业务知识，自动从待处理提醒中降噪。",
+      "auto_triage_reason_code": "no_business_value"
+    },
+    "reviewed_by_user": false,
+    "formal_relation_cache": {
+      "relation": "novel",
+      "formal_match": {},
+      "recommended_action": "keep_as_rag_experience",
+      "formal_item_count": 25,
+      "formal_revision": "6bd5a24a67f53ddc015b4da7",
+      "evaluated_at": "2026-05-06T02:28:30"
+    }
+  },
+  {
+    "experience_id": "rag_exp_367dabe37bbba830d312",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_wechat_private",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_b9e4d10f3ab6851fecb2.txt",
+    "category": "private",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "RAG经验：raw_wechat_private/private，摘要=[2026-05-05T20:57:34] self: 宝马320Li那台今天能到店试驾吗 CHEJIN_20260505_205729",
+    "question": "",
+    "reply_text": "[2026-05-05T20:57:34] self: 宝马320Li那台今天能到店试驾吗 CHEJIN_20260505_205729",
+    "evidence_excerpt": "[2026-05-05T20:57:34] self: 宝马320Li那台今天能到店试驾吗 CHEJIN_20260505_205729",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_b72a7ef7759a6e86",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "original_source": {
+      "raw_batch_id": "raw_batch_b9e4d10f3ab6851fecb2",
+      "conversation_id": "conv_54a96e57c70563ab9c",
+      "conversation_type": "private",
+      "raw_message_ids": [
+        "raw_msg_87226e4a54d6bdd47fce"
+      ]
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-05T20:57:34"
+    },
+    "created_at": "2026-05-05T20:57:34",
+    "updated_at": "2026-05-06T02:28:30",
+    "quality": {
+      "score": 0.64,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_wechat_private",
+        "candidate_count": 0,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-06T02:28:30"
+    },
+    "ai_interpretation": {
+      "version": "rag_experience_interpretation_v3",
+      "source_fingerprint": "2a03d09335182b4953070e09",
+      "content_fingerprint": "4932a8c14508ab6644afba1e",
+      "formal_revision": "",
+      "generated_at": "2026-05-05T20:57:35",
+      "provider": "local_fallback",
+      "model": "",
+      "status": "fallback",
+      "fallback_reason": "llm_disabled_by_request",
+      "business_type": "无效内容",
+      "meaning": "这条内容看起来不像可入库的业务知识，可能只是测试、闲聊或噪音。",
+      "recommended_action": "discard",
+      "action_label": "建议废弃",
+      "action_reason": "内容缺少业务价值，继续保留会增加审核噪音。",
+      "formal_knowledge_comparison": {
+        "overlap_level": "none",
+        "matched_title": "",
+        "matched_category": "",
+        "matched_item_id": "",
+        "similarity": null,
+        "same_points": [],
+        "differences": [],
+        "conclusion": "暂未发现明显重合的正式知识。"
+      },
+      "what_to_check": [
+        "核对这条内容是否真实、完整、值得入库"
+      ],
+      "risk_notes": [
+        "没有识别到可沉淀的业务知识，自动从待处理提醒中降噪。"
+      ],
+      "confidence": "low",
+      "promotion_allowed": false,
+      "auto_triage": {
+        "recommended": true,
+        "reason_code": "no_business_value",
+        "reason": "没有识别到可沉淀的业务知识，自动从待处理提醒中降噪。"
+      }
+    },
+    "experience_review": {
+      "status": "auto_triaged",
+      "auto_triaged_at": "2026-05-05T20:57:35",
+      "auto_triage_action": "discard",
+      "auto_triage_reason": "没有识别到可沉淀的业务知识，自动从待处理提醒中降噪。",
+      "auto_triage_reason_code": "no_business_value"
+    },
+    "reviewed_by_user": false,
+    "formal_relation_cache": {
+      "relation": "novel",
+      "formal_match": {},
+      "recommended_action": "keep_as_rag_experience",
+      "formal_item_count": 25,
+      "formal_revision": "6bd5a24a67f53ddc015b4da7",
+      "evaluated_at": "2026-05-06T02:28:30"
+    }
+  },
+  {
+    "experience_id": "rag_exp_003ac5e85005fe991425",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_upload",
+    "source_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\products\\upload_79b493828d19a7a5_chejin_vehicles_CHEJIN_20260505_205853.txt",
+    "category": "products",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "RAG经验：raw_upload/products，摘要=商品资料：江苏车金二手车车源 CHEJIN_20260505_205853 测试批次：CHEJIN_20260505_205853 商品名称：2021款丰田凯美瑞2.0G豪华版 型号：CHE…",
+    "question": "",
+    "reply_text": "商品资料：江苏车金二手车车源 CHEJIN_20260505_205853 测试批次：CHEJIN_20260505_205853 商品名称：2021款丰田凯美瑞2.0G豪华版 型号：CHEJIN-CAMRY-2021G 商品类目：二手车/中级轿车 别名关键词：凯美瑞,丰田凯美瑞,8万预算,自动挡,省油,通勤 规格参数：2021年上牌，表显4.8万公里，2.0L自动挡，南京现车，一手车，支持第三方检测。 价格：8.98万 单位：台 库存：1 发货：南京门店可看车，异地客户需人工确认物流与提档。 售后：非重大事故、非水泡、非火烧以合同和检测报告为准。 标准回复：这台凯美瑞适合8到10万预算、家用通勤和省油需求，建议先确认到店时间、是否置换、是否贷款。 商品资料：江苏车金二手车车源 CHEJIN_20260505_205853 测试批次：CHEJIN_20260505_205853 商品名称：2020款本田思域220TURBO劲动版 型号：CHEJIN-CIVIC-2020T 商品类目：二手车/紧凑型轿车 别名关键词：思域,本田思域,年轻客户,按揭,首付三成 规格参数：2020年上牌，表显6.1万公里，1.5T自动挡，外观轻微补漆，支持按揭初审。 价格：7.58万 单位：台 库存：1 发货：门店看车后可协助过户，金融结果以资方审批为准。 售后：车况以检测报告和合同约定为准，不承诺贷款必过。 商品资料：江苏车金二手车车源 CHEJIN_20260505_205853 测试批次：CHEJIN_20260505_205853 商品名称：2019款宝马320Li M运动套装 型号：CHEJIN-BMW320-2019M 商品类目：二手车/豪华轿车 别名关键词：宝马320,宝马3系,320Li,试驾,精品车况 规格参数：2019年上牌，表显5.6万公里，2.0T自动挡，一手车源，支持到店试驾。 价格：12.80万 单位：台 库存：1 发货：高意向试驾需转人工确认门店和时间。 售后：精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。 商品资料：江苏车金二手车车源 CHEJIN_20260505_205853 测试批次：CHEJIN_20260505_205853 商品名称：2022款比亚迪秦PLUS DM-i 55KM 型号：CHEJIN-QINPLUS-2022DMI 商品类目：二手车/新能源轿车 别名关键词：秦PLUS,比亚迪秦,新能源,绿牌,混动,网约车 规格参数：2022年上牌，表显3.2万公里，插混，低油耗，适合通勤和网约车。 价格：8.68万 单位：台 库存：1 发货：新能源车需人工确认电池检测和当地迁入政策。 售后：电池和三电政策以厂家与检测报告为准。",
+    "evidence_excerpt": "商品资料：江苏车金二手车车源 CHEJIN_20260505_205853 测试批次：CHEJIN_20260505_205853 商品名称：2021款丰田凯美瑞2.0G豪华版 型号：CHEJIN-CAMRY-2021G 商品类目：二手车/中级轿车 别名关键词：凯美瑞,丰田凯美瑞,8万预算,自动挡,省油,通勤 规格参数：2021年上牌，表显4.8万公里，2.0L自动挡，南京现车，一手车，支持第三方检测。 价格：8.98万 单位：台 库存：1 发货：南京门店可看车，异地客户需人工确认物流与提档。 售后：非重大事故、非水泡、非火烧以合同和检测报告为准。 标准回复：这台凯美瑞适合8到10万预算、家用通勤和省油需求，建议先确认到店时间、是否置换、是否贷款。 商品资料：江苏车金二手车车源 CHEJIN_20260505_205853 测试批次：CHEJIN_20260505_205853 商品名称：2020款本田思域220TURBO劲动版 型号：CHEJIN-CIVIC-2020T 商品类目：二手车/紧凑型轿车 别名关键词：思域,本田思域,年轻客户,按揭,首付三成 规格参数：2020年上牌，表显6.1万公里，1.5T自动挡，外观轻微补漆，支持按揭初审。 价格：7.58万 单位：台 库存：1 发货：门店看车后可协助过户，金融结果以资方审批为准。 售后：车况以检测报告和合同约定为准，不承诺贷款必过。 商品资料：江苏车金二手车车源 CHEJIN_20260505_205853 测试批次：CHEJIN_20260505_205853 商品名称：2019款宝马320Li M运动套装 型号：CHEJIN-BMW320-2019M 商品类目：二手车/豪华轿车 别名关键词：宝马320,宝马3系,320Li,试驾,精品车况 规格参数：2019年上牌，表显5.6万公里，2.0T自动挡，一手车源，支持到店试驾。 价格：12.80万 单位：台 库存：1 发货：高意向试驾需转人工确认门店和时间。 售后：精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。 商品资料：江苏车金二手车车源 CHEJIN_20260505_205853 测试批次：CHEJIN_20260505_205853 商品名称：2022款比亚迪秦PLUS DM-i 55KM 型号：CHEJIN-QINPLUS-2022DMI 商品类目：二手车/新能源轿车 别名关键词：秦PLUS,比亚迪秦,新能源,绿牌,混动,网约车 规格参数：2022年上牌，表显3.2万公里，插混，低油耗，适合通勤和网约车。 价格：8.68万 单位：台 库存：1 发货：新能源车需人工确认电池检测和当地迁入政策。 售后：电池和三电政策以厂家与检测报告为准。",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_24ad55c9c0faf193",
+      "chunk_count": 2,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "original_source": {
+      "upload_id": "upload_79b493828d19a7a5",
+      "file_name": "upload_79b493828d19a7a5_chejin_vehicles_CHEJIN_20260505_205853.txt",
+      "kind": "products"
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-05T20:58:55"
+    },
+    "created_at": "2026-05-05T20:58:55",
+    "updated_at": "2026-05-06T02:40:26",
+    "quality": {
+      "score": 0.74,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_upload",
+        "candidate_count": 0,
+        "rag_ingest_ok": true,
+        "chunk_count": 2,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-06T02:40:26"
+    },
+    "ai_interpretation": {
+      "version": "rag_experience_interpretation_v3",
+      "source_fingerprint": "805b403ac3c865af0c2e3c02",
+      "content_fingerprint": "ffb793b643c22817ad38e827",
+      "formal_revision": "",
+      "generated_at": "2026-05-05T20:58:55",
+      "provider": "local_fallback",
+      "model": "",
+      "status": "fallback",
+      "fallback_reason": "llm_disabled_by_request",
+      "business_type": "商品资料",
+      "meaning": "系统从资料或聊天记录里识别到一条商品资料。",
+      "recommended_action": "manual_review",
+      "action_label": "建议人工检查",
+      "action_reason": "内容可能涉及承诺、风险或不完整信息，需要人工先看。",
+      "formal_knowledge_comparison": {
+        "overlap_level": "none",
+        "matched_title": "",
+        "matched_category": "",
+        "matched_item_id": "",
+        "similarity": null,
+        "same_points": [],
+        "differences": [],
+        "conclusion": "暂未发现明显重合的正式知识。"
+      },
+      "what_to_check": [
+        "核对价格是否准确、是否仍有效",
+        "核对库存或在售状态",
+        "核对金融方案是否必须转人工",
+        "核对车况承诺是否有检测报告依据"
+      ],
+      "risk_notes": [
+        "金融和贷款相关内容不要自动承诺",
+        "车况承诺必须以检测报告或人工确认为准"
+      ],
+      "confidence": "low",
+      "promotion_allowed": false,
+      "auto_triage": {
+        "recommended": false,
+        "reason_code": "",
+        "reason": "内容可能涉及承诺、风险或不完整信息，需要人工先看。"
+      }
+    },
+    "formal_relation_cache": {
+      "relation": "kept_experience",
+      "formal_match": {},
+      "recommended_action": "kept_as_experience",
+      "formal_item_count": 25,
+      "formal_revision": "6bd5a24a67f53ddc015b4da7",
+      "evaluated_at": "2026-05-06T02:40:26"
+    },
+    "experience_review": {
+      "status": "kept",
+      "kept_at": "2026-05-06T02:39:54",
+      "kept_reason": "kept in experience layer"
+    },
+    "reviewed_by_user": true
+  },
+  {
+    "experience_id": "rag_exp_816a8be10cee4fd1f666",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "promoted",
+    "source": "intake",
+    "source_type": "raw_upload",
+    "source_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\policies\\upload_e8597f09c7e0403b_chejin_policies_CHEJIN_20260505_205853.txt",
+    "category": "policies",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "RAG经验：raw_upload/policies，摘要=政策规则：江苏车金高意向转人工 CHEJIN_20260505_205853 测试批次：CHEJIN_20260505_205853 规则名称：试驾到店与订金转人工 规则类型：manual_…",
+    "question": "",
+    "reply_text": "政策规则：江苏车金高意向转人工 CHEJIN_20260505_205853 测试批次：CHEJIN_20260505_205853 规则名称：试驾到店与订金转人工 规则类型：manual_required 触发关键词：试驾,到店,订金,定金,今天看车,明天看车,销售联系,企业微信群 答案：客户明确要求试驾、到店、订金、销售联系时，AI只做确认和记录，必须转人工或企业微信群承接，不能自行承诺车源保留和最终价格。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high 政策规则：江苏车金金融与车况合规 CHEJIN_20260505_205853 测试批次：CHEJIN_20260505_205853 规则名称：金融审批与车况承诺边界 规则类型：contract 触发关键词：贷款,按揭,首付,月供,征信,保证无事故,水泡,火烧,赔偿,退款 答案：金融方案只能做初步说明，审批结果、利率、月供以资方审核为准；车况承诺必须以检测报告和合同为准，涉及赔偿、退款、纠纷必须转人工。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high 政策规则：江苏车金沉睡客户唤醒 CHEJIN_20260505_205853 测试批次：CHEJIN_20260505_205853 规则名称：沉睡客户递减唤醒策略 规则类型：other 触发关键词：沉睡客户,唤醒,老线索,新车源,还在看车 答案：首次唤醒只做轻提醒；3天未回复推同预算新车源；7天未回复询问需求是否变化；客户回复后停止自动唤醒并转入正常接待。 允许自动回复：true 必须转人工：false 风险等级：normal",
+    "evidence_excerpt": "政策规则：江苏车金高意向转人工 CHEJIN_20260505_205853 测试批次：CHEJIN_20260505_205853 规则名称：试驾到店与订金转人工 规则类型：manual_required 触发关键词：试驾,到店,订金,定金,今天看车,明天看车,销售联系,企业微信群 答案：客户明确要求试驾、到店、订金、销售联系时，AI只做确认和记录，必须转人工或企业微信群承接，不能自行承诺车源保留和最终价格。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high 政策规则：江苏车金金融与车况合规 CHEJIN_20260505_205853 测试批次：CHEJIN_20260505_205853 规则名称：金融审批与车况承诺边界 规则类型：contract 触发关键词：贷款,按揭,首付,月供,征信,保证无事故,水泡,火烧,赔偿,退款 答案：金融方案只能做初步说明，审批结果、利率、月供以资方审核为准；车况承诺必须以检测报告和合同为准，涉及赔偿、退款、纠纷必须转人工。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high 政策规则：江苏车金沉睡客户唤醒 CHEJIN_20260505_205853 测试批次：CHEJIN_20260505_205853 规则名称：沉睡客户递减唤醒策略 规则类型：other 触发关键词：沉睡客户,唤醒,老线索,新车源,还在看车 答案：首次唤醒只做轻提醒；3天未回复推同预算新车源；7天未回复询问需求是否变化；客户回复后停止自动唤醒并转入正常接待。 允许自动回复：true 必须转人工：false 风险等级：normal",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_343443ba52a65607",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "original_source": {
+      "upload_id": "upload_e8597f09c7e0403b",
+      "file_name": "upload_e8597f09c7e0403b_chejin_policies_CHEJIN_20260505_205853.txt",
+      "kind": "policies"
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-05T20:58:56"
+    },
+    "created_at": "2026-05-05T20:58:56",
+    "updated_at": "2026-05-06T02:26:13",
+    "quality": {
+      "score": 0.72,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_upload",
+        "candidate_count": 0,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-06T02:26:13"
+    },
+    "ai_interpretation": {
+      "version": "rag_experience_interpretation_v3",
+      "source_fingerprint": "d52e2469a5d49405126ed6b7",
+      "content_fingerprint": "f590eec46ea8406bf98c53c8",
+      "formal_revision": "f61aa62efb55ce994ff1328e",
+      "generated_at": "2026-05-06T02:25:56",
+      "provider": "deepseek",
+      "model": "deepseek-v4-pro",
+      "status": "model_generated",
+      "business_type": "政策规则",
+      "meaning": "这条经验是江苏车金公司的客服政策规则，规定了什么时候必须转人工、哪些事情AI不能自己承诺、怎么唤醒老客户等，用来防止AI乱答应客户要求，避免客诉和风险。",
+      "recommended_action": "promote_to_pending",
+      "action_label": "建议升级为待确认知识",
+      "action_reason": "这是一组全新的业务规则，正式知识库中没有覆盖，内容清晰、风险明确，建议升级为待确认知识，供管理员审核后入库使用。",
+      "formal_knowledge_comparison": {
+        "overlap_level": "none",
+        "matched_title": "",
+        "matched_category": "",
+        "matched_item_id": "",
+        "similarity": null,
+        "same_points": [],
+        "differences": [
+          "正式知识库中暂无类似规则，本条经验属于全新的政策规则，需要独立建立。"
+        ],
+        "conclusion": "现有正式知识未覆盖这条规则，可以直接提交审核。"
+      },
+      "what_to_check": [
+        "确认这些规则是否与公司现行流程一致，尤其是试驾、订金、金融承诺的转人工触发条件",
+        "核对沉睡客户唤醒策略的间隔天数（3天、7天）是否符合业务需求",
+        "检查规则中的关键词（如“试驾”“订金”“贷款”等）是否已经覆盖了所有需要转人工的场景"
+      ],
+      "risk_notes": [
+        "金融审批、车况承诺等规则涉及高风险事项，正式启用前需由业务负责人确认，避免AI给出违规承诺",
+        "沉睡客户唤醒策略中的自动推送功能需要技术评估，确保不会对客户造成骚扰"
+      ],
+      "confidence": "high",
+      "promotion_allowed": true,
+      "auto_triage": {
+        "recommended": false,
+        "reason_code": "",
+        "reason": "这是一组全新的业务规则，正式知识库中没有覆盖，内容清晰、风险明确，建议升级为待确认知识，供管理员审核后入库使用。"
+      },
+      "auto_keep": {
+        "recommended": false,
+        "reason_code": "",
+        "reason": ""
+      }
+    },
+    "formal_relation_cache": {
+      "relation": "novel",
+      "formal_match": {},
+      "recommended_action": "keep_as_rag_experience",
+      "formal_item_count": 24,
+      "formal_revision": "f61aa62efb55ce994ff1328e",
+      "evaluated_at": "2026-05-06T01:57:53"
+    },
+    "promoted_reason": "promoted_to_review_candidate",
+    "promoted_at": "2026-05-06T02:26:13",
+    "promoted_candidate_id": "rag_promote_a6edca069450cf5f8d80"
+  },
+  {
+    "experience_id": "rag_exp_c4d462ae49165d25ec80",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_upload",
+    "source_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\chats\\upload_35651a40b45c5b9e_chejin_chats_CHEJIN_20260505_205853.txt",
+    "category": "chats",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "RAG经验：raw_upload/chats，摘要=聊天记录：江苏车金预算推荐话术 CHEJIN_20260505_205853 测试批次：CHEJIN_20260505_205853 客户：我从抖音直播来的，8万左右想买自动挡省油代步车，有…",
+    "question": "",
+    "reply_text": "聊天记录：江苏车金预算推荐话术 CHEJIN_20260505_205853 测试批次：CHEJIN_20260505_205853 客户：我从抖音直播来的，8万左右想买自动挡省油代步车，有什么推荐？ 客服：您这个预算可以先看凯美瑞、思域和秦PLUS DM-i。凯美瑞偏家用稳、省心；思域更年轻；秦PLUS更省油。您是在南京看车吗？是否考虑贷款或置换？ 意图标签：预算推荐,车源推荐,抖音线索 聊天记录：江苏车金置换话术 CHEJIN_20260505_205853 测试批次：CHEJIN_20260505_205853 客户：我有一台老朗逸想置换。 客服：可以的，麻烦补充上牌年份、公里数、车况、所在城市和是否有贷款，我先帮您记录，评估价需要人工复核。 意图标签：置换,线索采集 聊天记录：江苏车金睡客唤醒话术 CHEJIN_20260505_205853 测试批次：CHEJIN_20260505_205853 客户：之前那台没买，现在还有新车源吗？ 客服：有的，我先按您之前的预算和用途筛一遍；如果预算或车型变了，直接告诉我，我会按新需求推荐更合适的车。 意图标签：沉睡客户,唤醒,二次转化",
+    "evidence_excerpt": "聊天记录：江苏车金预算推荐话术 CHEJIN_20260505_205853 测试批次：CHEJIN_20260505_205853 客户：我从抖音直播来的，8万左右想买自动挡省油代步车，有什么推荐？ 客服：您这个预算可以先看凯美瑞、思域和秦PLUS DM-i。凯美瑞偏家用稳、省心；思域更年轻；秦PLUS更省油。您是在南京看车吗？是否考虑贷款或置换？ 意图标签：预算推荐,车源推荐,抖音线索 聊天记录：江苏车金置换话术 CHEJIN_20260505_205853 测试批次：CHEJIN_20260505_205853 客户：我有一台老朗逸想置换。 客服：可以的，麻烦补充上牌年份、公里数、车况、所在城市和是否有贷款，我先帮您记录，评估价需要人工复核。 意图标签：置换,线索采集 聊天记录：江苏车金睡客唤醒话术 CHEJIN_20260505_205853 测试批次：CHEJIN_20260505_205853 客户：之前那台没买，现在还有新车源吗？ 客服：有的，我先按您之前的预算和用途筛一遍；如果预算或车型变了，直接告诉我，我会按新需求推荐更合适的车。 意图标签：沉睡客户,唤醒,二次转化",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_472cfc1e61d6e50c",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "original_source": {
+      "upload_id": "upload_35651a40b45c5b9e",
+      "file_name": "upload_35651a40b45c5b9e_chejin_chats_CHEJIN_20260505_205853.txt",
+      "kind": "chats"
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-05T20:58:57"
+    },
+    "created_at": "2026-05-05T20:58:57",
+    "updated_at": "2026-05-06T02:32:47",
+    "quality": {
+      "score": 0.72,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_upload",
+        "candidate_count": 0,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-06T02:32:47"
+    },
+    "ai_interpretation": {
+      "version": "rag_experience_interpretation_v3",
+      "source_fingerprint": "3f0b7ebbb2fe6892a167b02c",
+      "content_fingerprint": "0a91be6b1ce8a8de7f81b677",
+      "formal_revision": "",
+      "generated_at": "2026-05-05T20:58:57",
+      "provider": "local_fallback",
+      "model": "",
+      "status": "fallback",
+      "fallback_reason": "llm_disabled_by_request",
+      "business_type": "商品资料",
+      "meaning": "系统从资料或聊天记录里识别到一条商品资料。",
+      "recommended_action": "promote_to_pending",
+      "action_label": "建议升级为待确认知识",
+      "action_reason": "内容看起来可以整理成结构化知识，但仍需要人工确认字段。",
+      "formal_knowledge_comparison": {
+        "overlap_level": "none",
+        "matched_title": "",
+        "matched_category": "",
+        "matched_item_id": "",
+        "similarity": null,
+        "same_points": [],
+        "differences": [],
+        "conclusion": "暂未发现明显重合的正式知识。"
+      },
+      "what_to_check": [
+        "核对金融方案是否必须转人工",
+        "核对车况承诺是否有检测报告依据"
+      ],
+      "risk_notes": [],
+      "confidence": "low",
+      "promotion_allowed": true,
+      "auto_triage": {
+        "recommended": false,
+        "reason_code": "",
+        "reason": "内容看起来可以整理成结构化知识，但仍需要人工确认字段。"
+      }
+    },
+    "formal_relation_cache": {
+      "relation": "kept_experience",
+      "formal_match": {},
+      "recommended_action": "kept_as_experience",
+      "formal_item_count": 25,
+      "formal_revision": "6bd5a24a67f53ddc015b4da7",
+      "evaluated_at": "2026-05-06T02:32:47"
+    },
+    "experience_review": {
+      "status": "kept",
+      "kept_at": "2026-05-06T02:32:33",
+      "kept_reason": "kept in experience layer"
+    },
+    "reviewed_by_user": true
+  },
+  {
+    "experience_id": "rag_exp_28af1d68069955154986",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_wechat_private",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_563d08edebbc26b38405.txt",
+    "category": "private",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "RAG经验：raw_wechat_private/private，摘要=[2026-05-05T20:58:58] self: 8万预算，自动挡省油，通勤代步 CHEJIN_20260505_205853",
+    "question": "",
+    "reply_text": "[2026-05-05T20:58:58] self: 8万预算，自动挡省油，通勤代步 CHEJIN_20260505_205853",
+    "evidence_excerpt": "[2026-05-05T20:58:58] self: 8万预算，自动挡省油，通勤代步 CHEJIN_20260505_205853",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_b75cbcfa0284dfb8",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "original_source": {
+      "raw_batch_id": "raw_batch_563d08edebbc26b38405",
+      "conversation_id": "conv_54a96e57c70563ab9c",
+      "conversation_type": "private",
+      "raw_message_ids": [
+        "raw_msg_616a99ef5f15747cf78c"
+      ]
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-05T20:58:58"
+    },
+    "created_at": "2026-05-05T20:58:58",
+    "updated_at": "2026-05-06T02:28:30",
+    "quality": {
+      "score": 0.64,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_wechat_private",
+        "candidate_count": 0,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-06T02:28:30"
+    },
+    "ai_interpretation": {
+      "version": "rag_experience_interpretation_v3",
+      "source_fingerprint": "dbf9a9da384a56a8433e14ad",
+      "content_fingerprint": "24074658301ca699e2896557",
+      "formal_revision": "",
+      "generated_at": "2026-05-05T20:58:59",
+      "provider": "local_fallback",
+      "model": "",
+      "status": "fallback",
+      "fallback_reason": "llm_disabled_by_request",
+      "business_type": "无效内容",
+      "meaning": "这条内容看起来不像可入库的业务知识，可能只是测试、闲聊或噪音。",
+      "recommended_action": "discard",
+      "action_label": "建议废弃",
+      "action_reason": "内容缺少业务价值，继续保留会增加审核噪音。",
+      "formal_knowledge_comparison": {
+        "overlap_level": "none",
+        "matched_title": "",
+        "matched_category": "",
+        "matched_item_id": "",
+        "similarity": null,
+        "same_points": [],
+        "differences": [],
+        "conclusion": "暂未发现明显重合的正式知识。"
+      },
+      "what_to_check": [
+        "核对这条内容是否真实、完整、值得入库"
+      ],
+      "risk_notes": [
+        "没有识别到可沉淀的业务知识，自动从待处理提醒中降噪。"
+      ],
+      "confidence": "low",
+      "promotion_allowed": false,
+      "auto_triage": {
+        "recommended": true,
+        "reason_code": "no_business_value",
+        "reason": "没有识别到可沉淀的业务知识，自动从待处理提醒中降噪。"
+      }
+    },
+    "experience_review": {
+      "status": "auto_triaged",
+      "auto_triaged_at": "2026-05-05T20:58:59",
+      "auto_triage_action": "discard",
+      "auto_triage_reason": "没有识别到可沉淀的业务知识，自动从待处理提醒中降噪。",
+      "auto_triage_reason_code": "no_business_value"
+    },
+    "reviewed_by_user": false,
+    "formal_relation_cache": {
+      "relation": "novel",
+      "formal_match": {},
+      "recommended_action": "keep_as_rag_experience",
+      "formal_item_count": 25,
+      "formal_revision": "6bd5a24a67f53ddc015b4da7",
+      "evaluated_at": "2026-05-06T02:28:30"
+    }
+  },
+  {
+    "experience_id": "rag_exp_94f1529db8f4bccdf53c",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_wechat_private",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_c5856af8615ba83a7178.txt",
+    "category": "private",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "RAG经验：raw_wechat_private/private，摘要=[2026-05-05T20:58:59] self: 宝马320Li那台今天能到店试驾吗 CHEJIN_20260505_205853",
+    "question": "",
+    "reply_text": "[2026-05-05T20:58:59] self: 宝马320Li那台今天能到店试驾吗 CHEJIN_20260505_205853",
+    "evidence_excerpt": "[2026-05-05T20:58:59] self: 宝马320Li那台今天能到店试驾吗 CHEJIN_20260505_205853",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_6ecd946c70e558cc",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "original_source": {
+      "raw_batch_id": "raw_batch_c5856af8615ba83a7178",
+      "conversation_id": "conv_54a96e57c70563ab9c",
+      "conversation_type": "private",
+      "raw_message_ids": [
+        "raw_msg_f4d5bd387b3ad0e02f61"
+      ]
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-05T20:59:00"
+    },
+    "created_at": "2026-05-05T20:59:00",
+    "updated_at": "2026-05-06T02:28:30",
+    "quality": {
+      "score": 0.64,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_wechat_private",
+        "candidate_count": 0,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-06T02:28:30"
+    },
+    "ai_interpretation": {
+      "version": "rag_experience_interpretation_v3",
+      "source_fingerprint": "a0aeb41ce299434895f12f4a",
+      "content_fingerprint": "bfa1e9a922e7b785acb05fa4",
+      "formal_revision": "",
+      "generated_at": "2026-05-05T20:59:00",
+      "provider": "local_fallback",
+      "model": "",
+      "status": "fallback",
+      "fallback_reason": "llm_disabled_by_request",
+      "business_type": "无效内容",
+      "meaning": "这条内容看起来不像可入库的业务知识，可能只是测试、闲聊或噪音。",
+      "recommended_action": "discard",
+      "action_label": "建议废弃",
+      "action_reason": "内容缺少业务价值，继续保留会增加审核噪音。",
+      "formal_knowledge_comparison": {
+        "overlap_level": "none",
+        "matched_title": "",
+        "matched_category": "",
+        "matched_item_id": "",
+        "similarity": null,
+        "same_points": [],
+        "differences": [],
+        "conclusion": "暂未发现明显重合的正式知识。"
+      },
+      "what_to_check": [
+        "核对这条内容是否真实、完整、值得入库"
+      ],
+      "risk_notes": [
+        "没有识别到可沉淀的业务知识，自动从待处理提醒中降噪。"
+      ],
+      "confidence": "low",
+      "promotion_allowed": false,
+      "auto_triage": {
+        "recommended": true,
+        "reason_code": "no_business_value",
+        "reason": "没有识别到可沉淀的业务知识，自动从待处理提醒中降噪。"
+      }
+    },
+    "experience_review": {
+      "status": "auto_triaged",
+      "auto_triaged_at": "2026-05-05T20:59:00",
+      "auto_triage_action": "discard",
+      "auto_triage_reason": "没有识别到可沉淀的业务知识，自动从待处理提醒中降噪。",
+      "auto_triage_reason_code": "no_business_value"
+    },
+    "reviewed_by_user": false,
+    "formal_relation_cache": {
+      "relation": "novel",
+      "formal_match": {},
+      "recommended_action": "keep_as_rag_experience",
+      "formal_item_count": 25,
+      "formal_revision": "6bd5a24a67f53ddc015b4da7",
+      "evaluated_at": "2026-05-06T02:28:30"
+    }
+  },
+  {
+    "experience_id": "rag_exp_46d8b9e415415f1bf470",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_wechat_group",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_05c0063e689ee9eb9323.txt",
+    "category": "group",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "RAG经验：raw_wechat_group/group，摘要=[2026-05-01 16:00:00] 销售A: 商品资料：江苏车金记录员完整车源 CHEJIN_20260505_205853 测试批次：CHEJIN_20260505_205853…",
+    "question": "",
+    "reply_text": "[2026-05-01 16:00:00] 销售A: 商品资料：江苏车金记录员完整车源 CHEJIN_20260505_205853 测试批次：CHEJIN_20260505_205853 商品名称：2020款别克GL8 ES陆尊653T豪华型 型号：CHEJIN-REC-GL8-2020ES 商品类目：二手车/MPV 价格：17.60万 单位：台 库存：1 发货：南京门店可看车，商务客户试乘需人工确认 售后：车况以检测报告为准 [2026-05-01 16:01:00] 销售B: 政策规则：江苏车金记录员风控 CHEJIN_20260505_205853 测试批次：CHEJIN_20260505_205853 规则名称：保证无事故转人工 规则类型：contract 触发关键词：保证无事故,赔偿,CHEJIN_20260505_205853 答案：此类问题必须让销售人工按检测报告和合同回复。 [2026-05-01 16:02:00] 销售C: 边界噪音：CHEJIN_20260505_205853_NOISE 今天午饭吃什么，这不是车源也不是客服知识。",
+    "evidence_excerpt": "[2026-05-01 16:00:00] 销售A: 商品资料：江苏车金记录员完整车源 CHEJIN_20260505_205853 测试批次：CHEJIN_20260505_205853 商品名称：2020款别克GL8 ES陆尊653T豪华型 型号：CHEJIN-REC-GL8-2020ES 商品类目：二手车/MPV 价格：17.60万 单位：台 库存：1 发货：南京门店可看车，商务客户试乘需人工确认 售后：车况以检测报告为准 [2026-05-01 16:01:00] 销售B: 政策规则：江苏车金记录员风控 CHEJIN_20260505_205853 测试批次：CHEJIN_20260505_205853 规则名称：保证无事故转人工 规则类型：contract 触发关键词：保证无事故,赔偿,CHEJIN_20260505_205853 答案：此类问题必须让销售人工按检测报告和合同回复。 [2026-05-01 16:02:00] 销售C: 边界噪音：CHEJIN_20260505_205853_NOISE 今天午饭吃什么，这不是车源也不是客服知识。",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_ea95b32bcbd86f7c",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "original_source": {
+      "raw_batch_id": "raw_batch_05c0063e689ee9eb9323",
+      "conversation_id": "conv_8022f0948f611f15b4",
+      "conversation_type": "group",
+      "raw_message_ids": [
+        "raw_msg_3a1023003775efd1a760",
+        "raw_msg_9b3b1e05b6b20ace77bf",
+        "raw_msg_333ee5f0cb8de5e9fdc8"
+      ]
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-05T20:59:03"
+    },
+    "created_at": "2026-05-05T20:59:03",
+    "updated_at": "2026-05-06T02:28:30",
+    "quality": {
+      "score": 0.72,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_wechat_group",
+        "candidate_count": 0,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-06T02:28:30"
+    },
+    "ai_interpretation": {
+      "version": "rag_experience_interpretation_v3",
+      "source_fingerprint": "d89d2b7a7c36f7c8e0cfecc6",
+      "content_fingerprint": "a3785f7b6e4c3fc122a15ed7",
+      "formal_revision": "",
+      "generated_at": "2026-05-05T20:59:03",
+      "provider": "local_fallback",
+      "model": "",
+      "status": "fallback",
+      "fallback_reason": "llm_disabled_by_request",
+      "business_type": "商品资料",
+      "meaning": "系统从资料或聊天记录里识别到一条商品资料。",
+      "recommended_action": "discard",
+      "action_label": "建议废弃",
+      "action_reason": "内容缺少业务价值，继续保留会增加审核噪音。",
+      "formal_knowledge_comparison": {
+        "overlap_level": "none",
+        "matched_title": "",
+        "matched_category": "",
+        "matched_item_id": "",
+        "similarity": null,
+        "same_points": [],
+        "differences": [],
+        "conclusion": "暂未发现明显重合的正式知识。"
+      },
+      "what_to_check": [
+        "核对价格是否准确、是否仍有效",
+        "核对库存或在售状态",
+        "核对车况承诺是否有检测报告依据"
+      ],
+      "risk_notes": [
+        "车况承诺必须以检测报告或人工确认为准",
+        "这条经验来自微信聊天，不能当作商品价格、库存、车型资料的入库依据；商品资料只能走商品库或资料导入审核。"
+      ],
+      "confidence": "low",
+      "promotion_allowed": false,
+      "auto_triage": {
+        "recommended": true,
+        "reason_code": "observed_wechat_product_fact_not_authoritative",
+        "reason": "这条经验来自微信聊天，不能当作商品价格、库存、车型资料的入库依据；商品资料只能走商品库或资料导入审核。"
+      }
+    },
+    "experience_review": {
+      "status": "auto_triaged",
+      "auto_triaged_at": "2026-05-05T20:59:03",
+      "auto_triage_action": "discard",
+      "auto_triage_reason": "这条经验来自微信聊天，不能当作商品价格、库存、车型资料的入库依据；商品资料只能走商品库或资料导入审核。",
+      "auto_triage_reason_code": "observed_wechat_product_fact_not_authoritative"
+    },
+    "reviewed_by_user": false,
+    "formal_relation_cache": {
+      "relation": "novel",
+      "formal_match": {},
+      "recommended_action": "keep_as_rag_experience",
+      "formal_item_count": 25,
+      "formal_revision": "6bd5a24a67f53ddc015b4da7",
+      "evaluated_at": "2026-05-06T02:28:30"
+    }
+  },
+  {
+    "experience_id": "rag_exp_aafffb0dc1737cc4de86",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_wechat_file_transfer",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_675a6dbc1a483f91619e.txt",
+    "category": "file_transfer",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "RAG经验：raw_wechat_file_transfer/file_transfer，摘要=[2026-05-01 16:03:00] self: 聊天记录：江苏车金记录员话术 CHEJIN_20260505_205853 客户：想买新能源通勤，能看秦PLUS吗？ 客服：可以先看秦…",
+    "question": "",
+    "reply_text": "[2026-05-01 16:03:00] self: 聊天记录：江苏车金记录员话术 CHEJIN_20260505_205853 客户：想买新能源通勤，能看秦PLUS吗？ 客服：可以先看秦PLUS DM-i，低油耗适合通勤；但电池检测、当地迁入和金融方案都需要人工确认。",
+    "evidence_excerpt": "[2026-05-01 16:03:00] self: 聊天记录：江苏车金记录员话术 CHEJIN_20260505_205853 客户：想买新能源通勤，能看秦PLUS吗？ 客服：可以先看秦PLUS DM-i，低油耗适合通勤；但电池检测、当地迁入和金融方案都需要人工确认。",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_7214627dfed12da8",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "original_source": {
+      "raw_batch_id": "raw_batch_675a6dbc1a483f91619e",
+      "conversation_id": "conv_87036d2253c2c945ed",
+      "conversation_type": "file_transfer",
+      "raw_message_ids": [
+        "raw_msg_d54183121f12d8fa573e"
+      ]
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-05T20:59:04"
+    },
+    "created_at": "2026-05-05T20:59:04",
+    "updated_at": "2026-05-06T02:28:29",
+    "quality": {
+      "score": 0.72,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_wechat_file_transfer",
+        "candidate_count": 0,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-06T02:28:29"
+    },
+    "ai_interpretation": {
+      "version": "rag_experience_interpretation_v3",
+      "source_fingerprint": "1140c520e1ff73f01b87f625",
+      "content_fingerprint": "551d48fefa759f2da072fc24",
+      "formal_revision": "",
+      "generated_at": "2026-05-05T20:59:04",
+      "provider": "local_fallback",
+      "model": "",
+      "status": "fallback",
+      "fallback_reason": "llm_disabled_by_request",
+      "business_type": "客服话术",
+      "meaning": "系统从资料或聊天记录里识别到一条客服话术。",
+      "recommended_action": "discard",
+      "action_label": "建议废弃",
+      "action_reason": "内容缺少业务价值，继续保留会增加审核噪音。",
+      "formal_knowledge_comparison": {
+        "overlap_level": "none",
+        "matched_title": "",
+        "matched_category": "",
+        "matched_item_id": "",
+        "similarity": null,
+        "same_points": [],
+        "differences": [],
+        "conclusion": "暂未发现明显重合的正式知识。"
+      },
+      "what_to_check": [
+        "核对金融方案是否必须转人工"
+      ],
+      "risk_notes": [
+        "这条AI经验带有具体客户、人称、转人工场景或金融边界，不能直接升级为正式话术候选；请保留在经验层，或人工改写成通用边界规则后再提交。"
+      ],
+      "confidence": "low",
+      "promotion_allowed": false,
+      "auto_triage": {
+        "recommended": true,
+        "reason_code": "observed_wechat_chat_experience_not_generalized",
+        "reason": "这条AI经验带有具体客户、人称、转人工场景或金融边界，不能直接升级为正式话术候选；请保留在经验层，或人工改写成通用边界规则后再提交。"
+      }
+    },
+    "experience_review": {
+      "status": "auto_triaged",
+      "auto_triaged_at": "2026-05-05T20:59:04",
+      "auto_triage_action": "discard",
+      "auto_triage_reason": "这条AI经验带有具体客户、人称、转人工场景或金融边界，不能直接升级为正式话术候选；请保留在经验层，或人工改写成通用边界规则后再提交。",
+      "auto_triage_reason_code": "observed_wechat_chat_experience_not_generalized"
+    },
+    "reviewed_by_user": false,
+    "formal_relation_cache": {
+      "relation": "novel",
+      "formal_match": {},
+      "recommended_action": "keep_as_rag_experience",
+      "formal_item_count": 25,
+      "formal_revision": "6bd5a24a67f53ddc015b4da7",
+      "evaluated_at": "2026-05-06T02:28:29"
+    }
+  },
+  {
+    "experience_id": "rag_exp_a14287c37c6aac2463a5",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "discarded",
+    "source": "intake",
+    "source_type": "raw_upload",
+    "source_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\products\\upload_9c73fa073ebbe091_chejin_vehicles_CHEJIN_20260505_212909.txt",
+    "category": "products",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "RAG经验：raw_upload/products，摘要=商品资料：江苏车金二手车车源 CHEJIN_20260505_212909 测试批次：CHEJIN_20260505_212909 商品名称：2021款丰田凯美瑞2.0G豪华版 型号：CHE…",
+    "question": "",
+    "reply_text": "商品资料：江苏车金二手车车源 CHEJIN_20260505_212909 测试批次：CHEJIN_20260505_212909 商品名称：2021款丰田凯美瑞2.0G豪华版 型号：CHEJIN-CAMRY-2021G 商品类目：二手车/中级轿车 别名关键词：凯美瑞,丰田凯美瑞,8万预算,自动挡,省油,通勤 规格参数：2021年上牌，表显4.8万公里，2.0L自动挡，南京现车，一手车，支持第三方检测。 价格：8.98万 单位：台 库存：1 发货：南京门店可看车，异地客户需人工确认物流与提档。 售后：非重大事故、非水泡、非火烧以合同和检测报告为准。 标准回复：这台凯美瑞适合8到10万预算、家用通勤和省油需求，建议先确认到店时间、是否置换、是否贷款。 商品资料：江苏车金二手车车源 CHEJIN_20260505_212909 测试批次：CHEJIN_20260505_212909 商品名称：2020款本田思域220TURBO劲动版 型号：CHEJIN-CIVIC-2020T 商品类目：二手车/紧凑型轿车 别名关键词：思域,本田思域,年轻客户,按揭,首付三成 规格参数：2020年上牌，表显6.1万公里，1.5T自动挡，外观轻微补漆，支持按揭初审。 价格：7.58万 单位：台 库存：1 发货：门店看车后可协助过户，金融结果以资方审批为准。 售后：车况以检测报告和合同约定为准，不承诺贷款必过。 商品资料：江苏车金二手车车源 CHEJIN_20260505_212909 测试批次：CHEJIN_20260505_212909 商品名称：2019款宝马320Li M运动套装 型号：CHEJIN-BMW320-2019M 商品类目：二手车/豪华轿车 别名关键词：宝马320,宝马3系,320Li,试驾,精品车况 规格参数：2019年上牌，表显5.6万公里，2.0T自动挡，一手车源，支持到店试驾。 价格：12.80万 单位：台 库存：1 发货：高意向试驾需转人工确认门店和时间。 售后：精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。 商品资料：江苏车金二手车车源 CHEJIN_20260505_212909 测试批次：CHEJIN_20260505_212909 商品名称：2022款比亚迪秦PLUS DM-i 55KM 型号：CHEJIN-QINPLUS-2022DMI 商品类目：二手车/新能源轿车 别名关键词：秦PLUS,比亚迪秦,新能源,绿牌,混动,网约车 规格参数：2022年上牌，表显3.2万公里，插混，低油耗，适合通勤和网约车。 价格：8.68万 单位：台 库存：1 发货：新能源车需人工确认电池检测和当地迁入政策。 售后：电池和三电政策以厂家与检测报告为准。",
+    "evidence_excerpt": "商品资料：江苏车金二手车车源 CHEJIN_20260505_212909 测试批次：CHEJIN_20260505_212909 商品名称：2021款丰田凯美瑞2.0G豪华版 型号：CHEJIN-CAMRY-2021G 商品类目：二手车/中级轿车 别名关键词：凯美瑞,丰田凯美瑞,8万预算,自动挡,省油,通勤 规格参数：2021年上牌，表显4.8万公里，2.0L自动挡，南京现车，一手车，支持第三方检测。 价格：8.98万 单位：台 库存：1 发货：南京门店可看车，异地客户需人工确认物流与提档。 售后：非重大事故、非水泡、非火烧以合同和检测报告为准。 标准回复：这台凯美瑞适合8到10万预算、家用通勤和省油需求，建议先确认到店时间、是否置换、是否贷款。 商品资料：江苏车金二手车车源 CHEJIN_20260505_212909 测试批次：CHEJIN_20260505_212909 商品名称：2020款本田思域220TURBO劲动版 型号：CHEJIN-CIVIC-2020T 商品类目：二手车/紧凑型轿车 别名关键词：思域,本田思域,年轻客户,按揭,首付三成 规格参数：2020年上牌，表显6.1万公里，1.5T自动挡，外观轻微补漆，支持按揭初审。 价格：7.58万 单位：台 库存：1 发货：门店看车后可协助过户，金融结果以资方审批为准。 售后：车况以检测报告和合同约定为准，不承诺贷款必过。 商品资料：江苏车金二手车车源 CHEJIN_20260505_212909 测试批次：CHEJIN_20260505_212909 商品名称：2019款宝马320Li M运动套装 型号：CHEJIN-BMW320-2019M 商品类目：二手车/豪华轿车 别名关键词：宝马320,宝马3系,320Li,试驾,精品车况 规格参数：2019年上牌，表显5.6万公里，2.0T自动挡，一手车源，支持到店试驾。 价格：12.80万 单位：台 库存：1 发货：高意向试驾需转人工确认门店和时间。 售后：精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。 商品资料：江苏车金二手车车源 CHEJIN_20260505_212909 测试批次：CHEJIN_20260505_212909 商品名称：2022款比亚迪秦PLUS DM-i 55KM 型号：CHEJIN-QINPLUS-2022DMI 商品类目：二手车/新能源轿车 别名关键词：秦PLUS,比亚迪秦,新能源,绿牌,混动,网约车 规格参数：2022年上牌，表显3.2万公里，插混，低油耗，适合通勤和网约车。 价格：8.68万 单位：台 库存：1 发货：新能源车需人工确认电池检测和当地迁入政策。 售后：电池和三电政策以厂家与检测报告为准。",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_347962136644ec6b",
+      "chunk_count": 2,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "original_source": {
+      "upload_id": "upload_9c73fa073ebbe091",
+      "file_name": "upload_9c73fa073ebbe091_chejin_vehicles_CHEJIN_20260505_212909.txt",
+      "kind": "products"
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-05T21:29:10"
+    },
+    "created_at": "2026-05-05T21:29:10",
+    "updated_at": "2026-05-06T02:44:51",
+    "quality": {
+      "score": 0.74,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_upload",
+        "candidate_count": 0,
+        "rag_ingest_ok": true,
+        "chunk_count": 2,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-06T02:44:51"
+    },
+    "ai_interpretation": {
+      "version": "rag_experience_interpretation_v3",
+      "source_fingerprint": "65b0750f619a1a44acadf029",
+      "content_fingerprint": "f14dc0d76847c6f8ea33c3b7",
+      "formal_revision": "",
+      "generated_at": "2026-05-05T21:29:11",
+      "provider": "local_fallback",
+      "model": "",
+      "status": "fallback",
+      "fallback_reason": "llm_disabled_by_request",
+      "business_type": "商品资料",
+      "meaning": "系统从资料或聊天记录里识别到一条商品资料。",
+      "recommended_action": "manual_review",
+      "action_label": "建议人工检查",
+      "action_reason": "内容可能涉及承诺、风险或不完整信息，需要人工先看。",
+      "formal_knowledge_comparison": {
+        "overlap_level": "none",
+        "matched_title": "",
+        "matched_category": "",
+        "matched_item_id": "",
+        "similarity": null,
+        "same_points": [],
+        "differences": [],
+        "conclusion": "暂未发现明显重合的正式知识。"
+      },
+      "what_to_check": [
+        "核对价格是否准确、是否仍有效",
+        "核对库存或在售状态",
+        "核对金融方案是否必须转人工",
+        "核对车况承诺是否有检测报告依据"
+      ],
+      "risk_notes": [
+        "金融和贷款相关内容不要自动承诺",
+        "车况承诺必须以检测报告或人工确认为准"
+      ],
+      "confidence": "low",
+      "promotion_allowed": false,
+      "auto_triage": {
+        "recommended": false,
+        "reason_code": "",
+        "reason": "内容可能涉及承诺、风险或不完整信息，需要人工先看。"
+      }
+    },
+    "formal_relation_cache": {
+      "relation": "novel",
+      "formal_match": {},
+      "recommended_action": "keep_as_rag_experience",
+      "formal_item_count": 25,
+      "formal_revision": "6bd5a24a67f53ddc015b4da7",
+      "evaluated_at": "2026-05-06T02:28:29"
+    },
+    "discarded_reason": "discarded in admin",
+    "discard_reason": "discarded in admin",
+    "discarded_at": "2026-05-06T02:44:51"
+  },
+  {
+    "experience_id": "rag_exp_fdc653589ff43305ded7",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "discarded",
+    "source": "intake",
+    "source_type": "raw_upload",
+    "source_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\policies\\upload_6dbc7a5b7a1bcb95_chejin_policies_CHEJIN_20260505_212909.txt",
+    "category": "policies",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "RAG经验：raw_upload/policies，摘要=政策规则：江苏车金高意向转人工 CHEJIN_20260505_212909 测试批次：CHEJIN_20260505_212909 规则名称：试驾到店与订金转人工 规则类型：manual_…",
+    "question": "",
+    "reply_text": "政策规则：江苏车金高意向转人工 CHEJIN_20260505_212909 测试批次：CHEJIN_20260505_212909 规则名称：试驾到店与订金转人工 规则类型：manual_required 触发关键词：试驾,到店,订金,定金,今天看车,明天看车,销售联系,企业微信群 答案：客户明确要求试驾、到店、订金、销售联系时，AI只做确认和记录，必须转人工或企业微信群承接，不能自行承诺车源保留和最终价格。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high 政策规则：江苏车金金融与车况合规 CHEJIN_20260505_212909 测试批次：CHEJIN_20260505_212909 规则名称：金融审批与车况承诺边界 规则类型：contract 触发关键词：贷款,按揭,首付,月供,征信,保证无事故,水泡,火烧,赔偿,退款 答案：金融方案只能做初步说明，审批结果、利率、月供以资方审核为准；车况承诺必须以检测报告和合同为准，涉及赔偿、退款、纠纷必须转人工。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high 政策规则：江苏车金沉睡客户唤醒 CHEJIN_20260505_212909 测试批次：CHEJIN_20260505_212909 规则名称：沉睡客户递减唤醒策略 规则类型：other 触发关键词：沉睡客户,唤醒,老线索,新车源,还在看车 答案：首次唤醒只做轻提醒；3天未回复推同预算新车源；7天未回复询问需求是否变化；客户回复后停止自动唤醒并转入正常接待。 允许自动回复：true 必须转人工：false 风险等级：normal",
+    "evidence_excerpt": "政策规则：江苏车金高意向转人工 CHEJIN_20260505_212909 测试批次：CHEJIN_20260505_212909 规则名称：试驾到店与订金转人工 规则类型：manual_required 触发关键词：试驾,到店,订金,定金,今天看车,明天看车,销售联系,企业微信群 答案：客户明确要求试驾、到店、订金、销售联系时，AI只做确认和记录，必须转人工或企业微信群承接，不能自行承诺车源保留和最终价格。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high 政策规则：江苏车金金融与车况合规 CHEJIN_20260505_212909 测试批次：CHEJIN_20260505_212909 规则名称：金融审批与车况承诺边界 规则类型：contract 触发关键词：贷款,按揭,首付,月供,征信,保证无事故,水泡,火烧,赔偿,退款 答案：金融方案只能做初步说明，审批结果、利率、月供以资方审核为准；车况承诺必须以检测报告和合同为准，涉及赔偿、退款、纠纷必须转人工。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high 政策规则：江苏车金沉睡客户唤醒 CHEJIN_20260505_212909 测试批次：CHEJIN_20260505_212909 规则名称：沉睡客户递减唤醒策略 规则类型：other 触发关键词：沉睡客户,唤醒,老线索,新车源,还在看车 答案：首次唤醒只做轻提醒；3天未回复推同预算新车源；7天未回复询问需求是否变化；客户回复后停止自动唤醒并转入正常接待。 允许自动回复：true 必须转人工：false 风险等级：normal",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_5b1f58592f389d80",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "original_source": {
+      "upload_id": "upload_6dbc7a5b7a1bcb95",
+      "file_name": "upload_6dbc7a5b7a1bcb95_chejin_policies_CHEJIN_20260505_212909.txt",
+      "kind": "policies"
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-05T21:29:11"
+    },
+    "created_at": "2026-05-05T21:29:11",
+    "updated_at": "2026-05-06T02:44:23",
+    "quality": {
+      "score": 0.72,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_upload",
+        "candidate_count": 0,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-06T02:44:23"
+    },
+    "ai_interpretation": {
+      "version": "rag_experience_interpretation_v3",
+      "source_fingerprint": "b4d66361b69ab2b54c2b9f0e",
+      "content_fingerprint": "13b62cfeac26c6291ebc2245",
+      "formal_revision": "",
+      "generated_at": "2026-05-05T21:29:12",
+      "provider": "local_fallback",
+      "model": "",
+      "status": "fallback",
+      "fallback_reason": "llm_disabled_by_request",
+      "business_type": "商品资料",
+      "meaning": "系统从资料或聊天记录里识别到一条商品资料。",
+      "recommended_action": "manual_review",
+      "action_label": "建议人工检查",
+      "action_reason": "内容可能涉及承诺、风险或不完整信息，需要人工先看。",
+      "formal_knowledge_comparison": {
+        "overlap_level": "none",
+        "matched_title": "",
+        "matched_category": "",
+        "matched_item_id": "",
+        "similarity": null,
+        "same_points": [],
+        "differences": [],
+        "conclusion": "暂未发现明显重合的正式知识。"
+      },
+      "what_to_check": [
+        "核对价格是否准确、是否仍有效",
+        "核对金融方案是否必须转人工",
+        "核对车况承诺是否有检测报告依据"
+      ],
+      "risk_notes": [
+        "金融和贷款相关内容不要自动承诺",
+        "车况承诺必须以检测报告或人工确认为准"
+      ],
+      "confidence": "low",
+      "promotion_allowed": false,
+      "auto_triage": {
+        "recommended": false,
+        "reason_code": "",
+        "reason": "内容可能涉及承诺、风险或不完整信息，需要人工先看。"
+      }
+    },
+    "formal_relation_cache": {
+      "relation": "supports_formal",
+      "formal_match": {
+        "category_id": "chats",
+        "item_id": "ai-ai",
+        "product_id": "",
+        "title": "这条经验是江苏车金公司的客服政策规则，规定了什么时候必须转人工、哪些事情AI不能自己承诺、怎么唤醒老客户等，用来防止AI乱答应客户要求，避免客诉和风险。",
+        "similarity": 0.604,
+        "excerpt": "{\"data\": {\"additional_details\": {\"rag_experience_id\": \"rag_exp_816a8be10cee4fd1f666\", \"source_chunk_id\": null, \"source_id\": null, \"source_text\": \"\"}, \"customer_message\": \"这条经验是江苏车金公司的客服政策规则，规定了什么时候必须转人工、哪些事情AI不能自己承诺、怎么唤醒老客户等，用来防止AI乱答应客户要求，避免客诉和风险。\", \"intent_tags\": [\"rag_experience\"], \"service_reply\": \"true 风险等级：high 政策规则：江苏车金金融与车况合规 CHEJIN_20260505_205853 测试批次：CHEJIN_20260505_205853 规则名称：金融审批与车况承诺边界 规则类型：contract 触发关键词：贷款,按揭,首付,月供,征信,保证无事故,水泡,火烧,赔偿,退款 答案：金融方案只能做初步说明，审批结果、利率、月供以资方审核为准；车况承诺必须以检测报告和合同为准，涉及赔偿、退款、纠纷必须转人工。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high 政策规则：江苏车金沉睡客户唤醒 CHEJIN_20260505_205853 测试批次：CHEJIN_20260505_205853 规则名称：沉睡客户递减唤醒策略 规则类型：other 触发关键词：沉睡客户,唤醒,老线索,新车源,还在看车 答案：首次唤醒只做轻提醒；3天未回复推同预算新车源；7天未回复询问需求是否变化；客户回复后停止自动唤醒并转入正常接待。 允许自动回复：true 必须转人工：false 风险等级：normal\", \"tone_tags\": [\"rag_reference\"]}, \"id\": \"ai-ai\", \"runtime\": {\"allow_auto_reply\": true, \"requires_handoff\": false…"
+      },
+      "recommended_action": "keep_as_supporting_expression",
+      "formal_item_count": 25,
+      "formal_revision": "6bd5a24a67f53ddc015b4da7",
+      "evaluated_at": "2026-05-06T02:28:29"
+    },
+    "discarded_reason": "discarded in admin",
+    "discard_reason": "discarded in admin",
+    "discarded_at": "2026-05-06T02:44:23"
+  },
+  {
+    "experience_id": "rag_exp_a298b6f4a41f3c824d5b",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "discarded",
+    "source": "intake",
+    "source_type": "raw_upload",
+    "source_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\chats\\upload_de0404b46df1b6c0_chejin_chats_CHEJIN_20260505_212909.txt",
+    "category": "chats",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "RAG经验：raw_upload/chats，摘要=聊天记录：江苏车金预算推荐话术 CHEJIN_20260505_212909 测试批次：CHEJIN_20260505_212909 客户：我从抖音直播来的，8万左右想买自动挡省油代步车，有…",
+    "question": "",
+    "reply_text": "聊天记录：江苏车金预算推荐话术 CHEJIN_20260505_212909 测试批次：CHEJIN_20260505_212909 客户：我从抖音直播来的，8万左右想买自动挡省油代步车，有什么推荐？ 客服：您这个预算可以先看凯美瑞、思域和秦PLUS DM-i。凯美瑞偏家用稳、省心；思域更年轻；秦PLUS更省油。您是在南京看车吗？是否考虑贷款或置换？ 意图标签：预算推荐,车源推荐,抖音线索 聊天记录：江苏车金置换话术 CHEJIN_20260505_212909 测试批次：CHEJIN_20260505_212909 客户：我有一台老朗逸想置换。 客服：可以的，麻烦补充上牌年份、公里数、车况、所在城市和是否有贷款，我先帮您记录，评估价需要人工复核。 意图标签：置换,线索采集 聊天记录：江苏车金睡客唤醒话术 CHEJIN_20260505_212909 测试批次：CHEJIN_20260505_212909 客户：之前那台没买，现在还有新车源吗？ 客服：有的，我先按您之前的预算和用途筛一遍；如果预算或车型变了，直接告诉我，我会按新需求推荐更合适的车。 意图标签：沉睡客户,唤醒,二次转化",
+    "evidence_excerpt": "聊天记录：江苏车金预算推荐话术 CHEJIN_20260505_212909 测试批次：CHEJIN_20260505_212909 客户：我从抖音直播来的，8万左右想买自动挡省油代步车，有什么推荐？ 客服：您这个预算可以先看凯美瑞、思域和秦PLUS DM-i。凯美瑞偏家用稳、省心；思域更年轻；秦PLUS更省油。您是在南京看车吗？是否考虑贷款或置换？ 意图标签：预算推荐,车源推荐,抖音线索 聊天记录：江苏车金置换话术 CHEJIN_20260505_212909 测试批次：CHEJIN_20260505_212909 客户：我有一台老朗逸想置换。 客服：可以的，麻烦补充上牌年份、公里数、车况、所在城市和是否有贷款，我先帮您记录，评估价需要人工复核。 意图标签：置换,线索采集 聊天记录：江苏车金睡客唤醒话术 CHEJIN_20260505_212909 测试批次：CHEJIN_20260505_212909 客户：之前那台没买，现在还有新车源吗？ 客服：有的，我先按您之前的预算和用途筛一遍；如果预算或车型变了，直接告诉我，我会按新需求推荐更合适的车。 意图标签：沉睡客户,唤醒,二次转化",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_e1598c20f1ba693d",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "original_source": {
+      "upload_id": "upload_de0404b46df1b6c0",
+      "file_name": "upload_de0404b46df1b6c0_chejin_chats_CHEJIN_20260505_212909.txt",
+      "kind": "chats"
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-05T21:29:12"
+    },
+    "created_at": "2026-05-05T21:29:12",
+    "updated_at": "2026-05-06T02:44:11",
+    "quality": {
+      "score": 0.72,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_upload",
+        "candidate_count": 0,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-06T02:44:11"
+    },
+    "ai_interpretation": {
+      "version": "rag_experience_interpretation_v3",
+      "source_fingerprint": "ac338de9554359d5d6f4b064",
+      "content_fingerprint": "71d5b500a4cdde9673a3040a",
+      "formal_revision": "",
+      "generated_at": "2026-05-05T21:29:13",
+      "provider": "local_fallback",
+      "model": "",
+      "status": "fallback",
+      "fallback_reason": "llm_disabled_by_request",
+      "business_type": "商品资料",
+      "meaning": "系统从资料或聊天记录里识别到一条商品资料。",
+      "recommended_action": "promote_to_pending",
+      "action_label": "建议升级为待确认知识",
+      "action_reason": "内容看起来可以整理成结构化知识，但仍需要人工确认字段。",
+      "formal_knowledge_comparison": {
+        "overlap_level": "none",
+        "matched_title": "",
+        "matched_category": "",
+        "matched_item_id": "",
+        "similarity": null,
+        "same_points": [],
+        "differences": [],
+        "conclusion": "暂未发现明显重合的正式知识。"
+      },
+      "what_to_check": [
+        "核对金融方案是否必须转人工",
+        "核对车况承诺是否有检测报告依据"
+      ],
+      "risk_notes": [],
+      "confidence": "low",
+      "promotion_allowed": true,
+      "auto_triage": {
+        "recommended": false,
+        "reason_code": "",
+        "reason": "内容看起来可以整理成结构化知识，但仍需要人工确认字段。"
+      }
+    },
+    "formal_relation_cache": {
+      "relation": "novel",
+      "formal_match": {},
+      "recommended_action": "keep_as_rag_experience",
+      "formal_item_count": 25,
+      "formal_revision": "6bd5a24a67f53ddc015b4da7",
+      "evaluated_at": "2026-05-06T02:28:29"
+    },
+    "discarded_reason": "discarded in admin",
+    "discard_reason": "discarded in admin",
+    "discarded_at": "2026-05-06T02:44:11"
+  },
+  {
+    "experience_id": "rag_exp_33564e4b4b1e27ea8c49",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_wechat_private",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_ce92cecc7fda7ad03ac6.txt",
+    "category": "private",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "RAG经验：raw_wechat_private/private，摘要=[2026-05-05T21:29:14] self: 8万预算，自动挡省油，通勤代步 CHEJIN_20260505_212909",
+    "question": "",
+    "reply_text": "[2026-05-05T21:29:14] self: 8万预算，自动挡省油，通勤代步 CHEJIN_20260505_212909",
+    "evidence_excerpt": "[2026-05-05T21:29:14] self: 8万预算，自动挡省油，通勤代步 CHEJIN_20260505_212909",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_b9232197be32a31e",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "original_source": {
+      "raw_batch_id": "raw_batch_ce92cecc7fda7ad03ac6",
+      "conversation_id": "conv_54a96e57c70563ab9c",
+      "conversation_type": "private",
+      "raw_message_ids": [
+        "raw_msg_ad87dc0ec1961479ed66"
+      ]
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-05T21:29:14"
+    },
+    "created_at": "2026-05-05T21:29:14",
+    "updated_at": "2026-05-06T02:28:29",
+    "quality": {
+      "score": 0.64,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_wechat_private",
+        "candidate_count": 0,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-06T02:28:29"
+    },
+    "ai_interpretation": {
+      "version": "rag_experience_interpretation_v3",
+      "source_fingerprint": "c575f99ebb73f86868d789de",
+      "content_fingerprint": "78948fa526aaf65943701049",
+      "formal_revision": "",
+      "generated_at": "2026-05-05T21:29:15",
+      "provider": "local_fallback",
+      "model": "",
+      "status": "fallback",
+      "fallback_reason": "llm_disabled_by_request",
+      "business_type": "无效内容",
+      "meaning": "这条内容看起来不像可入库的业务知识，可能只是测试、闲聊或噪音。",
+      "recommended_action": "discard",
+      "action_label": "建议废弃",
+      "action_reason": "内容缺少业务价值，继续保留会增加审核噪音。",
+      "formal_knowledge_comparison": {
+        "overlap_level": "none",
+        "matched_title": "",
+        "matched_category": "",
+        "matched_item_id": "",
+        "similarity": null,
+        "same_points": [],
+        "differences": [],
+        "conclusion": "暂未发现明显重合的正式知识。"
+      },
+      "what_to_check": [
+        "核对这条内容是否真实、完整、值得入库"
+      ],
+      "risk_notes": [
+        "没有识别到可沉淀的业务知识，自动从待处理提醒中降噪。"
+      ],
+      "confidence": "low",
+      "promotion_allowed": false,
+      "auto_triage": {
+        "recommended": true,
+        "reason_code": "no_business_value",
+        "reason": "没有识别到可沉淀的业务知识，自动从待处理提醒中降噪。"
+      }
+    },
+    "experience_review": {
+      "status": "auto_triaged",
+      "auto_triaged_at": "2026-05-05T21:29:15",
+      "auto_triage_action": "discard",
+      "auto_triage_reason": "没有识别到可沉淀的业务知识，自动从待处理提醒中降噪。",
+      "auto_triage_reason_code": "no_business_value"
+    },
+    "reviewed_by_user": false,
+    "formal_relation_cache": {
+      "relation": "novel",
+      "formal_match": {},
+      "recommended_action": "keep_as_rag_experience",
+      "formal_item_count": 25,
+      "formal_revision": "6bd5a24a67f53ddc015b4da7",
+      "evaluated_at": "2026-05-06T02:28:29"
+    }
+  },
+  {
+    "experience_id": "rag_exp_b71d0b889cd0d3f7fd98",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_wechat_private",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_ca8272cc421683a9d6db.txt",
+    "category": "private",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "RAG经验：raw_wechat_private/private，摘要=[2026-05-05T21:29:15] self: 宝马320Li那台今天能到店试驾吗 CHEJIN_20260505_212909",
+    "question": "",
+    "reply_text": "[2026-05-05T21:29:15] self: 宝马320Li那台今天能到店试驾吗 CHEJIN_20260505_212909",
+    "evidence_excerpt": "[2026-05-05T21:29:15] self: 宝马320Li那台今天能到店试驾吗 CHEJIN_20260505_212909",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_500bc0e3b6ad53ab",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "original_source": {
+      "raw_batch_id": "raw_batch_ca8272cc421683a9d6db",
+      "conversation_id": "conv_54a96e57c70563ab9c",
+      "conversation_type": "private",
+      "raw_message_ids": [
+        "raw_msg_a14db52cf1211a8c8577"
+      ]
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-05T21:29:16"
+    },
+    "created_at": "2026-05-05T21:29:16",
+    "updated_at": "2026-05-06T02:28:29",
+    "quality": {
+      "score": 0.64,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_wechat_private",
+        "candidate_count": 0,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-06T02:28:29"
+    },
+    "ai_interpretation": {
+      "version": "rag_experience_interpretation_v3",
+      "source_fingerprint": "0fdb9fd27f317684d35783e5",
+      "content_fingerprint": "ed77382be310307e3fef92ea",
+      "formal_revision": "",
+      "generated_at": "2026-05-05T21:29:16",
+      "provider": "local_fallback",
+      "model": "",
+      "status": "fallback",
+      "fallback_reason": "llm_disabled_by_request",
+      "business_type": "无效内容",
+      "meaning": "这条内容看起来不像可入库的业务知识，可能只是测试、闲聊或噪音。",
+      "recommended_action": "discard",
+      "action_label": "建议废弃",
+      "action_reason": "内容缺少业务价值，继续保留会增加审核噪音。",
+      "formal_knowledge_comparison": {
+        "overlap_level": "none",
+        "matched_title": "",
+        "matched_category": "",
+        "matched_item_id": "",
+        "similarity": null,
+        "same_points": [],
+        "differences": [],
+        "conclusion": "暂未发现明显重合的正式知识。"
+      },
+      "what_to_check": [
+        "核对这条内容是否真实、完整、值得入库"
+      ],
+      "risk_notes": [
+        "没有识别到可沉淀的业务知识，自动从待处理提醒中降噪。"
+      ],
+      "confidence": "low",
+      "promotion_allowed": false,
+      "auto_triage": {
+        "recommended": true,
+        "reason_code": "no_business_value",
+        "reason": "没有识别到可沉淀的业务知识，自动从待处理提醒中降噪。"
+      }
+    },
+    "experience_review": {
+      "status": "auto_triaged",
+      "auto_triaged_at": "2026-05-05T21:29:16",
+      "auto_triage_action": "discard",
+      "auto_triage_reason": "没有识别到可沉淀的业务知识，自动从待处理提醒中降噪。",
+      "auto_triage_reason_code": "no_business_value"
+    },
+    "reviewed_by_user": false,
+    "formal_relation_cache": {
+      "relation": "novel",
+      "formal_match": {},
+      "recommended_action": "keep_as_rag_experience",
+      "formal_item_count": 25,
+      "formal_revision": "6bd5a24a67f53ddc015b4da7",
+      "evaluated_at": "2026-05-06T02:28:29"
+    }
+  },
+  {
+    "experience_id": "rag_exp_886db4492a5895521947",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_wechat_group",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_cce0d6384d5e7a128183.txt",
+    "category": "group",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "RAG经验：raw_wechat_group/group，摘要=[2026-05-01 16:00:00] 销售A: 商品资料：江苏车金记录员完整车源 CHEJIN_20260505_212909 测试批次：CHEJIN_20260505_212909…",
+    "question": "",
+    "reply_text": "[2026-05-01 16:00:00] 销售A: 商品资料：江苏车金记录员完整车源 CHEJIN_20260505_212909 测试批次：CHEJIN_20260505_212909 商品名称：2020款别克GL8 ES陆尊653T豪华型 型号：CHEJIN-REC-GL8-2020ES 商品类目：二手车/MPV 价格：17.60万 单位：台 库存：1 发货：南京门店可看车，商务客户试乘需人工确认 售后：车况以检测报告为准 [2026-05-01 16:01:00] 销售B: 政策规则：江苏车金记录员风控 CHEJIN_20260505_212909 测试批次：CHEJIN_20260505_212909 规则名称：保证无事故转人工 规则类型：contract 触发关键词：保证无事故,赔偿,CHEJIN_20260505_212909 答案：此类问题必须让销售人工按检测报告和合同回复。 [2026-05-01 16:02:00] 销售C: 边界噪音：CHEJIN_20260505_212909_NOISE 今天午饭吃什么，这不是车源也不是客服知识。",
+    "evidence_excerpt": "[2026-05-01 16:00:00] 销售A: 商品资料：江苏车金记录员完整车源 CHEJIN_20260505_212909 测试批次：CHEJIN_20260505_212909 商品名称：2020款别克GL8 ES陆尊653T豪华型 型号：CHEJIN-REC-GL8-2020ES 商品类目：二手车/MPV 价格：17.60万 单位：台 库存：1 发货：南京门店可看车，商务客户试乘需人工确认 售后：车况以检测报告为准 [2026-05-01 16:01:00] 销售B: 政策规则：江苏车金记录员风控 CHEJIN_20260505_212909 测试批次：CHEJIN_20260505_212909 规则名称：保证无事故转人工 规则类型：contract 触发关键词：保证无事故,赔偿,CHEJIN_20260505_212909 答案：此类问题必须让销售人工按检测报告和合同回复。 [2026-05-01 16:02:00] 销售C: 边界噪音：CHEJIN_20260505_212909_NOISE 今天午饭吃什么，这不是车源也不是客服知识。",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_d5ace951155d735c",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "original_source": {
+      "raw_batch_id": "raw_batch_cce0d6384d5e7a128183",
+      "conversation_id": "conv_8022f0948f611f15b4",
+      "conversation_type": "group",
+      "raw_message_ids": [
+        "raw_msg_3f582c6c541d18689e71",
+        "raw_msg_ff3ab08981c6e86bd178",
+        "raw_msg_234aab085416fc8a7379"
+      ]
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-05T21:29:19"
+    },
+    "created_at": "2026-05-05T21:29:19",
+    "updated_at": "2026-05-06T02:28:29",
+    "quality": {
+      "score": 0.72,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_wechat_group",
+        "candidate_count": 0,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-06T02:28:29"
+    },
+    "ai_interpretation": {
+      "version": "rag_experience_interpretation_v3",
+      "source_fingerprint": "4a703ea26e6a05360ea474a1",
+      "content_fingerprint": "5a0eb71129e1550e9c374f9c",
+      "formal_revision": "",
+      "generated_at": "2026-05-05T21:29:19",
+      "provider": "local_fallback",
+      "model": "",
+      "status": "fallback",
+      "fallback_reason": "llm_disabled_by_request",
+      "business_type": "商品资料",
+      "meaning": "系统从资料或聊天记录里识别到一条商品资料。",
+      "recommended_action": "discard",
+      "action_label": "建议废弃",
+      "action_reason": "内容缺少业务价值，继续保留会增加审核噪音。",
+      "formal_knowledge_comparison": {
+        "overlap_level": "none",
+        "matched_title": "",
+        "matched_category": "",
+        "matched_item_id": "",
+        "similarity": null,
+        "same_points": [],
+        "differences": [],
+        "conclusion": "暂未发现明显重合的正式知识。"
+      },
+      "what_to_check": [
+        "核对价格是否准确、是否仍有效",
+        "核对库存或在售状态",
+        "核对车况承诺是否有检测报告依据"
+      ],
+      "risk_notes": [
+        "车况承诺必须以检测报告或人工确认为准",
+        "这条经验来自微信聊天，不能当作商品价格、库存、车型资料的入库依据；商品资料只能走商品库或资料导入审核。"
+      ],
+      "confidence": "low",
+      "promotion_allowed": false,
+      "auto_triage": {
+        "recommended": true,
+        "reason_code": "observed_wechat_product_fact_not_authoritative",
+        "reason": "这条经验来自微信聊天，不能当作商品价格、库存、车型资料的入库依据；商品资料只能走商品库或资料导入审核。"
+      }
+    },
+    "experience_review": {
+      "status": "auto_triaged",
+      "auto_triaged_at": "2026-05-05T21:29:19",
+      "auto_triage_action": "discard",
+      "auto_triage_reason": "这条经验来自微信聊天，不能当作商品价格、库存、车型资料的入库依据；商品资料只能走商品库或资料导入审核。",
+      "auto_triage_reason_code": "observed_wechat_product_fact_not_authoritative"
+    },
+    "reviewed_by_user": false,
+    "formal_relation_cache": {
+      "relation": "novel",
+      "formal_match": {},
+      "recommended_action": "keep_as_rag_experience",
+      "formal_item_count": 25,
+      "formal_revision": "6bd5a24a67f53ddc015b4da7",
+      "evaluated_at": "2026-05-06T02:28:29"
+    }
+  },
+  {
+    "experience_id": "rag_exp_76c278b67d400101a85a",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_wechat_file_transfer",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_1a44b3015445d62ff25e.txt",
+    "category": "file_transfer",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "RAG经验：raw_wechat_file_transfer/file_transfer，摘要=[2026-05-01 16:03:00] self: 聊天记录：江苏车金记录员话术 CHEJIN_20260505_212909 客户：想买新能源通勤，能看秦PLUS吗？ 客服：可以先看秦…",
+    "question": "",
+    "reply_text": "[2026-05-01 16:03:00] self: 聊天记录：江苏车金记录员话术 CHEJIN_20260505_212909 客户：想买新能源通勤，能看秦PLUS吗？ 客服：可以先看秦PLUS DM-i，低油耗适合通勤；但电池检测、当地迁入和金融方案都需要人工确认。",
+    "evidence_excerpt": "[2026-05-01 16:03:00] self: 聊天记录：江苏车金记录员话术 CHEJIN_20260505_212909 客户：想买新能源通勤，能看秦PLUS吗？ 客服：可以先看秦PLUS DM-i，低油耗适合通勤；但电池检测、当地迁入和金融方案都需要人工确认。",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_f97a87de7fb4ac45",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "original_source": {
+      "raw_batch_id": "raw_batch_1a44b3015445d62ff25e",
+      "conversation_id": "conv_87036d2253c2c945ed",
+      "conversation_type": "file_transfer",
+      "raw_message_ids": [
+        "raw_msg_ca2fa7ca46b616b21d4e"
+      ]
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-05T21:29:20"
+    },
+    "created_at": "2026-05-05T21:29:20",
+    "updated_at": "2026-05-06T02:28:29",
+    "quality": {
+      "score": 0.72,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_wechat_file_transfer",
+        "candidate_count": 0,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-06T02:28:29"
+    },
+    "ai_interpretation": {
+      "version": "rag_experience_interpretation_v3",
+      "source_fingerprint": "2ae0930956b93add51778d79",
+      "content_fingerprint": "d18cd72a351409f59a93e8d8",
+      "formal_revision": "",
+      "generated_at": "2026-05-05T21:29:20",
+      "provider": "local_fallback",
+      "model": "",
+      "status": "fallback",
+      "fallback_reason": "llm_disabled_by_request",
+      "business_type": "客服话术",
+      "meaning": "系统从资料或聊天记录里识别到一条客服话术。",
+      "recommended_action": "discard",
+      "action_label": "建议废弃",
+      "action_reason": "内容缺少业务价值，继续保留会增加审核噪音。",
+      "formal_knowledge_comparison": {
+        "overlap_level": "none",
+        "matched_title": "",
+        "matched_category": "",
+        "matched_item_id": "",
+        "similarity": null,
+        "same_points": [],
+        "differences": [],
+        "conclusion": "暂未发现明显重合的正式知识。"
+      },
+      "what_to_check": [
+        "核对金融方案是否必须转人工"
+      ],
+      "risk_notes": [
+        "这条AI经验带有具体客户、人称、转人工场景或金融边界，不能直接升级为正式话术候选；请保留在经验层，或人工改写成通用边界规则后再提交。"
+      ],
+      "confidence": "low",
+      "promotion_allowed": false,
+      "auto_triage": {
+        "recommended": true,
+        "reason_code": "observed_wechat_chat_experience_not_generalized",
+        "reason": "这条AI经验带有具体客户、人称、转人工场景或金融边界，不能直接升级为正式话术候选；请保留在经验层，或人工改写成通用边界规则后再提交。"
+      }
+    },
+    "experience_review": {
+      "status": "auto_triaged",
+      "auto_triaged_at": "2026-05-05T21:29:20",
+      "auto_triage_action": "discard",
+      "auto_triage_reason": "这条AI经验带有具体客户、人称、转人工场景或金融边界，不能直接升级为正式话术候选；请保留在经验层，或人工改写成通用边界规则后再提交。",
+      "auto_triage_reason_code": "observed_wechat_chat_experience_not_generalized"
+    },
+    "reviewed_by_user": false,
+    "formal_relation_cache": {
+      "relation": "novel",
+      "formal_match": {},
+      "recommended_action": "keep_as_rag_experience",
+      "formal_item_count": 25,
+      "formal_revision": "6bd5a24a67f53ddc015b4da7",
+      "evaluated_at": "2026-05-06T02:28:29"
+    }
+  },
+  {
+    "experience_id": "rag_exp_290220b1086b5230738d",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "discarded",
+    "source": "intake",
+    "source_type": "raw_upload",
+    "source_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\products\\upload_f683c9c03d804601_chejin_vehicles_CHEJIN_20260505_214257.txt",
+    "category": "products",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "RAG经验：raw_upload/products，摘要=商品资料：江苏车金二手车车源 CHEJIN_20260505_214257 测试批次：CHEJIN_20260505_214257 商品名称：2021款丰田凯美瑞2.0G豪华版 型号：CHE…",
+    "question": "",
+    "reply_text": "商品资料：江苏车金二手车车源 CHEJIN_20260505_214257 测试批次：CHEJIN_20260505_214257 商品名称：2021款丰田凯美瑞2.0G豪华版 型号：CHEJIN-CAMRY-2021G 商品类目：二手车/中级轿车 别名关键词：凯美瑞,丰田凯美瑞,8万预算,自动挡,省油,通勤 规格参数：2021年上牌，表显4.8万公里，2.0L自动挡，南京现车，一手车，支持第三方检测。 价格：8.98万 单位：台 库存：1 发货：南京门店可看车，异地客户需人工确认物流与提档。 售后：非重大事故、非水泡、非火烧以合同和检测报告为准。 标准回复：这台凯美瑞适合8到10万预算、家用通勤和省油需求，建议先确认到店时间、是否置换、是否贷款。 商品资料：江苏车金二手车车源 CHEJIN_20260505_214257 测试批次：CHEJIN_20260505_214257 商品名称：2020款本田思域220TURBO劲动版 型号：CHEJIN-CIVIC-2020T 商品类目：二手车/紧凑型轿车 别名关键词：思域,本田思域,年轻客户,按揭,首付三成 规格参数：2020年上牌，表显6.1万公里，1.5T自动挡，外观轻微补漆，支持按揭初审。 价格：7.58万 单位：台 库存：1 发货：门店看车后可协助过户，金融结果以资方审批为准。 售后：车况以检测报告和合同约定为准，不承诺贷款必过。 商品资料：江苏车金二手车车源 CHEJIN_20260505_214257 测试批次：CHEJIN_20260505_214257 商品名称：2019款宝马320Li M运动套装 型号：CHEJIN-BMW320-2019M 商品类目：二手车/豪华轿车 别名关键词：宝马320,宝马3系,320Li,试驾,精品车况 规格参数：2019年上牌，表显5.6万公里，2.0T自动挡，一手车源，支持到店试驾。 价格：12.80万 单位：台 库存：1 发货：高意向试驾需转人工确认门店和时间。 售后：精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。 商品资料：江苏车金二手车车源 CHEJIN_20260505_214257 测试批次：CHEJIN_20260505_214257 商品名称：2022款比亚迪秦PLUS DM-i 55KM 型号：CHEJIN-QINPLUS-2022DMI 商品类目：二手车/新能源轿车 别名关键词：秦PLUS,比亚迪秦,新能源,绿牌,混动,网约车 规格参数：2022年上牌，表显3.2万公里，插混，低油耗，适合通勤和网约车。 价格：8.68万 单位：台 库存：1 发货：新能源车需人工确认电池检测和当地迁入政策。 售后：电池和三电政策以厂家与检测报告为准。",
+    "evidence_excerpt": "商品资料：江苏车金二手车车源 CHEJIN_20260505_214257 测试批次：CHEJIN_20260505_214257 商品名称：2021款丰田凯美瑞2.0G豪华版 型号：CHEJIN-CAMRY-2021G 商品类目：二手车/中级轿车 别名关键词：凯美瑞,丰田凯美瑞,8万预算,自动挡,省油,通勤 规格参数：2021年上牌，表显4.8万公里，2.0L自动挡，南京现车，一手车，支持第三方检测。 价格：8.98万 单位：台 库存：1 发货：南京门店可看车，异地客户需人工确认物流与提档。 售后：非重大事故、非水泡、非火烧以合同和检测报告为准。 标准回复：这台凯美瑞适合8到10万预算、家用通勤和省油需求，建议先确认到店时间、是否置换、是否贷款。 商品资料：江苏车金二手车车源 CHEJIN_20260505_214257 测试批次：CHEJIN_20260505_214257 商品名称：2020款本田思域220TURBO劲动版 型号：CHEJIN-CIVIC-2020T 商品类目：二手车/紧凑型轿车 别名关键词：思域,本田思域,年轻客户,按揭,首付三成 规格参数：2020年上牌，表显6.1万公里，1.5T自动挡，外观轻微补漆，支持按揭初审。 价格：7.58万 单位：台 库存：1 发货：门店看车后可协助过户，金融结果以资方审批为准。 售后：车况以检测报告和合同约定为准，不承诺贷款必过。 商品资料：江苏车金二手车车源 CHEJIN_20260505_214257 测试批次：CHEJIN_20260505_214257 商品名称：2019款宝马320Li M运动套装 型号：CHEJIN-BMW320-2019M 商品类目：二手车/豪华轿车 别名关键词：宝马320,宝马3系,320Li,试驾,精品车况 规格参数：2019年上牌，表显5.6万公里，2.0T自动挡，一手车源，支持到店试驾。 价格：12.80万 单位：台 库存：1 发货：高意向试驾需转人工确认门店和时间。 售后：精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。 商品资料：江苏车金二手车车源 CHEJIN_20260505_214257 测试批次：CHEJIN_20260505_214257 商品名称：2022款比亚迪秦PLUS DM-i 55KM 型号：CHEJIN-QINPLUS-2022DMI 商品类目：二手车/新能源轿车 别名关键词：秦PLUS,比亚迪秦,新能源,绿牌,混动,网约车 规格参数：2022年上牌，表显3.2万公里，插混，低油耗，适合通勤和网约车。 价格：8.68万 单位：台 库存：1 发货：新能源车需人工确认电池检测和当地迁入政策。 售后：电池和三电政策以厂家与检测报告为准。",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_316b9017584ef2ad",
+      "chunk_count": 2,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "original_source": {
+      "upload_id": "upload_f683c9c03d804601",
+      "file_name": "upload_f683c9c03d804601_chejin_vehicles_CHEJIN_20260505_214257.txt",
+      "kind": "products"
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-05T21:42:58"
+    },
+    "created_at": "2026-05-05T21:42:58",
+    "updated_at": "2026-05-06T02:43:56",
+    "quality": {
+      "score": 0.74,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_upload",
+        "candidate_count": 0,
+        "rag_ingest_ok": true,
+        "chunk_count": 2,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-06T02:43:56"
+    },
+    "ai_interpretation": {
+      "version": "rag_experience_interpretation_v3",
+      "source_fingerprint": "993ec215a84f20cdc12a0a1c",
+      "content_fingerprint": "f95df88db45a76a518af904f",
+      "formal_revision": "",
+      "generated_at": "2026-05-05T21:42:58",
+      "provider": "local_fallback",
+      "model": "",
+      "status": "fallback",
+      "fallback_reason": "llm_disabled_by_request",
+      "business_type": "商品资料",
+      "meaning": "系统从资料或聊天记录里识别到一条商品资料。",
+      "recommended_action": "manual_review",
+      "action_label": "建议人工检查",
+      "action_reason": "内容可能涉及承诺、风险或不完整信息，需要人工先看。",
+      "formal_knowledge_comparison": {
+        "overlap_level": "none",
+        "matched_title": "",
+        "matched_category": "",
+        "matched_item_id": "",
+        "similarity": null,
+        "same_points": [],
+        "differences": [],
+        "conclusion": "暂未发现明显重合的正式知识。"
+      },
+      "what_to_check": [
+        "核对价格是否准确、是否仍有效",
+        "核对库存或在售状态",
+        "核对金融方案是否必须转人工",
+        "核对车况承诺是否有检测报告依据"
+      ],
+      "risk_notes": [
+        "金融和贷款相关内容不要自动承诺",
+        "车况承诺必须以检测报告或人工确认为准"
+      ],
+      "confidence": "low",
+      "promotion_allowed": false,
+      "auto_triage": {
+        "recommended": false,
+        "reason_code": "",
+        "reason": "内容可能涉及承诺、风险或不完整信息，需要人工先看。"
+      }
+    },
+    "formal_relation_cache": {
+      "relation": "novel",
+      "formal_match": {
+        "category_id": "products",
+        "item_id": "chejin_civic_2020_220turbo",
+        "product_id": "",
+        "title": "2020款本田思域220TURBO劲动版",
+        "similarity": 0.22,
+        "excerpt": "{\"data\": {\"aliases\": [\"思域\", \"本田思域\", \"年轻客户\", \"首付三成\", \"CHEJIN_20260505_214257\"], \"category\": \"二手车/紧凑型轿车\", \"inventory\": 1, \"name\": \"2020款本田思域220TURBO劲动版\", \"price\": 7.58, \"reply_templates\": {\"recommendation\": \"适合年轻客户、预算7到8万、想要动力和外观的需求。\"}, \"shipping_policy\": \"门店看车后可协助过户，金融结果以资方审批为准。\", \"sku\": \"CHEJIN-CIVIC-2020T\", \"specs\": \"2020年上牌，表显6.1万公里，1.5T自动挡，外观轻微补漆。\", \"unit\": \"台\", \"warranty_policy\": \"车况以检测报告和合同为准，不承诺贷款必过。\"}, \"id\": \"chejin_civic_2020_220turbo\", \"runtime\": {\"allow_auto_reply\": true, \"requires_handoff\": false, \"risk_level\": \"normal\"}}"
+      },
+      "recommended_action": "keep_as_rag_experience",
+      "formal_item_count": 25,
+      "formal_revision": "6bd5a24a67f53ddc015b4da7",
+      "evaluated_at": "2026-05-06T02:28:29"
+    },
+    "discarded_reason": "discarded in admin",
+    "discard_reason": "discarded in admin",
+    "discarded_at": "2026-05-06T02:43:56"
+  },
+  {
+    "experience_id": "rag_exp_a4270dbd211d6cac9951",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "discarded",
+    "source": "intake",
+    "source_type": "raw_upload",
+    "source_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\policies\\upload_fa0d6934c351fbd9_chejin_policies_CHEJIN_20260505_214257.txt",
+    "category": "policies",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "RAG经验：raw_upload/policies，摘要=政策规则：江苏车金高意向转人工 CHEJIN_20260505_214257 测试批次：CHEJIN_20260505_214257 规则名称：试驾到店与订金转人工 规则类型：manual_…",
+    "question": "",
+    "reply_text": "政策规则：江苏车金高意向转人工 CHEJIN_20260505_214257 测试批次：CHEJIN_20260505_214257 规则名称：试驾到店与订金转人工 规则类型：manual_required 触发关键词：试驾,到店,订金,定金,今天看车,明天看车,销售联系,企业微信群 答案：客户明确要求试驾、到店、订金、销售联系时，AI只做确认和记录，必须转人工或企业微信群承接，不能自行承诺车源保留和最终价格。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high 政策规则：江苏车金金融与车况合规 CHEJIN_20260505_214257 测试批次：CHEJIN_20260505_214257 规则名称：金融审批与车况承诺边界 规则类型：contract 触发关键词：贷款,按揭,首付,月供,征信,保证无事故,水泡,火烧,赔偿,退款 答案：金融方案只能做初步说明，审批结果、利率、月供以资方审核为准；车况承诺必须以检测报告和合同为准，涉及赔偿、退款、纠纷必须转人工。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high 政策规则：江苏车金沉睡客户唤醒 CHEJIN_20260505_214257 测试批次：CHEJIN_20260505_214257 规则名称：沉睡客户递减唤醒策略 规则类型：other 触发关键词：沉睡客户,唤醒,老线索,新车源,还在看车 答案：首次唤醒只做轻提醒；3天未回复推同预算新车源；7天未回复询问需求是否变化；客户回复后停止自动唤醒并转入正常接待。 允许自动回复：true 必须转人工：false 风险等级：normal",
+    "evidence_excerpt": "政策规则：江苏车金高意向转人工 CHEJIN_20260505_214257 测试批次：CHEJIN_20260505_214257 规则名称：试驾到店与订金转人工 规则类型：manual_required 触发关键词：试驾,到店,订金,定金,今天看车,明天看车,销售联系,企业微信群 答案：客户明确要求试驾、到店、订金、销售联系时，AI只做确认和记录，必须转人工或企业微信群承接，不能自行承诺车源保留和最终价格。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high 政策规则：江苏车金金融与车况合规 CHEJIN_20260505_214257 测试批次：CHEJIN_20260505_214257 规则名称：金融审批与车况承诺边界 规则类型：contract 触发关键词：贷款,按揭,首付,月供,征信,保证无事故,水泡,火烧,赔偿,退款 答案：金融方案只能做初步说明，审批结果、利率、月供以资方审核为准；车况承诺必须以检测报告和合同为准，涉及赔偿、退款、纠纷必须转人工。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high 政策规则：江苏车金沉睡客户唤醒 CHEJIN_20260505_214257 测试批次：CHEJIN_20260505_214257 规则名称：沉睡客户递减唤醒策略 规则类型：other 触发关键词：沉睡客户,唤醒,老线索,新车源,还在看车 答案：首次唤醒只做轻提醒；3天未回复推同预算新车源；7天未回复询问需求是否变化；客户回复后停止自动唤醒并转入正常接待。 允许自动回复：true 必须转人工：false 风险等级：normal",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_6c69bdf8c6a9fc48",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "original_source": {
+      "upload_id": "upload_fa0d6934c351fbd9",
+      "file_name": "upload_fa0d6934c351fbd9_chejin_policies_CHEJIN_20260505_214257.txt",
+      "kind": "policies"
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-05T21:42:59"
+    },
+    "created_at": "2026-05-05T21:42:59",
+    "updated_at": "2026-05-06T02:43:17",
+    "quality": {
+      "score": 0.72,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_upload",
+        "candidate_count": 0,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-06T02:43:17"
+    },
+    "ai_interpretation": {
+      "version": "rag_experience_interpretation_v3",
+      "source_fingerprint": "f3824df8159e081e1d5d4052",
+      "content_fingerprint": "50b28135ecff688f9a819bd8",
+      "formal_revision": "",
+      "generated_at": "2026-05-05T21:42:59",
+      "provider": "local_fallback",
+      "model": "",
+      "status": "fallback",
+      "fallback_reason": "llm_disabled_by_request",
+      "business_type": "商品资料",
+      "meaning": "系统从资料或聊天记录里识别到一条商品资料。",
+      "recommended_action": "manual_review",
+      "action_label": "建议人工检查",
+      "action_reason": "内容可能涉及承诺、风险或不完整信息，需要人工先看。",
+      "formal_knowledge_comparison": {
+        "overlap_level": "none",
+        "matched_title": "",
+        "matched_category": "",
+        "matched_item_id": "",
+        "similarity": null,
+        "same_points": [],
+        "differences": [],
+        "conclusion": "暂未发现明显重合的正式知识。"
+      },
+      "what_to_check": [
+        "核对价格是否准确、是否仍有效",
+        "核对金融方案是否必须转人工",
+        "核对车况承诺是否有检测报告依据"
+      ],
+      "risk_notes": [
+        "金融和贷款相关内容不要自动承诺",
+        "车况承诺必须以检测报告或人工确认为准"
+      ],
+      "confidence": "low",
+      "promotion_allowed": false,
+      "auto_triage": {
+        "recommended": false,
+        "reason_code": "",
+        "reason": "内容可能涉及承诺、风险或不完整信息，需要人工先看。"
+      }
+    },
+    "formal_relation_cache": {
+      "relation": "supports_formal",
+      "formal_match": {
+        "category_id": "chats",
+        "item_id": "ai-ai",
+        "product_id": "",
+        "title": "这条经验是江苏车金公司的客服政策规则，规定了什么时候必须转人工、哪些事情AI不能自己承诺、怎么唤醒老客户等，用来防止AI乱答应客户要求，避免客诉和风险。",
+        "similarity": 0.604,
+        "excerpt": "{\"data\": {\"additional_details\": {\"rag_experience_id\": \"rag_exp_816a8be10cee4fd1f666\", \"source_chunk_id\": null, \"source_id\": null, \"source_text\": \"\"}, \"customer_message\": \"这条经验是江苏车金公司的客服政策规则，规定了什么时候必须转人工、哪些事情AI不能自己承诺、怎么唤醒老客户等，用来防止AI乱答应客户要求，避免客诉和风险。\", \"intent_tags\": [\"rag_experience\"], \"service_reply\": \"true 风险等级：high 政策规则：江苏车金金融与车况合规 CHEJIN_20260505_205853 测试批次：CHEJIN_20260505_205853 规则名称：金融审批与车况承诺边界 规则类型：contract 触发关键词：贷款,按揭,首付,月供,征信,保证无事故,水泡,火烧,赔偿,退款 答案：金融方案只能做初步说明，审批结果、利率、月供以资方审核为准；车况承诺必须以检测报告和合同为准，涉及赔偿、退款、纠纷必须转人工。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high 政策规则：江苏车金沉睡客户唤醒 CHEJIN_20260505_205853 测试批次：CHEJIN_20260505_205853 规则名称：沉睡客户递减唤醒策略 规则类型：other 触发关键词：沉睡客户,唤醒,老线索,新车源,还在看车 答案：首次唤醒只做轻提醒；3天未回复推同预算新车源；7天未回复询问需求是否变化；客户回复后停止自动唤醒并转入正常接待。 允许自动回复：true 必须转人工：false 风险等级：normal\", \"tone_tags\": [\"rag_reference\"]}, \"id\": \"ai-ai\", \"runtime\": {\"allow_auto_reply\": true, \"requires_handoff\": false…"
+      },
+      "recommended_action": "keep_as_supporting_expression",
+      "formal_item_count": 25,
+      "formal_revision": "6bd5a24a67f53ddc015b4da7",
+      "evaluated_at": "2026-05-06T02:28:29"
+    },
+    "discarded_reason": "discarded in admin",
+    "discard_reason": "discarded in admin",
+    "discarded_at": "2026-05-06T02:43:17"
+  },
+  {
+    "experience_id": "rag_exp_fbe0e51a58894a2511bd",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_upload",
+    "source_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\chats\\upload_7fb239d1bae059cb_chejin_chats_CHEJIN_20260505_214257.txt",
+    "category": "chats",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "RAG经验：raw_upload/chats，摘要=聊天记录：江苏车金预算推荐话术 CHEJIN_20260505_214257 测试批次：CHEJIN_20260505_214257 客户：我从抖音直播来的，8万左右想买自动挡省油代步车，有…",
+    "question": "",
+    "reply_text": "聊天记录：江苏车金预算推荐话术 CHEJIN_20260505_214257 测试批次：CHEJIN_20260505_214257 客户：我从抖音直播来的，8万左右想买自动挡省油代步车，有什么推荐？ 客服：您这个预算可以先看凯美瑞、思域和秦PLUS DM-i。凯美瑞偏家用稳、省心；思域更年轻；秦PLUS更省油。您是在南京看车吗？是否考虑贷款或置换？ 意图标签：预算推荐,车源推荐,抖音线索 聊天记录：江苏车金置换话术 CHEJIN_20260505_214257 测试批次：CHEJIN_20260505_214257 客户：我有一台老朗逸想置换。 客服：可以的，麻烦补充上牌年份、公里数、车况、所在城市和是否有贷款，我先帮您记录，评估价需要人工复核。 意图标签：置换,线索采集 聊天记录：江苏车金睡客唤醒话术 CHEJIN_20260505_214257 测试批次：CHEJIN_20260505_214257 客户：之前那台没买，现在还有新车源吗？ 客服：有的，我先按您之前的预算和用途筛一遍；如果预算或车型变了，直接告诉我，我会按新需求推荐更合适的车。 意图标签：沉睡客户,唤醒,二次转化",
+    "evidence_excerpt": "聊天记录：江苏车金预算推荐话术 CHEJIN_20260505_214257 测试批次：CHEJIN_20260505_214257 客户：我从抖音直播来的，8万左右想买自动挡省油代步车，有什么推荐？ 客服：您这个预算可以先看凯美瑞、思域和秦PLUS DM-i。凯美瑞偏家用稳、省心；思域更年轻；秦PLUS更省油。您是在南京看车吗？是否考虑贷款或置换？ 意图标签：预算推荐,车源推荐,抖音线索 聊天记录：江苏车金置换话术 CHEJIN_20260505_214257 测试批次：CHEJIN_20260505_214257 客户：我有一台老朗逸想置换。 客服：可以的，麻烦补充上牌年份、公里数、车况、所在城市和是否有贷款，我先帮您记录，评估价需要人工复核。 意图标签：置换,线索采集 聊天记录：江苏车金睡客唤醒话术 CHEJIN_20260505_214257 测试批次：CHEJIN_20260505_214257 客户：之前那台没买，现在还有新车源吗？ 客服：有的，我先按您之前的预算和用途筛一遍；如果预算或车型变了，直接告诉我，我会按新需求推荐更合适的车。 意图标签：沉睡客户,唤醒,二次转化",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_f95396f6ca16cf28",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "original_source": {
+      "upload_id": "upload_7fb239d1bae059cb",
+      "file_name": "upload_7fb239d1bae059cb_chejin_chats_CHEJIN_20260505_214257.txt",
+      "kind": "chats"
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-05T21:42:59"
+    },
+    "created_at": "2026-05-05T21:42:59",
+    "updated_at": "2026-05-06T02:43:54",
+    "quality": {
+      "score": 0.72,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_upload",
+        "candidate_count": 0,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-06T02:43:54"
+    },
+    "ai_interpretation": {
+      "version": "rag_experience_interpretation_v3",
+      "source_fingerprint": "9dfd745fb1bccd56c7166743",
+      "content_fingerprint": "0f2cf3f7d3fbefa81b0772be",
+      "formal_revision": "",
+      "generated_at": "2026-05-05T21:43:00",
+      "provider": "local_fallback",
+      "model": "",
+      "status": "fallback",
+      "fallback_reason": "llm_disabled_by_request",
+      "business_type": "商品资料",
+      "meaning": "系统从资料或聊天记录里识别到一条商品资料。",
+      "recommended_action": "promote_to_pending",
+      "action_label": "建议升级为待确认知识",
+      "action_reason": "内容看起来可以整理成结构化知识，但仍需要人工确认字段。",
+      "formal_knowledge_comparison": {
+        "overlap_level": "none",
+        "matched_title": "",
+        "matched_category": "",
+        "matched_item_id": "",
+        "similarity": null,
+        "same_points": [],
+        "differences": [],
+        "conclusion": "暂未发现明显重合的正式知识。"
+      },
+      "what_to_check": [
+        "核对金融方案是否必须转人工",
+        "核对车况承诺是否有检测报告依据"
+      ],
+      "risk_notes": [],
+      "confidence": "low",
+      "promotion_allowed": true,
+      "auto_triage": {
+        "recommended": false,
+        "reason_code": "",
+        "reason": "内容看起来可以整理成结构化知识，但仍需要人工确认字段。"
+      }
+    },
+    "formal_relation_cache": {
+      "relation": "kept_experience",
+      "formal_match": {},
+      "recommended_action": "kept_as_experience",
+      "formal_item_count": 25,
+      "formal_revision": "6bd5a24a67f53ddc015b4da7",
+      "evaluated_at": "2026-05-06T02:43:54"
+    },
+    "experience_review": {
+      "status": "kept",
+      "kept_at": "2026-05-06T02:43:40",
+      "kept_reason": "kept in experience layer"
+    },
+    "reviewed_by_user": true
+  },
+  {
+    "experience_id": "rag_exp_43ceed95b9dceddded19",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_wechat_private",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_4acd505b4a3d3c893dfc.txt",
+    "category": "private",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "RAG经验：raw_wechat_private/private，摘要=[2026-05-05T21:43:00] self: 8万预算，自动挡省油，通勤代步 CHEJIN_20260505_214257",
+    "question": "",
+    "reply_text": "[2026-05-05T21:43:00] self: 8万预算，自动挡省油，通勤代步 CHEJIN_20260505_214257",
+    "evidence_excerpt": "[2026-05-05T21:43:00] self: 8万预算，自动挡省油，通勤代步 CHEJIN_20260505_214257",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_005ee926e36cfdf1",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "original_source": {
+      "raw_batch_id": "raw_batch_4acd505b4a3d3c893dfc",
+      "conversation_id": "conv_54a96e57c70563ab9c",
+      "conversation_type": "private",
+      "raw_message_ids": [
+        "raw_msg_95e96df8fe4c041b73ac"
+      ]
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-05T21:43:01"
+    },
+    "created_at": "2026-05-05T21:43:01",
+    "updated_at": "2026-05-06T02:28:28",
+    "quality": {
+      "score": 0.64,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_wechat_private",
+        "candidate_count": 0,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-06T02:28:28"
+    },
+    "ai_interpretation": {
+      "version": "rag_experience_interpretation_v3",
+      "source_fingerprint": "2d63e0c908b2cb084a62a24c",
+      "content_fingerprint": "8de0e59dec261413b7e4ac52",
+      "formal_revision": "",
+      "generated_at": "2026-05-05T21:43:01",
+      "provider": "local_fallback",
+      "model": "",
+      "status": "fallback",
+      "fallback_reason": "llm_disabled_by_request",
+      "business_type": "无效内容",
+      "meaning": "这条内容看起来不像可入库的业务知识，可能只是测试、闲聊或噪音。",
+      "recommended_action": "discard",
+      "action_label": "建议废弃",
+      "action_reason": "内容缺少业务价值，继续保留会增加审核噪音。",
+      "formal_knowledge_comparison": {
+        "overlap_level": "none",
+        "matched_title": "",
+        "matched_category": "",
+        "matched_item_id": "",
+        "similarity": null,
+        "same_points": [],
+        "differences": [],
+        "conclusion": "暂未发现明显重合的正式知识。"
+      },
+      "what_to_check": [
+        "核对这条内容是否真实、完整、值得入库"
+      ],
+      "risk_notes": [
+        "没有识别到可沉淀的业务知识，自动从待处理提醒中降噪。"
+      ],
+      "confidence": "low",
+      "promotion_allowed": false,
+      "auto_triage": {
+        "recommended": true,
+        "reason_code": "no_business_value",
+        "reason": "没有识别到可沉淀的业务知识，自动从待处理提醒中降噪。"
+      }
+    },
+    "experience_review": {
+      "status": "auto_triaged",
+      "auto_triaged_at": "2026-05-05T21:43:01",
+      "auto_triage_action": "discard",
+      "auto_triage_reason": "没有识别到可沉淀的业务知识，自动从待处理提醒中降噪。",
+      "auto_triage_reason_code": "no_business_value"
+    },
+    "reviewed_by_user": false,
+    "formal_relation_cache": {
+      "relation": "novel",
+      "formal_match": {},
+      "recommended_action": "keep_as_rag_experience",
+      "formal_item_count": 25,
+      "formal_revision": "6bd5a24a67f53ddc015b4da7",
+      "evaluated_at": "2026-05-06T02:28:28"
+    }
+  },
+  {
+    "experience_id": "rag_exp_c3985e2b8c9c20449a45",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_wechat_private",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_1a15344d30f7d9a4ad1f.txt",
+    "category": "private",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "RAG经验：raw_wechat_private/private，摘要=[2026-05-05T21:43:02] self: 宝马320Li那台今天能到店试驾吗 CHEJIN_20260505_214257",
+    "question": "",
+    "reply_text": "[2026-05-05T21:43:02] self: 宝马320Li那台今天能到店试驾吗 CHEJIN_20260505_214257",
+    "evidence_excerpt": "[2026-05-05T21:43:02] self: 宝马320Li那台今天能到店试驾吗 CHEJIN_20260505_214257",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_53a52bed4bdfbc56",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "original_source": {
+      "raw_batch_id": "raw_batch_1a15344d30f7d9a4ad1f",
+      "conversation_id": "conv_54a96e57c70563ab9c",
+      "conversation_type": "private",
+      "raw_message_ids": [
+        "raw_msg_2fa013ee2c097613f35b"
+      ]
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-05T21:43:02"
+    },
+    "created_at": "2026-05-05T21:43:02",
+    "updated_at": "2026-05-06T02:28:28",
+    "quality": {
+      "score": 0.64,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_wechat_private",
+        "candidate_count": 0,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-06T02:28:28"
+    },
+    "ai_interpretation": {
+      "version": "rag_experience_interpretation_v3",
+      "source_fingerprint": "6d3f2447e7bb155892311b5f",
+      "content_fingerprint": "05d7659b275a235b5ec740dc",
+      "formal_revision": "",
+      "generated_at": "2026-05-05T21:43:03",
+      "provider": "local_fallback",
+      "model": "",
+      "status": "fallback",
+      "fallback_reason": "llm_disabled_by_request",
+      "business_type": "无效内容",
+      "meaning": "这条内容看起来不像可入库的业务知识，可能只是测试、闲聊或噪音。",
+      "recommended_action": "discard",
+      "action_label": "建议废弃",
+      "action_reason": "内容缺少业务价值，继续保留会增加审核噪音。",
+      "formal_knowledge_comparison": {
+        "overlap_level": "none",
+        "matched_title": "",
+        "matched_category": "",
+        "matched_item_id": "",
+        "similarity": null,
+        "same_points": [],
+        "differences": [],
+        "conclusion": "暂未发现明显重合的正式知识。"
+      },
+      "what_to_check": [
+        "核对这条内容是否真实、完整、值得入库"
+      ],
+      "risk_notes": [
+        "没有识别到可沉淀的业务知识，自动从待处理提醒中降噪。"
+      ],
+      "confidence": "low",
+      "promotion_allowed": false,
+      "auto_triage": {
+        "recommended": true,
+        "reason_code": "no_business_value",
+        "reason": "没有识别到可沉淀的业务知识，自动从待处理提醒中降噪。"
+      }
+    },
+    "experience_review": {
+      "status": "auto_triaged",
+      "auto_triaged_at": "2026-05-05T21:43:03",
+      "auto_triage_action": "discard",
+      "auto_triage_reason": "没有识别到可沉淀的业务知识，自动从待处理提醒中降噪。",
+      "auto_triage_reason_code": "no_business_value"
+    },
+    "reviewed_by_user": false,
+    "formal_relation_cache": {
+      "relation": "novel",
+      "formal_match": {},
+      "recommended_action": "keep_as_rag_experience",
+      "formal_item_count": 25,
+      "formal_revision": "6bd5a24a67f53ddc015b4da7",
+      "evaluated_at": "2026-05-06T02:28:28"
+    }
+  },
+  {
+    "experience_id": "rag_exp_bc4c24eb93b3b8bac7f7",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_wechat_group",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_7528fd7a20d70d53048e.txt",
+    "category": "group",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "RAG经验：raw_wechat_group/group，摘要=[2026-05-01 16:00:00] 销售A: 商品资料：江苏车金记录员完整车源 CHEJIN_20260505_214257 测试批次：CHEJIN_20260505_214257…",
+    "question": "",
+    "reply_text": "[2026-05-01 16:00:00] 销售A: 商品资料：江苏车金记录员完整车源 CHEJIN_20260505_214257 测试批次：CHEJIN_20260505_214257 商品名称：2020款别克GL8 ES陆尊653T豪华型 型号：CHEJIN-REC-GL8-2020ES 商品类目：二手车/MPV 价格：17.60万 单位：台 库存：1 发货：南京门店可看车，商务客户试乘需人工确认 售后：车况以检测报告为准 [2026-05-01 16:01:00] 销售B: 政策规则：江苏车金记录员风控 CHEJIN_20260505_214257 测试批次：CHEJIN_20260505_214257 规则名称：保证无事故转人工 规则类型：contract 触发关键词：保证无事故,赔偿,CHEJIN_20260505_214257 答案：此类问题必须让销售人工按检测报告和合同回复。 [2026-05-01 16:02:00] 销售C: 边界噪音：CHEJIN_20260505_214257_NOISE 今天午饭吃什么，这不是车源也不是客服知识。",
+    "evidence_excerpt": "[2026-05-01 16:00:00] 销售A: 商品资料：江苏车金记录员完整车源 CHEJIN_20260505_214257 测试批次：CHEJIN_20260505_214257 商品名称：2020款别克GL8 ES陆尊653T豪华型 型号：CHEJIN-REC-GL8-2020ES 商品类目：二手车/MPV 价格：17.60万 单位：台 库存：1 发货：南京门店可看车，商务客户试乘需人工确认 售后：车况以检测报告为准 [2026-05-01 16:01:00] 销售B: 政策规则：江苏车金记录员风控 CHEJIN_20260505_214257 测试批次：CHEJIN_20260505_214257 规则名称：保证无事故转人工 规则类型：contract 触发关键词：保证无事故,赔偿,CHEJIN_20260505_214257 答案：此类问题必须让销售人工按检测报告和合同回复。 [2026-05-01 16:02:00] 销售C: 边界噪音：CHEJIN_20260505_214257_NOISE 今天午饭吃什么，这不是车源也不是客服知识。",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_633641a75e83d324",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "original_source": {
+      "raw_batch_id": "raw_batch_7528fd7a20d70d53048e",
+      "conversation_id": "conv_8022f0948f611f15b4",
+      "conversation_type": "group",
+      "raw_message_ids": [
+        "raw_msg_e5df4fc66bf3e5fe2647",
+        "raw_msg_da3a26bd31f7144f4864",
+        "raw_msg_a1c3d15a1d27c0ea3539"
+      ]
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-05T21:43:05"
+    },
+    "created_at": "2026-05-05T21:43:05",
+    "updated_at": "2026-05-06T02:28:28",
+    "quality": {
+      "score": 0.72,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_wechat_group",
+        "candidate_count": 0,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-06T02:28:28"
+    },
+    "ai_interpretation": {
+      "version": "rag_experience_interpretation_v3",
+      "source_fingerprint": "3048ce5166495532f54952a8",
+      "content_fingerprint": "02bb5d1a2a848a57efc9830e",
+      "formal_revision": "",
+      "generated_at": "2026-05-05T21:43:05",
+      "provider": "local_fallback",
+      "model": "",
+      "status": "fallback",
+      "fallback_reason": "llm_disabled_by_request",
+      "business_type": "商品资料",
+      "meaning": "系统从资料或聊天记录里识别到一条商品资料。",
+      "recommended_action": "discard",
+      "action_label": "建议废弃",
+      "action_reason": "内容缺少业务价值，继续保留会增加审核噪音。",
+      "formal_knowledge_comparison": {
+        "overlap_level": "none",
+        "matched_title": "",
+        "matched_category": "",
+        "matched_item_id": "",
+        "similarity": null,
+        "same_points": [],
+        "differences": [],
+        "conclusion": "暂未发现明显重合的正式知识。"
+      },
+      "what_to_check": [
+        "核对价格是否准确、是否仍有效",
+        "核对库存或在售状态",
+        "核对车况承诺是否有检测报告依据"
+      ],
+      "risk_notes": [
+        "车况承诺必须以检测报告或人工确认为准",
+        "这条经验来自微信聊天，不能当作商品价格、库存、车型资料的入库依据；商品资料只能走商品库或资料导入审核。"
+      ],
+      "confidence": "low",
+      "promotion_allowed": false,
+      "auto_triage": {
+        "recommended": true,
+        "reason_code": "observed_wechat_product_fact_not_authoritative",
+        "reason": "这条经验来自微信聊天，不能当作商品价格、库存、车型资料的入库依据；商品资料只能走商品库或资料导入审核。"
+      }
+    },
+    "experience_review": {
+      "status": "auto_triaged",
+      "auto_triaged_at": "2026-05-05T21:43:05",
+      "auto_triage_action": "discard",
+      "auto_triage_reason": "这条经验来自微信聊天，不能当作商品价格、库存、车型资料的入库依据；商品资料只能走商品库或资料导入审核。",
+      "auto_triage_reason_code": "observed_wechat_product_fact_not_authoritative"
+    },
+    "reviewed_by_user": false,
+    "formal_relation_cache": {
+      "relation": "novel",
+      "formal_match": {},
+      "recommended_action": "keep_as_rag_experience",
+      "formal_item_count": 25,
+      "formal_revision": "6bd5a24a67f53ddc015b4da7",
+      "evaluated_at": "2026-05-06T02:28:28"
+    }
+  },
+  {
+    "experience_id": "rag_exp_d55de58536d5d2b53905",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_wechat_file_transfer",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_79929fb09208e7b7bb6e.txt",
+    "category": "file_transfer",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "RAG经验：raw_wechat_file_transfer/file_transfer，摘要=[2026-05-01 16:03:00] self: 聊天记录：江苏车金记录员话术 CHEJIN_20260505_214257 客户：想买新能源通勤，能看秦PLUS吗？ 客服：可以先看秦…",
+    "question": "",
+    "reply_text": "[2026-05-01 16:03:00] self: 聊天记录：江苏车金记录员话术 CHEJIN_20260505_214257 客户：想买新能源通勤，能看秦PLUS吗？ 客服：可以先看秦PLUS DM-i，低油耗适合通勤；但电池检测、当地迁入和金融方案都需要人工确认。",
+    "evidence_excerpt": "[2026-05-01 16:03:00] self: 聊天记录：江苏车金记录员话术 CHEJIN_20260505_214257 客户：想买新能源通勤，能看秦PLUS吗？ 客服：可以先看秦PLUS DM-i，低油耗适合通勤；但电池检测、当地迁入和金融方案都需要人工确认。",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_4d19c75b15eed3b2",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "original_source": {
+      "raw_batch_id": "raw_batch_79929fb09208e7b7bb6e",
+      "conversation_id": "conv_87036d2253c2c945ed",
+      "conversation_type": "file_transfer",
+      "raw_message_ids": [
+        "raw_msg_8f3d8fbfa763f70763b9"
+      ]
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-05T21:43:06"
+    },
+    "created_at": "2026-05-05T21:43:06",
+    "updated_at": "2026-05-06T02:28:28",
+    "quality": {
+      "score": 0.72,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_wechat_file_transfer",
+        "candidate_count": 0,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-06T02:28:28"
+    },
+    "ai_interpretation": {
+      "version": "rag_experience_interpretation_v3",
+      "source_fingerprint": "d2ccc074bdf71a9bcb5d444a",
+      "content_fingerprint": "9f654ba0468eb10d5f9bca59",
+      "formal_revision": "",
+      "generated_at": "2026-05-05T21:43:06",
+      "provider": "local_fallback",
+      "model": "",
+      "status": "fallback",
+      "fallback_reason": "llm_disabled_by_request",
+      "business_type": "客服话术",
+      "meaning": "系统从资料或聊天记录里识别到一条客服话术。",
+      "recommended_action": "discard",
+      "action_label": "建议废弃",
+      "action_reason": "内容缺少业务价值，继续保留会增加审核噪音。",
+      "formal_knowledge_comparison": {
+        "overlap_level": "none",
+        "matched_title": "",
+        "matched_category": "",
+        "matched_item_id": "",
+        "similarity": null,
+        "same_points": [],
+        "differences": [],
+        "conclusion": "暂未发现明显重合的正式知识。"
+      },
+      "what_to_check": [
+        "核对金融方案是否必须转人工"
+      ],
+      "risk_notes": [
+        "这条AI经验带有具体客户、人称、转人工场景或金融边界，不能直接升级为正式话术候选；请保留在经验层，或人工改写成通用边界规则后再提交。"
+      ],
+      "confidence": "low",
+      "promotion_allowed": false,
+      "auto_triage": {
+        "recommended": true,
+        "reason_code": "observed_wechat_chat_experience_not_generalized",
+        "reason": "这条AI经验带有具体客户、人称、转人工场景或金融边界，不能直接升级为正式话术候选；请保留在经验层，或人工改写成通用边界规则后再提交。"
+      }
+    },
+    "experience_review": {
+      "status": "auto_triaged",
+      "auto_triaged_at": "2026-05-05T21:43:06",
+      "auto_triage_action": "discard",
+      "auto_triage_reason": "这条AI经验带有具体客户、人称、转人工场景或金融边界，不能直接升级为正式话术候选；请保留在经验层，或人工改写成通用边界规则后再提交。",
+      "auto_triage_reason_code": "observed_wechat_chat_experience_not_generalized"
+    },
+    "reviewed_by_user": false,
+    "formal_relation_cache": {
+      "relation": "novel",
+      "formal_match": {},
+      "recommended_action": "keep_as_rag_experience",
+      "formal_item_count": 25,
+      "formal_revision": "6bd5a24a67f53ddc015b4da7",
+      "evaluated_at": "2026-05-06T02:28:28"
+    }
+  }
+]

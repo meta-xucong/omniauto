@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_1dc13086cf97bf75",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "file_transfer",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_d751dd32734a589ff678.txt",
+    "content_hash": "07ffa55d310b08b9c922dc4d328d3a65",
+    "status": "active",
+    "created_at": "2026-05-03T08:28:07",
+    "updated_at": "2026-05-03T08:28:07"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_1c2d8d45a9571eb5",
+      "source_id": "source_1dc13086cf97bf75",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "file_transfer",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_d751dd32734a589ff678.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-01 16:03:00] self: 聊天记录：江苏车金记录员话术 CHEJIN_20260503_082804\n客户：想买新能源通勤，能看秦PLUS吗？\n客服：可以先看秦PLUS DM-i，低油耗适合通勤；但电池检测、当地迁入和金融方案都需要人工确认。",
+      "char_count": 136,
+      "status": "active",
+      "created_at": "2026-05-03T08:28:07"
+    }
+  ]
+}

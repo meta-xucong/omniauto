@@ -1,0 +1,321 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_053260483c4245a8",
+  "generated_at": "2026-05-04T02:06:42",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_913376c6855da1ba9669.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"service_reply\": \"[车金AI] GL8确实是商务接待的热门选择，空间和舒适性都很好，而且2020款ES陆尊版内饰比较精致，不会显得老气。您目前预算大概多少？或者需要具体看配置吗？\", \"intent_tags\": [\"车辆推荐\", \"商务接待\", \"舒适性\"], \"tone_tags\": [\"专业\", \"引导\"], \"linked_categories\": [\"products\"], \"applicability_scope\": \"specific_product\", \"product_id\": \"gl8\", \"usable_as_template\": true, \"product_category\": \"\"}",
+    "content_sha256": "b57285c5fd044d83c5811937b3009bbee97b324cd4b27b21d833c71ca5775685",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_913376c6855da1ba9669",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_7d405c414989bb4a60a5",
+      "raw_msg_f6f2896188acd7b67c8c"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_7943d074129d3b59",
+        "source_id": "source_6bbbc7f540d0df8c",
+        "score": 0.8972,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.4996,
+          "semantic": 0.2676,
+          "vector": 0.14,
+          "vector_similarity": 0.9264,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.8972
+        },
+        "text": "[2026-05-04T02:05:46] self: [车金AI] GL8确实是商务接待的热门选择，空间和舒适性都很好，而且2020款ES陆尊版内饰比较精致，不会显得老气。您目前预算大概多少？或者需要具体看配置吗？\n[2026-05-04T02:05:46] 许聪: 秦PLUS那台适合每天通勤吗？我主要市区跑"
+      },
+      {
+        "chunk_id": "chunk_d2ec0cebcf16c10c",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5547,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2058,
+          "semantic": 0.1399,
+          "vector": 0.139,
+          "vector_similarity": 0.7725,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5547
+        },
+        "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+      },
+      {
+        "chunk_id": "chunk_58029d4057022265",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5453,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1985,
+          "semantic": 0.1368,
+          "vector": 0.14,
+          "vector_similarity": 0.8183,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5453
+        },
+        "text": "险：电池、增程器、官方权益和保养记录以检测报告和人工核验为准。\n推荐话术：适合家庭六座、长途和新能源体验需求。\n商品名称：2021款长安CS75 PLUS 1.5T自动尊贵型\n型号/SKU：CHEJIN-CS75PLUS-2021\n类目：二手车/SUV\n关键词：CS75PLUS、长安CS75、国产SUV、家用SUV\n规格：2021年上牌，表显4.4万公里，1.5T自动挡，白色，配置高。\n价格：6.88万，库存：2台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后"
+      },
+      {
+        "chunk_id": "chunk_b73fd7e249648300",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5418,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1961,
+          "semantic": 0.1357,
+          "vector": 0.14,
+          "vector_similarity": 0.8122,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5418
+        },
+        "text": "。\n商品名称：2022款五菱宏光MINIEV马卡龙臻享款\n型号/SKU：CHEJIN-MINIEV-2022\n类目：二手车/微型电动车\n关键词：宏光MINIEV、五菱mini、代步电车、练手车\n规格：2022年上牌，表显1.6万公里，纯电微型车，粉色，城市通勤。\n价格：2.88万，库存：1台\n物流/过户：微型电动车跨城运输和充电条件需人工确认。\n售后/风险：续航、电池和低温表现以检测报告和使用场景说明为准。\n推荐话术：适合短途通勤、练手、接送孩子，长途或高速需求不推荐。\n商品名称：2020款本田雅阁260TURBO"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_3a80146eaea46f66b8a9",
+    "experience_id": "rag_exp_3a80146eaea46f66b8a9"
+  },
+  "detected_tags": [
+    "llm",
+    "rag_experience",
+    "unknown",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "chats",
+    "change_type": "llm_upsert_chats",
+    "summary": "车金AI关于别克GL8的推荐话术，强调空间舒适性和2020款ES陆尊版内饰",
+    "suggested_fields": {
+      "service_reply": "[车金AI] GL8确实是商务接待的热门选择，空间和舒适性都很好，而且2020款ES陆尊版内饰比较精致，不会显得老气。您目前预算大概多少？或者需要具体看配置吗？",
+      "intent_tags": [
+        "车辆推荐",
+        "商务接待",
+        "舒适性"
+      ],
+      "tone_tags": [
+        "专业",
+        "引导"
+      ],
+      "linked_categories": [
+        "products"
+      ],
+      "applicability_scope": "specific_product",
+      "product_id": "gl8",
+      "usable_as_template": true,
+      "product_category": "",
+      "additional_details": {
+        "原始资料摘录": "{\"service_reply\": \"[车金AI] GL8确实是商务接待的热门选择，空间和舒适性都很好，而且2020款ES陆尊版内饰比较精致，不会显得老气。您目前预算大概多少？或者需要具体看配置吗？\", \"intent_tags\": [\"车辆推荐\", \"商务接待\", \"舒适性\"], \"tone_tags\": [\"专业\", \"引导\"], \"linked_categories\": [\"products\"], \"applicability_scope\": \"specific_product\", \"product_id\": \"gl8\", \"usable_as_template\": true, \"product_category\": \"\"}"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "chats",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "chats",
+        "id": "gl8_recommendation_talk",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_913376c6855da1ba9669.txt",
+          "candidate_id": "raw_053260483c4245a8",
+          "rag_experience_id": "rag_exp_3a80146eaea46f66b8a9",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "service_reply": "[车金AI] GL8确实是商务接待的热门选择，空间和舒适性都很好，而且2020款ES陆尊版内饰比较精致，不会显得老气。您目前预算大概多少？或者需要具体看配置吗？",
+          "intent_tags": [
+            "车辆推荐",
+            "商务接待",
+            "舒适性"
+          ],
+          "tone_tags": [
+            "专业",
+            "引导"
+          ],
+          "linked_categories": [
+            "products"
+          ],
+          "applicability_scope": "specific_product",
+          "product_id": "gl8",
+          "usable_as_template": true,
+          "product_category": "",
+          "additional_details": {
+            "原始资料摘录": "{\"service_reply\": \"[车金AI] GL8确实是商务接待的热门选择，空间和舒适性都很好，而且2020款ES陆尊版内饰比较精致，不会显得老气。您目前预算大概多少？或者需要具体看配置吗？\", \"intent_tags\": [\"车辆推荐\", \"商务接待\", \"舒适性\"], \"tone_tags\": [\"专业\", \"引导\"], \"linked_categories\": [\"products\"], \"applicability_scope\": \"specific_product\", \"product_id\": \"gl8\", \"usable_as_template\": true, \"product_category\": \"\"}"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "pending",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_913376c6855da1ba9669",
+    "source_raw_message_ids": [
+      "raw_msg_7d405c414989bb4a60a5",
+      "raw_msg_f6f2896188acd7b67c8c"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_6bbbc7f540d0df8c",
+      "chunk_count": 1,
+      "query": "车金AI关于别克GL8的推荐话术，强调空间舒适性和2020款ES陆尊版内饰\n{\"service_reply\": \"[车金AI] GL8确实是商务接待的热门选择，空间和舒适性都很好，而且2020款ES陆尊版内饰比较精致，不会显得老气。您目前预算大概多少？或者需要具体看配置吗？\", \"intent_tags\": [\"车辆推荐\", \"商务接待\", \"舒适性\"], \"tone_tags\": [\"专业\", \"引导\"], \"linked_categories\": [\"products\"], \"applicability_scope\": \"specific_product\", \"product_id\": \"gl8\", \"usable_as_template\": true, \"product_category\": \"\"}\n[车金AI] GL8确实是商务接待的热门选择，空间和舒适性都很好，而且2020款ES陆尊版内饰比较精致，不会显得老气。您目前预算大概多少？或者需要具体看配置吗？",
+      "hits": [
+        {
+          "chunk_id": "chunk_7943d074129d3b59",
+          "source_id": "source_6bbbc7f540d0df8c",
+          "score": 0.8972,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.4996,
+            "semantic": 0.2676,
+            "vector": 0.14,
+            "vector_similarity": 0.9264,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.8972
+          },
+          "text": "[2026-05-04T02:05:46] self: [车金AI] GL8确实是商务接待的热门选择，空间和舒适性都很好，而且2020款ES陆尊版内饰比较精致，不会显得老气。您目前预算大概多少？或者需要具体看配置吗？\n[2026-05-04T02:05:46] 许聪: 秦PLUS那台适合每天通勤吗？我主要市区跑"
+        },
+        {
+          "chunk_id": "chunk_d2ec0cebcf16c10c",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5547,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2058,
+            "semantic": 0.1399,
+            "vector": 0.139,
+            "vector_similarity": 0.7725,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5547
+          },
+          "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+        },
+        {
+          "chunk_id": "chunk_58029d4057022265",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5453,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1985,
+            "semantic": 0.1368,
+            "vector": 0.14,
+            "vector_similarity": 0.8183,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5453
+          },
+          "text": "险：电池、增程器、官方权益和保养记录以检测报告和人工核验为准。\n推荐话术：适合家庭六座、长途和新能源体验需求。\n商品名称：2021款长安CS75 PLUS 1.5T自动尊贵型\n型号/SKU：CHEJIN-CS75PLUS-2021\n类目：二手车/SUV\n关键词：CS75PLUS、长安CS75、国产SUV、家用SUV\n规格：2021年上牌，表显4.4万公里，1.5T自动挡，白色，配置高。\n价格：6.88万，库存：2台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后"
+        },
+        {
+          "chunk_id": "chunk_b73fd7e249648300",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5418,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1961,
+            "semantic": 0.1357,
+            "vector": 0.14,
+            "vector_similarity": 0.8122,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5418
+          },
+          "text": "。\n商品名称：2022款五菱宏光MINIEV马卡龙臻享款\n型号/SKU：CHEJIN-MINIEV-2022\n类目：二手车/微型电动车\n关键词：宏光MINIEV、五菱mini、代步电车、练手车\n规格：2022年上牌，表显1.6万公里，纯电微型车，粉色，城市通勤。\n价格：2.88万，库存：1台\n物流/过户：微型电动车跨城运输和充电条件需人工确认。\n售后/风险：续航、电池和低温表现以检测报告和使用场景说明为准。\n推荐话术：适合短途通勤、练手、接送孩子，长途或高速需求不推荐。\n商品名称：2020款本田雅阁260TURBO"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_3a80146eaea46f66b8a9",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ]
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

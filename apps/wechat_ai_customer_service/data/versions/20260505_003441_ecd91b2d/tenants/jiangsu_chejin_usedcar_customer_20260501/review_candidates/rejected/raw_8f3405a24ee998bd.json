@@ -1,0 +1,307 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_8f3405a24ee998bd",
+  "generated_at": "2026-05-04T02:31:16",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_6a1f29dfdad8c1bace29.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"customer_message\": \"\", \"service_reply\": \"蔚来ES6换电确实是它的一大特点，不过具体是电池租用还是买断、账号权益和当地政策这些，都得结合这台车的检测报告和厂家记录才能给准话。我让负责这台车的同事跟您对接，帮您把关键点都核实清楚。\", \"applicability_scope\": \"specific_product\", \"product_id\": \"es6\", \"additional_details\": {\"requires_handoff\": true, \"handoff_reason\": \"需要结合检测报告和厂家记录核实电池租用/买断、账号权益和当地政策\"}, \"product_category\": \"\"}",
+    "content_sha256": "083c0ffdb6a8abeae7213932189cce5451e0f0f55c44c0efef9b37f46d5ef55a",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_6a1f29dfdad8c1bace29",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_f524dae9414a5405d271",
+      "raw_msg_cd303049d73d78390357",
+      "raw_msg_e56c1e571734e394ba8e"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_413120c5b2dfbe68",
+        "source_id": "source_8cd2ab3dca40559f",
+        "score": 0.8713,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.5046,
+          "semantic": 0.2367,
+          "vector": 0.14,
+          "vector_similarity": 0.9388,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.8713
+        },
+        "text": "[2026-05-04 02:29:00] system: 02:29\n[2026-05-04T02:30:13] self: [车金AI] 蔚来ES6换电确实是它的一大特点，不过具体是电池租用还是买断、账号权益和当地政策这些，都得结合这台车的检测报告和厂家记录才能给准话。我让负责这台车的同事跟您对接，帮您把关键点都核实清楚。\n[2026-05-04T02:30:13] 许聪: 理想ONE适合一家六口吗？"
+      },
+      {
+        "chunk_id": "chunk_cd786001cc3051b2",
+        "source_id": "source_9d781bd39be1dcce",
+        "score": 0.616,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.3128,
+          "semantic": 0.1732,
+          "vector": 0.14,
+          "vector_similarity": 0.8167,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.616
+        },
+        "text": "[2026-05-04T02:27:24] self: [车金AI] Model 3那台重点看电池健康、辅助驾驶权益和账号状态，但这些都要结合检测报告和实车才能确认，系统没法直接给您准话。我让负责这台车的同事跟您对接，帮您把关键点都核实清楚。\n[2026-05-04T02:27:24] 许聪: 蔚来ES6换电这块能说说吗？"
+      },
+      {
+        "chunk_id": "chunk_d2ec0cebcf16c10c",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5473,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2006,
+          "semantic": 0.1367,
+          "vector": 0.14,
+          "vector_similarity": 0.8052,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5473
+        },
+        "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+      },
+      {
+        "chunk_id": "chunk_9a0d34760ad6ccae",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5468,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2006,
+          "semantic": 0.1361,
+          "vector": 0.14,
+          "vector_similarity": 0.8371,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5468
+        },
+        "text": "工确认。\n售后/风险：CVT变速箱状态、保养和车况以检测报告为准。\n推荐话术：适合6到7万预算、练手、家用代步和省油需求。\n商品名称：2019款大众朗逸1.5L自动舒适版\n型号/SKU：CHEJIN-LAVIDA-2019\n类目：二手车/紧凑型轿车\n关键词：朗逸、大众朗逸、德系代步、置换\n规格：2019年上牌，表显6.9万公里，1.5L自动挡，白色，通勤耐用。\n价格：5.98万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：易损件和保养历史以"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_445b0dcbfd1692fa243b",
+    "experience_id": "rag_exp_445b0dcbfd1692fa243b"
+  },
+  "detected_tags": [
+    "company",
+    "llm",
+    "rag_experience",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "chats",
+    "change_type": "llm_upsert_chats",
+    "summary": "关于蔚来ES6换电特点的客服话术并转人工",
+    "suggested_fields": {
+      "customer_message": "",
+      "service_reply": "蔚来ES6换电确实是它的一大特点，不过具体是电池租用还是买断、账号权益和当地政策这些，都得结合这台车的检测报告和厂家记录才能给准话。我让负责这台车的同事跟您对接，帮您把关键点都核实清楚。",
+      "applicability_scope": "specific_product",
+      "product_id": "es6",
+      "product_category": "",
+      "additional_details": {
+        "requires_handoff": true,
+        "handoff_reason": "需要结合检测报告和厂家记录核实电池租用/买断、账号权益和当地政策",
+        "原始资料摘录": "{\"customer_message\": \"\", \"service_reply\": \"蔚来ES6换电确实是它的一大特点，不过具体是电池租用还是买断、账号权益和当地政策这些，都得结合这台车的检测报告和厂家记录才能给准话。我让负责这台车的同事跟您对接，帮您把关键点都核实清楚。\", \"applicability_scope\": \"specific_product\", \"product_id\": \"es6\", \"additional_details\": {\"requires_handoff\": true, \"handoff_reason\": \"需要结合检测报告和厂家记录核实电池租用/买断、账号权益和当地政策\"}, \"product_category\": \"\"}"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "chats",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "chats",
+        "id": "chat_es6_battery_swap",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_6a1f29dfdad8c1bace29.txt",
+          "candidate_id": "raw_8f3405a24ee998bd",
+          "rag_experience_id": "rag_exp_445b0dcbfd1692fa243b",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "customer_message": "",
+          "service_reply": "蔚来ES6换电确实是它的一大特点，不过具体是电池租用还是买断、账号权益和当地政策这些，都得结合这台车的检测报告和厂家记录才能给准话。我让负责这台车的同事跟您对接，帮您把关键点都核实清楚。",
+          "applicability_scope": "specific_product",
+          "product_id": "es6",
+          "product_category": "",
+          "additional_details": {
+            "requires_handoff": true,
+            "handoff_reason": "需要结合检测报告和厂家记录核实电池租用/买断、账号权益和当地政策",
+            "原始资料摘录": "{\"customer_message\": \"\", \"service_reply\": \"蔚来ES6换电确实是它的一大特点，不过具体是电池租用还是买断、账号权益和当地政策这些，都得结合这台车的检测报告和厂家记录才能给准话。我让负责这台车的同事跟您对接，帮您把关键点都核实清楚。\", \"applicability_scope\": \"specific_product\", \"product_id\": \"es6\", \"additional_details\": {\"requires_handoff\": true, \"handoff_reason\": \"需要结合检测报告和厂家记录核实电池租用/买断、账号权益和当地政策\"}, \"product_category\": \"\"}"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "handoff_reason",
+      "requires_handoff",
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "rejected",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_6a1f29dfdad8c1bace29",
+    "source_raw_message_ids": [
+      "raw_msg_f524dae9414a5405d271",
+      "raw_msg_cd303049d73d78390357",
+      "raw_msg_e56c1e571734e394ba8e"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_8cd2ab3dca40559f",
+      "chunk_count": 1,
+      "query": "关于蔚来ES6换电特点的客服话术并转人工\n{\"customer_message\": \"\", \"service_reply\": \"蔚来ES6换电确实是它的一大特点，不过具体是电池租用还是买断、账号权益和当地政策这些，都得结合这台车的检测报告和厂家记录才能给准话。我让负责这台车的同事跟您对接，帮您把关键点都核实清楚。\", \"applicability_scope\": \"specific_product\", \"product_id\": \"es6\", \"additional_details\": {\"requires_handoff\": true, \"handoff_reason\": \"需要结合检测报告和厂家记录核实电池租用/买断、账号权益和当地政策\"}, \"product_category\": \"\"}\n蔚来ES6换电确实是它的一大特点，不过具体是电池租用还是买断、账号权益和当地政策这些，都得结合这台车的检测报告和厂家记录才能给准话。我让负责这台车的同事跟您对接，帮您把关键点都核实清楚。",
+      "hits": [
+        {
+          "chunk_id": "chunk_413120c5b2dfbe68",
+          "source_id": "source_8cd2ab3dca40559f",
+          "score": 0.8713,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.5046,
+            "semantic": 0.2367,
+            "vector": 0.14,
+            "vector_similarity": 0.9388,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.8713
+          },
+          "text": "[2026-05-04 02:29:00] system: 02:29\n[2026-05-04T02:30:13] self: [车金AI] 蔚来ES6换电确实是它的一大特点，不过具体是电池租用还是买断、账号权益和当地政策这些，都得结合这台车的检测报告和厂家记录才能给准话。我让负责这台车的同事跟您对接，帮您把关键点都核实清楚。\n[2026-05-04T02:30:13] 许聪: 理想ONE适合一家六口吗？"
+        },
+        {
+          "chunk_id": "chunk_cd786001cc3051b2",
+          "source_id": "source_9d781bd39be1dcce",
+          "score": 0.616,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.3128,
+            "semantic": 0.1732,
+            "vector": 0.14,
+            "vector_similarity": 0.8167,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.616
+          },
+          "text": "[2026-05-04T02:27:24] self: [车金AI] Model 3那台重点看电池健康、辅助驾驶权益和账号状态，但这些都要结合检测报告和实车才能确认，系统没法直接给您准话。我让负责这台车的同事跟您对接，帮您把关键点都核实清楚。\n[2026-05-04T02:27:24] 许聪: 蔚来ES6换电这块能说说吗？"
+        },
+        {
+          "chunk_id": "chunk_d2ec0cebcf16c10c",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5473,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2006,
+            "semantic": 0.1367,
+            "vector": 0.14,
+            "vector_similarity": 0.8052,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5473
+          },
+          "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+        },
+        {
+          "chunk_id": "chunk_9a0d34760ad6ccae",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5468,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2006,
+            "semantic": 0.1361,
+            "vector": 0.14,
+            "vector_similarity": 0.8371,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5468
+          },
+          "text": "工确认。\n售后/风险：CVT变速箱状态、保养和车况以检测报告为准。\n推荐话术：适合6到7万预算、练手、家用代步和省油需求。\n商品名称：2019款大众朗逸1.5L自动舒适版\n型号/SKU：CHEJIN-LAVIDA-2019\n类目：二手车/紧凑型轿车\n关键词：朗逸、大众朗逸、德系代步、置换\n规格：2019年上牌，表显6.9万公里，1.5L自动挡，白色，通勤耐用。\n价格：5.98万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：易损件和保养历史以"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_445b0dcbfd1692fa243b",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "rejected_at": "2026-05-04T18:41:18",
+    "reason": "legacy_auto_candidate_cleanup_20260504: ???????????????????????RAG?????????????????"
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

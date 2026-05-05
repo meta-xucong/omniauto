@@ -1,0 +1,324 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_b0ba6020fa37c519",
+  "generated_at": "2026-05-04T04:20:50",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_d71f6063c31b300e6040.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"customer_message\": \"如果我把你的车都买下，可以跟我谈恋爱吗\", \"service_reply\": null, \"intent_tags\": [\"调情\", \"玩笑\", \"购买意向\"], \"tone_tags\": [\"幽默\", \"非正式\"], \"applicability_scope\": \"global\", \"additional_details\": {\"note\": \"客户疑似玩笑，无具体商品信息\"}, \"product_id\": \"\", \"product_category\": \"\"}",
+    "content_sha256": "4a825df5b14f91ad908756667b0f5bb1bea9b2ea3a890b8293680a49ac6d0e70",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_d71f6063c31b300e6040",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_88072ae42b67a85b5727"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_fdb0c7dd6b08b1e1",
+        "source_id": "source_8f3a7384ea6c2a66",
+        "score": 0.6104,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.3122,
+          "semantic": 0.1862,
+          "vector": 0.122,
+          "vector_similarity": 0.678,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.6104
+        },
+        "text": "[2026-05-04T04:20:23] 许聪: 如果我把你的车都买下，可以跟我谈恋爱吗"
+      },
+      {
+        "chunk_id": "chunk_bd5bc67861c08740",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.4943,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1738,
+          "semantic": 0.126,
+          "vector": 0.1244,
+          "vector_similarity": 0.6914,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.4943
+        },
+        "text": "品名称：2021款捷达VS5 280TSI自动荣耀型\n型号/SKU：CHEJIN-JETTAVS5-2021\n类目：二手车/SUV\n关键词：捷达VS5、VS5、德系SUV、预算SUV\n规格：2021年上牌，表显3.8万公里，1.4T自动挡，白色。\n价格：6.38万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：涡轮、变速箱和保养以检测报告为准。\n推荐话术：适合预算6到7万、想买合资SUV的客户。\n商品名称：2017款福特福克斯1.6L自动风尚"
+      },
+      {
+        "chunk_id": "chunk_58029d4057022265",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.4745,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1472,
+          "semantic": 0.1245,
+          "vector": 0.1328,
+          "vector_similarity": 0.7378,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.4745
+        },
+        "text": "险：电池、增程器、官方权益和保养记录以检测报告和人工核验为准。\n推荐话术：适合家庭六座、长途和新能源体验需求。\n商品名称：2021款长安CS75 PLUS 1.5T自动尊贵型\n型号/SKU：CHEJIN-CS75PLUS-2021\n类目：二手车/SUV\n关键词：CS75PLUS、长安CS75、国产SUV、家用SUV\n规格：2021年上牌，表显4.4万公里，1.5T自动挡，白色，配置高。\n价格：6.88万，库存：2台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后"
+      },
+      {
+        "chunk_id": "chunk_99cc4e7f8c7061b0",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.4556,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1341,
+          "semantic": 0.1245,
+          "vector": 0.127,
+          "vector_similarity": 0.7053,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.4556
+        },
+        "text": "、提档、当地新能源指标和运输方式。\n售后/风险：电池健康、辅助驾驶功能和官方权益以检测报告及账号核验为准。\n推荐话术：适合想体验纯电、智能化和低用车成本的客户，电池和权益必须人工确认。\n商品名称：2020款奥迪A4L 40TFSI时尚动感型\n型号/SKU：CHEJIN-A4L-2020\n类目：二手车/豪华轿车\n关键词：奥迪A4L、A4L、豪华轿车、婚庆、商务\n规格：2020年上牌，表显6.8万公里，2.0T自动挡，黑色，保养记录较完整。\n价格：15.88万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_a84f75b9a3ca5059f1dd",
+    "experience_id": "rag_exp_a84f75b9a3ca5059f1dd"
+  },
+  "detected_tags": [
+    "llm",
+    "rag_experience",
+    "unknown",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "chats",
+    "change_type": "llm_upsert_chats",
+    "summary": "客户询问购买全部车辆是否能谈恋爱",
+    "suggested_fields": {
+      "customer_message": "如果我把你的车都买下，可以跟我谈恋爱吗",
+      "service_reply": null,
+      "intent_tags": [
+        "调情",
+        "玩笑",
+        "购买意向"
+      ],
+      "tone_tags": [
+        "幽默",
+        "非正式"
+      ],
+      "applicability_scope": "global",
+      "product_id": "",
+      "product_category": "",
+      "additional_details": {
+        "note": "客户疑似玩笑，无具体商品信息",
+        "原始资料摘录": "{\"customer_message\": \"如果我把你的车都买下，可以跟我谈恋爱吗\", \"service_reply\": null, \"intent_tags\": [\"调情\", \"玩笑\", \"购买意向\"], \"tone_tags\": [\"幽默\", \"非正式\"], \"applicability_scope\": \"global\", \"additional_details\": {\"note\": \"客户疑似玩笑，无具体商品信息\"}, \"product_id\": \"\", \"product_category\": \"\"}"
+      }
+    },
+    "missing_fields": [
+      "service_reply"
+    ],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "chats",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "chats",
+        "id": "chat_flirt_buy_all_cars",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_d71f6063c31b300e6040.txt",
+          "candidate_id": "raw_b0ba6020fa37c519",
+          "rag_experience_id": "rag_exp_a84f75b9a3ca5059f1dd",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "customer_message": "如果我把你的车都买下，可以跟我谈恋爱吗",
+          "service_reply": null,
+          "intent_tags": [
+            "调情",
+            "玩笑",
+            "购买意向"
+          ],
+          "tone_tags": [
+            "幽默",
+            "非正式"
+          ],
+          "applicability_scope": "global",
+          "product_id": "",
+          "product_category": "",
+          "additional_details": {
+            "note": "客户疑似玩笑，无具体商品信息",
+            "原始资料摘录": "{\"customer_message\": \"如果我把你的车都买下，可以跟我谈恋爱吗\", \"service_reply\": null, \"intent_tags\": [\"调情\", \"玩笑\", \"购买意向\"], \"tone_tags\": [\"幽默\", \"非正式\"], \"applicability_scope\": \"global\", \"additional_details\": {\"note\": \"客户疑似玩笑，无具体商品信息\"}, \"product_id\": \"\", \"product_category\": \"\"}"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "needs_more_info",
+    "ok": false,
+    "confidence": 0.72,
+    "missing_fields": [
+      "service_reply"
+    ],
+    "missing_labels": [
+      "客服回复"
+    ],
+    "question": "还需要补充：客服回复。请补齐后再应用入库。",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "note",
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "pending",
+    "completeness_status": "needs_more_info",
+    "missing_fields": [
+      "service_reply"
+    ],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_d71f6063c31b300e6040",
+    "source_raw_message_ids": [
+      "raw_msg_88072ae42b67a85b5727"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_8f3a7384ea6c2a66",
+      "chunk_count": 1,
+      "query": "客户询问购买全部车辆是否能谈恋爱\n{\"customer_message\": \"如果我把你的车都买下，可以跟我谈恋爱吗\", \"service_reply\": null, \"intent_tags\": [\"调情\", \"玩笑\", \"购买意向\"], \"tone_tags\": [\"幽默\", \"非正式\"], \"applicability_scope\": \"global\", \"additional_details\": {\"note\": \"客户疑似玩笑，无具体商品信息\"}, \"product_id\": \"\", \"product_category\": \"\"}",
+      "hits": [
+        {
+          "chunk_id": "chunk_fdb0c7dd6b08b1e1",
+          "source_id": "source_8f3a7384ea6c2a66",
+          "score": 0.6104,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.3122,
+            "semantic": 0.1862,
+            "vector": 0.122,
+            "vector_similarity": 0.678,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.6104
+          },
+          "text": "[2026-05-04T04:20:23] 许聪: 如果我把你的车都买下，可以跟我谈恋爱吗"
+        },
+        {
+          "chunk_id": "chunk_bd5bc67861c08740",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.4943,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1738,
+            "semantic": 0.126,
+            "vector": 0.1244,
+            "vector_similarity": 0.6914,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.4943
+          },
+          "text": "品名称：2021款捷达VS5 280TSI自动荣耀型\n型号/SKU：CHEJIN-JETTAVS5-2021\n类目：二手车/SUV\n关键词：捷达VS5、VS5、德系SUV、预算SUV\n规格：2021年上牌，表显3.8万公里，1.4T自动挡，白色。\n价格：6.38万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：涡轮、变速箱和保养以检测报告为准。\n推荐话术：适合预算6到7万、想买合资SUV的客户。\n商品名称：2017款福特福克斯1.6L自动风尚"
+        },
+        {
+          "chunk_id": "chunk_58029d4057022265",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.4745,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1472,
+            "semantic": 0.1245,
+            "vector": 0.1328,
+            "vector_similarity": 0.7378,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.4745
+          },
+          "text": "险：电池、增程器、官方权益和保养记录以检测报告和人工核验为准。\n推荐话术：适合家庭六座、长途和新能源体验需求。\n商品名称：2021款长安CS75 PLUS 1.5T自动尊贵型\n型号/SKU：CHEJIN-CS75PLUS-2021\n类目：二手车/SUV\n关键词：CS75PLUS、长安CS75、国产SUV、家用SUV\n规格：2021年上牌，表显4.4万公里，1.5T自动挡，白色，配置高。\n价格：6.88万，库存：2台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后"
+        },
+        {
+          "chunk_id": "chunk_99cc4e7f8c7061b0",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.4556,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1341,
+            "semantic": 0.1245,
+            "vector": 0.127,
+            "vector_similarity": 0.7053,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.4556
+          },
+          "text": "、提档、当地新能源指标和运输方式。\n售后/风险：电池健康、辅助驾驶功能和官方权益以检测报告及账号核验为准。\n推荐话术：适合想体验纯电、智能化和低用车成本的客户，电池和权益必须人工确认。\n商品名称：2020款奥迪A4L 40TFSI时尚动感型\n型号/SKU：CHEJIN-A4L-2020\n类目：二手车/豪华轿车\n关键词：奥迪A4L、A4L、豪华轿车、婚庆、商务\n规格：2020年上牌，表显6.8万公里，2.0T自动挡，黑色，保养记录较完整。\n价格：15.88万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_a84f75b9a3ca5059f1dd",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ]
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

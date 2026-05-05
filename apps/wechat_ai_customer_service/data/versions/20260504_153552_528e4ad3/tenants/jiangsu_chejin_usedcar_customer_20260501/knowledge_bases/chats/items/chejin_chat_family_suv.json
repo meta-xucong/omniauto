@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "category_id": "chats",
+  "id": "chejin_chat_family_suv",
+  "status": "active",
+  "source": {
+    "type": "demo_fixture",
+    "batch_token": "CHEJIN_DEMO_20260503_203628",
+    "domain": "used_car"
+  },
+  "data": {
+    "customer_message": "家里两个孩子，想要SUV空间大一点",
+    "service_reply": "可以优先看CR-V、宋PLUS、CS75 PLUS或汉兰达。您预算大概多少，是否需要七座或新能源？",
+    "intent_tags": [
+      "家用SUV",
+      "需求澄清",
+      "CHEJIN_DEMO_20260503_203628"
+    ],
+    "tone_tags": [
+      "专业",
+      "克制",
+      "不乱承诺"
+    ],
+    "linked_categories": [
+      "products",
+      "policies"
+    ],
+    "linked_item_ids": [],
+    "applicability_scope": "product_category",
+    "product_id": "",
+    "product_category": "二手车/SUV",
+    "usable_as_template": true,
+    "additional_details": {
+      "演示批次": "CHEJIN_DEMO_20260503_203628",
+      "客户可读摘要": "真实客服可直接参考的问答样例。"
+    }
+  },
+  "runtime": {
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "risk_level": "normal",
+    "operator_alert": false
+  },
+  "review_state": {
+    "is_new": true,
+    "new_reason": "newly_added_formal_knowledge",
+    "marked_at": "2026-05-03T20:36:28",
+    "updated_at": "2026-05-03T20:36:28",
+    "read_at": "",
+    "read_by": "",
+    "source": {
+      "source_module": "jiangsu_chejin_demo_seed",
+      "target_category": "chats",
+      "item_id": "chejin_chat_family_suv"
+    }
+  },
+  "metadata": {
+    "created_at": "2026-05-03T20:36:28",
+    "updated_at": "2026-05-03T20:36:28",
+    "created_by": "admin",
+    "updated_by": "admin"
+  }
+}

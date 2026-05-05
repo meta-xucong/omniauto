@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_c1b89c3f08be53e0",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_6ad264dea870359255d3.txt",
+    "content_hash": "f2da20397b2ccfc3a708deabb0665c46",
+    "status": "active",
+    "created_at": "2026-05-04T02:37:01",
+    "updated_at": "2026-05-04T02:37:01"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_adbbf62fccfd1011",
+      "source_id": "source_c1b89c3f08be53e0",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_6ad264dea870359255d3.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-04 02:36:00] system: 02:36\n[2026-05-04T02:37:00] self: [车金AI] 福克斯那台已经卖掉了。目前店里便宜的练手车有台2022款五菱MINIEV马卡龙，2.88万，纯电，适合短途代步；还有台2021款轩逸，6.88万，自动挡省油，家用练手都不错。您更倾向于油车还是电车？或者预算大概多少？\n[2026-05-04T02:37:00] 许聪: 我预算6万左右，想买个别太费油的代步车，有啥能看？",
+      "char_count": 231,
+      "status": "active",
+      "created_at": "2026-05-04T02:37:01"
+    }
+  ]
+}

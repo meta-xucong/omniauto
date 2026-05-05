@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_76e6142eb73f046c",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_38965568a58be5ae8674.txt",
+    "content_hash": "eec8e07130cffab032e9ad9e324a3090",
+    "status": "active",
+    "created_at": "2026-05-04T04:16:24",
+    "updated_at": "2026-05-04T04:16:24"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_95acdcedc240dacf",
+      "source_id": "source_76e6142eb73f046c",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_38965568a58be5ae8674.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-04 04:16:00] system: 04:16\n[2026-05-04T04:16:23] self: [车金AI] 许哥，贷款能不能过，真得看资方的审核，我这边没法给您打包票。我让销售同事帮您对接，让他根据您的条件看看方案，方便留个电话吗？",
+      "char_count": 133,
+      "status": "active",
+      "created_at": "2026-05-04T04:16:24"
+    }
+  ]
+}

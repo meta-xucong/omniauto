@@ -1,0 +1,318 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_c0b3450100769286",
+  "generated_at": "2026-05-04T02:29:11",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_ab65115d35fa88926ecf.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"product_id\": \"nio-es6\", \"title\": \"蔚来ES6换电咨询\", \"question\": \"蔚来ES6换电这块能说说吗？\", \"answer\": \"\"}",
+    "content_sha256": "340beb65599585a56f039816b9489736bff84883ff9010c5e414ca34aa90fe47",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_ab65115d35fa88926ecf",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_7802c9938d6da2f93f4a",
+      "raw_msg_4f80296eddbedd9d3511"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_cd786001cc3051b2",
+        "source_id": "source_9d781bd39be1dcce",
+        "score": 0.6666,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.3571,
+          "semantic": 0.2057,
+          "vector": 0.1138,
+          "vector_similarity": 0.632,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.6666
+        },
+        "text": "[2026-05-04T02:27:24] self: [车金AI] Model 3那台重点看电池健康、辅助驾驶权益和账号状态，但这些都要结合检测报告和实车才能确认，系统没法直接给您准话。我让负责这台车的同事跟您对接，帮您把关键点都核实清楚。\n[2026-05-04T02:27:24] 许聪: 蔚来ES6换电这块能说说吗？"
+      },
+      {
+        "chunk_id": "chunk_2880218003265ab1",
+        "source_id": "source_bb395d5ecba99f8b",
+        "score": 0.444,
+        "category": "policies",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2257,
+          "semantic": 0.1486,
+          "vector": 0.1047,
+          "vector_similarity": 0.5818,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.045,
+          "risk_penalty": 0.08,
+          "final": 0.444
+        },
+        "text": "3628\n标准说明：AI 可以解释需要人工测算首付和月供，但不得承诺贷款包过、固定利率、固定月供或不查征信。\n规则：置换资料收集规则\n触发词：置换、卖车、旧车、评估、收车、CHEJIN_DEMO_20260503_203628\n标准说明：客户咨询置换时，AI 先收集旧车品牌车型、上牌时间、公里数、车况、城市、是否贷款和期望价；估价和收车价必须人工复核。\n规则：车况检测报告解释规则\n触发词：检测报告、第三方检测、车况、保养记录、CHEJIN_DEMO_20260503_203628\n标准说明：AI 可以提示车况以检测"
+      },
+      {
+        "chunk_id": "chunk_2b56ca7d3ec3952e",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.4173,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1872,
+          "semantic": 0.1363,
+          "vector": 0.1037,
+          "vector_similarity": 0.5764,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.08,
+          "final": 0.4173
+        },
+        "text": "车/豪华SUV\n关键词：Macan、保时捷Macan、豪华SUV、高端车\n规格：2018年上牌，表显7.2万公里，2.0T自动挡，黑色，需预约看车。\n价格：23.80万，库存：1台\n物流/过户：高端车看车、试驾、订金和付款方案必须人工预约确认。\n售后/风险：保养、选配、事故记录、按揭和产权状态必须人工核验。\n推荐话术：适合预算20万以上、品牌和外观优先的客户，高端车必须转人工推进。\n商品名称：2021款比亚迪汉EV超长续航豪华型\n型号/SKU：CHEJIN-HANEV-2021\n类目：二手车/新能源轿车\n关键词：汉"
+      },
+      {
+        "chunk_id": "chunk_bd5bc67861c08740",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.3813,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1195,
+          "semantic": 0.1079,
+          "vector": 0.0838,
+          "vector_similarity": 0.4656,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.3813
+        },
+        "text": "品名称：2021款捷达VS5 280TSI自动荣耀型\n型号/SKU：CHEJIN-JETTAVS5-2021\n类目：二手车/SUV\n关键词：捷达VS5、VS5、德系SUV、预算SUV\n规格：2021年上牌，表显3.8万公里，1.4T自动挡，白色。\n价格：6.38万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：涡轮、变速箱和保养以检测报告为准。\n推荐话术：适合预算6到7万、想买合资SUV的客户。\n商品名称：2017款福特福克斯1.6L自动风尚"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_7ab1441f1c23a1483611",
+    "experience_id": "rag_exp_7ab1441f1c23a1483611"
+  },
+  "detected_tags": [
+    "llm",
+    "rag_experience",
+    "unknown",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "product_faq",
+    "change_type": "llm_upsert_product_faq",
+    "summary": "??ES6???????????",
+    "suggested_fields": {
+      "product_id": "chejin_es6_2020_420",
+      "title": "??ES6???????????",
+      "question": "??ES6??????????????",
+      "answer": "??ES6?????????????????????????????????/???????????????AI????????????SUV???????????????",
+      "additional_details": {
+        "原始资料摘录": "{\"product_id\": \"nio-es6\", \"title\": \"蔚来ES6换电咨询\", \"question\": \"蔚来ES6换电这块能说说吗？\", \"answer\": \"\"}"
+      },
+      "keywords": [
+        "??ES6",
+        "??",
+        "????",
+        "?????"
+      ]
+    },
+    "missing_fields": [
+      "answer"
+    ],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "product_faq",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "product_faq",
+        "id": "seed_92a0aa1d8f2946113cfc",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_ab65115d35fa88926ecf.txt",
+          "candidate_id": "raw_c0b3450100769286",
+          "rag_experience_id": "rag_exp_7ab1441f1c23a1483611",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "product_id": "chejin_es6_2020_420",
+          "title": "??ES6???????????",
+          "question": "??ES6??????????????",
+          "answer": "??ES6?????????????????????????????????/???????????????AI????????????SUV???????????????",
+          "additional_details": {
+            "原始资料摘录": "{\"product_id\": \"nio-es6\", \"title\": \"蔚来ES6换电咨询\", \"question\": \"蔚来ES6换电这块能说说吗？\", \"answer\": \"\"}"
+          },
+          "keywords": [
+            "??ES6",
+            "??",
+            "????",
+            "?????"
+          ]
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "confidence": 0.86,
+    "missing_fields": [],
+    "warnings": [
+      "?????????????????"
+    ]
+  },
+  "review": {
+    "status": "pending",
+    "completeness_status": "needs_more_info",
+    "missing_fields": [
+      "answer"
+    ],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_ab65115d35fa88926ecf",
+    "source_raw_message_ids": [
+      "raw_msg_7802c9938d6da2f93f4a",
+      "raw_msg_4f80296eddbedd9d3511"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_9d781bd39be1dcce",
+      "chunk_count": 1,
+      "query": "客户询问蔚来ES6换电，但无答案\n{\"product_id\": \"nio-es6\", \"title\": \"蔚来ES6换电咨询\", \"question\": \"蔚来ES6换电这块能说说吗？\", \"answer\": \"\"}\n蔚来ES6换电咨询",
+      "hits": [
+        {
+          "chunk_id": "chunk_cd786001cc3051b2",
+          "source_id": "source_9d781bd39be1dcce",
+          "score": 0.6666,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.3571,
+            "semantic": 0.2057,
+            "vector": 0.1138,
+            "vector_similarity": 0.632,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.6666
+          },
+          "text": "[2026-05-04T02:27:24] self: [车金AI] Model 3那台重点看电池健康、辅助驾驶权益和账号状态，但这些都要结合检测报告和实车才能确认，系统没法直接给您准话。我让负责这台车的同事跟您对接，帮您把关键点都核实清楚。\n[2026-05-04T02:27:24] 许聪: 蔚来ES6换电这块能说说吗？"
+        },
+        {
+          "chunk_id": "chunk_2880218003265ab1",
+          "source_id": "source_bb395d5ecba99f8b",
+          "score": 0.444,
+          "category": "policies",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2257,
+            "semantic": 0.1486,
+            "vector": 0.1047,
+            "vector_similarity": 0.5818,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.045,
+            "risk_penalty": 0.08,
+            "final": 0.444
+          },
+          "text": "3628\n标准说明：AI 可以解释需要人工测算首付和月供，但不得承诺贷款包过、固定利率、固定月供或不查征信。\n规则：置换资料收集规则\n触发词：置换、卖车、旧车、评估、收车、CHEJIN_DEMO_20260503_203628\n标准说明：客户咨询置换时，AI 先收集旧车品牌车型、上牌时间、公里数、车况、城市、是否贷款和期望价；估价和收车价必须人工复核。\n规则：车况检测报告解释规则\n触发词：检测报告、第三方检测、车况、保养记录、CHEJIN_DEMO_20260503_203628\n标准说明：AI 可以提示车况以检测"
+        },
+        {
+          "chunk_id": "chunk_2b56ca7d3ec3952e",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.4173,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1872,
+            "semantic": 0.1363,
+            "vector": 0.1037,
+            "vector_similarity": 0.5764,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.08,
+            "final": 0.4173
+          },
+          "text": "车/豪华SUV\n关键词：Macan、保时捷Macan、豪华SUV、高端车\n规格：2018年上牌，表显7.2万公里，2.0T自动挡，黑色，需预约看车。\n价格：23.80万，库存：1台\n物流/过户：高端车看车、试驾、订金和付款方案必须人工预约确认。\n售后/风险：保养、选配、事故记录、按揭和产权状态必须人工核验。\n推荐话术：适合预算20万以上、品牌和外观优先的客户，高端车必须转人工推进。\n商品名称：2021款比亚迪汉EV超长续航豪华型\n型号/SKU：CHEJIN-HANEV-2021\n类目：二手车/新能源轿车\n关键词：汉"
+        },
+        {
+          "chunk_id": "chunk_bd5bc67861c08740",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.3813,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1195,
+            "semantic": 0.1079,
+            "vector": 0.0838,
+            "vector_similarity": 0.4656,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.3813
+          },
+          "text": "品名称：2021款捷达VS5 280TSI自动荣耀型\n型号/SKU：CHEJIN-JETTAVS5-2021\n类目：二手车/SUV\n关键词：捷达VS5、VS5、德系SUV、预算SUV\n规格：2021年上牌，表显3.8万公里，1.4T自动挡，白色。\n价格：6.38万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：涡轮、变速箱和保养以检测报告为准。\n推荐话术：适合预算6到7万、想买合资SUV的客户。\n商品名称：2017款福特福克斯1.6L自动风尚"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_7ab1441f1c23a1483611",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "previous_reject_reason": "?????????????AI/??????????????????????????????????????????AI????",
+    "previous_rejected_at": "2026-05-04T15:24:47",
+    "updated_at": "2026-05-04T18:58:38",
+    "reopened_at": "2026-05-04T18:58:38",
+    "reopened_by": "codex_test_seed",
+    "reopened_reason": "direct test seed: restored as pending candidate for manual review regression",
+    "test_seed_direct_fill": true
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ],
+  "test_seed": {
+    "seed_id": "direct_test_fill_20260504_v2",
+    "direct_fill": true
+  }
+}

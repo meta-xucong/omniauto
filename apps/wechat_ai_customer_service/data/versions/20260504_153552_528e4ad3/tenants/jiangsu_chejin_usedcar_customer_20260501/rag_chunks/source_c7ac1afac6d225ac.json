@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_c7ac1afac6d225ac",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_fa849f37456858ce097b.txt",
+    "content_hash": "26fc595b36d0caf7d0a927bb2aaa398a",
+    "status": "active",
+    "created_at": "2026-05-03T04:39:24",
+    "updated_at": "2026-05-03T04:39:24"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_928ea12a188f87ad",
+      "source_id": "source_c7ac1afac6d225ac",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_fa849f37456858ce097b.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-03T04:39:24] self: 姓名：张先生\n电话：13900001111\n预算：8万\n车型：凯美瑞或思域\n到店时间：明天下午",
+      "char_count": 75,
+      "status": "active",
+      "created_at": "2026-05-03T04:39:24"
+    }
+  ]
+}

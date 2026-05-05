@@ -1,0 +1,327 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_a1997c1c56a58c83",
+  "generated_at": "2026-05-04T02:10:15",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_eb5e7a05f3a2f90a32e3.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"customer_message\": \"宝马320那台是运动套装吗，适合年轻人开不？\", \"service_reply\": \"\", \"intent_tags\": [\"product_inquiry\", \"suitability\"], \"tone_tags\": [\"neutral\"], \"linked_categories\": [\"products\"], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\", \"usable_as_template\": false, \"additional_details\": {}}",
+    "content_sha256": "e56bdb9cb2c8a7bc344cb0945f69696a1f115c4404f28ecff7b96ac7ee956909",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_eb5e7a05f3a2f90a32e3",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_48844ce41207fbcbf0f5"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_95712ea979bb2910",
+        "source_id": "source_71f8ef433ce3650e",
+        "score": 0.6346,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.3491,
+          "semantic": 0.1786,
+          "vector": 0.1169,
+          "vector_similarity": 0.6494,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.6346
+        },
+        "text": "[2026-05-04T02:09:30] 许聪: 宝马320那台是运动套装吗，适合年轻人开不？"
+      },
+      {
+        "chunk_id": "chunk_d2ec0cebcf16c10c",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5484,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2111,
+          "semantic": 0.14,
+          "vector": 0.1273,
+          "vector_similarity": 0.7073,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5484
+        },
+        "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+      },
+      {
+        "chunk_id": "chunk_bd5bc67861c08740",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.4924,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1665,
+          "semantic": 0.13,
+          "vector": 0.126,
+          "vector_similarity": 0.6998,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.4924
+        },
+        "text": "品名称：2021款捷达VS5 280TSI自动荣耀型\n型号/SKU：CHEJIN-JETTAVS5-2021\n类目：二手车/SUV\n关键词：捷达VS5、VS5、德系SUV、预算SUV\n规格：2021年上牌，表显3.8万公里，1.4T自动挡，白色。\n价格：6.38万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：涡轮、变速箱和保养以检测报告为准。\n推荐话术：适合预算6到7万、想买合资SUV的客户。\n商品名称：2017款福特福克斯1.6L自动风尚"
+      },
+      {
+        "chunk_id": "chunk_c7dfee0c99fa8158",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.4592,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2009,
+          "semantic": 0.1371,
+          "vector": 0.1312,
+          "vector_similarity": 0.7287,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.08,
+          "final": 0.4592
+        },
+        "text": "# 车辆库存总表\n演示批次：CHEJIN_DEMO_20260503_203628\n用途：客户演示用二手车库存，覆盖轿车、SUV、MPV、新能源、高端车、已售归档等场景。\n商品名称：2021款丰田凯美瑞2.0G豪华版\n型号/SKU：CHEJIN-CAMRY-2021G\n类目：二手车/中级轿车\n关键词：凯美瑞、丰田凯美瑞、8万预算、家用通勤、省油自动挡\n规格：2021年上牌，表显4.8万公里，2.0L自动挡，白色，南京现车，一手家用车。\n价格：8.98万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_1d2186e870eedfdcdb06",
+    "experience_id": "rag_exp_1d2186e870eedfdcdb06"
+  },
+  "detected_tags": [
+    "llm",
+    "rag_experience",
+    "unknown",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "chats",
+    "change_type": "llm_upsert_chats",
+    "summary": "客户询问宝马320是否为运动套装及是否适合年轻人",
+    "suggested_fields": {
+      "customer_message": "宝马320那台是运动套装吗，适合年轻人开不？",
+      "service_reply": "",
+      "intent_tags": [
+        "product_inquiry",
+        "suitability"
+      ],
+      "tone_tags": [
+        "neutral"
+      ],
+      "linked_categories": [
+        "products"
+      ],
+      "linked_item_ids": [],
+      "applicability_scope": "global",
+      "product_id": "",
+      "product_category": "",
+      "usable_as_template": false,
+      "additional_details": {
+        "原始资料摘录": "{\"customer_message\": \"宝马320那台是运动套装吗，适合年轻人开不？\", \"service_reply\": \"\", \"intent_tags\": [\"product_inquiry\", \"suitability\"], \"tone_tags\": [\"neutral\"], \"linked_categories\": [\"products\"], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\", \"usable_as_template\": false, \"additional_details\": {}}"
+      }
+    },
+    "missing_fields": [
+      "service_reply"
+    ],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "chats",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "chats",
+        "id": "chat_20260504_020930",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_eb5e7a05f3a2f90a32e3.txt",
+          "candidate_id": "raw_a1997c1c56a58c83",
+          "rag_experience_id": "rag_exp_1d2186e870eedfdcdb06",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "customer_message": "宝马320那台是运动套装吗，适合年轻人开不？",
+          "service_reply": "",
+          "intent_tags": [
+            "product_inquiry",
+            "suitability"
+          ],
+          "tone_tags": [
+            "neutral"
+          ],
+          "linked_categories": [
+            "products"
+          ],
+          "linked_item_ids": [],
+          "applicability_scope": "global",
+          "product_id": "",
+          "product_category": "",
+          "usable_as_template": false,
+          "additional_details": {
+            "原始资料摘录": "{\"customer_message\": \"宝马320那台是运动套装吗，适合年轻人开不？\", \"service_reply\": \"\", \"intent_tags\": [\"product_inquiry\", \"suitability\"], \"tone_tags\": [\"neutral\"], \"linked_categories\": [\"products\"], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\", \"usable_as_template\": false, \"additional_details\": {}}"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "needs_more_info",
+    "ok": false,
+    "confidence": 0.72,
+    "missing_fields": [
+      "service_reply"
+    ],
+    "missing_labels": [
+      "客服回复"
+    ],
+    "question": "还需要补充：客服回复。请补齐后再应用入库。",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "pending",
+    "completeness_status": "needs_more_info",
+    "missing_fields": [
+      "service_reply"
+    ],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_eb5e7a05f3a2f90a32e3",
+    "source_raw_message_ids": [
+      "raw_msg_48844ce41207fbcbf0f5"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_71f8ef433ce3650e",
+      "chunk_count": 1,
+      "query": "客户询问宝马320是否为运动套装及是否适合年轻人\n{\"customer_message\": \"宝马320那台是运动套装吗，适合年轻人开不？\", \"service_reply\": \"\", \"intent_tags\": [\"product_inquiry\", \"suitability\"], \"tone_tags\": [\"neutral\"], \"linked_categories\": [\"products\"], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\", \"usable_as_template\": false, \"additional_details\": {}}",
+      "hits": [
+        {
+          "chunk_id": "chunk_95712ea979bb2910",
+          "source_id": "source_71f8ef433ce3650e",
+          "score": 0.6346,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.3491,
+            "semantic": 0.1786,
+            "vector": 0.1169,
+            "vector_similarity": 0.6494,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.6346
+          },
+          "text": "[2026-05-04T02:09:30] 许聪: 宝马320那台是运动套装吗，适合年轻人开不？"
+        },
+        {
+          "chunk_id": "chunk_d2ec0cebcf16c10c",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5484,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2111,
+            "semantic": 0.14,
+            "vector": 0.1273,
+            "vector_similarity": 0.7073,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5484
+          },
+          "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+        },
+        {
+          "chunk_id": "chunk_bd5bc67861c08740",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.4924,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1665,
+            "semantic": 0.13,
+            "vector": 0.126,
+            "vector_similarity": 0.6998,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.4924
+          },
+          "text": "品名称：2021款捷达VS5 280TSI自动荣耀型\n型号/SKU：CHEJIN-JETTAVS5-2021\n类目：二手车/SUV\n关键词：捷达VS5、VS5、德系SUV、预算SUV\n规格：2021年上牌，表显3.8万公里，1.4T自动挡，白色。\n价格：6.38万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：涡轮、变速箱和保养以检测报告为准。\n推荐话术：适合预算6到7万、想买合资SUV的客户。\n商品名称：2017款福特福克斯1.6L自动风尚"
+        },
+        {
+          "chunk_id": "chunk_c7dfee0c99fa8158",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.4592,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2009,
+            "semantic": 0.1371,
+            "vector": 0.1312,
+            "vector_similarity": 0.7287,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.08,
+            "final": 0.4592
+          },
+          "text": "# 车辆库存总表\n演示批次：CHEJIN_DEMO_20260503_203628\n用途：客户演示用二手车库存，覆盖轿车、SUV、MPV、新能源、高端车、已售归档等场景。\n商品名称：2021款丰田凯美瑞2.0G豪华版\n型号/SKU：CHEJIN-CAMRY-2021G\n类目：二手车/中级轿车\n关键词：凯美瑞、丰田凯美瑞、8万预算、家用通勤、省油自动挡\n规格：2021年上牌，表显4.8万公里，2.0L自动挡，白色，南京现车，一手家用车。\n价格：8.98万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_1d2186e870eedfdcdb06",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ]
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

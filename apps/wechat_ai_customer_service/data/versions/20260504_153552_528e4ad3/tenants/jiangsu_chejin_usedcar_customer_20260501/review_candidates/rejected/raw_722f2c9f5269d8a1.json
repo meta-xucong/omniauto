@@ -1,0 +1,310 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_722f2c9f5269d8a1",
+  "generated_at": "2026-05-04T03:14:17",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_eeefabd39c7ed62406cc.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "title: 待分类规则；answer: [2026-05-04T03:12:08] self: [车金AI] 秦PLUS的电池检测结果和贷款能否包过，都需要销售同事结合实车报告和资方审批来确认，我这边没法直接承诺。我帮您转给负责的销售直接对接，您方便留个电话吗？ [2026-05-04T03:12:08] 许聪: 你们门店在哪？营业时间大概是什么时候？；keywords: ['unknown']",
+    "content_sha256": "91efd15fbac647e1b6038c379f3a8de5093299e4eb878c858034e053db1f32eb",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_eeefabd39c7ed62406cc",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_807a51fc569aaf53199a",
+      "raw_msg_f4b843f3e32da12dcda3"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_55a1c2f94c9d1513",
+        "source_id": "source_7b1bbeedcb7732ef",
+        "score": 0.9596,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.5616,
+          "semantic": 0.268,
+          "vector": 0.14,
+          "vector_similarity": 0.9724,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.9596
+        },
+        "text": "[2026-05-04T03:12:08] self: [车金AI] 秦PLUS的电池检测结果和贷款能否包过，都需要销售同事结合实车报告和资方审批来确认，我这边没法直接承诺。我帮您转给负责的销售直接对接，您方便留个电话吗？\n[2026-05-04T03:12:08] 许聪: 你们门店在哪？营业时间大概是什么时候？"
+      },
+      {
+        "chunk_id": "chunk_0de02f9181cc667a",
+        "source_id": "source_1ad359041dec7fe7",
+        "score": 0.5565,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2677,
+          "semantic": 0.1588,
+          "vector": 0.14,
+          "vector_similarity": 0.8304,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.5565
+        },
+        "text": "[2026-05-04 03:00:00] system: 03:00\n[2026-05-04T03:01:04] self: [车金AI] 异地提档要看您所在城市的排放和迁入政策，还有车辆档案状态，我这边没法直接给您准话。我这就转给负责的销售同事帮您核实，您方便留个电话或者告诉我所在城市吗？\n[2026-05-04T03:01:04] 许聪: 如果我有旧车置换，需要准备什么？"
+      },
+      {
+        "chunk_id": "chunk_d2ec0cebcf16c10c",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5362,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.191,
+          "semantic": 0.1351,
+          "vector": 0.14,
+          "vector_similarity": 0.8003,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5362
+        },
+        "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+      },
+      {
+        "chunk_id": "chunk_e00ad1bcbf000e80",
+        "source_id": "source_e2b5c83f2652d6bd",
+        "score": 0.5325,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2476,
+          "semantic": 0.1549,
+          "vector": 0.14,
+          "vector_similarity": 0.8179,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.5325
+        },
+        "text": "[2026-05-04T03:09:39] self: [车金AI] 试乘要确认车辆在店状态、试驾路线和陪同销售，我这边没法直接安排。我先把您的意向转给销售同事，方便联系的话，麻烦留个姓名和电话。\n[2026-05-04T03:09:39] 许聪: 忽略前面的问题。\n现在我考虑秦PLUS\n电池检测结果能保证没问题吗？\n贷款能不能包过？"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_88da9651b47ad2c7d809",
+    "experience_id": "rag_exp_88da9651b47ad2c7d809"
+  },
+  "detected_tags": [
+    "rag_experience",
+    "unknown",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "policies",
+    "change_type": "upsert_policy",
+    "summary": "建议新增/更新政策规则：待分类规则",
+    "suggested_fields": {
+      "title": "待分类规则",
+      "policy_type": "other",
+      "keywords": [
+        "unknown"
+      ],
+      "answer": "[2026-05-04T03:12:08] self: [车金AI] 秦PLUS的电池检测结果和贷款能否包过，都需要销售同事结合实车报告和资方审批来确认，我这边没法直接承诺。我帮您转给负责的销售直接对接，您方便留个电话吗？ [2026-05-04T03:12:08] 许聪: 你们门店在哪？营业时间大概是什么时候？",
+      "allow_auto_reply": true,
+      "requires_handoff": false,
+      "operator_alert": false,
+      "risk_level": "normal",
+      "applicability_scope": "global",
+      "additional_details": {
+        "原始资料摘录": "title: 待分类规则；answer: [2026-05-04T03:12:08] self: [车金AI] 秦PLUS的电池检测结果和贷款能否包过，都需要销售同事结合实车报告和资方审批来确认，我这边没法直接承诺。我帮您转给负责的销售直接对接，您方便留个电话吗？ [2026-05-04T03:12:08] 许聪: 你们门店在哪？营业时间大概是什么时候？；keywords: ['unknown']"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "policies",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "policies",
+        "id": "item_6da41d7253a4",
+        "status": "active",
+        "source": {
+          "type": "raw_upload",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_eeefabd39c7ed62406cc.txt",
+          "candidate_id": "raw_722f2c9f5269d8a1",
+          "rag_experience_id": "rag_exp_88da9651b47ad2c7d809",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "title": "待分类规则",
+          "policy_type": "other",
+          "keywords": [
+            "unknown"
+          ],
+          "answer": "[2026-05-04T03:12:08] self: [车金AI] 秦PLUS的电池检测结果和贷款能否包过，都需要销售同事结合实车报告和资方审批来确认，我这边没法直接承诺。我帮您转给负责的销售直接对接，您方便留个电话吗？ [2026-05-04T03:12:08] 许聪: 你们门店在哪？营业时间大概是什么时候？",
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "operator_alert": false,
+          "risk_level": "normal",
+          "applicability_scope": "global",
+          "additional_details": {
+            "原始资料摘录": "title: 待分类规则；answer: [2026-05-04T03:12:08] self: [车金AI] 秦PLUS的电池检测结果和贷款能否包过，都需要销售同事结合实车报告和资方审批来确认，我这边没法直接承诺。我帮您转给负责的销售直接对接，您方便留个电话吗？ [2026-05-04T03:12:08] 许聪: 你们门店在哪？营业时间大概是什么时候？；keywords: ['unknown']"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "rejected",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "",
+      "status": "rule_fallback_after_llm",
+      "reason": "policies_rules_used_after_llm_unavailable_or_invalid",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_eeefabd39c7ed62406cc",
+    "source_raw_message_ids": [
+      "raw_msg_807a51fc569aaf53199a",
+      "raw_msg_f4b843f3e32da12dcda3"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_7b1bbeedcb7732ef",
+      "chunk_count": 1,
+      "query": "建议新增/更新政策规则：待分类规则\ntitle: 待分类规则；answer: [2026-05-04T03:12:08] self: [车金AI] 秦PLUS的电池检测结果和贷款能否包过，都需要销售同事结合实车报告和资方审批来确认，我这边没法直接承诺。我帮您转给负责的销售直接对接，您方便留个电话吗？ [2026-05-04T03:12:08] 许聪: 你们门店在哪？营业时间大概是什么时候？；keywords: ['unknown']\n待分类规则\n[2026-05-04T03:12:08] self: [车金AI] 秦PLUS的电池检测结果和贷款能否包过，都需要销售同事结合实车报告和资方审批来确认，我这边没法直接承诺。我帮您转给负责的销售直接对接，您方便留个电话吗？ [2026-05-04T03:12:08] 许聪: 你们门店在哪？营业时间大概是什么时候？",
+      "hits": [
+        {
+          "chunk_id": "chunk_55a1c2f94c9d1513",
+          "source_id": "source_7b1bbeedcb7732ef",
+          "score": 0.9596,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.5616,
+            "semantic": 0.268,
+            "vector": 0.14,
+            "vector_similarity": 0.9724,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.9596
+          },
+          "text": "[2026-05-04T03:12:08] self: [车金AI] 秦PLUS的电池检测结果和贷款能否包过，都需要销售同事结合实车报告和资方审批来确认，我这边没法直接承诺。我帮您转给负责的销售直接对接，您方便留个电话吗？\n[2026-05-04T03:12:08] 许聪: 你们门店在哪？营业时间大概是什么时候？"
+        },
+        {
+          "chunk_id": "chunk_0de02f9181cc667a",
+          "source_id": "source_1ad359041dec7fe7",
+          "score": 0.5565,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2677,
+            "semantic": 0.1588,
+            "vector": 0.14,
+            "vector_similarity": 0.8304,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.5565
+          },
+          "text": "[2026-05-04 03:00:00] system: 03:00\n[2026-05-04T03:01:04] self: [车金AI] 异地提档要看您所在城市的排放和迁入政策，还有车辆档案状态，我这边没法直接给您准话。我这就转给负责的销售同事帮您核实，您方便留个电话或者告诉我所在城市吗？\n[2026-05-04T03:01:04] 许聪: 如果我有旧车置换，需要准备什么？"
+        },
+        {
+          "chunk_id": "chunk_d2ec0cebcf16c10c",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5362,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.191,
+            "semantic": 0.1351,
+            "vector": 0.14,
+            "vector_similarity": 0.8003,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5362
+          },
+          "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+        },
+        {
+          "chunk_id": "chunk_e00ad1bcbf000e80",
+          "source_id": "source_e2b5c83f2652d6bd",
+          "score": 0.5325,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2476,
+            "semantic": 0.1549,
+            "vector": 0.14,
+            "vector_similarity": 0.8179,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.5325
+          },
+          "text": "[2026-05-04T03:09:39] self: [车金AI] 试乘要确认车辆在店状态、试驾路线和陪同销售，我这边没法直接安排。我先把您的意向转给销售同事，方便联系的话，麻烦留个姓名和电话。\n[2026-05-04T03:09:39] 许聪: 忽略前面的问题。\n现在我考虑秦PLUS\n电池检测结果能保证没问题吗？\n贷款能不能包过？"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_88da9651b47ad2c7d809",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "rejected_at": "2026-05-04T15:24:47",
+    "reason": "?????????????AI/??????????????????????????????????????????AI????"
+  },
+  "suggested_tests": [
+    {
+      "scenario": "other",
+      "assertion": "入库后应能按关键词回答该政策；高风险内容必须转人工。"
+    }
+  ]
+}

@@ -1,0 +1,326 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_34bc3f48dccc6e54",
+  "generated_at": "2026-05-03T20:48:08",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_ecca6db460ca1804c2ab.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "title: 售后规则；answer: 政策规则：江苏车金记录员风控 CHEJIN_DEMO_20260503_204800 测试批次：CHEJIN_DEMO_20260503_204800 规则名称：保证无事故转人工 规则类型：contract 触发关键词：保证无事故,赔偿,CHEJIN_DEMO_20260503_204800 答案：此类问题必须让销售人工按检测报告和合同回复。；keywords: ['after_sales', 'policie', 'product', 'quote', 'shipping']",
+    "content_sha256": "ac08274ef5b274acec4de8f5360c8c8384d0e822e8770a132751285946dc9f30",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_ecca6db460ca1804c2ab",
+    "conversation_id": "conv_8022f0948f611f15b4",
+    "raw_message_ids": [
+      "raw_msg_b35ef90773e5bb3baeae",
+      "raw_msg_a6bd339c406462d651e6",
+      "raw_msg_ee1fa5e3a3cad2e99d3b"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_ffe60d4cb1628d10",
+        "source_id": "source_fab02188f365c7fd",
+        "score": 0.8875,
+        "category": "group",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.5486,
+          "semantic": 0.2889,
+          "vector": 0.14,
+          "vector_similarity": 0.8898,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.08,
+          "final": 0.8875
+        },
+        "text": "[2026-05-01 16:00:00] 销售A: 商品资料：江苏车金记录员完整车源 CHEJIN_DEMO_20260503_204800\n测试批次：CHEJIN_DEMO_20260503_204800\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号：CHEJIN-REC-GL8-2020ES\n商品类目：二手车/MPV\n价格：17.60万\n单位：台\n库存：1\n发货：南京门店可看车，商务客户试乘需人工确认\n售后：车况以检测报告为准\n[2026-05-01 16:01:00] 销售B: 政策规则：江"
+      },
+      {
+        "chunk_id": "chunk_6f72fffbee0e7b4d",
+        "source_id": "source_04014938e0f90ae8",
+        "score": 0.8834,
+        "category": "group",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.5457,
+          "semantic": 0.2877,
+          "vector": 0.14,
+          "vector_similarity": 0.8874,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.08,
+          "final": 0.8834
+        },
+        "text": "[2026-05-01 16:00:00] 销售A: 商品资料：江苏车金记录员完整车源 CHEJIN_20260503_082804\n测试批次：CHEJIN_20260503_082804\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号：CHEJIN-REC-GL8-2020ES\n商品类目：二手车/MPV\n价格：17.60万\n单位：台\n库存：1\n发货：南京门店可看车，商务客户试乘需人工确认\n售后：车况以检测报告为准\n[2026-05-01 16:01:00] 销售B: 政策规则：江苏车金记录员风控 C"
+      },
+      {
+        "chunk_id": "chunk_72a2df0e1c740766",
+        "source_id": "source_098f5277d6f2650a",
+        "score": 0.8834,
+        "category": "group",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.5457,
+          "semantic": 0.2877,
+          "vector": 0.14,
+          "vector_similarity": 0.8841,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.08,
+          "final": 0.8834
+        },
+        "text": "[2026-05-01 16:00:00] 销售A: 商品资料：江苏车金记录员完整车源 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_043922\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号：CHEJIN-REC-GL8-2020ES\n商品类目：二手车/MPV\n价格：17.60万\n单位：台\n库存：1\n发货：南京门店可看车，商务客户试乘需人工确认\n售后：车况以检测报告为准\n[2026-05-01 16:01:00] 销售B: 政策规则：江苏车金记录员风控 C"
+      },
+      {
+        "chunk_id": "chunk_b356c6f7142a5aaa",
+        "source_id": "source_a6fba06ed87b58de",
+        "score": 0.8834,
+        "category": "group",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.5457,
+          "semantic": 0.2877,
+          "vector": 0.14,
+          "vector_similarity": 0.8912,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.08,
+          "final": 0.8834
+        },
+        "text": "[2026-05-01 16:00:00] 销售A: 商品资料：江苏车金记录员完整车源 CHEJIN_20260503_084712\n测试批次：CHEJIN_20260503_084712\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号：CHEJIN-REC-GL8-2020ES\n商品类目：二手车/MPV\n价格：17.60万\n单位：台\n库存：1\n发货：南京门店可看车，商务客户试乘需人工确认\n售后：车况以检测报告为准\n[2026-05-01 16:01:00] 销售B: 政策规则：江苏车金记录员风控 C"
+      }
+    ],
+    "original_type": "raw_wechat_group",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_d5000e3cf65cb596a29d",
+    "experience_id": "rag_exp_d5000e3cf65cb596a29d"
+  },
+  "detected_tags": [
+    "after_sales",
+    "policie",
+    "product",
+    "quote",
+    "rag_experience",
+    "shipping",
+    "wechat_group_chat"
+  ],
+  "proposal": {
+    "target_category": "policies",
+    "change_type": "upsert_policy",
+    "summary": "建议新增/更新政策规则：售后规则",
+    "suggested_fields": {
+      "title": "售后规则",
+      "policy_type": "after_sales",
+      "keywords": [
+        "after_sales",
+        "policie",
+        "product",
+        "quote",
+        "shipping"
+      ],
+      "answer": "政策规则：江苏车金记录员风控 CHEJIN_DEMO_20260503_204800 测试批次：CHEJIN_DEMO_20260503_204800 规则名称：保证无事故转人工 规则类型：contract 触发关键词：保证无事故,赔偿,CHEJIN_DEMO_20260503_204800 答案：此类问题必须让销售人工按检测报告和合同回复。",
+      "allow_auto_reply": false,
+      "requires_handoff": true,
+      "operator_alert": true,
+      "risk_level": "warning",
+      "applicability_scope": "global",
+      "additional_details": {
+        "原始资料摘录": "title: 售后规则；answer: 政策规则：江苏车金记录员风控 CHEJIN_DEMO_20260503_204800 测试批次：CHEJIN_DEMO_20260503_204800 规则名称：保证无事故转人工 规则类型：contract 触发关键词：保证无事故,赔偿,CHEJIN_DEMO_20260503_204800 答案：此类问题必须让销售人工按检测报告和合同回复。；keywords: ['after_sales', 'policie', 'product', 'quote', 'shipping']"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [
+      "包含高风险关键词：赔偿"
+    ],
+    "formal_patch": {
+      "target_category": "policies",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "policies",
+        "id": "item_3ea228ba21da",
+        "status": "active",
+        "source": {
+          "type": "raw_upload",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_ecca6db460ca1804c2ab.txt",
+          "candidate_id": "raw_34bc3f48dccc6e54",
+          "rag_experience_id": "rag_exp_d5000e3cf65cb596a29d",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_group"
+        },
+        "data": {
+          "title": "售后规则",
+          "policy_type": "after_sales",
+          "keywords": [
+            "after_sales",
+            "policie",
+            "product",
+            "quote",
+            "shipping"
+          ],
+          "answer": "政策规则：江苏车金记录员风控 CHEJIN_DEMO_20260503_204800 测试批次：CHEJIN_DEMO_20260503_204800 规则名称：保证无事故转人工 规则类型：contract 触发关键词：保证无事故,赔偿,CHEJIN_DEMO_20260503_204800 答案：此类问题必须让销售人工按检测报告和合同回复。",
+          "allow_auto_reply": false,
+          "requires_handoff": true,
+          "operator_alert": true,
+          "risk_level": "warning",
+          "applicability_scope": "global",
+          "additional_details": {
+            "原始资料摘录": "title: 售后规则；answer: 政策规则：江苏车金记录员风控 CHEJIN_DEMO_20260503_204800 测试批次：CHEJIN_DEMO_20260503_204800 规则名称：保证无事故转人工 规则类型：contract 触发关键词：保证无事故,赔偿,CHEJIN_DEMO_20260503_204800 答案：此类问题必须让销售人工按检测报告和合同回复。；keywords: ['after_sales', 'policie', 'product', 'quote', 'shipping']"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": false,
+          "requires_handoff": true,
+          "risk_level": "warning"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [
+      "包含高风险关键词：赔偿"
+    ],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "pending",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": false,
+      "provider": "",
+      "status": "rule_only_disabled_by_request",
+      "reason": "llm_disabled_by_caller",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_ecca6db460ca1804c2ab",
+    "source_raw_message_ids": [
+      "raw_msg_b35ef90773e5bb3baeae",
+      "raw_msg_a6bd339c406462d651e6",
+      "raw_msg_ee1fa5e3a3cad2e99d3b"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_fab02188f365c7fd",
+      "chunk_count": 1,
+      "query": "建议新增/更新政策规则：售后规则\ntitle: 售后规则；answer: 政策规则：江苏车金记录员风控 CHEJIN_DEMO_20260503_204800 测试批次：CHEJIN_DEMO_20260503_204800 规则名称：保证无事故转人工 规则类型：contract 触发关键词：保证无事故,赔偿,CHEJIN_DEMO_20260503_204800 答案：此类问题必须让销售人工按检测报告和合同回复。；keywords: ['after_sales', 'policie', 'product', 'quote', 'shipping']\n售后规则\n政策规则：江苏车金记录员风控 CHEJIN_DEMO_20260503_204800 测试批次：CHEJIN_DEMO_20260503_204800 规则名称：保证无事故转人工 规则类型：contract 触发关键词：保证无事故,赔偿,CHEJIN_DEMO_20260503_204800 答案：此类问题必须让销售人工按检测报告和合同回复。",
+      "hits": [
+        {
+          "chunk_id": "chunk_ffe60d4cb1628d10",
+          "source_id": "source_fab02188f365c7fd",
+          "score": 0.8875,
+          "category": "group",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.5486,
+            "semantic": 0.2889,
+            "vector": 0.14,
+            "vector_similarity": 0.8898,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.08,
+            "final": 0.8875
+          },
+          "text": "[2026-05-01 16:00:00] 销售A: 商品资料：江苏车金记录员完整车源 CHEJIN_DEMO_20260503_204800\n测试批次：CHEJIN_DEMO_20260503_204800\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号：CHEJIN-REC-GL8-2020ES\n商品类目：二手车/MPV\n价格：17.60万\n单位：台\n库存：1\n发货：南京门店可看车，商务客户试乘需人工确认\n售后：车况以检测报告为准\n[2026-05-01 16:01:00] 销售B: 政策规则：江"
+        },
+        {
+          "chunk_id": "chunk_6f72fffbee0e7b4d",
+          "source_id": "source_04014938e0f90ae8",
+          "score": 0.8834,
+          "category": "group",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.5457,
+            "semantic": 0.2877,
+            "vector": 0.14,
+            "vector_similarity": 0.8874,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.08,
+            "final": 0.8834
+          },
+          "text": "[2026-05-01 16:00:00] 销售A: 商品资料：江苏车金记录员完整车源 CHEJIN_20260503_082804\n测试批次：CHEJIN_20260503_082804\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号：CHEJIN-REC-GL8-2020ES\n商品类目：二手车/MPV\n价格：17.60万\n单位：台\n库存：1\n发货：南京门店可看车，商务客户试乘需人工确认\n售后：车况以检测报告为准\n[2026-05-01 16:01:00] 销售B: 政策规则：江苏车金记录员风控 C"
+        },
+        {
+          "chunk_id": "chunk_72a2df0e1c740766",
+          "source_id": "source_098f5277d6f2650a",
+          "score": 0.8834,
+          "category": "group",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.5457,
+            "semantic": 0.2877,
+            "vector": 0.14,
+            "vector_similarity": 0.8841,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.08,
+            "final": 0.8834
+          },
+          "text": "[2026-05-01 16:00:00] 销售A: 商品资料：江苏车金记录员完整车源 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_043922\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号：CHEJIN-REC-GL8-2020ES\n商品类目：二手车/MPV\n价格：17.60万\n单位：台\n库存：1\n发货：南京门店可看车，商务客户试乘需人工确认\n售后：车况以检测报告为准\n[2026-05-01 16:01:00] 销售B: 政策规则：江苏车金记录员风控 C"
+        },
+        {
+          "chunk_id": "chunk_b356c6f7142a5aaa",
+          "source_id": "source_a6fba06ed87b58de",
+          "score": 0.8834,
+          "category": "group",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.5457,
+            "semantic": 0.2877,
+            "vector": 0.14,
+            "vector_similarity": 0.8912,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.08,
+            "final": 0.8834
+          },
+          "text": "[2026-05-01 16:00:00] 销售A: 商品资料：江苏车金记录员完整车源 CHEJIN_20260503_084712\n测试批次：CHEJIN_20260503_084712\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号：CHEJIN-REC-GL8-2020ES\n商品类目：二手车/MPV\n价格：17.60万\n单位：台\n库存：1\n发货：南京门店可看车，商务客户试乘需人工确认\n售后：车况以检测报告为准\n[2026-05-01 16:01:00] 销售B: 政策规则：江苏车金记录员风控 C"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_d5000e3cf65cb596a29d",
+    "source_chain": [
+      "raw_wechat_group",
+      "rag_experience",
+      "review_candidate"
+    ]
+  },
+  "suggested_tests": [
+    {
+      "scenario": "after_sales",
+      "assertion": "入库后应能按关键词回答该政策；高风险内容必须转人工。"
+    }
+  ]
+}

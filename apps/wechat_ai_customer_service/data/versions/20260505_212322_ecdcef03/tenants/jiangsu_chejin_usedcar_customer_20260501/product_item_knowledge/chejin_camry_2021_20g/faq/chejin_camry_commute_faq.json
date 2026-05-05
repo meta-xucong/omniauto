@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "category_id": "product_faq",
+  "id": "chejin_camry_commute_faq",
+  "status": "active",
+  "source": {
+    "type": "test_fixture",
+    "batch_token": "CHEJIN_20260505_205853"
+  },
+  "data": {
+    "product_id": "chejin_camry_2021_20g",
+    "title": "凯美瑞适合家用通勤吗",
+    "keywords": [
+      "凯美瑞",
+      "家用",
+      "通勤",
+      "省油"
+    ],
+    "question": "这台凯美瑞适合家用通勤吗？",
+    "answer": "这台凯美瑞偏家用稳、省心，适合8到10万预算和日常通勤；仍建议到店看车并以检测报告为准。",
+    "additional_details": {
+      "适用商品": "2021款丰田凯美瑞2.0G豪华版"
+    }
+  },
+  "runtime": {
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "risk_level": "normal"
+  },
+  "review_state": {
+    "is_new": true,
+    "new_reason": "newly_added_formal_knowledge",
+    "marked_at": "2026-05-05T20:58:58",
+    "updated_at": "2026-05-05T20:58:58",
+    "read_at": "",
+    "read_by": "",
+    "source": {
+      "source_module": "jiangsu_chejin_test",
+      "target_category": "product_faq",
+      "item_id": "chejin_camry_commute_faq"
+    }
+  },
+  "metadata": {
+    "created_at": "2026-05-05T20:58:58",
+    "updated_at": "2026-05-05T20:58:58",
+    "created_by": "admin",
+    "updated_by": "admin"
+  }
+}

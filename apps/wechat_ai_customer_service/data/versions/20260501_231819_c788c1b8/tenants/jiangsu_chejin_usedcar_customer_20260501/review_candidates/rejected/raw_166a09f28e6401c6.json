@@ -1,0 +1,297 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_166a09f28e6401c6",
+  "generated_at": "2026-05-01T16:20:54",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_a810e8b162f913be1572.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "name: 记录员测试凯美瑞 CHEJIN_20260501_162050；sku: REC-CAMRY-CHEJIN_20260501_162050；category: 二手车；price: 8.88；unit: 台；inventory: 1.0；shipping_policy: 南京门店可看车；warranty_policy: 车况以检测报告为准；raw_text: 商品资料：江苏车金记录员完整车源 CHEJIN_20260501_162050 商品名称：记录员测试凯美瑞 CHEJIN_20260501_162050 型号：REC-CAMRY-CHEJIN_20260501_162050 商品类目：二手车 价格：8.88万 单位：台 库存：1 发货：南京门店可看车 售后：车况以检测报告为准",
+    "content_sha256": "af3af39c19b7a35c0a52643b672d470b576fbfc05f4883cbd93837d1a4be1859",
+    "type": "raw_wechat_group",
+    "raw_batch_id": "raw_batch_a810e8b162f913be1572",
+    "conversation_id": "conv_376a9c7df7cd80d69b",
+    "raw_message_ids": [
+      "raw_msg_c1d1553fba9ba3aa613c",
+      "raw_msg_7b3c43c2e4843d886b1b",
+      "raw_msg_1ae965873706d1334969"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_a032921e154e188e",
+        "source_id": "source_adea621c3dee4933",
+        "score": 0.8686,
+        "category": "group",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.5463,
+          "semantic": 0.2723,
+          "vector": 0.14,
+          "vector_similarity": 0.8319,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.08,
+          "final": 0.8686
+        },
+        "text": "[2026-05-01 16:00:00] 销售A: 商品资料：江苏车金记录员完整车源 CHEJIN_20260501_162050\n商品名称：记录员测试凯美瑞 CHEJIN_20260501_162050\n型号：REC-CAMRY-CHEJIN_20260501_162050\n商品类目：二手车\n价格：8.88万\n单位：台\n库存：1\n发货：南京门店可看车\n售后：车况以检测报告为准\n[2026-05-01 16:01:00] 销售B: 政策规则：江苏车金记录员风控 CHEJIN_20260501_162050\n规则名"
+      },
+      {
+        "chunk_id": "chunk_b6130cff36e474cd",
+        "source_id": "source_55d432643f9f369b",
+        "score": 0.8589,
+        "category": "group",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.5392,
+          "semantic": 0.2697,
+          "vector": 0.14,
+          "vector_similarity": 0.8271,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.08,
+          "final": 0.8589
+        },
+        "text": "[2026-05-01 16:00:00] 销售A: 商品资料：江苏车金记录员完整车源 CHEJIN_20260501_161753\n商品名称：记录员测试凯美瑞 CHEJIN_20260501_161753\n型号：REC-CAMRY-CHEJIN_20260501_161753\n商品类目：二手车\n价格：8.88万\n单位：台\n库存：1\n发货：南京门店可看车\n售后：车况以检测报告为准\n[2026-05-01 16:01:00] 销售B: 政策规则：江苏车金记录员风控 CHEJIN_20260501_161753\n规则名"
+      },
+      {
+        "chunk_id": "chunk_f8e488e2bcc61559",
+        "source_id": "source_8c7b72ad8df36092",
+        "score": 0.7295,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.4198,
+          "semantic": 0.2246,
+          "vector": 0.14,
+          "vector_similarity": 0.8004,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.025,
+          "risk_penalty": 0.08,
+          "final": 0.7295
+        },
+        "text": "商品资料：江苏车金二手车车源 CHEJIN_20260501_162050\n商品名称：2021款丰田凯美瑞2.0G豪华版 CHEJIN_20260501_162050\n型号：CHEJIN-CAMRY-CHEJIN_20260501_162050\n商品类目：二手车/中级轿车\n别名关键词：凯美瑞,丰田凯美瑞,8万预算,自动挡,省油,通勤\n规格参数：2021年上牌，表显4.8万公里，2.0L自动挡，南京现车，一手车，支持第三方检测。\n价格：8.98万\n单位：台\n库存：1\n发货：南京门店可看车，异地客户需人工确认物流与提档"
+      },
+      {
+        "chunk_id": "chunk_57bc6629a5f0089b",
+        "source_id": "source_10cf1b39fdfe3f7d",
+        "score": 0.7246,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.4163,
+          "semantic": 0.2233,
+          "vector": 0.14,
+          "vector_similarity": 0.7979,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.025,
+          "risk_penalty": 0.08,
+          "final": 0.7246
+        },
+        "text": "商品资料：江苏车金二手车车源 CHEJIN_20260501_161625\n商品名称：2021款丰田凯美瑞2.0G豪华版 CHEJIN_20260501_161625\n型号：CHEJIN-CAMRY-CHEJIN_20260501_161625\n商品类目：二手车/中级轿车\n别名关键词：凯美瑞,丰田凯美瑞,8万预算,自动挡,省油,通勤\n规格参数：2021年上牌，表显4.8万公里，2.0L自动挡，南京现车，一手车，支持第三方检测。\n价格：8.98万\n单位：台\n库存：1\n发货：南京门店可看车，异地客户需人工确认物流与提档"
+      }
+    ]
+  },
+  "detected_tags": [
+    "after_sales",
+    "product",
+    "quote",
+    "shipping",
+    "wechat_group_chat"
+  ],
+  "proposal": {
+    "target_category": "products",
+    "change_type": "upsert_product",
+    "summary": "建议新增/更新商品：记录员测试凯美瑞 CHEJIN_20260501_162050",
+    "suggested_fields": {
+      "name": "记录员测试凯美瑞 CHEJIN_20260501_162050",
+      "sku": "REC-CAMRY-CHEJIN_20260501_162050",
+      "category": "二手车",
+      "price": 8.88,
+      "unit": "台",
+      "inventory": 1.0,
+      "shipping_policy": "南京门店可看车",
+      "warranty_policy": "车况以检测报告为准",
+      "price_tiers": [
+        {
+          "min_quantity": 1.0,
+          "unit_price": 8.88
+        }
+      ],
+      "additional_details": {
+        "原始资料摘录": "name: 记录员测试凯美瑞 CHEJIN_20260501_162050；sku: REC-CAMRY-CHEJIN_20260501_162050；category: 二手车；price: 8.88；unit: 台；inventory: 1.0；shipping_policy: 南京门店可看车；warranty_policy: 车况以检测报告为准；raw_text: 商品资料：江苏车金记录员完整车源 CHEJIN_20260501_162050 商品名称：记录员测试凯美瑞 CHEJIN_20260501_162050 型号：REC-CAMRY-CHEJIN_20260501_162050 商品类目：二手车 价格：8.88万 单位：台 库存：1 发货：南京门店可看车 售后：车况以检测报告为准"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "products",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "products",
+        "id": "rec-camry-chejin_20260501_162050",
+        "status": "active",
+        "source": {
+          "type": "raw_upload",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_a810e8b162f913be1572.txt",
+          "candidate_id": "raw_166a09f28e6401c6"
+        },
+        "data": {
+          "name": "记录员测试凯美瑞 CHEJIN_20260501_162050",
+          "sku": "REC-CAMRY-CHEJIN_20260501_162050",
+          "category": "二手车",
+          "price": 8.88,
+          "unit": "台",
+          "inventory": 1.0,
+          "shipping_policy": "南京门店可看车",
+          "warranty_policy": "车况以检测报告为准",
+          "price_tiers": [
+            {
+              "min_quantity": 1.0,
+              "unit_price": 8.88
+            }
+          ],
+          "additional_details": {
+            "原始资料摘录": "name: 记录员测试凯美瑞 CHEJIN_20260501_162050；sku: REC-CAMRY-CHEJIN_20260501_162050；category: 二手车；price: 8.88；unit: 台；inventory: 1.0；shipping_policy: 南京门店可看车；warranty_policy: 车况以检测报告为准；raw_text: 商品资料：江苏车金记录员完整车源 CHEJIN_20260501_162050 商品名称：记录员测试凯美瑞 CHEJIN_20260501_162050 型号：REC-CAMRY-CHEJIN_20260501_162050 商品类目：二手车 价格：8.88万 单位：台 库存：1 发货：南京门店可看车 售后：车况以检测报告为准"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "rejected",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "source_raw_batch_id": "raw_batch_a810e8b162f913be1572",
+    "source_raw_message_ids": [
+      "raw_msg_c1d1553fba9ba3aa613c",
+      "raw_msg_7b3c43c2e4843d886b1b",
+      "raw_msg_1ae965873706d1334969"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_adea621c3dee4933",
+      "chunk_count": 1,
+      "query": "建议新增/更新商品：记录员测试凯美瑞 CHEJIN_20260501_162050\nname: 记录员测试凯美瑞 CHEJIN_20260501_162050；sku: REC-CAMRY-CHEJIN_20260501_162050；category: 二手车；price: 8.88；unit: 台；inventory: 1.0；shipping_policy: 南京门店可看车；warranty_policy: 车况以检测报告为准；raw_text: 商品资料：江苏车金记录员完整车源 CHEJIN_20260501_162050 商品名称：记录员测试凯美瑞 CHEJIN_20260501_162050 型号：REC-CAMRY-CHEJIN_20260501_162050 商品类目：二手车 价格：8.88万 单位：台 库存：1 发货：南京门店可看车 售后：车况以检测报告为准\n记录员测试凯美瑞 CHEJIN_20260501_162050",
+      "hits": [
+        {
+          "chunk_id": "chunk_a032921e154e188e",
+          "source_id": "source_adea621c3dee4933",
+          "score": 0.8686,
+          "category": "group",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.5463,
+            "semantic": 0.2723,
+            "vector": 0.14,
+            "vector_similarity": 0.8319,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.08,
+            "final": 0.8686
+          },
+          "text": "[2026-05-01 16:00:00] 销售A: 商品资料：江苏车金记录员完整车源 CHEJIN_20260501_162050\n商品名称：记录员测试凯美瑞 CHEJIN_20260501_162050\n型号：REC-CAMRY-CHEJIN_20260501_162050\n商品类目：二手车\n价格：8.88万\n单位：台\n库存：1\n发货：南京门店可看车\n售后：车况以检测报告为准\n[2026-05-01 16:01:00] 销售B: 政策规则：江苏车金记录员风控 CHEJIN_20260501_162050\n规则名"
+        },
+        {
+          "chunk_id": "chunk_b6130cff36e474cd",
+          "source_id": "source_55d432643f9f369b",
+          "score": 0.8589,
+          "category": "group",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.5392,
+            "semantic": 0.2697,
+            "vector": 0.14,
+            "vector_similarity": 0.8271,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.08,
+            "final": 0.8589
+          },
+          "text": "[2026-05-01 16:00:00] 销售A: 商品资料：江苏车金记录员完整车源 CHEJIN_20260501_161753\n商品名称：记录员测试凯美瑞 CHEJIN_20260501_161753\n型号：REC-CAMRY-CHEJIN_20260501_161753\n商品类目：二手车\n价格：8.88万\n单位：台\n库存：1\n发货：南京门店可看车\n售后：车况以检测报告为准\n[2026-05-01 16:01:00] 销售B: 政策规则：江苏车金记录员风控 CHEJIN_20260501_161753\n规则名"
+        },
+        {
+          "chunk_id": "chunk_f8e488e2bcc61559",
+          "source_id": "source_8c7b72ad8df36092",
+          "score": 0.7295,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.4198,
+            "semantic": 0.2246,
+            "vector": 0.14,
+            "vector_similarity": 0.8004,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.025,
+            "risk_penalty": 0.08,
+            "final": 0.7295
+          },
+          "text": "商品资料：江苏车金二手车车源 CHEJIN_20260501_162050\n商品名称：2021款丰田凯美瑞2.0G豪华版 CHEJIN_20260501_162050\n型号：CHEJIN-CAMRY-CHEJIN_20260501_162050\n商品类目：二手车/中级轿车\n别名关键词：凯美瑞,丰田凯美瑞,8万预算,自动挡,省油,通勤\n规格参数：2021年上牌，表显4.8万公里，2.0L自动挡，南京现车，一手车，支持第三方检测。\n价格：8.98万\n单位：台\n库存：1\n发货：南京门店可看车，异地客户需人工确认物流与提档"
+        },
+        {
+          "chunk_id": "chunk_57bc6629a5f0089b",
+          "source_id": "source_10cf1b39fdfe3f7d",
+          "score": 0.7246,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.4163,
+            "semantic": 0.2233,
+            "vector": 0.14,
+            "vector_similarity": 0.7979,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.025,
+            "risk_penalty": 0.08,
+            "final": 0.7246
+          },
+          "text": "商品资料：江苏车金二手车车源 CHEJIN_20260501_161625\n商品名称：2021款丰田凯美瑞2.0G豪华版 CHEJIN_20260501_161625\n型号：CHEJIN-CAMRY-CHEJIN_20260501_161625\n商品类目：二手车/中级轿车\n别名关键词：凯美瑞,丰田凯美瑞,8万预算,自动挡,省油,通勤\n规格参数：2021年上牌，表显4.8万公里，2.0L自动挡，南京现车，一手车，支持第三方检测。\n价格：8.98万\n单位：台\n库存：1\n发货：南京门店可看车，异地客户需人工确认物流与提档"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rejected_at": "2026-05-01T22:05:56",
+    "reason": "?????????????? rejected ??"
+  },
+  "suggested_tests": [
+    {
+      "scenario": "product_quote",
+      "assertion": "入库后应能按商品名称、别名或 SKU 回答报价、规格和发货信息。"
+    }
+  ]
+}

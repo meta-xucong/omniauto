@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "category_id": "erp_exports",
+  "display_name": "ERP 导出",
+  "description": "用于承接库存、价格、客户资料、订单状态等后续 ERP 数据。",
+  "item_title_field": "external_id",
+  "item_subtitle_field": "record_type",
+  "fields": [
+    {"id": "source_system", "label": "来源系统", "type": "short_text", "required": true, "searchable": true, "form_order": 10},
+    {"id": "record_type", "label": "记录类型", "type": "single_select", "required": true, "searchable": true, "form_order": 20, "options": ["product", "inventory", "price", "customer", "order", "other"]},
+    {"id": "external_id", "label": "外部编号", "type": "short_text", "required": true, "searchable": true, "form_order": 30},
+    {"id": "fields", "label": "导出字段", "type": "object", "required": false, "form_order": 40},
+    {"id": "sync_status", "label": "同步状态", "type": "single_select", "required": false, "default": "imported", "form_order": 50, "options": ["imported", "linked", "ignored", "error"]},
+    {"id": "additional_details", "label": "补充信息", "type": "object", "required": false, "searchable": true, "form_order": 60}
+  ],
+  "validation": {
+    "unique_fields": ["id"],
+    "required_for_auto_reply": []
+  }
+}

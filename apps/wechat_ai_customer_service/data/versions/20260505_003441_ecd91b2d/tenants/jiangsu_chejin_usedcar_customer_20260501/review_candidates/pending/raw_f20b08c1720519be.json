@@ -1,0 +1,337 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_f20b08c1720519be",
+  "generated_at": "2026-05-04T03:38:56",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_82267405ba70f614ee19.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"customer_message\": \"许聪询问秦PLUS的首付和月供\", \"service_reply\": \"许哥，首付和月供得让金融同事根据您选定的秦PLUS、贷款期数和资方方案来算，我这边直接给不了准数。我马上把信息转过去，稍后他会直接联系您出具体方案。\", \"intent_tags\": [\"金融方案咨询\"], \"tone_tags\": [\"专业\", \"礼貌\"], \"linked_categories\": [\"金融\"], \"linked_item_ids\": [], \"applicability_scope\": \"specific_product\", \"product_id\": \"plus\", \"product_category\": \"\", \"usable_as_template\": true, \"a",
+    "content_sha256": "54024dabeb7b884d7c6a05294908085f40ed68ae6526451832485fa5d1afa857",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_82267405ba70f614ee19",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_c7391b9833c0edbfc93d",
+      "raw_msg_6dce651857abbdefe0f2",
+      "raw_msg_29bb6e894085f8f02200"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_6349a5bc6f66f3e1",
+        "source_id": "source_4bbd83bc3eb666a5",
+        "score": 0.8831,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.4897,
+          "semantic": 0.2634,
+          "vector": 0.14,
+          "vector_similarity": 0.9286,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.8831
+        },
+        "text": "[2026-05-04 03:37:00] system: 03:37\n[2026-05-04T03:37:38] self: [车金AI] 许哥，首付和月供得让金融同事根据您选定的秦PLUS、贷款期数和资方方案来算，我这边直接给不了准数。我马上把信息转过去，稍后他会直接联系您出具体方案。\n[2026-05-04T03:37:38] 许聪: 我想开出去上高速试驾一圈，可以吗？"
+      },
+      {
+        "chunk_id": "chunk_99cc4e7f8c7061b0",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5104,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1742,
+          "semantic": 0.1262,
+          "vector": 0.14,
+          "vector_similarity": 0.8144,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5104
+        },
+        "text": "、提档、当地新能源指标和运输方式。\n售后/风险：电池健康、辅助驾驶功能和官方权益以检测报告及账号核验为准。\n推荐话术：适合想体验纯电、智能化和低用车成本的客户，电池和权益必须人工确认。\n商品名称：2020款奥迪A4L 40TFSI时尚动感型\n型号/SKU：CHEJIN-A4L-2020\n类目：二手车/豪华轿车\n关键词：奥迪A4L、A4L、豪华轿车、婚庆、商务\n规格：2020年上牌，表显6.8万公里，2.0T自动挡，黑色，保养记录较完整。\n价格：15.88万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档"
+      },
+      {
+        "chunk_id": "chunk_d2ec0cebcf16c10c",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5075,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1722,
+          "semantic": 0.1253,
+          "vector": 0.14,
+          "vector_similarity": 0.7954,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5075
+        },
+        "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+      },
+      {
+        "chunk_id": "chunk_0d27f032aa229103",
+        "source_id": "source_58950035fd736f45",
+        "score": 0.483,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2109,
+          "semantic": 0.1421,
+          "vector": 0.14,
+          "vector_similarity": 0.7887,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.483
+        },
+        "text": "[2026-05-04T03:24:34] 许聪: 绿本有没有抵押或者查封？\n[2026-05-04T03:24:34] 许聪: 表显公里数准不准？有没有调表？\n[2026-05-04T03:24:34] self: [车金AI] 营运性质有没有跑过网约车，我们得看登记证和实车记录来确认，我这边没法直接给准信。我马上帮您转给销售同事人工核实，方便留个电话吗？他们直接联系您。"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_c842a1c3e2d5bc240082",
+    "experience_id": "rag_exp_c842a1c3e2d5bc240082"
+  },
+  "detected_tags": [
+    "llm",
+    "rag_experience",
+    "unknown",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "chats",
+    "change_type": "llm_upsert_chats",
+    "summary": "金融方案咨询回复，无法直接给准数，需转金融同事",
+    "suggested_fields": {
+      "customer_message": "许聪询问秦PLUS的首付和月供",
+      "service_reply": "许哥，首付和月供得让金融同事根据您选定的秦PLUS、贷款期数和资方方案来算，我这边直接给不了准数。我马上把信息转过去，稍后他会直接联系您出具体方案。",
+      "intent_tags": [
+        "金融方案咨询"
+      ],
+      "tone_tags": [
+        "专业",
+        "礼貌"
+      ],
+      "linked_categories": [
+        "金融"
+      ],
+      "linked_item_ids": [],
+      "applicability_scope": "specific_product",
+      "product_id": "plus",
+      "product_category": "",
+      "usable_as_template": true,
+      "additional_details": {
+        "context_note": "客户后续还询问了上高速试驾，未回答",
+        "原始资料摘录": "{\"customer_message\": \"许聪询问秦PLUS的首付和月供\", \"service_reply\": \"许哥，首付和月供得让金融同事根据您选定的秦PLUS、贷款期数和资方方案来算，我这边直接给不了准数。我马上把信息转过去，稍后他会直接联系您出具体方案。\", \"intent_tags\": [\"金融方案咨询\"], \"tone_tags\": [\"专业\", \"礼貌\"], \"linked_categories\": [\"金融\"], \"linked_item_ids\": [], \"applicability_scope\": \"specific_product\", \"product_id\": \"plus\", \"product_category\": \"\", \"usable_as_template\": true, \"a"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "chats",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "chats",
+        "id": "qinplus_finance_reply",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_82267405ba70f614ee19.txt",
+          "candidate_id": "raw_f20b08c1720519be",
+          "rag_experience_id": "rag_exp_c842a1c3e2d5bc240082",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "customer_message": "许聪询问秦PLUS的首付和月供",
+          "service_reply": "许哥，首付和月供得让金融同事根据您选定的秦PLUS、贷款期数和资方方案来算，我这边直接给不了准数。我马上把信息转过去，稍后他会直接联系您出具体方案。",
+          "intent_tags": [
+            "金融方案咨询"
+          ],
+          "tone_tags": [
+            "专业",
+            "礼貌"
+          ],
+          "linked_categories": [
+            "金融"
+          ],
+          "linked_item_ids": [],
+          "applicability_scope": "specific_product",
+          "product_id": "plus",
+          "product_category": "",
+          "usable_as_template": true,
+          "additional_details": {
+            "context_note": "客户后续还询问了上高速试驾，未回答",
+            "原始资料摘录": "{\"customer_message\": \"许聪询问秦PLUS的首付和月供\", \"service_reply\": \"许哥，首付和月供得让金融同事根据您选定的秦PLUS、贷款期数和资方方案来算，我这边直接给不了准数。我马上把信息转过去，稍后他会直接联系您出具体方案。\", \"intent_tags\": [\"金融方案咨询\"], \"tone_tags\": [\"专业\", \"礼貌\"], \"linked_categories\": [\"金融\"], \"linked_item_ids\": [], \"applicability_scope\": \"specific_product\", \"product_id\": \"plus\", \"product_category\": \"\", \"usable_as_template\": true, \"a"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "context_note",
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "pending",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_82267405ba70f614ee19",
+    "source_raw_message_ids": [
+      "raw_msg_c7391b9833c0edbfc93d",
+      "raw_msg_6dce651857abbdefe0f2",
+      "raw_msg_29bb6e894085f8f02200"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_4bbd83bc3eb666a5",
+      "chunk_count": 1,
+      "query": "金融方案咨询回复，无法直接给准数，需转金融同事\n{\"customer_message\": \"许聪询问秦PLUS的首付和月供\", \"service_reply\": \"许哥，首付和月供得让金融同事根据您选定的秦PLUS、贷款期数和资方方案来算，我这边直接给不了准数。我马上把信息转过去，稍后他会直接联系您出具体方案。\", \"intent_tags\": [\"金融方案咨询\"], \"tone_tags\": [\"专业\", \"礼貌\"], \"linked_categories\": [\"金融\"], \"linked_item_ids\": [], \"applicability_scope\": \"specific_product\", \"product_id\": \"plus\", \"product_category\": \"\", \"usable_as_template\": true, \"a\n许哥，首付和月供得让金融同事根据您选定的秦PLUS、贷款期数和资方方案来算，我这边直接给不了准数。我马上把信息转过去，稍后他会直接联系您出具体方案。",
+      "hits": [
+        {
+          "chunk_id": "chunk_6349a5bc6f66f3e1",
+          "source_id": "source_4bbd83bc3eb666a5",
+          "score": 0.8831,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.4897,
+            "semantic": 0.2634,
+            "vector": 0.14,
+            "vector_similarity": 0.9286,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.8831
+          },
+          "text": "[2026-05-04 03:37:00] system: 03:37\n[2026-05-04T03:37:38] self: [车金AI] 许哥，首付和月供得让金融同事根据您选定的秦PLUS、贷款期数和资方方案来算，我这边直接给不了准数。我马上把信息转过去，稍后他会直接联系您出具体方案。\n[2026-05-04T03:37:38] 许聪: 我想开出去上高速试驾一圈，可以吗？"
+        },
+        {
+          "chunk_id": "chunk_99cc4e7f8c7061b0",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5104,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1742,
+            "semantic": 0.1262,
+            "vector": 0.14,
+            "vector_similarity": 0.8144,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5104
+          },
+          "text": "、提档、当地新能源指标和运输方式。\n售后/风险：电池健康、辅助驾驶功能和官方权益以检测报告及账号核验为准。\n推荐话术：适合想体验纯电、智能化和低用车成本的客户，电池和权益必须人工确认。\n商品名称：2020款奥迪A4L 40TFSI时尚动感型\n型号/SKU：CHEJIN-A4L-2020\n类目：二手车/豪华轿车\n关键词：奥迪A4L、A4L、豪华轿车、婚庆、商务\n规格：2020年上牌，表显6.8万公里，2.0T自动挡，黑色，保养记录较完整。\n价格：15.88万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档"
+        },
+        {
+          "chunk_id": "chunk_d2ec0cebcf16c10c",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5075,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1722,
+            "semantic": 0.1253,
+            "vector": 0.14,
+            "vector_similarity": 0.7954,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5075
+          },
+          "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+        },
+        {
+          "chunk_id": "chunk_0d27f032aa229103",
+          "source_id": "source_58950035fd736f45",
+          "score": 0.483,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2109,
+            "semantic": 0.1421,
+            "vector": 0.14,
+            "vector_similarity": 0.7887,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.483
+          },
+          "text": "[2026-05-04T03:24:34] 许聪: 绿本有没有抵押或者查封？\n[2026-05-04T03:24:34] 许聪: 表显公里数准不准？有没有调表？\n[2026-05-04T03:24:34] self: [车金AI] 营运性质有没有跑过网约车，我们得看登记证和实车记录来确认，我这边没法直接给准信。我马上帮您转给销售同事人工核实，方便留个电话吗？他们直接联系您。"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_c842a1c3e2d5bc240082",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "previous_reject_reason": "legacy_auto_candidate_cleanup_20260504: ???????????????????????RAG?????????????????",
+    "previous_rejected_at": "2026-05-04T18:41:18",
+    "updated_at": "2026-05-04T18:58:38",
+    "reopened_at": "2026-05-04T18:58:38",
+    "reopened_by": "codex_test_seed",
+    "reopened_reason": "direct test seed: restored as pending candidate for manual review regression",
+    "test_seed_direct_fill": true
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ],
+  "test_seed": {
+    "seed_id": "direct_test_fill_20260504_v2",
+    "direct_fill": true
+  }
+}

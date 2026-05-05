@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "category_id": "products",
+  "id": "chejin_idealone_2021",
+  "status": "active",
+  "source": {
+    "type": "demo_fixture",
+    "batch_token": "CHEJIN_DEMO_20260503_203628",
+    "domain": "used_car"
+  },
+  "data": {
+    "name": "2021款理想ONE增程6座版",
+    "sku": "CHEJIN-IDEALONE-2021",
+    "category": "二手车/新能源SUV",
+    "aliases": [
+      "理想ONE",
+      "理想",
+      "六座",
+      "增程SUV",
+      "2021款理想ONE增程6座版",
+      "CHEJIN-IDEALONE-2021",
+      "CHEJIN_DEMO_20260503_203628"
+    ],
+    "specs": "2021年上牌，表显5.8万公里，增程式SUV，六座，黑色。",
+    "price": 17.98,
+    "unit": "台",
+    "price_tiers": [
+      {
+        "min_quantity": 1,
+        "unit_price": 17.98
+      }
+    ],
+    "inventory": 1,
+    "shipping_policy": "家庭客户看车建议提前预约，增程系统和权益人工确认。",
+    "warranty_policy": "电池、增程器、官方权益和保养记录以检测报告和人工核验为准。",
+    "reply_templates": {
+      "默认回复": "适合家庭六座、长途和新能源体验需求。",
+      "报价回复": "这台车当前演示价约 17.98 万，最终成交价、金融方案和费用明细需要人工确认。",
+      "议价回复": "二手车一车一况，AI 可以说明参考价和看车建议，最终优惠、订金和成交条件必须由销售确认。",
+      "物流回复": "家庭客户看车建议提前预约，增程系统和权益人工确认。",
+      "售后回复": "电池、增程器、官方权益和保养记录以检测报告和人工核验为准。",
+      "内部备注": "演示资料：用于覆盖二手车常见咨询、风险边界和商品专属知识。"
+    },
+    "risk_rules": [
+      "官方权益转人工",
+      "增程系统检测转人工"
+    ],
+    "additional_details": {
+      "上牌时间": "2021-07",
+      "表显里程": "5.8万公里",
+      "座位数": "6座",
+      "演示状态": "在售"
+    }
+  },
+  "runtime": {
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "risk_level": "normal"
+  },
+  "review_state": {
+    "is_new": true,
+    "new_reason": "newly_added_formal_knowledge",
+    "marked_at": "2026-05-03T20:36:28",
+    "updated_at": "2026-05-03T20:36:28",
+    "read_at": "",
+    "read_by": "",
+    "source": {
+      "source_module": "jiangsu_chejin_demo_seed",
+      "target_category": "products",
+      "item_id": "chejin_idealone_2021"
+    }
+  },
+  "metadata": {
+    "created_at": "2026-05-03T20:36:28",
+    "updated_at": "2026-05-03T20:36:28",
+    "created_by": "admin",
+    "updated_by": "admin"
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_ccd6b05833138724",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_7ac739ded321e247d917.txt",
+    "content_hash": "6dc945b2d81347fc8d1554add5685d62",
+    "status": "active",
+    "created_at": "2026-05-04T02:58:15",
+    "updated_at": "2026-05-04T02:58:15"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_9e6629d775f2e445",
+      "source_id": "source_ccd6b05833138724",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_7ac739ded321e247d917.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-04T02:58:14] self: [车金AI] 这台凯美瑞2021款2.0G豪华版表显是4.8万公里，南京现车。您之前提到预算和高速需求，这台车家用省油、高速也够用。方便问我您是在南京用车还是需要考虑异地提档的事？\n[2026-05-04T02:58:14] 许聪: 那这台能不能异地提档？",
+      "char_count": 156,
+      "status": "active",
+      "created_at": "2026-05-04T02:58:15"
+    }
+  ]
+}

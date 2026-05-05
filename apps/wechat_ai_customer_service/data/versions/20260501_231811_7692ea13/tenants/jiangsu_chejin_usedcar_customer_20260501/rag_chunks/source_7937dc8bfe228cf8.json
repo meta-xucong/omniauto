@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_7937dc8bfe228cf8",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_83bbdbe378e1380f7abf.txt",
+    "content_hash": "cec32018c0d27bdd3336e7ec179902f1",
+    "status": "active",
+    "created_at": "2026-05-01T16:17:56",
+    "updated_at": "2026-05-01T16:17:56"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_d81de7013b045a5d",
+      "source_id": "source_7937dc8bfe228cf8",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_83bbdbe378e1380f7abf.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-01T16:17:56] self: [车金AI] 上一轮客服回复，不应重复处理\n[2026-05-01T16:17:56] self: 还有哪些车源可以看看？",
+      "char_count": 89,
+      "status": "active",
+      "created_at": "2026-05-01T16:17:56"
+    }
+  ]
+}

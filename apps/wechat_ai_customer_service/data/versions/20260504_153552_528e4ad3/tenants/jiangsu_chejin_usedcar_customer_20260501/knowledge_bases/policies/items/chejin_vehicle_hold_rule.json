@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "category_id": "policies",
+  "id": "chejin_vehicle_hold_rule",
+  "status": "active",
+  "source": {
+    "type": "demo_fixture",
+    "batch_token": "CHEJIN_DEMO_20260503_203628",
+    "domain": "used_car"
+  },
+  "data": {
+    "title": "留车时效规则",
+    "policy_type": "contract",
+    "keywords": [
+      "帮我留着",
+      "锁车",
+      "别卖",
+      "保留",
+      "CHEJIN_DEMO_20260503_203628"
+    ],
+    "applicability_scope": "global",
+    "product_category": "",
+    "answer": "留车、锁车、订金时效和违约规则必须由人工确认，AI 只能记录客户意向。",
+    "allow_auto_reply": false,
+    "requires_handoff": true,
+    "handoff_reason": "vehicle_hold",
+    "operator_alert": true,
+    "risk_level": "high",
+    "additional_details": {
+      "演示批次": "CHEJIN_DEMO_20260503_203628",
+      "面向客户解释": "前台可直接按自然语言理解，不需要客户理解技术字段。"
+    }
+  },
+  "runtime": {
+    "allow_auto_reply": false,
+    "requires_handoff": true,
+    "risk_level": "high",
+    "operator_alert": true
+  },
+  "review_state": {
+    "is_new": true,
+    "new_reason": "newly_added_formal_knowledge",
+    "marked_at": "2026-05-03T20:36:28",
+    "updated_at": "2026-05-03T20:36:28",
+    "read_at": "",
+    "read_by": "",
+    "source": {
+      "source_module": "jiangsu_chejin_demo_seed",
+      "target_category": "policies",
+      "item_id": "chejin_vehicle_hold_rule"
+    }
+  },
+  "metadata": {
+    "created_at": "2026-05-03T20:36:28",
+    "updated_at": "2026-05-03T20:36:28",
+    "created_by": "admin",
+    "updated_by": "admin"
+  }
+}

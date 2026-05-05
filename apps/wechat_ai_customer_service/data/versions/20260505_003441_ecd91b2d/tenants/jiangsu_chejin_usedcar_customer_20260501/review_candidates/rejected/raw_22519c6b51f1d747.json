@@ -1,0 +1,321 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_22519c6b51f1d747",
+  "generated_at": "2026-05-04T03:26:47",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_df8fe891509a352c3aee.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"service_reply\": \"绿本是否抵押、查封，以及里程有没有调过，都需要销售同事查登记证和维保记录才能确认，我这边不能直接给结论。我帮您转给负责的销售，方便留个电话吗？他们直接联系您核实。\", \"intent_tags\": [\"车辆状态查询\", \"抵押查封查询\", \"里程真实性查询\"], \"tone_tags\": [\"礼貌\", \"转接\", \"核实\"], \"linked_categories\": [], \"linked_item_ids\": [], \"applicability_scope\": \"product_category\", \"product_category\": \"二手车\", \"usable_as_template\": true, \"additional_details\": {}, \"pro",
+    "content_sha256": "fba72b1acaa85d316d2be86aee01ce0e1054b02681a7c7dc4c2a85f32b50f6e8",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_df8fe891509a352c3aee",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_40073774a3aee01baff6"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_40e674aac8716b84",
+        "source_id": "source_3255eb23cf1d9e7f",
+        "score": 0.8411,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.4604,
+          "semantic": 0.2506,
+          "vector": 0.14,
+          "vector_similarity": 0.9412,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.8411
+        },
+        "text": "[2026-05-04T03:25:55] self: [车金AI] 绿本是否抵押、查封，以及里程有没有调过，都需要销售同事查登记证和维保记录才能确认，我这边不能直接给结论。我帮您转给负责的销售，方便留个电话吗？他们直接联系您核实。"
+      },
+      {
+        "chunk_id": "chunk_0d27f032aa229103",
+        "source_id": "source_58950035fd736f45",
+        "score": 0.5732,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2737,
+          "semantic": 0.1694,
+          "vector": 0.14,
+          "vector_similarity": 0.8389,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.5732
+        },
+        "text": "[2026-05-04T03:24:34] 许聪: 绿本有没有抵押或者查封？\n[2026-05-04T03:24:34] 许聪: 表显公里数准不准？有没有调表？\n[2026-05-04T03:24:34] self: [车金AI] 营运性质有没有跑过网约车，我们得看登记证和实车记录来确认，我这边没法直接给准信。我马上帮您转给销售同事人工核实，方便留个电话吗？他们直接联系您。"
+      },
+      {
+        "chunk_id": "chunk_55a1c2f94c9d1513",
+        "source_id": "source_7b1bbeedcb7732ef",
+        "score": 0.5513,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2585,
+          "semantic": 0.1628,
+          "vector": 0.14,
+          "vector_similarity": 0.8101,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.5513
+        },
+        "text": "[2026-05-04T03:12:08] self: [车金AI] 秦PLUS的电池检测结果和贷款能否包过，都需要销售同事结合实车报告和资方审批来确认，我这边没法直接承诺。我帮您转给负责的销售直接对接，您方便留个电话吗？\n[2026-05-04T03:12:08] 许聪: 你们门店在哪？营业时间大概是什么时候？"
+      },
+      {
+        "chunk_id": "chunk_cea25e6c7bbc1d31",
+        "source_id": "source_6d72e3824a4b9f43",
+        "score": 0.5342,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2466,
+          "semantic": 0.1576,
+          "vector": 0.14,
+          "vector_similarity": 0.7843,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.5342
+        },
+        "text": "[2026-05-04T03:23:13] self: [车金AI] 检测报告和保养、出险记录都需要销售同事调取核实后才能发给您，我这边没法直接发。我马上帮您转给销售，麻烦您留个电话，他们直接联系您发。\n[2026-05-04T03:23:13] 许聪: 这车是不是非营运？有没有跑过网约车？"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_c0ae675b551312df2271",
+    "experience_id": "rag_exp_c0ae675b551312df2271"
+  },
+  "detected_tags": [
+    "llm",
+    "rag_experience",
+    "unknown",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "chats",
+    "change_type": "llm_upsert_chats",
+    "summary": "车辆抵押/查封/调表查询需转销售核实的话术模板",
+    "suggested_fields": {
+      "service_reply": "绿本是否抵押、查封，以及里程有没有调过，都需要销售同事查登记证和维保记录才能确认，我这边不能直接给结论。我帮您转给负责的销售，方便留个电话吗？他们直接联系您核实。",
+      "intent_tags": [
+        "车辆状态查询",
+        "抵押查封查询",
+        "里程真实性查询"
+      ],
+      "tone_tags": [
+        "礼貌",
+        "转接",
+        "核实"
+      ],
+      "linked_categories": [],
+      "linked_item_ids": [],
+      "applicability_scope": "product_category",
+      "product_category": "二手车",
+      "usable_as_template": true,
+      "product_id": "",
+      "additional_details": {
+        "原始资料摘录": "{\"service_reply\": \"绿本是否抵押、查封，以及里程有没有调过，都需要销售同事查登记证和维保记录才能确认，我这边不能直接给结论。我帮您转给负责的销售，方便留个电话吗？他们直接联系您核实。\", \"intent_tags\": [\"车辆状态查询\", \"抵押查封查询\", \"里程真实性查询\"], \"tone_tags\": [\"礼貌\", \"转接\", \"核实\"], \"linked_categories\": [], \"linked_item_ids\": [], \"applicability_scope\": \"product_category\", \"product_category\": \"二手车\", \"usable_as_template\": true, \"additional_details\": {}, \"pro"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "chats",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "chats",
+        "id": "vehicle_history_check_handoff_template",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_df8fe891509a352c3aee.txt",
+          "candidate_id": "raw_22519c6b51f1d747",
+          "rag_experience_id": "rag_exp_c0ae675b551312df2271",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "service_reply": "绿本是否抵押、查封，以及里程有没有调过，都需要销售同事查登记证和维保记录才能确认，我这边不能直接给结论。我帮您转给负责的销售，方便留个电话吗？他们直接联系您核实。",
+          "intent_tags": [
+            "车辆状态查询",
+            "抵押查封查询",
+            "里程真实性查询"
+          ],
+          "tone_tags": [
+            "礼貌",
+            "转接",
+            "核实"
+          ],
+          "linked_categories": [],
+          "linked_item_ids": [],
+          "applicability_scope": "product_category",
+          "product_category": "二手车",
+          "usable_as_template": true,
+          "product_id": "",
+          "additional_details": {
+            "原始资料摘录": "{\"service_reply\": \"绿本是否抵押、查封，以及里程有没有调过，都需要销售同事查登记证和维保记录才能确认，我这边不能直接给结论。我帮您转给负责的销售，方便留个电话吗？他们直接联系您核实。\", \"intent_tags\": [\"车辆状态查询\", \"抵押查封查询\", \"里程真实性查询\"], \"tone_tags\": [\"礼貌\", \"转接\", \"核实\"], \"linked_categories\": [], \"linked_item_ids\": [], \"applicability_scope\": \"product_category\", \"product_category\": \"二手车\", \"usable_as_template\": true, \"additional_details\": {}, \"pro"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "rejected",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_df8fe891509a352c3aee",
+    "source_raw_message_ids": [
+      "raw_msg_40073774a3aee01baff6"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_3255eb23cf1d9e7f",
+      "chunk_count": 1,
+      "query": "车辆抵押/查封/调表查询需转销售核实的话术模板\n{\"service_reply\": \"绿本是否抵押、查封，以及里程有没有调过，都需要销售同事查登记证和维保记录才能确认，我这边不能直接给结论。我帮您转给负责的销售，方便留个电话吗？他们直接联系您核实。\", \"intent_tags\": [\"车辆状态查询\", \"抵押查封查询\", \"里程真实性查询\"], \"tone_tags\": [\"礼貌\", \"转接\", \"核实\"], \"linked_categories\": [], \"linked_item_ids\": [], \"applicability_scope\": \"product_category\", \"product_category\": \"二手车\", \"usable_as_template\": true, \"additional_details\": {}, \"pro\n绿本是否抵押、查封，以及里程有没有调过，都需要销售同事查登记证和维保记录才能确认，我这边不能直接给结论。我帮您转给负责的销售，方便留个电话吗？他们直接联系您核实。",
+      "hits": [
+        {
+          "chunk_id": "chunk_40e674aac8716b84",
+          "source_id": "source_3255eb23cf1d9e7f",
+          "score": 0.8411,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.4604,
+            "semantic": 0.2506,
+            "vector": 0.14,
+            "vector_similarity": 0.9412,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.8411
+          },
+          "text": "[2026-05-04T03:25:55] self: [车金AI] 绿本是否抵押、查封，以及里程有没有调过，都需要销售同事查登记证和维保记录才能确认，我这边不能直接给结论。我帮您转给负责的销售，方便留个电话吗？他们直接联系您核实。"
+        },
+        {
+          "chunk_id": "chunk_0d27f032aa229103",
+          "source_id": "source_58950035fd736f45",
+          "score": 0.5732,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2737,
+            "semantic": 0.1694,
+            "vector": 0.14,
+            "vector_similarity": 0.8389,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.5732
+          },
+          "text": "[2026-05-04T03:24:34] 许聪: 绿本有没有抵押或者查封？\n[2026-05-04T03:24:34] 许聪: 表显公里数准不准？有没有调表？\n[2026-05-04T03:24:34] self: [车金AI] 营运性质有没有跑过网约车，我们得看登记证和实车记录来确认，我这边没法直接给准信。我马上帮您转给销售同事人工核实，方便留个电话吗？他们直接联系您。"
+        },
+        {
+          "chunk_id": "chunk_55a1c2f94c9d1513",
+          "source_id": "source_7b1bbeedcb7732ef",
+          "score": 0.5513,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2585,
+            "semantic": 0.1628,
+            "vector": 0.14,
+            "vector_similarity": 0.8101,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.5513
+          },
+          "text": "[2026-05-04T03:12:08] self: [车金AI] 秦PLUS的电池检测结果和贷款能否包过，都需要销售同事结合实车报告和资方审批来确认，我这边没法直接承诺。我帮您转给负责的销售直接对接，您方便留个电话吗？\n[2026-05-04T03:12:08] 许聪: 你们门店在哪？营业时间大概是什么时候？"
+        },
+        {
+          "chunk_id": "chunk_cea25e6c7bbc1d31",
+          "source_id": "source_6d72e3824a4b9f43",
+          "score": 0.5342,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2466,
+            "semantic": 0.1576,
+            "vector": 0.14,
+            "vector_similarity": 0.7843,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.5342
+          },
+          "text": "[2026-05-04T03:23:13] self: [车金AI] 检测报告和保养、出险记录都需要销售同事调取核实后才能发给您，我这边没法直接发。我马上帮您转给销售，麻烦您留个电话，他们直接联系您发。\n[2026-05-04T03:23:13] 许聪: 这车是不是非营运？有没有跑过网约车？"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_c0ae675b551312df2271",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "rejected_at": "2026-05-04T18:41:18",
+    "reason": "legacy_auto_candidate_cleanup_20260504: ???????????????????????RAG?????????????????"
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_4689ceaaf159e590",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_884305a67c6a6b3269eb.txt",
+    "content_hash": "21b1ecb6700dbf7ed99a623fc5454a21",
+    "status": "active",
+    "created_at": "2026-05-04T04:17:00",
+    "updated_at": "2026-05-04T04:17:00"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_0058d68f579efeac",
+      "source_id": "source_4689ceaaf159e590",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_884305a67c6a6b3269eb.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-04T04:16:59] 许聪: 你是不是机器人？能不能让真人处理？",
+      "char_count": 43,
+      "status": "active",
+      "created_at": "2026-05-04T04:17:00"
+    }
+  ]
+}

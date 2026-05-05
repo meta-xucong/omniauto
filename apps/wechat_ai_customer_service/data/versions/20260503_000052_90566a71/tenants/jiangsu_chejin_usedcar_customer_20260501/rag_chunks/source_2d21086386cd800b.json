@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_2d21086386cd800b",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "group",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_f7748bf2c64aeb0b4d07.txt",
+    "content_hash": "0de54943c523401a9828cde21a520309",
+    "status": "active",
+    "created_at": "2026-05-02T04:25:17",
+    "updated_at": "2026-05-02T04:25:17"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_cc5f986c69c6dc5a",
+      "source_id": "source_2d21086386cd800b",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "group",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_f7748bf2c64aeb0b4d07.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-02T04:25:17] self: 边界噪音：LIVE_RECORDER_20260502_042340_NOISE 今天天气和测试心跳记录，不是产品资料，也不是客服知识。",
+      "char_count": 96,
+      "status": "active",
+      "created_at": "2026-05-02T04:25:17"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_5367a60ae40b4620",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_4f5e4d93869340b41b79.txt",
+    "content_hash": "5a62f4e6688be134c8e36878bbc65ac4",
+    "status": "active",
+    "created_at": "2026-05-04T02:32:09",
+    "updated_at": "2026-05-04T02:32:09"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_0f63e3abe75c4723",
+      "source_id": "source_5367a60ae40b4620",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_4f5e4d93869340b41b79.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-04T02:32:08] self: [车金AI] 理想ONE是六座SUV，第二排独立座椅，空间比较宽敞，一家六口出行是坐得下的。我们店里正好有一台2021款六座版，5.8万公里，17.98万。不过具体的车况、权益这些还是需要人工核实。您目前的预算大概多少？或者想先看看这台车的检测报告？",
+      "char_count": 153,
+      "status": "active",
+      "created_at": "2026-05-04T02:32:09"
+    }
+  ]
+}

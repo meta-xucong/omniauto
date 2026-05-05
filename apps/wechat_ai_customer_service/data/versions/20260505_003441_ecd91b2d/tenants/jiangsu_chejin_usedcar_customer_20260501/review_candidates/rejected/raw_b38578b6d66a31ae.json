@@ -1,0 +1,337 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_b38578b6d66a31ae",
+  "generated_at": "2026-05-03T20:39:34",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_fb0b11ed5534bfa774fb.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"title\": \"到店看车预约流程\", \"policy_type\": \"appointment\", \"keywords\": [\"看车\", \"预约\", \"到店\", \"试驾\"], \"applicability_scope\": \"global\", \"answer\": \"可以，我先记录到店意向并转人工确认车辆是否在店和接待时间。\", \"allow_auto_reply\": false, \"requires_handoff\": true, \"handoff_reason\": \"需人工确认车辆库存和接待时间\", \"operator_alert\": true, \"risk_level\": \"low\", \"additional_details\": {\"source_batch\": \"CHEJIN_DEMO_20260503",
+    "content_sha256": "bc78b9cc88ba231832f6e32d9a4f6450fb6abcdfc731494b904baf8ece1da54d",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_fb0b11ed5534bfa774fb",
+    "conversation_id": "chejin_demo_private_zhang_chejin_demo_20260503_203628",
+    "raw_message_ids": [
+      "raw_msg_1231489305db04721e33",
+      "raw_msg_e3901ad7a28119658bcf",
+      "raw_msg_bdcc77bc6c45435cc81e",
+      "raw_msg_ad553e7c1176bddf5049",
+      "raw_msg_6f2890dc1bb4f44f3577",
+      "raw_msg_f9e0c8431d69ed4f4a53"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_9b1c960bb7c4529b",
+        "source_id": "source_a805e8d8d686b497",
+        "score": 0.7519,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.3983,
+          "semantic": 0.2236,
+          "vector": 0.14,
+          "vector_similarity": 0.8072,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.7519
+        },
+        "text": "[2026-05-03T19:26:31] 客户: 张先生：我从直播间来的，预算8万，想买省油自动挡，最好南京能看车。\n演示批次：CHEJIN_DEMO_20260503_203628\n[2026-05-03T19:27:31] self: 客服：8万左右可以先看凯美瑞、轩逸、卡罗拉或秦PLUS，您是想燃油还是新能源？\n演示批次：CHEJIN_DEMO_20260503_203628\n[2026-05-03T19:28:31] 客户: 张先生：可以贷款吗，首付三成月供多少？\n演示批次：CHEJIN_DEMO_202"
+      },
+      {
+        "chunk_id": "chunk_d2ec0cebcf16c10c",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5739,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2262,
+          "semantic": 0.1488,
+          "vector": 0.1289,
+          "vector_similarity": 0.7162,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5739
+        },
+        "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+      },
+      {
+        "chunk_id": "chunk_c042ee843c5513a9",
+        "source_id": "source_b6382fbc1e2edf58",
+        "score": 0.5479,
+        "category": "chats",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.3188,
+          "semantic": 0.1891,
+          "vector": 0.14,
+          "vector_similarity": 0.7987,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.02,
+          "risk_penalty": 0.08,
+          "final": 0.5479
+        },
+        "text": "# 销售对话话术库\n演示批次：CHEJIN_DEMO_20260503_203628\n真实客服话术样例：\n客户：8万左右想买省油自动挡代步\n客服：8万左右可以优先看凯美瑞、轩逸、卡罗拉或秦PLUS。燃油车更省心，插混更省油；我先帮您确认城市、到店时间、是否贷款和置换。\n标签：预算推荐、代步、CHEJIN_DEMO_20260503_203628\n客户：秦PLUS和Model 3怎么选\n客服：秦PLUS偏低油耗和家用成本，Model 3偏纯电驾驶和智能化。新能源车我会先提醒电池检测、官方权益和当地政策需要人工确认。\n"
+      },
+      {
+        "chunk_id": "chunk_754ecf131d7858cd",
+        "source_id": "source_bb395d5ecba99f8b",
+        "score": 0.542,
+        "category": "policies",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2725,
+          "semantic": 0.1689,
+          "vector": 0.1356,
+          "vector_similarity": 0.7532,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.045,
+          "risk_penalty": 0.08,
+          "final": 0.542
+        },
+        "text": "# 二手车交易规则手册\n演示批次：CHEJIN_DEMO_20260503_203628\n二手车行业演示规则：所有成交、过户、金融、售后和车况承诺均以合同、检测报告和人工确认为准。\n规则：江苏车金门店介绍\n触发词：江苏车金、门店、地址、营业时间、CHEJIN_DEMO_20260503_203628\n标准说明：江苏车金二手车演示账号默认说明：客户可以预约南京门店看车，AI 只做初步接待、资料收集和风险提醒，成交条件由人工确认。\n规则：看车预约与到店规则\n触发词：看车、到店、试驾、试乘、预约、CHEJIN_DEMO_"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_bcfba2812ed56b2a9444",
+    "experience_id": "rag_exp_bcfba2812ed56b2a9444"
+  },
+  "detected_tags": [
+    "llm",
+    "rag_experience",
+    "style",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "policies",
+    "change_type": "llm_upsert_policies",
+    "summary": "到店看车预约需转人工确认流程",
+    "suggested_fields": {
+      "title": "到店看车预约流程",
+      "policy_type": "appointment",
+      "keywords": [
+        "看车",
+        "预约",
+        "到店",
+        "试驾"
+      ],
+      "applicability_scope": "global",
+      "answer": "可以，我先记录到店意向并转人工确认车辆是否在店和接待时间。",
+      "allow_auto_reply": false,
+      "requires_handoff": true,
+      "handoff_reason": "需人工确认车辆库存和接待时间",
+      "operator_alert": true,
+      "risk_level": "low",
+      "product_id": "",
+      "product_category": "",
+      "additional_details": {
+        "source_batch": "CHEJIN_DEMO_20260503_203628",
+        "procedure": "客服记录客户意向，转人工坐席确认车辆在店和预约时间后联系客户",
+        "原始资料摘录": "{\"title\": \"到店看车预约流程\", \"policy_type\": \"appointment\", \"keywords\": [\"看车\", \"预约\", \"到店\", \"试驾\"], \"applicability_scope\": \"global\", \"answer\": \"可以，我先记录到店意向并转人工确认车辆是否在店和接待时间。\", \"allow_auto_reply\": false, \"requires_handoff\": true, \"handoff_reason\": \"需人工确认车辆库存和接待时间\", \"operator_alert\": true, \"risk_level\": \"low\", \"additional_details\": {\"source_batch\": \"CHEJIN_DEMO_20260503"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "policies",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "policies",
+        "id": "policy_visit_appointment",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_fb0b11ed5534bfa774fb.txt",
+          "candidate_id": "raw_b38578b6d66a31ae",
+          "rag_experience_id": "rag_exp_bcfba2812ed56b2a9444",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "title": "到店看车预约流程",
+          "policy_type": "appointment",
+          "keywords": [
+            "看车",
+            "预约",
+            "到店",
+            "试驾"
+          ],
+          "applicability_scope": "global",
+          "answer": "可以，我先记录到店意向并转人工确认车辆是否在店和接待时间。",
+          "allow_auto_reply": false,
+          "requires_handoff": true,
+          "handoff_reason": "需人工确认车辆库存和接待时间",
+          "operator_alert": true,
+          "risk_level": "low",
+          "product_id": "",
+          "product_category": "",
+          "additional_details": {
+            "source_batch": "CHEJIN_DEMO_20260503_203628",
+            "procedure": "客服记录客户意向，转人工坐席确认车辆在店和预约时间后联系客户",
+            "原始资料摘录": "{\"title\": \"到店看车预约流程\", \"policy_type\": \"appointment\", \"keywords\": [\"看车\", \"预约\", \"到店\", \"试驾\"], \"applicability_scope\": \"global\", \"answer\": \"可以，我先记录到店意向并转人工确认车辆是否在店和接待时间。\", \"allow_auto_reply\": false, \"requires_handoff\": true, \"handoff_reason\": \"需人工确认车辆库存和接待时间\", \"operator_alert\": true, \"risk_level\": \"low\", \"additional_details\": {\"source_batch\": \"CHEJIN_DEMO_20260503"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": false,
+          "requires_handoff": true,
+          "risk_level": "warning"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "procedure",
+      "source_batch",
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "rejected",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_fb0b11ed5534bfa774fb",
+    "source_raw_message_ids": [
+      "raw_msg_1231489305db04721e33",
+      "raw_msg_e3901ad7a28119658bcf",
+      "raw_msg_bdcc77bc6c45435cc81e",
+      "raw_msg_ad553e7c1176bddf5049",
+      "raw_msg_6f2890dc1bb4f44f3577",
+      "raw_msg_f9e0c8431d69ed4f4a53"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_a805e8d8d686b497",
+      "chunk_count": 1,
+      "query": "到店看车预约需转人工确认流程\n{\"title\": \"到店看车预约流程\", \"policy_type\": \"appointment\", \"keywords\": [\"看车\", \"预约\", \"到店\", \"试驾\"], \"applicability_scope\": \"global\", \"answer\": \"可以，我先记录到店意向并转人工确认车辆是否在店和接待时间。\", \"allow_auto_reply\": false, \"requires_handoff\": true, \"handoff_reason\": \"需人工确认车辆库存和接待时间\", \"operator_alert\": true, \"risk_level\": \"low\", \"additional_details\": {\"source_batch\": \"CHEJIN_DEMO_20260503\n到店看车预约流程\n可以，我先记录到店意向并转人工确认车辆是否在店和接待时间。",
+      "hits": [
+        {
+          "chunk_id": "chunk_9b1c960bb7c4529b",
+          "source_id": "source_a805e8d8d686b497",
+          "score": 0.7519,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.3983,
+            "semantic": 0.2236,
+            "vector": 0.14,
+            "vector_similarity": 0.8072,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.7519
+          },
+          "text": "[2026-05-03T19:26:31] 客户: 张先生：我从直播间来的，预算8万，想买省油自动挡，最好南京能看车。\n演示批次：CHEJIN_DEMO_20260503_203628\n[2026-05-03T19:27:31] self: 客服：8万左右可以先看凯美瑞、轩逸、卡罗拉或秦PLUS，您是想燃油还是新能源？\n演示批次：CHEJIN_DEMO_20260503_203628\n[2026-05-03T19:28:31] 客户: 张先生：可以贷款吗，首付三成月供多少？\n演示批次：CHEJIN_DEMO_202"
+        },
+        {
+          "chunk_id": "chunk_d2ec0cebcf16c10c",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5739,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2262,
+            "semantic": 0.1488,
+            "vector": 0.1289,
+            "vector_similarity": 0.7162,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5739
+          },
+          "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+        },
+        {
+          "chunk_id": "chunk_c042ee843c5513a9",
+          "source_id": "source_b6382fbc1e2edf58",
+          "score": 0.5479,
+          "category": "chats",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.3188,
+            "semantic": 0.1891,
+            "vector": 0.14,
+            "vector_similarity": 0.7987,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.02,
+            "risk_penalty": 0.08,
+            "final": 0.5479
+          },
+          "text": "# 销售对话话术库\n演示批次：CHEJIN_DEMO_20260503_203628\n真实客服话术样例：\n客户：8万左右想买省油自动挡代步\n客服：8万左右可以优先看凯美瑞、轩逸、卡罗拉或秦PLUS。燃油车更省心，插混更省油；我先帮您确认城市、到店时间、是否贷款和置换。\n标签：预算推荐、代步、CHEJIN_DEMO_20260503_203628\n客户：秦PLUS和Model 3怎么选\n客服：秦PLUS偏低油耗和家用成本，Model 3偏纯电驾驶和智能化。新能源车我会先提醒电池检测、官方权益和当地政策需要人工确认。\n"
+        },
+        {
+          "chunk_id": "chunk_754ecf131d7858cd",
+          "source_id": "source_bb395d5ecba99f8b",
+          "score": 0.542,
+          "category": "policies",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2725,
+            "semantic": 0.1689,
+            "vector": 0.1356,
+            "vector_similarity": 0.7532,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.045,
+            "risk_penalty": 0.08,
+            "final": 0.542
+          },
+          "text": "# 二手车交易规则手册\n演示批次：CHEJIN_DEMO_20260503_203628\n二手车行业演示规则：所有成交、过户、金融、售后和车况承诺均以合同、检测报告和人工确认为准。\n规则：江苏车金门店介绍\n触发词：江苏车金、门店、地址、营业时间、CHEJIN_DEMO_20260503_203628\n标准说明：江苏车金二手车演示账号默认说明：客户可以预约南京门店看车，AI 只做初步接待、资料收集和风险提醒，成交条件由人工确认。\n规则：看车预约与到店规则\n触发词：看车、到店、试驾、试乘、预约、CHEJIN_DEMO_"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_bcfba2812ed56b2a9444",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "rejected_at": "2026-05-04T15:24:47",
+    "reason": "?????????????AI/??????????????????????????????????????????AI????"
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

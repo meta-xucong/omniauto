@@ -1,0 +1,315 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_c25974d2000f1df0",
+  "generated_at": "2026-05-04T02:14:42",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_8cd14bfd9c2b6530fc3f.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"product_id\": \"a4l\", \"title\": \"A4L适合婚庆或商务接待吗？\", \"keywords\": [\"婚庆\", \"商务接待\"], \"question\": \"A4L适合婚庆或者商务接待吗？\", \"answer\": \"\", \"additional_details\": {\"customer_name\": \"许聪\", \"timestamp\": \"2026-05-04T02:14:09\"}}",
+    "content_sha256": "bf3f699a9c7aa35c69227d28fc02e352eadbf0c328d656de3e8c8d5449e93e5c",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_8cd14bfd9c2b6530fc3f",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_0c2e2b1261a4cc012b27"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_b337ce53075b8e8c",
+        "source_id": "source_811aa2358e7c4dbd",
+        "score": 0.693,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.3866,
+          "semantic": 0.1822,
+          "vector": 0.1343,
+          "vector_similarity": 0.746,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.693
+        },
+        "text": "[2026-05-04T02:14:09] 许聪: A4L适合婚庆或者商务接待吗？"
+      },
+      {
+        "chunk_id": "chunk_d2ec0cebcf16c10c",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.582,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2355,
+          "semantic": 0.1452,
+          "vector": 0.1313,
+          "vector_similarity": 0.7292,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.582
+        },
+        "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+      },
+      {
+        "chunk_id": "chunk_99cc4e7f8c7061b0",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5264,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1943,
+          "semantic": 0.1351,
+          "vector": 0.127,
+          "vector_similarity": 0.7055,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5264
+        },
+        "text": "、提档、当地新能源指标和运输方式。\n售后/风险：电池健康、辅助驾驶功能和官方权益以检测报告及账号核验为准。\n推荐话术：适合想体验纯电、智能化和低用车成本的客户，电池和权益必须人工确认。\n商品名称：2020款奥迪A4L 40TFSI时尚动感型\n型号/SKU：CHEJIN-A4L-2020\n类目：二手车/豪华轿车\n关键词：奥迪A4L、A4L、豪华轿车、婚庆、商务\n规格：2020年上牌，表显6.8万公里，2.0T自动挡，黑色，保养记录较完整。\n价格：15.88万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档"
+      },
+      {
+        "chunk_id": "chunk_bd5bc67861c08740",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.494,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1717,
+          "semantic": 0.1318,
+          "vector": 0.1205,
+          "vector_similarity": 0.6694,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.494
+        },
+        "text": "品名称：2021款捷达VS5 280TSI自动荣耀型\n型号/SKU：CHEJIN-JETTAVS5-2021\n类目：二手车/SUV\n关键词：捷达VS5、VS5、德系SUV、预算SUV\n规格：2021年上牌，表显3.8万公里，1.4T自动挡，白色。\n价格：6.38万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：涡轮、变速箱和保养以检测报告为准。\n推荐话术：适合预算6到7万、想买合资SUV的客户。\n商品名称：2017款福特福克斯1.6L自动风尚"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_45a26693b29b1a55dde9",
+    "experience_id": "rag_exp_45a26693b29b1a55dde9"
+  },
+  "detected_tags": [
+    "llm",
+    "rag_experience",
+    "unknown",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "product_faq",
+    "change_type": "llm_upsert_product_faq",
+    "summary": "客户许聪咨询A4L是否适合婚庆或商务接待",
+    "suggested_fields": {
+      "product_id": "a4l",
+      "title": "A4L适合婚庆或商务接待吗？",
+      "keywords": [
+        "婚庆",
+        "商务接待"
+      ],
+      "question": "A4L适合婚庆或者商务接待吗？",
+      "answer": "",
+      "additional_details": {
+        "customer_name": "许聪",
+        "timestamp": "2026-05-04T02:14:09",
+        "原始资料摘录": "{\"product_id\": \"a4l\", \"title\": \"A4L适合婚庆或商务接待吗？\", \"keywords\": [\"婚庆\", \"商务接待\"], \"question\": \"A4L适合婚庆或者商务接待吗？\", \"answer\": \"\", \"additional_details\": {\"customer_name\": \"许聪\", \"timestamp\": \"2026-05-04T02:14:09\"}}"
+      }
+    },
+    "missing_fields": [
+      "answer"
+    ],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "product_faq",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "product_faq",
+        "id": "a4l-wedding-business",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_8cd14bfd9c2b6530fc3f.txt",
+          "candidate_id": "raw_c25974d2000f1df0",
+          "rag_experience_id": "rag_exp_45a26693b29b1a55dde9",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "product_id": "a4l",
+          "title": "A4L适合婚庆或商务接待吗？",
+          "keywords": [
+            "婚庆",
+            "商务接待"
+          ],
+          "question": "A4L适合婚庆或者商务接待吗？",
+          "answer": "",
+          "additional_details": {
+            "customer_name": "许聪",
+            "timestamp": "2026-05-04T02:14:09",
+            "原始资料摘录": "{\"product_id\": \"a4l\", \"title\": \"A4L适合婚庆或商务接待吗？\", \"keywords\": [\"婚庆\", \"商务接待\"], \"question\": \"A4L适合婚庆或者商务接待吗？\", \"answer\": \"\", \"additional_details\": {\"customer_name\": \"许聪\", \"timestamp\": \"2026-05-04T02:14:09\"}}"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "needs_more_info",
+    "ok": false,
+    "confidence": 0.72,
+    "missing_fields": [
+      "answer"
+    ],
+    "missing_labels": [
+      "标准回复"
+    ],
+    "question": "还需要补充：标准回复。请补齐后再应用入库。",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "customer_name",
+      "timestamp",
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "pending",
+    "completeness_status": "needs_more_info",
+    "missing_fields": [
+      "answer"
+    ],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_8cd14bfd9c2b6530fc3f",
+    "source_raw_message_ids": [
+      "raw_msg_0c2e2b1261a4cc012b27"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_811aa2358e7c4dbd",
+      "chunk_count": 1,
+      "query": "客户许聪咨询A4L是否适合婚庆或商务接待\n{\"product_id\": \"a4l\", \"title\": \"A4L适合婚庆或商务接待吗？\", \"keywords\": [\"婚庆\", \"商务接待\"], \"question\": \"A4L适合婚庆或者商务接待吗？\", \"answer\": \"\", \"additional_details\": {\"customer_name\": \"许聪\", \"timestamp\": \"2026-05-04T02:14:09\"}}\nA4L适合婚庆或商务接待吗？",
+      "hits": [
+        {
+          "chunk_id": "chunk_b337ce53075b8e8c",
+          "source_id": "source_811aa2358e7c4dbd",
+          "score": 0.693,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.3866,
+            "semantic": 0.1822,
+            "vector": 0.1343,
+            "vector_similarity": 0.746,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.693
+          },
+          "text": "[2026-05-04T02:14:09] 许聪: A4L适合婚庆或者商务接待吗？"
+        },
+        {
+          "chunk_id": "chunk_d2ec0cebcf16c10c",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.582,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2355,
+            "semantic": 0.1452,
+            "vector": 0.1313,
+            "vector_similarity": 0.7292,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.582
+          },
+          "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+        },
+        {
+          "chunk_id": "chunk_99cc4e7f8c7061b0",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5264,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1943,
+            "semantic": 0.1351,
+            "vector": 0.127,
+            "vector_similarity": 0.7055,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5264
+          },
+          "text": "、提档、当地新能源指标和运输方式。\n售后/风险：电池健康、辅助驾驶功能和官方权益以检测报告及账号核验为准。\n推荐话术：适合想体验纯电、智能化和低用车成本的客户，电池和权益必须人工确认。\n商品名称：2020款奥迪A4L 40TFSI时尚动感型\n型号/SKU：CHEJIN-A4L-2020\n类目：二手车/豪华轿车\n关键词：奥迪A4L、A4L、豪华轿车、婚庆、商务\n规格：2020年上牌，表显6.8万公里，2.0T自动挡，黑色，保养记录较完整。\n价格：15.88万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档"
+        },
+        {
+          "chunk_id": "chunk_bd5bc67861c08740",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.494,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1717,
+            "semantic": 0.1318,
+            "vector": 0.1205,
+            "vector_similarity": 0.6694,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.494
+          },
+          "text": "品名称：2021款捷达VS5 280TSI自动荣耀型\n型号/SKU：CHEJIN-JETTAVS5-2021\n类目：二手车/SUV\n关键词：捷达VS5、VS5、德系SUV、预算SUV\n规格：2021年上牌，表显3.8万公里，1.4T自动挡，白色。\n价格：6.38万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：涡轮、变速箱和保养以检测报告为准。\n推荐话术：适合预算6到7万、想买合资SUV的客户。\n商品名称：2017款福特福克斯1.6L自动风尚"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_45a26693b29b1a55dde9",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ]
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

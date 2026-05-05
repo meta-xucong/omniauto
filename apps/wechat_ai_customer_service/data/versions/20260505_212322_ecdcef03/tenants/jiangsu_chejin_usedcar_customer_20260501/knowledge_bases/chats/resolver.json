@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "category_id": "chats",
+  "match_fields": ["customer_message", "service_reply", "intent_tags", "tone_tags", "product_id", "product_category", "additional_details"],
+  "intent_fields": ["intent_tags"],
+  "risk_fields": ["intent_tags"],
+  "reply_fields": ["service_reply", "intent_tags", "tone_tags", "linked_categories", "linked_item_ids", "applicability_scope", "product_id", "product_category", "additional_details"],
+  "minimum_confidence": 0.35,
+  "default_action": "style_or_boundary_template"
+}

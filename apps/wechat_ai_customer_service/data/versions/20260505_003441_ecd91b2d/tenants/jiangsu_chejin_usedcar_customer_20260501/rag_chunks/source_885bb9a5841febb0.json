@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_885bb9a5841febb0",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_cc21f2b358cc8b549e92.txt",
+    "content_hash": "a72bae8ff56585ede0038d5690f23f19",
+    "status": "active",
+    "created_at": "2026-05-04T02:52:32",
+    "updated_at": "2026-05-04T02:52:32"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_f46e0d244519420d",
+      "source_id": "source_885bb9a5841febb0",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_cc21f2b358cc8b549e92.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-04T02:52:31] self: [车金AI] 您经常跑高速，又想撑门面，预算15万上下的话，店里有一台2020款奥迪A4L 40TFSI时尚动感型，2.0T动力稳，黑色商务范，参考价15.88万，比较符合您的需求。如果不介意品牌低调点，2020款本田雅阁260TURBO也适合高速，10.88万更实惠。您倾向哪个方向？具体车况和价格需要销售同事核实。\n[2026-05-04T02:52:31] 许聪: 我想看凯美瑞",
+      "char_count": 220,
+      "status": "active",
+      "created_at": "2026-05-04T02:52:32"
+    }
+  ]
+}

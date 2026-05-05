@@ -1,0 +1,331 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_821bea0b22e27ad7",
+  "generated_at": "2026-05-04T02:32:48",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_4f5e4d93869340b41b79.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"customer_message\": null, \"service_reply\": \"理想ONE是六座SUV，第二排独立座椅，空间比较宽敞，一家六口出行是坐得下的。我们店里正好有一台2021款六座版，5.8万公里，17.98万。不过具体的车况、权益这些还是需要人工核实。您目前的预算大概多少？或者想先看看这台车的检测报告？\", \"intent_tags\": [\"询价\", \"空间咨询\", \"车况咨询\"], \"tone_tags\": [\"专业\", \"引导性\"], \"linked_categories\": [\"汽车销售\"], \"linked_item_ids\": [], \"applicability_scope\": \"product_category\", \"product_id\": \"\", \"product_cat",
+    "content_sha256": "5a62f4e6688be134c8e36878bbc65ac436b5d6b5b92f5de8eda39aab7ab5c2a6",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_4f5e4d93869340b41b79",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_42f61f2b8e84139ca19f"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_0f63e3abe75c4723",
+        "source_id": "source_5367a60ae40b4620",
+        "score": 0.8782,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.4863,
+          "semantic": 0.2619,
+          "vector": 0.14,
+          "vector_similarity": 0.9467,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.8782
+        },
+        "text": "[2026-05-04T02:32:08] self: [车金AI] 理想ONE是六座SUV，第二排独立座椅，空间比较宽敞，一家六口出行是坐得下的。我们店里正好有一台2021款六座版，5.8万公里，17.98万。不过具体的车况、权益这些还是需要人工核实。您目前的预算大概多少？或者想先看看这台车的检测报告？"
+      },
+      {
+        "chunk_id": "chunk_58029d4057022265",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5369,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1934,
+          "semantic": 0.1345,
+          "vector": 0.139,
+          "vector_similarity": 0.772,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5369
+        },
+        "text": "险：电池、增程器、官方权益和保养记录以检测报告和人工核验为准。\n推荐话术：适合家庭六座、长途和新能源体验需求。\n商品名称：2021款长安CS75 PLUS 1.5T自动尊贵型\n型号/SKU：CHEJIN-CS75PLUS-2021\n类目：二手车/SUV\n关键词：CS75PLUS、长安CS75、国产SUV、家用SUV\n规格：2021年上牌，表显4.4万公里，1.5T自动挡，白色，配置高。\n价格：6.88万，库存：2台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后"
+      },
+      {
+        "chunk_id": "chunk_9a0d34760ad6ccae",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5298,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1887,
+          "semantic": 0.1325,
+          "vector": 0.1387,
+          "vector_similarity": 0.7703,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5298
+        },
+        "text": "工确认。\n售后/风险：CVT变速箱状态、保养和车况以检测报告为准。\n推荐话术：适合6到7万预算、练手、家用代步和省油需求。\n商品名称：2019款大众朗逸1.5L自动舒适版\n型号/SKU：CHEJIN-LAVIDA-2019\n类目：二手车/紧凑型轿车\n关键词：朗逸、大众朗逸、德系代步、置换\n规格：2019年上牌，表显6.9万公里，1.5L自动挡，白色，通勤耐用。\n价格：5.98万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：易损件和保养历史以"
+      },
+      {
+        "chunk_id": "chunk_d2ec0cebcf16c10c",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5265,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1855,
+          "semantic": 0.1311,
+          "vector": 0.14,
+          "vector_similarity": 0.7872,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5265
+        },
+        "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_71758861a9d35c19f707",
+    "experience_id": "rag_exp_71758861a9d35c19f707"
+  },
+  "detected_tags": [
+    "llm",
+    "rag_experience",
+    "unknown",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "chats",
+    "change_type": "llm_upsert_chats",
+    "summary": "客服回复理想ONE六座版空间、价格及车况信息，引导人工核实预算和检测报告",
+    "suggested_fields": {
+      "customer_message": null,
+      "service_reply": "理想ONE是六座SUV，第二排独立座椅，空间比较宽敞，一家六口出行是坐得下的。我们店里正好有一台2021款六座版，5.8万公里，17.98万。不过具体的车况、权益这些还是需要人工核实。您目前的预算大概多少？或者想先看看这台车的检测报告？",
+      "intent_tags": [
+        "询价",
+        "空间咨询",
+        "车况咨询"
+      ],
+      "tone_tags": [
+        "专业",
+        "引导性"
+      ],
+      "linked_categories": [
+        "汽车销售"
+      ],
+      "linked_item_ids": [],
+      "applicability_scope": "product_category",
+      "product_id": "",
+      "product_category": "汽车",
+      "usable_as_template": true,
+      "additional_details": {
+        "vehicle_details": "2021款六座版，5.8万公里，17.98万",
+        "note": "客服提示具体车况和权益需人工核实",
+        "原始资料摘录": "{\"customer_message\": null, \"service_reply\": \"理想ONE是六座SUV，第二排独立座椅，空间比较宽敞，一家六口出行是坐得下的。我们店里正好有一台2021款六座版，5.8万公里，17.98万。不过具体的车况、权益这些还是需要人工核实。您目前的预算大概多少？或者想先看看这台车的检测报告？\", \"intent_tags\": [\"询价\", \"空间咨询\", \"车况咨询\"], \"tone_tags\": [\"专业\", \"引导性\"], \"linked_categories\": [\"汽车销售\"], \"linked_item_ids\": [], \"applicability_scope\": \"product_category\", \"product_id\": \"\", \"product_cat"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "chats",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "chats",
+        "id": "chat_20260504_reply_ideal_one",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_4f5e4d93869340b41b79.txt",
+          "candidate_id": "raw_821bea0b22e27ad7",
+          "rag_experience_id": "rag_exp_71758861a9d35c19f707",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "customer_message": null,
+          "service_reply": "理想ONE是六座SUV，第二排独立座椅，空间比较宽敞，一家六口出行是坐得下的。我们店里正好有一台2021款六座版，5.8万公里，17.98万。不过具体的车况、权益这些还是需要人工核实。您目前的预算大概多少？或者想先看看这台车的检测报告？",
+          "intent_tags": [
+            "询价",
+            "空间咨询",
+            "车况咨询"
+          ],
+          "tone_tags": [
+            "专业",
+            "引导性"
+          ],
+          "linked_categories": [
+            "汽车销售"
+          ],
+          "linked_item_ids": [],
+          "applicability_scope": "product_category",
+          "product_id": "",
+          "product_category": "汽车",
+          "usable_as_template": true,
+          "additional_details": {
+            "vehicle_details": "2021款六座版，5.8万公里，17.98万",
+            "note": "客服提示具体车况和权益需人工核实",
+            "原始资料摘录": "{\"customer_message\": null, \"service_reply\": \"理想ONE是六座SUV，第二排独立座椅，空间比较宽敞，一家六口出行是坐得下的。我们店里正好有一台2021款六座版，5.8万公里，17.98万。不过具体的车况、权益这些还是需要人工核实。您目前的预算大概多少？或者想先看看这台车的检测报告？\", \"intent_tags\": [\"询价\", \"空间咨询\", \"车况咨询\"], \"tone_tags\": [\"专业\", \"引导性\"], \"linked_categories\": [\"汽车销售\"], \"linked_item_ids\": [], \"applicability_scope\": \"product_category\", \"product_id\": \"\", \"product_cat"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": false,
+          "requires_handoff": true,
+          "risk_level": "warning"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "note",
+      "vehicle_details",
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "rejected",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_4f5e4d93869340b41b79",
+    "source_raw_message_ids": [
+      "raw_msg_42f61f2b8e84139ca19f"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_5367a60ae40b4620",
+      "chunk_count": 1,
+      "query": "客服回复理想ONE六座版空间、价格及车况信息，引导人工核实预算和检测报告\n{\"customer_message\": null, \"service_reply\": \"理想ONE是六座SUV，第二排独立座椅，空间比较宽敞，一家六口出行是坐得下的。我们店里正好有一台2021款六座版，5.8万公里，17.98万。不过具体的车况、权益这些还是需要人工核实。您目前的预算大概多少？或者想先看看这台车的检测报告？\", \"intent_tags\": [\"询价\", \"空间咨询\", \"车况咨询\"], \"tone_tags\": [\"专业\", \"引导性\"], \"linked_categories\": [\"汽车销售\"], \"linked_item_ids\": [], \"applicability_scope\": \"product_category\", \"product_id\": \"\", \"product_cat\n理想ONE是六座SUV，第二排独立座椅，空间比较宽敞，一家六口出行是坐得下的。我们店里正好有一台2021款六座版，5.8万公里，17.98万。不过具体的车况、权益这些还是需要人工核实。您目前的预算大概多少？或者想先看看这台车的检测报告？",
+      "hits": [
+        {
+          "chunk_id": "chunk_0f63e3abe75c4723",
+          "source_id": "source_5367a60ae40b4620",
+          "score": 0.8782,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.4863,
+            "semantic": 0.2619,
+            "vector": 0.14,
+            "vector_similarity": 0.9467,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.8782
+          },
+          "text": "[2026-05-04T02:32:08] self: [车金AI] 理想ONE是六座SUV，第二排独立座椅，空间比较宽敞，一家六口出行是坐得下的。我们店里正好有一台2021款六座版，5.8万公里，17.98万。不过具体的车况、权益这些还是需要人工核实。您目前的预算大概多少？或者想先看看这台车的检测报告？"
+        },
+        {
+          "chunk_id": "chunk_58029d4057022265",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5369,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1934,
+            "semantic": 0.1345,
+            "vector": 0.139,
+            "vector_similarity": 0.772,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5369
+          },
+          "text": "险：电池、增程器、官方权益和保养记录以检测报告和人工核验为准。\n推荐话术：适合家庭六座、长途和新能源体验需求。\n商品名称：2021款长安CS75 PLUS 1.5T自动尊贵型\n型号/SKU：CHEJIN-CS75PLUS-2021\n类目：二手车/SUV\n关键词：CS75PLUS、长安CS75、国产SUV、家用SUV\n规格：2021年上牌，表显4.4万公里，1.5T自动挡，白色，配置高。\n价格：6.88万，库存：2台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后"
+        },
+        {
+          "chunk_id": "chunk_9a0d34760ad6ccae",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5298,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1887,
+            "semantic": 0.1325,
+            "vector": 0.1387,
+            "vector_similarity": 0.7703,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5298
+          },
+          "text": "工确认。\n售后/风险：CVT变速箱状态、保养和车况以检测报告为准。\n推荐话术：适合6到7万预算、练手、家用代步和省油需求。\n商品名称：2019款大众朗逸1.5L自动舒适版\n型号/SKU：CHEJIN-LAVIDA-2019\n类目：二手车/紧凑型轿车\n关键词：朗逸、大众朗逸、德系代步、置换\n规格：2019年上牌，表显6.9万公里，1.5L自动挡，白色，通勤耐用。\n价格：5.98万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：易损件和保养历史以"
+        },
+        {
+          "chunk_id": "chunk_d2ec0cebcf16c10c",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5265,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1855,
+            "semantic": 0.1311,
+            "vector": 0.14,
+            "vector_similarity": 0.7872,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5265
+          },
+          "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_71758861a9d35c19f707",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "rejected_at": "2026-05-04T18:41:18",
+    "reason": "legacy_auto_candidate_cleanup_20260504: ???????????????????????RAG?????????????????"
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

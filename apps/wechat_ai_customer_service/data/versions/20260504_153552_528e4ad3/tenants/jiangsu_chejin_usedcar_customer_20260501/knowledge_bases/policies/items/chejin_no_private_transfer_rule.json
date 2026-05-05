@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "category_id": "policies",
+  "id": "chejin_no_private_transfer_rule",
+  "status": "active",
+  "source": {
+    "type": "demo_fixture",
+    "batch_token": "CHEJIN_DEMO_20260503_203628",
+    "domain": "used_car"
+  },
+  "data": {
+    "title": "禁止私下转账提醒",
+    "policy_type": "payment",
+    "keywords": [
+      "私下转账",
+      "个人收款",
+      "定金给你",
+      "微信转账",
+      "CHEJIN_DEMO_20260503_203628"
+    ],
+    "applicability_scope": "global",
+    "product_category": "",
+    "answer": "客户提出私下转账、个人收款或绕过合同支付时，AI 必须提醒走公司确认流程并转人工。",
+    "allow_auto_reply": false,
+    "requires_handoff": true,
+    "handoff_reason": "private_payment_risk",
+    "operator_alert": true,
+    "risk_level": "high",
+    "additional_details": {
+      "演示批次": "CHEJIN_DEMO_20260503_203628",
+      "面向客户解释": "前台可直接按自然语言理解，不需要客户理解技术字段。"
+    }
+  },
+  "runtime": {
+    "allow_auto_reply": false,
+    "requires_handoff": true,
+    "risk_level": "high",
+    "operator_alert": true
+  },
+  "review_state": {
+    "is_new": true,
+    "new_reason": "newly_added_formal_knowledge",
+    "marked_at": "2026-05-03T20:36:28",
+    "updated_at": "2026-05-03T20:36:28",
+    "read_at": "",
+    "read_by": "",
+    "source": {
+      "source_module": "jiangsu_chejin_demo_seed",
+      "target_category": "policies",
+      "item_id": "chejin_no_private_transfer_rule"
+    }
+  },
+  "metadata": {
+    "created_at": "2026-05-03T20:36:28",
+    "updated_at": "2026-05-03T20:36:28",
+    "created_by": "admin",
+    "updated_by": "admin"
+  }
+}

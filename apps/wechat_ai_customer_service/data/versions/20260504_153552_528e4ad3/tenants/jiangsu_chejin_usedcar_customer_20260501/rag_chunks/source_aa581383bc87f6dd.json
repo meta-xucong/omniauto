@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_aa581383bc87f6dd",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_f883756ec7e468cd48b0.txt",
+    "content_hash": "b68f8a176288c9d4de064f63c89b82ce",
+    "status": "active",
+    "created_at": "2026-05-04T03:04:50",
+    "updated_at": "2026-05-04T03:04:50"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_faece2458ba0f145",
+      "source_id": "source_aa581383bc87f6dd",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_f883756ec7e468cd48b0.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-04T03:04:49] self: [车金AI] 这台是2020款GL8 ES陆尊653T豪华型，2020年上牌，表显7.4万公里，2.0T自动挡七座，参考价17.6万，适合商务接待和多人家庭。内饰和保养记录建议到店实际看车。您主要是家用还是商务用途？或者预算大概多少？\n[2026-05-04T03:04:49] 许聪: 公司买的话能不能开发票？",
+      "char_count": 184,
+      "status": "active",
+      "created_at": "2026-05-04T03:04:50"
+    }
+  ]
+}

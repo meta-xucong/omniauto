@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_132731aa3f41ea1f",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_7caa97b2077d3915264f.txt",
+    "content_hash": "fb442a98a5c0a9e6746b52b0403d35f9",
+    "status": "active",
+    "created_at": "2026-05-04T03:16:53",
+    "updated_at": "2026-05-04T03:16:53"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_4a6a5bac215a4fdd",
+      "source_id": "source_132731aa3f41ea1f",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_7caa97b2077d3915264f.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-04T03:16:53] self: [车金AI] 您好，二手车过户通常需要买卖双方身份证、机动车登记证书、行驶证、号牌等材料。不过各地车管所要求可能略有不同，具体以当地办理窗口为准。您是在哪个城市办理过户？需要我让销售同事帮您确认当地的具体流程吗？\n[2026-05-04T03:16:53] 许聪: 异地客户能不能提档到安徽？",
+      "char_count": 174,
+      "status": "active",
+      "created_at": "2026-05-04T03:16:53"
+    }
+  ]
+}

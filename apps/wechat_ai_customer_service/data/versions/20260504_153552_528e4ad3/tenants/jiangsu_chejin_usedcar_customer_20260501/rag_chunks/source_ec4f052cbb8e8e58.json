@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_ec4f052cbb8e8e58",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_7c0d0285a8928312a033.txt",
+    "content_hash": "a3daceaf85d5912571a3bd2b829cd493",
+    "status": "active",
+    "created_at": "2026-05-04T03:02:47",
+    "updated_at": "2026-05-04T03:02:47"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_0c5ae5a4020b118d",
+      "source_id": "source_ec4f052cbb8e8e58",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_7c0d0285a8928312a033.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-04T03:02:47] self: [车金AI] 置换没问题的，我先帮您登记旧车信息。麻烦提供：品牌车型、上牌年份、公里数、车况、所在城市、有没有贷款，以及期望的估价范围。最终收车价需要人工复核。方便先告诉我几项吗？",
+      "char_count": 118,
+      "status": "active",
+      "created_at": "2026-05-04T03:02:47"
+    }
+  ]
+}

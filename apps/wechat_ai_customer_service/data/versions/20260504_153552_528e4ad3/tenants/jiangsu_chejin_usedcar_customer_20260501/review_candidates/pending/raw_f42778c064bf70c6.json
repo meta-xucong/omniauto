@@ -1,0 +1,327 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_f42778c064bf70c6",
+  "generated_at": "2026-05-04T04:17:21",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_884305a67c6a6b3269eb.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"customer_message\": \"你是不是机器人？能不能让真人处理？\", \"service_reply\": \"\", \"intent_tags\": [\"询问是否机器人\", \"要求转人工\"], \"tone_tags\": [\"质疑\", \"急躁\"], \"linked_categories\": [\"人工服务\"], \"applicability_scope\": \"global\", \"usable_as_template\": false, \"additional_details\": {}, \"product_id\": \"\", \"product_category\": \"\"}",
+    "content_sha256": "21b1ecb6700dbf7ed99a623fc5454a21ce8d786158f258871780b5fc02c517c7",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_884305a67c6a6b3269eb",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_df577c83d65a034bf6d3"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_0058d68f579efeac",
+        "source_id": "source_4689ceaaf159e590",
+        "score": 0.5943,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.3015,
+          "semantic": 0.1815,
+          "vector": 0.1213,
+          "vector_similarity": 0.6737,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.5943
+        },
+        "text": "[2026-05-04T04:16:59] 许聪: 你是不是机器人？能不能让真人处理？"
+      },
+      {
+        "chunk_id": "chunk_33c3361d48168491",
+        "source_id": "source_24ab119125808712",
+        "score": 0.4588,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1718,
+          "semantic": 0.1251,
+          "vector": 0.1368,
+          "vector_similarity": 0.7602,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.025,
+          "risk_penalty": 0.0,
+          "final": 0.4588
+        },
+        "text": "公里，2.0T自动挡，一手车源，支持到店试驾。\n价格：12.80万\n单位：台\n库存：1\n发货：高意向试驾需转人工确认门店和时间。\n售后：精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。\n商品资料：江苏车金二手车车源 CHEJIN_20260503_205541\n测试批次：CHEJIN_20260503_205541\n商品名称：2022款比亚迪秦PLUS DM-i 55KM\n型号：CHEJIN-QINPLUS-2022DMI\n商品类目：二手车/新能源轿车\n别名关键词：秦PLUS,比亚迪秦,新能源,绿牌,混"
+      },
+      {
+        "chunk_id": "chunk_b8065993cbb63daf",
+        "source_id": "source_31b9a2c7aefa474e",
+        "score": 0.4581,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1718,
+          "semantic": 0.1251,
+          "vector": 0.1362,
+          "vector_similarity": 0.7565,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.025,
+          "risk_penalty": 0.0,
+          "final": 0.4581
+        },
+        "text": "公里，2.0T自动挡，一手车源，支持到店试驾。\n价格：12.80万\n单位：台\n库存：1\n发货：高意向试驾需转人工确认门店和时间。\n售后：精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。\n商品资料：江苏车金二手车车源 CHEJIN_20260503_214706\n测试批次：CHEJIN_20260503_214706\n商品名称：2022款比亚迪秦PLUS DM-i 55KM\n型号：CHEJIN-QINPLUS-2022DMI\n商品类目：二手车/新能源轿车\n别名关键词：秦PLUS,比亚迪秦,新能源,绿牌,混"
+      },
+      {
+        "chunk_id": "chunk_320caa1062c4cf21",
+        "source_id": "source_55cce0d21fe7898c",
+        "score": 0.4579,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1718,
+          "semantic": 0.1251,
+          "vector": 0.136,
+          "vector_similarity": 0.7556,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.025,
+          "risk_penalty": 0.0,
+          "final": 0.4579
+        },
+        "text": "公里，2.0T自动挡，一手车源，支持到店试驾。\n价格：12.80万\n单位：台\n库存：1\n发货：高意向试驾需转人工确认门店和时间。\n售后：精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。\n商品资料：江苏车金二手车车源 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_043922\n商品名称：2022款比亚迪秦PLUS DM-i 55KM\n型号：CHEJIN-QINPLUS-2022DMI\n商品类目：二手车/新能源轿车\n别名关键词：秦PLUS,比亚迪秦,新能源,绿牌,混"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_461b8fd78ae3f5396dac",
+    "experience_id": "rag_exp_461b8fd78ae3f5396dac"
+  },
+  "detected_tags": [
+    "llm",
+    "rag_experience",
+    "unknown",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "chats",
+    "change_type": "llm_upsert_chats",
+    "summary": "客户许聪质疑是否为机器人并要求真人处理。",
+    "suggested_fields": {
+      "customer_message": "你是不是机器人？能不能让真人处理？",
+      "service_reply": "",
+      "intent_tags": [
+        "询问是否机器人",
+        "要求转人工"
+      ],
+      "tone_tags": [
+        "质疑",
+        "急躁"
+      ],
+      "linked_categories": [
+        "人工服务"
+      ],
+      "applicability_scope": "global",
+      "usable_as_template": false,
+      "product_id": "",
+      "product_category": "",
+      "additional_details": {
+        "原始资料摘录": "{\"customer_message\": \"你是不是机器人？能不能让真人处理？\", \"service_reply\": \"\", \"intent_tags\": [\"询问是否机器人\", \"要求转人工\"], \"tone_tags\": [\"质疑\", \"急躁\"], \"linked_categories\": [\"人工服务\"], \"applicability_scope\": \"global\", \"usable_as_template\": false, \"additional_details\": {}, \"product_id\": \"\", \"product_category\": \"\"}"
+      }
+    },
+    "missing_fields": [
+      "service_reply"
+    ],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "chats",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "chats",
+        "id": "chat_20260504_0416",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_884305a67c6a6b3269eb.txt",
+          "candidate_id": "raw_f42778c064bf70c6",
+          "rag_experience_id": "rag_exp_461b8fd78ae3f5396dac",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "customer_message": "你是不是机器人？能不能让真人处理？",
+          "service_reply": "",
+          "intent_tags": [
+            "询问是否机器人",
+            "要求转人工"
+          ],
+          "tone_tags": [
+            "质疑",
+            "急躁"
+          ],
+          "linked_categories": [
+            "人工服务"
+          ],
+          "applicability_scope": "global",
+          "usable_as_template": false,
+          "product_id": "",
+          "product_category": "",
+          "additional_details": {
+            "原始资料摘录": "{\"customer_message\": \"你是不是机器人？能不能让真人处理？\", \"service_reply\": \"\", \"intent_tags\": [\"询问是否机器人\", \"要求转人工\"], \"tone_tags\": [\"质疑\", \"急躁\"], \"linked_categories\": [\"人工服务\"], \"applicability_scope\": \"global\", \"usable_as_template\": false, \"additional_details\": {}, \"product_id\": \"\", \"product_category\": \"\"}"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": false,
+          "requires_handoff": true,
+          "risk_level": "warning"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "needs_more_info",
+    "ok": false,
+    "confidence": 0.72,
+    "missing_fields": [
+      "service_reply"
+    ],
+    "missing_labels": [
+      "客服回复"
+    ],
+    "question": "还需要补充：客服回复。请补齐后再应用入库。",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "pending",
+    "completeness_status": "needs_more_info",
+    "missing_fields": [
+      "service_reply"
+    ],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_884305a67c6a6b3269eb",
+    "source_raw_message_ids": [
+      "raw_msg_df577c83d65a034bf6d3"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_4689ceaaf159e590",
+      "chunk_count": 1,
+      "query": "客户许聪质疑是否为机器人并要求真人处理。\n{\"customer_message\": \"你是不是机器人？能不能让真人处理？\", \"service_reply\": \"\", \"intent_tags\": [\"询问是否机器人\", \"要求转人工\"], \"tone_tags\": [\"质疑\", \"急躁\"], \"linked_categories\": [\"人工服务\"], \"applicability_scope\": \"global\", \"usable_as_template\": false, \"additional_details\": {}, \"product_id\": \"\", \"product_category\": \"\"}",
+      "hits": [
+        {
+          "chunk_id": "chunk_0058d68f579efeac",
+          "source_id": "source_4689ceaaf159e590",
+          "score": 0.5943,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.3015,
+            "semantic": 0.1815,
+            "vector": 0.1213,
+            "vector_similarity": 0.6737,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.5943
+          },
+          "text": "[2026-05-04T04:16:59] 许聪: 你是不是机器人？能不能让真人处理？"
+        },
+        {
+          "chunk_id": "chunk_33c3361d48168491",
+          "source_id": "source_24ab119125808712",
+          "score": 0.4588,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1718,
+            "semantic": 0.1251,
+            "vector": 0.1368,
+            "vector_similarity": 0.7602,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.025,
+            "risk_penalty": 0.0,
+            "final": 0.4588
+          },
+          "text": "公里，2.0T自动挡，一手车源，支持到店试驾。\n价格：12.80万\n单位：台\n库存：1\n发货：高意向试驾需转人工确认门店和时间。\n售后：精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。\n商品资料：江苏车金二手车车源 CHEJIN_20260503_205541\n测试批次：CHEJIN_20260503_205541\n商品名称：2022款比亚迪秦PLUS DM-i 55KM\n型号：CHEJIN-QINPLUS-2022DMI\n商品类目：二手车/新能源轿车\n别名关键词：秦PLUS,比亚迪秦,新能源,绿牌,混"
+        },
+        {
+          "chunk_id": "chunk_b8065993cbb63daf",
+          "source_id": "source_31b9a2c7aefa474e",
+          "score": 0.4581,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1718,
+            "semantic": 0.1251,
+            "vector": 0.1362,
+            "vector_similarity": 0.7565,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.025,
+            "risk_penalty": 0.0,
+            "final": 0.4581
+          },
+          "text": "公里，2.0T自动挡，一手车源，支持到店试驾。\n价格：12.80万\n单位：台\n库存：1\n发货：高意向试驾需转人工确认门店和时间。\n售后：精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。\n商品资料：江苏车金二手车车源 CHEJIN_20260503_214706\n测试批次：CHEJIN_20260503_214706\n商品名称：2022款比亚迪秦PLUS DM-i 55KM\n型号：CHEJIN-QINPLUS-2022DMI\n商品类目：二手车/新能源轿车\n别名关键词：秦PLUS,比亚迪秦,新能源,绿牌,混"
+        },
+        {
+          "chunk_id": "chunk_320caa1062c4cf21",
+          "source_id": "source_55cce0d21fe7898c",
+          "score": 0.4579,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1718,
+            "semantic": 0.1251,
+            "vector": 0.136,
+            "vector_similarity": 0.7556,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.025,
+            "risk_penalty": 0.0,
+            "final": 0.4579
+          },
+          "text": "公里，2.0T自动挡，一手车源，支持到店试驾。\n价格：12.80万\n单位：台\n库存：1\n发货：高意向试驾需转人工确认门店和时间。\n售后：精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。\n商品资料：江苏车金二手车车源 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_043922\n商品名称：2022款比亚迪秦PLUS DM-i 55KM\n型号：CHEJIN-QINPLUS-2022DMI\n商品类目：二手车/新能源轿车\n别名关键词：秦PLUS,比亚迪秦,新能源,绿牌,混"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_461b8fd78ae3f5396dac",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ]
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

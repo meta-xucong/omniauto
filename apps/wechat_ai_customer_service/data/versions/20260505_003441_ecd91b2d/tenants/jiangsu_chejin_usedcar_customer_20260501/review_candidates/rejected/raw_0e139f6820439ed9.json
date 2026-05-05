@@ -1,0 +1,322 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_0e139f6820439ed9",
+  "generated_at": "2026-05-04T03:53:12",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_4331d3b693c11fb38552.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"customer_message\": \"\", \"service_reply\": \"许哥，比亚迪海鸥是新车吧？我这边暂时没看到准确的车源数据，得让销售同事帮您查一下。方便留个电话吗？他查到后第一时间联系您。\", \"intent_tags\": [\"车源查询\", \"转人工\"], \"tone_tags\": [\"亲切\"], \"linked_categories\": [], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\", \"usable_as_template\": true, \"additional_details\": {\"context\": \"客服以许哥称呼，提到比亚迪海",
+    "content_sha256": "b18a210bb96c6035fb495b61e48c89b3e4ca3670cfc2d207da8bc1fd7878adb9",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_4331d3b693c11fb38552",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_468010060eb4f4f61de5",
+      "raw_msg_efab46dab651b07af9bf"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_9e63ae068b82817d",
+        "source_id": "source_45537e325007626b",
+        "score": 0.8036,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.4478,
+          "semantic": 0.2258,
+          "vector": 0.14,
+          "vector_similarity": 0.8959,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.8036
+        },
+        "text": "[2026-05-04T03:52:04] self: [车金AI] 许哥，比亚迪海鸥是新车吧？我这边暂时没看到准确的车源数据，得让销售同事帮您查一下。方便留个电话吗？他查到后第一时间联系您。\n[2026-05-04T03:52:04] 许聪: 有没有5万以内自动挡SUV？"
+      },
+      {
+        "chunk_id": "chunk_76a8a4fc1bc5a9e9",
+        "source_id": "source_da9bcbdd0cb1be4a",
+        "score": 0.68,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.3574,
+          "semantic": 0.1926,
+          "vector": 0.14,
+          "vector_similarity": 0.8175,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.68
+        },
+        "text": "[2026-05-04T03:50:27] self: [车金AI] 坦克300的现车我这边暂时没看到准确数据，得让销售同事查一下库存和到店情况。您方便留个电话吗？他查到后第一时间联系您。\n[2026-05-04T03:50:27] 许聪: 我要一台全新未上牌的比亚迪海鸥"
+      },
+      {
+        "chunk_id": "chunk_20b1ed4080531862",
+        "source_id": "source_de4fa2163767901b",
+        "score": 0.6312,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.3217,
+          "semantic": 0.1795,
+          "vector": 0.14,
+          "vector_similarity": 0.8433,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.6312
+        },
+        "text": "[2026-05-04T03:46:11] self: [车金AI] 许哥，奥德赛这款日系MPV我这边暂时没看到现车信息，需要让销售同事查一下库存和具体车况。我马上帮您转过去，您方便留个电话吗？他查到后第一时间联系您。\n[2026-05-04T03:46:11] 许聪: 有没有奔驰E级，最好2021以后的"
+      },
+      {
+        "chunk_id": "chunk_9a0d34760ad6ccae",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5082,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1705,
+          "semantic": 0.1277,
+          "vector": 0.14,
+          "vector_similarity": 0.8033,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5082
+        },
+        "text": "工确认。\n售后/风险：CVT变速箱状态、保养和车况以检测报告为准。\n推荐话术：适合6到7万预算、练手、家用代步和省油需求。\n商品名称：2019款大众朗逸1.5L自动舒适版\n型号/SKU：CHEJIN-LAVIDA-2019\n类目：二手车/紧凑型轿车\n关键词：朗逸、大众朗逸、德系代步、置换\n规格：2019年上牌，表显6.9万公里，1.5L自动挡，白色，通勤耐用。\n价格：5.98万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：易损件和保养历史以"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_c1d324c1b985824ca710",
+    "experience_id": "rag_exp_c1d324c1b985824ca710"
+  },
+  "detected_tags": [
+    "llm",
+    "rag_experience",
+    "unknown",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "chats",
+    "change_type": "llm_upsert_chats",
+    "summary": "车金AI回复比亚迪海鸥车源查询，建议转销售同事并提供电话",
+    "suggested_fields": {
+      "customer_message": "",
+      "service_reply": "许哥，比亚迪海鸥是新车吧？我这边暂时没看到准确的车源数据，得让销售同事帮您查一下。方便留个电话吗？他查到后第一时间联系您。",
+      "intent_tags": [
+        "车源查询",
+        "转人工"
+      ],
+      "tone_tags": [
+        "亲切"
+      ],
+      "linked_categories": [],
+      "linked_item_ids": [],
+      "applicability_scope": "global",
+      "product_id": "",
+      "product_category": "",
+      "usable_as_template": true,
+      "additional_details": {
+        "context": "客服以许哥称呼，提到比亚迪海鸥，可能是在回复之前的询问。后续客户又问了'有没有5万以内自动挡SUV？'，但该问题尚未回复。",
+        "原始资料摘录": "{\"customer_message\": \"\", \"service_reply\": \"许哥，比亚迪海鸥是新车吧？我这边暂时没看到准确的车源数据，得让销售同事帮您查一下。方便留个电话吗？他查到后第一时间联系您。\", \"intent_tags\": [\"车源查询\", \"转人工\"], \"tone_tags\": [\"亲切\"], \"linked_categories\": [], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\", \"usable_as_template\": true, \"additional_details\": {\"context\": \"客服以许哥称呼，提到比亚迪海"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "chats",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "chats",
+        "id": "chat_byd_seagull_inquiry",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_4331d3b693c11fb38552.txt",
+          "candidate_id": "raw_0e139f6820439ed9",
+          "rag_experience_id": "rag_exp_c1d324c1b985824ca710",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "customer_message": "",
+          "service_reply": "许哥，比亚迪海鸥是新车吧？我这边暂时没看到准确的车源数据，得让销售同事帮您查一下。方便留个电话吗？他查到后第一时间联系您。",
+          "intent_tags": [
+            "车源查询",
+            "转人工"
+          ],
+          "tone_tags": [
+            "亲切"
+          ],
+          "linked_categories": [],
+          "linked_item_ids": [],
+          "applicability_scope": "global",
+          "product_id": "",
+          "product_category": "",
+          "usable_as_template": true,
+          "additional_details": {
+            "context": "客服以许哥称呼，提到比亚迪海鸥，可能是在回复之前的询问。后续客户又问了'有没有5万以内自动挡SUV？'，但该问题尚未回复。",
+            "原始资料摘录": "{\"customer_message\": \"\", \"service_reply\": \"许哥，比亚迪海鸥是新车吧？我这边暂时没看到准确的车源数据，得让销售同事帮您查一下。方便留个电话吗？他查到后第一时间联系您。\", \"intent_tags\": [\"车源查询\", \"转人工\"], \"tone_tags\": [\"亲切\"], \"linked_categories\": [], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\", \"usable_as_template\": true, \"additional_details\": {\"context\": \"客服以许哥称呼，提到比亚迪海"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": false,
+          "requires_handoff": true,
+          "risk_level": "warning"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "context",
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "rejected",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_4331d3b693c11fb38552",
+    "source_raw_message_ids": [
+      "raw_msg_468010060eb4f4f61de5",
+      "raw_msg_efab46dab651b07af9bf"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_45537e325007626b",
+      "chunk_count": 1,
+      "query": "车金AI回复比亚迪海鸥车源查询，建议转销售同事并提供电话\n{\"customer_message\": \"\", \"service_reply\": \"许哥，比亚迪海鸥是新车吧？我这边暂时没看到准确的车源数据，得让销售同事帮您查一下。方便留个电话吗？他查到后第一时间联系您。\", \"intent_tags\": [\"车源查询\", \"转人工\"], \"tone_tags\": [\"亲切\"], \"linked_categories\": [], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\", \"usable_as_template\": true, \"additional_details\": {\"context\": \"客服以许哥称呼，提到比亚迪海\n许哥，比亚迪海鸥是新车吧？我这边暂时没看到准确的车源数据，得让销售同事帮您查一下。方便留个电话吗？他查到后第一时间联系您。",
+      "hits": [
+        {
+          "chunk_id": "chunk_9e63ae068b82817d",
+          "source_id": "source_45537e325007626b",
+          "score": 0.8036,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.4478,
+            "semantic": 0.2258,
+            "vector": 0.14,
+            "vector_similarity": 0.8959,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.8036
+          },
+          "text": "[2026-05-04T03:52:04] self: [车金AI] 许哥，比亚迪海鸥是新车吧？我这边暂时没看到准确的车源数据，得让销售同事帮您查一下。方便留个电话吗？他查到后第一时间联系您。\n[2026-05-04T03:52:04] 许聪: 有没有5万以内自动挡SUV？"
+        },
+        {
+          "chunk_id": "chunk_76a8a4fc1bc5a9e9",
+          "source_id": "source_da9bcbdd0cb1be4a",
+          "score": 0.68,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.3574,
+            "semantic": 0.1926,
+            "vector": 0.14,
+            "vector_similarity": 0.8175,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.68
+          },
+          "text": "[2026-05-04T03:50:27] self: [车金AI] 坦克300的现车我这边暂时没看到准确数据，得让销售同事查一下库存和到店情况。您方便留个电话吗？他查到后第一时间联系您。\n[2026-05-04T03:50:27] 许聪: 我要一台全新未上牌的比亚迪海鸥"
+        },
+        {
+          "chunk_id": "chunk_20b1ed4080531862",
+          "source_id": "source_de4fa2163767901b",
+          "score": 0.6312,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.3217,
+            "semantic": 0.1795,
+            "vector": 0.14,
+            "vector_similarity": 0.8433,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.6312
+          },
+          "text": "[2026-05-04T03:46:11] self: [车金AI] 许哥，奥德赛这款日系MPV我这边暂时没看到现车信息，需要让销售同事查一下库存和具体车况。我马上帮您转过去，您方便留个电话吗？他查到后第一时间联系您。\n[2026-05-04T03:46:11] 许聪: 有没有奔驰E级，最好2021以后的"
+        },
+        {
+          "chunk_id": "chunk_9a0d34760ad6ccae",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5082,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1705,
+            "semantic": 0.1277,
+            "vector": 0.14,
+            "vector_similarity": 0.8033,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5082
+          },
+          "text": "工确认。\n售后/风险：CVT变速箱状态、保养和车况以检测报告为准。\n推荐话术：适合6到7万预算、练手、家用代步和省油需求。\n商品名称：2019款大众朗逸1.5L自动舒适版\n型号/SKU：CHEJIN-LAVIDA-2019\n类目：二手车/紧凑型轿车\n关键词：朗逸、大众朗逸、德系代步、置换\n规格：2019年上牌，表显6.9万公里，1.5L自动挡，白色，通勤耐用。\n价格：5.98万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：易损件和保养历史以"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_c1d324c1b985824ca710",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "rejected_at": "2026-05-04T18:41:18",
+    "reason": "legacy_auto_candidate_cleanup_20260504: ???????????????????????RAG?????????????????"
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

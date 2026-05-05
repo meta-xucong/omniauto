@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "category_id": "chats",
+  "id": "chejin_chat_hold",
+  "status": "active",
+  "source": {
+    "type": "demo_fixture",
+    "batch_token": "CHEJIN_DEMO_20260503_203628",
+    "domain": "used_car"
+  },
+  "data": {
+    "customer_message": "我先给你转500帮我留车",
+    "service_reply": "留车和订金需要走公司确认流程，我不能收款或承诺保留。我先帮您转人工确认正式流程。",
+    "intent_tags": [
+      "订金",
+      "支付风险",
+      "CHEJIN_DEMO_20260503_203628"
+    ],
+    "tone_tags": [
+      "专业",
+      "克制",
+      "不乱承诺"
+    ],
+    "linked_categories": [
+      "products",
+      "policies"
+    ],
+    "linked_item_ids": [],
+    "applicability_scope": "global",
+    "product_id": "",
+    "product_category": "",
+    "usable_as_template": true,
+    "additional_details": {
+      "演示批次": "CHEJIN_DEMO_20260503_203628",
+      "客户可读摘要": "真实客服可直接参考的问答样例。"
+    }
+  },
+  "runtime": {
+    "allow_auto_reply": false,
+    "requires_handoff": true,
+    "risk_level": "warning",
+    "operator_alert": true
+  },
+  "review_state": {
+    "is_new": true,
+    "new_reason": "newly_added_formal_knowledge",
+    "marked_at": "2026-05-03T20:36:28",
+    "updated_at": "2026-05-03T20:36:28",
+    "read_at": "",
+    "read_by": "",
+    "source": {
+      "source_module": "jiangsu_chejin_demo_seed",
+      "target_category": "chats",
+      "item_id": "chejin_chat_hold"
+    }
+  },
+  "metadata": {
+    "created_at": "2026-05-03T20:36:28",
+    "updated_at": "2026-05-03T20:36:28",
+    "created_by": "admin",
+    "updated_by": "admin"
+  }
+}

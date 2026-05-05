@@ -1,0 +1,325 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_e0991e340d71417e",
+  "generated_at": "2026-05-04T03:49:21",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_9e6715e6131a1260f500.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"customer_message\": \"坦克300有现车吗？\", \"service_reply\": null, \"intent_tags\": [\"车辆库存查询\"], \"tone_tags\": [\"直接\"], \"linked_categories\": [\"汽车销售\"], \"applicability_scope\": \"product_category\", \"product_id\": \"\", \"product_category\": \"汽车销售\", \"additional_details\": {}}",
+    "content_sha256": "aa9a30835a5d02c0ae18e9d3af56409dd128627fd4c2b55c55013ef66c7fd82e",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_9e6715e6131a1260f500",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_839d64dc25847a8b7ff3",
+      "raw_msg_07c988ebf13f5a7d7e1d",
+      "raw_msg_d36c21588a1d2a3f7661"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_5ce004697dbee133",
+        "source_id": "source_edf4b496ba3529d7",
+        "score": 0.4834,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2403,
+          "semantic": 0.1549,
+          "vector": 0.0981,
+          "vector_similarity": 0.5453,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.4834
+        },
+        "text": "[2026-05-04 03:48:00] system: 03:48\n[2026-05-04T03:48:32] self: [车金AI] 许哥，奔驰E级2021年以后的目前库里没查到现车信息，我帮您转给销售同事核实一下，方便留个电话吗？他查到后直接联系您。\n[2026-05-04T03:48:32] 许聪: 坦克300有现车吗？"
+      },
+      {
+        "chunk_id": "chunk_bd5bc67861c08740",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.4693,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.173,
+          "semantic": 0.1295,
+          "vector": 0.0967,
+          "vector_similarity": 0.5372,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.4693
+        },
+        "text": "品名称：2021款捷达VS5 280TSI自动荣耀型\n型号/SKU：CHEJIN-JETTAVS5-2021\n类目：二手车/SUV\n关键词：捷达VS5、VS5、德系SUV、预算SUV\n规格：2021年上牌，表显3.8万公里，1.4T自动挡，白色。\n价格：6.38万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：涡轮、变速箱和保养以检测报告为准。\n推荐话术：适合预算6到7万、想买合资SUV的客户。\n商品名称：2017款福特福克斯1.6L自动风尚"
+      },
+      {
+        "chunk_id": "chunk_c7dfee0c99fa8158",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.468,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2257,
+          "semantic": 0.1486,
+          "vector": 0.1038,
+          "vector_similarity": 0.5764,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.08,
+          "final": 0.468
+        },
+        "text": "# 车辆库存总表\n演示批次：CHEJIN_DEMO_20260503_203628\n用途：客户演示用二手车库存，覆盖轿车、SUV、MPV、新能源、高端车、已售归档等场景。\n商品名称：2021款丰田凯美瑞2.0G豪华版\n型号/SKU：CHEJIN-CAMRY-2021G\n类目：二手车/中级轿车\n关键词：凯美瑞、丰田凯美瑞、8万预算、家用通勤、省油自动挡\n规格：2021年上牌，表显4.8万公里，2.0L自动挡，白色，南京现车，一手家用车。\n价格：8.98万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物"
+      },
+      {
+        "chunk_id": "chunk_b7acad9cd8df8d8d",
+        "source_id": "source_0ca4e6c116479753",
+        "score": 0.4428,
+        "category": "chats",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2038,
+          "semantic": 0.139,
+          "vector": 0.0999,
+          "vector_similarity": 0.5551,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.0,
+          "risk_penalty": 0.0,
+          "final": 0.4428
+        },
+        "text": "聊天记录：江苏车金预算推荐话术 CHEJIN_20260503_204823\n测试批次：CHEJIN_20260503_204823\n客户：我从抖音直播来的，8万左右想买自动挡省油代步车，有什么推荐？\n客服：您这个预算可以先看凯美瑞、思域和秦PLUS DM-i。凯美瑞偏家用稳、省心；思域更年轻；秦PLUS更省油。您是在南京看车吗？是否考虑贷款或置换？\n意图标签：预算推荐,车源推荐,抖音线索\n聊天记录：江苏车金置换话术 CHEJIN_20260503_204823\n测试批次：CHEJIN_20260503_20482"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_3e1f2dcc6d2cbc885e71",
+    "experience_id": "rag_exp_3e1f2dcc6d2cbc885e71"
+  },
+  "detected_tags": [
+    "llm",
+    "rag_experience",
+    "unknown",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "chats",
+    "change_type": "llm_upsert_chats",
+    "summary": "客户许聪询问坦克300是否有现车",
+    "suggested_fields": {
+      "customer_message": "坦克300有现车吗？",
+      "service_reply": null,
+      "intent_tags": [
+        "车辆库存查询"
+      ],
+      "tone_tags": [
+        "直接"
+      ],
+      "linked_categories": [
+        "汽车销售"
+      ],
+      "applicability_scope": "product_category",
+      "product_id": "",
+      "product_category": "汽车销售",
+      "additional_details": {
+        "原始资料摘录": "{\"customer_message\": \"坦克300有现车吗？\", \"service_reply\": null, \"intent_tags\": [\"车辆库存查询\"], \"tone_tags\": [\"直接\"], \"linked_categories\": [\"汽车销售\"], \"applicability_scope\": \"product_category\", \"product_id\": \"\", \"product_category\": \"汽车销售\", \"additional_details\": {}}"
+      }
+    },
+    "missing_fields": [
+      "service_reply"
+    ],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "chats",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "chats",
+        "id": "tank300_inquiry",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_9e6715e6131a1260f500.txt",
+          "candidate_id": "raw_e0991e340d71417e",
+          "rag_experience_id": "rag_exp_3e1f2dcc6d2cbc885e71",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "customer_message": "坦克300有现车吗？",
+          "service_reply": null,
+          "intent_tags": [
+            "车辆库存查询"
+          ],
+          "tone_tags": [
+            "直接"
+          ],
+          "linked_categories": [
+            "汽车销售"
+          ],
+          "applicability_scope": "product_category",
+          "product_id": "",
+          "product_category": "汽车销售",
+          "additional_details": {
+            "原始资料摘录": "{\"customer_message\": \"坦克300有现车吗？\", \"service_reply\": null, \"intent_tags\": [\"车辆库存查询\"], \"tone_tags\": [\"直接\"], \"linked_categories\": [\"汽车销售\"], \"applicability_scope\": \"product_category\", \"product_id\": \"\", \"product_category\": \"汽车销售\", \"additional_details\": {}}"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "needs_more_info",
+    "ok": false,
+    "confidence": 0.72,
+    "missing_fields": [
+      "service_reply"
+    ],
+    "missing_labels": [
+      "客服回复"
+    ],
+    "question": "还需要补充：客服回复。请补齐后再应用入库。",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "pending",
+    "completeness_status": "needs_more_info",
+    "missing_fields": [
+      "service_reply"
+    ],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_9e6715e6131a1260f500",
+    "source_raw_message_ids": [
+      "raw_msg_839d64dc25847a8b7ff3",
+      "raw_msg_07c988ebf13f5a7d7e1d",
+      "raw_msg_d36c21588a1d2a3f7661"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_edf4b496ba3529d7",
+      "chunk_count": 1,
+      "query": "客户许聪询问坦克300是否有现车\n{\"customer_message\": \"坦克300有现车吗？\", \"service_reply\": null, \"intent_tags\": [\"车辆库存查询\"], \"tone_tags\": [\"直接\"], \"linked_categories\": [\"汽车销售\"], \"applicability_scope\": \"product_category\", \"product_id\": \"\", \"product_category\": \"汽车销售\", \"additional_details\": {}}",
+      "hits": [
+        {
+          "chunk_id": "chunk_5ce004697dbee133",
+          "source_id": "source_edf4b496ba3529d7",
+          "score": 0.4834,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2403,
+            "semantic": 0.1549,
+            "vector": 0.0981,
+            "vector_similarity": 0.5453,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.4834
+          },
+          "text": "[2026-05-04 03:48:00] system: 03:48\n[2026-05-04T03:48:32] self: [车金AI] 许哥，奔驰E级2021年以后的目前库里没查到现车信息，我帮您转给销售同事核实一下，方便留个电话吗？他查到后直接联系您。\n[2026-05-04T03:48:32] 许聪: 坦克300有现车吗？"
+        },
+        {
+          "chunk_id": "chunk_bd5bc67861c08740",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.4693,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.173,
+            "semantic": 0.1295,
+            "vector": 0.0967,
+            "vector_similarity": 0.5372,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.4693
+          },
+          "text": "品名称：2021款捷达VS5 280TSI自动荣耀型\n型号/SKU：CHEJIN-JETTAVS5-2021\n类目：二手车/SUV\n关键词：捷达VS5、VS5、德系SUV、预算SUV\n规格：2021年上牌，表显3.8万公里，1.4T自动挡，白色。\n价格：6.38万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：涡轮、变速箱和保养以检测报告为准。\n推荐话术：适合预算6到7万、想买合资SUV的客户。\n商品名称：2017款福特福克斯1.6L自动风尚"
+        },
+        {
+          "chunk_id": "chunk_c7dfee0c99fa8158",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.468,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2257,
+            "semantic": 0.1486,
+            "vector": 0.1038,
+            "vector_similarity": 0.5764,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.08,
+            "final": 0.468
+          },
+          "text": "# 车辆库存总表\n演示批次：CHEJIN_DEMO_20260503_203628\n用途：客户演示用二手车库存，覆盖轿车、SUV、MPV、新能源、高端车、已售归档等场景。\n商品名称：2021款丰田凯美瑞2.0G豪华版\n型号/SKU：CHEJIN-CAMRY-2021G\n类目：二手车/中级轿车\n关键词：凯美瑞、丰田凯美瑞、8万预算、家用通勤、省油自动挡\n规格：2021年上牌，表显4.8万公里，2.0L自动挡，白色，南京现车，一手家用车。\n价格：8.98万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物"
+        },
+        {
+          "chunk_id": "chunk_b7acad9cd8df8d8d",
+          "source_id": "source_0ca4e6c116479753",
+          "score": 0.4428,
+          "category": "chats",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2038,
+            "semantic": 0.139,
+            "vector": 0.0999,
+            "vector_similarity": 0.5551,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.0,
+            "risk_penalty": 0.0,
+            "final": 0.4428
+          },
+          "text": "聊天记录：江苏车金预算推荐话术 CHEJIN_20260503_204823\n测试批次：CHEJIN_20260503_204823\n客户：我从抖音直播来的，8万左右想买自动挡省油代步车，有什么推荐？\n客服：您这个预算可以先看凯美瑞、思域和秦PLUS DM-i。凯美瑞偏家用稳、省心；思域更年轻；秦PLUS更省油。您是在南京看车吗？是否考虑贷款或置换？\n意图标签：预算推荐,车源推荐,抖音线索\n聊天记录：江苏车金置换话术 CHEJIN_20260503_204823\n测试批次：CHEJIN_20260503_20482"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_3e1f2dcc6d2cbc885e71",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ]
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

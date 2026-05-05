@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_a2f8ec8ebb4d10b8",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_cde05095473a2c5b0765.txt",
+    "content_hash": "d422a754c295ff957882b2f5b0fee407",
+    "status": "active",
+    "created_at": "2026-05-04T03:27:01",
+    "updated_at": "2026-05-04T03:27:01"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_3863cb0d6bea95a5",
+      "source_id": "source_a2f8ec8ebb4d10b8",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_cde05095473a2c5b0765.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-04 03:25:00] system: 03:25\n[2026-05-04T03:27:00] 许聪: 售后质保怎么说？买完发现问题能退车吗？",
+      "char_count": 81,
+      "status": "active",
+      "created_at": "2026-05-04T03:27:01"
+    }
+  ]
+}

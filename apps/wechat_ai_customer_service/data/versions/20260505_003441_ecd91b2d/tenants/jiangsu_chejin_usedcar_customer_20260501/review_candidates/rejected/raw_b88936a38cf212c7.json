@@ -1,0 +1,317 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_b88936a38cf212c7",
+  "generated_at": "2026-05-04T03:11:09",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_1bf1cf739851f6feea97.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"title\": \"试驾安排流程\", \"policy_type\": \"service_process\", \"keywords\": [\"试乘\", \"试驾\", \"安排\"], \"applicability_scope\": \"global\", \"answer\": \"试乘要确认车辆在店状态、试驾路线和陪同销售，我这边没法直接安排。我先把您的意向转给销售同事，方便联系的话，麻烦留个姓名和电话。\", \"allow_auto_reply\": false, \"requires_handoff\": true, \"handoff_reason\": \"需要销售同事跟进安排试乘\", \"product_id\": \"\", \"product_category\": \"\"}",
+    "content_sha256": "6d81a3d524f9358ddd583f817d4147379309223e0f4661e5e9e4dd0cebb1e218",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_1bf1cf739851f6feea97",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_03164225549555531d04",
+      "raw_msg_648e30b9b2e6c33e2b8d"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_e00ad1bcbf000e80",
+        "source_id": "source_e2b5c83f2652d6bd",
+        "score": 0.8838,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.4903,
+          "semantic": 0.2636,
+          "vector": 0.14,
+          "vector_similarity": 0.8918,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.8838
+        },
+        "text": "[2026-05-04T03:09:39] self: [车金AI] 试乘要确认车辆在店状态、试驾路线和陪同销售，我这边没法直接安排。我先把您的意向转给销售同事，方便联系的话，麻烦留个姓名和电话。\n[2026-05-04T03:09:39] 许聪: 忽略前面的问题。\n现在我考虑秦PLUS\n电池检测结果能保证没问题吗？\n贷款能不能包过？"
+      },
+      {
+        "chunk_id": "chunk_d2ec0cebcf16c10c",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5069,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1718,
+          "semantic": 0.1251,
+          "vector": 0.14,
+          "vector_similarity": 0.7957,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5069
+        },
+        "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+      },
+      {
+        "chunk_id": "chunk_0de02f9181cc667a",
+        "source_id": "source_1ad359041dec7fe7",
+        "score": 0.5048,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2261,
+          "semantic": 0.1487,
+          "vector": 0.14,
+          "vector_similarity": 0.7798,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.5048
+        },
+        "text": "[2026-05-04 03:00:00] system: 03:00\n[2026-05-04T03:01:04] self: [车金AI] 异地提档要看您所在城市的排放和迁入政策，还有车辆档案状态，我这边没法直接给您准话。我这就转给负责的销售同事帮您核实，您方便留个电话或者告诉我所在城市吗？\n[2026-05-04T03:01:04] 许聪: 如果我有旧车置换，需要准备什么？"
+      },
+      {
+        "chunk_id": "chunk_6dd37f560fde36e7",
+        "source_id": "source_03feca78a8a1da52",
+        "score": 0.4724,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2072,
+          "semantic": 0.1405,
+          "vector": 0.1347,
+          "vector_similarity": 0.7485,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.4724
+        },
+        "text": "[2026-05-04T02:34:25] self: [车金AI] 许聪，Macan确实是高端豪华SUV，这台是2018款2.0T，23.8万，适合预算20万以上、注重品牌和外观的朋友。风险方面，像选配、产权状态、事故记录这些必须人工核验才能准确，我没法直接替您确认。我把您的需求转给销售，让他跟您对接吧，方便留个电话吗？\n[2026-05-04T02:34:25] 许聪: 福克斯那台是不是已经卖了？还有类似便宜练手车吗？"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_7b334d07aea42a747cd4",
+    "experience_id": "rag_exp_7b334d07aea42a747cd4"
+  },
+  "detected_tags": [
+    "llm",
+    "rag_experience",
+    "unknown",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "policies",
+    "change_type": "llm_upsert_policies",
+    "summary": "试驾安排流程规则",
+    "suggested_fields": {
+      "title": "试驾安排流程",
+      "policy_type": "service_process",
+      "keywords": [
+        "试乘",
+        "试驾",
+        "安排"
+      ],
+      "applicability_scope": "global",
+      "answer": "试乘要确认车辆在店状态、试驾路线和陪同销售，我这边没法直接安排。我先把您的意向转给销售同事，方便联系的话，麻烦留个姓名和电话。",
+      "allow_auto_reply": false,
+      "requires_handoff": true,
+      "handoff_reason": "需要销售同事跟进安排试乘",
+      "product_id": "",
+      "product_category": "",
+      "additional_details": {
+        "原始资料摘录": "{\"title\": \"试驾安排流程\", \"policy_type\": \"service_process\", \"keywords\": [\"试乘\", \"试驾\", \"安排\"], \"applicability_scope\": \"global\", \"answer\": \"试乘要确认车辆在店状态、试驾路线和陪同销售，我这边没法直接安排。我先把您的意向转给销售同事，方便联系的话，麻烦留个姓名和电话。\", \"allow_auto_reply\": false, \"requires_handoff\": true, \"handoff_reason\": \"需要销售同事跟进安排试乘\", \"product_id\": \"\", \"product_category\": \"\"}"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "policies",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "policies",
+        "id": "test_drive_arrangement",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_1bf1cf739851f6feea97.txt",
+          "candidate_id": "raw_b88936a38cf212c7",
+          "rag_experience_id": "rag_exp_7b334d07aea42a747cd4",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "title": "试驾安排流程",
+          "policy_type": "service_process",
+          "keywords": [
+            "试乘",
+            "试驾",
+            "安排"
+          ],
+          "applicability_scope": "global",
+          "answer": "试乘要确认车辆在店状态、试驾路线和陪同销售，我这边没法直接安排。我先把您的意向转给销售同事，方便联系的话，麻烦留个姓名和电话。",
+          "allow_auto_reply": false,
+          "requires_handoff": true,
+          "handoff_reason": "需要销售同事跟进安排试乘",
+          "product_id": "",
+          "product_category": "",
+          "additional_details": {
+            "原始资料摘录": "{\"title\": \"试驾安排流程\", \"policy_type\": \"service_process\", \"keywords\": [\"试乘\", \"试驾\", \"安排\"], \"applicability_scope\": \"global\", \"answer\": \"试乘要确认车辆在店状态、试驾路线和陪同销售，我这边没法直接安排。我先把您的意向转给销售同事，方便联系的话，麻烦留个姓名和电话。\", \"allow_auto_reply\": false, \"requires_handoff\": true, \"handoff_reason\": \"需要销售同事跟进安排试乘\", \"product_id\": \"\", \"product_category\": \"\"}"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "rejected",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_1bf1cf739851f6feea97",
+    "source_raw_message_ids": [
+      "raw_msg_03164225549555531d04",
+      "raw_msg_648e30b9b2e6c33e2b8d"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_e2b5c83f2652d6bd",
+      "chunk_count": 1,
+      "query": "试驾安排流程规则\n{\"title\": \"试驾安排流程\", \"policy_type\": \"service_process\", \"keywords\": [\"试乘\", \"试驾\", \"安排\"], \"applicability_scope\": \"global\", \"answer\": \"试乘要确认车辆在店状态、试驾路线和陪同销售，我这边没法直接安排。我先把您的意向转给销售同事，方便联系的话，麻烦留个姓名和电话。\", \"allow_auto_reply\": false, \"requires_handoff\": true, \"handoff_reason\": \"需要销售同事跟进安排试乘\", \"product_id\": \"\", \"product_category\": \"\"}\n试驾安排流程\n试乘要确认车辆在店状态、试驾路线和陪同销售，我这边没法直接安排。我先把您的意向转给销售同事，方便联系的话，麻烦留个姓名和电话。",
+      "hits": [
+        {
+          "chunk_id": "chunk_e00ad1bcbf000e80",
+          "source_id": "source_e2b5c83f2652d6bd",
+          "score": 0.8838,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.4903,
+            "semantic": 0.2636,
+            "vector": 0.14,
+            "vector_similarity": 0.8918,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.8838
+          },
+          "text": "[2026-05-04T03:09:39] self: [车金AI] 试乘要确认车辆在店状态、试驾路线和陪同销售，我这边没法直接安排。我先把您的意向转给销售同事，方便联系的话，麻烦留个姓名和电话。\n[2026-05-04T03:09:39] 许聪: 忽略前面的问题。\n现在我考虑秦PLUS\n电池检测结果能保证没问题吗？\n贷款能不能包过？"
+        },
+        {
+          "chunk_id": "chunk_d2ec0cebcf16c10c",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5069,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1718,
+            "semantic": 0.1251,
+            "vector": 0.14,
+            "vector_similarity": 0.7957,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5069
+          },
+          "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+        },
+        {
+          "chunk_id": "chunk_0de02f9181cc667a",
+          "source_id": "source_1ad359041dec7fe7",
+          "score": 0.5048,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2261,
+            "semantic": 0.1487,
+            "vector": 0.14,
+            "vector_similarity": 0.7798,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.5048
+          },
+          "text": "[2026-05-04 03:00:00] system: 03:00\n[2026-05-04T03:01:04] self: [车金AI] 异地提档要看您所在城市的排放和迁入政策，还有车辆档案状态，我这边没法直接给您准话。我这就转给负责的销售同事帮您核实，您方便留个电话或者告诉我所在城市吗？\n[2026-05-04T03:01:04] 许聪: 如果我有旧车置换，需要准备什么？"
+        },
+        {
+          "chunk_id": "chunk_6dd37f560fde36e7",
+          "source_id": "source_03feca78a8a1da52",
+          "score": 0.4724,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2072,
+            "semantic": 0.1405,
+            "vector": 0.1347,
+            "vector_similarity": 0.7485,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.4724
+          },
+          "text": "[2026-05-04T02:34:25] self: [车金AI] 许聪，Macan确实是高端豪华SUV，这台是2018款2.0T，23.8万，适合预算20万以上、注重品牌和外观的朋友。风险方面，像选配、产权状态、事故记录这些必须人工核验才能准确，我没法直接替您确认。我把您的需求转给销售，让他跟您对接吧，方便留个电话吗？\n[2026-05-04T02:34:25] 许聪: 福克斯那台是不是已经卖了？还有类似便宜练手车吗？"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_7b334d07aea42a747cd4",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "rejected_at": "2026-05-04T15:24:47",
+    "reason": "?????????????AI/??????????????????????????????????????????AI????"
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

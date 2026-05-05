@@ -1,0 +1,317 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_339e34a5df63e148",
+  "generated_at": "2026-05-03T08:28:57",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_61c69328f3571e61afe0.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "title: 待分类规则；answer: 政策规则：江苏车金真机金融边界 CHEJIN_20260503_082804 测试批次：CHEJIN_20260503_082804 规则名称：新能源电池与金融审批转人工 规则类型：contract 触发关键词：电池检测,首付,月供,贷款包过,CHEJIN_20260503_082804 答案：涉及新能源电池检测、首付月供、贷款通过率时必须转人工确认，不允许AI承诺结果。；keywords: ['policie', 'unknown']",
+    "content_sha256": "dcdd6fd2ee00ddb78eed6ba15e163cb746a0ed2c7c68039fc8142843c0039066",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_61c69328f3571e61afe0",
+    "conversation_id": "conv_1c4c2bfac8a6d1ae7d",
+    "raw_message_ids": [
+      "raw_msg_f2b54613a9eed3a220aa",
+      "raw_msg_0aeff371fca33c37058e"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_8853d46e12ff05ef",
+        "source_id": "source_095a69445f947e68",
+        "score": 0.9227,
+        "category": "group",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.5529,
+          "semantic": 0.2399,
+          "vector": 0.14,
+          "vector_similarity": 0.928,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.9227
+        },
+        "text": "[2026-05-03T08:28:56] self: 政策规则：江苏车金真机金融边界 CHEJIN_20260503_082804\n测试批次：CHEJIN_20260503_082804\n规则名称：新能源电池与金融审批转人工\n规则类型：contract\n触发关键词：电池检测,首付,月供,贷款包过,CHEJIN_20260503_082804\n答案：涉及新能源电池检测、首付月供、贷款通过率时必须转人工确认，不允许AI承诺结果。\n[2026-05-03T08:28:56] self: 边界噪音：CHEJIN_2026"
+      },
+      {
+        "chunk_id": "chunk_3b9873d8b83133da",
+        "source_id": "source_bc0403ace18ef800",
+        "score": 0.607,
+        "category": "group",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.3092,
+          "semantic": 0.1678,
+          "vector": 0.14,
+          "vector_similarity": 0.8028,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.607
+        },
+        "text": "[2026-05-03T08:23:44] self: 政策规则：记录员缺字段边界 LIVE_RECORDER_20260503_082131\n测试批次：LIVE_RECORDER_20260503_082131\n规则名称：新能源电池检测转人工\n规则类型：contract\n触发关键词：电池检测,首付,月供,贷款包过,LIVE_RECORDER_20260503_082131"
+      },
+      {
+        "chunk_id": "chunk_f33e20a058626f2d",
+        "source_id": "source_d262d55f8b02b514",
+        "score": 0.607,
+        "category": "group",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.3092,
+          "semantic": 0.1678,
+          "vector": 0.14,
+          "vector_similarity": 0.8004,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.607
+        },
+        "text": "[2026-05-02T04:24:40] self: 政策规则：记录员缺字段边界 LIVE_RECORDER_20260502_042340\n测试批次：LIVE_RECORDER_20260502_042340\n规则名称：新能源电池检测转人工\n规则类型：contract\n触发关键词：电池检测,首付,月供,贷款包过,LIVE_RECORDER_20260502_042340"
+      },
+      {
+        "chunk_id": "chunk_d4cf69be74b065ed",
+        "source_id": "source_ae5344337eddd346",
+        "score": 0.5711,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2545,
+          "semantic": 0.1516,
+          "vector": 0.14,
+          "vector_similarity": 0.8164,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.025,
+          "risk_penalty": 0.0,
+          "final": 0.5711
+        },
+        "text": "公里，2.0T自动挡，一手车源，支持到店试驾。\n价格：12.80万\n单位：台\n库存：1\n发货：高意向试驾需转人工确认门店和时间。\n售后：精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。\n商品资料：江苏车金二手车车源 CHEJIN_20260503_082804\n测试批次：CHEJIN_20260503_082804\n商品名称：2022款比亚迪秦PLUS DM-i 55KM\n型号：CHEJIN-QINPLUS-2022DMI\n商品类目：二手车/新能源轿车\n别名关键词：秦PLUS,比亚迪秦,新能源,绿牌,混"
+      }
+    ],
+    "original_type": "raw_wechat_group",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_613463c75b9919007b94",
+    "experience_id": "rag_exp_613463c75b9919007b94"
+  },
+  "detected_tags": [
+    "policie",
+    "rag_experience",
+    "unknown",
+    "wechat_group_chat"
+  ],
+  "proposal": {
+    "target_category": "policies",
+    "change_type": "upsert_policy",
+    "summary": "建议新增/更新政策规则：待分类规则",
+    "suggested_fields": {
+      "title": "待分类规则",
+      "policy_type": "other",
+      "keywords": [
+        "policie",
+        "unknown"
+      ],
+      "answer": "政策规则：江苏车金真机金融边界 CHEJIN_20260503_082804 测试批次：CHEJIN_20260503_082804 规则名称：新能源电池与金融审批转人工 规则类型：contract 触发关键词：电池检测,首付,月供,贷款包过,CHEJIN_20260503_082804 答案：涉及新能源电池检测、首付月供、贷款通过率时必须转人工确认，不允许AI承诺结果。",
+      "allow_auto_reply": false,
+      "requires_handoff": true,
+      "operator_alert": true,
+      "risk_level": "warning",
+      "applicability_scope": "global",
+      "additional_details": {
+        "原始资料摘录": "title: 待分类规则；answer: 政策规则：江苏车金真机金融边界 CHEJIN_20260503_082804 测试批次：CHEJIN_20260503_082804 规则名称：新能源电池与金融审批转人工 规则类型：contract 触发关键词：电池检测,首付,月供,贷款包过,CHEJIN_20260503_082804 答案：涉及新能源电池检测、首付月供、贷款通过率时必须转人工确认，不允许AI承诺结果。；keywords: ['policie', 'unknown']"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [
+      "明确要求人工确认：必须转人工"
+    ],
+    "formal_patch": {
+      "target_category": "policies",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "policies",
+        "id": "item_ac31960147d0",
+        "status": "active",
+        "source": {
+          "type": "raw_upload",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_61c69328f3571e61afe0.txt",
+          "candidate_id": "raw_339e34a5df63e148",
+          "rag_experience_id": "rag_exp_613463c75b9919007b94",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_group"
+        },
+        "data": {
+          "title": "待分类规则",
+          "policy_type": "other",
+          "keywords": [
+            "policie",
+            "unknown"
+          ],
+          "answer": "政策规则：江苏车金真机金融边界 CHEJIN_20260503_082804 测试批次：CHEJIN_20260503_082804 规则名称：新能源电池与金融审批转人工 规则类型：contract 触发关键词：电池检测,首付,月供,贷款包过,CHEJIN_20260503_082804 答案：涉及新能源电池检测、首付月供、贷款通过率时必须转人工确认，不允许AI承诺结果。",
+          "allow_auto_reply": false,
+          "requires_handoff": true,
+          "operator_alert": true,
+          "risk_level": "warning",
+          "applicability_scope": "global",
+          "additional_details": {
+            "原始资料摘录": "title: 待分类规则；answer: 政策规则：江苏车金真机金融边界 CHEJIN_20260503_082804 测试批次：CHEJIN_20260503_082804 规则名称：新能源电池与金融审批转人工 规则类型：contract 触发关键词：电池检测,首付,月供,贷款包过,CHEJIN_20260503_082804 答案：涉及新能源电池检测、首付月供、贷款通过率时必须转人工确认，不允许AI承诺结果。；keywords: ['policie', 'unknown']"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": false,
+          "requires_handoff": true,
+          "risk_level": "high"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [
+      "明确要求人工确认：必须转人工"
+    ],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "rejected",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": false,
+      "provider": "",
+      "status": "rule_only_disabled_by_request",
+      "reason": "llm_disabled_by_caller",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_61c69328f3571e61afe0",
+    "source_raw_message_ids": [
+      "raw_msg_f2b54613a9eed3a220aa",
+      "raw_msg_0aeff371fca33c37058e"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_095a69445f947e68",
+      "chunk_count": 1,
+      "query": "建议新增/更新政策规则：待分类规则\ntitle: 待分类规则；answer: 政策规则：江苏车金真机金融边界 CHEJIN_20260503_082804 测试批次：CHEJIN_20260503_082804 规则名称：新能源电池与金融审批转人工 规则类型：contract 触发关键词：电池检测,首付,月供,贷款包过,CHEJIN_20260503_082804 答案：涉及新能源电池检测、首付月供、贷款通过率时必须转人工确认，不允许AI承诺结果。；keywords: ['policie', 'unknown']\n待分类规则\n政策规则：江苏车金真机金融边界 CHEJIN_20260503_082804 测试批次：CHEJIN_20260503_082804 规则名称：新能源电池与金融审批转人工 规则类型：contract 触发关键词：电池检测,首付,月供,贷款包过,CHEJIN_20260503_082804 答案：涉及新能源电池检测、首付月供、贷款通过率时必须转人工确认，不允许AI承诺结果。",
+      "hits": [
+        {
+          "chunk_id": "chunk_8853d46e12ff05ef",
+          "source_id": "source_095a69445f947e68",
+          "score": 0.9227,
+          "category": "group",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.5529,
+            "semantic": 0.2399,
+            "vector": 0.14,
+            "vector_similarity": 0.928,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.9227
+          },
+          "text": "[2026-05-03T08:28:56] self: 政策规则：江苏车金真机金融边界 CHEJIN_20260503_082804\n测试批次：CHEJIN_20260503_082804\n规则名称：新能源电池与金融审批转人工\n规则类型：contract\n触发关键词：电池检测,首付,月供,贷款包过,CHEJIN_20260503_082804\n答案：涉及新能源电池检测、首付月供、贷款通过率时必须转人工确认，不允许AI承诺结果。\n[2026-05-03T08:28:56] self: 边界噪音：CHEJIN_2026"
+        },
+        {
+          "chunk_id": "chunk_3b9873d8b83133da",
+          "source_id": "source_bc0403ace18ef800",
+          "score": 0.607,
+          "category": "group",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.3092,
+            "semantic": 0.1678,
+            "vector": 0.14,
+            "vector_similarity": 0.8028,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.607
+          },
+          "text": "[2026-05-03T08:23:44] self: 政策规则：记录员缺字段边界 LIVE_RECORDER_20260503_082131\n测试批次：LIVE_RECORDER_20260503_082131\n规则名称：新能源电池检测转人工\n规则类型：contract\n触发关键词：电池检测,首付,月供,贷款包过,LIVE_RECORDER_20260503_082131"
+        },
+        {
+          "chunk_id": "chunk_f33e20a058626f2d",
+          "source_id": "source_d262d55f8b02b514",
+          "score": 0.607,
+          "category": "group",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.3092,
+            "semantic": 0.1678,
+            "vector": 0.14,
+            "vector_similarity": 0.8004,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.607
+          },
+          "text": "[2026-05-02T04:24:40] self: 政策规则：记录员缺字段边界 LIVE_RECORDER_20260502_042340\n测试批次：LIVE_RECORDER_20260502_042340\n规则名称：新能源电池检测转人工\n规则类型：contract\n触发关键词：电池检测,首付,月供,贷款包过,LIVE_RECORDER_20260502_042340"
+        },
+        {
+          "chunk_id": "chunk_d4cf69be74b065ed",
+          "source_id": "source_ae5344337eddd346",
+          "score": 0.5711,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2545,
+            "semantic": 0.1516,
+            "vector": 0.14,
+            "vector_similarity": 0.8164,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.025,
+            "risk_penalty": 0.0,
+            "final": 0.5711
+          },
+          "text": "公里，2.0T自动挡，一手车源，支持到店试驾。\n价格：12.80万\n单位：台\n库存：1\n发货：高意向试驾需转人工确认门店和时间。\n售后：精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。\n商品资料：江苏车金二手车车源 CHEJIN_20260503_082804\n测试批次：CHEJIN_20260503_082804\n商品名称：2022款比亚迪秦PLUS DM-i 55KM\n型号：CHEJIN-QINPLUS-2022DMI\n商品类目：二手车/新能源轿车\n别名关键词：秦PLUS,比亚迪秦,新能源,绿牌,混"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_613463c75b9919007b94",
+    "source_chain": [
+      "raw_wechat_group",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "rejected_at": "2026-05-04T15:24:46",
+    "reason": "?????????????AI/??????????????????????????????????????????AI????"
+  },
+  "suggested_tests": [
+    {
+      "scenario": "other",
+      "assertion": "入库后应能按关键词回答该政策；高风险内容必须转人工。"
+    }
+  ]
+}

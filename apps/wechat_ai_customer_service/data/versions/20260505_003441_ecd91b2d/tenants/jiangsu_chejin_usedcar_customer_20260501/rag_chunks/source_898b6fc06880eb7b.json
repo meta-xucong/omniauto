@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_898b6fc06880eb7b",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_19596b885d42da7801cc.txt",
+    "content_hash": "5dfb342eb8838e067982b38001a97f4b",
+    "status": "active",
+    "created_at": "2026-05-04T03:36:25",
+    "updated_at": "2026-05-04T03:36:25"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_36daf911f8601554",
+      "source_id": "source_898b6fc06880eb7b",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_19596b885d42da7801cc.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-04T03:36:24] self: [车金AI] 贷款审批得看资方系统，征信情况也只是其中一项，我这边确实保证不了。我帮您转给销售同事直接对接银行或金融顾问，他们能给到更准的反馈，方便留个电话吗？\n[2026-05-04T03:36:24] 许聪: 首付和月供你直接给我算个确定数",
+      "char_count": 150,
+      "status": "active",
+      "created_at": "2026-05-04T03:36:25"
+    }
+  ]
+}

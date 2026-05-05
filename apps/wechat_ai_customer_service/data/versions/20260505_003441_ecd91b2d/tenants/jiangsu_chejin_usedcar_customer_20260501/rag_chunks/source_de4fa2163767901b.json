@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_de4fa2163767901b",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_ce9b8b7e9b874d75d48b.txt",
+    "content_hash": "82e755d3028fdc68cef12b087d824ea3",
+    "status": "active",
+    "created_at": "2026-05-04T03:46:12",
+    "updated_at": "2026-05-04T03:46:12"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_20b1ed4080531862",
+      "source_id": "source_de4fa2163767901b",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_ce9b8b7e9b874d75d48b.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-04T03:46:11] self: [车金AI] 许哥，奥德赛这款日系MPV我这边暂时没看到现车信息，需要让销售同事查一下库存和具体车况。我马上帮您转过去，您方便留个电话吗？他查到后第一时间联系您。\n[2026-05-04T03:46:11] 许聪: 有没有奔驰E级，最好2021以后的",
+      "char_count": 153,
+      "status": "active",
+      "created_at": "2026-05-04T03:46:12"
+    }
+  ]
+}

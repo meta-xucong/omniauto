@@ -1,0 +1,308 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_1959dc7caa35cbb5",
+  "generated_at": "2026-05-03T08:28:06",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_ee4af4a68c1a4196c9cb.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "title: 待分类规则；answer: [2026-05-03T08:28:06] self: 宝马320Li那台今天能到店试驾吗 CHEJIN_20260503_082804；keywords: ['unknown']",
+    "content_sha256": "8221553aa2f56eaafabb754f3468d60394d5e796eb51c7b6a60fcc020110f1d1",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_ee4af4a68c1a4196c9cb",
+    "conversation_id": "conv_54a96e57c70563ab9c",
+    "raw_message_ids": [
+      "raw_msg_d1ed60feea8b0b741575"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_c1a220c9425c3f82",
+        "source_id": "source_f76f7282908f7a1f",
+        "score": 0.74,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.39,
+          "semantic": 0.22,
+          "vector": 0.14,
+          "vector_similarity": 0.8371,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.74
+        },
+        "text": "[2026-05-03T08:28:06] self: 宝马320Li那台今天能到店试驾吗 CHEJIN_20260503_082804"
+      },
+      {
+        "chunk_id": "chunk_c593c6327d116537",
+        "source_id": "source_bee70070c72a9a2b",
+        "score": 0.6988,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.3613,
+          "semantic": 0.2075,
+          "vector": 0.14,
+          "vector_similarity": 0.7813,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.6988
+        },
+        "text": "[2026-05-03T04:39:23] self: 宝马320Li那台今天能到店试驾吗 CHEJIN_20260503_043922"
+      },
+      {
+        "chunk_id": "chunk_d4cf69be74b065ed",
+        "source_id": "source_ae5344337eddd346",
+        "score": 0.4917,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2175,
+          "semantic": 0.145,
+          "vector": 0.1042,
+          "vector_similarity": 0.579,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.025,
+          "risk_penalty": 0.0,
+          "final": 0.4917
+        },
+        "text": "公里，2.0T自动挡，一手车源，支持到店试驾。\n价格：12.80万\n单位：台\n库存：1\n发货：高意向试驾需转人工确认门店和时间。\n售后：精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。\n商品资料：江苏车金二手车车源 CHEJIN_20260503_082804\n测试批次：CHEJIN_20260503_082804\n商品名称：2022款比亚迪秦PLUS DM-i 55KM\n型号：CHEJIN-QINPLUS-2022DMI\n商品类目：二手车/新能源轿车\n别名关键词：秦PLUS,比亚迪秦,新能源,绿牌,混"
+      },
+      {
+        "chunk_id": "chunk_320caa1062c4cf21",
+        "source_id": "source_55cce0d21fe7898c",
+        "score": 0.481,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2103,
+          "semantic": 0.1419,
+          "vector": 0.1038,
+          "vector_similarity": 0.5765,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.025,
+          "risk_penalty": 0.0,
+          "final": 0.481
+        },
+        "text": "公里，2.0T自动挡，一手车源，支持到店试驾。\n价格：12.80万\n单位：台\n库存：1\n发货：高意向试驾需转人工确认门店和时间。\n售后：精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。\n商品资料：江苏车金二手车车源 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_043922\n商品名称：2022款比亚迪秦PLUS DM-i 55KM\n型号：CHEJIN-QINPLUS-2022DMI\n商品类目：二手车/新能源轿车\n别名关键词：秦PLUS,比亚迪秦,新能源,绿牌,混"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_8abf2e120017be1db2f5",
+    "experience_id": "rag_exp_8abf2e120017be1db2f5"
+  },
+  "detected_tags": [
+    "rag_experience",
+    "unknown",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "policies",
+    "change_type": "upsert_policy",
+    "summary": "建议新增/更新政策规则：待分类规则",
+    "suggested_fields": {
+      "title": "待分类规则",
+      "policy_type": "other",
+      "keywords": [
+        "unknown"
+      ],
+      "answer": "[2026-05-03T08:28:06] self: 宝马320Li那台今天能到店试驾吗 CHEJIN_20260503_082804",
+      "allow_auto_reply": true,
+      "requires_handoff": false,
+      "operator_alert": false,
+      "risk_level": "normal",
+      "applicability_scope": "global",
+      "additional_details": {
+        "原始资料摘录": "title: 待分类规则；answer: [2026-05-03T08:28:06] self: 宝马320Li那台今天能到店试驾吗 CHEJIN_20260503_082804；keywords: ['unknown']"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "policies",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "policies",
+        "id": "item_7ad188258356",
+        "status": "active",
+        "source": {
+          "type": "raw_upload",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_ee4af4a68c1a4196c9cb.txt",
+          "candidate_id": "raw_1959dc7caa35cbb5",
+          "rag_experience_id": "rag_exp_8abf2e120017be1db2f5",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "title": "待分类规则",
+          "policy_type": "other",
+          "keywords": [
+            "unknown"
+          ],
+          "answer": "[2026-05-03T08:28:06] self: 宝马320Li那台今天能到店试驾吗 CHEJIN_20260503_082804",
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "operator_alert": false,
+          "risk_level": "normal",
+          "applicability_scope": "global",
+          "additional_details": {
+            "原始资料摘录": "title: 待分类规则；answer: [2026-05-03T08:28:06] self: 宝马320Li那台今天能到店试驾吗 CHEJIN_20260503_082804；keywords: ['unknown']"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "rejected",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": false,
+      "provider": "",
+      "status": "rule_only_disabled_by_request",
+      "reason": "llm_disabled_by_caller",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_ee4af4a68c1a4196c9cb",
+    "source_raw_message_ids": [
+      "raw_msg_d1ed60feea8b0b741575"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_f76f7282908f7a1f",
+      "chunk_count": 1,
+      "query": "建议新增/更新政策规则：待分类规则\ntitle: 待分类规则；answer: [2026-05-03T08:28:06] self: 宝马320Li那台今天能到店试驾吗 CHEJIN_20260503_082804；keywords: ['unknown']\n待分类规则\n[2026-05-03T08:28:06] self: 宝马320Li那台今天能到店试驾吗 CHEJIN_20260503_082804",
+      "hits": [
+        {
+          "chunk_id": "chunk_c1a220c9425c3f82",
+          "source_id": "source_f76f7282908f7a1f",
+          "score": 0.74,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.39,
+            "semantic": 0.22,
+            "vector": 0.14,
+            "vector_similarity": 0.8371,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.74
+          },
+          "text": "[2026-05-03T08:28:06] self: 宝马320Li那台今天能到店试驾吗 CHEJIN_20260503_082804"
+        },
+        {
+          "chunk_id": "chunk_c593c6327d116537",
+          "source_id": "source_bee70070c72a9a2b",
+          "score": 0.6988,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.3613,
+            "semantic": 0.2075,
+            "vector": 0.14,
+            "vector_similarity": 0.7813,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.6988
+          },
+          "text": "[2026-05-03T04:39:23] self: 宝马320Li那台今天能到店试驾吗 CHEJIN_20260503_043922"
+        },
+        {
+          "chunk_id": "chunk_d4cf69be74b065ed",
+          "source_id": "source_ae5344337eddd346",
+          "score": 0.4917,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2175,
+            "semantic": 0.145,
+            "vector": 0.1042,
+            "vector_similarity": 0.579,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.025,
+            "risk_penalty": 0.0,
+            "final": 0.4917
+          },
+          "text": "公里，2.0T自动挡，一手车源，支持到店试驾。\n价格：12.80万\n单位：台\n库存：1\n发货：高意向试驾需转人工确认门店和时间。\n售后：精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。\n商品资料：江苏车金二手车车源 CHEJIN_20260503_082804\n测试批次：CHEJIN_20260503_082804\n商品名称：2022款比亚迪秦PLUS DM-i 55KM\n型号：CHEJIN-QINPLUS-2022DMI\n商品类目：二手车/新能源轿车\n别名关键词：秦PLUS,比亚迪秦,新能源,绿牌,混"
+        },
+        {
+          "chunk_id": "chunk_320caa1062c4cf21",
+          "source_id": "source_55cce0d21fe7898c",
+          "score": 0.481,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2103,
+            "semantic": 0.1419,
+            "vector": 0.1038,
+            "vector_similarity": 0.5765,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.025,
+            "risk_penalty": 0.0,
+            "final": 0.481
+          },
+          "text": "公里，2.0T自动挡，一手车源，支持到店试驾。\n价格：12.80万\n单位：台\n库存：1\n发货：高意向试驾需转人工确认门店和时间。\n售后：精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。\n商品资料：江苏车金二手车车源 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_043922\n商品名称：2022款比亚迪秦PLUS DM-i 55KM\n型号：CHEJIN-QINPLUS-2022DMI\n商品类目：二手车/新能源轿车\n别名关键词：秦PLUS,比亚迪秦,新能源,绿牌,混"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_8abf2e120017be1db2f5",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "rejected_at": "2026-05-04T15:24:46",
+    "reason": "?????????????AI/??????????????????????????????????????????AI????"
+  },
+  "suggested_tests": [
+    {
+      "scenario": "other",
+      "assertion": "入库后应能按关键词回答该政策；高风险内容必须转人工。"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_840a1c3c83b3ebfb",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "upload",
+    "category": "chats",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\chats\\upload_ae8328ae20bbd4ad_chejin_chats_CHEJIN_20260501_162143.txt",
+    "content_hash": "aba3af16dccb74bbf2898bbe393f65f7",
+    "status": "active",
+    "created_at": "2026-05-01T16:21:44",
+    "updated_at": "2026-05-01T16:21:44"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_5f4ea2a8bcf5a660",
+      "source_id": "source_840a1c3c83b3ebfb",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "upload",
+      "category": "chats",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\chats\\upload_ae8328ae20bbd4ad_chejin_chats_CHEJIN_20260501_162143.txt",
+      "chunk_index": 0,
+      "text": "聊天记录：江苏车金预算推荐话术 CHEJIN_20260501_162143\n客户：我从抖音直播来的，8万左右想买自动挡省油代步车，有什么推荐？\n客服：您这个预算可以先看凯美瑞、思域和秦PLUS DM-i。凯美瑞偏家用稳、省心；思域更年轻；秦PLUS更省油。您是在南京看车吗？是否考虑贷款或置换？\n意图标签：预算推荐,车源推荐,抖音线索\n聊天记录：江苏车金置换话术 CHEJIN_20260501_162143\n客户：我有一台老朗逸想置换。\n客服：可以的，麻烦补充上牌年份、公里数、车况、所在城市和是否有贷款，我先帮您记录，评估价需要人工复核。\n意图标签：置换,线索采集\n聊天记录：江苏车金睡客唤醒话术 CHEJIN_20260501_162143\n客户：之前那台没买，现在还有新车源吗？\n客服：有的，我先按您之前的预算和用途筛一遍；如果预算或车型变了，直接告诉我，我会按新需求推荐更合适的车。\n意图标签：沉睡客户,唤醒,二次转化",
+      "char_count": 415,
+      "status": "active",
+      "created_at": "2026-05-01T16:21:44"
+    }
+  ]
+}

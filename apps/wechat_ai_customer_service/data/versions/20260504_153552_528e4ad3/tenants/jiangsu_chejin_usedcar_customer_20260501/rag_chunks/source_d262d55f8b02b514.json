@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_d262d55f8b02b514",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "group",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_055784b7dc9082faf951.txt",
+    "content_hash": "185b80b74458723e1b368112c690385a",
+    "status": "active",
+    "created_at": "2026-05-02T04:24:40",
+    "updated_at": "2026-05-02T04:24:40"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_f33e20a058626f2d",
+      "source_id": "source_d262d55f8b02b514",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "group",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_055784b7dc9082faf951.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-02T04:24:40] self: 政策规则：记录员缺字段边界 LIVE_RECORDER_20260502_042340\n测试批次：LIVE_RECORDER_20260502_042340\n规则名称：新能源电池检测转人工\n规则类型：contract\n触发关键词：电池检测,首付,月供,贷款包过,LIVE_RECORDER_20260502_042340",
+      "char_count": 188,
+      "status": "active",
+      "created_at": "2026-05-02T04:24:40"
+    }
+  ]
+}

@@ -1,0 +1,356 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_43bf77c02dd5de93",
+  "generated_at": "2026-05-04T03:58:24",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_c9f8575a3c4fd1edec5c.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"customer_message\": \"家用车是不是日系更稳？你按你们现车给我说\", \"service_reply\": \"许哥，怕买到问题车、怕老修，这个顾虑我理解。店里像丰田卡罗拉、凯美瑞这类车，正常保养下故障率相对低，比较省心。凯美瑞2021款2.0G现在参考价8.98万，卡罗拉2020款1.2T大概6.98万，都在南京现车。当然二手车一车一况，具体车况还得看检测报告和实车。您预算大概多少？主要平时代步还是跑长途？我帮您筛筛看。\", \"intent_tags\": [\"询价\", \"车型推荐\", \"担忧故障\"], \"tone_tags\": [\"亲切\", \"专业\", \"引导\"], \"linked_categories\": [\"二手车\"], \"linked_item_ids\": [], \"applicabili",
+    "content_sha256": "09f3ffe37808ed51cc72e06f34c703d4ccf7e38bda30f13e6d627d62d47eecbe",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_c9f8575a3c4fd1edec5c",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_59bd5a89c45aab5e64f8",
+      "raw_msg_eaccefa50661c87bb5c2"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_45e5d08cb4648397",
+        "source_id": "source_0cc6c367c886244c",
+        "score": 0.8782,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.4915,
+          "semantic": 0.2566,
+          "vector": 0.14,
+          "vector_similarity": 0.9666,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.8782
+        },
+        "text": "[2026-05-04T03:57:36] self: [车金AI] 许哥，怕买到问题车、怕老修，这个顾虑我理解。店里像丰田卡罗拉、凯美瑞这类车，正常保养下故障率相对低，比较省心。凯美瑞2021款2.0G现在参考价8.98万，卡罗拉2020款1.2T大概6.98万，都在南京现车。当然二手车一车一况，具体车况还得看检测报告和实车。您预算大概多少？主要平时代步还是跑长途？我帮您筛筛看。\n[2026-05-04T03:57:36] 许聪: 家用车是不是日系更稳？你按你们现车给我说"
+      },
+      {
+        "chunk_id": "chunk_d2ec0cebcf16c10c",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.534,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1898,
+          "semantic": 0.1342,
+          "vector": 0.14,
+          "vector_similarity": 0.8199,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.534
+        },
+        "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+      },
+      {
+        "chunk_id": "chunk_b73fd7e249648300",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5329,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1887,
+          "semantic": 0.1342,
+          "vector": 0.14,
+          "vector_similarity": 0.8327,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5329
+        },
+        "text": "。\n商品名称：2022款五菱宏光MINIEV马卡龙臻享款\n型号/SKU：CHEJIN-MINIEV-2022\n类目：二手车/微型电动车\n关键词：宏光MINIEV、五菱mini、代步电车、练手车\n规格：2022年上牌，表显1.6万公里，纯电微型车，粉色，城市通勤。\n价格：2.88万，库存：1台\n物流/过户：微型电动车跨城运输和充电条件需人工确认。\n售后/风险：续航、电池和低温表现以检测报告和使用场景说明为准。\n推荐话术：适合短途通勤、练手、接送孩子，长途或高速需求不推荐。\n商品名称：2020款本田雅阁260TURBO"
+      },
+      {
+        "chunk_id": "chunk_58029d4057022265",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5329,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1887,
+          "semantic": 0.1342,
+          "vector": 0.14,
+          "vector_similarity": 0.8133,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5329
+        },
+        "text": "险：电池、增程器、官方权益和保养记录以检测报告和人工核验为准。\n推荐话术：适合家庭六座、长途和新能源体验需求。\n商品名称：2021款长安CS75 PLUS 1.5T自动尊贵型\n型号/SKU：CHEJIN-CS75PLUS-2021\n类目：二手车/SUV\n关键词：CS75PLUS、长安CS75、国产SUV、家用SUV\n规格：2021年上牌，表显4.4万公里，1.5T自动挡，白色，配置高。\n价格：6.88万，库存：2台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_c8b51d40d0763aad64b4",
+    "experience_id": "rag_exp_c8b51d40d0763aad64b4"
+  },
+  "detected_tags": [
+    "llm",
+    "rag_experience",
+    "unknown",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "chats",
+    "change_type": "llm_upsert_chats",
+    "summary": "二手车咨询：客户询问日系车稳定性，客服推荐卡罗拉和凯美瑞，提供价格和现车信息，并引导预算和用途。",
+    "suggested_fields": {
+      "customer_message": "家用车是不是日系更稳？你按你们现车给我说",
+      "service_reply": "许哥，怕买到问题车、怕老修，这个顾虑我理解。店里像丰田卡罗拉、凯美瑞这类车，正常保养下故障率相对低，比较省心。凯美瑞2021款2.0G现在参考价8.98万，卡罗拉2020款1.2T大概6.98万，都在南京现车。当然二手车一车一况，具体车况还得看检测报告和实车。您预算大概多少？主要平时代步还是跑长途？我帮您筛筛看。",
+      "intent_tags": [
+        "询价",
+        "车型推荐",
+        "担忧故障"
+      ],
+      "tone_tags": [
+        "亲切",
+        "专业",
+        "引导"
+      ],
+      "linked_categories": [
+        "二手车"
+      ],
+      "linked_item_ids": [],
+      "applicability_scope": "product_category",
+      "product_category": "二手车",
+      "usable_as_template": true,
+      "product_id": "",
+      "additional_details": {
+        "mentioned_models": [
+          "丰田卡罗拉 2020款 1.2T",
+          "丰田凯美瑞 2021款 2.0G"
+        ],
+        "prices": {
+          "卡罗拉": "6.98万",
+          "凯美瑞": "8.98万"
+        },
+        "location": "南京",
+        "condition": "现车",
+        "notes": "二手车一车一况，具体车况以检测报告和实车为准",
+        "原始资料摘录": "{\"customer_message\": \"家用车是不是日系更稳？你按你们现车给我说\", \"service_reply\": \"许哥，怕买到问题车、怕老修，这个顾虑我理解。店里像丰田卡罗拉、凯美瑞这类车，正常保养下故障率相对低，比较省心。凯美瑞2021款2.0G现在参考价8.98万，卡罗拉2020款1.2T大概6.98万，都在南京现车。当然二手车一车一况，具体车况还得看检测报告和实车。您预算大概多少？主要平时代步还是跑长途？我帮您筛筛看。\", \"intent_tags\": [\"询价\", \"车型推荐\", \"担忧故障\"], \"tone_tags\": [\"亲切\", \"专业\", \"引导\"], \"linked_categories\": [\"二手车\"], \"linked_item_ids\": [], \"applicabili"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "chats",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "chats",
+        "id": "chat_20260504_035736_1",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_c9f8575a3c4fd1edec5c.txt",
+          "candidate_id": "raw_43bf77c02dd5de93",
+          "rag_experience_id": "rag_exp_c8b51d40d0763aad64b4",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "customer_message": "家用车是不是日系更稳？你按你们现车给我说",
+          "service_reply": "许哥，怕买到问题车、怕老修，这个顾虑我理解。店里像丰田卡罗拉、凯美瑞这类车，正常保养下故障率相对低，比较省心。凯美瑞2021款2.0G现在参考价8.98万，卡罗拉2020款1.2T大概6.98万，都在南京现车。当然二手车一车一况，具体车况还得看检测报告和实车。您预算大概多少？主要平时代步还是跑长途？我帮您筛筛看。",
+          "intent_tags": [
+            "询价",
+            "车型推荐",
+            "担忧故障"
+          ],
+          "tone_tags": [
+            "亲切",
+            "专业",
+            "引导"
+          ],
+          "linked_categories": [
+            "二手车"
+          ],
+          "linked_item_ids": [],
+          "applicability_scope": "product_category",
+          "product_category": "二手车",
+          "usable_as_template": true,
+          "product_id": "",
+          "additional_details": {
+            "mentioned_models": [
+              "丰田卡罗拉 2020款 1.2T",
+              "丰田凯美瑞 2021款 2.0G"
+            ],
+            "prices": {
+              "卡罗拉": "6.98万",
+              "凯美瑞": "8.98万"
+            },
+            "location": "南京",
+            "condition": "现车",
+            "notes": "二手车一车一况，具体车况以检测报告和实车为准",
+            "原始资料摘录": "{\"customer_message\": \"家用车是不是日系更稳？你按你们现车给我说\", \"service_reply\": \"许哥，怕买到问题车、怕老修，这个顾虑我理解。店里像丰田卡罗拉、凯美瑞这类车，正常保养下故障率相对低，比较省心。凯美瑞2021款2.0G现在参考价8.98万，卡罗拉2020款1.2T大概6.98万，都在南京现车。当然二手车一车一况，具体车况还得看检测报告和实车。您预算大概多少？主要平时代步还是跑长途？我帮您筛筛看。\", \"intent_tags\": [\"询价\", \"车型推荐\", \"担忧故障\"], \"tone_tags\": [\"亲切\", \"专业\", \"引导\"], \"linked_categories\": [\"二手车\"], \"linked_item_ids\": [], \"applicabili"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "condition",
+      "location",
+      "mentioned_models",
+      "notes",
+      "prices",
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "rejected",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_c9f8575a3c4fd1edec5c",
+    "source_raw_message_ids": [
+      "raw_msg_59bd5a89c45aab5e64f8",
+      "raw_msg_eaccefa50661c87bb5c2"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_0cc6c367c886244c",
+      "chunk_count": 1,
+      "query": "二手车咨询：客户询问日系车稳定性，客服推荐卡罗拉和凯美瑞，提供价格和现车信息，并引导预算和用途。\n{\"customer_message\": \"家用车是不是日系更稳？你按你们现车给我说\", \"service_reply\": \"许哥，怕买到问题车、怕老修，这个顾虑我理解。店里像丰田卡罗拉、凯美瑞这类车，正常保养下故障率相对低，比较省心。凯美瑞2021款2.0G现在参考价8.98万，卡罗拉2020款1.2T大概6.98万，都在南京现车。当然二手车一车一况，具体车况还得看检测报告和实车。您预算大概多少？主要平时代步还是跑长途？我帮您筛筛看。\", \"intent_tags\": [\"询价\", \"车型推荐\", \"担忧故障\"], \"tone_tags\": [\"亲切\", \"专业\", \"引导\"], \"linked_categories\": [\"二手车\"], \"linked_item_ids\": [], \"applicabili\n许哥，怕买到问题车、怕老修，这个顾虑我理解。店里像丰田卡罗拉、凯美瑞这类车，正常保养下故障率相对低，比较省心。凯美瑞2021款2.0G现在参考价8.98万，卡罗拉2020款1.2T大概6.98万，都在南京现车。当然二手车一车一况，具体车况还得看检测报告和实车。您预算大概多少？主要平时代步还是跑长途？我帮您筛筛看。",
+      "hits": [
+        {
+          "chunk_id": "chunk_45e5d08cb4648397",
+          "source_id": "source_0cc6c367c886244c",
+          "score": 0.8782,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.4915,
+            "semantic": 0.2566,
+            "vector": 0.14,
+            "vector_similarity": 0.9666,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.8782
+          },
+          "text": "[2026-05-04T03:57:36] self: [车金AI] 许哥，怕买到问题车、怕老修，这个顾虑我理解。店里像丰田卡罗拉、凯美瑞这类车，正常保养下故障率相对低，比较省心。凯美瑞2021款2.0G现在参考价8.98万，卡罗拉2020款1.2T大概6.98万，都在南京现车。当然二手车一车一况，具体车况还得看检测报告和实车。您预算大概多少？主要平时代步还是跑长途？我帮您筛筛看。\n[2026-05-04T03:57:36] 许聪: 家用车是不是日系更稳？你按你们现车给我说"
+        },
+        {
+          "chunk_id": "chunk_d2ec0cebcf16c10c",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.534,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1898,
+            "semantic": 0.1342,
+            "vector": 0.14,
+            "vector_similarity": 0.8199,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.534
+          },
+          "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+        },
+        {
+          "chunk_id": "chunk_b73fd7e249648300",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5329,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1887,
+            "semantic": 0.1342,
+            "vector": 0.14,
+            "vector_similarity": 0.8327,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5329
+          },
+          "text": "。\n商品名称：2022款五菱宏光MINIEV马卡龙臻享款\n型号/SKU：CHEJIN-MINIEV-2022\n类目：二手车/微型电动车\n关键词：宏光MINIEV、五菱mini、代步电车、练手车\n规格：2022年上牌，表显1.6万公里，纯电微型车，粉色，城市通勤。\n价格：2.88万，库存：1台\n物流/过户：微型电动车跨城运输和充电条件需人工确认。\n售后/风险：续航、电池和低温表现以检测报告和使用场景说明为准。\n推荐话术：适合短途通勤、练手、接送孩子，长途或高速需求不推荐。\n商品名称：2020款本田雅阁260TURBO"
+        },
+        {
+          "chunk_id": "chunk_58029d4057022265",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5329,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1887,
+            "semantic": 0.1342,
+            "vector": 0.14,
+            "vector_similarity": 0.8133,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5329
+          },
+          "text": "险：电池、增程器、官方权益和保养记录以检测报告和人工核验为准。\n推荐话术：适合家庭六座、长途和新能源体验需求。\n商品名称：2021款长安CS75 PLUS 1.5T自动尊贵型\n型号/SKU：CHEJIN-CS75PLUS-2021\n类目：二手车/SUV\n关键词：CS75PLUS、长安CS75、国产SUV、家用SUV\n规格：2021年上牌，表显4.4万公里，1.5T自动挡，白色，配置高。\n价格：6.88万，库存：2台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_c8b51d40d0763aad64b4",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "rejected_at": "2026-05-04T18:41:18",
+    "reason": "legacy_auto_candidate_cleanup_20260504: ???????????????????????RAG?????????????????"
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

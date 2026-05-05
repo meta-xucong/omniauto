@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "category_id": "chats",
+  "id": "chejin_chat_high_end",
+  "status": "active",
+  "source": {
+    "type": "demo_fixture",
+    "batch_token": "CHEJIN_DEMO_20260503_203628",
+    "domain": "used_car"
+  },
+  "data": {
+    "customer_message": "Macan能不能今天试驾，最低多少钱",
+    "service_reply": "高端车试驾、订金、最低价和付款方式必须人工确认。我先记录您的到店时间和预算，再请销售联系您。",
+    "intent_tags": [
+      "高端车",
+      "议价",
+      "CHEJIN_DEMO_20260503_203628"
+    ],
+    "tone_tags": [
+      "专业",
+      "克制",
+      "不乱承诺"
+    ],
+    "linked_categories": [
+      "products",
+      "policies"
+    ],
+    "linked_item_ids": [
+      "chejin_macan_2018_20t"
+    ],
+    "applicability_scope": "specific_product",
+    "product_id": "chejin_macan_2018_20t",
+    "product_category": "",
+    "usable_as_template": true,
+    "additional_details": {
+      "演示批次": "CHEJIN_DEMO_20260503_203628",
+      "客户可读摘要": "真实客服可直接参考的问答样例。"
+    }
+  },
+  "runtime": {
+    "allow_auto_reply": false,
+    "requires_handoff": true,
+    "risk_level": "warning",
+    "operator_alert": true
+  },
+  "review_state": {
+    "is_new": false,
+    "new_reason": "newly_added_formal_knowledge",
+    "marked_at": "2026-05-03T20:36:28",
+    "updated_at": "2026-05-04T18:58:39",
+    "read_at": "2026-05-04T18:58:39",
+    "read_by": "codex_test_seed",
+    "source": {
+      "source_module": "jiangsu_chejin_demo_seed",
+      "target_category": "chats",
+      "item_id": "chejin_chat_high_end"
+    }
+  },
+  "metadata": {
+    "created_at": "2026-05-03T20:36:28",
+    "updated_at": "2026-05-04T18:58:39",
+    "created_by": "admin",
+    "updated_by": "admin",
+    "test_seed_direct_fill": true,
+    "test_seed_id": "direct_test_fill_20260504_v1",
+    "test_seed_note": "????????????????????????"
+  }
+}

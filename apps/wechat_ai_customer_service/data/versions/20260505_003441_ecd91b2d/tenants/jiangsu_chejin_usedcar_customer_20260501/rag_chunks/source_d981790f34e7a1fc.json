@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_d981790f34e7a1fc",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_4b708be1bfa067ade90f.txt",
+    "content_hash": "38b4e80f18578efd3f655d4b47d770dd",
+    "status": "active",
+    "created_at": "2026-05-04T04:07:05",
+    "updated_at": "2026-05-04T04:07:05"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_33f4a73550ebe7dd",
+      "source_id": "source_d981790f34e7a1fc",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_4b708be1bfa067ade90f.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-04T04:07:04] self: [车金AI] 许哥，正常流程一般先确认意向车型，然后安排看实车、验车，销售同事也会提供检测报告和合同条款。您方便的话，我直接让销售加您微信具体沟通？或者您先留个电话，他联系您？\n[2026-05-04T04:07:04] 许聪: 我之前问过的那种省油代步车，现在还有类似的吗？",
+      "char_count": 166,
+      "status": "active",
+      "created_at": "2026-05-04T04:07:05"
+    }
+  ]
+}

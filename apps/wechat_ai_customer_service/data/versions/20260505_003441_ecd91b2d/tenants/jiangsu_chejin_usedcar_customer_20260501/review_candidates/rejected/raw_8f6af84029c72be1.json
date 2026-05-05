@@ -1,0 +1,308 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_8f6af84029c72be1",
+  "generated_at": "2026-05-03T04:39:23",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_1eacc307c14fc3a3b2ac.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "title: 待分类规则；answer: [2026-05-03T04:39:23] self: 我从抖音直播来的，8万左右想看看自动挡；keywords: ['unknown']",
+    "content_sha256": "2ea544eec97d0c3eb8ca20e07725725003975f0ac8982d4f30222eab633404dd",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_1eacc307c14fc3a3b2ac",
+    "conversation_id": "conv_54a96e57c70563ab9c",
+    "raw_message_ids": [
+      "raw_msg_9bff3db81d3d1741cf44"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_0cb41b86cbc265bf",
+        "source_id": "source_6b020c71d10cd578",
+        "score": 0.7957,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.4288,
+          "semantic": 0.2369,
+          "vector": 0.14,
+          "vector_similarity": 0.87,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.7957
+        },
+        "text": "[2026-05-03T04:39:23] self: 我从抖音直播来的，8万左右想看看自动挡"
+      },
+      {
+        "chunk_id": "chunk_98d495755714a154",
+        "source_id": "source_25f67e9fcaeb0195",
+        "score": 0.631,
+        "category": "chats",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.3273,
+          "semantic": 0.1927,
+          "vector": 0.111,
+          "vector_similarity": 0.6169,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.0,
+          "risk_penalty": 0.0,
+          "final": 0.631
+        },
+        "text": "聊天记录：江苏车金预算推荐话术 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_043922\n客户：我从抖音直播来的，8万左右想买自动挡省油代步车，有什么推荐？\n客服：您这个预算可以先看凯美瑞、思域和秦PLUS DM-i。凯美瑞偏家用稳、省心；思域更年轻；秦PLUS更省油。您是在南京看车吗？是否考虑贷款或置换？\n意图标签：预算推荐,车源推荐,抖音线索\n聊天记录：江苏车金置换话术 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_04392"
+      },
+      {
+        "chunk_id": "chunk_320caa1062c4cf21",
+        "source_id": "source_55cce0d21fe7898c",
+        "score": 0.4518,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1839,
+          "semantic": 0.1304,
+          "vector": 0.1125,
+          "vector_similarity": 0.6252,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.025,
+          "risk_penalty": 0.0,
+          "final": 0.4518
+        },
+        "text": "公里，2.0T自动挡，一手车源，支持到店试驾。\n价格：12.80万\n单位：台\n库存：1\n发货：高意向试驾需转人工确认门店和时间。\n售后：精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。\n商品资料：江苏车金二手车车源 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_043922\n商品名称：2022款比亚迪秦PLUS DM-i 55KM\n型号：CHEJIN-QINPLUS-2022DMI\n商品类目：二手车/新能源轿车\n别名关键词：秦PLUS,比亚迪秦,新能源,绿牌,混"
+      },
+      {
+        "chunk_id": "chunk_f33e20a058626f2d",
+        "source_id": "source_d262d55f8b02b514",
+        "score": 0.4302,
+        "category": "group",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2018,
+          "semantic": 0.1382,
+          "vector": 0.1002,
+          "vector_similarity": 0.5566,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.4302
+        },
+        "text": "[2026-05-02T04:24:40] self: 政策规则：记录员缺字段边界 LIVE_RECORDER_20260502_042340\n测试批次：LIVE_RECORDER_20260502_042340\n规则名称：新能源电池检测转人工\n规则类型：contract\n触发关键词：电池检测,首付,月供,贷款包过,LIVE_RECORDER_20260502_042340"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_1fc9b037b05826ab87ab",
+    "experience_id": "rag_exp_1fc9b037b05826ab87ab"
+  },
+  "detected_tags": [
+    "rag_experience",
+    "unknown",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "policies",
+    "change_type": "upsert_policy",
+    "summary": "建议新增/更新政策规则：待分类规则",
+    "suggested_fields": {
+      "title": "待分类规则",
+      "policy_type": "other",
+      "keywords": [
+        "unknown"
+      ],
+      "answer": "[2026-05-03T04:39:23] self: 我从抖音直播来的，8万左右想看看自动挡",
+      "allow_auto_reply": true,
+      "requires_handoff": false,
+      "operator_alert": false,
+      "risk_level": "normal",
+      "applicability_scope": "global",
+      "additional_details": {
+        "原始资料摘录": "title: 待分类规则；answer: [2026-05-03T04:39:23] self: 我从抖音直播来的，8万左右想看看自动挡；keywords: ['unknown']"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "policies",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "policies",
+        "id": "item_ac0558e75f24",
+        "status": "active",
+        "source": {
+          "type": "raw_upload",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_1eacc307c14fc3a3b2ac.txt",
+          "candidate_id": "raw_8f6af84029c72be1",
+          "rag_experience_id": "rag_exp_1fc9b037b05826ab87ab",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "title": "待分类规则",
+          "policy_type": "other",
+          "keywords": [
+            "unknown"
+          ],
+          "answer": "[2026-05-03T04:39:23] self: 我从抖音直播来的，8万左右想看看自动挡",
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "operator_alert": false,
+          "risk_level": "normal",
+          "applicability_scope": "global",
+          "additional_details": {
+            "原始资料摘录": "title: 待分类规则；answer: [2026-05-03T04:39:23] self: 我从抖音直播来的，8万左右想看看自动挡；keywords: ['unknown']"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "rejected",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": false,
+      "provider": "",
+      "status": "rule_only_disabled_by_request",
+      "reason": "llm_disabled_by_caller",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_1eacc307c14fc3a3b2ac",
+    "source_raw_message_ids": [
+      "raw_msg_9bff3db81d3d1741cf44"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_6b020c71d10cd578",
+      "chunk_count": 1,
+      "query": "建议新增/更新政策规则：待分类规则\ntitle: 待分类规则；answer: [2026-05-03T04:39:23] self: 我从抖音直播来的，8万左右想看看自动挡；keywords: ['unknown']\n待分类规则\n[2026-05-03T04:39:23] self: 我从抖音直播来的，8万左右想看看自动挡",
+      "hits": [
+        {
+          "chunk_id": "chunk_0cb41b86cbc265bf",
+          "source_id": "source_6b020c71d10cd578",
+          "score": 0.7957,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.4288,
+            "semantic": 0.2369,
+            "vector": 0.14,
+            "vector_similarity": 0.87,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.7957
+          },
+          "text": "[2026-05-03T04:39:23] self: 我从抖音直播来的，8万左右想看看自动挡"
+        },
+        {
+          "chunk_id": "chunk_98d495755714a154",
+          "source_id": "source_25f67e9fcaeb0195",
+          "score": 0.631,
+          "category": "chats",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.3273,
+            "semantic": 0.1927,
+            "vector": 0.111,
+            "vector_similarity": 0.6169,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.0,
+            "risk_penalty": 0.0,
+            "final": 0.631
+          },
+          "text": "聊天记录：江苏车金预算推荐话术 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_043922\n客户：我从抖音直播来的，8万左右想买自动挡省油代步车，有什么推荐？\n客服：您这个预算可以先看凯美瑞、思域和秦PLUS DM-i。凯美瑞偏家用稳、省心；思域更年轻；秦PLUS更省油。您是在南京看车吗？是否考虑贷款或置换？\n意图标签：预算推荐,车源推荐,抖音线索\n聊天记录：江苏车金置换话术 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_04392"
+        },
+        {
+          "chunk_id": "chunk_320caa1062c4cf21",
+          "source_id": "source_55cce0d21fe7898c",
+          "score": 0.4518,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1839,
+            "semantic": 0.1304,
+            "vector": 0.1125,
+            "vector_similarity": 0.6252,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.025,
+            "risk_penalty": 0.0,
+            "final": 0.4518
+          },
+          "text": "公里，2.0T自动挡，一手车源，支持到店试驾。\n价格：12.80万\n单位：台\n库存：1\n发货：高意向试驾需转人工确认门店和时间。\n售后：精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。\n商品资料：江苏车金二手车车源 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_043922\n商品名称：2022款比亚迪秦PLUS DM-i 55KM\n型号：CHEJIN-QINPLUS-2022DMI\n商品类目：二手车/新能源轿车\n别名关键词：秦PLUS,比亚迪秦,新能源,绿牌,混"
+        },
+        {
+          "chunk_id": "chunk_f33e20a058626f2d",
+          "source_id": "source_d262d55f8b02b514",
+          "score": 0.4302,
+          "category": "group",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2018,
+            "semantic": 0.1382,
+            "vector": 0.1002,
+            "vector_similarity": 0.5566,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.4302
+          },
+          "text": "[2026-05-02T04:24:40] self: 政策规则：记录员缺字段边界 LIVE_RECORDER_20260502_042340\n测试批次：LIVE_RECORDER_20260502_042340\n规则名称：新能源电池检测转人工\n规则类型：contract\n触发关键词：电池检测,首付,月供,贷款包过,LIVE_RECORDER_20260502_042340"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_1fc9b037b05826ab87ab",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "rejected_at": "2026-05-04T15:24:47",
+    "reason": "?????????????AI/??????????????????????????????????????????AI????"
+  },
+  "suggested_tests": [
+    {
+      "scenario": "other",
+      "assertion": "入库后应能按关键词回答该政策；高风险内容必须转人工。"
+    }
+  ]
+}

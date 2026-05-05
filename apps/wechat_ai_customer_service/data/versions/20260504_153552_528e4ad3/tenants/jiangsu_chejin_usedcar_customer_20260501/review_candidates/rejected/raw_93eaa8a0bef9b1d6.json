@@ -1,0 +1,332 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_93eaa8a0bef9b1d6",
+  "generated_at": "2026-05-04T03:34:10",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_f41ae41acfb1f28bc04f.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"product_id\": \"\", \"title\": \"秦PLUS事故车保证与赔偿询问\", \"keywords\": [\"事故车\", \"水泡火烧\", \"赔偿\"], \"question\": \"你能保证这台车绝对不是事故车吗？如果发现水泡火烧，你们赔多少钱？\", \"answer\": \"\", \"additional_details\": {\"original_timestamp\": \"2026-05-04T03:32:34\", \"speaker\": \"许聪\"}}",
+    "content_sha256": "808e3066494b159c4a2e5e02f520c958aba3d961f6b5138d83014570b3fc5e2c",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_f41ae41acfb1f28bc04f",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_71b4f2c5b0edb768e0a5",
+      "raw_msg_1aa4efaaca37ae8a14b6",
+      "raw_msg_5ee513bf20c66ec7ab06"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_186f162b3ea4a01f",
+        "source_id": "source_5ffc84918d285832",
+        "score": 0.6711,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.3977,
+          "semantic": 0.2234,
+          "vector": 0.14,
+          "vector_similarity": 0.7847,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.08,
+          "final": 0.6711
+        },
+        "text": "[2026-05-04 03:32:00] system: 03:32\n[2026-05-04T03:32:34] self: [车金AI] 秦PLUS定金锁车需要销售同事确认现车状态、合同条款和支付方式，我这边没法直接处理。我马上帮您转给负责的销售对接，您稍等一下。\n[2026-05-04T03:32:34] 许聪: 你能保证这台车绝对不是事故车吗？如果发现水泡火烧，你们赔多少钱？"
+      },
+      {
+        "chunk_id": "chunk_d2ec0cebcf16c10c",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5063,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1785,
+          "semantic": 0.1281,
+          "vector": 0.1298,
+          "vector_similarity": 0.7208,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5063
+        },
+        "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+      },
+      {
+        "chunk_id": "chunk_bd5bc67861c08740",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.4846,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1604,
+          "semantic": 0.124,
+          "vector": 0.1302,
+          "vector_similarity": 0.7234,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.4846
+        },
+        "text": "品名称：2021款捷达VS5 280TSI自动荣耀型\n型号/SKU：CHEJIN-JETTAVS5-2021\n类目：二手车/SUV\n关键词：捷达VS5、VS5、德系SUV、预算SUV\n规格：2021年上牌，表显3.8万公里，1.4T自动挡，白色。\n价格：6.38万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：涡轮、变速箱和保养以检测报告为准。\n推荐话术：适合预算6到7万、想买合资SUV的客户。\n商品名称：2017款福特福克斯1.6L自动风尚"
+      },
+      {
+        "chunk_id": "chunk_2880218003265ab1",
+        "source_id": "source_bb395d5ecba99f8b",
+        "score": 0.4807,
+        "category": "policies",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2279,
+          "semantic": 0.1495,
+          "vector": 0.1383,
+          "vector_similarity": 0.7682,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.045,
+          "risk_penalty": 0.08,
+          "final": 0.4807
+        },
+        "text": "3628\n标准说明：AI 可以解释需要人工测算首付和月供，但不得承诺贷款包过、固定利率、固定月供或不查征信。\n规则：置换资料收集规则\n触发词：置换、卖车、旧车、评估、收车、CHEJIN_DEMO_20260503_203628\n标准说明：客户咨询置换时，AI 先收集旧车品牌车型、上牌时间、公里数、车况、城市、是否贷款和期望价；估价和收车价必须人工复核。\n规则：车况检测报告解释规则\n触发词：检测报告、第三方检测、车况、保养记录、CHEJIN_DEMO_20260503_203628\n标准说明：AI 可以提示车况以检测"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_9edfc59d0b7170d90288",
+    "experience_id": "rag_exp_9edfc59d0b7170d90288"
+  },
+  "detected_tags": [
+    "llm",
+    "payment",
+    "quote",
+    "rag_experience",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "product_faq",
+    "change_type": "llm_upsert_product_faq",
+    "summary": "客户询问秦PLUS是否为事故车及赔偿标准，高风险问题",
+    "suggested_fields": {
+      "product_id": "",
+      "title": "秦PLUS事故车保证与赔偿询问",
+      "keywords": [
+        "事故车",
+        "水泡火烧",
+        "赔偿"
+      ],
+      "question": "你能保证这台车绝对不是事故车吗？如果发现水泡火烧，你们赔多少钱？",
+      "answer": "",
+      "additional_details": {
+        "original_timestamp": "2026-05-04T03:32:34",
+        "speaker": "许聪",
+        "原始资料摘录": "{\"product_id\": \"\", \"title\": \"秦PLUS事故车保证与赔偿询问\", \"keywords\": [\"事故车\", \"水泡火烧\", \"赔偿\"], \"question\": \"你能保证这台车绝对不是事故车吗？如果发现水泡火烧，你们赔多少钱？\", \"answer\": \"\", \"additional_details\": {\"original_timestamp\": \"2026-05-04T03:32:34\", \"speaker\": \"许聪\"}}"
+      }
+    },
+    "missing_fields": [
+      "product_id",
+      "answer"
+    ],
+    "warnings": [
+      "包含高风险关键词：赔偿"
+    ],
+    "formal_patch": {
+      "target_category": "product_faq",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "product_faq",
+        "id": "qin_plus_accident_car_guarantee",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_f41ae41acfb1f28bc04f.txt",
+          "candidate_id": "raw_93eaa8a0bef9b1d6",
+          "rag_experience_id": "rag_exp_9edfc59d0b7170d90288",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "product_id": "",
+          "title": "秦PLUS事故车保证与赔偿询问",
+          "keywords": [
+            "事故车",
+            "水泡火烧",
+            "赔偿"
+          ],
+          "question": "你能保证这台车绝对不是事故车吗？如果发现水泡火烧，你们赔多少钱？",
+          "answer": "",
+          "additional_details": {
+            "original_timestamp": "2026-05-04T03:32:34",
+            "speaker": "许聪",
+            "原始资料摘录": "{\"product_id\": \"\", \"title\": \"秦PLUS事故车保证与赔偿询问\", \"keywords\": [\"事故车\", \"水泡火烧\", \"赔偿\"], \"question\": \"你能保证这台车绝对不是事故车吗？如果发现水泡火烧，你们赔多少钱？\", \"answer\": \"\", \"additional_details\": {\"original_timestamp\": \"2026-05-04T03:32:34\", \"speaker\": \"许聪\"}}"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "warning"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "needs_more_info",
+    "ok": false,
+    "confidence": 0.72,
+    "missing_fields": [
+      "product_id",
+      "answer"
+    ],
+    "missing_labels": [
+      "商品 ID",
+      "标准回复"
+    ],
+    "question": "还需要补充：商品 ID、标准回复。请补齐后再应用入库。",
+    "warnings": [
+      "包含高风险关键词：赔偿"
+    ],
+    "preserved_detail_keys": [
+      "original_timestamp",
+      "speaker",
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "rejected",
+    "completeness_status": "needs_more_info",
+    "missing_fields": [
+      "product_id",
+      "answer"
+    ],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_f41ae41acfb1f28bc04f",
+    "source_raw_message_ids": [
+      "raw_msg_71b4f2c5b0edb768e0a5",
+      "raw_msg_1aa4efaaca37ae8a14b6",
+      "raw_msg_5ee513bf20c66ec7ab06"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_5ffc84918d285832",
+      "chunk_count": 1,
+      "query": "客户询问秦PLUS是否为事故车及赔偿标准，高风险问题\n{\"product_id\": \"\", \"title\": \"秦PLUS事故车保证与赔偿询问\", \"keywords\": [\"事故车\", \"水泡火烧\", \"赔偿\"], \"question\": \"你能保证这台车绝对不是事故车吗？如果发现水泡火烧，你们赔多少钱？\", \"answer\": \"\", \"additional_details\": {\"original_timestamp\": \"2026-05-04T03:32:34\", \"speaker\": \"许聪\"}}\n秦PLUS事故车保证与赔偿询问",
+      "hits": [
+        {
+          "chunk_id": "chunk_186f162b3ea4a01f",
+          "source_id": "source_5ffc84918d285832",
+          "score": 0.6711,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.3977,
+            "semantic": 0.2234,
+            "vector": 0.14,
+            "vector_similarity": 0.7847,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.08,
+            "final": 0.6711
+          },
+          "text": "[2026-05-04 03:32:00] system: 03:32\n[2026-05-04T03:32:34] self: [车金AI] 秦PLUS定金锁车需要销售同事确认现车状态、合同条款和支付方式，我这边没法直接处理。我马上帮您转给负责的销售对接，您稍等一下。\n[2026-05-04T03:32:34] 许聪: 你能保证这台车绝对不是事故车吗？如果发现水泡火烧，你们赔多少钱？"
+        },
+        {
+          "chunk_id": "chunk_d2ec0cebcf16c10c",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5063,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1785,
+            "semantic": 0.1281,
+            "vector": 0.1298,
+            "vector_similarity": 0.7208,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5063
+          },
+          "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+        },
+        {
+          "chunk_id": "chunk_bd5bc67861c08740",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.4846,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1604,
+            "semantic": 0.124,
+            "vector": 0.1302,
+            "vector_similarity": 0.7234,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.4846
+          },
+          "text": "品名称：2021款捷达VS5 280TSI自动荣耀型\n型号/SKU：CHEJIN-JETTAVS5-2021\n类目：二手车/SUV\n关键词：捷达VS5、VS5、德系SUV、预算SUV\n规格：2021年上牌，表显3.8万公里，1.4T自动挡，白色。\n价格：6.38万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：涡轮、变速箱和保养以检测报告为准。\n推荐话术：适合预算6到7万、想买合资SUV的客户。\n商品名称：2017款福特福克斯1.6L自动风尚"
+        },
+        {
+          "chunk_id": "chunk_2880218003265ab1",
+          "source_id": "source_bb395d5ecba99f8b",
+          "score": 0.4807,
+          "category": "policies",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2279,
+            "semantic": 0.1495,
+            "vector": 0.1383,
+            "vector_similarity": 0.7682,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.045,
+            "risk_penalty": 0.08,
+            "final": 0.4807
+          },
+          "text": "3628\n标准说明：AI 可以解释需要人工测算首付和月供，但不得承诺贷款包过、固定利率、固定月供或不查征信。\n规则：置换资料收集规则\n触发词：置换、卖车、旧车、评估、收车、CHEJIN_DEMO_20260503_203628\n标准说明：客户咨询置换时，AI 先收集旧车品牌车型、上牌时间、公里数、车况、城市、是否贷款和期望价；估价和收车价必须人工复核。\n规则：车况检测报告解释规则\n触发词：检测报告、第三方检测、车况、保养记录、CHEJIN_DEMO_20260503_203628\n标准说明：AI 可以提示车况以检测"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_9edfc59d0b7170d90288",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "rejected_at": "2026-05-04T15:24:04",
+    "reason": "?????????????AI?????????????????????????????AI??????????"
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

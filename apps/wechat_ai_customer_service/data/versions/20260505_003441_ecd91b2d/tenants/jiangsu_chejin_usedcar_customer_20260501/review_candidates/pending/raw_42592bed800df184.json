@@ -1,0 +1,179 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_42592bed800df184",
+  "generated_at": "2026-05-04T02:36:15",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_a54d41036db2baad354f.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"title\": \"车况核验转人工规则\", \"policy_type\": \"转人工规则\", \"keywords\": [\"选配\", \"产权状态\", \"事故记录\", \"核验\"], \"applicability_scope\": \"specific_product\", \"product_id\": \"macan_2018_2.0t\", \"product_category\": \"\", \"answer\": \"关于车辆的具体选配、产权状态、事故记录等信息，需要由人工销售进行详细核验，无法自动确认。请提供您的联系电话，我们将安排销售顾问与您对接。\", \"allow_auto_reply\": false, \"requires_handoff\": true, \"handoff_reason\": \"车况信息必须人工核验\", \"ope",
+    "content_sha256": "4665b3b97d568fd2488fec9c824691126ce58ab0db430bbbbc04928710d7864e",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_a54d41036db2baad354f",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_d11728274da4627f1559",
+      "raw_msg_ec60d1bea81ff27209da"
+    ],
+    "rag_hits": [],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_c13779a3a76cd891bd74",
+    "experience_id": "rag_exp_c13779a3a76cd891bd74"
+  },
+  "detected_tags": [
+    "discount",
+    "llm",
+    "rag_experience",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "policies",
+    "change_type": "llm_upsert_policies",
+    "summary": "涉及车况核验（选配、产权、事故）必须转人工销售处理",
+    "suggested_fields": {
+      "title": "车况核验转人工规则",
+      "policy_type": "转人工规则",
+      "keywords": [
+        "选配",
+        "产权状态",
+        "事故记录",
+        "核验"
+      ],
+      "applicability_scope": "specific_product",
+      "product_id": "macan_2018_2.0t",
+      "product_category": "",
+      "answer": "关于车辆的具体选配、产权状态、事故记录等信息，需要由人工销售进行详细核验，无法自动确认。请提供您的联系电话，我们将安排销售顾问与您对接。",
+      "allow_auto_reply": false,
+      "requires_handoff": true,
+      "handoff_reason": "车况信息必须人工核验",
+      "operator_alert": false,
+      "risk_level": "high",
+      "additional_details": {
+        "原始资料摘录": "{\"title\": \"车况核验转人工规则\", \"policy_type\": \"转人工规则\", \"keywords\": [\"选配\", \"产权状态\", \"事故记录\", \"核验\"], \"applicability_scope\": \"specific_product\", \"product_id\": \"macan_2018_2.0t\", \"product_category\": \"\", \"answer\": \"关于车辆的具体选配、产权状态、事故记录等信息，需要由人工销售进行详细核验，无法自动确认。请提供您的联系电话，我们将安排销售顾问与您对接。\", \"allow_auto_reply\": false, \"requires_handoff\": true, \"handoff_reason\": \"车况信息必须人工核验\", \"ope"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "policies",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "policies",
+        "id": "manual_handoff_for_car_inspection",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_a54d41036db2baad354f.txt",
+          "candidate_id": "raw_42592bed800df184",
+          "rag_experience_id": "rag_exp_c13779a3a76cd891bd74",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "title": "车况核验转人工规则",
+          "policy_type": "转人工规则",
+          "keywords": [
+            "选配",
+            "产权状态",
+            "事故记录",
+            "核验"
+          ],
+          "applicability_scope": "specific_product",
+          "product_id": "macan_2018_2.0t",
+          "product_category": "",
+          "answer": "关于车辆的具体选配、产权状态、事故记录等信息，需要由人工销售进行详细核验，无法自动确认。请提供您的联系电话，我们将安排销售顾问与您对接。",
+          "allow_auto_reply": false,
+          "requires_handoff": true,
+          "handoff_reason": "车况信息必须人工核验",
+          "operator_alert": false,
+          "risk_level": "high",
+          "additional_details": {
+            "原始资料摘录": "{\"title\": \"车况核验转人工规则\", \"policy_type\": \"转人工规则\", \"keywords\": [\"选配\", \"产权状态\", \"事故记录\", \"核验\"], \"applicability_scope\": \"specific_product\", \"product_id\": \"macan_2018_2.0t\", \"product_category\": \"\", \"answer\": \"关于车辆的具体选配、产权状态、事故记录等信息，需要由人工销售进行详细核验，无法自动确认。请提供您的联系电话，我们将安排销售顾问与您对接。\", \"allow_auto_reply\": false, \"requires_handoff\": true, \"handoff_reason\": \"车况信息必须人工核验\", \"ope"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": false,
+          "requires_handoff": true,
+          "risk_level": "warning"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "pending",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_a54d41036db2baad354f",
+    "source_raw_message_ids": [
+      "raw_msg_d11728274da4627f1559",
+      "raw_msg_ec60d1bea81ff27209da"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_03feca78a8a1da52",
+      "chunk_count": 1,
+      "query": "涉及车况核验（选配、产权、事故）必须转人工销售处理\n{\"title\": \"车况核验转人工规则\", \"policy_type\": \"转人工规则\", \"keywords\": [\"选配\", \"产权状态\", \"事故记录\", \"核验\"], \"applicability_scope\": \"specific_product\", \"product_id\": \"macan_2018_2.0t\", \"product_category\": \"\", \"answer\": \"关于车辆的具体选配、产权状态、事故记录等信息，需要由人工销售进行详细核验，无法自动确认。请提供您的联系电话，我们将安排销售顾问与您对接。\", \"allow_auto_reply\": false, \"requires_handoff\": true, \"handoff_reason\": \"车况信息必须人工核验\", \"ope\n车况核验转人工规则\n关于车辆的具体选配、产权状态、事故记录等信息，需要由人工销售进行详细核验，无法自动确认。请提供您的联系电话，我们将安排销售顾问与您对接。",
+      "hits": [],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_c13779a3a76cd891bd74",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "cleanup_notes": [
+      {
+        "at": "2026-05-04T00:00:00",
+        "by": "codex_source_authority_cleanup",
+        "reason": "??/????????????????? RAG ????????????????",
+        "removed_review_hits": 4,
+        "removed_source_hits": 4
+      }
+    ],
+    "previous_reject_reason": "legacy_auto_candidate_cleanup_20260504: ???????????????????????RAG?????????????????",
+    "previous_rejected_at": "2026-05-04T18:41:18",
+    "updated_at": "2026-05-04T18:58:38",
+    "reopened_at": "2026-05-04T18:58:38",
+    "reopened_by": "codex_test_seed",
+    "reopened_reason": "direct test seed: restored as pending candidate for manual review regression",
+    "test_seed_direct_fill": true
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ],
+  "test_seed": {
+    "seed_id": "direct_test_fill_20260504_v2",
+    "direct_fill": true
+  }
+}

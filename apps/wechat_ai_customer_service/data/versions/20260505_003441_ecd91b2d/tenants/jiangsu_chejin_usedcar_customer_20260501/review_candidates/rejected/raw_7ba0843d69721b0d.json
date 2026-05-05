@@ -1,0 +1,340 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_7ba0843d69721b0d",
+  "generated_at": "2026-05-04T04:02:06",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_3e3fd5a2d7c695b3560d.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"customer_message\": \"\", \"service_reply\": \"许哥，这台凯美瑞8.98万的价格属于正常行情，日系车折旧慢、保值率不错，便宜不代表一定有问题。不过二手车一车一况，具体有没有事故、调表这些还是得看实车检测报告，我直接转给销售同事帮您调取核实一下，方便留个电话吗？\", \"intent_tags\": [\"价格咨询\", \"二手车行情\", \"事故检测\", \"调表查询\", \"留资引导\"], \"tone_tags\": [\"亲切\", \"专业\", \"引导性\"], \"linked_categories\": [\"二手车\", \"汽车销售\"], \"linked_item_ids\": [], \"applicability_scope\": \"product_category\", \"product_id\"",
+    "content_sha256": "ec72400e38f34ea6b6ed78e33c401b7a038bbd1e64e195102e81f36d51dcdaea",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_3e3fd5a2d7c695b3560d",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_0acd6dd68f60a1d0ac06"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_95333a39cc614be8",
+        "source_id": "source_d69b2fffa68e7f7d",
+        "score": 0.852,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.4681,
+          "semantic": 0.2539,
+          "vector": 0.14,
+          "vector_similarity": 0.9584,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.852
+        },
+        "text": "[2026-05-04T04:01:45] self: [车金AI] 许哥，这台凯美瑞8.98万的价格属于正常行情，日系车折旧慢、保值率不错，便宜不代表一定有问题。不过二手车一车一况，具体有没有事故、调表这些还是得看实车检测报告，我直接转给销售同事帮您调取核实一下，方便留个电话吗？"
+      },
+      {
+        "chunk_id": "chunk_9a0d34760ad6ccae",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.518,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1795,
+          "semantic": 0.1285,
+          "vector": 0.14,
+          "vector_similarity": 0.8134,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.518
+        },
+        "text": "工确认。\n售后/风险：CVT变速箱状态、保养和车况以检测报告为准。\n推荐话术：适合6到7万预算、练手、家用代步和省油需求。\n商品名称：2019款大众朗逸1.5L自动舒适版\n型号/SKU：CHEJIN-LAVIDA-2019\n类目：二手车/紧凑型轿车\n关键词：朗逸、大众朗逸、德系代步、置换\n规格：2019年上牌，表显6.9万公里，1.5L自动挡，白色，通勤耐用。\n价格：5.98万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：易损件和保养历史以"
+      },
+      {
+        "chunk_id": "chunk_d2ec0cebcf16c10c",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.516,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1781,
+          "semantic": 0.1279,
+          "vector": 0.14,
+          "vector_similarity": 0.8409,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.516
+        },
+        "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+      },
+      {
+        "chunk_id": "chunk_99cc4e7f8c7061b0",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.516,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1781,
+          "semantic": 0.1279,
+          "vector": 0.14,
+          "vector_similarity": 0.8414,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.516
+        },
+        "text": "、提档、当地新能源指标和运输方式。\n售后/风险：电池健康、辅助驾驶功能和官方权益以检测报告及账号核验为准。\n推荐话术：适合想体验纯电、智能化和低用车成本的客户，电池和权益必须人工确认。\n商品名称：2020款奥迪A4L 40TFSI时尚动感型\n型号/SKU：CHEJIN-A4L-2020\n类目：二手车/豪华轿车\n关键词：奥迪A4L、A4L、豪华轿车、婚庆、商务\n规格：2020年上牌，表显6.8万公里，2.0T自动挡，黑色，保养记录较完整。\n价格：15.88万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_5a68e7aba21fd87dc850",
+    "experience_id": "rag_exp_5a68e7aba21fd87dc850"
+  },
+  "detected_tags": [
+    "discount",
+    "llm",
+    "quote",
+    "rag_experience",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "chats",
+    "change_type": "llm_upsert_chats",
+    "summary": "客服回复关于凯美瑞二手车价格的聊天，解释价格行情，并引导获取检测报告",
+    "suggested_fields": {
+      "customer_message": "",
+      "service_reply": "许哥，这台凯美瑞8.98万的价格属于正常行情，日系车折旧慢、保值率不错，便宜不代表一定有问题。不过二手车一车一况，具体有没有事故、调表这些还是得看实车检测报告，我直接转给销售同事帮您调取核实一下，方便留个电话吗？",
+      "intent_tags": [
+        "价格咨询",
+        "二手车行情",
+        "事故检测",
+        "调表查询",
+        "留资引导"
+      ],
+      "tone_tags": [
+        "亲切",
+        "专业",
+        "引导性"
+      ],
+      "linked_categories": [
+        "二手车",
+        "汽车销售"
+      ],
+      "linked_item_ids": [],
+      "applicability_scope": "product_category",
+      "product_id": "",
+      "product_category": "凯美瑞",
+      "usable_as_template": true,
+      "additional_details": {
+        "date": "2026-05-04T04:01:45",
+        "agent": "车金AI",
+        "原始资料摘录": "{\"customer_message\": \"\", \"service_reply\": \"许哥，这台凯美瑞8.98万的价格属于正常行情，日系车折旧慢、保值率不错，便宜不代表一定有问题。不过二手车一车一况，具体有没有事故、调表这些还是得看实车检测报告，我直接转给销售同事帮您调取核实一下，方便留个电话吗？\", \"intent_tags\": [\"价格咨询\", \"二手车行情\", \"事故检测\", \"调表查询\", \"留资引导\"], \"tone_tags\": [\"亲切\", \"专业\", \"引导性\"], \"linked_categories\": [\"二手车\", \"汽车销售\"], \"linked_item_ids\": [], \"applicability_scope\": \"product_category\", \"product_id\""
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "chats",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "chats",
+        "id": "camry_price_chat_20260504",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_3e3fd5a2d7c695b3560d.txt",
+          "candidate_id": "raw_7ba0843d69721b0d",
+          "rag_experience_id": "rag_exp_5a68e7aba21fd87dc850",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "customer_message": "",
+          "service_reply": "许哥，这台凯美瑞8.98万的价格属于正常行情，日系车折旧慢、保值率不错，便宜不代表一定有问题。不过二手车一车一况，具体有没有事故、调表这些还是得看实车检测报告，我直接转给销售同事帮您调取核实一下，方便留个电话吗？",
+          "intent_tags": [
+            "价格咨询",
+            "二手车行情",
+            "事故检测",
+            "调表查询",
+            "留资引导"
+          ],
+          "tone_tags": [
+            "亲切",
+            "专业",
+            "引导性"
+          ],
+          "linked_categories": [
+            "二手车",
+            "汽车销售"
+          ],
+          "linked_item_ids": [],
+          "applicability_scope": "product_category",
+          "product_id": "",
+          "product_category": "凯美瑞",
+          "usable_as_template": true,
+          "additional_details": {
+            "date": "2026-05-04T04:01:45",
+            "agent": "车金AI",
+            "原始资料摘录": "{\"customer_message\": \"\", \"service_reply\": \"许哥，这台凯美瑞8.98万的价格属于正常行情，日系车折旧慢、保值率不错，便宜不代表一定有问题。不过二手车一车一况，具体有没有事故、调表这些还是得看实车检测报告，我直接转给销售同事帮您调取核实一下，方便留个电话吗？\", \"intent_tags\": [\"价格咨询\", \"二手车行情\", \"事故检测\", \"调表查询\", \"留资引导\"], \"tone_tags\": [\"亲切\", \"专业\", \"引导性\"], \"linked_categories\": [\"二手车\", \"汽车销售\"], \"linked_item_ids\": [], \"applicability_scope\": \"product_category\", \"product_id\""
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "warning"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "agent",
+      "date",
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "rejected",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_3e3fd5a2d7c695b3560d",
+    "source_raw_message_ids": [
+      "raw_msg_0acd6dd68f60a1d0ac06"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_d69b2fffa68e7f7d",
+      "chunk_count": 1,
+      "query": "客服回复关于凯美瑞二手车价格的聊天，解释价格行情，并引导获取检测报告\n{\"customer_message\": \"\", \"service_reply\": \"许哥，这台凯美瑞8.98万的价格属于正常行情，日系车折旧慢、保值率不错，便宜不代表一定有问题。不过二手车一车一况，具体有没有事故、调表这些还是得看实车检测报告，我直接转给销售同事帮您调取核实一下，方便留个电话吗？\", \"intent_tags\": [\"价格咨询\", \"二手车行情\", \"事故检测\", \"调表查询\", \"留资引导\"], \"tone_tags\": [\"亲切\", \"专业\", \"引导性\"], \"linked_categories\": [\"二手车\", \"汽车销售\"], \"linked_item_ids\": [], \"applicability_scope\": \"product_category\", \"product_id\"\n许哥，这台凯美瑞8.98万的价格属于正常行情，日系车折旧慢、保值率不错，便宜不代表一定有问题。不过二手车一车一况，具体有没有事故、调表这些还是得看实车检测报告，我直接转给销售同事帮您调取核实一下，方便留个电话吗？",
+      "hits": [
+        {
+          "chunk_id": "chunk_95333a39cc614be8",
+          "source_id": "source_d69b2fffa68e7f7d",
+          "score": 0.852,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.4681,
+            "semantic": 0.2539,
+            "vector": 0.14,
+            "vector_similarity": 0.9584,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.852
+          },
+          "text": "[2026-05-04T04:01:45] self: [车金AI] 许哥，这台凯美瑞8.98万的价格属于正常行情，日系车折旧慢、保值率不错，便宜不代表一定有问题。不过二手车一车一况，具体有没有事故、调表这些还是得看实车检测报告，我直接转给销售同事帮您调取核实一下，方便留个电话吗？"
+        },
+        {
+          "chunk_id": "chunk_9a0d34760ad6ccae",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.518,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1795,
+            "semantic": 0.1285,
+            "vector": 0.14,
+            "vector_similarity": 0.8134,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.518
+          },
+          "text": "工确认。\n售后/风险：CVT变速箱状态、保养和车况以检测报告为准。\n推荐话术：适合6到7万预算、练手、家用代步和省油需求。\n商品名称：2019款大众朗逸1.5L自动舒适版\n型号/SKU：CHEJIN-LAVIDA-2019\n类目：二手车/紧凑型轿车\n关键词：朗逸、大众朗逸、德系代步、置换\n规格：2019年上牌，表显6.9万公里，1.5L自动挡，白色，通勤耐用。\n价格：5.98万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：易损件和保养历史以"
+        },
+        {
+          "chunk_id": "chunk_d2ec0cebcf16c10c",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.516,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1781,
+            "semantic": 0.1279,
+            "vector": 0.14,
+            "vector_similarity": 0.8409,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.516
+          },
+          "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+        },
+        {
+          "chunk_id": "chunk_99cc4e7f8c7061b0",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.516,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1781,
+            "semantic": 0.1279,
+            "vector": 0.14,
+            "vector_similarity": 0.8414,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.516
+          },
+          "text": "、提档、当地新能源指标和运输方式。\n售后/风险：电池健康、辅助驾驶功能和官方权益以检测报告及账号核验为准。\n推荐话术：适合想体验纯电、智能化和低用车成本的客户，电池和权益必须人工确认。\n商品名称：2020款奥迪A4L 40TFSI时尚动感型\n型号/SKU：CHEJIN-A4L-2020\n类目：二手车/豪华轿车\n关键词：奥迪A4L、A4L、豪华轿车、婚庆、商务\n规格：2020年上牌，表显6.8万公里，2.0T自动挡，黑色，保养记录较完整。\n价格：15.88万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_5a68e7aba21fd87dc850",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "rejected_at": "2026-05-04T18:41:18",
+    "reason": "legacy_auto_candidate_cleanup_20260504: ???????????????????????RAG?????????????????"
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

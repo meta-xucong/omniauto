@@ -1,0 +1,324 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_2ba2f16fff443834",
+  "generated_at": "2026-05-04T03:42:53",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_ac214dc70fe2a8e60a95.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"customer_message\": \"合同能不能写成别的价格？\", \"service_reply\": \"发票金额要根据实际交易开，能不能少开一点，得让销售同事结合成交方式确认，我这边没法直接答复。我马上帮您转给销售对接，方便的话留个电话，他好第一时间联系您说明白。\", \"intent_tags\": [\"invoice\", \"quote\"], \"tone_tags\": [\"专业\", \"转人工\"], \"linked_categories\": [\"policies\"], \"applicability_scope\": \"global\", \"usable_as_template\": true, \"additional_details\": {}, \"product_id\": \"\", \"product_category",
+    "content_sha256": "41059803fa60c54fe3fbc2224e650091d6f03b9e0d87bfab3eb6e2128d6c65c1",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_ac214dc70fe2a8e60a95",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_f15067c4fe5d92874680",
+      "raw_msg_ee8c41f18bc573a2df5e"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_e39f7b1a98d192a5",
+        "source_id": "source_acda00c2f371ad35",
+        "score": 0.7854,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.4911,
+          "semantic": 0.2443,
+          "vector": 0.14,
+          "vector_similarity": 0.942,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.08,
+          "final": 0.7854
+        },
+        "text": "[2026-05-04T03:42:16] 许聪: 合同能不能写成别的价格？\n[2026-05-04T03:42:16] self: [车金AI] 发票金额要根据实际交易开，能不能少开一点，得让销售同事结合成交方式确认，我这边没法直接答复。我马上帮您转给销售对接，方便的话留个电话，他好第一时间联系您说明白。"
+      },
+      {
+        "chunk_id": "chunk_0d27f032aa229103",
+        "source_id": "source_58950035fd736f45",
+        "score": 0.5254,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2444,
+          "semantic": 0.1511,
+          "vector": 0.14,
+          "vector_similarity": 0.8051,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.5254
+        },
+        "text": "[2026-05-04T03:24:34] 许聪: 绿本有没有抵押或者查封？\n[2026-05-04T03:24:34] 许聪: 表显公里数准不准？有没有调表？\n[2026-05-04T03:24:34] self: [车金AI] 营运性质有没有跑过网约车，我们得看登记证和实车记录来确认，我这边没法直接给准信。我马上帮您转给销售同事人工核实，方便留个电话吗？他们直接联系您。"
+      },
+      {
+        "chunk_id": "chunk_cea25e6c7bbc1d31",
+        "source_id": "source_6d72e3824a4b9f43",
+        "score": 0.5189,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2396,
+          "semantic": 0.1493,
+          "vector": 0.14,
+          "vector_similarity": 0.8062,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.5189
+        },
+        "text": "[2026-05-04T03:23:13] self: [车金AI] 检测报告和保养、出险记录都需要销售同事调取核实后才能发给您，我这边没法直接发。我马上帮您转给销售，麻烦您留个电话，他们直接联系您发。\n[2026-05-04T03:23:13] 许聪: 这车是不是非营运？有没有跑过网约车？"
+      },
+      {
+        "chunk_id": "chunk_30f480baa8b23b10",
+        "source_id": "source_4df74352cf1c73ed",
+        "score": 0.5155,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2444,
+          "semantic": 0.1511,
+          "vector": 0.1301,
+          "vector_similarity": 0.7227,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.5155
+        },
+        "text": "[2026-05-04T03:40:44] self: [车金AI] 好的，我马上帮您转给销售同事，您方便留个电话吗？他们会尽快联系您。\n[2026-05-04T03:40:44] 许聪: 发票能不能少开一点金额？"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_c6751e653fa556723748",
+    "experience_id": "rag_exp_c6751e653fa556723748"
+  },
+  "detected_tags": [
+    "invoice",
+    "llm",
+    "quote",
+    "rag_experience",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "chats",
+    "change_type": "llm_upsert_chats",
+    "summary": "客户询问合同价格能否写成别的价格，客服回复发票金额按实际交易开，需转销售确认",
+    "suggested_fields": {
+      "customer_message": "合同能不能写成别的价格？",
+      "service_reply": "发票金额要根据实际交易开，能不能少开一点，得让销售同事结合成交方式确认，我这边没法直接答复。我马上帮您转给销售对接，方便的话留个电话，他好第一时间联系您说明白。",
+      "intent_tags": [
+        "invoice",
+        "quote"
+      ],
+      "tone_tags": [
+        "专业",
+        "转人工"
+      ],
+      "linked_categories": [
+        "policies"
+      ],
+      "applicability_scope": "global",
+      "usable_as_template": true,
+      "product_id": "",
+      "product_category": "",
+      "additional_details": {
+        "原始资料摘录": "{\"customer_message\": \"合同能不能写成别的价格？\", \"service_reply\": \"发票金额要根据实际交易开，能不能少开一点，得让销售同事结合成交方式确认，我这边没法直接答复。我马上帮您转给销售对接，方便的话留个电话，他好第一时间联系您说明白。\", \"intent_tags\": [\"invoice\", \"quote\"], \"tone_tags\": [\"专业\", \"转人工\"], \"linked_categories\": [\"policies\"], \"applicability_scope\": \"global\", \"usable_as_template\": true, \"additional_details\": {}, \"product_id\": \"\", \"product_category"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "chats",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "chats",
+        "id": "chat_invoice_price_inquiry",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_ac214dc70fe2a8e60a95.txt",
+          "candidate_id": "raw_2ba2f16fff443834",
+          "rag_experience_id": "rag_exp_c6751e653fa556723748",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "customer_message": "合同能不能写成别的价格？",
+          "service_reply": "发票金额要根据实际交易开，能不能少开一点，得让销售同事结合成交方式确认，我这边没法直接答复。我马上帮您转给销售对接，方便的话留个电话，他好第一时间联系您说明白。",
+          "intent_tags": [
+            "invoice",
+            "quote"
+          ],
+          "tone_tags": [
+            "专业",
+            "转人工"
+          ],
+          "linked_categories": [
+            "policies"
+          ],
+          "applicability_scope": "global",
+          "usable_as_template": true,
+          "product_id": "",
+          "product_category": "",
+          "additional_details": {
+            "原始资料摘录": "{\"customer_message\": \"合同能不能写成别的价格？\", \"service_reply\": \"发票金额要根据实际交易开，能不能少开一点，得让销售同事结合成交方式确认，我这边没法直接答复。我马上帮您转给销售对接，方便的话留个电话，他好第一时间联系您说明白。\", \"intent_tags\": [\"invoice\", \"quote\"], \"tone_tags\": [\"专业\", \"转人工\"], \"linked_categories\": [\"policies\"], \"applicability_scope\": \"global\", \"usable_as_template\": true, \"additional_details\": {}, \"product_id\": \"\", \"product_category"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": false,
+          "requires_handoff": true,
+          "risk_level": "warning"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "rejected",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_ac214dc70fe2a8e60a95",
+    "source_raw_message_ids": [
+      "raw_msg_f15067c4fe5d92874680",
+      "raw_msg_ee8c41f18bc573a2df5e"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_acda00c2f371ad35",
+      "chunk_count": 1,
+      "query": "客户询问合同价格能否写成别的价格，客服回复发票金额按实际交易开，需转销售确认\n{\"customer_message\": \"合同能不能写成别的价格？\", \"service_reply\": \"发票金额要根据实际交易开，能不能少开一点，得让销售同事结合成交方式确认，我这边没法直接答复。我马上帮您转给销售对接，方便的话留个电话，他好第一时间联系您说明白。\", \"intent_tags\": [\"invoice\", \"quote\"], \"tone_tags\": [\"专业\", \"转人工\"], \"linked_categories\": [\"policies\"], \"applicability_scope\": \"global\", \"usable_as_template\": true, \"additional_details\": {}, \"product_id\": \"\", \"product_category\n发票金额要根据实际交易开，能不能少开一点，得让销售同事结合成交方式确认，我这边没法直接答复。我马上帮您转给销售对接，方便的话留个电话，他好第一时间联系您说明白。",
+      "hits": [
+        {
+          "chunk_id": "chunk_e39f7b1a98d192a5",
+          "source_id": "source_acda00c2f371ad35",
+          "score": 0.7854,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.4911,
+            "semantic": 0.2443,
+            "vector": 0.14,
+            "vector_similarity": 0.942,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.08,
+            "final": 0.7854
+          },
+          "text": "[2026-05-04T03:42:16] 许聪: 合同能不能写成别的价格？\n[2026-05-04T03:42:16] self: [车金AI] 发票金额要根据实际交易开，能不能少开一点，得让销售同事结合成交方式确认，我这边没法直接答复。我马上帮您转给销售对接，方便的话留个电话，他好第一时间联系您说明白。"
+        },
+        {
+          "chunk_id": "chunk_0d27f032aa229103",
+          "source_id": "source_58950035fd736f45",
+          "score": 0.5254,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2444,
+            "semantic": 0.1511,
+            "vector": 0.14,
+            "vector_similarity": 0.8051,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.5254
+          },
+          "text": "[2026-05-04T03:24:34] 许聪: 绿本有没有抵押或者查封？\n[2026-05-04T03:24:34] 许聪: 表显公里数准不准？有没有调表？\n[2026-05-04T03:24:34] self: [车金AI] 营运性质有没有跑过网约车，我们得看登记证和实车记录来确认，我这边没法直接给准信。我马上帮您转给销售同事人工核实，方便留个电话吗？他们直接联系您。"
+        },
+        {
+          "chunk_id": "chunk_cea25e6c7bbc1d31",
+          "source_id": "source_6d72e3824a4b9f43",
+          "score": 0.5189,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2396,
+            "semantic": 0.1493,
+            "vector": 0.14,
+            "vector_similarity": 0.8062,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.5189
+          },
+          "text": "[2026-05-04T03:23:13] self: [车金AI] 检测报告和保养、出险记录都需要销售同事调取核实后才能发给您，我这边没法直接发。我马上帮您转给销售，麻烦您留个电话，他们直接联系您发。\n[2026-05-04T03:23:13] 许聪: 这车是不是非营运？有没有跑过网约车？"
+        },
+        {
+          "chunk_id": "chunk_30f480baa8b23b10",
+          "source_id": "source_4df74352cf1c73ed",
+          "score": 0.5155,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2444,
+            "semantic": 0.1511,
+            "vector": 0.1301,
+            "vector_similarity": 0.7227,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.5155
+          },
+          "text": "[2026-05-04T03:40:44] self: [车金AI] 好的，我马上帮您转给销售同事，您方便留个电话吗？他们会尽快联系您。\n[2026-05-04T03:40:44] 许聪: 发票能不能少开一点金额？"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_c6751e653fa556723748",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "rejected_at": "2026-05-04T18:41:18",
+    "reason": "legacy_auto_candidate_cleanup_20260504: ???????????????????????RAG?????????????????"
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

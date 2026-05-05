@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_7b1bbeedcb7732ef",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_eeefabd39c7ed62406cc.txt",
+    "content_hash": "91efd15fbac647e1b6038c379f3a8de5",
+    "status": "active",
+    "created_at": "2026-05-04T03:12:09",
+    "updated_at": "2026-05-04T03:12:09"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_55a1c2f94c9d1513",
+      "source_id": "source_7b1bbeedcb7732ef",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_eeefabd39c7ed62406cc.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-04T03:12:08] self: [车金AI] 秦PLUS的电池检测结果和贷款能否包过，都需要销售同事结合实车报告和资方审批来确认，我这边没法直接承诺。我帮您转给负责的销售直接对接，您方便留个电话吗？\n[2026-05-04T03:12:08] 许聪: 你们门店在哪？营业时间大概是什么时候？",
+      "char_count": 157,
+      "status": "active",
+      "created_at": "2026-05-04T03:12:09"
+    }
+  ]
+}

@@ -1,0 +1,312 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_c491bd3ab8603f8c",
+  "generated_at": "2026-05-04T04:00:18",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_4a122a7de55b1f2e9a9b.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "title: 优惠议价规则；answer: [2026-05-04 03:58:00] system: 03:58 [2026-05-04T03:59:08] self: [车金AI] 许哥，日系车家用确实口碑比较稳，正常保养下故障率相对低。按咱们现车来看，店里有一台2021款凯美瑞2.0G豪华版，8.98万，4.8万公里；还有一台2019款天籁2.0L舒适版，8.28万，6.2万公里，都在南京。具体车况以检测报告为准。您预算大概多少？或者更看重空间还是省油？我帮您具体对比下。 [2026-05-04T03:59:08] 许聪: 这车看着便宜，是不是有什么问题？；keywords: ['discount']",
+    "content_sha256": "e88e85074fa5b67baa630292bb8c57a2c519825cec6e3bead4bc9a5f0194b6fb",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_4a122a7de55b1f2e9a9b",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_7a4083be0198d1d1d179",
+      "raw_msg_76a8d6de41f0eb3ba354",
+      "raw_msg_a2265b26342531618a44"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_78dbc59daadfd4af",
+        "source_id": "source_e0064f85994484a8",
+        "score": 0.99,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.5645,
+          "semantic": 0.2959,
+          "vector": 0.14,
+          "vector_similarity": 0.9847,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.99
+        },
+        "text": "[2026-05-04 03:58:00] system: 03:58\n[2026-05-04T03:59:08] self: [车金AI] 许哥，日系车家用确实口碑比较稳，正常保养下故障率相对低。按咱们现车来看，店里有一台2021款凯美瑞2.0G豪华版，8.98万，4.8万公里；还有一台2019款天籁2.0L舒适版，8.28万，6.2万公里，都在南京。具体车况以检测报告为准。您预算大概多少？或者更看重空间还是省油？我帮您具体对比下。\n[2026-05-04T03:59:08] 许聪: 这车看着便宜，是不是有什么问"
+      },
+      {
+        "chunk_id": "chunk_45e5d08cb4648397",
+        "source_id": "source_0cc6c367c886244c",
+        "score": 0.6126,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.3012,
+          "semantic": 0.1814,
+          "vector": 0.14,
+          "vector_similarity": 0.8098,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.6126
+        },
+        "text": "[2026-05-04T03:57:36] self: [车金AI] 许哥，怕买到问题车、怕老修，这个顾虑我理解。店里像丰田卡罗拉、凯美瑞这类车，正常保养下故障率相对低，比较省心。凯美瑞2021款2.0G现在参考价8.98万，卡罗拉2020款1.2T大概6.98万，都在南京现车。当然二手车一车一况，具体车况还得看检测报告和实车。您预算大概多少？主要平时代步还是跑长途？我帮您筛筛看。\n[2026-05-04T03:57:36] 许聪: 家用车是不是日系更稳？你按你们现车给我说"
+      },
+      {
+        "chunk_id": "chunk_99cc4e7f8c7061b0",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5765,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2203,
+          "semantic": 0.1462,
+          "vector": 0.14,
+          "vector_similarity": 0.783,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5765
+        },
+        "text": "、提档、当地新能源指标和运输方式。\n售后/风险：电池健康、辅助驾驶功能和官方权益以检测报告及账号核验为准。\n推荐话术：适合想体验纯电、智能化和低用车成本的客户，电池和权益必须人工确认。\n商品名称：2020款奥迪A4L 40TFSI时尚动感型\n型号/SKU：CHEJIN-A4L-2020\n类目：二手车/豪华轿车\n关键词：奥迪A4L、A4L、豪华轿车、婚庆、商务\n规格：2020年上牌，表显6.8万公里，2.0T自动挡，黑色，保养记录较完整。\n价格：15.88万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档"
+      },
+      {
+        "chunk_id": "chunk_9a0d34760ad6ccae",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5742,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2187,
+          "semantic": 0.1455,
+          "vector": 0.14,
+          "vector_similarity": 0.8388,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5742
+        },
+        "text": "工确认。\n售后/风险：CVT变速箱状态、保养和车况以检测报告为准。\n推荐话术：适合6到7万预算、练手、家用代步和省油需求。\n商品名称：2019款大众朗逸1.5L自动舒适版\n型号/SKU：CHEJIN-LAVIDA-2019\n类目：二手车/紧凑型轿车\n关键词：朗逸、大众朗逸、德系代步、置换\n规格：2019年上牌，表显6.9万公里，1.5L自动挡，白色，通勤耐用。\n价格：5.98万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：易损件和保养历史以"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_f18d2c87d2f63a9d5759",
+    "experience_id": "rag_exp_f18d2c87d2f63a9d5759"
+  },
+  "detected_tags": [
+    "discount",
+    "rag_experience",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "policies",
+    "change_type": "upsert_policy",
+    "summary": "建议新增/更新政策规则：优惠议价规则",
+    "suggested_fields": {
+      "title": "优惠议价规则",
+      "policy_type": "discount",
+      "keywords": [
+        "discount"
+      ],
+      "answer": "[2026-05-04 03:58:00] system: 03:58 [2026-05-04T03:59:08] self: [车金AI] 许哥，日系车家用确实口碑比较稳，正常保养下故障率相对低。按咱们现车来看，店里有一台2021款凯美瑞2.0G豪华版，8.98万，4.8万公里；还有一台2019款天籁2.0L舒适版，8.28万，6.2万公里，都在南京。具体车况以检测报告为准。您预算大概多少？或者更看重空间还是省油？我帮您具体对比下。 [2026-05-04T03:59:08] 许聪: 这车看着便宜，是不是有什么问题？",
+      "allow_auto_reply": true,
+      "requires_handoff": false,
+      "operator_alert": false,
+      "risk_level": "normal",
+      "applicability_scope": "global",
+      "additional_details": {
+        "原始资料摘录": "title: 优惠议价规则；answer: [2026-05-04 03:58:00] system: 03:58 [2026-05-04T03:59:08] self: [车金AI] 许哥，日系车家用确实口碑比较稳，正常保养下故障率相对低。按咱们现车来看，店里有一台2021款凯美瑞2.0G豪华版，8.98万，4.8万公里；还有一台2019款天籁2.0L舒适版，8.28万，6.2万公里，都在南京。具体车况以检测报告为准。您预算大概多少？或者更看重空间还是省油？我帮您具体对比下。 [2026-05-04T03:59:08] 许聪: 这车看着便宜，是不是有什么问题？；keywords: ['discount']"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "policies",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "policies",
+        "id": "item_f7b1fac431a2",
+        "status": "active",
+        "source": {
+          "type": "raw_upload",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_4a122a7de55b1f2e9a9b.txt",
+          "candidate_id": "raw_c491bd3ab8603f8c",
+          "rag_experience_id": "rag_exp_f18d2c87d2f63a9d5759",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "title": "优惠议价规则",
+          "policy_type": "discount",
+          "keywords": [
+            "discount"
+          ],
+          "answer": "[2026-05-04 03:58:00] system: 03:58 [2026-05-04T03:59:08] self: [车金AI] 许哥，日系车家用确实口碑比较稳，正常保养下故障率相对低。按咱们现车来看，店里有一台2021款凯美瑞2.0G豪华版，8.98万，4.8万公里；还有一台2019款天籁2.0L舒适版，8.28万，6.2万公里，都在南京。具体车况以检测报告为准。您预算大概多少？或者更看重空间还是省油？我帮您具体对比下。 [2026-05-04T03:59:08] 许聪: 这车看着便宜，是不是有什么问题？",
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "operator_alert": false,
+          "risk_level": "normal",
+          "applicability_scope": "global",
+          "additional_details": {
+            "原始资料摘录": "title: 优惠议价规则；answer: [2026-05-04 03:58:00] system: 03:58 [2026-05-04T03:59:08] self: [车金AI] 许哥，日系车家用确实口碑比较稳，正常保养下故障率相对低。按咱们现车来看，店里有一台2021款凯美瑞2.0G豪华版，8.98万，4.8万公里；还有一台2019款天籁2.0L舒适版，8.28万，6.2万公里，都在南京。具体车况以检测报告为准。您预算大概多少？或者更看重空间还是省油？我帮您具体对比下。 [2026-05-04T03:59:08] 许聪: 这车看着便宜，是不是有什么问题？；keywords: ['discount']"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "rejected",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "",
+      "status": "rule_fallback_after_llm",
+      "reason": "policies_rules_used_after_llm_unavailable_or_invalid",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_4a122a7de55b1f2e9a9b",
+    "source_raw_message_ids": [
+      "raw_msg_7a4083be0198d1d1d179",
+      "raw_msg_76a8d6de41f0eb3ba354",
+      "raw_msg_a2265b26342531618a44"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_e0064f85994484a8",
+      "chunk_count": 1,
+      "query": "建议新增/更新政策规则：优惠议价规则\ntitle: 优惠议价规则；answer: [2026-05-04 03:58:00] system: 03:58 [2026-05-04T03:59:08] self: [车金AI] 许哥，日系车家用确实口碑比较稳，正常保养下故障率相对低。按咱们现车来看，店里有一台2021款凯美瑞2.0G豪华版，8.98万，4.8万公里；还有一台2019款天籁2.0L舒适版，8.28万，6.2万公里，都在南京。具体车况以检测报告为准。您预算大概多少？或者更看重空间还是省油？我帮您具体对比下。 [2026-05-04T03:59:08] 许聪: 这车看着便宜，是不是有什么问题？；keywords: ['discount']\n优惠议价规则\n[2026-05-04 03:58:00] system: 03:58 [2026-05-04T03:59:08] self: [车金AI] 许哥，日系车家用确实口碑比较稳，正常保养下故障率相对低。按咱们现车来看，店里有一台2021款凯美瑞2.0G豪华版，8.98万，4.8万公里；还有一台2019款天籁2.0L舒适版，8.28万，6.2万公里，都在南京。具体车况以检测报告为准。您预算大概多少？或者更看重空间还是省油？我帮您具体对比下。 [2026-05-04T03:59:08] 许聪: 这车看着便宜，是不是有什么问题？",
+      "hits": [
+        {
+          "chunk_id": "chunk_78dbc59daadfd4af",
+          "source_id": "source_e0064f85994484a8",
+          "score": 0.99,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.5645,
+            "semantic": 0.2959,
+            "vector": 0.14,
+            "vector_similarity": 0.9847,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.99
+          },
+          "text": "[2026-05-04 03:58:00] system: 03:58\n[2026-05-04T03:59:08] self: [车金AI] 许哥，日系车家用确实口碑比较稳，正常保养下故障率相对低。按咱们现车来看，店里有一台2021款凯美瑞2.0G豪华版，8.98万，4.8万公里；还有一台2019款天籁2.0L舒适版，8.28万，6.2万公里，都在南京。具体车况以检测报告为准。您预算大概多少？或者更看重空间还是省油？我帮您具体对比下。\n[2026-05-04T03:59:08] 许聪: 这车看着便宜，是不是有什么问"
+        },
+        {
+          "chunk_id": "chunk_45e5d08cb4648397",
+          "source_id": "source_0cc6c367c886244c",
+          "score": 0.6126,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.3012,
+            "semantic": 0.1814,
+            "vector": 0.14,
+            "vector_similarity": 0.8098,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.6126
+          },
+          "text": "[2026-05-04T03:57:36] self: [车金AI] 许哥，怕买到问题车、怕老修，这个顾虑我理解。店里像丰田卡罗拉、凯美瑞这类车，正常保养下故障率相对低，比较省心。凯美瑞2021款2.0G现在参考价8.98万，卡罗拉2020款1.2T大概6.98万，都在南京现车。当然二手车一车一况，具体车况还得看检测报告和实车。您预算大概多少？主要平时代步还是跑长途？我帮您筛筛看。\n[2026-05-04T03:57:36] 许聪: 家用车是不是日系更稳？你按你们现车给我说"
+        },
+        {
+          "chunk_id": "chunk_99cc4e7f8c7061b0",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5765,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2203,
+            "semantic": 0.1462,
+            "vector": 0.14,
+            "vector_similarity": 0.783,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5765
+          },
+          "text": "、提档、当地新能源指标和运输方式。\n售后/风险：电池健康、辅助驾驶功能和官方权益以检测报告及账号核验为准。\n推荐话术：适合想体验纯电、智能化和低用车成本的客户，电池和权益必须人工确认。\n商品名称：2020款奥迪A4L 40TFSI时尚动感型\n型号/SKU：CHEJIN-A4L-2020\n类目：二手车/豪华轿车\n关键词：奥迪A4L、A4L、豪华轿车、婚庆、商务\n规格：2020年上牌，表显6.8万公里，2.0T自动挡，黑色，保养记录较完整。\n价格：15.88万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档"
+        },
+        {
+          "chunk_id": "chunk_9a0d34760ad6ccae",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5742,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2187,
+            "semantic": 0.1455,
+            "vector": 0.14,
+            "vector_similarity": 0.8388,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5742
+          },
+          "text": "工确认。\n售后/风险：CVT变速箱状态、保养和车况以检测报告为准。\n推荐话术：适合6到7万预算、练手、家用代步和省油需求。\n商品名称：2019款大众朗逸1.5L自动舒适版\n型号/SKU：CHEJIN-LAVIDA-2019\n类目：二手车/紧凑型轿车\n关键词：朗逸、大众朗逸、德系代步、置换\n规格：2019年上牌，表显6.9万公里，1.5L自动挡，白色，通勤耐用。\n价格：5.98万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：易损件和保养历史以"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_f18d2c87d2f63a9d5759",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "rejected_at": "2026-05-04T15:24:47",
+    "reason": "?????????????AI/??????????????????????????????????????????AI????"
+  },
+  "suggested_tests": [
+    {
+      "scenario": "discount",
+      "assertion": "入库后应能按关键词回答该政策；高风险内容必须转人工。"
+    }
+  ]
+}

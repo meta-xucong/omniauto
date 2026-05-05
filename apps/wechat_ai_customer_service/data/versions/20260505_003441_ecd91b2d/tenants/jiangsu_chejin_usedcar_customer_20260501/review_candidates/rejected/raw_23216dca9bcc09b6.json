@@ -1,0 +1,305 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_23216dca9bcc09b6",
+  "generated_at": "2026-05-04T04:06:21",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_fccdc1a63ba5001c9749.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"customer_message\": \"如果今天聊得差不多，下一步正常怎么走？\", \"applicability_scope\": \"global\", \"additional_details\": {}, \"product_id\": \"\", \"product_category\": \"\"}",
+    "content_sha256": "bec58299de217e5705eec2102d08da52acf4ed36a312da7dbdaf6f16c2748c12",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_fccdc1a63ba5001c9749",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_63121b93cd05ac5e3fc2",
+      "raw_msg_e3d8383199777687e053"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_2db8782c7c1b8651",
+        "source_id": "source_8d4f29aafd5df1a9",
+        "score": 0.82,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.4458,
+          "semantic": 0.2442,
+          "vector": 0.14,
+          "vector_similarity": 0.8486,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.82
+        },
+        "text": "[2026-05-04 04:04:00] system: 04:04\n[2026-05-04T04:06:04] 许聪: 如果今天聊得差不多，下一步正常怎么走？"
+      },
+      {
+        "chunk_id": "chunk_2880218003265ab1",
+        "source_id": "source_bb395d5ecba99f8b",
+        "score": 0.4074,
+        "category": "policies",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2018,
+          "semantic": 0.1382,
+          "vector": 0.1024,
+          "vector_similarity": 0.569,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.045,
+          "risk_penalty": 0.08,
+          "final": 0.4074
+        },
+        "text": "3628\n标准说明：AI 可以解释需要人工测算首付和月供，但不得承诺贷款包过、固定利率、固定月供或不查征信。\n规则：置换资料收集规则\n触发词：置换、卖车、旧车、评估、收车、CHEJIN_DEMO_20260503_203628\n标准说明：客户咨询置换时，AI 先收集旧车品牌车型、上牌时间、公里数、车况、城市、是否贷款和期望价；估价和收车价必须人工复核。\n规则：车况检测报告解释规则\n触发词：检测报告、第三方检测、车况、保养记录、CHEJIN_DEMO_20260503_203628\n标准说明：AI 可以提示车况以检测"
+      },
+      {
+        "chunk_id": "chunk_a5467ca9555680d4",
+        "source_id": "source_f57826a24c2d2572",
+        "score": 0.3952,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1809,
+          "semantic": 0.1291,
+          "vector": 0.0952,
+          "vector_similarity": 0.5287,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.3952
+        },
+        "text": "[2026-05-03T19:36:31] 客户: 李女士：我有一台2018年朗逸想置换宋PLUS，车在苏州，6.5万公里。\n演示批次：CHEJIN_DEMO_20260503_203628\n[2026-05-03T19:37:31] self: 客服：可以，麻烦补充是否有贷款、事故水泡火烧情况、期望价和车牌所在地，估价需要人工复核。\n演示批次：CHEJIN_DEMO_20260503_203628\n[2026-05-03T19:38:31] 客户: 李女士：新能源车电池是不是保八年？\n演示批次：CHEJIN_DE"
+      },
+      {
+        "chunk_id": "chunk_83e7ff1580064aac",
+        "source_id": "source_b6382fbc1e2edf58",
+        "score": 0.3883,
+        "category": "chats",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.173,
+          "semantic": 0.1291,
+          "vector": 0.1062,
+          "vector_similarity": 0.5901,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.02,
+          "risk_penalty": 0.0,
+          "final": 0.3883
+        },
+        "text": "\n标签：支付风险、CHEJIN_DEMO_20260503_203628\n客户：我刚才发过电话了怎么还问\n客服：抱歉，我会先查看已记录信息，避免重复打扰；如果信息不完整，只补缺少的字段即可。\n标签：重复线索、安抚、CHEJIN_DEMO_20260503_203628\n客户：晚上11点还能看车吗\n客服：我先记录您的需求。门店接待时间和是否能夜间看车需要人工确认，销售上线后会联系您。\n标签：非营业时间、CHEJIN_DEMO_20260503_203628\n客户：能拍个底盘视频吗\n客服：可以先记录您想看的细节，底盘视"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_50520b2dbdea12da2907",
+    "experience_id": "rag_exp_50520b2dbdea12da2907"
+  },
+  "detected_tags": [
+    "llm",
+    "rag_experience",
+    "unknown",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "chats",
+    "change_type": "llm_upsert_chats",
+    "summary": "客户询问后续流程",
+    "suggested_fields": {
+      "customer_message": "如果今天聊得差不多，下一步正常怎么走？",
+      "applicability_scope": "global",
+      "product_id": "",
+      "product_category": "",
+      "additional_details": {
+        "原始资料摘录": "{\"customer_message\": \"如果今天聊得差不多，下一步正常怎么走？\", \"applicability_scope\": \"global\", \"additional_details\": {}, \"product_id\": \"\", \"product_category\": \"\"}"
+      }
+    },
+    "missing_fields": [
+      "service_reply"
+    ],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "chats",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "chats",
+        "id": "sales_process_inquiry",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_fccdc1a63ba5001c9749.txt",
+          "candidate_id": "raw_23216dca9bcc09b6",
+          "rag_experience_id": "rag_exp_50520b2dbdea12da2907",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "customer_message": "如果今天聊得差不多，下一步正常怎么走？",
+          "applicability_scope": "global",
+          "product_id": "",
+          "product_category": "",
+          "additional_details": {
+            "原始资料摘录": "{\"customer_message\": \"如果今天聊得差不多，下一步正常怎么走？\", \"applicability_scope\": \"global\", \"additional_details\": {}, \"product_id\": \"\", \"product_category\": \"\"}"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "needs_more_info",
+    "ok": false,
+    "confidence": 0.72,
+    "missing_fields": [
+      "service_reply"
+    ],
+    "missing_labels": [
+      "客服回复"
+    ],
+    "question": "还需要补充：客服回复。请补齐后再应用入库。",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "rejected",
+    "completeness_status": "needs_more_info",
+    "missing_fields": [
+      "service_reply"
+    ],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_fccdc1a63ba5001c9749",
+    "source_raw_message_ids": [
+      "raw_msg_63121b93cd05ac5e3fc2",
+      "raw_msg_e3d8383199777687e053"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_8d4f29aafd5df1a9",
+      "chunk_count": 1,
+      "query": "客户询问后续流程\n{\"customer_message\": \"如果今天聊得差不多，下一步正常怎么走？\", \"applicability_scope\": \"global\", \"additional_details\": {}, \"product_id\": \"\", \"product_category\": \"\"}",
+      "hits": [
+        {
+          "chunk_id": "chunk_2db8782c7c1b8651",
+          "source_id": "source_8d4f29aafd5df1a9",
+          "score": 0.82,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.4458,
+            "semantic": 0.2442,
+            "vector": 0.14,
+            "vector_similarity": 0.8486,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.82
+          },
+          "text": "[2026-05-04 04:04:00] system: 04:04\n[2026-05-04T04:06:04] 许聪: 如果今天聊得差不多，下一步正常怎么走？"
+        },
+        {
+          "chunk_id": "chunk_2880218003265ab1",
+          "source_id": "source_bb395d5ecba99f8b",
+          "score": 0.4074,
+          "category": "policies",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2018,
+            "semantic": 0.1382,
+            "vector": 0.1024,
+            "vector_similarity": 0.569,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.045,
+            "risk_penalty": 0.08,
+            "final": 0.4074
+          },
+          "text": "3628\n标准说明：AI 可以解释需要人工测算首付和月供，但不得承诺贷款包过、固定利率、固定月供或不查征信。\n规则：置换资料收集规则\n触发词：置换、卖车、旧车、评估、收车、CHEJIN_DEMO_20260503_203628\n标准说明：客户咨询置换时，AI 先收集旧车品牌车型、上牌时间、公里数、车况、城市、是否贷款和期望价；估价和收车价必须人工复核。\n规则：车况检测报告解释规则\n触发词：检测报告、第三方检测、车况、保养记录、CHEJIN_DEMO_20260503_203628\n标准说明：AI 可以提示车况以检测"
+        },
+        {
+          "chunk_id": "chunk_a5467ca9555680d4",
+          "source_id": "source_f57826a24c2d2572",
+          "score": 0.3952,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1809,
+            "semantic": 0.1291,
+            "vector": 0.0952,
+            "vector_similarity": 0.5287,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.3952
+          },
+          "text": "[2026-05-03T19:36:31] 客户: 李女士：我有一台2018年朗逸想置换宋PLUS，车在苏州，6.5万公里。\n演示批次：CHEJIN_DEMO_20260503_203628\n[2026-05-03T19:37:31] self: 客服：可以，麻烦补充是否有贷款、事故水泡火烧情况、期望价和车牌所在地，估价需要人工复核。\n演示批次：CHEJIN_DEMO_20260503_203628\n[2026-05-03T19:38:31] 客户: 李女士：新能源车电池是不是保八年？\n演示批次：CHEJIN_DE"
+        },
+        {
+          "chunk_id": "chunk_83e7ff1580064aac",
+          "source_id": "source_b6382fbc1e2edf58",
+          "score": 0.3883,
+          "category": "chats",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.173,
+            "semantic": 0.1291,
+            "vector": 0.1062,
+            "vector_similarity": 0.5901,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.02,
+            "risk_penalty": 0.0,
+            "final": 0.3883
+          },
+          "text": "\n标签：支付风险、CHEJIN_DEMO_20260503_203628\n客户：我刚才发过电话了怎么还问\n客服：抱歉，我会先查看已记录信息，避免重复打扰；如果信息不完整，只补缺少的字段即可。\n标签：重复线索、安抚、CHEJIN_DEMO_20260503_203628\n客户：晚上11点还能看车吗\n客服：我先记录您的需求。门店接待时间和是否能夜间看车需要人工确认，销售上线后会联系您。\n标签：非营业时间、CHEJIN_DEMO_20260503_203628\n客户：能拍个底盘视频吗\n客服：可以先记录您想看的细节，底盘视"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_50520b2dbdea12da2907",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "rejected_at": "2026-05-04T18:41:18",
+    "reason": "legacy_auto_candidate_cleanup_20260504: ???????????????????????RAG?????????????????"
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

@@ -1,0 +1,335 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_58bacaf6135b64d0",
+  "generated_at": "2026-05-04T03:45:31",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_e58ae030df8e83496276.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"customer_message\": \"你们有奥德赛吗？我想看日系MPV\", \"intent_tags\": [\"product_inquiry\", \"availability\"], \"tone_tags\": [], \"linked_categories\": [\"products\"], \"linked_item_ids\": [], \"applicability_scope\": \"product_category\", \"product_id\": \"\", \"product_category\": \"日系MPV\", \"usable_as_template\": false, \"additional_details\": {\"product_name_mentioned\": \"奥德赛\", \"raw_timestamp\": ",
+    "content_sha256": "61d2b7fdc17aca26dd49903c8c5a06b51ab45348bcee89adfc7dd3620e9ec158",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_e58ae030df8e83496276",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_6f667dfb45432f95d140",
+      "raw_msg_794692141bc22eeeca17",
+      "raw_msg_32f4948b712c28374923"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_2a36017605ce6c47",
+        "source_id": "source_c3ad65db513a6c27",
+        "score": 0.5259,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.3192,
+          "semantic": 0.1892,
+          "vector": 0.1074,
+          "vector_similarity": 0.5969,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.08,
+          "final": 0.5259
+        },
+        "text": "[2026-05-04 03:42:00] system: 03:42\n[2026-05-04T03:43:47] 许聪: 你们有奥德赛吗？我想看日系MPV\n[2026-05-04T03:43:47] self: [车金AI] 许哥，合同价格得依据实际成交金额开具，我没法直接答应写成别的价格。这事牵涉到合同、开票和交易流程，只能由销售同事核实后处理，我这就帮您转过去。"
+      },
+      {
+        "chunk_id": "chunk_98d495755714a154",
+        "source_id": "source_25f67e9fcaeb0195",
+        "score": 0.4355,
+        "category": "chats",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1895,
+          "semantic": 0.1328,
+          "vector": 0.1132,
+          "vector_similarity": 0.6291,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.0,
+          "risk_penalty": 0.0,
+          "final": 0.4355
+        },
+        "text": "聊天记录：江苏车金预算推荐话术 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_043922\n客户：我从抖音直播来的，8万左右想买自动挡省油代步车，有什么推荐？\n客服：您这个预算可以先看凯美瑞、思域和秦PLUS DM-i。凯美瑞偏家用稳、省心；思域更年轻；秦PLUS更省油。您是在南京看车吗？是否考虑贷款或置换？\n意图标签：预算推荐,车源推荐,抖音线索\n聊天记录：江苏车金置换话术 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_04392"
+      },
+      {
+        "chunk_id": "chunk_b21904463529fe5e",
+        "source_id": "source_9d8b444b42e66810",
+        "score": 0.4354,
+        "category": "chats",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1895,
+          "semantic": 0.1328,
+          "vector": 0.1131,
+          "vector_similarity": 0.6285,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.0,
+          "risk_penalty": 0.0,
+          "final": 0.4354
+        },
+        "text": "聊天记录：江苏车金预算推荐话术 CHEJIN_20260503_205541\n测试批次：CHEJIN_20260503_205541\n客户：我从抖音直播来的，8万左右想买自动挡省油代步车，有什么推荐？\n客服：您这个预算可以先看凯美瑞、思域和秦PLUS DM-i。凯美瑞偏家用稳、省心；思域更年轻；秦PLUS更省油。您是在南京看车吗？是否考虑贷款或置换？\n意图标签：预算推荐,车源推荐,抖音线索\n聊天记录：江苏车金置换话术 CHEJIN_20260503_205541\n测试批次：CHEJIN_20260503_20554"
+      },
+      {
+        "chunk_id": "chunk_eb07701dfd5ea4e2",
+        "source_id": "source_a52cebeca5813c72",
+        "score": 0.4354,
+        "category": "chats",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1895,
+          "semantic": 0.1328,
+          "vector": 0.1131,
+          "vector_similarity": 0.6283,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.0,
+          "risk_penalty": 0.0,
+          "final": 0.4354
+        },
+        "text": "聊天记录：江苏车金预算推荐话术 CHEJIN_20260503_082804\n测试批次：CHEJIN_20260503_082804\n客户：我从抖音直播来的，8万左右想买自动挡省油代步车，有什么推荐？\n客服：您这个预算可以先看凯美瑞、思域和秦PLUS DM-i。凯美瑞偏家用稳、省心；思域更年轻；秦PLUS更省油。您是在南京看车吗？是否考虑贷款或置换？\n意图标签：预算推荐,车源推荐,抖音线索\n聊天记录：江苏车金置换话术 CHEJIN_20260503_082804\n测试批次：CHEJIN_20260503_08280"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_6593c62caab002da0472",
+    "experience_id": "rag_exp_6593c62caab002da0472"
+  },
+  "detected_tags": [
+    "invoice",
+    "llm",
+    "quote",
+    "rag_experience",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "chats",
+    "change_type": "llm_upsert_chats",
+    "summary": "客户询问是否有奥德赛，想看日系MPV，无对应客服回复。",
+    "suggested_fields": {
+      "customer_message": "你们有奥德赛吗？我想看日系MPV",
+      "intent_tags": [
+        "product_inquiry",
+        "availability"
+      ],
+      "tone_tags": [],
+      "linked_categories": [
+        "products"
+      ],
+      "linked_item_ids": [],
+      "applicability_scope": "product_category",
+      "product_id": "",
+      "product_category": "日系MPV",
+      "usable_as_template": false,
+      "additional_details": {
+        "product_name_mentioned": "奥德赛",
+        "raw_timestamp": "2026-05-04T03:43:47",
+        "speaker": "许聪",
+        "原始资料摘录": "{\"customer_message\": \"你们有奥德赛吗？我想看日系MPV\", \"intent_tags\": [\"product_inquiry\", \"availability\"], \"tone_tags\": [], \"linked_categories\": [\"products\"], \"linked_item_ids\": [], \"applicability_scope\": \"product_category\", \"product_id\": \"\", \"product_category\": \"日系MPV\", \"usable_as_template\": false, \"additional_details\": {\"product_name_mentioned\": \"奥德赛\", \"raw_timestamp\":"
+      }
+    },
+    "missing_fields": [
+      "service_reply"
+    ],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "chats",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "chats",
+        "id": "customer_inquiry_odyssey",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_e58ae030df8e83496276.txt",
+          "candidate_id": "raw_58bacaf6135b64d0",
+          "rag_experience_id": "rag_exp_6593c62caab002da0472",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "customer_message": "你们有奥德赛吗？我想看日系MPV",
+          "intent_tags": [
+            "product_inquiry",
+            "availability"
+          ],
+          "tone_tags": [],
+          "linked_categories": [
+            "products"
+          ],
+          "linked_item_ids": [],
+          "applicability_scope": "product_category",
+          "product_id": "",
+          "product_category": "日系MPV",
+          "usable_as_template": false,
+          "additional_details": {
+            "product_name_mentioned": "奥德赛",
+            "raw_timestamp": "2026-05-04T03:43:47",
+            "speaker": "许聪",
+            "原始资料摘录": "{\"customer_message\": \"你们有奥德赛吗？我想看日系MPV\", \"intent_tags\": [\"product_inquiry\", \"availability\"], \"tone_tags\": [], \"linked_categories\": [\"products\"], \"linked_item_ids\": [], \"applicability_scope\": \"product_category\", \"product_id\": \"\", \"product_category\": \"日系MPV\", \"usable_as_template\": false, \"additional_details\": {\"product_name_mentioned\": \"奥德赛\", \"raw_timestamp\":"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "needs_more_info",
+    "ok": false,
+    "confidence": 0.72,
+    "missing_fields": [
+      "service_reply"
+    ],
+    "missing_labels": [
+      "客服回复"
+    ],
+    "question": "还需要补充：客服回复。请补齐后再应用入库。",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "product_name_mentioned",
+      "raw_timestamp",
+      "speaker",
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "pending",
+    "completeness_status": "needs_more_info",
+    "missing_fields": [
+      "service_reply"
+    ],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_e58ae030df8e83496276",
+    "source_raw_message_ids": [
+      "raw_msg_6f667dfb45432f95d140",
+      "raw_msg_794692141bc22eeeca17",
+      "raw_msg_32f4948b712c28374923"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_c3ad65db513a6c27",
+      "chunk_count": 1,
+      "query": "客户询问是否有奥德赛，想看日系MPV，无对应客服回复。\n{\"customer_message\": \"你们有奥德赛吗？我想看日系MPV\", \"intent_tags\": [\"product_inquiry\", \"availability\"], \"tone_tags\": [], \"linked_categories\": [\"products\"], \"linked_item_ids\": [], \"applicability_scope\": \"product_category\", \"product_id\": \"\", \"product_category\": \"日系MPV\", \"usable_as_template\": false, \"additional_details\": {\"product_name_mentioned\": \"奥德赛\", \"raw_timestamp\": ",
+      "hits": [
+        {
+          "chunk_id": "chunk_2a36017605ce6c47",
+          "source_id": "source_c3ad65db513a6c27",
+          "score": 0.5259,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.3192,
+            "semantic": 0.1892,
+            "vector": 0.1074,
+            "vector_similarity": 0.5969,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.08,
+            "final": 0.5259
+          },
+          "text": "[2026-05-04 03:42:00] system: 03:42\n[2026-05-04T03:43:47] 许聪: 你们有奥德赛吗？我想看日系MPV\n[2026-05-04T03:43:47] self: [车金AI] 许哥，合同价格得依据实际成交金额开具，我没法直接答应写成别的价格。这事牵涉到合同、开票和交易流程，只能由销售同事核实后处理，我这就帮您转过去。"
+        },
+        {
+          "chunk_id": "chunk_98d495755714a154",
+          "source_id": "source_25f67e9fcaeb0195",
+          "score": 0.4355,
+          "category": "chats",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1895,
+            "semantic": 0.1328,
+            "vector": 0.1132,
+            "vector_similarity": 0.6291,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.0,
+            "risk_penalty": 0.0,
+            "final": 0.4355
+          },
+          "text": "聊天记录：江苏车金预算推荐话术 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_043922\n客户：我从抖音直播来的，8万左右想买自动挡省油代步车，有什么推荐？\n客服：您这个预算可以先看凯美瑞、思域和秦PLUS DM-i。凯美瑞偏家用稳、省心；思域更年轻；秦PLUS更省油。您是在南京看车吗？是否考虑贷款或置换？\n意图标签：预算推荐,车源推荐,抖音线索\n聊天记录：江苏车金置换话术 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_04392"
+        },
+        {
+          "chunk_id": "chunk_b21904463529fe5e",
+          "source_id": "source_9d8b444b42e66810",
+          "score": 0.4354,
+          "category": "chats",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1895,
+            "semantic": 0.1328,
+            "vector": 0.1131,
+            "vector_similarity": 0.6285,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.0,
+            "risk_penalty": 0.0,
+            "final": 0.4354
+          },
+          "text": "聊天记录：江苏车金预算推荐话术 CHEJIN_20260503_205541\n测试批次：CHEJIN_20260503_205541\n客户：我从抖音直播来的，8万左右想买自动挡省油代步车，有什么推荐？\n客服：您这个预算可以先看凯美瑞、思域和秦PLUS DM-i。凯美瑞偏家用稳、省心；思域更年轻；秦PLUS更省油。您是在南京看车吗？是否考虑贷款或置换？\n意图标签：预算推荐,车源推荐,抖音线索\n聊天记录：江苏车金置换话术 CHEJIN_20260503_205541\n测试批次：CHEJIN_20260503_20554"
+        },
+        {
+          "chunk_id": "chunk_eb07701dfd5ea4e2",
+          "source_id": "source_a52cebeca5813c72",
+          "score": 0.4354,
+          "category": "chats",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1895,
+            "semantic": 0.1328,
+            "vector": 0.1131,
+            "vector_similarity": 0.6283,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.0,
+            "risk_penalty": 0.0,
+            "final": 0.4354
+          },
+          "text": "聊天记录：江苏车金预算推荐话术 CHEJIN_20260503_082804\n测试批次：CHEJIN_20260503_082804\n客户：我从抖音直播来的，8万左右想买自动挡省油代步车，有什么推荐？\n客服：您这个预算可以先看凯美瑞、思域和秦PLUS DM-i。凯美瑞偏家用稳、省心；思域更年轻；秦PLUS更省油。您是在南京看车吗？是否考虑贷款或置换？\n意图标签：预算推荐,车源推荐,抖音线索\n聊天记录：江苏车金置换话术 CHEJIN_20260503_082804\n测试批次：CHEJIN_20260503_08280"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_6593c62caab002da0472",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ]
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

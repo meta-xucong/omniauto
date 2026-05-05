@@ -1,0 +1,319 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_271e701da8890854",
+  "generated_at": "2026-05-04T03:01:55",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_583a232bc62af3a5993b.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"customer_message\": \"\", \"service_reply\": \"异地提档要看您所在城市的排放和迁入政策，还有车辆档案状态，我这边没法直接给您准话。我这就转给负责的销售同事帮您核实，您方便留个电话或者告诉我所在城市吗？\", \"intent_tags\": [\"异地提档\", \"转人工\", \"信息收集\"], \"tone_tags\": [], \"linked_categories\": [], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\", \"usable_as_template\": true, \"additional_details\": {}}",
+    "content_sha256": "114b63d0b67f457dc204d2e7fe1c52e5789ba7a450353782a856ab0ac71ce901",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_583a232bc62af3a5993b",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_37d0d096974b3b0a850c",
+      "raw_msg_797476a162a631775624",
+      "raw_msg_a99bab610a69945c9395"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_0de02f9181cc667a",
+        "source_id": "source_1ad359041dec7fe7",
+        "score": 0.9278,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.5209,
+          "semantic": 0.2769,
+          "vector": 0.14,
+          "vector_similarity": 0.9417,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.9278
+        },
+        "text": "[2026-05-04 03:00:00] system: 03:00\n[2026-05-04T03:01:04] self: [车金AI] 异地提档要看您所在城市的排放和迁入政策，还有车辆档案状态，我这边没法直接给您准话。我这就转给负责的销售同事帮您核实，您方便留个电话或者告诉我所在城市吗？\n[2026-05-04T03:01:04] 许聪: 如果我有旧车置换，需要准备什么？"
+      },
+      {
+        "chunk_id": "chunk_99cc4e7f8c7061b0",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5184,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1798,
+          "semantic": 0.1286,
+          "vector": 0.14,
+          "vector_similarity": 0.7881,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5184
+        },
+        "text": "、提档、当地新能源指标和运输方式。\n售后/风险：电池健康、辅助驾驶功能和官方权益以检测报告及账号核验为准。\n推荐话术：适合想体验纯电、智能化和低用车成本的客户，电池和权益必须人工确认。\n商品名称：2020款奥迪A4L 40TFSI时尚动感型\n型号/SKU：CHEJIN-A4L-2020\n类目：二手车/豪华轿车\n关键词：奥迪A4L、A4L、豪华轿车、婚庆、商务\n规格：2020年上牌，表显6.8万公里，2.0T自动挡，黑色，保养记录较完整。\n价格：15.88万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档"
+      },
+      {
+        "chunk_id": "chunk_9a0d34760ad6ccae",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5152,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1798,
+          "semantic": 0.1286,
+          "vector": 0.1367,
+          "vector_similarity": 0.7596,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5152
+        },
+        "text": "工确认。\n售后/风险：CVT变速箱状态、保养和车况以检测报告为准。\n推荐话术：适合6到7万预算、练手、家用代步和省油需求。\n商品名称：2019款大众朗逸1.5L自动舒适版\n型号/SKU：CHEJIN-LAVIDA-2019\n类目：二手车/紧凑型轿车\n关键词：朗逸、大众朗逸、德系代步、置换\n规格：2019年上牌，表显6.9万公里，1.5L自动挡，白色，通勤耐用。\n价格：5.98万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：易损件和保养历史以"
+      },
+      {
+        "chunk_id": "chunk_b73fd7e249648300",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5147,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1798,
+          "semantic": 0.1286,
+          "vector": 0.1362,
+          "vector_similarity": 0.7568,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5147
+        },
+        "text": "。\n商品名称：2022款五菱宏光MINIEV马卡龙臻享款\n型号/SKU：CHEJIN-MINIEV-2022\n类目：二手车/微型电动车\n关键词：宏光MINIEV、五菱mini、代步电车、练手车\n规格：2022年上牌，表显1.6万公里，纯电微型车，粉色，城市通勤。\n价格：2.88万，库存：1台\n物流/过户：微型电动车跨城运输和充电条件需人工确认。\n售后/风险：续航、电池和低温表现以检测报告和使用场景说明为准。\n推荐话术：适合短途通勤、练手、接送孩子，长途或高速需求不推荐。\n商品名称：2020款本田雅阁260TURBO"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_47eee29f389eab77429c",
+    "experience_id": "rag_exp_47eee29f389eab77429c"
+  },
+  "detected_tags": [
+    "llm",
+    "rag_experience",
+    "unknown",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "chats",
+    "change_type": "llm_upsert_chats",
+    "summary": "AI客服关于异地提档的转人工回复",
+    "suggested_fields": {
+      "customer_message": "",
+      "service_reply": "异地提档要看您所在城市的排放和迁入政策，还有车辆档案状态，我这边没法直接给您准话。我这就转给负责的销售同事帮您核实，您方便留个电话或者告诉我所在城市吗？",
+      "intent_tags": [
+        "异地提档",
+        "转人工",
+        "信息收集"
+      ],
+      "tone_tags": [],
+      "linked_categories": [],
+      "linked_item_ids": [],
+      "applicability_scope": "global",
+      "product_id": "",
+      "product_category": "",
+      "usable_as_template": true,
+      "additional_details": {
+        "原始资料摘录": "{\"customer_message\": \"\", \"service_reply\": \"异地提档要看您所在城市的排放和迁入政策，还有车辆档案状态，我这边没法直接给您准话。我这就转给负责的销售同事帮您核实，您方便留个电话或者告诉我所在城市吗？\", \"intent_tags\": [\"异地提档\", \"转人工\", \"信息收集\"], \"tone_tags\": [], \"linked_categories\": [], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\", \"usable_as_template\": true, \"additional_details\": {}}"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "chats",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "chats",
+        "id": "item_90e076de3b25",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_583a232bc62af3a5993b.txt",
+          "candidate_id": "raw_271e701da8890854",
+          "rag_experience_id": "rag_exp_47eee29f389eab77429c",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "customer_message": "",
+          "service_reply": "异地提档要看您所在城市的排放和迁入政策，还有车辆档案状态，我这边没法直接给您准话。我这就转给负责的销售同事帮您核实，您方便留个电话或者告诉我所在城市吗？",
+          "intent_tags": [
+            "异地提档",
+            "转人工",
+            "信息收集"
+          ],
+          "tone_tags": [],
+          "linked_categories": [],
+          "linked_item_ids": [],
+          "applicability_scope": "global",
+          "product_id": "",
+          "product_category": "",
+          "usable_as_template": true,
+          "additional_details": {
+            "原始资料摘录": "{\"customer_message\": \"\", \"service_reply\": \"异地提档要看您所在城市的排放和迁入政策，还有车辆档案状态，我这边没法直接给您准话。我这就转给负责的销售同事帮您核实，您方便留个电话或者告诉我所在城市吗？\", \"intent_tags\": [\"异地提档\", \"转人工\", \"信息收集\"], \"tone_tags\": [], \"linked_categories\": [], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\", \"usable_as_template\": true, \"additional_details\": {}}"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": false,
+          "requires_handoff": true,
+          "risk_level": "warning"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "rejected",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_583a232bc62af3a5993b",
+    "source_raw_message_ids": [
+      "raw_msg_37d0d096974b3b0a850c",
+      "raw_msg_797476a162a631775624",
+      "raw_msg_a99bab610a69945c9395"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_1ad359041dec7fe7",
+      "chunk_count": 1,
+      "query": "AI客服关于异地提档的转人工回复\n{\"customer_message\": \"\", \"service_reply\": \"异地提档要看您所在城市的排放和迁入政策，还有车辆档案状态，我这边没法直接给您准话。我这就转给负责的销售同事帮您核实，您方便留个电话或者告诉我所在城市吗？\", \"intent_tags\": [\"异地提档\", \"转人工\", \"信息收集\"], \"tone_tags\": [], \"linked_categories\": [], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\", \"usable_as_template\": true, \"additional_details\": {}}\n异地提档要看您所在城市的排放和迁入政策，还有车辆档案状态，我这边没法直接给您准话。我这就转给负责的销售同事帮您核实，您方便留个电话或者告诉我所在城市吗？",
+      "hits": [
+        {
+          "chunk_id": "chunk_0de02f9181cc667a",
+          "source_id": "source_1ad359041dec7fe7",
+          "score": 0.9278,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.5209,
+            "semantic": 0.2769,
+            "vector": 0.14,
+            "vector_similarity": 0.9417,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.9278
+          },
+          "text": "[2026-05-04 03:00:00] system: 03:00\n[2026-05-04T03:01:04] self: [车金AI] 异地提档要看您所在城市的排放和迁入政策，还有车辆档案状态，我这边没法直接给您准话。我这就转给负责的销售同事帮您核实，您方便留个电话或者告诉我所在城市吗？\n[2026-05-04T03:01:04] 许聪: 如果我有旧车置换，需要准备什么？"
+        },
+        {
+          "chunk_id": "chunk_99cc4e7f8c7061b0",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5184,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1798,
+            "semantic": 0.1286,
+            "vector": 0.14,
+            "vector_similarity": 0.7881,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5184
+          },
+          "text": "、提档、当地新能源指标和运输方式。\n售后/风险：电池健康、辅助驾驶功能和官方权益以检测报告及账号核验为准。\n推荐话术：适合想体验纯电、智能化和低用车成本的客户，电池和权益必须人工确认。\n商品名称：2020款奥迪A4L 40TFSI时尚动感型\n型号/SKU：CHEJIN-A4L-2020\n类目：二手车/豪华轿车\n关键词：奥迪A4L、A4L、豪华轿车、婚庆、商务\n规格：2020年上牌，表显6.8万公里，2.0T自动挡，黑色，保养记录较完整。\n价格：15.88万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档"
+        },
+        {
+          "chunk_id": "chunk_9a0d34760ad6ccae",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5152,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1798,
+            "semantic": 0.1286,
+            "vector": 0.1367,
+            "vector_similarity": 0.7596,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5152
+          },
+          "text": "工确认。\n售后/风险：CVT变速箱状态、保养和车况以检测报告为准。\n推荐话术：适合6到7万预算、练手、家用代步和省油需求。\n商品名称：2019款大众朗逸1.5L自动舒适版\n型号/SKU：CHEJIN-LAVIDA-2019\n类目：二手车/紧凑型轿车\n关键词：朗逸、大众朗逸、德系代步、置换\n规格：2019年上牌，表显6.9万公里，1.5L自动挡，白色，通勤耐用。\n价格：5.98万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：易损件和保养历史以"
+        },
+        {
+          "chunk_id": "chunk_b73fd7e249648300",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5147,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1798,
+            "semantic": 0.1286,
+            "vector": 0.1362,
+            "vector_similarity": 0.7568,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5147
+          },
+          "text": "。\n商品名称：2022款五菱宏光MINIEV马卡龙臻享款\n型号/SKU：CHEJIN-MINIEV-2022\n类目：二手车/微型电动车\n关键词：宏光MINIEV、五菱mini、代步电车、练手车\n规格：2022年上牌，表显1.6万公里，纯电微型车，粉色，城市通勤。\n价格：2.88万，库存：1台\n物流/过户：微型电动车跨城运输和充电条件需人工确认。\n售后/风险：续航、电池和低温表现以检测报告和使用场景说明为准。\n推荐话术：适合短途通勤、练手、接送孩子，长途或高速需求不推荐。\n商品名称：2020款本田雅阁260TURBO"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_47eee29f389eab77429c",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "rejected_at": "2026-05-04T18:41:18",
+    "reason": "legacy_auto_candidate_cleanup_20260504: ???????????????????????RAG?????????????????"
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

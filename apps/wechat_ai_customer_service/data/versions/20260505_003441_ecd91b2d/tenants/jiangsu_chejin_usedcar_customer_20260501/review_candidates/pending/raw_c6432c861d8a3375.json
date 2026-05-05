@@ -1,0 +1,219 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_c6432c861d8a3375",
+  "generated_at": "2026-05-03T20:43:53",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_3232f5a1792eaec6ff2e.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "title: 售后规则；answer: [2026-05-03T19:06:31] 客户: 群资料：新增2024款理想L6 Pro，预算23万内，适合家庭，增程SUV，库存1台，客户问权益时转人工。 演示批次：CHEJIN_DEMO_20260503_203628 [2026-05-03T19:07:31] 客户: 群提醒：二手车过户通常要核身份证明、机动车登记证书、行驶证和号牌，异地迁入先查当地政策。 演示批次：CHEJIN_DEMO_20260503_203628 [2026-05-03T19:08:31] 客户: 客户王总问GL8商务接待，重点看内饰磨损、二排座椅、保养记录和试乘。 演示批次：CHEJIN_DEMO_20260503_203628 [2026-05-03T19:09:31] 客户: 新能源",
+    "content_sha256": "b226f90ed2543d40b31bd8bd943bc3d20f0668de5ab25ad451569088db129b11",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_3232f5a1792eaec6ff2e",
+    "conversation_id": "chejin_demo_group_chejin_demo_20260503_203628",
+    "raw_message_ids": [
+      "raw_msg_4413bcdbb5f348a37ddc",
+      "raw_msg_6d57a1d7de38d0f24a97",
+      "raw_msg_944e47a9dece3d827b75",
+      "raw_msg_9881bfeb18fd7f59bee3",
+      "raw_msg_c82500ff3076966ea89c",
+      "raw_msg_e7ed5382b2daf1d8980e"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_4ca927d06003fa77",
+        "source_id": "source_4dfc6ec9a32e5644",
+        "score": 0.916,
+        "category": "group",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.5896,
+          "semantic": 0.2764,
+          "vector": 0.14,
+          "vector_similarity": 0.9723,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.08,
+          "final": 0.916
+        },
+        "text": "[2026-05-03T19:06:31] 客户: 群资料：新增2024款理想L6 Pro，预算23万内，适合家庭，增程SUV，库存1台，客户问权益时转人工。\n演示批次：CHEJIN_DEMO_20260503_203628\n[2026-05-03T19:07:31] 客户: 群提醒：二手车过户通常要核身份证明、机动车登记证书、行驶证和号牌，异地迁入先查当地政策。\n演示批次：CHEJIN_DEMO_20260503_203628\n[2026-05-03T19:08:31] 客户: 客户王总问GL8商务接待，重点看内"
+      }
+    ],
+    "original_type": "raw_wechat_group",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_f75908d15ff51ac90ddc",
+    "experience_id": "rag_exp_f75908d15ff51ac90ddc"
+  },
+  "detected_tags": [
+    "after_sales",
+    "product",
+    "rag_experience",
+    "wechat_group_chat"
+  ],
+  "proposal": {
+    "target_category": "policies",
+    "change_type": "upsert_policy",
+    "summary": "建议新增/更新政策规则：售后规则",
+    "suggested_fields": {
+      "title": "售后规则",
+      "policy_type": "after_sales",
+      "keywords": [
+        "after_sales",
+        "product"
+      ],
+      "answer": "[2026-05-03T19:06:31] 客户: 群资料：新增2024款理想L6 Pro，预算23万内，适合家庭，增程SUV，库存1台，客户问权益时转人工。 演示批次：CHEJIN_DEMO_20260503_203628 [2026-05-03T19:07:31] 客户: 群提醒：二手车过户通常要核身份证明、机动车登记证书、行驶证和号牌，异地迁入先查当地政策。 演示批次：CHEJIN_DEMO_20260503_203628 [2026-05-03T19:08:31] 客户: 客户王总问GL8商务接待，重点看内饰磨损、二排座椅、保养记录和试乘。 演示批次：CHEJIN_DEMO_20260503_203628 [2026-05-03T19:09:31] 客户: 新能源客户追问电池健康度、三电质保、续航衰减，一律让销售结合检测报告回复。 演示批次：CHEJIN_DEMO_20260503_203628 [2026-05-03T19:10:31] 客户: 边界噪音 CHEJIN_DEMO_20260503_203628：今晚大家记得下班关灯，这条不应该成为正式知识。 演示批次：CHEJIN_DEMO_20260503_203",
+      "allow_auto_reply": false,
+      "requires_handoff": true,
+      "operator_alert": true,
+      "risk_level": "warning",
+      "applicability_scope": "global",
+      "additional_details": {
+        "原始资料摘录": "title: 售后规则；answer: [2026-05-03T19:06:31] 客户: 群资料：新增2024款理想L6 Pro，预算23万内，适合家庭，增程SUV，库存1台，客户问权益时转人工。 演示批次：CHEJIN_DEMO_20260503_203628 [2026-05-03T19:07:31] 客户: 群提醒：二手车过户通常要核身份证明、机动车登记证书、行驶证和号牌，异地迁入先查当地政策。 演示批次：CHEJIN_DEMO_20260503_203628 [2026-05-03T19:08:31] 客户: 客户王总问GL8商务接待，重点看内饰磨损、二排座椅、保养记录和试乘。 演示批次：CHEJIN_DEMO_20260503_203628 [2026-05-03T19:09:31] 客户: 新能源"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "policies",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "policies",
+        "id": "item_59f2a231a18b",
+        "status": "active",
+        "source": {
+          "type": "raw_upload",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_3232f5a1792eaec6ff2e.txt",
+          "candidate_id": "raw_c6432c861d8a3375",
+          "rag_experience_id": "rag_exp_f75908d15ff51ac90ddc",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_group"
+        },
+        "data": {
+          "title": "售后规则",
+          "policy_type": "after_sales",
+          "keywords": [
+            "after_sales",
+            "product"
+          ],
+          "answer": "[2026-05-03T19:06:31] 客户: 群资料：新增2024款理想L6 Pro，预算23万内，适合家庭，增程SUV，库存1台，客户问权益时转人工。 演示批次：CHEJIN_DEMO_20260503_203628 [2026-05-03T19:07:31] 客户: 群提醒：二手车过户通常要核身份证明、机动车登记证书、行驶证和号牌，异地迁入先查当地政策。 演示批次：CHEJIN_DEMO_20260503_203628 [2026-05-03T19:08:31] 客户: 客户王总问GL8商务接待，重点看内饰磨损、二排座椅、保养记录和试乘。 演示批次：CHEJIN_DEMO_20260503_203628 [2026-05-03T19:09:31] 客户: 新能源客户追问电池健康度、三电质保、续航衰减，一律让销售结合检测报告回复。 演示批次：CHEJIN_DEMO_20260503_203628 [2026-05-03T19:10:31] 客户: 边界噪音 CHEJIN_DEMO_20260503_203628：今晚大家记得下班关灯，这条不应该成为正式知识。 演示批次：CHEJIN_DEMO_20260503_203",
+          "allow_auto_reply": false,
+          "requires_handoff": true,
+          "operator_alert": true,
+          "risk_level": "warning",
+          "applicability_scope": "global",
+          "additional_details": {
+            "原始资料摘录": "title: 售后规则；answer: [2026-05-03T19:06:31] 客户: 群资料：新增2024款理想L6 Pro，预算23万内，适合家庭，增程SUV，库存1台，客户问权益时转人工。 演示批次：CHEJIN_DEMO_20260503_203628 [2026-05-03T19:07:31] 客户: 群提醒：二手车过户通常要核身份证明、机动车登记证书、行驶证和号牌，异地迁入先查当地政策。 演示批次：CHEJIN_DEMO_20260503_203628 [2026-05-03T19:08:31] 客户: 客户王总问GL8商务接待，重点看内饰磨损、二排座椅、保养记录和试乘。 演示批次：CHEJIN_DEMO_20260503_203628 [2026-05-03T19:09:31] 客户: 新能源"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": false,
+          "requires_handoff": true,
+          "risk_level": "warning"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "pending",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "",
+      "status": "rule_fallback_after_llm",
+      "reason": "policies_rules_used_after_llm_unavailable_or_invalid",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_3232f5a1792eaec6ff2e",
+    "source_raw_message_ids": [
+      "raw_msg_4413bcdbb5f348a37ddc",
+      "raw_msg_6d57a1d7de38d0f24a97",
+      "raw_msg_944e47a9dece3d827b75",
+      "raw_msg_9881bfeb18fd7f59bee3",
+      "raw_msg_c82500ff3076966ea89c",
+      "raw_msg_e7ed5382b2daf1d8980e"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_4dfc6ec9a32e5644",
+      "chunk_count": 1,
+      "query": "建议新增/更新政策规则：售后规则\ntitle: 售后规则；answer: [2026-05-03T19:06:31] 客户: 群资料：新增2024款理想L6 Pro，预算23万内，适合家庭，增程SUV，库存1台，客户问权益时转人工。 演示批次：CHEJIN_DEMO_20260503_203628 [2026-05-03T19:07:31] 客户: 群提醒：二手车过户通常要核身份证明、机动车登记证书、行驶证和号牌，异地迁入先查当地政策。 演示批次：CHEJIN_DEMO_20260503_203628 [2026-05-03T19:08:31] 客户: 客户王总问GL8商务接待，重点看内饰磨损、二排座椅、保养记录和试乘。 演示批次：CHEJIN_DEMO_20260503_203628 [2026-05-03T19:09:31] 客户: 新能源\n售后规则\n[2026-05-03T19:06:31] 客户: 群资料：新增2024款理想L6 Pro，预算23万内，适合家庭，增程SUV，库存1台，客户问权益时转人工。 演示批次：CHEJIN_DEMO_20260503_203628 [2026-05-03T19:07:31] 客户: 群提醒：二手车过户通常要核身份证明、机动车登记证书、行驶证和号牌，异地迁入先查当地政策。 演示批次：CHEJIN_DEMO_20260503_203628 [2026-05-03T19:08:31] 客户: 客户王总问GL8商务接待，重点看内饰磨损、二排座椅、保养记录和试乘。 演示批次：CHEJIN_DEMO_20260503_203628 [2026-05-03T19:09:31] 客户: 新能源客户追问电池健康度、三电质保、续航衰减，一律让销售结合检测报告回复。 演示批次：CHEJIN_DEMO_20260503_203628 [2026-05-03T19:10:31] 客户: 边界噪音 CHEJIN_DEMO_20260503_203628：今晚大家记得下班关灯，这条不应该成为正式知识。 演示批次：CHEJIN_DEMO_20260503_203",
+      "hits": [
+        {
+          "chunk_id": "chunk_4ca927d06003fa77",
+          "source_id": "source_4dfc6ec9a32e5644",
+          "score": 0.916,
+          "category": "group",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.5896,
+            "semantic": 0.2764,
+            "vector": 0.14,
+            "vector_similarity": 0.9723,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.08,
+            "final": 0.916
+          },
+          "text": "[2026-05-03T19:06:31] 客户: 群资料：新增2024款理想L6 Pro，预算23万内，适合家庭，增程SUV，库存1台，客户问权益时转人工。\n演示批次：CHEJIN_DEMO_20260503_203628\n[2026-05-03T19:07:31] 客户: 群提醒：二手车过户通常要核身份证明、机动车登记证书、行驶证和号牌，异地迁入先查当地政策。\n演示批次：CHEJIN_DEMO_20260503_203628\n[2026-05-03T19:08:31] 客户: 客户王总问GL8商务接待，重点看内"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_f75908d15ff51ac90ddc",
+    "source_chain": [
+      "raw_wechat_group",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "cleanup_notes": [
+      {
+        "at": "2026-05-04T00:00:00",
+        "by": "codex_source_authority_cleanup",
+        "reason": "??/????????????????? RAG ????????????????",
+        "removed_review_hits": 3,
+        "removed_source_hits": 3
+      }
+    ],
+    "previous_reject_reason": "legacy_auto_candidate_cleanup_20260504: ???????????????????????RAG?????????????????",
+    "previous_rejected_at": "2026-05-04T18:41:18",
+    "updated_at": "2026-05-04T18:58:38",
+    "reopened_at": "2026-05-04T18:58:38",
+    "reopened_by": "codex_test_seed",
+    "reopened_reason": "direct test seed: restored as pending candidate for manual review regression",
+    "test_seed_direct_fill": true
+  },
+  "suggested_tests": [
+    {
+      "scenario": "after_sales",
+      "assertion": "入库后应能按关键词回答该政策；高风险内容必须转人工。"
+    }
+  ],
+  "test_seed": {
+    "seed_id": "direct_test_fill_20260504_v2",
+    "direct_fill": true
+  }
+}

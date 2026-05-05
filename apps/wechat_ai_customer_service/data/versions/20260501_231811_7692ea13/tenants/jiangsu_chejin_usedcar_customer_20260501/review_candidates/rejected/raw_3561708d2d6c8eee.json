@@ -1,0 +1,282 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_3561708d2d6c8eee",
+  "generated_at": "2026-05-01T16:16:28",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_978e8ff41b88e3cb0e27.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "title: 待分类规则；answer: [2026-05-01T16:16:28] self: 客户资料 电话：13900001111 预算：8万 车型：自动挡省油代步；keywords: ['unknown']",
+    "content_sha256": "56712ac10cf0a78b85bc292c3d63947b1b679bb108e9c814a076f1c8467f71c3",
+    "type": "raw_wechat_private",
+    "raw_batch_id": "raw_batch_978e8ff41b88e3cb0e27",
+    "conversation_id": "conv_54a96e57c70563ab9c",
+    "raw_message_ids": [
+      "raw_msg_4a071ebb5582edc45fe6"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_f8f9bde0950f9d77",
+        "source_id": "source_c1a953fdb6019e66",
+        "score": 0.7294,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.3826,
+          "semantic": 0.2168,
+          "vector": 0.14,
+          "vector_similarity": 0.7906,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.7294
+        },
+        "text": "[2026-05-01T16:16:28] self: 客户资料\n电话：13900001111\n预算：8万\n车型：自动挡省油代步"
+      },
+      {
+        "chunk_id": "chunk_69760b84cbbe7bb3",
+        "source_id": "source_b594b306434f7e0e",
+        "score": 0.574,
+        "category": "chats",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2935,
+          "semantic": 0.1781,
+          "vector": 0.1024,
+          "vector_similarity": 0.5691,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.0,
+          "risk_penalty": 0.0,
+          "final": 0.574
+        },
+        "text": "聊天记录：江苏车金预算推荐话术 CHEJIN_20260501_161415\n客户：我从抖音直播来的，8万左右想买自动挡省油代步车，有什么推荐？\n客服：您这个预算可以先看凯美瑞、思域和秦PLUS DM-i。凯美瑞偏家用稳、省心；思域更年轻；秦PLUS更省油。您是在南京看车吗？是否考虑贷款或置换？\n意图标签：预算推荐,车源推荐,抖音线索\n聊天记录：江苏车金置换话术 CHEJIN_20260501_161415\n客户：我有一台老朗逸想置换。\n客服：可以的，麻烦补充上牌年份、公里数、车况、所在城市和是否有贷款，我先帮您记"
+      },
+      {
+        "chunk_id": "chunk_0365abad8c2c56cf",
+        "source_id": "source_49df52a6b3a41e40",
+        "score": 0.5739,
+        "category": "chats",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2935,
+          "semantic": 0.1781,
+          "vector": 0.1023,
+          "vector_similarity": 0.5682,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.0,
+          "risk_penalty": 0.0,
+          "final": 0.5739
+        },
+        "text": "聊天记录：江苏车金预算推荐话术 CHEJIN_20260501_161529\n客户：我从抖音直播来的，8万左右想买自动挡省油代步车，有什么推荐？\n客服：您这个预算可以先看凯美瑞、思域和秦PLUS DM-i。凯美瑞偏家用稳、省心；思域更年轻；秦PLUS更省油。您是在南京看车吗？是否考虑贷款或置换？\n意图标签：预算推荐,车源推荐,抖音线索\n聊天记录：江苏车金置换话术 CHEJIN_20260501_161529\n客户：我有一台老朗逸想置换。\n客服：可以的，麻烦补充上牌年份、公里数、车况、所在城市和是否有贷款，我先帮您记"
+      },
+      {
+        "chunk_id": "chunk_a34c290cba4c97a0",
+        "source_id": "source_1ade257ca2a38bcd",
+        "score": 0.5738,
+        "category": "chats",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2935,
+          "semantic": 0.1781,
+          "vector": 0.1022,
+          "vector_similarity": 0.5678,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.0,
+          "risk_penalty": 0.0,
+          "final": 0.5738
+        },
+        "text": "聊天记录：江苏车金预算推荐话术 CHEJIN_20260501_161159\n客户：我从抖音直播来的，8万左右想买自动挡省油代步车，有什么推荐？\n客服：您这个预算可以先看凯美瑞、思域和秦PLUS DM-i。凯美瑞偏家用稳、省心；思域更年轻；秦PLUS更省油。您是在南京看车吗？是否考虑贷款或置换？\n意图标签：预算推荐,车源推荐,抖音线索\n聊天记录：江苏车金置换话术 CHEJIN_20260501_161159\n客户：我有一台老朗逸想置换。\n客服：可以的，麻烦补充上牌年份、公里数、车况、所在城市和是否有贷款，我先帮您记"
+      }
+    ]
+  },
+  "detected_tags": [
+    "unknown",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "policies",
+    "change_type": "upsert_policy",
+    "summary": "建议新增/更新政策规则：待分类规则",
+    "suggested_fields": {
+      "title": "待分类规则",
+      "policy_type": "other",
+      "keywords": [
+        "unknown"
+      ],
+      "answer": "[2026-05-01T16:16:28] self: 客户资料 电话：13900001111 预算：8万 车型：自动挡省油代步",
+      "allow_auto_reply": true,
+      "requires_handoff": false,
+      "operator_alert": false,
+      "risk_level": "normal",
+      "additional_details": {
+        "原始资料摘录": "title: 待分类规则；answer: [2026-05-01T16:16:28] self: 客户资料 电话：13900001111 预算：8万 车型：自动挡省油代步；keywords: ['unknown']"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "policies",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "policies",
+        "id": "item_773ebc7f76ba",
+        "status": "active",
+        "source": {
+          "type": "raw_upload",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_978e8ff41b88e3cb0e27.txt",
+          "candidate_id": "raw_3561708d2d6c8eee"
+        },
+        "data": {
+          "title": "待分类规则",
+          "policy_type": "other",
+          "keywords": [
+            "unknown"
+          ],
+          "answer": "[2026-05-01T16:16:28] self: 客户资料 电话：13900001111 预算：8万 车型：自动挡省油代步",
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "operator_alert": false,
+          "risk_level": "normal",
+          "additional_details": {
+            "原始资料摘录": "title: 待分类规则；answer: [2026-05-01T16:16:28] self: 客户资料 电话：13900001111 预算：8万 车型：自动挡省油代步；keywords: ['unknown']"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "rejected",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "source_raw_batch_id": "raw_batch_978e8ff41b88e3cb0e27",
+    "source_raw_message_ids": [
+      "raw_msg_4a071ebb5582edc45fe6"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_c1a953fdb6019e66",
+      "chunk_count": 1,
+      "query": "建议新增/更新政策规则：待分类规则\ntitle: 待分类规则；answer: [2026-05-01T16:16:28] self: 客户资料 电话：13900001111 预算：8万 车型：自动挡省油代步；keywords: ['unknown']\n待分类规则\n[2026-05-01T16:16:28] self: 客户资料 电话：13900001111 预算：8万 车型：自动挡省油代步",
+      "hits": [
+        {
+          "chunk_id": "chunk_f8f9bde0950f9d77",
+          "source_id": "source_c1a953fdb6019e66",
+          "score": 0.7294,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.3826,
+            "semantic": 0.2168,
+            "vector": 0.14,
+            "vector_similarity": 0.7906,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.7294
+          },
+          "text": "[2026-05-01T16:16:28] self: 客户资料\n电话：13900001111\n预算：8万\n车型：自动挡省油代步"
+        },
+        {
+          "chunk_id": "chunk_69760b84cbbe7bb3",
+          "source_id": "source_b594b306434f7e0e",
+          "score": 0.574,
+          "category": "chats",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2935,
+            "semantic": 0.1781,
+            "vector": 0.1024,
+            "vector_similarity": 0.5691,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.0,
+            "risk_penalty": 0.0,
+            "final": 0.574
+          },
+          "text": "聊天记录：江苏车金预算推荐话术 CHEJIN_20260501_161415\n客户：我从抖音直播来的，8万左右想买自动挡省油代步车，有什么推荐？\n客服：您这个预算可以先看凯美瑞、思域和秦PLUS DM-i。凯美瑞偏家用稳、省心；思域更年轻；秦PLUS更省油。您是在南京看车吗？是否考虑贷款或置换？\n意图标签：预算推荐,车源推荐,抖音线索\n聊天记录：江苏车金置换话术 CHEJIN_20260501_161415\n客户：我有一台老朗逸想置换。\n客服：可以的，麻烦补充上牌年份、公里数、车况、所在城市和是否有贷款，我先帮您记"
+        },
+        {
+          "chunk_id": "chunk_0365abad8c2c56cf",
+          "source_id": "source_49df52a6b3a41e40",
+          "score": 0.5739,
+          "category": "chats",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2935,
+            "semantic": 0.1781,
+            "vector": 0.1023,
+            "vector_similarity": 0.5682,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.0,
+            "risk_penalty": 0.0,
+            "final": 0.5739
+          },
+          "text": "聊天记录：江苏车金预算推荐话术 CHEJIN_20260501_161529\n客户：我从抖音直播来的，8万左右想买自动挡省油代步车，有什么推荐？\n客服：您这个预算可以先看凯美瑞、思域和秦PLUS DM-i。凯美瑞偏家用稳、省心；思域更年轻；秦PLUS更省油。您是在南京看车吗？是否考虑贷款或置换？\n意图标签：预算推荐,车源推荐,抖音线索\n聊天记录：江苏车金置换话术 CHEJIN_20260501_161529\n客户：我有一台老朗逸想置换。\n客服：可以的，麻烦补充上牌年份、公里数、车况、所在城市和是否有贷款，我先帮您记"
+        },
+        {
+          "chunk_id": "chunk_a34c290cba4c97a0",
+          "source_id": "source_1ade257ca2a38bcd",
+          "score": 0.5738,
+          "category": "chats",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2935,
+            "semantic": 0.1781,
+            "vector": 0.1022,
+            "vector_similarity": 0.5678,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.0,
+            "risk_penalty": 0.0,
+            "final": 0.5738
+          },
+          "text": "聊天记录：江苏车金预算推荐话术 CHEJIN_20260501_161159\n客户：我从抖音直播来的，8万左右想买自动挡省油代步车，有什么推荐？\n客服：您这个预算可以先看凯美瑞、思域和秦PLUS DM-i。凯美瑞偏家用稳、省心；思域更年轻；秦PLUS更省油。您是在南京看车吗？是否考虑贷款或置换？\n意图标签：预算推荐,车源推荐,抖音线索\n聊天记录：江苏车金置换话术 CHEJIN_20260501_161159\n客户：我有一台老朗逸想置换。\n客服：可以的，麻烦补充上牌年份、公里数、车况、所在城市和是否有贷款，我先帮您记"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rejected_at": "2026-05-01T22:05:56",
+    "reason": "?????????????? rejected ??"
+  },
+  "suggested_tests": [
+    {
+      "scenario": "other",
+      "assertion": "入库后应能按关键词回答该政策；高风险内容必须转人工。"
+    }
+  ]
+}

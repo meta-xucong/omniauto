@@ -1,0 +1,327 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_e70193a994828e00",
+  "generated_at": "2026-05-03T20:41:43",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_31e15602025f4d137a02.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "title: 优惠议价规则；answer: [2026-05-03T19:16:31] 客户: 手动粘贴：2022款大众途观L 330TSI两驱舒享版，表显4.3万公里，价格12.38万，SUV，客户问异地提档要人工确认。 演示批次：CHEJIN_DEMO_20260503_203628 [2026-05-03T19:17:31] 客户: 手动粘贴：客户问最低价时，AI只能说明二手车一车一况，最终优惠由销售结合到店和付款方式确认。 演示批次：CHEJIN_DEMO_20260503_203628 [2026-05-03T19:18:31] 客户: 手动粘贴：置换客户必须收集旧车品牌车型、上牌时间、公里数、是否贷款、城市、期望价。 演示批次：CHEJIN_DEMO_20260503_203628 [2026-05",
+    "content_sha256": "4a78a9ed09e525ae1ffe2069732a94576d75d0ba5940b92a5eae90cc0f3477b9",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_31e15602025f4d137a02",
+    "conversation_id": "chejin_demo_file_transfer_chejin_demo_20260503_203628",
+    "raw_message_ids": [
+      "raw_msg_8555ccf0a580354cf9d5",
+      "raw_msg_a0ed05fe3e825f5b5373",
+      "raw_msg_cb28c08dca01087f89f1",
+      "raw_msg_6570f748ce44c14492c7",
+      "raw_msg_4f3f36b93256a00c5ac8"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_b9c74ae4ba1475b5",
+        "source_id": "source_b711681b0b62e88e",
+        "score": 0.9101,
+        "category": "file_transfer",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.5795,
+          "semantic": 0.2806,
+          "vector": 0.14,
+          "vector_similarity": 0.9823,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.08,
+          "final": 0.9101
+        },
+        "text": "[2026-05-03T19:16:31] 客户: 手动粘贴：2022款大众途观L 330TSI两驱舒享版，表显4.3万公里，价格12.38万，SUV，客户问异地提档要人工确认。\n演示批次：CHEJIN_DEMO_20260503_203628\n[2026-05-03T19:17:31] 客户: 手动粘贴：客户问最低价时，AI只能说明二手车一车一况，最终优惠由销售结合到店和付款方式确认。\n演示批次：CHEJIN_DEMO_20260503_203628\n[2026-05-03T19:18:31] 客户: 手动粘贴："
+      },
+      {
+        "chunk_id": "chunk_9a0d34760ad6ccae",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5515,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2029,
+          "semantic": 0.1386,
+          "vector": 0.14,
+          "vector_similarity": 0.8426,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5515
+        },
+        "text": "工确认。\n售后/风险：CVT变速箱状态、保养和车况以检测报告为准。\n推荐话术：适合6到7万预算、练手、家用代步和省油需求。\n商品名称：2019款大众朗逸1.5L自动舒适版\n型号/SKU：CHEJIN-LAVIDA-2019\n类目：二手车/紧凑型轿车\n关键词：朗逸、大众朗逸、德系代步、置换\n规格：2019年上牌，表显6.9万公里，1.5L自动挡，白色，通勤耐用。\n价格：5.98万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：易损件和保养历史以"
+      },
+      {
+        "chunk_id": "chunk_b73fd7e249648300",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5481,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2005,
+          "semantic": 0.1376,
+          "vector": 0.14,
+          "vector_similarity": 0.819,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5481
+        },
+        "text": "。\n商品名称：2022款五菱宏光MINIEV马卡龙臻享款\n型号/SKU：CHEJIN-MINIEV-2022\n类目：二手车/微型电动车\n关键词：宏光MINIEV、五菱mini、代步电车、练手车\n规格：2022年上牌，表显1.6万公里，纯电微型车，粉色，城市通勤。\n价格：2.88万，库存：1台\n物流/过户：微型电动车跨城运输和充电条件需人工确认。\n售后/风险：续航、电池和低温表现以检测报告和使用场景说明为准。\n推荐话术：适合短途通勤、练手、接送孩子，长途或高速需求不推荐。\n商品名称：2020款本田雅阁260TURBO"
+      },
+      {
+        "chunk_id": "chunk_d2ec0cebcf16c10c",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5472,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2005,
+          "semantic": 0.1367,
+          "vector": 0.14,
+          "vector_similarity": 0.8283,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5472
+        },
+        "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+      }
+    ],
+    "original_type": "raw_wechat_file_transfer",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_cb8030b194813b7bd0cc",
+    "experience_id": "rag_exp_cb8030b194813b7bd0cc"
+  },
+  "detected_tags": [
+    "discount",
+    "invoice",
+    "payment",
+    "quote",
+    "rag_experience",
+    "wechat_file_transfer"
+  ],
+  "proposal": {
+    "target_category": "policies",
+    "change_type": "upsert_policy",
+    "summary": "建议新增/更新政策规则：优惠议价规则",
+    "suggested_fields": {
+      "title": "优惠议价规则",
+      "policy_type": "discount",
+      "keywords": [
+        "discount",
+        "invoice",
+        "payment",
+        "quote"
+      ],
+      "answer": "[2026-05-03T19:16:31] 客户: 手动粘贴：2022款大众途观L 330TSI两驱舒享版，表显4.3万公里，价格12.38万，SUV，客户问异地提档要人工确认。 演示批次：CHEJIN_DEMO_20260503_203628 [2026-05-03T19:17:31] 客户: 手动粘贴：客户问最低价时，AI只能说明二手车一车一况，最终优惠由销售结合到店和付款方式确认。 演示批次：CHEJIN_DEMO_20260503_203628 [2026-05-03T19:18:31] 客户: 手动粘贴：置换客户必须收集旧车品牌车型、上牌时间、公里数、是否贷款、城市、期望价。 演示批次：CHEJIN_DEMO_20260503_203628 [2026-05-03T19:19:31] 客户: 手动粘贴：发票和过户费用不能统一承诺包干，开票主体、金额、费用明细都要人工核对。 演示批次：CHEJIN_DEMO_20260503_203628 [2026-05-03T19:20:31] 客户: 手动粘贴：客户要求人工客服，统一回复已经转接人工，请稍等片刻。 演示批次：CHEJIN_DEMO_20260503_203628",
+      "allow_auto_reply": false,
+      "requires_handoff": true,
+      "operator_alert": true,
+      "risk_level": "warning",
+      "applicability_scope": "global",
+      "additional_details": {
+        "原始资料摘录": "title: 优惠议价规则；answer: [2026-05-03T19:16:31] 客户: 手动粘贴：2022款大众途观L 330TSI两驱舒享版，表显4.3万公里，价格12.38万，SUV，客户问异地提档要人工确认。 演示批次：CHEJIN_DEMO_20260503_203628 [2026-05-03T19:17:31] 客户: 手动粘贴：客户问最低价时，AI只能说明二手车一车一况，最终优惠由销售结合到店和付款方式确认。 演示批次：CHEJIN_DEMO_20260503_203628 [2026-05-03T19:18:31] 客户: 手动粘贴：置换客户必须收集旧车品牌车型、上牌时间、公里数、是否贷款、城市、期望价。 演示批次：CHEJIN_DEMO_20260503_203628 [2026-05"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [
+      "包含高风险关键词：最低价"
+    ],
+    "formal_patch": {
+      "target_category": "policies",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "policies",
+        "id": "item_5db8b24e6cfe",
+        "status": "active",
+        "source": {
+          "type": "raw_upload",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_31e15602025f4d137a02.txt",
+          "candidate_id": "raw_e70193a994828e00",
+          "rag_experience_id": "rag_exp_cb8030b194813b7bd0cc",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_file_transfer"
+        },
+        "data": {
+          "title": "优惠议价规则",
+          "policy_type": "discount",
+          "keywords": [
+            "discount",
+            "invoice",
+            "payment",
+            "quote"
+          ],
+          "answer": "[2026-05-03T19:16:31] 客户: 手动粘贴：2022款大众途观L 330TSI两驱舒享版，表显4.3万公里，价格12.38万，SUV，客户问异地提档要人工确认。 演示批次：CHEJIN_DEMO_20260503_203628 [2026-05-03T19:17:31] 客户: 手动粘贴：客户问最低价时，AI只能说明二手车一车一况，最终优惠由销售结合到店和付款方式确认。 演示批次：CHEJIN_DEMO_20260503_203628 [2026-05-03T19:18:31] 客户: 手动粘贴：置换客户必须收集旧车品牌车型、上牌时间、公里数、是否贷款、城市、期望价。 演示批次：CHEJIN_DEMO_20260503_203628 [2026-05-03T19:19:31] 客户: 手动粘贴：发票和过户费用不能统一承诺包干，开票主体、金额、费用明细都要人工核对。 演示批次：CHEJIN_DEMO_20260503_203628 [2026-05-03T19:20:31] 客户: 手动粘贴：客户要求人工客服，统一回复已经转接人工，请稍等片刻。 演示批次：CHEJIN_DEMO_20260503_203628",
+          "allow_auto_reply": false,
+          "requires_handoff": true,
+          "operator_alert": true,
+          "risk_level": "warning",
+          "applicability_scope": "global",
+          "additional_details": {
+            "原始资料摘录": "title: 优惠议价规则；answer: [2026-05-03T19:16:31] 客户: 手动粘贴：2022款大众途观L 330TSI两驱舒享版，表显4.3万公里，价格12.38万，SUV，客户问异地提档要人工确认。 演示批次：CHEJIN_DEMO_20260503_203628 [2026-05-03T19:17:31] 客户: 手动粘贴：客户问最低价时，AI只能说明二手车一车一况，最终优惠由销售结合到店和付款方式确认。 演示批次：CHEJIN_DEMO_20260503_203628 [2026-05-03T19:18:31] 客户: 手动粘贴：置换客户必须收集旧车品牌车型、上牌时间、公里数、是否贷款、城市、期望价。 演示批次：CHEJIN_DEMO_20260503_203628 [2026-05"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": false,
+          "requires_handoff": true,
+          "risk_level": "warning"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [
+      "包含高风险关键词：最低价"
+    ],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "pending",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "",
+      "status": "rule_fallback_after_llm",
+      "reason": "policies_rules_used_after_llm_unavailable_or_invalid",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_31e15602025f4d137a02",
+    "source_raw_message_ids": [
+      "raw_msg_8555ccf0a580354cf9d5",
+      "raw_msg_a0ed05fe3e825f5b5373",
+      "raw_msg_cb28c08dca01087f89f1",
+      "raw_msg_6570f748ce44c14492c7",
+      "raw_msg_4f3f36b93256a00c5ac8"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_b711681b0b62e88e",
+      "chunk_count": 1,
+      "query": "建议新增/更新政策规则：优惠议价规则\ntitle: 优惠议价规则；answer: [2026-05-03T19:16:31] 客户: 手动粘贴：2022款大众途观L 330TSI两驱舒享版，表显4.3万公里，价格12.38万，SUV，客户问异地提档要人工确认。 演示批次：CHEJIN_DEMO_20260503_203628 [2026-05-03T19:17:31] 客户: 手动粘贴：客户问最低价时，AI只能说明二手车一车一况，最终优惠由销售结合到店和付款方式确认。 演示批次：CHEJIN_DEMO_20260503_203628 [2026-05-03T19:18:31] 客户: 手动粘贴：置换客户必须收集旧车品牌车型、上牌时间、公里数、是否贷款、城市、期望价。 演示批次：CHEJIN_DEMO_20260503_203628 [2026-05\n优惠议价规则\n[2026-05-03T19:16:31] 客户: 手动粘贴：2022款大众途观L 330TSI两驱舒享版，表显4.3万公里，价格12.38万，SUV，客户问异地提档要人工确认。 演示批次：CHEJIN_DEMO_20260503_203628 [2026-05-03T19:17:31] 客户: 手动粘贴：客户问最低价时，AI只能说明二手车一车一况，最终优惠由销售结合到店和付款方式确认。 演示批次：CHEJIN_DEMO_20260503_203628 [2026-05-03T19:18:31] 客户: 手动粘贴：置换客户必须收集旧车品牌车型、上牌时间、公里数、是否贷款、城市、期望价。 演示批次：CHEJIN_DEMO_20260503_203628 [2026-05-03T19:19:31] 客户: 手动粘贴：发票和过户费用不能统一承诺包干，开票主体、金额、费用明细都要人工核对。 演示批次：CHEJIN_DEMO_20260503_203628 [2026-05-03T19:20:31] 客户: 手动粘贴：客户要求人工客服，统一回复已经转接人工，请稍等片刻。 演示批次：CHEJIN_DEMO_20260503_203628",
+      "hits": [
+        {
+          "chunk_id": "chunk_b9c74ae4ba1475b5",
+          "source_id": "source_b711681b0b62e88e",
+          "score": 0.9101,
+          "category": "file_transfer",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.5795,
+            "semantic": 0.2806,
+            "vector": 0.14,
+            "vector_similarity": 0.9823,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.08,
+            "final": 0.9101
+          },
+          "text": "[2026-05-03T19:16:31] 客户: 手动粘贴：2022款大众途观L 330TSI两驱舒享版，表显4.3万公里，价格12.38万，SUV，客户问异地提档要人工确认。\n演示批次：CHEJIN_DEMO_20260503_203628\n[2026-05-03T19:17:31] 客户: 手动粘贴：客户问最低价时，AI只能说明二手车一车一况，最终优惠由销售结合到店和付款方式确认。\n演示批次：CHEJIN_DEMO_20260503_203628\n[2026-05-03T19:18:31] 客户: 手动粘贴："
+        },
+        {
+          "chunk_id": "chunk_9a0d34760ad6ccae",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5515,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2029,
+            "semantic": 0.1386,
+            "vector": 0.14,
+            "vector_similarity": 0.8426,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5515
+          },
+          "text": "工确认。\n售后/风险：CVT变速箱状态、保养和车况以检测报告为准。\n推荐话术：适合6到7万预算、练手、家用代步和省油需求。\n商品名称：2019款大众朗逸1.5L自动舒适版\n型号/SKU：CHEJIN-LAVIDA-2019\n类目：二手车/紧凑型轿车\n关键词：朗逸、大众朗逸、德系代步、置换\n规格：2019年上牌，表显6.9万公里，1.5L自动挡，白色，通勤耐用。\n价格：5.98万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：易损件和保养历史以"
+        },
+        {
+          "chunk_id": "chunk_b73fd7e249648300",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5481,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2005,
+            "semantic": 0.1376,
+            "vector": 0.14,
+            "vector_similarity": 0.819,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5481
+          },
+          "text": "。\n商品名称：2022款五菱宏光MINIEV马卡龙臻享款\n型号/SKU：CHEJIN-MINIEV-2022\n类目：二手车/微型电动车\n关键词：宏光MINIEV、五菱mini、代步电车、练手车\n规格：2022年上牌，表显1.6万公里，纯电微型车，粉色，城市通勤。\n价格：2.88万，库存：1台\n物流/过户：微型电动车跨城运输和充电条件需人工确认。\n售后/风险：续航、电池和低温表现以检测报告和使用场景说明为准。\n推荐话术：适合短途通勤、练手、接送孩子，长途或高速需求不推荐。\n商品名称：2020款本田雅阁260TURBO"
+        },
+        {
+          "chunk_id": "chunk_d2ec0cebcf16c10c",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5472,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2005,
+            "semantic": 0.1367,
+            "vector": 0.14,
+            "vector_similarity": 0.8283,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5472
+          },
+          "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_cb8030b194813b7bd0cc",
+    "source_chain": [
+      "raw_wechat_file_transfer",
+      "rag_experience",
+      "review_candidate"
+    ]
+  },
+  "suggested_tests": [
+    {
+      "scenario": "discount",
+      "assertion": "入库后应能按关键词回答该政策；高风险内容必须转人工。"
+    }
+  ]
+}

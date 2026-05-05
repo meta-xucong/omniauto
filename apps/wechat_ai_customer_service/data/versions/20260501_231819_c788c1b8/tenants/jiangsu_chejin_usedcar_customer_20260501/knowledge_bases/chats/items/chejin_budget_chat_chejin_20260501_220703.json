@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "category_id": "chats",
+  "id": "chejin_budget_chat_chejin_20260501_220703",
+  "status": "active",
+  "source": {
+    "type": "test_fixture",
+    "batch_token": "CHEJIN_20260501_220703"
+  },
+  "data": {
+    "customer_message": "8万预算自动挡省油代步 CHEJIN_20260501_220703",
+    "service_reply": "可以优先看凯美瑞、思域、秦PLUS DM-i，先确认城市、贷款、置换和到店时间。",
+    "intent_tags": [
+      "scene_product",
+      "catalog",
+      "quote"
+    ],
+    "tone_tags": [
+      "专业",
+      "克制"
+    ],
+    "usable_as_template": true
+  },
+  "runtime": {
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "risk_level": "normal"
+  },
+  "review_state": {
+    "is_new": true,
+    "new_reason": "newly_added_formal_knowledge",
+    "marked_at": "2026-05-01T22:07:06",
+    "updated_at": "2026-05-01T22:07:06",
+    "read_at": "",
+    "read_by": "",
+    "source": {
+      "source_module": "jiangsu_chejin_test",
+      "target_category": "chats",
+      "item_id": "chejin_budget_chat_chejin_20260501_220703"
+    }
+  },
+  "metadata": {
+    "created_at": "2026-05-01T22:07:06",
+    "updated_at": "2026-05-01T22:07:06",
+    "created_by": "admin",
+    "updated_by": "admin"
+  }
+}

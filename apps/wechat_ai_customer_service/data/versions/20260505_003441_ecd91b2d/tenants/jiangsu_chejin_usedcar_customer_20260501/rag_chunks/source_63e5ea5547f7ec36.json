@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_63e5ea5547f7ec36",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "file_transfer",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_1be6edba6e5838b9acdc.txt",
+    "content_hash": "c7cd8b1547c23b86a36e1c952ea4910b",
+    "status": "active",
+    "created_at": "2026-05-03T08:25:36",
+    "updated_at": "2026-05-03T08:25:36"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_0b977700ab8d6a3f",
+      "source_id": "source_63e5ea5547f7ec36",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "file_transfer",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_1be6edba6e5838b9acdc.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-03 08:25:00] system: 08:25\n[2026-05-03T08:25:36] self: 聊天记录：记录员文件传输助手话术 LIVE_RECORDER_20260503_082131\n客户：我想买新能源通勤，能看秦PLUS吗？批次 LIVE_RECORDER_20260503_082131\n客服：可以先看秦PLUS DM-i，低油耗适合通勤；电池检测、当地迁入和金融方案都需要人工确认。\n意图标签：新能源通勤,车源推荐,金融边界",
+      "char_count": 234,
+      "status": "active",
+      "created_at": "2026-05-03T08:25:36"
+    }
+  ]
+}

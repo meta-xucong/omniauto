@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_c1a953fdb6019e66",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_978e8ff41b88e3cb0e27.txt",
+    "content_hash": "56712ac10cf0a78b85bc292c3d63947b",
+    "status": "active",
+    "created_at": "2026-05-01T16:16:28",
+    "updated_at": "2026-05-01T16:16:28"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_f8f9bde0950f9d77",
+      "source_id": "source_c1a953fdb6019e66",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_978e8ff41b88e3cb0e27.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-01T16:16:28] self: 客户资料\n电话：13900001111\n预算：8万\n车型：自动挡省油代步",
+      "char_count": 64,
+      "status": "active",
+      "created_at": "2026-05-01T16:16:28"
+    }
+  ]
+}

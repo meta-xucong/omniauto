@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "category_id": "product_rules",
+  "id": "chejin_accord_2020_260turbo_risk_rule",
+  "status": "active",
+  "source": {
+    "type": "demo_fixture",
+    "batch_token": "CHEJIN_DEMO_20260503_203628",
+    "domain": "used_car"
+  },
+  "data": {
+    "product_id": "chejin_accord_2020_260turbo",
+    "title": "本田雅阁260TURBO精英版风险边界",
+    "keywords": [
+      "2020款本田雅阁260TURBO精英版",
+      "漆面修复说明转人工",
+      "保证",
+      "赔付",
+      "CHEJIN_DEMO_20260503_203628"
+    ],
+    "answer": "2020款本田雅阁260TURBO精英版 的风险点包括：漆面修复说明转人工。客户要求最终承诺时必须人工确认。",
+    "allow_auto_reply": false,
+    "requires_handoff": true,
+    "handoff_reason": "product_specific_risk_boundary",
+    "additional_details": {
+      "关联商品": "2020款本田雅阁260TURBO精英版",
+      "演示批次": "CHEJIN_DEMO_20260503_203628"
+    }
+  },
+  "runtime": {
+    "allow_auto_reply": false,
+    "requires_handoff": true,
+    "risk_level": "high",
+    "operator_alert": true
+  },
+  "review_state": {
+    "is_new": true,
+    "new_reason": "newly_added_formal_knowledge",
+    "marked_at": "2026-05-03T20:36:28",
+    "updated_at": "2026-05-03T20:36:28",
+    "read_at": "",
+    "read_by": "",
+    "source": {
+      "source_module": "jiangsu_chejin_demo_seed",
+      "target_category": "product_rules",
+      "item_id": "chejin_accord_2020_260turbo_risk_rule"
+    }
+  },
+  "metadata": {
+    "created_at": "2026-05-03T20:36:28",
+    "updated_at": "2026-05-03T20:36:28",
+    "created_by": "admin",
+    "updated_by": "admin"
+  }
+}

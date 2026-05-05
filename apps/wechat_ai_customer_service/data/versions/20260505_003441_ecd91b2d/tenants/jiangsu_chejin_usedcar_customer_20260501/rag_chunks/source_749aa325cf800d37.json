@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_749aa325cf800d37",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_96586ceebc155d86c8c9.txt",
+    "content_hash": "9ddddf551bbcae178b1b4bd32bd3e3e0",
+    "status": "active",
+    "created_at": "2026-05-04T02:33:01",
+    "updated_at": "2026-05-04T02:33:01"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_c015a9440ea22351",
+      "source_id": "source_749aa325cf800d37",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_96586ceebc155d86c8c9.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-04T02:33:00] 许聪: 保时捷Macan那台是高端车吧，有什么风险要注意？",
+      "char_count": 51,
+      "status": "active",
+      "created_at": "2026-05-04T02:33:01"
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "category_id": "policies",
+  "id": "chejin_trade_in_chejin_20260501_220610",
+  "status": "archived",
+  "source": {
+    "type": "test_fixture",
+    "batch_token": "CHEJIN_20260501_220610"
+  },
+  "data": {
+    "title": "江苏车金置换资料收集",
+    "policy_type": "company",
+    "keywords": [
+      "置换",
+      "卖车",
+      "评估",
+      "旧车"
+    ],
+    "answer": "客户咨询置换时，AI 可以先收集旧车品牌车型、上牌年份、公里数、车况、所在城市和是否有贷款；估价、收车价和最终成交必须人工复核。",
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "operator_alert": false,
+    "risk_level": "normal"
+  },
+  "runtime": {
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "risk_level": "normal"
+  },
+  "review_state": {
+    "is_new": true,
+    "new_reason": "newly_added_formal_knowledge",
+    "marked_at": "2026-05-01T22:06:14",
+    "updated_at": "2026-05-01T22:06:14",
+    "read_at": "",
+    "read_by": "",
+    "source": {
+      "source_module": "jiangsu_chejin_test",
+      "target_category": "policies",
+      "item_id": "chejin_trade_in_chejin_20260501_220610"
+    }
+  },
+  "metadata": {
+    "created_at": "2026-05-01T22:06:14",
+    "updated_at": "2026-05-01T22:06:49",
+    "created_by": "admin",
+    "updated_by": "admin"
+  }
+}

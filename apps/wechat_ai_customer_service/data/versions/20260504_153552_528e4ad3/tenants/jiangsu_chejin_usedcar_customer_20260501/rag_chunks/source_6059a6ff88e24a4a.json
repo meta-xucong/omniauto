@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_6059a6ff88e24a4a",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "manual",
+    "category": "manual",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\jiangsu_chejin_used_car\\demo_materials\\CHEJIN_DEMO_20260503_203628\\manual_CHEJIN_DEMO_20260503_203628.md",
+    "content_hash": "93d9f16862dc8e189a7c43b317e0f877",
+    "status": "active",
+    "created_at": "2026-05-03T20:36:30",
+    "updated_at": "2026-05-03T20:36:30"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_bc85858031a5efd7",
+      "source_id": "source_6059a6ff88e24a4a",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "manual",
+      "category": "manual",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\test_artifacts\\jiangsu_chejin_used_car\\demo_materials\\CHEJIN_DEMO_20260503_203628\\manual_CHEJIN_DEMO_20260503_203628.md",
+      "chunk_index": 0,
+      "text": "# 风险边界与边界测试矩阵\n演示批次：CHEJIN_DEMO_20260503_203628\n边界矩阵：\n1. 客户只问车型推荐：可自动回复，需给出1到3个选择并追问预算、用途、城市。\n2. 客户问试驾、订金、最低价、金融包过：必须转人工。\n3. 客户问事故、水泡、火烧、调表、赔偿：必须转人工，不做保证。\n4. 客户问过户、异地迁入、发票、保险、费用：先解释大原则，再转人工确认明细。\n5. 客户发来商品资料或群聊内部规则：先入原始消息库，再形成RAG经验，再进入候选知识，最后人工确认。\n6. 客户发噪音、闲聊、和二手车无关的问题：可礼貌收束，不应升级为正式知识。\n7. 客户要求人工客服：直接记录并转人工，这类通用话术可被提炼为共享公共知识候选。",
+      "char_count": 326,
+      "status": "active",
+      "created_at": "2026-05-03T20:36:30"
+    }
+  ]
+}

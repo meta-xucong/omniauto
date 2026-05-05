@@ -1,0 +1,122 @@
+{
+  "schema_version": 1,
+  "candidate_id": "rag_promote_edc40acb05a5c9abc5e5",
+  "generated_at": "2026-05-04T22:46:06",
+  "source": {
+    "type": "rag_experience",
+    "experience_id": "rag_exp_98e88852c6521768025d",
+    "rag_hit": {},
+    "evidence_excerpt": "Intake -> RAG experience: raw_wechat_private/private, candidates=1, evidence={\"customer_message\": \"我不懂车，主要怕买到事故车，你怎么建议我问？\", \"tone_tags\": [\"焦虑\", \"求助\"], \"intent_tags\": [\"购车咨询…\n{\"customer_message\": \"我不懂车，主要怕买到事故车，你怎么建议我问？\", \"tone_tags\": [\"焦虑\", \"求助\"], \"intent_tags\": [\"购车咨询\", \"事故车鉴别\"], \"applicability_scope\": \"global\", \"additional_details\": {\"customer_name\": \"许聪\", \"timestamp\": \"2026-05-04T04:02:42\"}, \"product_id\": \"\", \"product_category\": \"\"}"
+  },
+  "detected_tags": [
+    "rag_experience",
+    "chats"
+  ],
+  "proposal": {
+    "target_category": "chats",
+    "change_type": "rag_experience_promote",
+    "summary": "从AI经验整理：我不懂车，主要怕买到事故车，你怎么建议我问？（聊天话术）",
+    "suggested_fields": {
+      "customer_message": "我不懂车，主要怕买到事故车，你怎么建议我问？",
+      "service_reply": "{\"customer_message\": \"我不懂车，主要怕买到事故车，你怎么建议我问？\", \"tone_tags\": [\"焦虑\", \"求助\"], \"intent_tags\": [\"购车咨询\", \"事故车鉴别\"], \"applicability_scope\": \"global\", \"additional_details\": {\"customer_name\": \"许聪\", \"timestamp\": \"2026-05-04T04:02:42\"}, \"product_id\": \"\", \"product_category\": \"\"}",
+      "intent_tags": [
+        "rag_experience"
+      ],
+      "tone_tags": [
+        "rag_reference"
+      ],
+      "additional_details": {
+        "rag_experience_id": "rag_exp_98e88852c6521768025d",
+        "source_chunk_id": null,
+        "source_id": null,
+        "source_text": ""
+      }
+    },
+    "formal_patch": {
+      "target_category": "chats",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "chats",
+        "id": "rag_item_2172e3e2f43e",
+        "status": "active",
+        "source": {
+          "type": "rag_experience",
+          "experience_id": "rag_exp_98e88852c6521768025d"
+        },
+        "data": {
+          "customer_message": "我不懂车，主要怕买到事故车，你怎么建议我问？",
+          "service_reply": "{\"customer_message\": \"我不懂车，主要怕买到事故车，你怎么建议我问？\", \"tone_tags\": [\"焦虑\", \"求助\"], \"intent_tags\": [\"购车咨询\", \"事故车鉴别\"], \"applicability_scope\": \"global\", \"additional_details\": {\"customer_name\": \"许聪\", \"timestamp\": \"2026-05-04T04:02:42\"}, \"product_id\": \"\", \"product_category\": \"\"}",
+          "intent_tags": [
+            "rag_experience"
+          ],
+          "tone_tags": [
+            "rag_reference"
+          ],
+          "additional_details": {
+            "rag_experience_id": "rag_exp_98e88852c6521768025d",
+            "source_chunk_id": null,
+            "source_id": null,
+            "source_text": ""
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "review": {
+    "status": "pending",
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "completeness_status": "ready",
+    "rag_experience_id": "rag_exp_98e88852c6521768025d",
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "rag_experience_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "model": "deepseek-v4-pro",
+      "status": "model_generated",
+      "reason": "model_generated",
+      "recommended_action": "promote_to_pending",
+      "formal_knowledge_comparison": {
+        "overlap_level": "none",
+        "matched_title": "",
+        "matched_category": "",
+        "matched_item_id": "",
+        "similarity": null,
+        "same_points": [],
+        "differences": [
+          "正式库无相关经验"
+        ],
+        "conclusion": "未被任何正式知识覆盖，适合作为待确认知识提交审核。"
+      },
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_authority": {
+      "allowed": true,
+      "category": "chats",
+      "source_types": [
+        "intake",
+        "private",
+        "raw_wechat_private"
+      ],
+      "observed_wechat": true,
+      "contains_model_reply": false,
+      "policy_version": "source_authority_v1"
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "missing_fields": [],
+    "missing_labels": [],
+    "warnings": [],
+    "confidence": 0.72,
+    "question": ""
+  }
+}

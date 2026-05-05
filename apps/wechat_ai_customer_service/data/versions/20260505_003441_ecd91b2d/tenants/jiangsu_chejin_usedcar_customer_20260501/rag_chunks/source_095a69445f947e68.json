@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_095a69445f947e68",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "group",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_61c69328f3571e61afe0.txt",
+    "content_hash": "fda25e38e3b659348fde59fd4d8b7fde",
+    "status": "active",
+    "created_at": "2026-05-03T08:28:57",
+    "updated_at": "2026-05-03T08:28:57"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_8853d46e12ff05ef",
+      "source_id": "source_095a69445f947e68",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "group",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_61c69328f3571e61afe0.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-03T08:28:56] self: 政策规则：江苏车金真机金融边界 CHEJIN_20260503_082804\n测试批次：CHEJIN_20260503_082804\n规则名称：新能源电池与金融审批转人工\n规则类型：contract\n触发关键词：电池检测,首付,月供,贷款包过,CHEJIN_20260503_082804\n答案：涉及新能源电池检测、首付月供、贷款通过率时必须转人工确认，不允许AI承诺结果。\n[2026-05-03T08:28:56] self: 边界噪音：CHEJIN_20260503_082804_LIVE_NOISE 今天群里测试心跳，不是车源知识。",
+      "char_count": 299,
+      "status": "active",
+      "created_at": "2026-05-03T08:28:57"
+    }
+  ]
+}

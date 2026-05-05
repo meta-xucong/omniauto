@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_164f9dfaecda7517",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_4303d744ce5d494452a1.txt",
+    "content_hash": "8c8939d32975c94fe10c9758dc1dd368",
+    "status": "active",
+    "created_at": "2026-05-04T02:16:32",
+    "updated_at": "2026-05-04T02:16:32"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_ef0bc0c6833c4d3c",
+      "source_id": "source_164f9dfaecda7517",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_4303d744ce5d494452a1.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-04T02:16:31] 许聪: CR-V还有几台？适合一家三口吗？\n[2026-05-04T02:16:31] 许聪: 汉兰达七座那台空间怎么样，带老人小孩合适吗？",
+      "char_count": 92,
+      "status": "active",
+      "created_at": "2026-05-04T02:16:32"
+    }
+  ]
+}

@@ -1,0 +1,321 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_ccbf74806dc9e730",
+  "generated_at": "2026-05-04T03:41:17",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_93a7760ed2a56db89a11.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"customer_message\": \"发票能不能少开一点金额？\", \"service_reply\": \"好的，我马上帮您转给销售同事，您方便留个电话吗？他们会尽快联系您。\", \"intent_tags\": [\"发票低开\", \"金额调整\"], \"tone_tags\": [\"客户咨询\", \"客服转接\"], \"linked_categories\": [\"policies\"], \"applicability_scope\": \"global\", \"usable_as_template\": true, \"additional_details\": {}, \"product_id\": \"\", \"product_category\": \"\"}",
+    "content_sha256": "550eaae8a88e1569a713663dfa83a97792e4079db86b30d4794617baa7019bae",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_93a7760ed2a56db89a11",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_b3f5f65a77fda7109a5b",
+      "raw_msg_d99c0cdeb5743fcce3b5"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_30f480baa8b23b10",
+        "source_id": "source_4df74352cf1c73ed",
+        "score": 0.797,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.4298,
+          "semantic": 0.2373,
+          "vector": 0.14,
+          "vector_similarity": 0.8766,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.797
+        },
+        "text": "[2026-05-04T03:40:44] self: [车金AI] 好的，我马上帮您转给销售同事，您方便留个电话吗？他们会尽快联系您。\n[2026-05-04T03:40:44] 许聪: 发票能不能少开一点金额？"
+      },
+      {
+        "chunk_id": "chunk_0d27f032aa229103",
+        "source_id": "source_58950035fd736f45",
+        "score": 0.5942,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2906,
+          "semantic": 0.1768,
+          "vector": 0.1368,
+          "vector_similarity": 0.7602,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.5942
+        },
+        "text": "[2026-05-04T03:24:34] 许聪: 绿本有没有抵押或者查封？\n[2026-05-04T03:24:34] 许聪: 表显公里数准不准？有没有调表？\n[2026-05-04T03:24:34] self: [车金AI] 营运性质有没有跑过网约车，我们得看登记证和实车记录来确认，我这边没法直接给准信。我马上帮您转给销售同事人工核实，方便留个电话吗？他们直接联系您。"
+      },
+      {
+        "chunk_id": "chunk_cea25e6c7bbc1d31",
+        "source_id": "source_6d72e3824a4b9f43",
+        "score": 0.5428,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2622,
+          "semantic": 0.1644,
+          "vector": 0.1261,
+          "vector_similarity": 0.7007,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.5428
+        },
+        "text": "[2026-05-04T03:23:13] self: [车金AI] 检测报告和保养、出险记录都需要销售同事调取核实后才能发给您，我这边没法直接发。我马上帮您转给销售，麻烦您留个电话，他们直接联系您发。\n[2026-05-04T03:23:13] 许聪: 这车是不是非营运？有没有跑过网约车？"
+      },
+      {
+        "chunk_id": "chunk_36daf911f8601554",
+        "source_id": "source_898b6fc06880eb7b",
+        "score": 0.5396,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2565,
+          "semantic": 0.162,
+          "vector": 0.1311,
+          "vector_similarity": 0.7281,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.5396
+        },
+        "text": "[2026-05-04T03:36:24] self: [车金AI] 贷款审批得看资方系统，征信情况也只是其中一项，我这边确实保证不了。我帮您转给销售同事直接对接银行或金融顾问，他们能给到更准的反馈，方便留个电话吗？\n[2026-05-04T03:36:24] 许聪: 首付和月供你直接给我算个确定数"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_c182dfead5f21d321562",
+    "experience_id": "rag_exp_c182dfead5f21d321562"
+  },
+  "detected_tags": [
+    "invoice",
+    "llm",
+    "rag_experience",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "chats",
+    "change_type": "llm_upsert_chats",
+    "summary": "客户询问发票能否少开金额，客服转接销售同事",
+    "suggested_fields": {
+      "customer_message": "发票能不能少开一点金额？",
+      "service_reply": "好的，我马上帮您转给销售同事，您方便留个电话吗？他们会尽快联系您。",
+      "intent_tags": [
+        "发票低开",
+        "金额调整"
+      ],
+      "tone_tags": [
+        "客户咨询",
+        "客服转接"
+      ],
+      "linked_categories": [
+        "policies"
+      ],
+      "applicability_scope": "global",
+      "usable_as_template": true,
+      "product_id": "",
+      "product_category": "",
+      "additional_details": {
+        "原始资料摘录": "{\"customer_message\": \"发票能不能少开一点金额？\", \"service_reply\": \"好的，我马上帮您转给销售同事，您方便留个电话吗？他们会尽快联系您。\", \"intent_tags\": [\"发票低开\", \"金额调整\"], \"tone_tags\": [\"客户咨询\", \"客服转接\"], \"linked_categories\": [\"policies\"], \"applicability_scope\": \"global\", \"usable_as_template\": true, \"additional_details\": {}, \"product_id\": \"\", \"product_category\": \"\"}"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "chats",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "chats",
+        "id": "invoice_reduction_query_20260504",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_93a7760ed2a56db89a11.txt",
+          "candidate_id": "raw_ccbf74806dc9e730",
+          "rag_experience_id": "rag_exp_c182dfead5f21d321562",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "customer_message": "发票能不能少开一点金额？",
+          "service_reply": "好的，我马上帮您转给销售同事，您方便留个电话吗？他们会尽快联系您。",
+          "intent_tags": [
+            "发票低开",
+            "金额调整"
+          ],
+          "tone_tags": [
+            "客户咨询",
+            "客服转接"
+          ],
+          "linked_categories": [
+            "policies"
+          ],
+          "applicability_scope": "global",
+          "usable_as_template": true,
+          "product_id": "",
+          "product_category": "",
+          "additional_details": {
+            "原始资料摘录": "{\"customer_message\": \"发票能不能少开一点金额？\", \"service_reply\": \"好的，我马上帮您转给销售同事，您方便留个电话吗？他们会尽快联系您。\", \"intent_tags\": [\"发票低开\", \"金额调整\"], \"tone_tags\": [\"客户咨询\", \"客服转接\"], \"linked_categories\": [\"policies\"], \"applicability_scope\": \"global\", \"usable_as_template\": true, \"additional_details\": {}, \"product_id\": \"\", \"product_category\": \"\"}"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "pending",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_93a7760ed2a56db89a11",
+    "source_raw_message_ids": [
+      "raw_msg_b3f5f65a77fda7109a5b",
+      "raw_msg_d99c0cdeb5743fcce3b5"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_4df74352cf1c73ed",
+      "chunk_count": 1,
+      "query": "客户询问发票能否少开金额，客服转接销售同事\n{\"customer_message\": \"发票能不能少开一点金额？\", \"service_reply\": \"好的，我马上帮您转给销售同事，您方便留个电话吗？他们会尽快联系您。\", \"intent_tags\": [\"发票低开\", \"金额调整\"], \"tone_tags\": [\"客户咨询\", \"客服转接\"], \"linked_categories\": [\"policies\"], \"applicability_scope\": \"global\", \"usable_as_template\": true, \"additional_details\": {}, \"product_id\": \"\", \"product_category\": \"\"}\n好的，我马上帮您转给销售同事，您方便留个电话吗？他们会尽快联系您。",
+      "hits": [
+        {
+          "chunk_id": "chunk_30f480baa8b23b10",
+          "source_id": "source_4df74352cf1c73ed",
+          "score": 0.797,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.4298,
+            "semantic": 0.2373,
+            "vector": 0.14,
+            "vector_similarity": 0.8766,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.797
+          },
+          "text": "[2026-05-04T03:40:44] self: [车金AI] 好的，我马上帮您转给销售同事，您方便留个电话吗？他们会尽快联系您。\n[2026-05-04T03:40:44] 许聪: 发票能不能少开一点金额？"
+        },
+        {
+          "chunk_id": "chunk_0d27f032aa229103",
+          "source_id": "source_58950035fd736f45",
+          "score": 0.5942,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2906,
+            "semantic": 0.1768,
+            "vector": 0.1368,
+            "vector_similarity": 0.7602,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.5942
+          },
+          "text": "[2026-05-04T03:24:34] 许聪: 绿本有没有抵押或者查封？\n[2026-05-04T03:24:34] 许聪: 表显公里数准不准？有没有调表？\n[2026-05-04T03:24:34] self: [车金AI] 营运性质有没有跑过网约车，我们得看登记证和实车记录来确认，我这边没法直接给准信。我马上帮您转给销售同事人工核实，方便留个电话吗？他们直接联系您。"
+        },
+        {
+          "chunk_id": "chunk_cea25e6c7bbc1d31",
+          "source_id": "source_6d72e3824a4b9f43",
+          "score": 0.5428,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2622,
+            "semantic": 0.1644,
+            "vector": 0.1261,
+            "vector_similarity": 0.7007,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.5428
+          },
+          "text": "[2026-05-04T03:23:13] self: [车金AI] 检测报告和保养、出险记录都需要销售同事调取核实后才能发给您，我这边没法直接发。我马上帮您转给销售，麻烦您留个电话，他们直接联系您发。\n[2026-05-04T03:23:13] 许聪: 这车是不是非营运？有没有跑过网约车？"
+        },
+        {
+          "chunk_id": "chunk_36daf911f8601554",
+          "source_id": "source_898b6fc06880eb7b",
+          "score": 0.5396,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2565,
+            "semantic": 0.162,
+            "vector": 0.1311,
+            "vector_similarity": 0.7281,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.5396
+          },
+          "text": "[2026-05-04T03:36:24] self: [车金AI] 贷款审批得看资方系统，征信情况也只是其中一项，我这边确实保证不了。我帮您转给销售同事直接对接银行或金融顾问，他们能给到更准的反馈，方便留个电话吗？\n[2026-05-04T03:36:24] 许聪: 首付和月供你直接给我算个确定数"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_c182dfead5f21d321562",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ]
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

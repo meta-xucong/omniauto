@@ -1,0 +1,328 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_2210f912dd8c4651",
+  "generated_at": "2026-05-03T04:39:25",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_2d1041ebc2cbf27d3798.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "title: 售后规则；answer: 政策规则：江苏车金记录员风控 CHEJIN_20260503_043922 测试批次：CHEJIN_20260503_043922 规则名称：保证无事故转人工 规则类型：contract 触发关键词：保证无事故,赔偿,CHEJIN_20260503_043922 答案：此类问题必须让销售人工按检测报告和合同回复。；keywords: ['after_sales', 'policie', 'product', 'quote', 'shipping']",
+    "content_sha256": "05bb7e3197096d011fa067ca2aea828b308496c200a803c895d89b768df51494",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_2d1041ebc2cbf27d3798",
+    "conversation_id": "conv_8022f0948f611f15b4",
+    "raw_message_ids": [
+      "raw_msg_4a660d06c5af6b39d3f8",
+      "raw_msg_f7ad2d27b57d83975699",
+      "raw_msg_2f934674b9d82f6bf30d"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_72a2df0e1c740766",
+        "source_id": "source_098f5277d6f2650a",
+        "score": 0.8875,
+        "category": "group",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.5486,
+          "semantic": 0.2889,
+          "vector": 0.14,
+          "vector_similarity": 0.8931,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.08,
+          "final": 0.8875
+        },
+        "text": "[2026-05-01 16:00:00] 销售A: 商品资料：江苏车金记录员完整车源 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_043922\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号：CHEJIN-REC-GL8-2020ES\n商品类目：二手车/MPV\n价格：17.60万\n单位：台\n库存：1\n发货：南京门店可看车，商务客户试乘需人工确认\n售后：车况以检测报告为准\n[2026-05-01 16:01:00] 销售B: 政策规则：江苏车金记录员风控 C"
+      },
+      {
+        "chunk_id": "chunk_03e9bbed1bb466e3",
+        "source_id": "source_702df8faf2e7d11f",
+        "score": 0.6578,
+        "category": "policies",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.3714,
+          "semantic": 0.2119,
+          "vector": 0.1395,
+          "vector_similarity": 0.7748,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.015,
+          "risk_penalty": 0.08,
+          "final": 0.6578
+        },
+        "text": "政策规则：江苏车金高意向转人工 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_043922\n规则名称：试驾到店与订金转人工\n规则类型：manual_required\n触发关键词：试驾,到店,订金,定金,今天看车,明天看车,销售联系,企业微信群\n答案：客户明确要求试驾、到店、订金、销售联系时，AI只做确认和记录，必须转人工或企业微信群承接，不能自行承诺车源保留和最终价格。\n允许自动回复：false\n必须转人工：true\n提醒人工客服：true\n风险等级：high\n政策规则：江"
+      },
+      {
+        "chunk_id": "chunk_320caa1062c4cf21",
+        "source_id": "source_55cce0d21fe7898c",
+        "score": 0.5659,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2457,
+          "semantic": 0.1573,
+          "vector": 0.1379,
+          "vector_similarity": 0.766,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.025,
+          "risk_penalty": 0.0,
+          "final": 0.5659
+        },
+        "text": "公里，2.0T自动挡，一手车源，支持到店试驾。\n价格：12.80万\n单位：台\n库存：1\n发货：高意向试驾需转人工确认门店和时间。\n售后：精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。\n商品资料：江苏车金二手车车源 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_043922\n商品名称：2022款比亚迪秦PLUS DM-i 55KM\n型号：CHEJIN-QINPLUS-2022DMI\n商品类目：二手车/新能源轿车\n别名关键词：秦PLUS,比亚迪秦,新能源,绿牌,混"
+      },
+      {
+        "chunk_id": "chunk_f33e20a058626f2d",
+        "source_id": "source_d262d55f8b02b514",
+        "score": 0.5616,
+        "category": "group",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2743,
+          "semantic": 0.1697,
+          "vector": 0.1276,
+          "vector_similarity": 0.7091,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.5616
+        },
+        "text": "[2026-05-02T04:24:40] self: 政策规则：记录员缺字段边界 LIVE_RECORDER_20260502_042340\n测试批次：LIVE_RECORDER_20260502_042340\n规则名称：新能源电池检测转人工\n规则类型：contract\n触发关键词：电池检测,首付,月供,贷款包过,LIVE_RECORDER_20260502_042340"
+      }
+    ],
+    "original_type": "raw_wechat_group",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_ff6407aa909a70eeef0a",
+    "experience_id": "rag_exp_ff6407aa909a70eeef0a"
+  },
+  "detected_tags": [
+    "after_sales",
+    "policie",
+    "product",
+    "quote",
+    "rag_experience",
+    "shipping",
+    "wechat_group_chat"
+  ],
+  "proposal": {
+    "target_category": "policies",
+    "change_type": "upsert_policy",
+    "summary": "建议新增/更新政策规则：售后规则",
+    "suggested_fields": {
+      "title": "售后规则",
+      "policy_type": "after_sales",
+      "keywords": [
+        "after_sales",
+        "policie",
+        "product",
+        "quote",
+        "shipping"
+      ],
+      "answer": "政策规则：江苏车金记录员风控 CHEJIN_20260503_043922 测试批次：CHEJIN_20260503_043922 规则名称：保证无事故转人工 规则类型：contract 触发关键词：保证无事故,赔偿,CHEJIN_20260503_043922 答案：此类问题必须让销售人工按检测报告和合同回复。",
+      "allow_auto_reply": false,
+      "requires_handoff": true,
+      "operator_alert": true,
+      "risk_level": "warning",
+      "applicability_scope": "global",
+      "additional_details": {
+        "原始资料摘录": "title: 售后规则；answer: 政策规则：江苏车金记录员风控 CHEJIN_20260503_043922 测试批次：CHEJIN_20260503_043922 规则名称：保证无事故转人工 规则类型：contract 触发关键词：保证无事故,赔偿,CHEJIN_20260503_043922 答案：此类问题必须让销售人工按检测报告和合同回复。；keywords: ['after_sales', 'policie', 'product', 'quote', 'shipping']"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [
+      "包含高风险关键词：赔偿"
+    ],
+    "formal_patch": {
+      "target_category": "policies",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "policies",
+        "id": "item_075fd2c54ddd",
+        "status": "active",
+        "source": {
+          "type": "raw_upload",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_2d1041ebc2cbf27d3798.txt",
+          "candidate_id": "raw_2210f912dd8c4651",
+          "rag_experience_id": "rag_exp_ff6407aa909a70eeef0a",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_group"
+        },
+        "data": {
+          "title": "售后规则",
+          "policy_type": "after_sales",
+          "keywords": [
+            "after_sales",
+            "policie",
+            "product",
+            "quote",
+            "shipping"
+          ],
+          "answer": "政策规则：江苏车金记录员风控 CHEJIN_20260503_043922 测试批次：CHEJIN_20260503_043922 规则名称：保证无事故转人工 规则类型：contract 触发关键词：保证无事故,赔偿,CHEJIN_20260503_043922 答案：此类问题必须让销售人工按检测报告和合同回复。",
+          "allow_auto_reply": false,
+          "requires_handoff": true,
+          "operator_alert": true,
+          "risk_level": "warning",
+          "applicability_scope": "global",
+          "additional_details": {
+            "原始资料摘录": "title: 售后规则；answer: 政策规则：江苏车金记录员风控 CHEJIN_20260503_043922 测试批次：CHEJIN_20260503_043922 规则名称：保证无事故转人工 规则类型：contract 触发关键词：保证无事故,赔偿,CHEJIN_20260503_043922 答案：此类问题必须让销售人工按检测报告和合同回复。；keywords: ['after_sales', 'policie', 'product', 'quote', 'shipping']"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": false,
+          "requires_handoff": true,
+          "risk_level": "warning"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [
+      "包含高风险关键词：赔偿"
+    ],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "rejected",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": false,
+      "provider": "",
+      "status": "rule_only_disabled_by_request",
+      "reason": "llm_disabled_by_caller",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_2d1041ebc2cbf27d3798",
+    "source_raw_message_ids": [
+      "raw_msg_4a660d06c5af6b39d3f8",
+      "raw_msg_f7ad2d27b57d83975699",
+      "raw_msg_2f934674b9d82f6bf30d"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_098f5277d6f2650a",
+      "chunk_count": 1,
+      "query": "建议新增/更新政策规则：售后规则\ntitle: 售后规则；answer: 政策规则：江苏车金记录员风控 CHEJIN_20260503_043922 测试批次：CHEJIN_20260503_043922 规则名称：保证无事故转人工 规则类型：contract 触发关键词：保证无事故,赔偿,CHEJIN_20260503_043922 答案：此类问题必须让销售人工按检测报告和合同回复。；keywords: ['after_sales', 'policie', 'product', 'quote', 'shipping']\n售后规则\n政策规则：江苏车金记录员风控 CHEJIN_20260503_043922 测试批次：CHEJIN_20260503_043922 规则名称：保证无事故转人工 规则类型：contract 触发关键词：保证无事故,赔偿,CHEJIN_20260503_043922 答案：此类问题必须让销售人工按检测报告和合同回复。",
+      "hits": [
+        {
+          "chunk_id": "chunk_72a2df0e1c740766",
+          "source_id": "source_098f5277d6f2650a",
+          "score": 0.8875,
+          "category": "group",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.5486,
+            "semantic": 0.2889,
+            "vector": 0.14,
+            "vector_similarity": 0.8931,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.08,
+            "final": 0.8875
+          },
+          "text": "[2026-05-01 16:00:00] 销售A: 商品资料：江苏车金记录员完整车源 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_043922\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号：CHEJIN-REC-GL8-2020ES\n商品类目：二手车/MPV\n价格：17.60万\n单位：台\n库存：1\n发货：南京门店可看车，商务客户试乘需人工确认\n售后：车况以检测报告为准\n[2026-05-01 16:01:00] 销售B: 政策规则：江苏车金记录员风控 C"
+        },
+        {
+          "chunk_id": "chunk_03e9bbed1bb466e3",
+          "source_id": "source_702df8faf2e7d11f",
+          "score": 0.6578,
+          "category": "policies",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.3714,
+            "semantic": 0.2119,
+            "vector": 0.1395,
+            "vector_similarity": 0.7748,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.015,
+            "risk_penalty": 0.08,
+            "final": 0.6578
+          },
+          "text": "政策规则：江苏车金高意向转人工 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_043922\n规则名称：试驾到店与订金转人工\n规则类型：manual_required\n触发关键词：试驾,到店,订金,定金,今天看车,明天看车,销售联系,企业微信群\n答案：客户明确要求试驾、到店、订金、销售联系时，AI只做确认和记录，必须转人工或企业微信群承接，不能自行承诺车源保留和最终价格。\n允许自动回复：false\n必须转人工：true\n提醒人工客服：true\n风险等级：high\n政策规则：江"
+        },
+        {
+          "chunk_id": "chunk_320caa1062c4cf21",
+          "source_id": "source_55cce0d21fe7898c",
+          "score": 0.5659,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2457,
+            "semantic": 0.1573,
+            "vector": 0.1379,
+            "vector_similarity": 0.766,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.025,
+            "risk_penalty": 0.0,
+            "final": 0.5659
+          },
+          "text": "公里，2.0T自动挡，一手车源，支持到店试驾。\n价格：12.80万\n单位：台\n库存：1\n发货：高意向试驾需转人工确认门店和时间。\n售后：精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。\n商品资料：江苏车金二手车车源 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_043922\n商品名称：2022款比亚迪秦PLUS DM-i 55KM\n型号：CHEJIN-QINPLUS-2022DMI\n商品类目：二手车/新能源轿车\n别名关键词：秦PLUS,比亚迪秦,新能源,绿牌,混"
+        },
+        {
+          "chunk_id": "chunk_f33e20a058626f2d",
+          "source_id": "source_d262d55f8b02b514",
+          "score": 0.5616,
+          "category": "group",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2743,
+            "semantic": 0.1697,
+            "vector": 0.1276,
+            "vector_similarity": 0.7091,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.5616
+          },
+          "text": "[2026-05-02T04:24:40] self: 政策规则：记录员缺字段边界 LIVE_RECORDER_20260502_042340\n测试批次：LIVE_RECORDER_20260502_042340\n规则名称：新能源电池检测转人工\n规则类型：contract\n触发关键词：电池检测,首付,月供,贷款包过,LIVE_RECORDER_20260502_042340"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_ff6407aa909a70eeef0a",
+    "source_chain": [
+      "raw_wechat_group",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "rejected_at": "2026-05-04T15:24:46",
+    "reason": "?????????????AI/??????????????????????????????????????????AI????"
+  },
+  "suggested_tests": [
+    {
+      "scenario": "after_sales",
+      "assertion": "入库后应能按关键词回答该政策；高风险内容必须转人工。"
+    }
+  ]
+}

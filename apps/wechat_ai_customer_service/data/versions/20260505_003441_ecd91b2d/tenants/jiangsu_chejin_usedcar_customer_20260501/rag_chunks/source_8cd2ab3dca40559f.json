@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_8cd2ab3dca40559f",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_6a1f29dfdad8c1bace29.txt",
+    "content_hash": "083c0ffdb6a8abeae7213932189cce54",
+    "status": "active",
+    "created_at": "2026-05-04T02:30:14",
+    "updated_at": "2026-05-04T02:30:14"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_413120c5b2dfbe68",
+      "source_id": "source_8cd2ab3dca40559f",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_6a1f29dfdad8c1bace29.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-04 02:29:00] system: 02:29\n[2026-05-04T02:30:13] self: [车金AI] 蔚来ES6换电确实是它的一大特点，不过具体是电池租用还是买断、账号权益和当地政策这些，都得结合这台车的检测报告和厂家记录才能给准话。我让负责这台车的同事跟您对接，帮您把关键点都核实清楚。\n[2026-05-04T02:30:13] 许聪: 理想ONE适合一家六口吗？",
+      "char_count": 204,
+      "status": "active",
+      "created_at": "2026-05-04T02:30:14"
+    }
+  ]
+}

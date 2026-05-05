@@ -1,0 +1,300 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_6149fcb173a5f4ff",
+  "generated_at": "2026-05-01T22:07:05",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\policies\\upload_111b8820fd6879b0_chejin_policies_CHEJIN_20260501_220703.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "title: 售后规则；answer: 政策规则：江苏车金金融与车况合规 CHEJIN_20260501_220703 规则名称：金融审批与车况承诺边界 CHEJIN_20260501_220703 规则类型：contract 触发关键词：贷款,按揭,首付,月供,征信,保证无事故,水泡,火烧,赔偿,退款 答案：金融方案只能做初步说明，审批结果、利率、月供以资方审核为准；车况承诺必须以检测报告和合同为准，涉及赔偿、退款、纠纷必须转人工。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high；keywords: ['after_sales', 'policie', 'quote', 'style']",
+    "content_sha256": "02112a4c032ebdce786527db25357d7909c46e74a41d049c702575971d4f033c",
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_4b994cf12ee669d6",
+        "source_id": "source_ec8e31d2b218cf48",
+        "score": 0.9325,
+        "category": "policies",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.5774,
+          "semantic": 0.2801,
+          "vector": 0.14,
+          "vector_similarity": 0.9299,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.015,
+          "risk_penalty": 0.08,
+          "final": 0.9325
+        },
+        "text": "政策规则：江苏车金高意向转人工 CHEJIN_20260501_220703\n规则名称：试驾到店与订金转人工 CHEJIN_20260501_220703\n规则类型：manual_required\n触发关键词：试驾,到店,订金,定金,今天看车,明天看车,销售联系,企业微信群\n答案：客户明确要求试驾、到店、订金、销售联系时，AI只做确认和记录，必须转人工或企业微信群承接，不能自行承诺车源保留和最终价格。\n允许自动回复：false\n必须转人工：true\n提醒人工客服：true\n风险等级：high\n政策规则：江苏车金金融"
+      },
+      {
+        "chunk_id": "chunk_f55b3105aad7be64",
+        "source_id": "source_0f54bb6e9571790b",
+        "score": 0.9302,
+        "category": "policies",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.5757,
+          "semantic": 0.2795,
+          "vector": 0.14,
+          "vector_similarity": 0.9285,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.015,
+          "risk_penalty": 0.08,
+          "final": 0.9302
+        },
+        "text": "政策规则：江苏车金高意向转人工 CHEJIN_20260501_161600\n规则名称：试驾到店与订金转人工 CHEJIN_20260501_161600\n规则类型：manual_required\n触发关键词：试驾,到店,订金,定金,今天看车,明天看车,销售联系,企业微信群\n答案：客户明确要求试驾、到店、订金、销售联系时，AI只做确认和记录，必须转人工或企业微信群承接，不能自行承诺车源保留和最终价格。\n允许自动回复：false\n必须转人工：true\n提醒人工客服：true\n风险等级：high\n政策规则：江苏车金金融"
+      },
+      {
+        "chunk_id": "chunk_115ea40ec94190cd",
+        "source_id": "source_13e216a440602c9a",
+        "score": 0.9302,
+        "category": "policies",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.5757,
+          "semantic": 0.2795,
+          "vector": 0.14,
+          "vector_similarity": 0.9296,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.015,
+          "risk_penalty": 0.08,
+          "final": 0.9302
+        },
+        "text": "政策规则：江苏车金高意向转人工 CHEJIN_20260501_162302\n规则名称：试驾到店与订金转人工 CHEJIN_20260501_162302\n规则类型：manual_required\n触发关键词：试驾,到店,订金,定金,今天看车,明天看车,销售联系,企业微信群\n答案：客户明确要求试驾、到店、订金、销售联系时，AI只做确认和记录，必须转人工或企业微信群承接，不能自行承诺车源保留和最终价格。\n允许自动回复：false\n必须转人工：true\n提醒人工客服：true\n风险等级：high\n政策规则：江苏车金金融"
+      },
+      {
+        "chunk_id": "chunk_4c9dddbd5d8b2413",
+        "source_id": "source_34400adcdf9baec5",
+        "score": 0.9302,
+        "category": "policies",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.5757,
+          "semantic": 0.2795,
+          "vector": 0.14,
+          "vector_similarity": 0.9301,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.015,
+          "risk_penalty": 0.08,
+          "final": 0.9302
+        },
+        "text": "政策规则：江苏车金高意向转人工 CHEJIN_20260501_162143\n规则名称：试驾到店与订金转人工 CHEJIN_20260501_162143\n规则类型：manual_required\n触发关键词：试驾,到店,订金,定金,今天看车,明天看车,销售联系,企业微信群\n答案：客户明确要求试驾、到店、订金、销售联系时，AI只做确认和记录，必须转人工或企业微信群承接，不能自行承诺车源保留和最终价格。\n允许自动回复：false\n必须转人工：true\n提醒人工客服：true\n风险等级：high\n政策规则：江苏车金金融"
+      }
+    ],
+    "type": "rag_experience",
+    "original_type": "raw_upload",
+    "original_channel": "legacy_pending_migration",
+    "rag_experience_id": "rag_exp_33571663441b29d10e4c",
+    "experience_id": "rag_exp_33571663441b29d10e4c"
+  },
+  "detected_tags": [
+    "after_sales",
+    "policie",
+    "quote",
+    "rag_experience",
+    "style"
+  ],
+  "proposal": {
+    "target_category": "policies",
+    "change_type": "upsert_policy",
+    "summary": "建议新增/更新政策规则：售后规则",
+    "suggested_fields": {
+      "title": "售后规则",
+      "policy_type": "after_sales",
+      "keywords": [
+        "after_sales",
+        "policie",
+        "quote",
+        "style"
+      ],
+      "answer": "政策规则：江苏车金金融与车况合规 CHEJIN_20260501_220703 规则名称：金融审批与车况承诺边界 CHEJIN_20260501_220703 规则类型：contract 触发关键词：贷款,按揭,首付,月供,征信,保证无事故,水泡,火烧,赔偿,退款 答案：金融方案只能做初步说明，审批结果、利率、月供以资方审核为准；车况承诺必须以检测报告和合同为准，涉及赔偿、退款、纠纷必须转人工。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high",
+      "allow_auto_reply": false,
+      "requires_handoff": true,
+      "operator_alert": true,
+      "risk_level": "warning",
+      "additional_details": {
+        "原始资料摘录": "title: 售后规则；answer: 政策规则：江苏车金金融与车况合规 CHEJIN_20260501_220703 规则名称：金融审批与车况承诺边界 CHEJIN_20260501_220703 规则类型：contract 触发关键词：贷款,按揭,首付,月供,征信,保证无事故,水泡,火烧,赔偿,退款 答案：金融方案只能做初步说明，审批结果、利率、月供以资方审核为准；车况承诺必须以检测报告和合同为准，涉及赔偿、退款、纠纷必须转人工。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high；keywords: ['after_sales', 'policie', 'quote', 'style']"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [
+      "包含高风险关键词：赔偿",
+      "明确要求人工确认：必须转人工"
+    ],
+    "formal_patch": {
+      "target_category": "policies",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "policies",
+        "id": "item_485cf1a1e978",
+        "status": "active",
+        "source": {
+          "type": "raw_upload",
+          "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\policies\\upload_111b8820fd6879b0_chejin_policies_CHEJIN_20260501_220703.txt",
+          "candidate_id": "raw_6149fcb173a5f4ff",
+          "rag_experience_id": "rag_exp_33571663441b29d10e4c",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_upload"
+        },
+        "data": {
+          "title": "售后规则",
+          "policy_type": "after_sales",
+          "keywords": [
+            "after_sales",
+            "policie",
+            "quote",
+            "style"
+          ],
+          "answer": "政策规则：江苏车金金融与车况合规 CHEJIN_20260501_220703 规则名称：金融审批与车况承诺边界 CHEJIN_20260501_220703 规则类型：contract 触发关键词：贷款,按揭,首付,月供,征信,保证无事故,水泡,火烧,赔偿,退款 答案：金融方案只能做初步说明，审批结果、利率、月供以资方审核为准；车况承诺必须以检测报告和合同为准，涉及赔偿、退款、纠纷必须转人工。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high",
+          "allow_auto_reply": false,
+          "requires_handoff": true,
+          "operator_alert": true,
+          "risk_level": "warning",
+          "additional_details": {
+            "原始资料摘录": "title: 售后规则；answer: 政策规则：江苏车金金融与车况合规 CHEJIN_20260501_220703 规则名称：金融审批与车况承诺边界 CHEJIN_20260501_220703 规则类型：contract 触发关键词：贷款,按揭,首付,月供,征信,保证无事故,水泡,火烧,赔偿,退款 答案：金融方案只能做初步说明，审批结果、利率、月供以资方审核为准；车况承诺必须以检测报告和合同为准，涉及赔偿、退款、纠纷必须转人工。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high；keywords: ['after_sales', 'policie', 'quote', 'style']"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": false,
+          "requires_handoff": true,
+          "risk_level": "high"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [
+      "包含高风险关键词：赔偿",
+      "明确要求人工确认：必须转人工"
+    ],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "pending",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "source_upload_id": "upload_111b8820fd6879b0",
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_ec8e31d2b218cf48",
+      "chunk_count": 1,
+      "query": "建议新增/更新政策规则：售后规则\ntitle: 售后规则；answer: 政策规则：江苏车金金融与车况合规 CHEJIN_20260501_220703 规则名称：金融审批与车况承诺边界 CHEJIN_20260501_220703 规则类型：contract 触发关键词：贷款,按揭,首付,月供,征信,保证无事故,水泡,火烧,赔偿,退款 答案：金融方案只能做初步说明，审批结果、利率、月供以资方审核为准；车况承诺必须以检测报告和合同为准，涉及赔偿、退款、纠纷必须转人工。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high；keywords: ['after_sales', 'policie', 'quote', 'style']\n售后规则\n政策规则：江苏车金金融与车况合规 CHEJIN_20260501_220703 规则名称：金融审批与车况承诺边界 CHEJIN_20260501_220703 规则类型：contract 触发关键词：贷款,按揭,首付,月供,征信,保证无事故,水泡,火烧,赔偿,退款 答案：金融方案只能做初步说明，审批结果、利率、月供以资方审核为准；车况承诺必须以检测报告和合同为准，涉及赔偿、退款、纠纷必须转人工。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high",
+      "hits": [
+        {
+          "chunk_id": "chunk_4b994cf12ee669d6",
+          "source_id": "source_ec8e31d2b218cf48",
+          "score": 0.9325,
+          "category": "policies",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.5774,
+            "semantic": 0.2801,
+            "vector": 0.14,
+            "vector_similarity": 0.9299,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.015,
+            "risk_penalty": 0.08,
+            "final": 0.9325
+          },
+          "text": "政策规则：江苏车金高意向转人工 CHEJIN_20260501_220703\n规则名称：试驾到店与订金转人工 CHEJIN_20260501_220703\n规则类型：manual_required\n触发关键词：试驾,到店,订金,定金,今天看车,明天看车,销售联系,企业微信群\n答案：客户明确要求试驾、到店、订金、销售联系时，AI只做确认和记录，必须转人工或企业微信群承接，不能自行承诺车源保留和最终价格。\n允许自动回复：false\n必须转人工：true\n提醒人工客服：true\n风险等级：high\n政策规则：江苏车金金融"
+        },
+        {
+          "chunk_id": "chunk_f55b3105aad7be64",
+          "source_id": "source_0f54bb6e9571790b",
+          "score": 0.9302,
+          "category": "policies",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.5757,
+            "semantic": 0.2795,
+            "vector": 0.14,
+            "vector_similarity": 0.9285,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.015,
+            "risk_penalty": 0.08,
+            "final": 0.9302
+          },
+          "text": "政策规则：江苏车金高意向转人工 CHEJIN_20260501_161600\n规则名称：试驾到店与订金转人工 CHEJIN_20260501_161600\n规则类型：manual_required\n触发关键词：试驾,到店,订金,定金,今天看车,明天看车,销售联系,企业微信群\n答案：客户明确要求试驾、到店、订金、销售联系时，AI只做确认和记录，必须转人工或企业微信群承接，不能自行承诺车源保留和最终价格。\n允许自动回复：false\n必须转人工：true\n提醒人工客服：true\n风险等级：high\n政策规则：江苏车金金融"
+        },
+        {
+          "chunk_id": "chunk_115ea40ec94190cd",
+          "source_id": "source_13e216a440602c9a",
+          "score": 0.9302,
+          "category": "policies",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.5757,
+            "semantic": 0.2795,
+            "vector": 0.14,
+            "vector_similarity": 0.9296,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.015,
+            "risk_penalty": 0.08,
+            "final": 0.9302
+          },
+          "text": "政策规则：江苏车金高意向转人工 CHEJIN_20260501_162302\n规则名称：试驾到店与订金转人工 CHEJIN_20260501_162302\n规则类型：manual_required\n触发关键词：试驾,到店,订金,定金,今天看车,明天看车,销售联系,企业微信群\n答案：客户明确要求试驾、到店、订金、销售联系时，AI只做确认和记录，必须转人工或企业微信群承接，不能自行承诺车源保留和最终价格。\n允许自动回复：false\n必须转人工：true\n提醒人工客服：true\n风险等级：high\n政策规则：江苏车金金融"
+        },
+        {
+          "chunk_id": "chunk_4c9dddbd5d8b2413",
+          "source_id": "source_34400adcdf9baec5",
+          "score": 0.9302,
+          "category": "policies",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.5757,
+            "semantic": 0.2795,
+            "vector": 0.14,
+            "vector_similarity": 0.9301,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.015,
+            "risk_penalty": 0.08,
+            "final": 0.9302
+          },
+          "text": "政策规则：江苏车金高意向转人工 CHEJIN_20260501_162143\n规则名称：试驾到店与订金转人工 CHEJIN_20260501_162143\n规则类型：manual_required\n触发关键词：试驾,到店,订金,定金,今天看车,明天看车,销售联系,企业微信群\n答案：客户明确要求试驾、到店、订金、销售联系时，AI只做确认和记录，必须转人工或企业微信群承接，不能自行承诺车源保留和最终价格。\n允许自动回复：false\n必须转人工：true\n提醒人工客服：true\n风险等级：high\n政策规则：江苏车金金融"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_33571663441b29d10e4c",
+    "source_chain": [
+      "raw_upload",
+      "rag_experience",
+      "review_candidate"
+    ]
+  },
+  "suggested_tests": [
+    {
+      "scenario": "after_sales",
+      "assertion": "入库后应能按关键词回答该政策；高风险内容必须转人工。"
+    }
+  ]
+}

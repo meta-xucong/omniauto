@@ -1,0 +1,209 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_c25974d2000f1df0",
+  "generated_at": "2026-05-04T02:14:42",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_8cd14bfd9c2b6530fc3f.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"product_id\": \"a4l\", \"title\": \"A4L适合婚庆或商务接待吗？\", \"keywords\": [\"婚庆\", \"商务接待\"], \"question\": \"A4L适合婚庆或者商务接待吗？\", \"answer\": \"\", \"additional_details\": {\"customer_name\": \"许聪\", \"timestamp\": \"2026-05-04T02:14:09\"}}",
+    "content_sha256": "bf3f699a9c7aa35c69227d28fc02e352eadbf0c328d656de3e8c8d5449e93e5c",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_8cd14bfd9c2b6530fc3f",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_0c2e2b1261a4cc012b27"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_b337ce53075b8e8c",
+        "source_id": "source_811aa2358e7c4dbd",
+        "score": 0.693,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.3866,
+          "semantic": 0.1822,
+          "vector": 0.1343,
+          "vector_similarity": 0.746,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.693
+        },
+        "text": "[2026-05-04T02:14:09] 许聪: A4L适合婚庆或者商务接待吗？"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_45a26693b29b1a55dde9",
+    "experience_id": "rag_exp_45a26693b29b1a55dde9"
+  },
+  "detected_tags": [
+    "llm",
+    "rag_experience",
+    "unknown",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "product_faq",
+    "change_type": "llm_upsert_product_faq",
+    "summary": "??A4L??????????",
+    "suggested_fields": {
+      "product_id": "chejin_a4l_2020_40tfsi",
+      "title": "??A4L??????????",
+      "keywords": [
+        "??A4L",
+        "??",
+        "????",
+        "????"
+      ],
+      "question": "A4L????????????",
+      "answer": "????????????????????????????????????????????????????????????????",
+      "additional_details": {
+        "customer_name": "许聪",
+        "timestamp": "2026-05-04T02:14:09",
+        "原始资料摘录": "{\"product_id\": \"a4l\", \"title\": \"A4L适合婚庆或商务接待吗？\", \"keywords\": [\"婚庆\", \"商务接待\"], \"question\": \"A4L适合婚庆或者商务接待吗？\", \"answer\": \"\", \"additional_details\": {\"customer_name\": \"许聪\", \"timestamp\": \"2026-05-04T02:14:09\"}}"
+      }
+    },
+    "missing_fields": [
+      "answer"
+    ],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "product_faq",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "product_faq",
+        "id": "seed_8d8e731c35a638060e8c",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_8cd14bfd9c2b6530fc3f.txt",
+          "candidate_id": "raw_c25974d2000f1df0",
+          "rag_experience_id": "rag_exp_45a26693b29b1a55dde9",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "product_id": "chejin_a4l_2020_40tfsi",
+          "title": "??A4L??????????",
+          "keywords": [
+            "??A4L",
+            "??",
+            "????",
+            "????"
+          ],
+          "question": "A4L????????????",
+          "answer": "????????????????????????????????????????????????????????????????",
+          "additional_details": {
+            "customer_name": "许聪",
+            "timestamp": "2026-05-04T02:14:09",
+            "原始资料摘录": "{\"product_id\": \"a4l\", \"title\": \"A4L适合婚庆或商务接待吗？\", \"keywords\": [\"婚庆\", \"商务接待\"], \"question\": \"A4L适合婚庆或者商务接待吗？\", \"answer\": \"\", \"additional_details\": {\"customer_name\": \"许聪\", \"timestamp\": \"2026-05-04T02:14:09\"}}"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "confidence": 0.86,
+    "missing_fields": [],
+    "warnings": [
+      "?????????????????"
+    ]
+  },
+  "review": {
+    "status": "pending",
+    "completeness_status": "needs_more_info",
+    "missing_fields": [
+      "answer"
+    ],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_8cd14bfd9c2b6530fc3f",
+    "source_raw_message_ids": [
+      "raw_msg_0c2e2b1261a4cc012b27"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_811aa2358e7c4dbd",
+      "chunk_count": 1,
+      "query": "客户许聪咨询A4L是否适合婚庆或商务接待\n{\"product_id\": \"a4l\", \"title\": \"A4L适合婚庆或商务接待吗？\", \"keywords\": [\"婚庆\", \"商务接待\"], \"question\": \"A4L适合婚庆或者商务接待吗？\", \"answer\": \"\", \"additional_details\": {\"customer_name\": \"许聪\", \"timestamp\": \"2026-05-04T02:14:09\"}}\nA4L适合婚庆或商务接待吗？",
+      "hits": [
+        {
+          "chunk_id": "chunk_b337ce53075b8e8c",
+          "source_id": "source_811aa2358e7c4dbd",
+          "score": 0.693,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.3866,
+            "semantic": 0.1822,
+            "vector": 0.1343,
+            "vector_similarity": 0.746,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.693
+          },
+          "text": "[2026-05-04T02:14:09] 许聪: A4L适合婚庆或者商务接待吗？"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_45a26693b29b1a55dde9",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "cleanup_notes": [
+      {
+        "at": "2026-05-04T00:00:00",
+        "by": "codex_source_authority_cleanup",
+        "reason": "??/????????????????? RAG ????????????????",
+        "removed_review_hits": 3,
+        "removed_source_hits": 3
+      }
+    ],
+    "previous_reject_reason": "legacy_auto_candidate_cleanup_20260504: ???????????????????????RAG?????????????????",
+    "previous_rejected_at": "2026-05-04T18:41:18",
+    "updated_at": "2026-05-04T18:58:38",
+    "reopened_at": "2026-05-04T18:58:38",
+    "reopened_by": "codex_test_seed",
+    "reopened_reason": "direct test seed: restored as pending candidate for manual review regression",
+    "test_seed_direct_fill": true
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ],
+  "test_seed": {
+    "seed_id": "direct_test_fill_20260504_v2",
+    "direct_fill": true
+  }
+}

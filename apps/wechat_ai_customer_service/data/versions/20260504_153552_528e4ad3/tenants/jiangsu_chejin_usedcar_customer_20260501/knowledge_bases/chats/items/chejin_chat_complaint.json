@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "category_id": "chats",
+  "id": "chejin_chat_complaint",
+  "status": "active",
+  "source": {
+    "type": "demo_fixture",
+    "batch_token": "CHEJIN_DEMO_20260503_203628",
+    "domain": "used_car"
+  },
+  "data": {
+    "customer_message": "你们是不是骗人，我要投诉",
+    "service_reply": "很抱歉让您有这样的感受。我先记录您的问题，并立即转人工处理，请您先不要重复提交敏感资料。",
+    "intent_tags": [
+      "投诉",
+      "转人工",
+      "CHEJIN_DEMO_20260503_203628"
+    ],
+    "tone_tags": [
+      "专业",
+      "克制",
+      "不乱承诺"
+    ],
+    "linked_categories": [
+      "products",
+      "policies"
+    ],
+    "linked_item_ids": [],
+    "applicability_scope": "global",
+    "product_id": "",
+    "product_category": "",
+    "usable_as_template": true,
+    "additional_details": {
+      "演示批次": "CHEJIN_DEMO_20260503_203628",
+      "客户可读摘要": "真实客服可直接参考的问答样例。"
+    }
+  },
+  "runtime": {
+    "allow_auto_reply": false,
+    "requires_handoff": true,
+    "risk_level": "warning",
+    "operator_alert": true
+  },
+  "review_state": {
+    "is_new": true,
+    "new_reason": "newly_added_formal_knowledge",
+    "marked_at": "2026-05-03T20:36:28",
+    "updated_at": "2026-05-03T20:36:28",
+    "read_at": "",
+    "read_by": "",
+    "source": {
+      "source_module": "jiangsu_chejin_demo_seed",
+      "target_category": "chats",
+      "item_id": "chejin_chat_complaint"
+    }
+  },
+  "metadata": {
+    "created_at": "2026-05-03T20:36:28",
+    "updated_at": "2026-05-03T20:36:28",
+    "created_by": "admin",
+    "updated_by": "admin"
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "source": {
+    "source_id": "source_8c7b72ad8df36092",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "upload",
+    "category": "products",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\products\\upload_4242fe383c80bb77_chejin_vehicles_CHEJIN_20260501_162050.txt",
+    "content_hash": "1d2f6cbb725ccf2bb64cea9e946ac02c",
+    "status": "active",
+    "created_at": "2026-05-01T16:20:50",
+    "updated_at": "2026-05-01T16:20:50"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_f8e488e2bcc61559",
+      "source_id": "source_8c7b72ad8df36092",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "upload",
+      "category": "products",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\products\\upload_4242fe383c80bb77_chejin_vehicles_CHEJIN_20260501_162050.txt",
+      "chunk_index": 0,
+      "text": "商品资料：江苏车金二手车车源 CHEJIN_20260501_162050\n商品名称：2021款丰田凯美瑞2.0G豪华版 CHEJIN_20260501_162050\n型号：CHEJIN-CAMRY-CHEJIN_20260501_162050\n商品类目：二手车/中级轿车\n别名关键词：凯美瑞,丰田凯美瑞,8万预算,自动挡,省油,通勤\n规格参数：2021年上牌，表显4.8万公里，2.0L自动挡，南京现车，一手车，支持第三方检测。\n价格：8.98万\n单位：台\n库存：1\n发货：南京门店可看车，异地客户需人工确认物流与提档。\n售后：非重大事故、非水泡、非火烧以合同和检测报告为准。\n标准回复：这台凯美瑞适合8到10万预算、家用通勤和省油需求，建议先确认到店时间、是否置换、是否贷款。\n商品资料：江苏车金二手车车源 CHEJIN_20260501_162050\n商品名称：2020款本田思域220TURBO劲动版 CHEJIN_20260501_162050\n型号：CHEJIN-CIVIC-CHEJIN_20260501_162050\n商品类目：二手车/紧凑型轿车\n别名关键词：思域,本田思域,年轻客户,按揭,首付三成\n规格参数：2020年上牌，表显6.1万公里，1.5T自动挡，外观轻微补漆，支持按揭初审。\n价格：7.58万\n单位：台\n库存：1\n发货：门店看车后可协助过户，金融结果以资方审批为准。\n售后：车况以检测报告和合同约定为准，不承诺贷款必过。\n商品资料：江苏车金二手车车源 CHEJIN_20260501_162050\n商品名称：2019款宝马320Li M运动套装 CHEJIN_20260501_162050\n型号：CHEJIN-BMW320-CHEJIN_20260501_162050\n商品类目：二手车/豪华轿车\n别名关键词：宝马320,宝马3系,320Li,试驾,精品车况\n规格参数：2019年上牌，表显5.6万公里，2.0T自动挡，一手车源，支持到店试驾。\n价格：12.80万\n单位：台\n库存：1\n发货：高意向试驾需转人工确认门店和时间。\n售后：精品车况需以检测报告为准，事故、",
+      "char_count": 900,
+      "status": "active",
+      "created_at": "2026-05-01T16:20:50"
+    },
+    {
+      "chunk_id": "chunk_d407710c4857c9ce",
+      "source_id": "source_8c7b72ad8df36092",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "upload",
+      "category": "products",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\products\\upload_4242fe383c80bb77_chejin_vehicles_CHEJIN_20260501_162050.txt",
+      "chunk_index": 1,
+      "text": "3系,320Li,试驾,精品车况\n规格参数：2019年上牌，表显5.6万公里，2.0T自动挡，一手车源，支持到店试驾。\n价格：12.80万\n单位：台\n库存：1\n发货：高意向试驾需转人工确认门店和时间。\n售后：精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。\n商品资料：江苏车金二手车车源 CHEJIN_20260501_162050\n商品名称：2022款比亚迪秦PLUS DM-i 55KM CHEJIN_20260501_162050\n型号：CHEJIN-QINPLUS-CHEJIN_20260501_162050\n商品类目：二手车/新能源轿车\n别名关键词：秦PLUS,比亚迪秦,新能源,绿牌,混动,网约车\n规格参数：2022年上牌，表显3.2万公里，插混，低油耗，适合通勤和网约车。\n价格：8.68万\n单位：台\n库存：1\n发货：新能源车需人工确认电池检测和当地迁入政策。\n售后：电池和三电政策以厂家与检测报告为准。",
+      "char_count": 416,
+      "status": "active",
+      "created_at": "2026-05-01T16:20:50"
+    }
+  ]
+}

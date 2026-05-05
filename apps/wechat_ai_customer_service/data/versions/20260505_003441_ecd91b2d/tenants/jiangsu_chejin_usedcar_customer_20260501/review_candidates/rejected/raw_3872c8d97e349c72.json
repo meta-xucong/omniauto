@@ -1,0 +1,328 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_3872c8d97e349c72",
+  "generated_at": "2026-05-03T20:56:40",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_4623b22a59961b7bcb29.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "title: 售后规则；answer: 政策规则：江苏车金真机金融边界 CHEJIN_20260503_205541 测试批次：CHEJIN_20260503_205541 规则名称：新能源电池与金融审批转人工 规则类型：contract 触发关键词：电池检测,首付,月供,贷款包过,CHEJIN_20260503_205541 答案：涉及新能源电池检测、首付月供、贷款通过率时必须转人工确认，不允许AI承诺结果。；keywords: ['after_sales', 'policie', 'product', 'quote', 'shipping']",
+    "content_sha256": "cc23dbae1a22d215b91e6e802260d6e8bf8132424d307b4cf647d7f318f98f2c",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_4623b22a59961b7bcb29",
+    "conversation_id": "chejin_demo_group_chejin_demo_20260503_203628",
+    "raw_message_ids": [
+      "raw_msg_3f93d7ebe3fa8a66b046",
+      "raw_msg_5f31ddcfedfafffb9cc9",
+      "raw_msg_92a6944ea2b5b52effb4"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_efac4c07a3acfbca",
+        "source_id": "source_c2d0ba4033d268bd",
+        "score": 0.9285,
+        "category": "group",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.5575,
+          "semantic": 0.241,
+          "vector": 0.14,
+          "vector_similarity": 0.8967,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.9285
+        },
+        "text": "[2026-05-03T20:56:40] self: 商品资料：江苏车金真机记录员车源 CHEJIN_20260503_205541\n测试批次：CHEJIN_20260503_205541\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号：CHEJIN-LIVE-GL8-2020ES\n商品类目：二手车/MPV\n价格：17.66万\n单位：台\n库存：1\n发货：南京门店可看车，商务客户试乘需人工确认\n售后：车况以检测报告为准\n[2026-05-03T20:56:40] self: 政策规则：江苏车金真机金融"
+      },
+      {
+        "chunk_id": "chunk_8853d46e12ff05ef",
+        "source_id": "source_095a69445f947e68",
+        "score": 0.9221,
+        "category": "group",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.5525,
+          "semantic": 0.2396,
+          "vector": 0.14,
+          "vector_similarity": 0.9252,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.9221
+        },
+        "text": "[2026-05-03T08:28:56] self: 政策规则：江苏车金真机金融边界 CHEJIN_20260503_082804\n测试批次：CHEJIN_20260503_082804\n规则名称：新能源电池与金融审批转人工\n规则类型：contract\n触发关键词：电池检测,首付,月供,贷款包过,CHEJIN_20260503_082804\n答案：涉及新能源电池检测、首付月供、贷款通过率时必须转人工确认，不允许AI承诺结果。\n[2026-05-03T08:28:56] self: 边界噪音：CHEJIN_2026"
+      },
+      {
+        "chunk_id": "chunk_3b9873d8b83133da",
+        "source_id": "source_bc0403ace18ef800",
+        "score": 0.608,
+        "category": "group",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.31,
+          "semantic": 0.168,
+          "vector": 0.14,
+          "vector_similarity": 0.7973,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.608
+        },
+        "text": "[2026-05-03T08:23:44] self: 政策规则：记录员缺字段边界 LIVE_RECORDER_20260503_082131\n测试批次：LIVE_RECORDER_20260503_082131\n规则名称：新能源电池检测转人工\n规则类型：contract\n触发关键词：电池检测,首付,月供,贷款包过,LIVE_RECORDER_20260503_082131"
+      },
+      {
+        "chunk_id": "chunk_f33e20a058626f2d",
+        "source_id": "source_d262d55f8b02b514",
+        "score": 0.608,
+        "category": "group",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.31,
+          "semantic": 0.168,
+          "vector": 0.14,
+          "vector_similarity": 0.7926,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.608
+        },
+        "text": "[2026-05-02T04:24:40] self: 政策规则：记录员缺字段边界 LIVE_RECORDER_20260502_042340\n测试批次：LIVE_RECORDER_20260502_042340\n规则名称：新能源电池检测转人工\n规则类型：contract\n触发关键词：电池检测,首付,月供,贷款包过,LIVE_RECORDER_20260502_042340"
+      }
+    ],
+    "original_type": "raw_wechat_group",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_b93463ebf7f54f51a9b6",
+    "experience_id": "rag_exp_b93463ebf7f54f51a9b6"
+  },
+  "detected_tags": [
+    "after_sales",
+    "policie",
+    "product",
+    "quote",
+    "rag_experience",
+    "shipping",
+    "wechat_group_chat"
+  ],
+  "proposal": {
+    "target_category": "policies",
+    "change_type": "upsert_policy",
+    "summary": "建议新增/更新政策规则：售后规则",
+    "suggested_fields": {
+      "title": "售后规则",
+      "policy_type": "after_sales",
+      "keywords": [
+        "after_sales",
+        "policie",
+        "product",
+        "quote",
+        "shipping"
+      ],
+      "answer": "政策规则：江苏车金真机金融边界 CHEJIN_20260503_205541 测试批次：CHEJIN_20260503_205541 规则名称：新能源电池与金融审批转人工 规则类型：contract 触发关键词：电池检测,首付,月供,贷款包过,CHEJIN_20260503_205541 答案：涉及新能源电池检测、首付月供、贷款通过率时必须转人工确认，不允许AI承诺结果。",
+      "allow_auto_reply": false,
+      "requires_handoff": true,
+      "operator_alert": true,
+      "risk_level": "warning",
+      "applicability_scope": "global",
+      "additional_details": {
+        "原始资料摘录": "title: 售后规则；answer: 政策规则：江苏车金真机金融边界 CHEJIN_20260503_205541 测试批次：CHEJIN_20260503_205541 规则名称：新能源电池与金融审批转人工 规则类型：contract 触发关键词：电池检测,首付,月供,贷款包过,CHEJIN_20260503_205541 答案：涉及新能源电池检测、首付月供、贷款通过率时必须转人工确认，不允许AI承诺结果。；keywords: ['after_sales', 'policie', 'product', 'quote', 'shipping']"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [
+      "明确要求人工确认：必须转人工"
+    ],
+    "formal_patch": {
+      "target_category": "policies",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "policies",
+        "id": "item_8fcfd6767038",
+        "status": "active",
+        "source": {
+          "type": "raw_upload",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_4623b22a59961b7bcb29.txt",
+          "candidate_id": "raw_3872c8d97e349c72",
+          "rag_experience_id": "rag_exp_b93463ebf7f54f51a9b6",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_group"
+        },
+        "data": {
+          "title": "售后规则",
+          "policy_type": "after_sales",
+          "keywords": [
+            "after_sales",
+            "policie",
+            "product",
+            "quote",
+            "shipping"
+          ],
+          "answer": "政策规则：江苏车金真机金融边界 CHEJIN_20260503_205541 测试批次：CHEJIN_20260503_205541 规则名称：新能源电池与金融审批转人工 规则类型：contract 触发关键词：电池检测,首付,月供,贷款包过,CHEJIN_20260503_205541 答案：涉及新能源电池检测、首付月供、贷款通过率时必须转人工确认，不允许AI承诺结果。",
+          "allow_auto_reply": false,
+          "requires_handoff": true,
+          "operator_alert": true,
+          "risk_level": "warning",
+          "applicability_scope": "global",
+          "additional_details": {
+            "原始资料摘录": "title: 售后规则；answer: 政策规则：江苏车金真机金融边界 CHEJIN_20260503_205541 测试批次：CHEJIN_20260503_205541 规则名称：新能源电池与金融审批转人工 规则类型：contract 触发关键词：电池检测,首付,月供,贷款包过,CHEJIN_20260503_205541 答案：涉及新能源电池检测、首付月供、贷款通过率时必须转人工确认，不允许AI承诺结果。；keywords: ['after_sales', 'policie', 'product', 'quote', 'shipping']"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": false,
+          "requires_handoff": true,
+          "risk_level": "high"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [
+      "明确要求人工确认：必须转人工"
+    ],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "rejected",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": false,
+      "provider": "",
+      "status": "rule_only_disabled_by_request",
+      "reason": "llm_disabled_by_caller",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_4623b22a59961b7bcb29",
+    "source_raw_message_ids": [
+      "raw_msg_3f93d7ebe3fa8a66b046",
+      "raw_msg_5f31ddcfedfafffb9cc9",
+      "raw_msg_92a6944ea2b5b52effb4"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_c2d0ba4033d268bd",
+      "chunk_count": 1,
+      "query": "建议新增/更新政策规则：售后规则\ntitle: 售后规则；answer: 政策规则：江苏车金真机金融边界 CHEJIN_20260503_205541 测试批次：CHEJIN_20260503_205541 规则名称：新能源电池与金融审批转人工 规则类型：contract 触发关键词：电池检测,首付,月供,贷款包过,CHEJIN_20260503_205541 答案：涉及新能源电池检测、首付月供、贷款通过率时必须转人工确认，不允许AI承诺结果。；keywords: ['after_sales', 'policie', 'product', 'quote', 'shipping']\n售后规则\n政策规则：江苏车金真机金融边界 CHEJIN_20260503_205541 测试批次：CHEJIN_20260503_205541 规则名称：新能源电池与金融审批转人工 规则类型：contract 触发关键词：电池检测,首付,月供,贷款包过,CHEJIN_20260503_205541 答案：涉及新能源电池检测、首付月供、贷款通过率时必须转人工确认，不允许AI承诺结果。",
+      "hits": [
+        {
+          "chunk_id": "chunk_efac4c07a3acfbca",
+          "source_id": "source_c2d0ba4033d268bd",
+          "score": 0.9285,
+          "category": "group",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.5575,
+            "semantic": 0.241,
+            "vector": 0.14,
+            "vector_similarity": 0.8967,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.9285
+          },
+          "text": "[2026-05-03T20:56:40] self: 商品资料：江苏车金真机记录员车源 CHEJIN_20260503_205541\n测试批次：CHEJIN_20260503_205541\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号：CHEJIN-LIVE-GL8-2020ES\n商品类目：二手车/MPV\n价格：17.66万\n单位：台\n库存：1\n发货：南京门店可看车，商务客户试乘需人工确认\n售后：车况以检测报告为准\n[2026-05-03T20:56:40] self: 政策规则：江苏车金真机金融"
+        },
+        {
+          "chunk_id": "chunk_8853d46e12ff05ef",
+          "source_id": "source_095a69445f947e68",
+          "score": 0.9221,
+          "category": "group",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.5525,
+            "semantic": 0.2396,
+            "vector": 0.14,
+            "vector_similarity": 0.9252,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.9221
+          },
+          "text": "[2026-05-03T08:28:56] self: 政策规则：江苏车金真机金融边界 CHEJIN_20260503_082804\n测试批次：CHEJIN_20260503_082804\n规则名称：新能源电池与金融审批转人工\n规则类型：contract\n触发关键词：电池检测,首付,月供,贷款包过,CHEJIN_20260503_082804\n答案：涉及新能源电池检测、首付月供、贷款通过率时必须转人工确认，不允许AI承诺结果。\n[2026-05-03T08:28:56] self: 边界噪音：CHEJIN_2026"
+        },
+        {
+          "chunk_id": "chunk_3b9873d8b83133da",
+          "source_id": "source_bc0403ace18ef800",
+          "score": 0.608,
+          "category": "group",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.31,
+            "semantic": 0.168,
+            "vector": 0.14,
+            "vector_similarity": 0.7973,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.608
+          },
+          "text": "[2026-05-03T08:23:44] self: 政策规则：记录员缺字段边界 LIVE_RECORDER_20260503_082131\n测试批次：LIVE_RECORDER_20260503_082131\n规则名称：新能源电池检测转人工\n规则类型：contract\n触发关键词：电池检测,首付,月供,贷款包过,LIVE_RECORDER_20260503_082131"
+        },
+        {
+          "chunk_id": "chunk_f33e20a058626f2d",
+          "source_id": "source_d262d55f8b02b514",
+          "score": 0.608,
+          "category": "group",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.31,
+            "semantic": 0.168,
+            "vector": 0.14,
+            "vector_similarity": 0.7926,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.608
+          },
+          "text": "[2026-05-02T04:24:40] self: 政策规则：记录员缺字段边界 LIVE_RECORDER_20260502_042340\n测试批次：LIVE_RECORDER_20260502_042340\n规则名称：新能源电池检测转人工\n规则类型：contract\n触发关键词：电池检测,首付,月供,贷款包过,LIVE_RECORDER_20260502_042340"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_b93463ebf7f54f51a9b6",
+    "source_chain": [
+      "raw_wechat_group",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "rejected_at": "2026-05-04T15:24:46",
+    "reason": "?????????????AI/??????????????????????????????????????????AI????"
+  },
+  "suggested_tests": [
+    {
+      "scenario": "after_sales",
+      "assertion": "入库后应能按关键词回答该政策；高风险内容必须转人工。"
+    }
+  ]
+}

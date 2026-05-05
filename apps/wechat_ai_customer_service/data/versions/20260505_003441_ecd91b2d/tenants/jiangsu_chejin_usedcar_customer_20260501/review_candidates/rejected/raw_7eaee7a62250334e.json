@@ -1,0 +1,334 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_7eaee7a62250334e",
+  "generated_at": "2026-05-04T03:25:01",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_b1805da7fc80300aadd1.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"customer_message\": \"绿本有没有抵押或者查封？表显公里数准不准？有没有调表？\", \"service_reply\": \"营运性质有没有跑过网约车，我们得看登记证和实车记录来确认，我这边没法直接给准信。我马上帮您转给销售同事人工核实，方便留个电话吗？他们直接联系您。\", \"intent_tags\": [\"车辆状态查询\", \"里程真实性\", \"抵押查封查询\"], \"tone_tags\": [\"专业\", \"谨慎\", \"服务导向\"], \"linked_categories\": [\"policies\"], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"usable_as_template\": false, \"additional_de",
+    "content_sha256": "f6711545f7c7994e1d514997d47627fb1b93540f7f55ffcc8fbdc8c4a1062b43",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_b1805da7fc80300aadd1",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_9c6c100aaf8df8dfc61d",
+      "raw_msg_02f3f1bc803b75e068b4",
+      "raw_msg_2c9a870a19a5b52c74d6"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_0d27f032aa229103",
+        "source_id": "source_58950035fd736f45",
+        "score": 0.8441,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.4625,
+          "semantic": 0.2515,
+          "vector": 0.14,
+          "vector_similarity": 0.9439,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.8441
+        },
+        "text": "[2026-05-04T03:24:34] 许聪: 绿本有没有抵押或者查封？\n[2026-05-04T03:24:34] 许聪: 表显公里数准不准？有没有调表？\n[2026-05-04T03:24:34] self: [车金AI] 营运性质有没有跑过网约车，我们得看登记证和实车记录来确认，我这边没法直接给准信。我马上帮您转给销售同事人工核实，方便留个电话吗？他们直接联系您。"
+      },
+      {
+        "chunk_id": "chunk_cea25e6c7bbc1d31",
+        "source_id": "source_6d72e3824a4b9f43",
+        "score": 0.5745,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2747,
+          "semantic": 0.1698,
+          "vector": 0.14,
+          "vector_similarity": 0.8155,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.5745
+        },
+        "text": "[2026-05-04T03:23:13] self: [车金AI] 检测报告和保养、出险记录都需要销售同事调取核实后才能发给您，我这边没法直接发。我马上帮您转给销售，麻烦您留个电话，他们直接联系您发。\n[2026-05-04T03:23:13] 许聪: 这车是不是非营运？有没有跑过网约车？"
+      },
+      {
+        "chunk_id": "chunk_9a0d34760ad6ccae",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5158,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.178,
+          "semantic": 0.1278,
+          "vector": 0.14,
+          "vector_similarity": 0.8214,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5158
+        },
+        "text": "工确认。\n售后/风险：CVT变速箱状态、保养和车况以检测报告为准。\n推荐话术：适合6到7万预算、练手、家用代步和省油需求。\n商品名称：2019款大众朗逸1.5L自动舒适版\n型号/SKU：CHEJIN-LAVIDA-2019\n类目：二手车/紧凑型轿车\n关键词：朗逸、大众朗逸、德系代步、置换\n规格：2019年上牌，表显6.9万公里，1.5L自动挡，白色，通勤耐用。\n价格：5.98万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：易损件和保养历史以"
+      },
+      {
+        "chunk_id": "chunk_2a615d55ce973cfb",
+        "source_id": "source_9f2fb326c482586a",
+        "score": 0.515,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2332,
+          "semantic": 0.1518,
+          "vector": 0.14,
+          "vector_similarity": 0.8094,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.515
+        },
+        "text": "[2026-05-04T03:18:33] self: [车金AI] 异地提档到安徽，得看当地排放政策和车辆档案状态，我这边没法直接保证能迁入。我帮你转给销售同事人工核实，具体车型他确认起来更准，方便留个姓名和电话吗？\n[2026-05-04T03:18:33] 许聪: 国五国六迁入你们能保证吗？"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_dc2982bd645062c14100",
+    "experience_id": "rag_exp_dc2982bd645062c14100"
+  },
+  "detected_tags": [
+    "llm",
+    "rag_experience",
+    "unknown",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "chats",
+    "change_type": "llm_upsert_chats",
+    "summary": "客户询问车辆绿本抵押、查封及表显公里数准确性，AI回复需人工核实并转接销售。",
+    "suggested_fields": {
+      "customer_message": "绿本有没有抵押或者查封？表显公里数准不准？有没有调表？",
+      "service_reply": "营运性质有没有跑过网约车，我们得看登记证和实车记录来确认，我这边没法直接给准信。我马上帮您转给销售同事人工核实，方便留个电话吗？他们直接联系您。",
+      "intent_tags": [
+        "车辆状态查询",
+        "里程真实性",
+        "抵押查封查询"
+      ],
+      "tone_tags": [
+        "专业",
+        "谨慎",
+        "服务导向"
+      ],
+      "linked_categories": [
+        "policies"
+      ],
+      "linked_item_ids": [],
+      "applicability_scope": "global",
+      "usable_as_template": false,
+      "product_id": "",
+      "product_category": "",
+      "additional_details": {
+        "transfer_intent": "转人工核实车辆证件和实际车况",
+        "原始资料摘录": "{\"customer_message\": \"绿本有没有抵押或者查封？表显公里数准不准？有没有调表？\", \"service_reply\": \"营运性质有没有跑过网约车，我们得看登记证和实车记录来确认，我这边没法直接给准信。我马上帮您转给销售同事人工核实，方便留个电话吗？他们直接联系您。\", \"intent_tags\": [\"车辆状态查询\", \"里程真实性\", \"抵押查封查询\"], \"tone_tags\": [\"专业\", \"谨慎\", \"服务导向\"], \"linked_categories\": [\"policies\"], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"usable_as_template\": false, \"additional_de"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "chats",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "chats",
+        "id": "chat_20260504_032434",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_b1805da7fc80300aadd1.txt",
+          "candidate_id": "raw_7eaee7a62250334e",
+          "rag_experience_id": "rag_exp_dc2982bd645062c14100",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "customer_message": "绿本有没有抵押或者查封？表显公里数准不准？有没有调表？",
+          "service_reply": "营运性质有没有跑过网约车，我们得看登记证和实车记录来确认，我这边没法直接给准信。我马上帮您转给销售同事人工核实，方便留个电话吗？他们直接联系您。",
+          "intent_tags": [
+            "车辆状态查询",
+            "里程真实性",
+            "抵押查封查询"
+          ],
+          "tone_tags": [
+            "专业",
+            "谨慎",
+            "服务导向"
+          ],
+          "linked_categories": [
+            "policies"
+          ],
+          "linked_item_ids": [],
+          "applicability_scope": "global",
+          "usable_as_template": false,
+          "product_id": "",
+          "product_category": "",
+          "additional_details": {
+            "transfer_intent": "转人工核实车辆证件和实际车况",
+            "原始资料摘录": "{\"customer_message\": \"绿本有没有抵押或者查封？表显公里数准不准？有没有调表？\", \"service_reply\": \"营运性质有没有跑过网约车，我们得看登记证和实车记录来确认，我这边没法直接给准信。我马上帮您转给销售同事人工核实，方便留个电话吗？他们直接联系您。\", \"intent_tags\": [\"车辆状态查询\", \"里程真实性\", \"抵押查封查询\"], \"tone_tags\": [\"专业\", \"谨慎\", \"服务导向\"], \"linked_categories\": [\"policies\"], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"usable_as_template\": false, \"additional_de"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": false,
+          "requires_handoff": true,
+          "risk_level": "warning"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "transfer_intent",
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "rejected",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_b1805da7fc80300aadd1",
+    "source_raw_message_ids": [
+      "raw_msg_9c6c100aaf8df8dfc61d",
+      "raw_msg_02f3f1bc803b75e068b4",
+      "raw_msg_2c9a870a19a5b52c74d6"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_58950035fd736f45",
+      "chunk_count": 1,
+      "query": "客户询问车辆绿本抵押、查封及表显公里数准确性，AI回复需人工核实并转接销售。\n{\"customer_message\": \"绿本有没有抵押或者查封？表显公里数准不准？有没有调表？\", \"service_reply\": \"营运性质有没有跑过网约车，我们得看登记证和实车记录来确认，我这边没法直接给准信。我马上帮您转给销售同事人工核实，方便留个电话吗？他们直接联系您。\", \"intent_tags\": [\"车辆状态查询\", \"里程真实性\", \"抵押查封查询\"], \"tone_tags\": [\"专业\", \"谨慎\", \"服务导向\"], \"linked_categories\": [\"policies\"], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"usable_as_template\": false, \"additional_de\n营运性质有没有跑过网约车，我们得看登记证和实车记录来确认，我这边没法直接给准信。我马上帮您转给销售同事人工核实，方便留个电话吗？他们直接联系您。",
+      "hits": [
+        {
+          "chunk_id": "chunk_0d27f032aa229103",
+          "source_id": "source_58950035fd736f45",
+          "score": 0.8441,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.4625,
+            "semantic": 0.2515,
+            "vector": 0.14,
+            "vector_similarity": 0.9439,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.8441
+          },
+          "text": "[2026-05-04T03:24:34] 许聪: 绿本有没有抵押或者查封？\n[2026-05-04T03:24:34] 许聪: 表显公里数准不准？有没有调表？\n[2026-05-04T03:24:34] self: [车金AI] 营运性质有没有跑过网约车，我们得看登记证和实车记录来确认，我这边没法直接给准信。我马上帮您转给销售同事人工核实，方便留个电话吗？他们直接联系您。"
+        },
+        {
+          "chunk_id": "chunk_cea25e6c7bbc1d31",
+          "source_id": "source_6d72e3824a4b9f43",
+          "score": 0.5745,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2747,
+            "semantic": 0.1698,
+            "vector": 0.14,
+            "vector_similarity": 0.8155,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.5745
+          },
+          "text": "[2026-05-04T03:23:13] self: [车金AI] 检测报告和保养、出险记录都需要销售同事调取核实后才能发给您，我这边没法直接发。我马上帮您转给销售，麻烦您留个电话，他们直接联系您发。\n[2026-05-04T03:23:13] 许聪: 这车是不是非营运？有没有跑过网约车？"
+        },
+        {
+          "chunk_id": "chunk_9a0d34760ad6ccae",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5158,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.178,
+            "semantic": 0.1278,
+            "vector": 0.14,
+            "vector_similarity": 0.8214,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5158
+          },
+          "text": "工确认。\n售后/风险：CVT变速箱状态、保养和车况以检测报告为准。\n推荐话术：适合6到7万预算、练手、家用代步和省油需求。\n商品名称：2019款大众朗逸1.5L自动舒适版\n型号/SKU：CHEJIN-LAVIDA-2019\n类目：二手车/紧凑型轿车\n关键词：朗逸、大众朗逸、德系代步、置换\n规格：2019年上牌，表显6.9万公里，1.5L自动挡，白色，通勤耐用。\n价格：5.98万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：易损件和保养历史以"
+        },
+        {
+          "chunk_id": "chunk_2a615d55ce973cfb",
+          "source_id": "source_9f2fb326c482586a",
+          "score": 0.515,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2332,
+            "semantic": 0.1518,
+            "vector": 0.14,
+            "vector_similarity": 0.8094,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.515
+          },
+          "text": "[2026-05-04T03:18:33] self: [车金AI] 异地提档到安徽，得看当地排放政策和车辆档案状态，我这边没法直接保证能迁入。我帮你转给销售同事人工核实，具体车型他确认起来更准，方便留个姓名和电话吗？\n[2026-05-04T03:18:33] 许聪: 国五国六迁入你们能保证吗？"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_dc2982bd645062c14100",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "rejected_at": "2026-05-04T18:41:18",
+    "reason": "legacy_auto_candidate_cleanup_20260504: ???????????????????????RAG?????????????????"
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

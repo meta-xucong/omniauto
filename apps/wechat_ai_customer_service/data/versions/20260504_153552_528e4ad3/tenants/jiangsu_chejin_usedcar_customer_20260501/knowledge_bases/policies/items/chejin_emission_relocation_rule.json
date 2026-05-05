@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "category_id": "policies",
+  "id": "chejin_emission_relocation_rule",
+  "status": "active",
+  "source": {
+    "type": "demo_fixture",
+    "batch_token": "CHEJIN_DEMO_20260503_203628",
+    "domain": "used_car"
+  },
+  "data": {
+    "title": "异地迁入和排放政策规则",
+    "policy_type": "logistics",
+    "keywords": [
+      "异地",
+      "提档",
+      "迁入",
+      "排放",
+      "国五",
+      "国六",
+      "CHEJIN_DEMO_20260503_203628"
+    ],
+    "applicability_scope": "global",
+    "product_category": "",
+    "answer": "异地客户需人工确认迁入城市排放政策、提档资料、临牌、物流方式和费用，AI 不承诺一定能迁入。",
+    "allow_auto_reply": false,
+    "requires_handoff": true,
+    "handoff_reason": "relocation_policy",
+    "operator_alert": true,
+    "risk_level": "high",
+    "additional_details": {
+      "演示批次": "CHEJIN_DEMO_20260503_203628",
+      "面向客户解释": "前台可直接按自然语言理解，不需要客户理解技术字段。"
+    }
+  },
+  "runtime": {
+    "allow_auto_reply": false,
+    "requires_handoff": true,
+    "risk_level": "high",
+    "operator_alert": true
+  },
+  "review_state": {
+    "is_new": true,
+    "new_reason": "newly_added_formal_knowledge",
+    "marked_at": "2026-05-03T20:36:28",
+    "updated_at": "2026-05-03T20:36:28",
+    "read_at": "",
+    "read_by": "",
+    "source": {
+      "source_module": "jiangsu_chejin_demo_seed",
+      "target_category": "policies",
+      "item_id": "chejin_emission_relocation_rule"
+    }
+  },
+  "metadata": {
+    "created_at": "2026-05-03T20:36:28",
+    "updated_at": "2026-05-03T20:36:28",
+    "created_by": "admin",
+    "updated_by": "admin"
+  }
+}

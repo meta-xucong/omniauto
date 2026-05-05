@@ -1,0 +1,325 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_3f3704a7b0e61dff",
+  "generated_at": "2026-05-04T02:17:04",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_4303d744ce5d494452a1.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"customer_message\": \"汉兰达七座那台空间怎么样，带老人小孩合适吗？\", \"intent_tags\": [\"空间咨询\", \"适合人群咨询\"], \"tone_tags\": [\"中性咨询\"], \"linked_categories\": [\"汽车\"], \"applicability_scope\": \"product_category\", \"product_category\": \"SUV\", \"usable_as_template\": false, \"product_id\": \"\"}",
+    "content_sha256": "8c8939d32975c94fe10c9758dc1dd3682a21c59bab9eaa9bdd34db405fc77190",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_4303d744ce5d494452a1",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_d01f28bb4d79eb149ee7",
+      "raw_msg_3a9cdb51fadceea8b199"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_ef0bc0c6833c4d3c",
+        "source_id": "source_164f9dfaecda7517",
+        "score": 0.6696,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.3571,
+          "semantic": 0.1825,
+          "vector": 0.14,
+          "vector_similarity": 0.8129,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.6696
+        },
+        "text": "[2026-05-04T02:16:31] 许聪: CR-V还有几台？适合一家三口吗？\n[2026-05-04T02:16:31] 许聪: 汉兰达七座那台空间怎么样，带老人小孩合适吗？"
+      },
+      {
+        "chunk_id": "chunk_9a0d34760ad6ccae",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5287,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1871,
+          "semantic": 0.1336,
+          "vector": 0.138,
+          "vector_similarity": 0.7668,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5287
+        },
+        "text": "工确认。\n售后/风险：CVT变速箱状态、保养和车况以检测报告为准。\n推荐话术：适合6到7万预算、练手、家用代步和省油需求。\n商品名称：2019款大众朗逸1.5L自动舒适版\n型号/SKU：CHEJIN-LAVIDA-2019\n类目：二手车/紧凑型轿车\n关键词：朗逸、大众朗逸、德系代步、置换\n规格：2019年上牌，表显6.9万公里，1.5L自动挡，白色，通勤耐用。\n价格：5.98万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：易损件和保养历史以"
+      },
+      {
+        "chunk_id": "chunk_b73fd7e249648300",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5146,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1755,
+          "semantic": 0.1291,
+          "vector": 0.14,
+          "vector_similarity": 0.794,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5146
+        },
+        "text": "。\n商品名称：2022款五菱宏光MINIEV马卡龙臻享款\n型号/SKU：CHEJIN-MINIEV-2022\n类目：二手车/微型电动车\n关键词：宏光MINIEV、五菱mini、代步电车、练手车\n规格：2022年上牌，表显1.6万公里，纯电微型车，粉色，城市通勤。\n价格：2.88万，库存：1台\n物流/过户：微型电动车跨城运输和充电条件需人工确认。\n售后/风险：续航、电池和低温表现以检测报告和使用场景说明为准。\n推荐话术：适合短途通勤、练手、接送孩子，长途或高速需求不推荐。\n商品名称：2020款本田雅阁260TURBO"
+      },
+      {
+        "chunk_id": "chunk_58029d4057022265",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5146,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1755,
+          "semantic": 0.1291,
+          "vector": 0.14,
+          "vector_similarity": 0.7955,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5146
+        },
+        "text": "险：电池、增程器、官方权益和保养记录以检测报告和人工核验为准。\n推荐话术：适合家庭六座、长途和新能源体验需求。\n商品名称：2021款长安CS75 PLUS 1.5T自动尊贵型\n型号/SKU：CHEJIN-CS75PLUS-2021\n类目：二手车/SUV\n关键词：CS75PLUS、长安CS75、国产SUV、家用SUV\n规格：2021年上牌，表显4.4万公里，1.5T自动挡，白色，配置高。\n价格：6.88万，库存：2台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_db32892ac885311a6fab",
+    "experience_id": "rag_exp_db32892ac885311a6fab"
+  },
+  "detected_tags": [
+    "llm",
+    "rag_experience",
+    "unknown",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "chats",
+    "change_type": "llm_upsert_chats",
+    "summary": "客户询问汉兰达七座空间及老人小孩适用性",
+    "suggested_fields": {
+      "customer_message": "汉兰达七座那台空间怎么样，带老人小孩合适吗？",
+      "intent_tags": [
+        "空间咨询",
+        "适合人群咨询"
+      ],
+      "tone_tags": [
+        "中性咨询"
+      ],
+      "linked_categories": [
+        "汽车"
+      ],
+      "applicability_scope": "product_category",
+      "product_category": "SUV",
+      "usable_as_template": false,
+      "product_id": "",
+      "additional_details": {
+        "原始资料摘录": "{\"customer_message\": \"汉兰达七座那台空间怎么样，带老人小孩合适吗？\", \"intent_tags\": [\"空间咨询\", \"适合人群咨询\"], \"tone_tags\": [\"中性咨询\"], \"linked_categories\": [\"汽车\"], \"applicability_scope\": \"product_category\", \"product_category\": \"SUV\", \"usable_as_template\": false, \"product_id\": \"\"}"
+      }
+    },
+    "missing_fields": [
+      "service_reply"
+    ],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "chats",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "chats",
+        "id": "chat_highlander_inquiry",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_4303d744ce5d494452a1.txt",
+          "candidate_id": "raw_3f3704a7b0e61dff",
+          "rag_experience_id": "rag_exp_db32892ac885311a6fab",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "customer_message": "汉兰达七座那台空间怎么样，带老人小孩合适吗？",
+          "intent_tags": [
+            "空间咨询",
+            "适合人群咨询"
+          ],
+          "tone_tags": [
+            "中性咨询"
+          ],
+          "linked_categories": [
+            "汽车"
+          ],
+          "applicability_scope": "product_category",
+          "product_category": "SUV",
+          "usable_as_template": false,
+          "product_id": "",
+          "additional_details": {
+            "原始资料摘录": "{\"customer_message\": \"汉兰达七座那台空间怎么样，带老人小孩合适吗？\", \"intent_tags\": [\"空间咨询\", \"适合人群咨询\"], \"tone_tags\": [\"中性咨询\"], \"linked_categories\": [\"汽车\"], \"applicability_scope\": \"product_category\", \"product_category\": \"SUV\", \"usable_as_template\": false, \"product_id\": \"\"}"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "needs_more_info",
+    "ok": false,
+    "confidence": 0.72,
+    "missing_fields": [
+      "service_reply"
+    ],
+    "missing_labels": [
+      "客服回复"
+    ],
+    "question": "还需要补充：客服回复。请补齐后再应用入库。",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "pending",
+    "completeness_status": "needs_more_info",
+    "missing_fields": [
+      "service_reply"
+    ],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_4303d744ce5d494452a1",
+    "source_raw_message_ids": [
+      "raw_msg_d01f28bb4d79eb149ee7",
+      "raw_msg_3a9cdb51fadceea8b199"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_164f9dfaecda7517",
+      "chunk_count": 1,
+      "query": "客户询问汉兰达七座空间及老人小孩适用性\n{\"customer_message\": \"汉兰达七座那台空间怎么样，带老人小孩合适吗？\", \"intent_tags\": [\"空间咨询\", \"适合人群咨询\"], \"tone_tags\": [\"中性咨询\"], \"linked_categories\": [\"汽车\"], \"applicability_scope\": \"product_category\", \"product_category\": \"SUV\", \"usable_as_template\": false, \"product_id\": \"\"}",
+      "hits": [
+        {
+          "chunk_id": "chunk_ef0bc0c6833c4d3c",
+          "source_id": "source_164f9dfaecda7517",
+          "score": 0.6696,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.3571,
+            "semantic": 0.1825,
+            "vector": 0.14,
+            "vector_similarity": 0.8129,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.6696
+          },
+          "text": "[2026-05-04T02:16:31] 许聪: CR-V还有几台？适合一家三口吗？\n[2026-05-04T02:16:31] 许聪: 汉兰达七座那台空间怎么样，带老人小孩合适吗？"
+        },
+        {
+          "chunk_id": "chunk_9a0d34760ad6ccae",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5287,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1871,
+            "semantic": 0.1336,
+            "vector": 0.138,
+            "vector_similarity": 0.7668,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5287
+          },
+          "text": "工确认。\n售后/风险：CVT变速箱状态、保养和车况以检测报告为准。\n推荐话术：适合6到7万预算、练手、家用代步和省油需求。\n商品名称：2019款大众朗逸1.5L自动舒适版\n型号/SKU：CHEJIN-LAVIDA-2019\n类目：二手车/紧凑型轿车\n关键词：朗逸、大众朗逸、德系代步、置换\n规格：2019年上牌，表显6.9万公里，1.5L自动挡，白色，通勤耐用。\n价格：5.98万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：易损件和保养历史以"
+        },
+        {
+          "chunk_id": "chunk_b73fd7e249648300",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5146,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1755,
+            "semantic": 0.1291,
+            "vector": 0.14,
+            "vector_similarity": 0.794,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5146
+          },
+          "text": "。\n商品名称：2022款五菱宏光MINIEV马卡龙臻享款\n型号/SKU：CHEJIN-MINIEV-2022\n类目：二手车/微型电动车\n关键词：宏光MINIEV、五菱mini、代步电车、练手车\n规格：2022年上牌，表显1.6万公里，纯电微型车，粉色，城市通勤。\n价格：2.88万，库存：1台\n物流/过户：微型电动车跨城运输和充电条件需人工确认。\n售后/风险：续航、电池和低温表现以检测报告和使用场景说明为准。\n推荐话术：适合短途通勤、练手、接送孩子，长途或高速需求不推荐。\n商品名称：2020款本田雅阁260TURBO"
+        },
+        {
+          "chunk_id": "chunk_58029d4057022265",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5146,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1755,
+            "semantic": 0.1291,
+            "vector": 0.14,
+            "vector_similarity": 0.7955,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5146
+          },
+          "text": "险：电池、增程器、官方权益和保养记录以检测报告和人工核验为准。\n推荐话术：适合家庭六座、长途和新能源体验需求。\n商品名称：2021款长安CS75 PLUS 1.5T自动尊贵型\n型号/SKU：CHEJIN-CS75PLUS-2021\n类目：二手车/SUV\n关键词：CS75PLUS、长安CS75、国产SUV、家用SUV\n规格：2021年上牌，表显4.4万公里，1.5T自动挡，白色，配置高。\n价格：6.88万，库存：2台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_db32892ac885311a6fab",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ]
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

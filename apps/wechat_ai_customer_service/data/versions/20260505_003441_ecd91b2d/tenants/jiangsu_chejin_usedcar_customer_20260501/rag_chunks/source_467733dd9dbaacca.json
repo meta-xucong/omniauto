@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_467733dd9dbaacca",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_f6a5b91c2097560e9ff0.txt",
+    "content_hash": "ee5dbb2a8b95c4895945128550fb9511",
+    "status": "active",
+    "created_at": "2026-05-04T02:40:53",
+    "updated_at": "2026-05-04T02:40:53"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_1822cc11b8ab226e",
+      "source_id": "source_467733dd9dbaacca",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_f6a5b91c2097560e9ff0.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-04T02:40:52] self: [车金AI] 两个孩子出去玩，空间确实很重要。店里有一台2020款本田CR-V两驱都市版，灰色，5.9万公里，参考价11.98万，后排和后备箱空间都比较宽敞，适合带小孩和行李出门。不过之前您提到预算6万左右，这台会超出一些。您目前预算能往上提吗？或者更倾向五座SUV还是七座？",
+      "char_count": 166,
+      "status": "active",
+      "created_at": "2026-05-04T02:40:53"
+    }
+  ]
+}

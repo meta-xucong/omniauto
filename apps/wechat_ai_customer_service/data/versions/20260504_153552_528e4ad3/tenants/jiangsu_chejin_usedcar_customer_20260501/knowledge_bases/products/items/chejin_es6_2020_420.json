@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "category_id": "products",
+  "id": "chejin_es6_2020_420",
+  "status": "active",
+  "source": {
+    "type": "demo_fixture",
+    "batch_token": "CHEJIN_DEMO_20260503_203628",
+    "domain": "used_car"
+  },
+  "data": {
+    "name": "2020款蔚来ES6 420KM运动版",
+    "sku": "CHEJIN-ES6-2020",
+    "category": "二手车/新能源SUV",
+    "aliases": [
+      "蔚来ES6",
+      "ES6",
+      "换电",
+      "新能源SUV",
+      "2020款蔚来ES6 420KM运动版",
+      "CHEJIN-ES6-2020",
+      "CHEJIN_DEMO_20260503_203628"
+    ],
+    "specs": "2020年上牌，表显6.4万公里，纯电SUV，灰色，需核验电池租用或买断。",
+    "price": 12.98,
+    "unit": "台",
+    "price_tiers": [
+      {
+        "min_quantity": 1,
+        "unit_price": 12.98
+      }
+    ],
+    "inventory": 1,
+    "shipping_policy": "换电权益、电池租用、账号权益和当地政策必须人工确认。",
+    "warranty_policy": "BaaS、电池状态、官方权益和过户手续以人工核验为准。",
+    "reply_templates": {
+      "默认回复": "适合关注换电体验和纯电SUV的客户，但权益核验必须转人工。",
+      "报价回复": "这台车当前演示价约 12.98 万，最终成交价、金融方案和费用明细需要人工确认。",
+      "议价回复": "二手车一车一况，AI 可以说明参考价和看车建议，最终优惠、订金和成交条件必须由销售确认。",
+      "物流回复": "换电权益、电池租用、账号权益和当地政策必须人工确认。",
+      "售后回复": "BaaS、电池状态、官方权益和过户手续以人工核验为准。",
+      "内部备注": "演示资料：用于覆盖二手车常见咨询、风险边界和商品专属知识。"
+    },
+    "risk_rules": [
+      "BaaS权益转人工",
+      "账号权益转人工",
+      "电池买断/租用转人工"
+    ],
+    "additional_details": {
+      "上牌时间": "2020-10",
+      "表显里程": "6.4万公里",
+      "能源类型": "纯电",
+      "演示状态": "在售"
+    }
+  },
+  "runtime": {
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "risk_level": "normal"
+  },
+  "review_state": {
+    "is_new": true,
+    "new_reason": "newly_added_formal_knowledge",
+    "marked_at": "2026-05-03T20:36:28",
+    "updated_at": "2026-05-03T20:36:28",
+    "read_at": "",
+    "read_by": "",
+    "source": {
+      "source_module": "jiangsu_chejin_demo_seed",
+      "target_category": "products",
+      "item_id": "chejin_es6_2020_420"
+    }
+  },
+  "metadata": {
+    "created_at": "2026-05-03T20:36:28",
+    "updated_at": "2026-05-03T20:36:28",
+    "created_by": "admin",
+    "updated_by": "admin"
+  }
+}

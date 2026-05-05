@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_da9bcbdd0cb1be4a",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_f1b60e0b7af02873fb8a.txt",
+    "content_hash": "45fd6ea42f4c59b634d93357ee6b1e67",
+    "status": "active",
+    "created_at": "2026-05-04T03:50:28",
+    "updated_at": "2026-05-04T03:50:28"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_76a8a4fc1bc5a9e9",
+      "source_id": "source_da9bcbdd0cb1be4a",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_f1b60e0b7af02873fb8a.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-04T03:50:27] self: [车金AI] 坦克300的现车我这边暂时没看到准确数据，得让销售同事查一下库存和到店情况。您方便留个电话吗？他查到后第一时间联系您。\n[2026-05-04T03:50:27] 许聪: 我要一台全新未上牌的比亚迪海鸥",
+      "char_count": 136,
+      "status": "active",
+      "created_at": "2026-05-04T03:50:28"
+    }
+  ]
+}

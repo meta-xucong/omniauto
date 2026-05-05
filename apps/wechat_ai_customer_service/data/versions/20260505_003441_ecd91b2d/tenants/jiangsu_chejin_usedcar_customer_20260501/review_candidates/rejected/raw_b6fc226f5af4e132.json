@@ -1,0 +1,306 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_b6fc226f5af4e132",
+  "generated_at": "2026-05-04T02:31:16",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_6a1f29dfdad8c1bace29.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"title\": \"客服人设\", \"policy_type\": \"company\", \"answer\": \"车金AI\", \"applicability_scope\": \"global\", \"additional_details\": {\"as_prefix\": true}, \"product_id\": \"\", \"product_category\": \"\"}",
+    "content_sha256": "083c0ffdb6a8abeae7213932189cce5451e0f0f55c44c0efef9b37f46d5ef55a",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_6a1f29dfdad8c1bace29",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_f524dae9414a5405d271",
+      "raw_msg_cd303049d73d78390357",
+      "raw_msg_e56c1e571734e394ba8e"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_dc5154876696eb06",
+        "source_id": "source_7043869bb5b7a93d",
+        "score": 0.429,
+        "category": "policies",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2485,
+          "semantic": 0.1585,
+          "vector": 0.0871,
+          "vector_similarity": 0.4837,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.015,
+          "risk_penalty": 0.08,
+          "final": 0.429
+        },
+        "text": "政策规则：江苏车金高意向转人工 CHEJIN_20260503_082804\n测试批次：CHEJIN_20260503_082804\n规则名称：试驾到店与订金转人工\n规则类型：manual_required\n触发关键词：试驾,到店,订金,定金,今天看车,明天看车,销售联系,企业微信群\n答案：客户明确要求试驾、到店、订金、销售联系时，AI只做确认和记录，必须转人工或企业微信群承接，不能自行承诺车源保留和最终价格。\n允许自动回复：false\n必须转人工：true\n提醒人工客服：true\n风险等级：high\n政策规则：江"
+      },
+      {
+        "chunk_id": "chunk_2fbb94d5e39e356d",
+        "source_id": "source_d34e2630837135e0",
+        "score": 0.429,
+        "category": "policies",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2485,
+          "semantic": 0.1585,
+          "vector": 0.0871,
+          "vector_similarity": 0.4838,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.015,
+          "risk_penalty": 0.08,
+          "final": 0.429
+        },
+        "text": "政策规则：江苏车金高意向转人工 CHEJIN_20260503_204823\n测试批次：CHEJIN_20260503_204823\n规则名称：试驾到店与订金转人工\n规则类型：manual_required\n触发关键词：试驾,到店,订金,定金,今天看车,明天看车,销售联系,企业微信群\n答案：客户明确要求试驾、到店、订金、销售联系时，AI只做确认和记录，必须转人工或企业微信群承接，不能自行承诺车源保留和最终价格。\n允许自动回复：false\n必须转人工：true\n提醒人工客服：true\n风险等级：high\n政策规则：江"
+      },
+      {
+        "chunk_id": "chunk_8853d46e12ff05ef",
+        "source_id": "source_095a69445f947e68",
+        "score": 0.4289,
+        "category": "group",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2131,
+          "semantic": 0.1431,
+          "vector": 0.0827,
+          "vector_similarity": 0.4596,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.4289
+        },
+        "text": "[2026-05-03T08:28:56] self: 政策规则：江苏车金真机金融边界 CHEJIN_20260503_082804\n测试批次：CHEJIN_20260503_082804\n规则名称：新能源电池与金融审批转人工\n规则类型：contract\n触发关键词：电池检测,首付,月供,贷款包过,CHEJIN_20260503_082804\n答案：涉及新能源电池检测、首付月供、贷款通过率时必须转人工确认，不允许AI承诺结果。\n[2026-05-03T08:28:56] self: 边界噪音：CHEJIN_2026"
+      },
+      {
+        "chunk_id": "chunk_5f89f0f0cab985ee",
+        "source_id": "source_4c1945c7dec906b9",
+        "score": 0.4285,
+        "category": "policies",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2485,
+          "semantic": 0.1585,
+          "vector": 0.0866,
+          "vector_similarity": 0.4812,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.015,
+          "risk_penalty": 0.08,
+          "final": 0.4285
+        },
+        "text": "政策规则：江苏车金高意向转人工 CHEJIN_20260503_214706\n测试批次：CHEJIN_20260503_214706\n规则名称：试驾到店与订金转人工\n规则类型：manual_required\n触发关键词：试驾,到店,订金,定金,今天看车,明天看车,销售联系,企业微信群\n答案：客户明确要求试驾、到店、订金、销售联系时，AI只做确认和记录，必须转人工或企业微信群承接，不能自行承诺车源保留和最终价格。\n允许自动回复：false\n必须转人工：true\n提醒人工客服：true\n风险等级：high\n政策规则：江"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_445b0dcbfd1692fa243b",
+    "experience_id": "rag_exp_445b0dcbfd1692fa243b"
+  },
+  "detected_tags": [
+    "company",
+    "llm",
+    "rag_experience",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "policies",
+    "change_type": "llm_upsert_policies",
+    "summary": "客服人设名称",
+    "suggested_fields": {
+      "title": "客服人设",
+      "policy_type": "company",
+      "answer": "车金AI",
+      "applicability_scope": "global",
+      "product_id": "",
+      "product_category": "",
+      "additional_details": {
+        "as_prefix": true,
+        "原始资料摘录": "{\"title\": \"客服人设\", \"policy_type\": \"company\", \"answer\": \"车金AI\", \"applicability_scope\": \"global\", \"additional_details\": {\"as_prefix\": true}, \"product_id\": \"\", \"product_category\": \"\"}"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "policies",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "policies",
+        "id": "company_agent_name",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_6a1f29dfdad8c1bace29.txt",
+          "candidate_id": "raw_b6fc226f5af4e132",
+          "rag_experience_id": "rag_exp_445b0dcbfd1692fa243b",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "title": "客服人设",
+          "policy_type": "company",
+          "answer": "车金AI",
+          "applicability_scope": "global",
+          "product_id": "",
+          "product_category": "",
+          "additional_details": {
+            "as_prefix": true,
+            "原始资料摘录": "{\"title\": \"客服人设\", \"policy_type\": \"company\", \"answer\": \"车金AI\", \"applicability_scope\": \"global\", \"additional_details\": {\"as_prefix\": true}, \"product_id\": \"\", \"product_category\": \"\"}"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "as_prefix",
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "rejected",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_6a1f29dfdad8c1bace29",
+    "source_raw_message_ids": [
+      "raw_msg_f524dae9414a5405d271",
+      "raw_msg_cd303049d73d78390357",
+      "raw_msg_e56c1e571734e394ba8e"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_8cd2ab3dca40559f",
+      "chunk_count": 1,
+      "query": "客服人设名称\n{\"title\": \"客服人设\", \"policy_type\": \"company\", \"answer\": \"车金AI\", \"applicability_scope\": \"global\", \"additional_details\": {\"as_prefix\": true}, \"product_id\": \"\", \"product_category\": \"\"}\n客服人设\n车金AI",
+      "hits": [
+        {
+          "chunk_id": "chunk_dc5154876696eb06",
+          "source_id": "source_7043869bb5b7a93d",
+          "score": 0.429,
+          "category": "policies",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2485,
+            "semantic": 0.1585,
+            "vector": 0.0871,
+            "vector_similarity": 0.4837,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.015,
+            "risk_penalty": 0.08,
+            "final": 0.429
+          },
+          "text": "政策规则：江苏车金高意向转人工 CHEJIN_20260503_082804\n测试批次：CHEJIN_20260503_082804\n规则名称：试驾到店与订金转人工\n规则类型：manual_required\n触发关键词：试驾,到店,订金,定金,今天看车,明天看车,销售联系,企业微信群\n答案：客户明确要求试驾、到店、订金、销售联系时，AI只做确认和记录，必须转人工或企业微信群承接，不能自行承诺车源保留和最终价格。\n允许自动回复：false\n必须转人工：true\n提醒人工客服：true\n风险等级：high\n政策规则：江"
+        },
+        {
+          "chunk_id": "chunk_2fbb94d5e39e356d",
+          "source_id": "source_d34e2630837135e0",
+          "score": 0.429,
+          "category": "policies",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2485,
+            "semantic": 0.1585,
+            "vector": 0.0871,
+            "vector_similarity": 0.4838,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.015,
+            "risk_penalty": 0.08,
+            "final": 0.429
+          },
+          "text": "政策规则：江苏车金高意向转人工 CHEJIN_20260503_204823\n测试批次：CHEJIN_20260503_204823\n规则名称：试驾到店与订金转人工\n规则类型：manual_required\n触发关键词：试驾,到店,订金,定金,今天看车,明天看车,销售联系,企业微信群\n答案：客户明确要求试驾、到店、订金、销售联系时，AI只做确认和记录，必须转人工或企业微信群承接，不能自行承诺车源保留和最终价格。\n允许自动回复：false\n必须转人工：true\n提醒人工客服：true\n风险等级：high\n政策规则：江"
+        },
+        {
+          "chunk_id": "chunk_8853d46e12ff05ef",
+          "source_id": "source_095a69445f947e68",
+          "score": 0.4289,
+          "category": "group",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2131,
+            "semantic": 0.1431,
+            "vector": 0.0827,
+            "vector_similarity": 0.4596,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.4289
+          },
+          "text": "[2026-05-03T08:28:56] self: 政策规则：江苏车金真机金融边界 CHEJIN_20260503_082804\n测试批次：CHEJIN_20260503_082804\n规则名称：新能源电池与金融审批转人工\n规则类型：contract\n触发关键词：电池检测,首付,月供,贷款包过,CHEJIN_20260503_082804\n答案：涉及新能源电池检测、首付月供、贷款通过率时必须转人工确认，不允许AI承诺结果。\n[2026-05-03T08:28:56] self: 边界噪音：CHEJIN_2026"
+        },
+        {
+          "chunk_id": "chunk_5f89f0f0cab985ee",
+          "source_id": "source_4c1945c7dec906b9",
+          "score": 0.4285,
+          "category": "policies",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2485,
+            "semantic": 0.1585,
+            "vector": 0.0866,
+            "vector_similarity": 0.4812,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.015,
+            "risk_penalty": 0.08,
+            "final": 0.4285
+          },
+          "text": "政策规则：江苏车金高意向转人工 CHEJIN_20260503_214706\n测试批次：CHEJIN_20260503_214706\n规则名称：试驾到店与订金转人工\n规则类型：manual_required\n触发关键词：试驾,到店,订金,定金,今天看车,明天看车,销售联系,企业微信群\n答案：客户明确要求试驾、到店、订金、销售联系时，AI只做确认和记录，必须转人工或企业微信群承接，不能自行承诺车源保留和最终价格。\n允许自动回复：false\n必须转人工：true\n提醒人工客服：true\n风险等级：high\n政策规则：江"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_445b0dcbfd1692fa243b",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "rejected_at": "2026-05-04T15:24:47",
+    "reason": "?????????????AI/??????????????????????????????????????????AI????"
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

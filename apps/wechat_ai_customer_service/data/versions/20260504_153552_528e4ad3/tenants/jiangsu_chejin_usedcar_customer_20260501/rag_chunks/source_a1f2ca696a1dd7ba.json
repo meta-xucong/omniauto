@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_a1f2ca696a1dd7ba",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_9f8bcd2bbfed329844d2.txt",
+    "content_hash": "7149bcff86efee3cb7c5312f595f37ac",
+    "status": "active",
+    "created_at": "2026-05-04T02:04:35",
+    "updated_at": "2026-05-04T02:04:35"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_b4d37c949676291d",
+      "source_id": "source_a1f2ca696a1dd7ba",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_9f8bcd2bbfed329844d2.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-04T02:04:35] 许聪: GL8适合公司接待客户吗？别太老气就行",
+      "char_count": 45,
+      "status": "active",
+      "created_at": "2026-05-04T02:04:35"
+    }
+  ]
+}

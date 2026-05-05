@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_e0064f85994484a8",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_4a122a7de55b1f2e9a9b.txt",
+    "content_hash": "e88e85074fa5b67baa630292bb8c57a2",
+    "status": "active",
+    "created_at": "2026-05-04T03:59:09",
+    "updated_at": "2026-05-04T03:59:09"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_78dbc59daadfd4af",
+      "source_id": "source_e0064f85994484a8",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_4a122a7de55b1f2e9a9b.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-04 03:58:00] system: 03:58\n[2026-05-04T03:59:08] self: [车金AI] 许哥，日系车家用确实口碑比较稳，正常保养下故障率相对低。按咱们现车来看，店里有一台2021款凯美瑞2.0G豪华版，8.98万，4.8万公里；还有一台2019款天籁2.0L舒适版，8.28万，6.2万公里，都在南京。具体车况以检测报告为准。您预算大概多少？或者更看重空间还是省油？我帮您具体对比下。\n[2026-05-04T03:59:08] 许聪: 这车看着便宜，是不是有什么问题？",
+      "char_count": 262,
+      "status": "active",
+      "created_at": "2026-05-04T03:59:09"
+    }
+  ]
+}

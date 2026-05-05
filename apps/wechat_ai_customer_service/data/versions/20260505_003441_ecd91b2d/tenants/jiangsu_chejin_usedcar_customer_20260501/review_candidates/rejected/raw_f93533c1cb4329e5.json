@@ -1,0 +1,310 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_f93533c1cb4329e5",
+  "generated_at": "2026-05-04T04:21:42",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_0854ff54a2650a38c36d.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "title: 待分类规则；answer: [2026-05-04 04:21:00] system: 04:21 [2026-05-04T04:21:30] self: [车金AI] 许哥，您这玩笑开大了😄 谈感情我可真不专业，还是转给销售同事跟您聊车吧？方便留个电话吗？；keywords: ['unknown']",
+    "content_sha256": "a7f3ccdaebf2f180d022d6d5bc57c68b8cb503d7b5b26b929c8f4446aeff14db",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_0854ff54a2650a38c36d",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_a13b5cd88dacd7e26849",
+      "raw_msg_a039676cb5555ef5db2e"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_c76838b448f4c3d5",
+        "source_id": "source_53d5214e7d8f7161",
+        "score": 0.9088,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.5076,
+          "semantic": 0.2711,
+          "vector": 0.14,
+          "vector_similarity": 0.9497,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.9088
+        },
+        "text": "[2026-05-04 04:21:00] system: 04:21\n[2026-05-04T04:21:30] self: [车金AI] 许哥，您这玩笑开大了😄 谈感情我可真不专业，还是转给销售同事跟您聊车吧？方便留个电话吗？"
+      },
+      {
+        "chunk_id": "chunk_95333a39cc614be8",
+        "source_id": "source_d69b2fffa68e7f7d",
+        "score": 0.5731,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2794,
+          "semantic": 0.1719,
+          "vector": 0.1318,
+          "vector_similarity": 0.7324,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.5731
+        },
+        "text": "[2026-05-04T04:01:45] self: [车金AI] 许哥，这台凯美瑞8.98万的价格属于正常行情，日系车折旧慢、保值率不错，便宜不代表一定有问题。不过二手车一车一况，具体有没有事故、调表这些还是得看实车检测报告，我直接转给销售同事帮您调取核实一下，方便留个电话吗？"
+      },
+      {
+        "chunk_id": "chunk_5ce004697dbee133",
+        "source_id": "source_edf4b496ba3529d7",
+        "score": 0.5607,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2829,
+          "semantic": 0.1734,
+          "vector": 0.1143,
+          "vector_similarity": 0.6352,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.5607
+        },
+        "text": "[2026-05-04 03:48:00] system: 03:48\n[2026-05-04T03:48:32] self: [车金AI] 许哥，奔驰E级2021年以后的目前库里没查到现车信息，我帮您转给销售同事核实一下，方便留个电话吗？他查到后直接联系您。\n[2026-05-04T03:48:32] 许聪: 坦克300有现车吗？"
+      },
+      {
+        "chunk_id": "chunk_30f480baa8b23b10",
+        "source_id": "source_4df74352cf1c73ed",
+        "score": 0.5598,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2653,
+          "semantic": 0.1658,
+          "vector": 0.1387,
+          "vector_similarity": 0.7704,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.5598
+        },
+        "text": "[2026-05-04T03:40:44] self: [车金AI] 好的，我马上帮您转给销售同事，您方便留个电话吗？他们会尽快联系您。\n[2026-05-04T03:40:44] 许聪: 发票能不能少开一点金额？"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_109171c2b1fb3e9289f5",
+    "experience_id": "rag_exp_109171c2b1fb3e9289f5"
+  },
+  "detected_tags": [
+    "rag_experience",
+    "unknown",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "policies",
+    "change_type": "upsert_policy",
+    "summary": "建议新增/更新政策规则：待分类规则",
+    "suggested_fields": {
+      "title": "待分类规则",
+      "policy_type": "other",
+      "keywords": [
+        "unknown"
+      ],
+      "answer": "[2026-05-04 04:21:00] system: 04:21 [2026-05-04T04:21:30] self: [车金AI] 许哥，您这玩笑开大了😄 谈感情我可真不专业，还是转给销售同事跟您聊车吧？方便留个电话吗？",
+      "allow_auto_reply": true,
+      "requires_handoff": false,
+      "operator_alert": false,
+      "risk_level": "normal",
+      "applicability_scope": "global",
+      "additional_details": {
+        "原始资料摘录": "title: 待分类规则；answer: [2026-05-04 04:21:00] system: 04:21 [2026-05-04T04:21:30] self: [车金AI] 许哥，您这玩笑开大了😄 谈感情我可真不专业，还是转给销售同事跟您聊车吧？方便留个电话吗？；keywords: ['unknown']"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "policies",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "policies",
+        "id": "item_abab680ba97a",
+        "status": "active",
+        "source": {
+          "type": "raw_upload",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_0854ff54a2650a38c36d.txt",
+          "candidate_id": "raw_f93533c1cb4329e5",
+          "rag_experience_id": "rag_exp_109171c2b1fb3e9289f5",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "title": "待分类规则",
+          "policy_type": "other",
+          "keywords": [
+            "unknown"
+          ],
+          "answer": "[2026-05-04 04:21:00] system: 04:21 [2026-05-04T04:21:30] self: [车金AI] 许哥，您这玩笑开大了😄 谈感情我可真不专业，还是转给销售同事跟您聊车吧？方便留个电话吗？",
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "operator_alert": false,
+          "risk_level": "normal",
+          "applicability_scope": "global",
+          "additional_details": {
+            "原始资料摘录": "title: 待分类规则；answer: [2026-05-04 04:21:00] system: 04:21 [2026-05-04T04:21:30] self: [车金AI] 许哥，您这玩笑开大了😄 谈感情我可真不专业，还是转给销售同事跟您聊车吧？方便留个电话吗？；keywords: ['unknown']"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "rejected",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "",
+      "status": "rule_fallback_after_llm",
+      "reason": "policies_rules_used_after_llm_unavailable_or_invalid",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_0854ff54a2650a38c36d",
+    "source_raw_message_ids": [
+      "raw_msg_a13b5cd88dacd7e26849",
+      "raw_msg_a039676cb5555ef5db2e"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_53d5214e7d8f7161",
+      "chunk_count": 1,
+      "query": "建议新增/更新政策规则：待分类规则\ntitle: 待分类规则；answer: [2026-05-04 04:21:00] system: 04:21 [2026-05-04T04:21:30] self: [车金AI] 许哥，您这玩笑开大了😄 谈感情我可真不专业，还是转给销售同事跟您聊车吧？方便留个电话吗？；keywords: ['unknown']\n待分类规则\n[2026-05-04 04:21:00] system: 04:21 [2026-05-04T04:21:30] self: [车金AI] 许哥，您这玩笑开大了😄 谈感情我可真不专业，还是转给销售同事跟您聊车吧？方便留个电话吗？",
+      "hits": [
+        {
+          "chunk_id": "chunk_c76838b448f4c3d5",
+          "source_id": "source_53d5214e7d8f7161",
+          "score": 0.9088,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.5076,
+            "semantic": 0.2711,
+            "vector": 0.14,
+            "vector_similarity": 0.9497,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.9088
+          },
+          "text": "[2026-05-04 04:21:00] system: 04:21\n[2026-05-04T04:21:30] self: [车金AI] 许哥，您这玩笑开大了😄 谈感情我可真不专业，还是转给销售同事跟您聊车吧？方便留个电话吗？"
+        },
+        {
+          "chunk_id": "chunk_95333a39cc614be8",
+          "source_id": "source_d69b2fffa68e7f7d",
+          "score": 0.5731,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2794,
+            "semantic": 0.1719,
+            "vector": 0.1318,
+            "vector_similarity": 0.7324,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.5731
+          },
+          "text": "[2026-05-04T04:01:45] self: [车金AI] 许哥，这台凯美瑞8.98万的价格属于正常行情，日系车折旧慢、保值率不错，便宜不代表一定有问题。不过二手车一车一况，具体有没有事故、调表这些还是得看实车检测报告，我直接转给销售同事帮您调取核实一下，方便留个电话吗？"
+        },
+        {
+          "chunk_id": "chunk_5ce004697dbee133",
+          "source_id": "source_edf4b496ba3529d7",
+          "score": 0.5607,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2829,
+            "semantic": 0.1734,
+            "vector": 0.1143,
+            "vector_similarity": 0.6352,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.5607
+          },
+          "text": "[2026-05-04 03:48:00] system: 03:48\n[2026-05-04T03:48:32] self: [车金AI] 许哥，奔驰E级2021年以后的目前库里没查到现车信息，我帮您转给销售同事核实一下，方便留个电话吗？他查到后直接联系您。\n[2026-05-04T03:48:32] 许聪: 坦克300有现车吗？"
+        },
+        {
+          "chunk_id": "chunk_30f480baa8b23b10",
+          "source_id": "source_4df74352cf1c73ed",
+          "score": 0.5598,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2653,
+            "semantic": 0.1658,
+            "vector": 0.1387,
+            "vector_similarity": 0.7704,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.5598
+          },
+          "text": "[2026-05-04T03:40:44] self: [车金AI] 好的，我马上帮您转给销售同事，您方便留个电话吗？他们会尽快联系您。\n[2026-05-04T03:40:44] 许聪: 发票能不能少开一点金额？"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_109171c2b1fb3e9289f5",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "rejected_at": "2026-05-04T15:24:47",
+    "reason": "?????????????AI/??????????????????????????????????????????AI????"
+  },
+  "suggested_tests": [
+    {
+      "scenario": "other",
+      "assertion": "入库后应能按关键词回答该政策；高风险内容必须转人工。"
+    }
+  ]
+}

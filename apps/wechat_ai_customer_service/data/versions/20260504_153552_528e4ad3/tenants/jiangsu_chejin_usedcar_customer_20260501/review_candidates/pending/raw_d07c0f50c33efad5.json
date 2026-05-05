@@ -1,0 +1,334 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_d07c0f50c33efad5",
+  "generated_at": "2026-05-03T20:37:48",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_6b36251a9f11bbc51eae.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"customer_message\": \"如果迁不回苏州怎么办？\", \"service_reply\": \"异地迁入要先查当地政策和车辆档案，我帮您转人工确认。\", \"intent_tags\": [\"异地迁入\", \"上牌政策\"], \"tone_tags\": [\"专业\", \"转人工\"], \"linked_categories\": [\"policies\"], \"applicability_scope\": \"global\", \"usable_as_template\": true, \"additional_details\": {\"演示批次\": \"CHEJIN_DEMO_20260503_203628\"}, \"product_id\": \"\", \"product_category\": \"\"}",
+    "content_sha256": "1824f2f8d4e5d032222318da592361456558a72bb957e997cc276244de0bc41c",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_6b36251a9f11bbc51eae",
+    "conversation_id": "chejin_demo_private_li_chejin_demo_20260503_203628",
+    "raw_message_ids": [
+      "raw_msg_a022800132d7aa285143",
+      "raw_msg_a6fc89daffffdee3eddc",
+      "raw_msg_0acb83b1b09a81e6de01",
+      "raw_msg_8e30f22ccb573f4ac82f",
+      "raw_msg_0b3c42e3c2fdea076041",
+      "raw_msg_93e363817c880d01e946"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_a5467ca9555680d4",
+        "source_id": "source_f57826a24c2d2572",
+        "score": 0.8136,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.4413,
+          "semantic": 0.2423,
+          "vector": 0.14,
+          "vector_similarity": 0.8439,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.8136
+        },
+        "text": "[2026-05-03T19:36:31] 客户: 李女士：我有一台2018年朗逸想置换宋PLUS，车在苏州，6.5万公里。\n演示批次：CHEJIN_DEMO_20260503_203628\n[2026-05-03T19:37:31] self: 客服：可以，麻烦补充是否有贷款、事故水泡火烧情况、期望价和车牌所在地，估价需要人工复核。\n演示批次：CHEJIN_DEMO_20260503_203628\n[2026-05-03T19:38:31] 客户: 李女士：新能源车电池是不是保八年？\n演示批次：CHEJIN_DE"
+      },
+      {
+        "chunk_id": "chunk_c042ee843c5513a9",
+        "source_id": "source_b6382fbc1e2edf58",
+        "score": 0.5554,
+        "category": "chats",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.3241,
+          "semantic": 0.1913,
+          "vector": 0.14,
+          "vector_similarity": 0.7895,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.02,
+          "risk_penalty": 0.08,
+          "final": 0.5554
+        },
+        "text": "# 销售对话话术库\n演示批次：CHEJIN_DEMO_20260503_203628\n真实客服话术样例：\n客户：8万左右想买省油自动挡代步\n客服：8万左右可以优先看凯美瑞、轩逸、卡罗拉或秦PLUS。燃油车更省心，插混更省油；我先帮您确认城市、到店时间、是否贷款和置换。\n标签：预算推荐、代步、CHEJIN_DEMO_20260503_203628\n客户：秦PLUS和Model 3怎么选\n客服：秦PLUS偏低油耗和家用成本，Model 3偏纯电驾驶和智能化。新能源车我会先提醒电池检测、官方权益和当地政策需要人工确认。\n"
+      },
+      {
+        "chunk_id": "chunk_9a0d34760ad6ccae",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.549,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2069,
+          "semantic": 0.1404,
+          "vector": 0.1318,
+          "vector_similarity": 0.7321,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.549
+        },
+        "text": "工确认。\n售后/风险：CVT变速箱状态、保养和车况以检测报告为准。\n推荐话术：适合6到7万预算、练手、家用代步和省油需求。\n商品名称：2019款大众朗逸1.5L自动舒适版\n型号/SKU：CHEJIN-LAVIDA-2019\n类目：二手车/紧凑型轿车\n关键词：朗逸、大众朗逸、德系代步、置换\n规格：2019年上牌，表显6.9万公里，1.5L自动挡，白色，通勤耐用。\n价格：5.98万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：易损件和保养历史以"
+      },
+      {
+        "chunk_id": "chunk_99cc4e7f8c7061b0",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5397,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1981,
+          "semantic": 0.1366,
+          "vector": 0.135,
+          "vector_similarity": 0.7501,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5397
+        },
+        "text": "、提档、当地新能源指标和运输方式。\n售后/风险：电池健康、辅助驾驶功能和官方权益以检测报告及账号核验为准。\n推荐话术：适合想体验纯电、智能化和低用车成本的客户，电池和权益必须人工确认。\n商品名称：2020款奥迪A4L 40TFSI时尚动感型\n型号/SKU：CHEJIN-A4L-2020\n类目：二手车/豪华轿车\n关键词：奥迪A4L、A4L、豪华轿车、婚庆、商务\n规格：2020年上牌，表显6.8万公里，2.0T自动挡，黑色，保养记录较完整。\n价格：15.88万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_7a0ea059911e2261be5b",
+    "experience_id": "rag_exp_7a0ea059911e2261be5b"
+  },
+  "detected_tags": [
+    "after_sales",
+    "company",
+    "llm",
+    "rag_experience",
+    "style",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "chats",
+    "change_type": "llm_upsert_chats",
+    "summary": "客户询问迁不回苏州怎么办，客服表示需查当地政策并建议转人工确认",
+    "suggested_fields": {
+      "customer_message": "如果迁不回苏州怎么办？",
+      "service_reply": "异地迁入要先查当地政策和车辆档案，我帮您转人工确认。",
+      "intent_tags": [
+        "异地迁入",
+        "上牌政策"
+      ],
+      "tone_tags": [
+        "专业",
+        "转人工"
+      ],
+      "linked_categories": [
+        "policies"
+      ],
+      "applicability_scope": "global",
+      "usable_as_template": true,
+      "product_id": "",
+      "product_category": "",
+      "additional_details": {
+        "演示批次": "CHEJIN_DEMO_20260503_203628",
+        "原始资料摘录": "{\"customer_message\": \"如果迁不回苏州怎么办？\", \"service_reply\": \"异地迁入要先查当地政策和车辆档案，我帮您转人工确认。\", \"intent_tags\": [\"异地迁入\", \"上牌政策\"], \"tone_tags\": [\"专业\", \"转人工\"], \"linked_categories\": [\"policies\"], \"applicability_scope\": \"global\", \"usable_as_template\": true, \"additional_details\": {\"演示批次\": \"CHEJIN_DEMO_20260503_203628\"}, \"product_id\": \"\", \"product_category\": \"\"}"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "chats",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "chats",
+        "id": "chat_migration_issue",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_6b36251a9f11bbc51eae.txt",
+          "candidate_id": "raw_d07c0f50c33efad5",
+          "rag_experience_id": "rag_exp_7a0ea059911e2261be5b",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "customer_message": "如果迁不回苏州怎么办？",
+          "service_reply": "异地迁入要先查当地政策和车辆档案，我帮您转人工确认。",
+          "intent_tags": [
+            "异地迁入",
+            "上牌政策"
+          ],
+          "tone_tags": [
+            "专业",
+            "转人工"
+          ],
+          "linked_categories": [
+            "policies"
+          ],
+          "applicability_scope": "global",
+          "usable_as_template": true,
+          "product_id": "",
+          "product_category": "",
+          "additional_details": {
+            "演示批次": "CHEJIN_DEMO_20260503_203628",
+            "原始资料摘录": "{\"customer_message\": \"如果迁不回苏州怎么办？\", \"service_reply\": \"异地迁入要先查当地政策和车辆档案，我帮您转人工确认。\", \"intent_tags\": [\"异地迁入\", \"上牌政策\"], \"tone_tags\": [\"专业\", \"转人工\"], \"linked_categories\": [\"policies\"], \"applicability_scope\": \"global\", \"usable_as_template\": true, \"additional_details\": {\"演示批次\": \"CHEJIN_DEMO_20260503_203628\"}, \"product_id\": \"\", \"product_category\": \"\"}"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": false,
+          "requires_handoff": true,
+          "risk_level": "warning"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "原始资料摘录",
+      "演示批次"
+    ]
+  },
+  "review": {
+    "status": "pending",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_6b36251a9f11bbc51eae",
+    "source_raw_message_ids": [
+      "raw_msg_a022800132d7aa285143",
+      "raw_msg_a6fc89daffffdee3eddc",
+      "raw_msg_0acb83b1b09a81e6de01",
+      "raw_msg_8e30f22ccb573f4ac82f",
+      "raw_msg_0b3c42e3c2fdea076041",
+      "raw_msg_93e363817c880d01e946"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_f57826a24c2d2572",
+      "chunk_count": 1,
+      "query": "客户询问迁不回苏州怎么办，客服表示需查当地政策并建议转人工确认\n{\"customer_message\": \"如果迁不回苏州怎么办？\", \"service_reply\": \"异地迁入要先查当地政策和车辆档案，我帮您转人工确认。\", \"intent_tags\": [\"异地迁入\", \"上牌政策\"], \"tone_tags\": [\"专业\", \"转人工\"], \"linked_categories\": [\"policies\"], \"applicability_scope\": \"global\", \"usable_as_template\": true, \"additional_details\": {\"演示批次\": \"CHEJIN_DEMO_20260503_203628\"}, \"product_id\": \"\", \"product_category\": \"\"}\n异地迁入要先查当地政策和车辆档案，我帮您转人工确认。",
+      "hits": [
+        {
+          "chunk_id": "chunk_a5467ca9555680d4",
+          "source_id": "source_f57826a24c2d2572",
+          "score": 0.8136,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.4413,
+            "semantic": 0.2423,
+            "vector": 0.14,
+            "vector_similarity": 0.8439,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.8136
+          },
+          "text": "[2026-05-03T19:36:31] 客户: 李女士：我有一台2018年朗逸想置换宋PLUS，车在苏州，6.5万公里。\n演示批次：CHEJIN_DEMO_20260503_203628\n[2026-05-03T19:37:31] self: 客服：可以，麻烦补充是否有贷款、事故水泡火烧情况、期望价和车牌所在地，估价需要人工复核。\n演示批次：CHEJIN_DEMO_20260503_203628\n[2026-05-03T19:38:31] 客户: 李女士：新能源车电池是不是保八年？\n演示批次：CHEJIN_DE"
+        },
+        {
+          "chunk_id": "chunk_c042ee843c5513a9",
+          "source_id": "source_b6382fbc1e2edf58",
+          "score": 0.5554,
+          "category": "chats",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.3241,
+            "semantic": 0.1913,
+            "vector": 0.14,
+            "vector_similarity": 0.7895,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.02,
+            "risk_penalty": 0.08,
+            "final": 0.5554
+          },
+          "text": "# 销售对话话术库\n演示批次：CHEJIN_DEMO_20260503_203628\n真实客服话术样例：\n客户：8万左右想买省油自动挡代步\n客服：8万左右可以优先看凯美瑞、轩逸、卡罗拉或秦PLUS。燃油车更省心，插混更省油；我先帮您确认城市、到店时间、是否贷款和置换。\n标签：预算推荐、代步、CHEJIN_DEMO_20260503_203628\n客户：秦PLUS和Model 3怎么选\n客服：秦PLUS偏低油耗和家用成本，Model 3偏纯电驾驶和智能化。新能源车我会先提醒电池检测、官方权益和当地政策需要人工确认。\n"
+        },
+        {
+          "chunk_id": "chunk_9a0d34760ad6ccae",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.549,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2069,
+            "semantic": 0.1404,
+            "vector": 0.1318,
+            "vector_similarity": 0.7321,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.549
+          },
+          "text": "工确认。\n售后/风险：CVT变速箱状态、保养和车况以检测报告为准。\n推荐话术：适合6到7万预算、练手、家用代步和省油需求。\n商品名称：2019款大众朗逸1.5L自动舒适版\n型号/SKU：CHEJIN-LAVIDA-2019\n类目：二手车/紧凑型轿车\n关键词：朗逸、大众朗逸、德系代步、置换\n规格：2019年上牌，表显6.9万公里，1.5L自动挡，白色，通勤耐用。\n价格：5.98万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：易损件和保养历史以"
+        },
+        {
+          "chunk_id": "chunk_99cc4e7f8c7061b0",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5397,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1981,
+            "semantic": 0.1366,
+            "vector": 0.135,
+            "vector_similarity": 0.7501,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5397
+          },
+          "text": "、提档、当地新能源指标和运输方式。\n售后/风险：电池健康、辅助驾驶功能和官方权益以检测报告及账号核验为准。\n推荐话术：适合想体验纯电、智能化和低用车成本的客户，电池和权益必须人工确认。\n商品名称：2020款奥迪A4L 40TFSI时尚动感型\n型号/SKU：CHEJIN-A4L-2020\n类目：二手车/豪华轿车\n关键词：奥迪A4L、A4L、豪华轿车、婚庆、商务\n规格：2020年上牌，表显6.8万公里，2.0T自动挡，黑色，保养记录较完整。\n价格：15.88万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_7a0ea059911e2261be5b",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ]
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "category_id": "products",
+  "id": "chejin_gl8_2020_es653t",
+  "status": "active",
+  "source": {
+    "type": "deepseek_upload_learning",
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_67996a827b284cf4f839.txt",
+    "candidate_id": "raw_780fd867cde6a5a5",
+    "rag_experience_id": "rag_exp_78785b6f2855b8517269",
+    "candidate_source_type": "rag_experience",
+    "original_type": "raw_wechat_group"
+  },
+  "data": {
+    "name": "2020款别克GL8 ES陆尊653T豪华型",
+    "sku": "CHEJIN-LIVE-GL8-2020ES",
+    "category": "二手车/MPV",
+    "aliases": [
+      "GL8",
+      "别克GL8",
+      "商务接待",
+      "七座",
+      "CHEJIN_BASELINE_20260502"
+    ],
+    "specs": "2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。",
+    "price": 17.66,
+    "unit": "台",
+    "inventory": 1,
+    "shipping_policy": "南京门店可看车，商务客户试乘需人工确认",
+    "warranty_policy": "车况以检测报告为准，事故、水泡、火烧承诺必须人工确认",
+    "reply_templates": {
+      "recommendation": "适合商务接待、多人家庭和七座刚需客户。"
+    },
+    "price_tiers": [
+      {
+        "min_quantity": 1.0,
+        "unit_price": 17.66
+      }
+    ],
+    "additional_details": {
+      "batch": "LIVE_RECORDER_20260502_042340",
+      "原始资料摘录": "{\"name\": \"2020款别克GL8 ES陆尊653T豪华型\", \"sku\": \"CHEJIN-LIVE-GL8-2020ES\", \"category\": \"二手车/MPV\", \"price\": 17.66, \"unit\": \"台\", \"inventory\": 1, \"shipping_policy\": \"南京门店可看车，商务客户试乘需人工确认\", \"warranty_policy\": \"车况以检测报告为准，事故、水泡、火烧承诺必须人工确认\", \"additional_details\": {\"batch\": \"LIVE_RECORDER_20260502_042340\"}, \"price_tiers\": [{\"min_quantity\": 1.0, \"unit_price\": 17.66}]}"
+    }
+  },
+  "runtime": {
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "risk_level": "warning"
+  },
+  "review_state": {
+    "is_new": true,
+    "new_reason": "newly_added_formal_knowledge",
+    "marked_at": "2026-05-02T04:23:27",
+    "updated_at": "2026-05-02T23:59:18",
+    "read_at": "",
+    "read_by": "",
+    "source": {
+      "source_module": "candidate",
+      "candidate_id": "raw_780fd867cde6a5a5",
+      "target_category": "products",
+      "item_id": "chejin_gl8_2020_es653t"
+    }
+  },
+  "metadata": {
+    "created_at": "2026-05-02T04:23:27",
+    "updated_at": "2026-05-02T23:59:18",
+    "created_by": "admin",
+    "updated_by": "admin"
+  }
+}

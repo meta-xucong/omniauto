@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_5ffc84918d285832",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_f41ae41acfb1f28bc04f.txt",
+    "content_hash": "808e3066494b159c4a2e5e02f520c958",
+    "status": "active",
+    "created_at": "2026-05-04T03:32:35",
+    "updated_at": "2026-05-04T03:32:35"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_186f162b3ea4a01f",
+      "source_id": "source_5ffc84918d285832",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_f41ae41acfb1f28bc04f.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-04 03:32:00] system: 03:32\n[2026-05-04T03:32:34] self: [车金AI] 秦PLUS定金锁车需要销售同事确认现车状态、合同条款和支付方式，我这边没法直接处理。我马上帮您转给负责的销售对接，您稍等一下。\n[2026-05-04T03:32:34] 许聪: 你能保证这台车绝对不是事故车吗？如果发现水泡火烧，你们赔多少钱？",
+      "char_count": 193,
+      "status": "active",
+      "created_at": "2026-05-04T03:32:35"
+    }
+  ]
+}

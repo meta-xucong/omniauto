@@ -1,0 +1,323 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_01921911ab952f6c",
+  "generated_at": "2026-05-04T03:16:12",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_98c9b3032beab7e8bd99.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"customer_message\": \"\", \"service_reply\": \"[车金AI] 门店在南京，具体地址和营业时间我这边没有直接查到，我转给销售同事让他发您详细位置和时间，方便留个电话或微信吗？\", \"intent_tags\": [\"门店查询\", \"转人工\"], \"tone_tags\": [\"友好\", \"协商\"], \"linked_categories\": [], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\", \"usable_as_template\": true, \"additional_details\": {}}",
+    "content_sha256": "8e0e6088ba2d077e4c14f5a4e19c35fc1f9486a16a40f9697235761904f0f3f0",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_98c9b3032beab7e8bd99",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_05834bab9978e15023d1",
+      "raw_msg_6dff708d0a79756a47f0",
+      "raw_msg_48836951afc66b280f7c"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_c70b0c1a0c869265",
+        "source_id": "source_66ed68902378a7c8",
+        "score": 0.9041,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.5044,
+          "semantic": 0.2697,
+          "vector": 0.14,
+          "vector_similarity": 0.9234,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.9041
+        },
+        "text": "[2026-05-04 03:14:00] system: 03:14\n[2026-05-04T03:15:05] self: [车金AI] 门店在南京，具体地址和营业时间我这边没有直接查到，我转给销售同事让他发您详细位置和时间，方便留个电话或微信吗？\n[2026-05-04T03:15:05] 许聪: 二手车过户需要我带哪些材料？"
+      },
+      {
+        "chunk_id": "chunk_55a1c2f94c9d1513",
+        "source_id": "source_7b1bbeedcb7732ef",
+        "score": 0.5275,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2551,
+          "semantic": 0.1613,
+          "vector": 0.1211,
+          "vector_similarity": 0.6727,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.5275
+        },
+        "text": "[2026-05-04T03:12:08] self: [车金AI] 秦PLUS的电池检测结果和贷款能否包过，都需要销售同事结合实车报告和资方审批来确认，我这边没法直接承诺。我帮您转给负责的销售直接对接，您方便留个电话吗？\n[2026-05-04T03:12:08] 许聪: 你们门店在哪？营业时间大概是什么时候？"
+      },
+      {
+        "chunk_id": "chunk_0de02f9181cc667a",
+        "source_id": "source_1ad359041dec7fe7",
+        "score": 0.511,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2397,
+          "semantic": 0.1546,
+          "vector": 0.1267,
+          "vector_similarity": 0.7036,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.511
+        },
+        "text": "[2026-05-04 03:00:00] system: 03:00\n[2026-05-04T03:01:04] self: [车金AI] 异地提档要看您所在城市的排放和迁入政策，还有车辆档案状态，我这边没法直接给您准话。我这就转给负责的销售同事帮您核实，您方便留个电话或者告诉我所在城市吗？\n[2026-05-04T03:01:04] 许聪: 如果我有旧车置换，需要准备什么？"
+      },
+      {
+        "chunk_id": "chunk_d2ec0cebcf16c10c",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5033,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1754,
+          "semantic": 0.1267,
+          "vector": 0.1311,
+          "vector_similarity": 0.7285,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5033
+        },
+        "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_dff00166eae335d86050",
+    "experience_id": "rag_exp_dff00166eae335d86050"
+  },
+  "detected_tags": [
+    "llm",
+    "rag_experience",
+    "unknown",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "chats",
+    "change_type": "llm_upsert_chats",
+    "summary": "门店地址查询转人工话术",
+    "suggested_fields": {
+      "customer_message": "",
+      "service_reply": "[车金AI] 门店在南京，具体地址和营业时间我这边没有直接查到，我转给销售同事让他发您详细位置和时间，方便留个电话或微信吗？",
+      "intent_tags": [
+        "门店查询",
+        "转人工"
+      ],
+      "tone_tags": [
+        "友好",
+        "协商"
+      ],
+      "linked_categories": [],
+      "linked_item_ids": [],
+      "applicability_scope": "global",
+      "product_id": "",
+      "product_category": "",
+      "usable_as_template": true,
+      "additional_details": {
+        "原始资料摘录": "{\"customer_message\": \"\", \"service_reply\": \"[车金AI] 门店在南京，具体地址和营业时间我这边没有直接查到，我转给销售同事让他发您详细位置和时间，方便留个电话或微信吗？\", \"intent_tags\": [\"门店查询\", \"转人工\"], \"tone_tags\": [\"友好\", \"协商\"], \"linked_categories\": [], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\", \"usable_as_template\": true, \"additional_details\": {}}"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "chats",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "chats",
+        "id": "store_location_handoff",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_98c9b3032beab7e8bd99.txt",
+          "candidate_id": "raw_01921911ab952f6c",
+          "rag_experience_id": "rag_exp_dff00166eae335d86050",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "customer_message": "",
+          "service_reply": "[车金AI] 门店在南京，具体地址和营业时间我这边没有直接查到，我转给销售同事让他发您详细位置和时间，方便留个电话或微信吗？",
+          "intent_tags": [
+            "门店查询",
+            "转人工"
+          ],
+          "tone_tags": [
+            "友好",
+            "协商"
+          ],
+          "linked_categories": [],
+          "linked_item_ids": [],
+          "applicability_scope": "global",
+          "product_id": "",
+          "product_category": "",
+          "usable_as_template": true,
+          "additional_details": {
+            "原始资料摘录": "{\"customer_message\": \"\", \"service_reply\": \"[车金AI] 门店在南京，具体地址和营业时间我这边没有直接查到，我转给销售同事让他发您详细位置和时间，方便留个电话或微信吗？\", \"intent_tags\": [\"门店查询\", \"转人工\"], \"tone_tags\": [\"友好\", \"协商\"], \"linked_categories\": [], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\", \"usable_as_template\": true, \"additional_details\": {}}"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": false,
+          "requires_handoff": true,
+          "risk_level": "warning"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "rejected",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_98c9b3032beab7e8bd99",
+    "source_raw_message_ids": [
+      "raw_msg_05834bab9978e15023d1",
+      "raw_msg_6dff708d0a79756a47f0",
+      "raw_msg_48836951afc66b280f7c"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_66ed68902378a7c8",
+      "chunk_count": 1,
+      "query": "门店地址查询转人工话术\n{\"customer_message\": \"\", \"service_reply\": \"[车金AI] 门店在南京，具体地址和营业时间我这边没有直接查到，我转给销售同事让他发您详细位置和时间，方便留个电话或微信吗？\", \"intent_tags\": [\"门店查询\", \"转人工\"], \"tone_tags\": [\"友好\", \"协商\"], \"linked_categories\": [], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\", \"usable_as_template\": true, \"additional_details\": {}}\n[车金AI] 门店在南京，具体地址和营业时间我这边没有直接查到，我转给销售同事让他发您详细位置和时间，方便留个电话或微信吗？",
+      "hits": [
+        {
+          "chunk_id": "chunk_c70b0c1a0c869265",
+          "source_id": "source_66ed68902378a7c8",
+          "score": 0.9041,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.5044,
+            "semantic": 0.2697,
+            "vector": 0.14,
+            "vector_similarity": 0.9234,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.9041
+          },
+          "text": "[2026-05-04 03:14:00] system: 03:14\n[2026-05-04T03:15:05] self: [车金AI] 门店在南京，具体地址和营业时间我这边没有直接查到，我转给销售同事让他发您详细位置和时间，方便留个电话或微信吗？\n[2026-05-04T03:15:05] 许聪: 二手车过户需要我带哪些材料？"
+        },
+        {
+          "chunk_id": "chunk_55a1c2f94c9d1513",
+          "source_id": "source_7b1bbeedcb7732ef",
+          "score": 0.5275,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2551,
+            "semantic": 0.1613,
+            "vector": 0.1211,
+            "vector_similarity": 0.6727,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.5275
+          },
+          "text": "[2026-05-04T03:12:08] self: [车金AI] 秦PLUS的电池检测结果和贷款能否包过，都需要销售同事结合实车报告和资方审批来确认，我这边没法直接承诺。我帮您转给负责的销售直接对接，您方便留个电话吗？\n[2026-05-04T03:12:08] 许聪: 你们门店在哪？营业时间大概是什么时候？"
+        },
+        {
+          "chunk_id": "chunk_0de02f9181cc667a",
+          "source_id": "source_1ad359041dec7fe7",
+          "score": 0.511,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2397,
+            "semantic": 0.1546,
+            "vector": 0.1267,
+            "vector_similarity": 0.7036,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.511
+          },
+          "text": "[2026-05-04 03:00:00] system: 03:00\n[2026-05-04T03:01:04] self: [车金AI] 异地提档要看您所在城市的排放和迁入政策，还有车辆档案状态，我这边没法直接给您准话。我这就转给负责的销售同事帮您核实，您方便留个电话或者告诉我所在城市吗？\n[2026-05-04T03:01:04] 许聪: 如果我有旧车置换，需要准备什么？"
+        },
+        {
+          "chunk_id": "chunk_d2ec0cebcf16c10c",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5033,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1754,
+            "semantic": 0.1267,
+            "vector": 0.1311,
+            "vector_similarity": 0.7285,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5033
+          },
+          "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_dff00166eae335d86050",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "rejected_at": "2026-05-04T18:41:18",
+    "reason": "legacy_auto_candidate_cleanup_20260504: ???????????????????????RAG?????????????????"
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

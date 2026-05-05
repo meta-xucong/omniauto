@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "category_id": "policies",
+  "id": "new_energy_battery_test_handoff",
+  "status": "active",
+  "source": {
+    "type": "manual_admin_cleanup",
+    "reason": "聊天来源不能作为权威政策来源；本条仅因安全转人工边界经人工复核后保留。",
+    "previous_source": {
+      "type": "deepseek_upload_learning",
+      "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_055784b7dc9082faf951.txt",
+      "candidate_id": "raw_0aa6e09d264ec7ad",
+      "rag_experience_id": "rag_exp_005c3d0cad0e96075bbd",
+      "candidate_source_type": "rag_experience",
+      "original_type": "raw_wechat_group"
+    }
+  },
+  "data": {
+    "title": "新能源电池检测转人工",
+    "policy_type": "contract",
+    "keywords": [
+      "电池检测",
+      "首付",
+      "月供",
+      "贷款包过"
+    ],
+    "applicability_scope": "global",
+    "answer": "涉及相关敏感内容，需转人工处理",
+    "allow_auto_reply": false,
+    "requires_handoff": true,
+    "handoff_reason": "涉及电池检测及贷款相关敏感内容，需转人工处理",
+    "product_id": "",
+    "product_category": "",
+    "operator_alert": true,
+    "risk_level": "normal",
+    "additional_details": {
+      "source": "LIVE_RECORDER_20260502_042340",
+      "batch": "LIVE_RECORDER_20260502_042340",
+      "原始资料摘录": "{\"title\": \"新能源电池检测转人工\", \"policy_type\": \"contract\", \"keywords\": [\"电池检测\", \"首付\", \"月供\", \"贷款包过\"], \"applicability_scope\": \"global\", \"answer\": \"\", \"allow_auto_reply\": false, \"requires_handoff\": true, \"handoff_reason\": \"涉及电池检测及贷款相关敏感内容，需转人工处理\", \"additional_details\": {\"source\": \"LIVE_RECORDER_20260502_042340\", \"batch\": \"LIVE_RECORDER_20260502_042340\"}, \"product_id\":",
+      "来源资料摘录": "{\"title\": \"新能源电池检测转人工\", \"policy_type\": \"contract\", \"keywords\": [\"电池检测\", \"首付\", \"月供\", \"贷款包过\"], \"applicability_scope\": \"global\", \"answer\": \"\", \"allow_auto_reply\": false, \"requires_handoff\": true, \"handoff_reason\": \"涉及电池检测及贷款相关敏感内容，需转人工处理\", \"additional_details\": {\"source\": \"LIVE_RECORDER_20260502_042340\", \"batch\": \"LIVE_RECORDER_20260502_042340\"}, \"product_id\":"
+    }
+  },
+  "runtime": {
+    "allow_auto_reply": false,
+    "requires_handoff": true,
+    "risk_level": "warning"
+  },
+  "review_state": {
+    "is_new": true,
+    "new_reason": "newly_added_formal_knowledge",
+    "marked_at": "2026-05-03T00:00:53",
+    "updated_at": "2026-05-03T00:00:53",
+    "read_at": "",
+    "read_by": "",
+    "source": {
+      "source_module": "candidate",
+      "candidate_id": "raw_0aa6e09d264ec7ad",
+      "target_category": "policies",
+      "item_id": "new_energy_battery_test_handoff"
+    }
+  },
+  "metadata": {
+    "created_at": "2026-05-03T00:00:53",
+    "updated_at": "2026-05-04T00:00:00",
+    "created_by": "admin",
+    "updated_by": "codex_source_authority_cleanup"
+  }
+}

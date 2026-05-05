@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_951eaef520f56265",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "group",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_f6fe6cdc0ec6e30a79a5.txt",
+    "content_hash": "a0a6b611da3af62ac2082dd416a2b97b",
+    "status": "active",
+    "created_at": "2026-05-01T16:23:07",
+    "updated_at": "2026-05-01T16:23:07"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_3f9e8f92b1e6d67b",
+      "source_id": "source_951eaef520f56265",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "group",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_f6fe6cdc0ec6e30a79a5.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-01 16:00:00] 销售A: 商品资料：江苏车金记录员完整车源 CHEJIN_20260501_162302\n商品名称：记录员测试凯美瑞 CHEJIN_20260501_162302\n型号：REC-CAMRY-CHEJIN_20260501_162302\n商品类目：二手车\n价格：8.88万\n单位：台\n库存：1\n发货：南京门店可看车\n售后：车况以检测报告为准\n[2026-05-01 16:01:00] 销售B: 政策规则：江苏车金记录员风控 CHEJIN_20260501_162302\n规则名称：保证无事故转人工 CHEJIN_20260501_162302\n规则类型：contract\n触发关键词：保证无事故,赔偿,CHEJIN_20260501_162302\n答案：此类问题必须让销售人工按检测报告和合同回复。\n[2026-05-01 16:02:00] 销售C: 边界噪音：CHEJIN_20260501_162302_NOISE 今天午饭吃什么，这不是车源也不是客服知识。",
+      "char_count": 454,
+      "status": "active",
+      "created_at": "2026-05-01T16:23:07"
+    }
+  ]
+}

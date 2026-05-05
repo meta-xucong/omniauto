@@ -1,0 +1,341 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_c4462022df069bc2",
+  "generated_at": "2026-05-04T03:56:53",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_2a93e6439e01565daf19.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"customer_message\": null, \"service_reply\": \"许哥，保险理赔代办这块我们系统里没查到对应的业务流程，得让销售同事对接清楚合作方式再回复你。我直接帮你转过去，方便留个电话吗？他马上联系你确认。\", \"intent_tags\": [\"业务咨询\", \"保险理赔\", \"转接人工\"], \"tone_tags\": [\"礼貌\", \"专业\", \"解决问题\"], \"linked_categories\": [\"客服转接\"], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\", \"usable_as_template\": true, \"additi",
+    "content_sha256": "983412ca3821c497f5ddcd521a3eeb2547f153735fd64a70e9e82bab148e9585",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_2a93e6439e01565daf19",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_14d32221e09351254f1f",
+      "raw_msg_497e692147ebf282f838"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_bdc8e12a46606336",
+        "source_id": "source_37b7fcf02e76b2c4",
+        "score": 0.8778,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.4861,
+          "semantic": 0.2618,
+          "vector": 0.14,
+          "vector_similarity": 0.927,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.8778
+        },
+        "text": "[2026-05-04T03:55:38] self: [车金AI] 许哥，保险理赔代办这块我们系统里没查到对应的业务流程，得让销售同事对接清楚合作方式再回复你。我直接帮你转过去，方便留个电话吗？他马上联系你确认。\n[2026-05-04T03:55:38] 许聪: 我就想买个别坑人的，别老修，预算也别太高"
+      },
+      {
+        "chunk_id": "chunk_48f9c5e1df1051bf",
+        "source_id": "source_f59637a80fd43f55",
+        "score": 0.527,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2415,
+          "semantic": 0.1554,
+          "vector": 0.14,
+          "vector_similarity": 0.792,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.527
+        },
+        "text": "[2026-05-04 03:53:00] system: 03:53\n[2026-05-04T03:53:52] self: [车金AI] 许哥，5万以内的自动挡SUV目前库里没有完全匹配的现车，我让销售同事帮您留意一下相近的车源，方便留个电话吗？他查到后直接联系您。\n[2026-05-04T03:53:52] 许聪: 你们能不能做保险理赔代办？"
+      },
+      {
+        "chunk_id": "chunk_d2ec0cebcf16c10c",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5039,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1697,
+          "semantic": 0.1242,
+          "vector": 0.14,
+          "vector_similarity": 0.7815,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5039
+        },
+        "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+      },
+      {
+        "chunk_id": "chunk_9a0d34760ad6ccae",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5011,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1678,
+          "semantic": 0.1234,
+          "vector": 0.14,
+          "vector_similarity": 0.7896,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5011
+        },
+        "text": "工确认。\n售后/风险：CVT变速箱状态、保养和车况以检测报告为准。\n推荐话术：适合6到7万预算、练手、家用代步和省油需求。\n商品名称：2019款大众朗逸1.5L自动舒适版\n型号/SKU：CHEJIN-LAVIDA-2019\n类目：二手车/紧凑型轿车\n关键词：朗逸、大众朗逸、德系代步、置换\n规格：2019年上牌，表显6.9万公里，1.5L自动挡，白色，通勤耐用。\n价格：5.98万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：易损件和保养历史以"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_247b688eb28e48ddd200",
+    "experience_id": "rag_exp_247b688eb28e48ddd200"
+  },
+  "detected_tags": [
+    "llm",
+    "rag_experience",
+    "unknown",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "chats",
+    "change_type": "llm_upsert_chats",
+    "summary": "客服关于保险理赔代办业务的转接话术",
+    "suggested_fields": {
+      "customer_message": null,
+      "service_reply": "许哥，保险理赔代办这块我们系统里没查到对应的业务流程，得让销售同事对接清楚合作方式再回复你。我直接帮你转过去，方便留个电话吗？他马上联系你确认。",
+      "intent_tags": [
+        "业务咨询",
+        "保险理赔",
+        "转接人工"
+      ],
+      "tone_tags": [
+        "礼貌",
+        "专业",
+        "解决问题"
+      ],
+      "linked_categories": [
+        "客服转接"
+      ],
+      "linked_item_ids": [],
+      "applicability_scope": "global",
+      "product_id": "",
+      "product_category": "",
+      "usable_as_template": true,
+      "additional_details": {
+        "备注": "适用于保险理赔代办相关咨询，可转接销售同事",
+        "原始资料摘录": "{\"customer_message\": null, \"service_reply\": \"许哥，保险理赔代办这块我们系统里没查到对应的业务流程，得让销售同事对接清楚合作方式再回复你。我直接帮你转过去，方便留个电话吗？他马上联系你确认。\", \"intent_tags\": [\"业务咨询\", \"保险理赔\", \"转接人工\"], \"tone_tags\": [\"礼貌\", \"专业\", \"解决问题\"], \"linked_categories\": [\"客服转接\"], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\", \"usable_as_template\": true, \"additi"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "chats",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "chats",
+        "id": "chat-insurance-handoff",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_2a93e6439e01565daf19.txt",
+          "candidate_id": "raw_c4462022df069bc2",
+          "rag_experience_id": "rag_exp_247b688eb28e48ddd200",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "customer_message": null,
+          "service_reply": "许哥，保险理赔代办这块我们系统里没查到对应的业务流程，得让销售同事对接清楚合作方式再回复你。我直接帮你转过去，方便留个电话吗？他马上联系你确认。",
+          "intent_tags": [
+            "业务咨询",
+            "保险理赔",
+            "转接人工"
+          ],
+          "tone_tags": [
+            "礼貌",
+            "专业",
+            "解决问题"
+          ],
+          "linked_categories": [
+            "客服转接"
+          ],
+          "linked_item_ids": [],
+          "applicability_scope": "global",
+          "product_id": "",
+          "product_category": "",
+          "usable_as_template": true,
+          "additional_details": {
+            "备注": "适用于保险理赔代办相关咨询，可转接销售同事",
+            "原始资料摘录": "{\"customer_message\": null, \"service_reply\": \"许哥，保险理赔代办这块我们系统里没查到对应的业务流程，得让销售同事对接清楚合作方式再回复你。我直接帮你转过去，方便留个电话吗？他马上联系你确认。\", \"intent_tags\": [\"业务咨询\", \"保险理赔\", \"转接人工\"], \"tone_tags\": [\"礼貌\", \"专业\", \"解决问题\"], \"linked_categories\": [\"客服转接\"], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\", \"usable_as_template\": true, \"additi"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": false,
+          "requires_handoff": true,
+          "risk_level": "warning"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "原始资料摘录",
+      "备注"
+    ]
+  },
+  "review": {
+    "status": "pending",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_2a93e6439e01565daf19",
+    "source_raw_message_ids": [
+      "raw_msg_14d32221e09351254f1f",
+      "raw_msg_497e692147ebf282f838"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_37b7fcf02e76b2c4",
+      "chunk_count": 1,
+      "query": "客服关于保险理赔代办业务的转接话术\n{\"customer_message\": null, \"service_reply\": \"许哥，保险理赔代办这块我们系统里没查到对应的业务流程，得让销售同事对接清楚合作方式再回复你。我直接帮你转过去，方便留个电话吗？他马上联系你确认。\", \"intent_tags\": [\"业务咨询\", \"保险理赔\", \"转接人工\"], \"tone_tags\": [\"礼貌\", \"专业\", \"解决问题\"], \"linked_categories\": [\"客服转接\"], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\", \"usable_as_template\": true, \"additi\n许哥，保险理赔代办这块我们系统里没查到对应的业务流程，得让销售同事对接清楚合作方式再回复你。我直接帮你转过去，方便留个电话吗？他马上联系你确认。",
+      "hits": [
+        {
+          "chunk_id": "chunk_bdc8e12a46606336",
+          "source_id": "source_37b7fcf02e76b2c4",
+          "score": 0.8778,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.4861,
+            "semantic": 0.2618,
+            "vector": 0.14,
+            "vector_similarity": 0.927,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.8778
+          },
+          "text": "[2026-05-04T03:55:38] self: [车金AI] 许哥，保险理赔代办这块我们系统里没查到对应的业务流程，得让销售同事对接清楚合作方式再回复你。我直接帮你转过去，方便留个电话吗？他马上联系你确认。\n[2026-05-04T03:55:38] 许聪: 我就想买个别坑人的，别老修，预算也别太高"
+        },
+        {
+          "chunk_id": "chunk_48f9c5e1df1051bf",
+          "source_id": "source_f59637a80fd43f55",
+          "score": 0.527,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2415,
+            "semantic": 0.1554,
+            "vector": 0.14,
+            "vector_similarity": 0.792,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.527
+          },
+          "text": "[2026-05-04 03:53:00] system: 03:53\n[2026-05-04T03:53:52] self: [车金AI] 许哥，5万以内的自动挡SUV目前库里没有完全匹配的现车，我让销售同事帮您留意一下相近的车源，方便留个电话吗？他查到后直接联系您。\n[2026-05-04T03:53:52] 许聪: 你们能不能做保险理赔代办？"
+        },
+        {
+          "chunk_id": "chunk_d2ec0cebcf16c10c",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5039,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1697,
+            "semantic": 0.1242,
+            "vector": 0.14,
+            "vector_similarity": 0.7815,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5039
+          },
+          "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+        },
+        {
+          "chunk_id": "chunk_9a0d34760ad6ccae",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5011,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1678,
+            "semantic": 0.1234,
+            "vector": 0.14,
+            "vector_similarity": 0.7896,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5011
+          },
+          "text": "工确认。\n售后/风险：CVT变速箱状态、保养和车况以检测报告为准。\n推荐话术：适合6到7万预算、练手、家用代步和省油需求。\n商品名称：2019款大众朗逸1.5L自动舒适版\n型号/SKU：CHEJIN-LAVIDA-2019\n类目：二手车/紧凑型轿车\n关键词：朗逸、大众朗逸、德系代步、置换\n规格：2019年上牌，表显6.9万公里，1.5L自动挡，白色，通勤耐用。\n价格：5.98万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：易损件和保养历史以"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_247b688eb28e48ddd200",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "previous_reject_reason": "legacy_auto_candidate_cleanup_20260504: ???????????????????????RAG?????????????????",
+    "previous_rejected_at": "2026-05-04T18:41:18",
+    "updated_at": "2026-05-04T18:58:38",
+    "reopened_at": "2026-05-04T18:58:38",
+    "reopened_by": "codex_test_seed",
+    "reopened_reason": "direct test seed: restored as pending candidate for manual review regression",
+    "test_seed_direct_fill": true
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ],
+  "test_seed": {
+    "seed_id": "direct_test_fill_20260504_v2",
+    "direct_fill": true
+  }
+}

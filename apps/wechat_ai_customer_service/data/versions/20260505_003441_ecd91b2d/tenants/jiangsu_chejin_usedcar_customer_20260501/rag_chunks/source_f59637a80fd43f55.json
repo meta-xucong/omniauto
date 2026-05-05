@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_f59637a80fd43f55",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_132b1d1a4b6f755289a0.txt",
+    "content_hash": "d6c2dc752a6a1078d4fd8d071e2a77cd",
+    "status": "active",
+    "created_at": "2026-05-04T03:53:53",
+    "updated_at": "2026-05-04T03:53:53"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_48f9c5e1df1051bf",
+      "source_id": "source_f59637a80fd43f55",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_132b1d1a4b6f755289a0.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-04 03:53:00] system: 03:53\n[2026-05-04T03:53:52] self: [车金AI] 许哥，5万以内的自动挡SUV目前库里没有完全匹配的现车，我让销售同事帮您留意一下相近的车源，方便留个电话吗？他查到后直接联系您。\n[2026-05-04T03:53:52] 许聪: 你们能不能做保险理赔代办？",
+      "char_count": 175,
+      "status": "active",
+      "created_at": "2026-05-04T03:53:53"
+    }
+  ]
+}

@@ -1,0 +1,305 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_f42d6d436a2f85f9",
+  "generated_at": "2026-05-02T04:25:46",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_3b5b56264d2d30a3c358.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"customer_message\": \"我想买新能源通勤，能看秦PLUS吗？\", \"service_reply\": \"可以先看秦PLUS DM-i，低油耗适合通勤；电池检测、当地迁入和金融方案都需要人工确认。\", \"intent_tags\": [\"新能源通勤\", \"车源推荐\", \"金融边界\"], \"tone_tags\": [], \"linked_categories\": [], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\", \"usable_as_template\": true, \"additional_details\": {}}",
+    "content_sha256": "7ba8348f71ae3acba110d5141bfe9277d72fa80d73cfe2a3f0db0110742a82ef",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_3b5b56264d2d30a3c358",
+    "conversation_id": "conv_87036d2253c2c945ed",
+    "raw_message_ids": [
+      "raw_msg_b5aec111c9d7f8fd8d8a",
+      "raw_msg_377f15b4a7eda84cdccb"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_9c80524ef6f05098",
+        "source_id": "source_46ade21c94a25215",
+        "score": 0.8233,
+        "category": "file_transfer",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.4733,
+          "semantic": 0.22,
+          "vector": 0.14,
+          "vector_similarity": 0.8664,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.8233
+        },
+        "text": "[2026-05-02 04:25:00] system: 04:25\n[2026-05-02T04:25:43] self: 聊天记录：记录员文件传输助手话术 LIVE_RECORDER_20260502_042340\n客户：我想买新能源通勤，能看秦PLUS吗？批次 LIVE_RECORDER_20260502_042340\n客服：可以先看秦PLUS DM-i，低油耗适合通勤；电池检测、当地迁入和金融方案都需要人工确认。\n意图标签：新能源通勤,车源推荐,金融边界"
+      },
+      {
+        "chunk_id": "chunk_f33e20a058626f2d",
+        "source_id": "source_d262d55f8b02b514",
+        "score": 0.4374,
+        "category": "group",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.191,
+          "semantic": 0.1333,
+          "vector": 0.1231,
+          "vector_similarity": 0.6837,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.4374
+        },
+        "text": "[2026-05-02T04:24:40] self: 政策规则：记录员缺字段边界 LIVE_RECORDER_20260502_042340\n测试批次：LIVE_RECORDER_20260502_042340\n规则名称：新能源电池检测转人工\n规则类型：contract\n触发关键词：电池检测,首付,月供,贷款包过,LIVE_RECORDER_20260502_042340"
+      },
+      {
+        "chunk_id": "chunk_899511b64b2f5970",
+        "source_id": "source_98b8438d7f65da3a",
+        "score": 0.4264,
+        "category": "group",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.191,
+          "semantic": 0.1292,
+          "vector": 0.1162,
+          "vector_similarity": 0.6457,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.4264
+        },
+        "text": "[2026-05-02 04:24:00] system: 04:24\n[2026-05-02T04:24:20] self: 商品资料：记录员正常产品 LIVE_RECORDER_20260502_042340\n测试批次：LIVE_RECORDER_20260502_042340\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号：CHEJIN-LIVE-GL8-2020ES\n商品类目：二手车/MPV\n价格：17.66万\n单位：台\n库存：1\n发货：南京门店可看车，商务客户试乘需人工确认\n售后：车况以检测"
+      },
+      {
+        "chunk_id": "chunk_cc5f986c69c6dc5a",
+        "source_id": "source_2d21086386cd800b",
+        "score": 0.3845,
+        "category": "group",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1656,
+          "semantic": 0.1217,
+          "vector": 0.1072,
+          "vector_similarity": 0.5956,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.3845
+        },
+        "text": "[2026-05-02T04:25:17] self: 边界噪音：LIVE_RECORDER_20260502_042340_NOISE 今天天气和测试心跳记录，不是产品资料，也不是客服知识。"
+      }
+    ],
+    "original_type": "raw_wechat_file_transfer",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_c3905d7e7c0ffa77349a",
+    "experience_id": "rag_exp_c3905d7e7c0ffa77349a"
+  },
+  "detected_tags": [
+    "llm",
+    "rag_experience",
+    "style",
+    "wechat_file_transfer"
+  ],
+  "proposal": {
+    "target_category": "chats",
+    "change_type": "llm_upsert_chats",
+    "summary": "客户咨询新能源通勤，客服推荐秦PLUS DM-i并提示需人工确认事项",
+    "suggested_fields": {
+      "customer_message": "我想买新能源通勤，能看秦PLUS吗？",
+      "service_reply": "可以先看秦PLUS DM-i，低油耗适合通勤；电池检测、当地迁入和金融方案都需要人工确认。",
+      "intent_tags": [
+        "新能源通勤",
+        "车源推荐",
+        "金融边界"
+      ],
+      "tone_tags": [],
+      "linked_categories": [],
+      "linked_item_ids": [],
+      "applicability_scope": "global",
+      "product_id": "",
+      "product_category": "",
+      "usable_as_template": true,
+      "additional_details": {
+        "原始资料摘录": "{\"customer_message\": \"我想买新能源通勤，能看秦PLUS吗？\", \"service_reply\": \"可以先看秦PLUS DM-i，低油耗适合通勤；电池检测、当地迁入和金融方案都需要人工确认。\", \"intent_tags\": [\"新能源通勤\", \"车源推荐\", \"金融边界\"], \"tone_tags\": [], \"linked_categories\": [], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\", \"usable_as_template\": true, \"additional_details\": {}}"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "chats",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "chats",
+        "id": "chat_20260502_042340",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_3b5b56264d2d30a3c358.txt",
+          "candidate_id": "raw_f42d6d436a2f85f9",
+          "rag_experience_id": "rag_exp_c3905d7e7c0ffa77349a",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_file_transfer"
+        },
+        "data": {
+          "customer_message": "我想买新能源通勤，能看秦PLUS吗？",
+          "service_reply": "可以先看秦PLUS DM-i，低油耗适合通勤；电池检测、当地迁入和金融方案都需要人工确认。",
+          "intent_tags": [
+            "新能源通勤",
+            "车源推荐",
+            "金融边界"
+          ],
+          "tone_tags": [],
+          "linked_categories": [],
+          "linked_item_ids": [],
+          "applicability_scope": "global",
+          "product_id": "",
+          "product_category": "",
+          "usable_as_template": true,
+          "additional_details": {
+            "原始资料摘录": "{\"customer_message\": \"我想买新能源通勤，能看秦PLUS吗？\", \"service_reply\": \"可以先看秦PLUS DM-i，低油耗适合通勤；电池检测、当地迁入和金融方案都需要人工确认。\", \"intent_tags\": [\"新能源通勤\", \"车源推荐\", \"金融边界\"], \"tone_tags\": [], \"linked_categories\": [], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\", \"usable_as_template\": true, \"additional_details\": {}}"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": false,
+          "requires_handoff": true,
+          "risk_level": "warning"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "pending",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "source_raw_batch_id": "raw_batch_3b5b56264d2d30a3c358",
+    "source_raw_message_ids": [
+      "raw_msg_b5aec111c9d7f8fd8d8a",
+      "raw_msg_377f15b4a7eda84cdccb"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_46ade21c94a25215",
+      "chunk_count": 1,
+      "query": "客户咨询新能源通勤，客服推荐秦PLUS DM-i并提示需人工确认事项\n{\"customer_message\": \"我想买新能源通勤，能看秦PLUS吗？\", \"service_reply\": \"可以先看秦PLUS DM-i，低油耗适合通勤；电池检测、当地迁入和金融方案都需要人工确认。\", \"intent_tags\": [\"新能源通勤\", \"车源推荐\", \"金融边界\"], \"tone_tags\": [], \"linked_categories\": [], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\", \"usable_as_template\": true, \"additional_details\": {}}\n可以先看秦PLUS DM-i，低油耗适合通勤；电池检测、当地迁入和金融方案都需要人工确认。",
+      "hits": [
+        {
+          "chunk_id": "chunk_9c80524ef6f05098",
+          "source_id": "source_46ade21c94a25215",
+          "score": 0.8233,
+          "category": "file_transfer",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.4733,
+            "semantic": 0.22,
+            "vector": 0.14,
+            "vector_similarity": 0.8664,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.8233
+          },
+          "text": "[2026-05-02 04:25:00] system: 04:25\n[2026-05-02T04:25:43] self: 聊天记录：记录员文件传输助手话术 LIVE_RECORDER_20260502_042340\n客户：我想买新能源通勤，能看秦PLUS吗？批次 LIVE_RECORDER_20260502_042340\n客服：可以先看秦PLUS DM-i，低油耗适合通勤；电池检测、当地迁入和金融方案都需要人工确认。\n意图标签：新能源通勤,车源推荐,金融边界"
+        },
+        {
+          "chunk_id": "chunk_f33e20a058626f2d",
+          "source_id": "source_d262d55f8b02b514",
+          "score": 0.4374,
+          "category": "group",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.191,
+            "semantic": 0.1333,
+            "vector": 0.1231,
+            "vector_similarity": 0.6837,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.4374
+          },
+          "text": "[2026-05-02T04:24:40] self: 政策规则：记录员缺字段边界 LIVE_RECORDER_20260502_042340\n测试批次：LIVE_RECORDER_20260502_042340\n规则名称：新能源电池检测转人工\n规则类型：contract\n触发关键词：电池检测,首付,月供,贷款包过,LIVE_RECORDER_20260502_042340"
+        },
+        {
+          "chunk_id": "chunk_899511b64b2f5970",
+          "source_id": "source_98b8438d7f65da3a",
+          "score": 0.4264,
+          "category": "group",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.191,
+            "semantic": 0.1292,
+            "vector": 0.1162,
+            "vector_similarity": 0.6457,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.4264
+          },
+          "text": "[2026-05-02 04:24:00] system: 04:24\n[2026-05-02T04:24:20] self: 商品资料：记录员正常产品 LIVE_RECORDER_20260502_042340\n测试批次：LIVE_RECORDER_20260502_042340\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号：CHEJIN-LIVE-GL8-2020ES\n商品类目：二手车/MPV\n价格：17.66万\n单位：台\n库存：1\n发货：南京门店可看车，商务客户试乘需人工确认\n售后：车况以检测"
+        },
+        {
+          "chunk_id": "chunk_cc5f986c69c6dc5a",
+          "source_id": "source_2d21086386cd800b",
+          "score": 0.3845,
+          "category": "group",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1656,
+            "semantic": 0.1217,
+            "vector": 0.1072,
+            "vector_similarity": 0.5956,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.3845
+          },
+          "text": "[2026-05-02T04:25:17] self: 边界噪音：LIVE_RECORDER_20260502_042340_NOISE 今天天气和测试心跳记录，不是产品资料，也不是客服知识。"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_c3905d7e7c0ffa77349a",
+    "source_chain": [
+      "raw_wechat_file_transfer",
+      "rag_experience",
+      "review_candidate"
+    ]
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

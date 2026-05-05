@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "category_id": "products",
+  "id": "chejin_civic_chejin_20260501_diverse02",
+  "status": "archived",
+  "source": {
+    "type": "test_fixture",
+    "batch_token": "CHEJIN_20260501_DIVERSE02"
+  },
+  "data": {
+    "name": "2020款本田思域220TURBO劲动版 CHEJIN_20260501_DIVERSE02",
+    "sku": "CHEJIN-CIVIC-CHEJIN_20260501_DIVERSE02",
+    "category": "二手车/紧凑型轿车",
+    "aliases": [
+      "思域",
+      "本田思域",
+      "年轻客户",
+      "首付三成",
+      "CHEJIN_20260501_DIVERSE02"
+    ],
+    "specs": "2020年上牌，表显6.1万公里，1.5T自动挡，外观轻微补漆。",
+    "price": 7.58,
+    "unit": "台",
+    "inventory": 1,
+    "shipping_policy": "门店看车后可协助过户，金融结果以资方审批为准。",
+    "warranty_policy": "车况以检测报告和合同为准，不承诺贷款必过。",
+    "reply_templates": {
+      "recommendation": "适合年轻客户、预算7到8万、想要动力和外观的需求。"
+    }
+  },
+  "runtime": {
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "risk_level": "normal"
+  },
+  "review_state": {
+    "is_new": true,
+    "new_reason": "newly_added_formal_knowledge",
+    "marked_at": "2026-05-01T22:06:49",
+    "updated_at": "2026-05-01T22:06:49",
+    "read_at": "",
+    "read_by": "",
+    "source": {
+      "source_module": "jiangsu_chejin_test",
+      "target_category": "products",
+      "item_id": "chejin_civic_chejin_20260501_diverse02"
+    }
+  },
+  "metadata": {
+    "created_at": "2026-05-01T22:06:49",
+    "updated_at": "2026-05-01T22:09:44",
+    "created_by": "admin",
+    "updated_by": "admin"
+  }
+}

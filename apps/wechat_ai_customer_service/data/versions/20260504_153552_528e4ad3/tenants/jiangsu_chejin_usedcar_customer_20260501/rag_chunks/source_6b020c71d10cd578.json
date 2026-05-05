@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_6b020c71d10cd578",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_1eacc307c14fc3a3b2ac.txt",
+    "content_hash": "2ea544eec97d0c3eb8ca20e077257250",
+    "status": "active",
+    "created_at": "2026-05-03T04:39:23",
+    "updated_at": "2026-05-03T04:39:23"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_0cb41b86cbc265bf",
+      "source_id": "source_6b020c71d10cd578",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_1eacc307c14fc3a3b2ac.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-03T04:39:23] self: 我从抖音直播来的，8万左右想看看自动挡",
+      "char_count": 47,
+      "status": "active",
+      "created_at": "2026-05-03T04:39:23"
+    }
+  ]
+}

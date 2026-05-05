@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_58950035fd736f45",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_b1805da7fc80300aadd1.txt",
+    "content_hash": "f6711545f7c7994e1d514997d47627fb",
+    "status": "active",
+    "created_at": "2026-05-04T03:24:34",
+    "updated_at": "2026-05-04T03:24:34"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_0d27f032aa229103",
+      "source_id": "source_58950035fd736f45",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_b1805da7fc80300aadd1.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-04T03:24:34] 许聪: 绿本有没有抵押或者查封？\n[2026-05-04T03:24:34] 许聪: 表显公里数准不准？有没有调表？\n[2026-05-04T03:24:34] self: [车金AI] 营运性质有没有跑过网约车，我们得看登记证和实车记录来确认，我这边没法直接给准信。我马上帮您转给销售同事人工核实，方便留个电话吗？他们直接联系您。",
+      "char_count": 188,
+      "status": "active",
+      "created_at": "2026-05-04T03:24:34"
+    }
+  ]
+}

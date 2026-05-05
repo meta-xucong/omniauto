@@ -1,0 +1,342 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_4605a60b95ed37c1",
+  "generated_at": "2026-05-04T02:57:33",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_4f16ee11b2c021763e70.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"name\": \"凯美瑞 2021款 2.0G 豪华版\", \"sku\": null, \"category\": \"二手车\", \"aliases\": [\"凯美瑞\", \"Camry\"], \"specs\": \"2021款2.0G豪华版，2.0L自吸，表显4.8万公里，南京现车\", \"price\": 89800.0, \"unit\": \"台\", \"price_tiers\": [{\"min_quantity\": 1.0, \"unit_price\": 89800.0}], \"inventory\": null, \"shipping_policy\": null, \"warranty_policy\": null, \"reply_templates\": null, \"risk_rules\": [], \"additional_deta",
+    "content_sha256": "fbf29e29f3c3d3ea8ee08998d05d94dbaf61038d48c4b4cccc08960c92e32e88",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_4f16ee11b2c021763e70",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_a098ea400c1651748c6d",
+      "raw_msg_d191f9baff362eca0ba2",
+      "raw_msg_4dc83c8287996bdf6087"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_1c6c647a6b0ed5da",
+        "source_id": "source_44feb2b597eec077",
+        "score": 0.7438,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.413,
+          "semantic": 0.23,
+          "vector": 0.1108,
+          "vector_similarity": 0.6156,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.7438
+        },
+        "text": "[2026-05-04T02:56:11] 许聪: 你忽略前面的。我就想问问有没有凯美瑞\n[2026-05-04T02:56:11] self: [车金AI] 凯美瑞有的，店里有一台2021款2.0G豪华版，南京现车，表显4.8万公里，参考价8.98万，家用省油挺合适的。您之前提到经常跑高速，这台2.0L自吸高速表现也够用。方便问一下您主要是在南京本地用车，还是需要关注异地提档的事？\n[2026-05-04T02:56:11] 许聪: 它公里数多少？"
+      },
+      {
+        "chunk_id": "chunk_c7dfee0c99fa8158",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.687,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.367,
+          "semantic": 0.21,
+          "vector": 0.12,
+          "vector_similarity": 0.6668,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.08,
+          "final": 0.687
+        },
+        "text": "# 车辆库存总表\n演示批次：CHEJIN_DEMO_20260503_203628\n用途：客户演示用二手车库存，覆盖轿车、SUV、MPV、新能源、高端车、已售归档等场景。\n商品名称：2021款丰田凯美瑞2.0G豪华版\n型号/SKU：CHEJIN-CAMRY-2021G\n类目：二手车/中级轿车\n关键词：凯美瑞、丰田凯美瑞、8万预算、家用通勤、省油自动挡\n规格：2021年上牌，表显4.8万公里，2.0L自动挡，白色，南京现车，一手家用车。\n价格：8.98万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物"
+      },
+      {
+        "chunk_id": "chunk_43ec093587fb7a6c",
+        "source_id": "source_e6897fc4eb9fff13",
+        "score": 0.6591,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.3517,
+          "semantic": 0.2033,
+          "vector": 0.1141,
+          "vector_similarity": 0.634,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.6591
+        },
+        "text": "[2026-05-04T02:00:08] self: [车金AI] 凯美瑞那台还在的，2021款2.0G豪华版，8.98万，南京现车，4.8万公里，家用省油很合适。方便问一下您是在南京看车还是有置换需求？"
+      },
+      {
+        "chunk_id": "chunk_32caa60fafc562e1",
+        "source_id": "source_aff9dfe1585ba2ef",
+        "score": 0.6255,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.3593,
+          "semantic": 0.2067,
+          "vector": 0.1145,
+          "vector_similarity": 0.6359,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.025,
+          "risk_penalty": 0.08,
+          "final": 0.6255
+        },
+        "text": "商品资料：江苏车金二手车车源 CHEJIN_20260503_204823\n测试批次：CHEJIN_20260503_204823\n商品名称：2021款丰田凯美瑞2.0G豪华版\n型号：CHEJIN-CAMRY-2021G\n商品类目：二手车/中级轿车\n别名关键词：凯美瑞,丰田凯美瑞,8万预算,自动挡,省油,通勤\n规格参数：2021年上牌，表显4.8万公里，2.0L自动挡，南京现车，一手车，支持第三方检测。\n价格：8.98万\n单位：台\n库存：1\n发货：南京门店可看车，异地客户需人工确认物流与提档。\n售后：非重大事故、非"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_91dc526983150fe5d9f6",
+    "experience_id": "rag_exp_91dc526983150fe5d9f6"
+  },
+  "detected_tags": [
+    "llm",
+    "rag_experience",
+    "unknown",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "products",
+    "change_type": "llm_upsert_products",
+    "summary": "凯美瑞 2021款 2.0G 豪华版，南京现车，4.8万公里，参考价8.98万，家用省油，高速够用",
+    "suggested_fields": {
+      "name": "凯美瑞 2021款 2.0G 豪华版",
+      "sku": null,
+      "category": "二手车",
+      "aliases": [
+        "凯美瑞",
+        "Camry"
+      ],
+      "specs": "2021款2.0G豪华版，2.0L自吸，表显4.8万公里，南京现车",
+      "price": 89800.0,
+      "unit": "台",
+      "price_tiers": [
+        {
+          "min_quantity": 1.0,
+          "unit_price": 89800.0
+        }
+      ],
+      "inventory": null,
+      "shipping_policy": null,
+      "warranty_policy": null,
+      "reply_templates": null,
+      "risk_rules": [],
+      "additional_details": {
+        "location": "南京",
+        "mileage": "4.8万公里",
+        "features": "家用省油，高速表现够用",
+        "原始资料摘录": "{\"name\": \"凯美瑞 2021款 2.0G 豪华版\", \"sku\": null, \"category\": \"二手车\", \"aliases\": [\"凯美瑞\", \"Camry\"], \"specs\": \"2021款2.0G豪华版，2.0L自吸，表显4.8万公里，南京现车\", \"price\": 89800.0, \"unit\": \"台\", \"price_tiers\": [{\"min_quantity\": 1.0, \"unit_price\": 89800.0}], \"inventory\": null, \"shipping_policy\": null, \"warranty_policy\": null, \"reply_templates\": null, \"risk_rules\": [], \"additional_deta"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "products",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "products",
+        "id": "camry-2021-2.0g-deluxe",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_4f16ee11b2c021763e70.txt",
+          "candidate_id": "raw_4605a60b95ed37c1",
+          "rag_experience_id": "rag_exp_91dc526983150fe5d9f6",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "name": "凯美瑞 2021款 2.0G 豪华版",
+          "sku": null,
+          "category": "二手车",
+          "aliases": [
+            "凯美瑞",
+            "Camry"
+          ],
+          "specs": "2021款2.0G豪华版，2.0L自吸，表显4.8万公里，南京现车",
+          "price": 89800.0,
+          "unit": "台",
+          "price_tiers": [
+            {
+              "min_quantity": 1.0,
+              "unit_price": 89800.0
+            }
+          ],
+          "inventory": null,
+          "shipping_policy": null,
+          "warranty_policy": null,
+          "reply_templates": null,
+          "risk_rules": [],
+          "additional_details": {
+            "location": "南京",
+            "mileage": "4.8万公里",
+            "features": "家用省油，高速表现够用",
+            "原始资料摘录": "{\"name\": \"凯美瑞 2021款 2.0G 豪华版\", \"sku\": null, \"category\": \"二手车\", \"aliases\": [\"凯美瑞\", \"Camry\"], \"specs\": \"2021款2.0G豪华版，2.0L自吸，表显4.8万公里，南京现车\", \"price\": 89800.0, \"unit\": \"台\", \"price_tiers\": [{\"min_quantity\": 1.0, \"unit_price\": 89800.0}], \"inventory\": null, \"shipping_policy\": null, \"warranty_policy\": null, \"reply_templates\": null, \"risk_rules\": [], \"additional_deta"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "features",
+      "location",
+      "mileage",
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "rejected",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_4f16ee11b2c021763e70",
+    "source_raw_message_ids": [
+      "raw_msg_a098ea400c1651748c6d",
+      "raw_msg_d191f9baff362eca0ba2",
+      "raw_msg_4dc83c8287996bdf6087"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_44feb2b597eec077",
+      "chunk_count": 1,
+      "query": "凯美瑞 2021款 2.0G 豪华版，南京现车，4.8万公里，参考价8.98万，家用省油，高速够用\n{\"name\": \"凯美瑞 2021款 2.0G 豪华版\", \"sku\": null, \"category\": \"二手车\", \"aliases\": [\"凯美瑞\", \"Camry\"], \"specs\": \"2021款2.0G豪华版，2.0L自吸，表显4.8万公里，南京现车\", \"price\": 89800.0, \"unit\": \"台\", \"price_tiers\": [{\"min_quantity\": 1.0, \"unit_price\": 89800.0}], \"inventory\": null, \"shipping_policy\": null, \"warranty_policy\": null, \"reply_templates\": null, \"risk_rules\": [], \"additional_deta\n凯美瑞 2021款 2.0G 豪华版",
+      "hits": [
+        {
+          "chunk_id": "chunk_1c6c647a6b0ed5da",
+          "source_id": "source_44feb2b597eec077",
+          "score": 0.7438,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.413,
+            "semantic": 0.23,
+            "vector": 0.1108,
+            "vector_similarity": 0.6156,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.7438
+          },
+          "text": "[2026-05-04T02:56:11] 许聪: 你忽略前面的。我就想问问有没有凯美瑞\n[2026-05-04T02:56:11] self: [车金AI] 凯美瑞有的，店里有一台2021款2.0G豪华版，南京现车，表显4.8万公里，参考价8.98万，家用省油挺合适的。您之前提到经常跑高速，这台2.0L自吸高速表现也够用。方便问一下您主要是在南京本地用车，还是需要关注异地提档的事？\n[2026-05-04T02:56:11] 许聪: 它公里数多少？"
+        },
+        {
+          "chunk_id": "chunk_c7dfee0c99fa8158",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.687,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.367,
+            "semantic": 0.21,
+            "vector": 0.12,
+            "vector_similarity": 0.6668,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.08,
+            "final": 0.687
+          },
+          "text": "# 车辆库存总表\n演示批次：CHEJIN_DEMO_20260503_203628\n用途：客户演示用二手车库存，覆盖轿车、SUV、MPV、新能源、高端车、已售归档等场景。\n商品名称：2021款丰田凯美瑞2.0G豪华版\n型号/SKU：CHEJIN-CAMRY-2021G\n类目：二手车/中级轿车\n关键词：凯美瑞、丰田凯美瑞、8万预算、家用通勤、省油自动挡\n规格：2021年上牌，表显4.8万公里，2.0L自动挡，白色，南京现车，一手家用车。\n价格：8.98万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物"
+        },
+        {
+          "chunk_id": "chunk_43ec093587fb7a6c",
+          "source_id": "source_e6897fc4eb9fff13",
+          "score": 0.6591,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.3517,
+            "semantic": 0.2033,
+            "vector": 0.1141,
+            "vector_similarity": 0.634,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.6591
+          },
+          "text": "[2026-05-04T02:00:08] self: [车金AI] 凯美瑞那台还在的，2021款2.0G豪华版，8.98万，南京现车，4.8万公里，家用省油很合适。方便问一下您是在南京看车还是有置换需求？"
+        },
+        {
+          "chunk_id": "chunk_32caa60fafc562e1",
+          "source_id": "source_aff9dfe1585ba2ef",
+          "score": 0.6255,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.3593,
+            "semantic": 0.2067,
+            "vector": 0.1145,
+            "vector_similarity": 0.6359,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.025,
+            "risk_penalty": 0.08,
+            "final": 0.6255
+          },
+          "text": "商品资料：江苏车金二手车车源 CHEJIN_20260503_204823\n测试批次：CHEJIN_20260503_204823\n商品名称：2021款丰田凯美瑞2.0G豪华版\n型号：CHEJIN-CAMRY-2021G\n商品类目：二手车/中级轿车\n别名关键词：凯美瑞,丰田凯美瑞,8万预算,自动挡,省油,通勤\n规格参数：2021年上牌，表显4.8万公里，2.0L自动挡，南京现车，一手车，支持第三方检测。\n价格：8.98万\n单位：台\n库存：1\n发货：南京门店可看车，异地客户需人工确认物流与提档。\n售后：非重大事故、非"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_91dc526983150fe5d9f6",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "rejected_at": "2026-05-04T15:03:49",
+    "reason": "???????????????????????????????????????????????????"
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

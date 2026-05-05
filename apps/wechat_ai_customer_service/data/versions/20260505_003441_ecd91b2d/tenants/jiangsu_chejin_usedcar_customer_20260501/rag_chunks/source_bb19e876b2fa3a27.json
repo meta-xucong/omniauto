@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_bb19e876b2fa3a27",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_8ab6dc31c82fc770a89e.txt",
+    "content_hash": "e2e4bebd92daf33d8582b0e1115581d5",
+    "status": "active",
+    "created_at": "2026-05-04T02:07:35",
+    "updated_at": "2026-05-04T02:07:35"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_f02bc5a95bad17f8",
+      "source_id": "source_bb19e876b2fa3a27",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_8ab6dc31c82fc770a89e.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-04 02:07:00] system: 02:07\n[2026-05-04T02:07:35] self: [车金AI] 许聪，秦PLUS DM-i 2022款插混，市区跑确实挺合适的，油耗低，通勤省心，也在你之前说的8-10万预算内。不过这车是新能源，电池检测和迁入政策得让销售结合检测报告给你确认，免得后续有出入。我让同事直接跟你对接吧。",
+      "char_count": 181,
+      "status": "active",
+      "created_at": "2026-05-04T02:07:35"
+    }
+  ]
+}

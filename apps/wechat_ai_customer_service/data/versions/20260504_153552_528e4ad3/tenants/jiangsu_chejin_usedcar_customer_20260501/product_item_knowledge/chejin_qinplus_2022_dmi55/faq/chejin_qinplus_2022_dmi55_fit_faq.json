@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "category_id": "product_faq",
+  "id": "chejin_qinplus_2022_dmi55_fit_faq",
+  "status": "active",
+  "source": {
+    "type": "demo_fixture",
+    "batch_token": "CHEJIN_DEMO_20260503_203628",
+    "domain": "used_car"
+  },
+  "data": {
+    "product_id": "chejin_qinplus_2022_dmi55",
+    "title": "比亚迪秦PLUS DM-i 55KM适合什么客户",
+    "keywords": [
+      "2022款比亚迪秦PLUS DM-i 55KM",
+      "秦PLUS",
+      "比亚迪秦",
+      "新能源",
+      "适合",
+      "CHEJIN_DEMO_20260503_203628"
+    ],
+    "question": "2022款比亚迪秦PLUS DM-i 55KM适合什么客户？",
+    "answer": "适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。",
+    "additional_details": {
+      "关联商品": "2022款比亚迪秦PLUS DM-i 55KM",
+      "演示批次": "CHEJIN_DEMO_20260503_203628"
+    }
+  },
+  "runtime": {
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "risk_level": "normal",
+    "operator_alert": false
+  },
+  "review_state": {
+    "is_new": true,
+    "new_reason": "newly_added_formal_knowledge",
+    "marked_at": "2026-05-03T20:36:28",
+    "updated_at": "2026-05-03T20:36:28",
+    "read_at": "",
+    "read_by": "",
+    "source": {
+      "source_module": "jiangsu_chejin_demo_seed",
+      "target_category": "product_faq",
+      "item_id": "chejin_qinplus_2022_dmi55_fit_faq"
+    }
+  },
+  "metadata": {
+    "created_at": "2026-05-03T20:36:28",
+    "updated_at": "2026-05-03T20:36:28",
+    "created_by": "admin",
+    "updated_by": "admin"
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_d6ed856177a4f366",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_f6b2bac7887e3694b7ab.txt",
+    "content_hash": "870735ccd9bd163800df7ce4814de2b1",
+    "status": "active",
+    "created_at": "2026-05-04T03:39:46",
+    "updated_at": "2026-05-04T03:39:46"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_5a1b36e314f4d86f",
+      "source_id": "source_d6ed856177a4f366",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_f6b2bac7887e3694b7ab.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-04T03:39:46] self: [车金AI] 高速试驾咱们得让销售同事帮忙确认现车能不能上高速、保险和路线这些细节，我这边没法直接安排。我帮您转过去，他们能最快回复您。\n[2026-05-04T03:39:46] 许聪: 你帮我安排销售马上联系我",
+      "char_count": 135,
+      "status": "active",
+      "created_at": "2026-05-04T03:39:46"
+    }
+  ]
+}

@@ -1,0 +1,323 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_a93dd78e9a808af1",
+  "generated_at": "2026-05-04T03:01:55",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_583a232bc62af3a5993b.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"customer_message\": \"如果我有旧车置换，需要准备什么？\", \"service_reply\": \"\", \"intent_tags\": [\"旧车置换\"], \"tone_tags\": [], \"linked_categories\": [], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\", \"usable_as_template\": false, \"additional_details\": {}}",
+    "content_sha256": "114b63d0b67f457dc204d2e7fe1c52e5789ba7a450353782a856ab0ac71ce901",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_583a232bc62af3a5993b",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_37d0d096974b3b0a850c",
+      "raw_msg_797476a162a631775624",
+      "raw_msg_a99bab610a69945c9395"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_0de02f9181cc667a",
+        "source_id": "source_1ad359041dec7fe7",
+        "score": 0.6922,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.3703,
+          "semantic": 0.2114,
+          "vector": 0.1205,
+          "vector_similarity": 0.6696,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.6922
+        },
+        "text": "[2026-05-04 03:00:00] system: 03:00\n[2026-05-04T03:01:04] self: [车金AI] 异地提档要看您所在城市的排放和迁入政策，还有车辆档案状态，我这边没法直接给您准话。我这就转给负责的销售同事帮您核实，您方便留个电话或者告诉我所在城市吗？\n[2026-05-04T03:01:04] 许聪: 如果我有旧车置换，需要准备什么？"
+      },
+      {
+        "chunk_id": "chunk_bd5bc67861c08740",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5114,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1994,
+          "semantic": 0.1371,
+          "vector": 0.1048,
+          "vector_similarity": 0.5823,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5114
+        },
+        "text": "品名称：2021款捷达VS5 280TSI自动荣耀型\n型号/SKU：CHEJIN-JETTAVS5-2021\n类目：二手车/SUV\n关键词：捷达VS5、VS5、德系SUV、预算SUV\n规格：2021年上牌，表显3.8万公里，1.4T自动挡，白色。\n价格：6.38万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：涡轮、变速箱和保养以检测报告为准。\n推荐话术：适合预算6到7万、想买合资SUV的客户。\n商品名称：2017款福特福克斯1.6L自动风尚"
+      },
+      {
+        "chunk_id": "chunk_b97bf1fb55256e5d",
+        "source_id": "source_eca6d2f00f8573a5",
+        "score": 0.4512,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.206,
+          "semantic": 0.14,
+          "vector": 0.1152,
+          "vector_similarity": 0.6402,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.4512
+        },
+        "text": "[2026-05-04T02:22:10] self: [车金AI] 两款都是省油省心的练手好车。轩逸1.6L更平顺省油，卡罗拉1.2T动力稍强、保值口碑也硬。目前我们有一台卡罗拉1.2T白色6.98万，和一台轩逸1.6L银色6.88万，都在南京门店。您主要在哪边用车？或者预算大概多少？\n[2026-05-04T02:22:10] 许聪: 朗逸那台可以置换吗？我有旧车"
+      },
+      {
+        "chunk_id": "chunk_754ecf131d7858cd",
+        "source_id": "source_bb395d5ecba99f8b",
+        "score": 0.4498,
+        "category": "policies",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2257,
+          "semantic": 0.1486,
+          "vector": 0.1105,
+          "vector_similarity": 0.6138,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.045,
+          "risk_penalty": 0.08,
+          "final": 0.4498
+        },
+        "text": "# 二手车交易规则手册\n演示批次：CHEJIN_DEMO_20260503_203628\n二手车行业演示规则：所有成交、过户、金融、售后和车况承诺均以合同、检测报告和人工确认为准。\n规则：江苏车金门店介绍\n触发词：江苏车金、门店、地址、营业时间、CHEJIN_DEMO_20260503_203628\n标准说明：江苏车金二手车演示账号默认说明：客户可以预约南京门店看车，AI 只做初步接待、资料收集和风险提醒，成交条件由人工确认。\n规则：看车预约与到店规则\n触发词：看车、到店、试驾、试乘、预约、CHEJIN_DEMO_"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_47eee29f389eab77429c",
+    "experience_id": "rag_exp_47eee29f389eab77429c"
+  },
+  "detected_tags": [
+    "llm",
+    "rag_experience",
+    "unknown",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "chats",
+    "change_type": "llm_upsert_chats",
+    "summary": "客户咨询旧车置换所需材料",
+    "suggested_fields": {
+      "customer_message": "如果我有旧车置换，需要准备什么？",
+      "service_reply": "",
+      "intent_tags": [
+        "旧车置换"
+      ],
+      "tone_tags": [],
+      "linked_categories": [],
+      "linked_item_ids": [],
+      "applicability_scope": "global",
+      "product_id": "",
+      "product_category": "",
+      "usable_as_template": false,
+      "additional_details": {
+        "原始资料摘录": "{\"customer_message\": \"如果我有旧车置换，需要准备什么？\", \"service_reply\": \"\", \"intent_tags\": [\"旧车置换\"], \"tone_tags\": [], \"linked_categories\": [], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\", \"usable_as_template\": false, \"additional_details\": {}}"
+      }
+    },
+    "missing_fields": [
+      "service_reply"
+    ],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "chats",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "chats",
+        "id": "item_040466aee466",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_583a232bc62af3a5993b.txt",
+          "candidate_id": "raw_a93dd78e9a808af1",
+          "rag_experience_id": "rag_exp_47eee29f389eab77429c",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "customer_message": "如果我有旧车置换，需要准备什么？",
+          "service_reply": "",
+          "intent_tags": [
+            "旧车置换"
+          ],
+          "tone_tags": [],
+          "linked_categories": [],
+          "linked_item_ids": [],
+          "applicability_scope": "global",
+          "product_id": "",
+          "product_category": "",
+          "usable_as_template": false,
+          "additional_details": {
+            "原始资料摘录": "{\"customer_message\": \"如果我有旧车置换，需要准备什么？\", \"service_reply\": \"\", \"intent_tags\": [\"旧车置换\"], \"tone_tags\": [], \"linked_categories\": [], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\", \"usable_as_template\": false, \"additional_details\": {}}"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "needs_more_info",
+    "ok": false,
+    "confidence": 0.72,
+    "missing_fields": [
+      "service_reply"
+    ],
+    "missing_labels": [
+      "客服回复"
+    ],
+    "question": "还需要补充：客服回复。请补齐后再应用入库。",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "rejected",
+    "completeness_status": "needs_more_info",
+    "missing_fields": [
+      "service_reply"
+    ],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_583a232bc62af3a5993b",
+    "source_raw_message_ids": [
+      "raw_msg_37d0d096974b3b0a850c",
+      "raw_msg_797476a162a631775624",
+      "raw_msg_a99bab610a69945c9395"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_1ad359041dec7fe7",
+      "chunk_count": 1,
+      "query": "客户咨询旧车置换所需材料\n{\"customer_message\": \"如果我有旧车置换，需要准备什么？\", \"service_reply\": \"\", \"intent_tags\": [\"旧车置换\"], \"tone_tags\": [], \"linked_categories\": [], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\", \"usable_as_template\": false, \"additional_details\": {}}",
+      "hits": [
+        {
+          "chunk_id": "chunk_0de02f9181cc667a",
+          "source_id": "source_1ad359041dec7fe7",
+          "score": 0.6922,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.3703,
+            "semantic": 0.2114,
+            "vector": 0.1205,
+            "vector_similarity": 0.6696,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.6922
+          },
+          "text": "[2026-05-04 03:00:00] system: 03:00\n[2026-05-04T03:01:04] self: [车金AI] 异地提档要看您所在城市的排放和迁入政策，还有车辆档案状态，我这边没法直接给您准话。我这就转给负责的销售同事帮您核实，您方便留个电话或者告诉我所在城市吗？\n[2026-05-04T03:01:04] 许聪: 如果我有旧车置换，需要准备什么？"
+        },
+        {
+          "chunk_id": "chunk_bd5bc67861c08740",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5114,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1994,
+            "semantic": 0.1371,
+            "vector": 0.1048,
+            "vector_similarity": 0.5823,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5114
+          },
+          "text": "品名称：2021款捷达VS5 280TSI自动荣耀型\n型号/SKU：CHEJIN-JETTAVS5-2021\n类目：二手车/SUV\n关键词：捷达VS5、VS5、德系SUV、预算SUV\n规格：2021年上牌，表显3.8万公里，1.4T自动挡，白色。\n价格：6.38万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：涡轮、变速箱和保养以检测报告为准。\n推荐话术：适合预算6到7万、想买合资SUV的客户。\n商品名称：2017款福特福克斯1.6L自动风尚"
+        },
+        {
+          "chunk_id": "chunk_b97bf1fb55256e5d",
+          "source_id": "source_eca6d2f00f8573a5",
+          "score": 0.4512,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.206,
+            "semantic": 0.14,
+            "vector": 0.1152,
+            "vector_similarity": 0.6402,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.4512
+          },
+          "text": "[2026-05-04T02:22:10] self: [车金AI] 两款都是省油省心的练手好车。轩逸1.6L更平顺省油，卡罗拉1.2T动力稍强、保值口碑也硬。目前我们有一台卡罗拉1.2T白色6.98万，和一台轩逸1.6L银色6.88万，都在南京门店。您主要在哪边用车？或者预算大概多少？\n[2026-05-04T02:22:10] 许聪: 朗逸那台可以置换吗？我有旧车"
+        },
+        {
+          "chunk_id": "chunk_754ecf131d7858cd",
+          "source_id": "source_bb395d5ecba99f8b",
+          "score": 0.4498,
+          "category": "policies",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2257,
+            "semantic": 0.1486,
+            "vector": 0.1105,
+            "vector_similarity": 0.6138,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.045,
+            "risk_penalty": 0.08,
+            "final": 0.4498
+          },
+          "text": "# 二手车交易规则手册\n演示批次：CHEJIN_DEMO_20260503_203628\n二手车行业演示规则：所有成交、过户、金融、售后和车况承诺均以合同、检测报告和人工确认为准。\n规则：江苏车金门店介绍\n触发词：江苏车金、门店、地址、营业时间、CHEJIN_DEMO_20260503_203628\n标准说明：江苏车金二手车演示账号默认说明：客户可以预约南京门店看车，AI 只做初步接待、资料收集和风险提醒，成交条件由人工确认。\n规则：看车预约与到店规则\n触发词：看车、到店、试驾、试乘、预约、CHEJIN_DEMO_"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_47eee29f389eab77429c",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "rejected_at": "2026-05-04T18:41:18",
+    "reason": "legacy_auto_candidate_cleanup_20260504: ???????????????????????RAG?????????????????"
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

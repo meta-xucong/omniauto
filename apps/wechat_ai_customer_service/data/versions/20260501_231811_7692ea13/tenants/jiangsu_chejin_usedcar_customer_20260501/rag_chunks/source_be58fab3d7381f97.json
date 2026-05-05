@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_be58fab3d7381f97",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "group",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_d78cb8134d88f947c093.txt",
+    "content_hash": "17705152c3cb8a9068f3d7b50d04d1b4",
+    "status": "active",
+    "created_at": "2026-05-01T16:24:26",
+    "updated_at": "2026-05-01T16:24:26"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_49c5a803acd165eb",
+      "source_id": "source_be58fab3d7381f97",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "group",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_d78cb8134d88f947c093.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-01T16:24:26] self: [车金AI] 您好，我是江苏车金AI助手。您可以直接告诉我预算、用途、想看的车型和所在城市，我先帮您筛车源。",
+      "char_count": 82,
+      "status": "active",
+      "created_at": "2026-05-01T16:24:26"
+    }
+  ]
+}

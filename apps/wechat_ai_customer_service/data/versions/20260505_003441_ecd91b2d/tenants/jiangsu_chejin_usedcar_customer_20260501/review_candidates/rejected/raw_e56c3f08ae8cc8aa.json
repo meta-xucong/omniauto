@@ -1,0 +1,297 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_e56c3f08ae8cc8aa",
+  "generated_at": "2026-05-04T02:16:19",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_c43d9b545c0f08237e0e.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"service_reply\": \"A4L黑色外观比较大气，婚庆车队或者商务接待都挺合适的。目前我们有一台2020款黑色，6.8万公里，15.88万，定位偏商务通勤和品牌升级。您之前看的预算大概在什么范围？或者更看重哪方面？\", \"applicability_scope\": \"specific_product\", \"product_id\": \"a4l\", \"usable_as_template\": true, \"product_category\": \"\"}",
+    "content_sha256": "62ef5d651003ed6644c08584b30d333a29dc45888f95fad94cbeeb9ea0e2120e",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_c43d9b545c0f08237e0e",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_fca1fe67a42691cb0b6d"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_b9a93b1c9ad9b43e",
+        "source_id": "source_276aa9710d99ba89",
+        "score": 0.8887,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.4936,
+          "semantic": 0.2651,
+          "vector": 0.14,
+          "vector_similarity": 0.9513,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.8887
+        },
+        "text": "[2026-05-04T02:15:26] self: [车金AI] A4L黑色外观比较大气，婚庆车队或者商务接待都挺合适的。目前我们有一台2020款黑色，6.8万公里，15.88万，定位偏商务通勤和品牌升级。您之前看的预算大概在什么范围？或者更看重哪方面？"
+      },
+      {
+        "chunk_id": "chunk_99cc4e7f8c7061b0",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5538,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2074,
+          "semantic": 0.1406,
+          "vector": 0.1358,
+          "vector_similarity": 0.7546,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5538
+        },
+        "text": "、提档、当地新能源指标和运输方式。\n售后/风险：电池健康、辅助驾驶功能和官方权益以检测报告及账号核验为准。\n推荐话术：适合想体验纯电、智能化和低用车成本的客户，电池和权益必须人工确认。\n商品名称：2020款奥迪A4L 40TFSI时尚动感型\n型号/SKU：CHEJIN-A4L-2020\n类目：二手车/豪华轿车\n关键词：奥迪A4L、A4L、豪华轿车、婚庆、商务\n规格：2020年上牌，表显6.8万公里，2.0T自动挡，黑色，保养记录较完整。\n价格：15.88万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档"
+      },
+      {
+        "chunk_id": "chunk_d2ec0cebcf16c10c",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5346,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1916,
+          "semantic": 0.1337,
+          "vector": 0.1393,
+          "vector_similarity": 0.7738,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5346
+        },
+        "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+      },
+      {
+        "chunk_id": "chunk_b73fd7e249648300",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5095,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1778,
+          "semantic": 0.1277,
+          "vector": 0.134,
+          "vector_similarity": 0.7443,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5095
+        },
+        "text": "。\n商品名称：2022款五菱宏光MINIEV马卡龙臻享款\n型号/SKU：CHEJIN-MINIEV-2022\n类目：二手车/微型电动车\n关键词：宏光MINIEV、五菱mini、代步电车、练手车\n规格：2022年上牌，表显1.6万公里，纯电微型车，粉色，城市通勤。\n价格：2.88万，库存：1台\n物流/过户：微型电动车跨城运输和充电条件需人工确认。\n售后/风险：续航、电池和低温表现以检测报告和使用场景说明为准。\n推荐话术：适合短途通勤、练手、接送孩子，长途或高速需求不推荐。\n商品名称：2020款本田雅阁260TURBO"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_8432911cbfeca3de7bfc",
+    "experience_id": "rag_exp_8432911cbfeca3de7bfc"
+  },
+  "detected_tags": [
+    "llm",
+    "rag_experience",
+    "unknown",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "chats",
+    "change_type": "llm_upsert_chats",
+    "summary": "客服介绍奥迪A4L黑色款车辆信息并询问客户预算与偏好",
+    "suggested_fields": {
+      "service_reply": "A4L黑色外观比较大气，婚庆车队或者商务接待都挺合适的。目前我们有一台2020款黑色，6.8万公里，15.88万，定位偏商务通勤和品牌升级。您之前看的预算大概在什么范围？或者更看重哪方面？",
+      "applicability_scope": "specific_product",
+      "product_id": "a4l",
+      "usable_as_template": true,
+      "product_category": "",
+      "additional_details": {
+        "原始资料摘录": "{\"service_reply\": \"A4L黑色外观比较大气，婚庆车队或者商务接待都挺合适的。目前我们有一台2020款黑色，6.8万公里，15.88万，定位偏商务通勤和品牌升级。您之前看的预算大概在什么范围？或者更看重哪方面？\", \"applicability_scope\": \"specific_product\", \"product_id\": \"a4l\", \"usable_as_template\": true, \"product_category\": \"\"}"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "chats",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "chats",
+        "id": "chat_a4l_20260504",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_c43d9b545c0f08237e0e.txt",
+          "candidate_id": "raw_e56c3f08ae8cc8aa",
+          "rag_experience_id": "rag_exp_8432911cbfeca3de7bfc",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "service_reply": "A4L黑色外观比较大气，婚庆车队或者商务接待都挺合适的。目前我们有一台2020款黑色，6.8万公里，15.88万，定位偏商务通勤和品牌升级。您之前看的预算大概在什么范围？或者更看重哪方面？",
+          "applicability_scope": "specific_product",
+          "product_id": "a4l",
+          "usable_as_template": true,
+          "product_category": "",
+          "additional_details": {
+            "原始资料摘录": "{\"service_reply\": \"A4L黑色外观比较大气，婚庆车队或者商务接待都挺合适的。目前我们有一台2020款黑色，6.8万公里，15.88万，定位偏商务通勤和品牌升级。您之前看的预算大概在什么范围？或者更看重哪方面？\", \"applicability_scope\": \"specific_product\", \"product_id\": \"a4l\", \"usable_as_template\": true, \"product_category\": \"\"}"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "rejected",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_c43d9b545c0f08237e0e",
+    "source_raw_message_ids": [
+      "raw_msg_fca1fe67a42691cb0b6d"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_276aa9710d99ba89",
+      "chunk_count": 1,
+      "query": "客服介绍奥迪A4L黑色款车辆信息并询问客户预算与偏好\n{\"service_reply\": \"A4L黑色外观比较大气，婚庆车队或者商务接待都挺合适的。目前我们有一台2020款黑色，6.8万公里，15.88万，定位偏商务通勤和品牌升级。您之前看的预算大概在什么范围？或者更看重哪方面？\", \"applicability_scope\": \"specific_product\", \"product_id\": \"a4l\", \"usable_as_template\": true, \"product_category\": \"\"}\nA4L黑色外观比较大气，婚庆车队或者商务接待都挺合适的。目前我们有一台2020款黑色，6.8万公里，15.88万，定位偏商务通勤和品牌升级。您之前看的预算大概在什么范围？或者更看重哪方面？",
+      "hits": [
+        {
+          "chunk_id": "chunk_b9a93b1c9ad9b43e",
+          "source_id": "source_276aa9710d99ba89",
+          "score": 0.8887,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.4936,
+            "semantic": 0.2651,
+            "vector": 0.14,
+            "vector_similarity": 0.9513,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.8887
+          },
+          "text": "[2026-05-04T02:15:26] self: [车金AI] A4L黑色外观比较大气，婚庆车队或者商务接待都挺合适的。目前我们有一台2020款黑色，6.8万公里，15.88万，定位偏商务通勤和品牌升级。您之前看的预算大概在什么范围？或者更看重哪方面？"
+        },
+        {
+          "chunk_id": "chunk_99cc4e7f8c7061b0",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5538,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2074,
+            "semantic": 0.1406,
+            "vector": 0.1358,
+            "vector_similarity": 0.7546,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5538
+          },
+          "text": "、提档、当地新能源指标和运输方式。\n售后/风险：电池健康、辅助驾驶功能和官方权益以检测报告及账号核验为准。\n推荐话术：适合想体验纯电、智能化和低用车成本的客户，电池和权益必须人工确认。\n商品名称：2020款奥迪A4L 40TFSI时尚动感型\n型号/SKU：CHEJIN-A4L-2020\n类目：二手车/豪华轿车\n关键词：奥迪A4L、A4L、豪华轿车、婚庆、商务\n规格：2020年上牌，表显6.8万公里，2.0T自动挡，黑色，保养记录较完整。\n价格：15.88万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档"
+        },
+        {
+          "chunk_id": "chunk_d2ec0cebcf16c10c",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5346,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1916,
+            "semantic": 0.1337,
+            "vector": 0.1393,
+            "vector_similarity": 0.7738,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5346
+          },
+          "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+        },
+        {
+          "chunk_id": "chunk_b73fd7e249648300",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5095,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1778,
+            "semantic": 0.1277,
+            "vector": 0.134,
+            "vector_similarity": 0.7443,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5095
+          },
+          "text": "。\n商品名称：2022款五菱宏光MINIEV马卡龙臻享款\n型号/SKU：CHEJIN-MINIEV-2022\n类目：二手车/微型电动车\n关键词：宏光MINIEV、五菱mini、代步电车、练手车\n规格：2022年上牌，表显1.6万公里，纯电微型车，粉色，城市通勤。\n价格：2.88万，库存：1台\n物流/过户：微型电动车跨城运输和充电条件需人工确认。\n售后/风险：续航、电池和低温表现以检测报告和使用场景说明为准。\n推荐话术：适合短途通勤、练手、接送孩子，长途或高速需求不推荐。\n商品名称：2020款本田雅阁260TURBO"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_8432911cbfeca3de7bfc",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "rejected_at": "2026-05-04T18:41:18",
+    "reason": "legacy_auto_candidate_cleanup_20260504: ???????????????????????RAG?????????????????"
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

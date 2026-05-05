@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_66ed68902378a7c8",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_98c9b3032beab7e8bd99.txt",
+    "content_hash": "8e0e6088ba2d077e4c14f5a4e19c35fc",
+    "status": "active",
+    "created_at": "2026-05-04T03:15:05",
+    "updated_at": "2026-05-04T03:15:05"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_c70b0c1a0c869265",
+      "source_id": "source_66ed68902378a7c8",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_98c9b3032beab7e8bd99.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-04 03:14:00] system: 03:14\n[2026-05-04T03:15:05] self: [车金AI] 门店在南京，具体地址和营业时间我这边没有直接查到，我转给销售同事让他发您详细位置和时间，方便留个电话或微信吗？\n[2026-05-04T03:15:05] 许聪: 二手车过户需要我带哪些材料？",
+      "char_count": 167,
+      "status": "active",
+      "created_at": "2026-05-04T03:15:05"
+    }
+  ]
+}

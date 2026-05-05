@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "category_id": "products",
+  "id": "chejin_model3_2021_std",
+  "status": "active",
+  "source": {
+    "type": "demo_fixture",
+    "batch_token": "CHEJIN_DEMO_20260503_203628",
+    "domain": "used_car"
+  },
+  "data": {
+    "name": "2021款特斯拉Model 3 标准续航后驱",
+    "sku": "CHEJIN-MODEL3-2021STD",
+    "category": "二手车/新能源轿车",
+    "aliases": [
+      "Model 3",
+      "特斯拉",
+      "新能源",
+      "电车",
+      "辅助驾驶",
+      "2021款特斯拉Model 3 标准续航后驱",
+      "CHEJIN-MODEL3-2021STD",
+      "CHEJIN_DEMO_20260503_203628"
+    ],
+    "specs": "2021年上牌，表显5.2万公里，纯电后驱，白色，支持第三方电池检测。",
+    "price": 13.98,
+    "unit": "台",
+    "price_tiers": [
+      {
+        "min_quantity": 1,
+        "unit_price": 13.98
+      }
+    ],
+    "inventory": 1,
+    "shipping_policy": "外地客户需人工确认充电、提档、当地新能源指标和运输方式。",
+    "warranty_policy": "电池健康、辅助驾驶功能和官方权益以检测报告及账号核验为准。",
+    "reply_templates": {
+      "默认回复": "适合想体验纯电、智能化和低用车成本的客户，电池和权益必须人工确认。",
+      "报价回复": "这台车当前演示价约 13.98 万，最终成交价、金融方案和费用明细需要人工确认。",
+      "议价回复": "二手车一车一况，AI 可以说明参考价和看车建议，最终优惠、订金和成交条件必须由销售确认。",
+      "物流回复": "外地客户需人工确认充电、提档、当地新能源指标和运输方式。",
+      "售后回复": "电池健康、辅助驾驶功能和官方权益以检测报告及账号核验为准。",
+      "内部备注": "演示资料：用于覆盖二手车常见咨询、风险边界和商品专属知识。"
+    },
+    "risk_rules": [
+      "电池健康转人工",
+      "辅助驾驶权益转人工",
+      "账号权益转人工"
+    ],
+    "additional_details": {
+      "上牌时间": "2021-10",
+      "表显里程": "5.2万公里",
+      "能源类型": "纯电",
+      "演示状态": "在售"
+    }
+  },
+  "runtime": {
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "risk_level": "normal"
+  },
+  "review_state": {
+    "is_new": true,
+    "new_reason": "newly_added_formal_knowledge",
+    "marked_at": "2026-05-03T20:36:28",
+    "updated_at": "2026-05-03T20:36:28",
+    "read_at": "",
+    "read_by": "",
+    "source": {
+      "source_module": "jiangsu_chejin_demo_seed",
+      "target_category": "products",
+      "item_id": "chejin_model3_2021_std"
+    }
+  },
+  "metadata": {
+    "created_at": "2026-05-03T20:36:28",
+    "updated_at": "2026-05-03T20:36:28",
+    "created_by": "admin",
+    "updated_by": "admin"
+  }
+}

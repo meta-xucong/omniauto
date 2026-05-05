@@ -1,0 +1,334 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_89a15f27de63901e",
+  "generated_at": "2026-05-04T03:04:07",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_281f8d8030914c8d0155.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"customer_message\": \"先不管前面的信息。GL8那台给我讲讲\", \"service_reply\": \"\", \"intent_tags\": [\"产品咨询\", \"忽略上下文\"], \"tone_tags\": [\"直接\", \"急切\"], \"linked_categories\": [], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\", \"usable_as_template\": false, \"additional_details\": {\"client_name\": \"许聪\", \"timestamp\": \"2026-05-04T03:03:35\", \"me",
+    "content_sha256": "423e2cc9cb4b79d58827a96d454768d833e738dd9965585491bf5de3c05578f4",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_281f8d8030914c8d0155",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_ff7384df868d8ce6d78a"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_279ed8d7c79eec49",
+        "source_id": "source_da45a38e3e304d8b",
+        "score": 0.7007,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.3626,
+          "semantic": 0.2081,
+          "vector": 0.14,
+          "vector_similarity": 0.7794,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.7007
+        },
+        "text": "[2026-05-04T03:03:35] 许聪: 先不管前面的信息。GL8那台给我讲讲"
+      },
+      {
+        "chunk_id": "chunk_ba6c0de42b810521",
+        "source_id": "source_bb395d5ecba99f8b",
+        "score": 0.4219,
+        "category": "policies",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1983,
+          "semantic": 0.1367,
+          "vector": 0.1219,
+          "vector_similarity": 0.6773,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.045,
+          "risk_penalty": 0.08,
+          "final": 0.4219
+        },
+        "text": "优惠、砍价、一口价、CHEJIN_DEMO_20260503_203628\n标准说明：AI 可以说明二手车一车一况、价格需结合到店看车和成交方式确认，不承诺最低价或保底优惠。\n规则：留车时效规则\n触发词：帮我留着、锁车、别卖、保留、CHEJIN_DEMO_20260503_203628\n标准说明：留车、锁车、订金时效和违约规则必须由人工确认，AI 只能记录客户意向。\n规则：投诉与纠纷升级规则\n触发词：投诉、举报、欺诈、纠纷、315、CHEJIN_DEMO_20260503_203628\n标准说明：客户出现投诉、纠纷"
+      },
+      {
+        "chunk_id": "chunk_d2ec0cebcf16c10c",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.4191,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1258,
+          "semantic": 0.1157,
+          "vector": 0.1076,
+          "vector_similarity": 0.5975,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.4191
+        },
+        "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+      },
+      {
+        "chunk_id": "chunk_1c6c647a6b0ed5da",
+        "source_id": "source_44feb2b597eec077",
+        "score": 0.416,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1874,
+          "semantic": 0.1319,
+          "vector": 0.1067,
+          "vector_similarity": 0.5927,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.416
+        },
+        "text": "[2026-05-04T02:56:11] 许聪: 你忽略前面的。我就想问问有没有凯美瑞\n[2026-05-04T02:56:11] self: [车金AI] 凯美瑞有的，店里有一台2021款2.0G豪华版，南京现车，表显4.8万公里，参考价8.98万，家用省油挺合适的。您之前提到经常跑高速，这台2.0L自吸高速表现也够用。方便问一下您主要是在南京本地用车，还是需要关注异地提档的事？\n[2026-05-04T02:56:11] 许聪: 它公里数多少？"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_be4212955193cfb0380e",
+    "experience_id": "rag_exp_be4212955193cfb0380e"
+  },
+  "detected_tags": [
+    "llm",
+    "rag_experience",
+    "unknown",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "chats",
+    "change_type": "llm_upsert_chats",
+    "summary": "客户要求介绍GL8产品",
+    "suggested_fields": {
+      "customer_message": "先不管前面的信息。GL8那台给我讲讲",
+      "service_reply": "",
+      "intent_tags": [
+        "产品咨询",
+        "忽略上下文"
+      ],
+      "tone_tags": [
+        "直接",
+        "急切"
+      ],
+      "linked_categories": [],
+      "linked_item_ids": [],
+      "applicability_scope": "global",
+      "product_id": "",
+      "product_category": "",
+      "usable_as_template": false,
+      "additional_details": {
+        "client_name": "许聪",
+        "timestamp": "2026-05-04T03:03:35",
+        "mentioned_product": "GL8",
+        "原始资料摘录": "{\"customer_message\": \"先不管前面的信息。GL8那台给我讲讲\", \"service_reply\": \"\", \"intent_tags\": [\"产品咨询\", \"忽略上下文\"], \"tone_tags\": [\"直接\", \"急切\"], \"linked_categories\": [], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\", \"usable_as_template\": false, \"additional_details\": {\"client_name\": \"许聪\", \"timestamp\": \"2026-05-04T03:03:35\", \"me"
+      }
+    },
+    "missing_fields": [
+      "service_reply"
+    ],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "chats",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "chats",
+        "id": "chat_20260504_030335_gl8",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_281f8d8030914c8d0155.txt",
+          "candidate_id": "raw_89a15f27de63901e",
+          "rag_experience_id": "rag_exp_be4212955193cfb0380e",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "customer_message": "先不管前面的信息。GL8那台给我讲讲",
+          "service_reply": "",
+          "intent_tags": [
+            "产品咨询",
+            "忽略上下文"
+          ],
+          "tone_tags": [
+            "直接",
+            "急切"
+          ],
+          "linked_categories": [],
+          "linked_item_ids": [],
+          "applicability_scope": "global",
+          "product_id": "",
+          "product_category": "",
+          "usable_as_template": false,
+          "additional_details": {
+            "client_name": "许聪",
+            "timestamp": "2026-05-04T03:03:35",
+            "mentioned_product": "GL8",
+            "原始资料摘录": "{\"customer_message\": \"先不管前面的信息。GL8那台给我讲讲\", \"service_reply\": \"\", \"intent_tags\": [\"产品咨询\", \"忽略上下文\"], \"tone_tags\": [\"直接\", \"急切\"], \"linked_categories\": [], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\", \"usable_as_template\": false, \"additional_details\": {\"client_name\": \"许聪\", \"timestamp\": \"2026-05-04T03:03:35\", \"me"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "needs_more_info",
+    "ok": false,
+    "confidence": 0.72,
+    "missing_fields": [
+      "service_reply"
+    ],
+    "missing_labels": [
+      "客服回复"
+    ],
+    "question": "还需要补充：客服回复。请补齐后再应用入库。",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "client_name",
+      "mentioned_product",
+      "timestamp",
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "pending",
+    "completeness_status": "needs_more_info",
+    "missing_fields": [
+      "service_reply"
+    ],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_281f8d8030914c8d0155",
+    "source_raw_message_ids": [
+      "raw_msg_ff7384df868d8ce6d78a"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_da45a38e3e304d8b",
+      "chunk_count": 1,
+      "query": "客户要求介绍GL8产品\n{\"customer_message\": \"先不管前面的信息。GL8那台给我讲讲\", \"service_reply\": \"\", \"intent_tags\": [\"产品咨询\", \"忽略上下文\"], \"tone_tags\": [\"直接\", \"急切\"], \"linked_categories\": [], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\", \"usable_as_template\": false, \"additional_details\": {\"client_name\": \"许聪\", \"timestamp\": \"2026-05-04T03:03:35\", \"me",
+      "hits": [
+        {
+          "chunk_id": "chunk_279ed8d7c79eec49",
+          "source_id": "source_da45a38e3e304d8b",
+          "score": 0.7007,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.3626,
+            "semantic": 0.2081,
+            "vector": 0.14,
+            "vector_similarity": 0.7794,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.7007
+          },
+          "text": "[2026-05-04T03:03:35] 许聪: 先不管前面的信息。GL8那台给我讲讲"
+        },
+        {
+          "chunk_id": "chunk_ba6c0de42b810521",
+          "source_id": "source_bb395d5ecba99f8b",
+          "score": 0.4219,
+          "category": "policies",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1983,
+            "semantic": 0.1367,
+            "vector": 0.1219,
+            "vector_similarity": 0.6773,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.045,
+            "risk_penalty": 0.08,
+            "final": 0.4219
+          },
+          "text": "优惠、砍价、一口价、CHEJIN_DEMO_20260503_203628\n标准说明：AI 可以说明二手车一车一况、价格需结合到店看车和成交方式确认，不承诺最低价或保底优惠。\n规则：留车时效规则\n触发词：帮我留着、锁车、别卖、保留、CHEJIN_DEMO_20260503_203628\n标准说明：留车、锁车、订金时效和违约规则必须由人工确认，AI 只能记录客户意向。\n规则：投诉与纠纷升级规则\n触发词：投诉、举报、欺诈、纠纷、315、CHEJIN_DEMO_20260503_203628\n标准说明：客户出现投诉、纠纷"
+        },
+        {
+          "chunk_id": "chunk_d2ec0cebcf16c10c",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.4191,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1258,
+            "semantic": 0.1157,
+            "vector": 0.1076,
+            "vector_similarity": 0.5975,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.4191
+          },
+          "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+        },
+        {
+          "chunk_id": "chunk_1c6c647a6b0ed5da",
+          "source_id": "source_44feb2b597eec077",
+          "score": 0.416,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1874,
+            "semantic": 0.1319,
+            "vector": 0.1067,
+            "vector_similarity": 0.5927,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.416
+          },
+          "text": "[2026-05-04T02:56:11] 许聪: 你忽略前面的。我就想问问有没有凯美瑞\n[2026-05-04T02:56:11] self: [车金AI] 凯美瑞有的，店里有一台2021款2.0G豪华版，南京现车，表显4.8万公里，参考价8.98万，家用省油挺合适的。您之前提到经常跑高速，这台2.0L自吸高速表现也够用。方便问一下您主要是在南京本地用车，还是需要关注异地提档的事？\n[2026-05-04T02:56:11] 许聪: 它公里数多少？"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_be4212955193cfb0380e",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ]
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

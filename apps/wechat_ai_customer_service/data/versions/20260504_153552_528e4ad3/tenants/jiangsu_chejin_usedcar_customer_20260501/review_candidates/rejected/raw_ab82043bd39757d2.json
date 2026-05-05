@@ -1,0 +1,326 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_ab82043bd39757d2",
+  "generated_at": "2026-05-04T03:34:10",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_f41ae41acfb1f28bc04f.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"product_id\": \"\", \"title\": \"秦PLUS定金锁车流程\", \"keywords\": [\"定金锁车\", \"秦PLUS\"], \"answer\": \"秦PLUS定金锁车需要销售同事确认现车状态、合同条款和支付方式，我这边没法直接处理。我马上帮您转给负责的销售对接，您稍等一下。\", \"allow_auto_reply\": false, \"requires_handoff\": true, \"handoff_reason\": \"需要销售确认现车状态、合同条款和支付方式\", \"additional_details\": {\"original_timestamp\": \"2026-05-04T03:32:34\", \"speaker\": \"车金AI\"}}",
+    "content_sha256": "808e3066494b159c4a2e5e02f520c958aba3d961f6b5138d83014570b3fc5e2c",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_f41ae41acfb1f28bc04f",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_71b4f2c5b0edb768e0a5",
+      "raw_msg_1aa4efaaca37ae8a14b6",
+      "raw_msg_5ee513bf20c66ec7ab06"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_186f162b3ea4a01f",
+        "source_id": "source_5ffc84918d285832",
+        "score": 0.8078,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.493,
+          "semantic": 0.2648,
+          "vector": 0.14,
+          "vector_similarity": 0.8927,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.08,
+          "final": 0.8078
+        },
+        "text": "[2026-05-04 03:32:00] system: 03:32\n[2026-05-04T03:32:34] self: [车金AI] 秦PLUS定金锁车需要销售同事确认现车状态、合同条款和支付方式，我这边没法直接处理。我马上帮您转给负责的销售对接，您稍等一下。\n[2026-05-04T03:32:34] 许聪: 你能保证这台车绝对不是事故车吗？如果发现水泡火烧，你们赔多少钱？"
+      },
+      {
+        "chunk_id": "chunk_55a1c2f94c9d1513",
+        "source_id": "source_7b1bbeedcb7732ef",
+        "score": 0.5879,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.287,
+          "semantic": 0.1752,
+          "vector": 0.1358,
+          "vector_similarity": 0.7542,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.5879
+        },
+        "text": "[2026-05-04T03:12:08] self: [车金AI] 秦PLUS的电池检测结果和贷款能否包过，都需要销售同事结合实车报告和资方审批来确认，我这边没法直接承诺。我帮您转给负责的销售直接对接，您方便留个电话吗？\n[2026-05-04T03:12:08] 许聪: 你们门店在哪？营业时间大概是什么时候？"
+      },
+      {
+        "chunk_id": "chunk_cea25e6c7bbc1d31",
+        "source_id": "source_6d72e3824a4b9f43",
+        "score": 0.5647,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2678,
+          "semantic": 0.1669,
+          "vector": 0.14,
+          "vector_similarity": 0.7933,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.5647
+        },
+        "text": "[2026-05-04T03:23:13] self: [车金AI] 检测报告和保养、出险记录都需要销售同事调取核实后才能发给您，我这边没法直接发。我马上帮您转给销售，麻烦您留个电话，他们直接联系您发。\n[2026-05-04T03:23:13] 许聪: 这车是不是非营运？有没有跑过网约车？"
+      },
+      {
+        "chunk_id": "chunk_0d27f032aa229103",
+        "source_id": "source_58950035fd736f45",
+        "score": 0.5544,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2606,
+          "semantic": 0.1638,
+          "vector": 0.14,
+          "vector_similarity": 0.7951,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.5544
+        },
+        "text": "[2026-05-04T03:24:34] 许聪: 绿本有没有抵押或者查封？\n[2026-05-04T03:24:34] 许聪: 表显公里数准不准？有没有调表？\n[2026-05-04T03:24:34] self: [车金AI] 营运性质有没有跑过网约车，我们得看登记证和实车记录来确认，我这边没法直接给准信。我马上帮您转给销售同事人工核实，方便留个电话吗？他们直接联系您。"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_9edfc59d0b7170d90288",
+    "experience_id": "rag_exp_9edfc59d0b7170d90288"
+  },
+  "detected_tags": [
+    "llm",
+    "payment",
+    "quote",
+    "rag_experience",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "product_rules",
+    "change_type": "llm_upsert_product_rules",
+    "summary": "秦PLUS定金锁车需转销售人工，不可自动处理",
+    "suggested_fields": {
+      "product_id": "",
+      "title": "秦PLUS定金锁车流程",
+      "keywords": [
+        "定金锁车",
+        "秦PLUS"
+      ],
+      "answer": "秦PLUS定金锁车需要销售同事确认现车状态、合同条款和支付方式，我这边没法直接处理。我马上帮您转给负责的销售对接，您稍等一下。",
+      "allow_auto_reply": false,
+      "requires_handoff": true,
+      "handoff_reason": "需要销售确认现车状态、合同条款和支付方式",
+      "additional_details": {
+        "original_timestamp": "2026-05-04T03:32:34",
+        "speaker": "车金AI",
+        "原始资料摘录": "{\"product_id\": \"\", \"title\": \"秦PLUS定金锁车流程\", \"keywords\": [\"定金锁车\", \"秦PLUS\"], \"answer\": \"秦PLUS定金锁车需要销售同事确认现车状态、合同条款和支付方式，我这边没法直接处理。我马上帮您转给负责的销售对接，您稍等一下。\", \"allow_auto_reply\": false, \"requires_handoff\": true, \"handoff_reason\": \"需要销售确认现车状态、合同条款和支付方式\", \"additional_details\": {\"original_timestamp\": \"2026-05-04T03:32:34\", \"speaker\": \"车金AI\"}}"
+      }
+    },
+    "missing_fields": [
+      "product_id"
+    ],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "product_rules",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "product_rules",
+        "id": "qin_plus_deposit_lock_handoff",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_f41ae41acfb1f28bc04f.txt",
+          "candidate_id": "raw_ab82043bd39757d2",
+          "rag_experience_id": "rag_exp_9edfc59d0b7170d90288",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "product_id": "",
+          "title": "秦PLUS定金锁车流程",
+          "keywords": [
+            "定金锁车",
+            "秦PLUS"
+          ],
+          "answer": "秦PLUS定金锁车需要销售同事确认现车状态、合同条款和支付方式，我这边没法直接处理。我马上帮您转给负责的销售对接，您稍等一下。",
+          "allow_auto_reply": false,
+          "requires_handoff": true,
+          "handoff_reason": "需要销售确认现车状态、合同条款和支付方式",
+          "additional_details": {
+            "original_timestamp": "2026-05-04T03:32:34",
+            "speaker": "车金AI",
+            "原始资料摘录": "{\"product_id\": \"\", \"title\": \"秦PLUS定金锁车流程\", \"keywords\": [\"定金锁车\", \"秦PLUS\"], \"answer\": \"秦PLUS定金锁车需要销售同事确认现车状态、合同条款和支付方式，我这边没法直接处理。我马上帮您转给负责的销售对接，您稍等一下。\", \"allow_auto_reply\": false, \"requires_handoff\": true, \"handoff_reason\": \"需要销售确认现车状态、合同条款和支付方式\", \"additional_details\": {\"original_timestamp\": \"2026-05-04T03:32:34\", \"speaker\": \"车金AI\"}}"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "warning"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "needs_more_info",
+    "ok": false,
+    "confidence": 0.72,
+    "missing_fields": [
+      "product_id"
+    ],
+    "missing_labels": [
+      "商品 ID"
+    ],
+    "question": "还需要补充：商品 ID。请补齐后再应用入库。",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "original_timestamp",
+      "speaker",
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "rejected",
+    "completeness_status": "needs_more_info",
+    "missing_fields": [
+      "product_id"
+    ],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_f41ae41acfb1f28bc04f",
+    "source_raw_message_ids": [
+      "raw_msg_71b4f2c5b0edb768e0a5",
+      "raw_msg_1aa4efaaca37ae8a14b6",
+      "raw_msg_5ee513bf20c66ec7ab06"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_5ffc84918d285832",
+      "chunk_count": 1,
+      "query": "秦PLUS定金锁车需转销售人工，不可自动处理\n{\"product_id\": \"\", \"title\": \"秦PLUS定金锁车流程\", \"keywords\": [\"定金锁车\", \"秦PLUS\"], \"answer\": \"秦PLUS定金锁车需要销售同事确认现车状态、合同条款和支付方式，我这边没法直接处理。我马上帮您转给负责的销售对接，您稍等一下。\", \"allow_auto_reply\": false, \"requires_handoff\": true, \"handoff_reason\": \"需要销售确认现车状态、合同条款和支付方式\", \"additional_details\": {\"original_timestamp\": \"2026-05-04T03:32:34\", \"speaker\": \"车金AI\"}}\n秦PLUS定金锁车流程\n秦PLUS定金锁车需要销售同事确认现车状态、合同条款和支付方式，我这边没法直接处理。我马上帮您转给负责的销售对接，您稍等一下。",
+      "hits": [
+        {
+          "chunk_id": "chunk_186f162b3ea4a01f",
+          "source_id": "source_5ffc84918d285832",
+          "score": 0.8078,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.493,
+            "semantic": 0.2648,
+            "vector": 0.14,
+            "vector_similarity": 0.8927,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.08,
+            "final": 0.8078
+          },
+          "text": "[2026-05-04 03:32:00] system: 03:32\n[2026-05-04T03:32:34] self: [车金AI] 秦PLUS定金锁车需要销售同事确认现车状态、合同条款和支付方式，我这边没法直接处理。我马上帮您转给负责的销售对接，您稍等一下。\n[2026-05-04T03:32:34] 许聪: 你能保证这台车绝对不是事故车吗？如果发现水泡火烧，你们赔多少钱？"
+        },
+        {
+          "chunk_id": "chunk_55a1c2f94c9d1513",
+          "source_id": "source_7b1bbeedcb7732ef",
+          "score": 0.5879,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.287,
+            "semantic": 0.1752,
+            "vector": 0.1358,
+            "vector_similarity": 0.7542,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.5879
+          },
+          "text": "[2026-05-04T03:12:08] self: [车金AI] 秦PLUS的电池检测结果和贷款能否包过，都需要销售同事结合实车报告和资方审批来确认，我这边没法直接承诺。我帮您转给负责的销售直接对接，您方便留个电话吗？\n[2026-05-04T03:12:08] 许聪: 你们门店在哪？营业时间大概是什么时候？"
+        },
+        {
+          "chunk_id": "chunk_cea25e6c7bbc1d31",
+          "source_id": "source_6d72e3824a4b9f43",
+          "score": 0.5647,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2678,
+            "semantic": 0.1669,
+            "vector": 0.14,
+            "vector_similarity": 0.7933,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.5647
+          },
+          "text": "[2026-05-04T03:23:13] self: [车金AI] 检测报告和保养、出险记录都需要销售同事调取核实后才能发给您，我这边没法直接发。我马上帮您转给销售，麻烦您留个电话，他们直接联系您发。\n[2026-05-04T03:23:13] 许聪: 这车是不是非营运？有没有跑过网约车？"
+        },
+        {
+          "chunk_id": "chunk_0d27f032aa229103",
+          "source_id": "source_58950035fd736f45",
+          "score": 0.5544,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2606,
+            "semantic": 0.1638,
+            "vector": 0.14,
+            "vector_similarity": 0.7951,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.5544
+          },
+          "text": "[2026-05-04T03:24:34] 许聪: 绿本有没有抵押或者查封？\n[2026-05-04T03:24:34] 许聪: 表显公里数准不准？有没有调表？\n[2026-05-04T03:24:34] self: [车金AI] 营运性质有没有跑过网约车，我们得看登记证和实车记录来确认，我这边没法直接给准信。我马上帮您转给销售同事人工核实，方便留个电话吗？他们直接联系您。"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_9edfc59d0b7170d90288",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "rejected_at": "2026-05-04T15:24:04",
+    "reason": "?????????????AI?????????????????????????????AI??????????"
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

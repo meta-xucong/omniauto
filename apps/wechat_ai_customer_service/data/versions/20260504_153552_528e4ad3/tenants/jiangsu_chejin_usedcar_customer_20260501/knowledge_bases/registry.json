@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "scope": "wechat_ai_customer_service",
+  "updated_at": "2026-04-26T17:50:00+08:00",
+  "categories": [
+    {
+      "id": "products",
+      "name": "商品资料",
+      "kind": "builtin",
+      "path": "products",
+      "enabled": true,
+      "participates_in_reply": true,
+      "participates_in_learning": true,
+      "participates_in_diagnostics": true,
+      "sort_order": 10
+    },
+    {
+      "id": "chats",
+      "name": "聊天记录与话术",
+      "kind": "builtin",
+      "path": "chats",
+      "enabled": true,
+      "participates_in_reply": true,
+      "participates_in_learning": true,
+      "participates_in_diagnostics": true,
+      "sort_order": 20
+    },
+    {
+      "id": "policies",
+      "name": "政策规则",
+      "kind": "builtin",
+      "path": "policies",
+      "enabled": true,
+      "participates_in_reply": true,
+      "participates_in_learning": true,
+      "participates_in_diagnostics": true,
+      "sort_order": 30
+    },
+    {
+      "id": "erp_exports",
+      "name": "ERP 导出",
+      "kind": "builtin",
+      "path": "erp_exports",
+      "enabled": true,
+      "participates_in_reply": false,
+      "participates_in_learning": true,
+      "participates_in_diagnostics": true,
+      "sort_order": 40
+    }
+  ]
+}

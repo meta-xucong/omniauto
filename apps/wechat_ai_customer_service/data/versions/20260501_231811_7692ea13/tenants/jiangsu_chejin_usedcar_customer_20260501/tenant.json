@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+  "display_name": "江苏车金二手车测试客户 2026-05-01",
+  "knowledge_base_root": "knowledge_bases",
+  "product_item_knowledge_root": "product_item_knowledge",
+  "created_at": "2026-05-01T15:18:01+00:00",
+  "sync": {
+    "private_backup": {
+      "enabled": false,
+      "schedule": "manual"
+    }
+  },
+  "updated_at": "2026-05-01T15:18:01+00:00"
+}

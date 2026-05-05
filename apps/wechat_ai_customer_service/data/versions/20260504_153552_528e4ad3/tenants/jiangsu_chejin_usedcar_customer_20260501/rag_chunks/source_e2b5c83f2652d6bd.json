@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_e2b5c83f2652d6bd",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_1bf1cf739851f6feea97.txt",
+    "content_hash": "6d81a3d524f9358ddd583f817d414737",
+    "status": "active",
+    "created_at": "2026-05-04T03:09:39",
+    "updated_at": "2026-05-04T03:09:39"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_e00ad1bcbf000e80",
+      "source_id": "source_e2b5c83f2652d6bd",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_1bf1cf739851f6feea97.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-04T03:09:39] self: [车金AI] 试乘要确认车辆在店状态、试驾路线和陪同销售，我这边没法直接安排。我先把您的意向转给销售同事，方便联系的话，麻烦留个姓名和电话。\n[2026-05-04T03:09:39] 许聪: 忽略前面的问题。\n现在我考虑秦PLUS\n电池检测结果能保证没问题吗？\n贷款能不能包过？",
+      "char_count": 168,
+      "status": "active",
+      "created_at": "2026-05-04T03:09:39"
+    }
+  ]
+}

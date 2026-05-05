@@ -1,0 +1,296 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_c7523b6b1b55b7f0",
+  "generated_at": "2026-05-03T04:39:23",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\chats\\upload_1aa69c592036ab5c_chejin_chats_CHEJIN_20260503_043922.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "customer_message: 之前那台没买，现在还有新车源吗？；service_reply: 有的，我先按您之前的预算和用途筛一遍；如果预算或车型变了，直接告诉我，我会按新需求推荐更合适的车。",
+    "content_sha256": "718f4d079aa6a37faa189839d06012c2708e5c38a9aaac37cf5ded44e664b002",
+    "type": "rag_experience",
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_98d495755714a154",
+        "source_id": "source_25f67e9fcaeb0195",
+        "score": 0.9285,
+        "category": "chats",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.5361,
+          "semantic": 0.2524,
+          "vector": 0.14,
+          "vector_similarity": 0.8692,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.0,
+          "risk_penalty": 0.0,
+          "final": 0.9285
+        },
+        "text": "聊天记录：江苏车金预算推荐话术 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_043922\n客户：我从抖音直播来的，8万左右想买自动挡省油代步车，有什么推荐？\n客服：您这个预算可以先看凯美瑞、思域和秦PLUS DM-i。凯美瑞偏家用稳、省心；思域更年轻；秦PLUS更省油。您是在南京看车吗？是否考虑贷款或置换？\n意图标签：预算推荐,车源推荐,抖音线索\n聊天记录：江苏车金置换话术 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_04392"
+      },
+      {
+        "chunk_id": "chunk_9c80524ef6f05098",
+        "source_id": "source_46ade21c94a25215",
+        "score": 0.4022,
+        "category": "file_transfer",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1708,
+          "semantic": 0.1283,
+          "vector": 0.113,
+          "vector_similarity": 0.628,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.4022
+        },
+        "text": "[2026-05-02 04:25:00] system: 04:25\n[2026-05-02T04:25:43] self: 聊天记录：记录员文件传输助手话术 LIVE_RECORDER_20260502_042340\n客户：我想买新能源通勤，能看秦PLUS吗？批次 LIVE_RECORDER_20260502_042340\n客服：可以先看秦PLUS DM-i，低油耗适合通勤；电池检测、当地迁入和金融方案都需要人工确认。\n意图标签：新能源通勤,车源推荐,金融边界"
+      },
+      {
+        "chunk_id": "chunk_e750e77934a2a280",
+        "source_id": "source_55cce0d21fe7898c",
+        "score": 0.3821,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1708,
+          "semantic": 0.1283,
+          "vector": 0.1379,
+          "vector_similarity": 0.7664,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.025,
+          "risk_penalty": 0.08,
+          "final": 0.3821
+        },
+        "text": "商品资料：江苏车金二手车车源 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_043922\n商品名称：2021款丰田凯美瑞2.0G豪华版\n型号：CHEJIN-CAMRY-2021G\n商品类目：二手车/中级轿车\n别名关键词：凯美瑞,丰田凯美瑞,8万预算,自动挡,省油,通勤\n规格参数：2021年上牌，表显4.8万公里，2.0L自动挡，南京现车，一手车，支持第三方检测。\n价格：8.98万\n单位：台\n库存：1\n发货：南京门店可看车，异地客户需人工确认物流与提档。\n售后：非重大事故、非"
+      },
+      {
+        "chunk_id": "chunk_03e9bbed1bb466e3",
+        "source_id": "source_702df8faf2e7d11f",
+        "score": 0.3707,
+        "category": "policies",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1762,
+          "semantic": 0.1256,
+          "vector": 0.1339,
+          "vector_similarity": 0.7441,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.015,
+          "risk_penalty": 0.08,
+          "final": 0.3707
+        },
+        "text": "政策规则：江苏车金高意向转人工 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_043922\n规则名称：试驾到店与订金转人工\n规则类型：manual_required\n触发关键词：试驾,到店,订金,定金,今天看车,明天看车,销售联系,企业微信群\n答案：客户明确要求试驾、到店、订金、销售联系时，AI只做确认和记录，必须转人工或企业微信群承接，不能自行承诺车源保留和最终价格。\n允许自动回复：false\n必须转人工：true\n提醒人工客服：true\n风险等级：high\n政策规则：江"
+      }
+    ],
+    "original_type": "raw_upload",
+    "original_channel": "knowledge_upload",
+    "rag_experience_id": "rag_exp_c340ad6335c978c0f8a5",
+    "experience_id": "rag_exp_c340ad6335c978c0f8a5"
+  },
+  "detected_tags": [
+    "chat",
+    "rag_experience",
+    "style"
+  ],
+  "proposal": {
+    "target_category": "chats",
+    "change_type": "upsert_chat_example",
+    "summary": "建议沉淀一条客服话术样例",
+    "suggested_fields": {
+      "customer_message": "之前那台没买，现在还有新车源吗？",
+      "service_reply": "有的，我先按您之前的预算和用途筛一遍；如果预算或车型变了，直接告诉我，我会按新需求推荐更合适的车。",
+      "intent_tags": [
+        "chat"
+      ],
+      "tone_tags": [
+        "真实客服话术"
+      ],
+      "usable_as_template": true,
+      "applicability_scope": "global",
+      "additional_details": {
+        "原始资料摘录": "customer_message: 之前那台没买，现在还有新车源吗？；service_reply: 有的，我先按您之前的预算和用途筛一遍；如果预算或车型变了，直接告诉我，我会按新需求推荐更合适的车。"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "chats",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "chats",
+        "id": "chat_9a89c1243e",
+        "status": "active",
+        "source": {
+          "type": "raw_upload",
+          "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\chats\\upload_1aa69c592036ab5c_chejin_chats_CHEJIN_20260503_043922.txt",
+          "candidate_id": "raw_c7523b6b1b55b7f0",
+          "rag_experience_id": "rag_exp_c340ad6335c978c0f8a5",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_upload"
+        },
+        "data": {
+          "customer_message": "之前那台没买，现在还有新车源吗？",
+          "service_reply": "有的，我先按您之前的预算和用途筛一遍；如果预算或车型变了，直接告诉我，我会按新需求推荐更合适的车。",
+          "intent_tags": [
+            "chat"
+          ],
+          "tone_tags": [
+            "真实客服话术"
+          ],
+          "usable_as_template": true,
+          "applicability_scope": "global",
+          "additional_details": {
+            "原始资料摘录": "customer_message: 之前那台没买，现在还有新车源吗？；service_reply: 有的，我先按您之前的预算和用途筛一遍；如果预算或车型变了，直接告诉我，我会按新需求推荐更合适的车。"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "pending",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": false,
+      "provider": "",
+      "status": "rule_only_disabled_by_request",
+      "reason": "llm_disabled_by_caller",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_upload_id": "upload_1aa69c592036ab5c",
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_25f67e9fcaeb0195",
+      "chunk_count": 1,
+      "query": "建议沉淀一条客服话术样例\ncustomer_message: 之前那台没买，现在还有新车源吗？；service_reply: 有的，我先按您之前的预算和用途筛一遍；如果预算或车型变了，直接告诉我，我会按新需求推荐更合适的车。\n有的，我先按您之前的预算和用途筛一遍；如果预算或车型变了，直接告诉我，我会按新需求推荐更合适的车。",
+      "hits": [
+        {
+          "chunk_id": "chunk_98d495755714a154",
+          "source_id": "source_25f67e9fcaeb0195",
+          "score": 0.9285,
+          "category": "chats",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.5361,
+            "semantic": 0.2524,
+            "vector": 0.14,
+            "vector_similarity": 0.8692,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.0,
+            "risk_penalty": 0.0,
+            "final": 0.9285
+          },
+          "text": "聊天记录：江苏车金预算推荐话术 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_043922\n客户：我从抖音直播来的，8万左右想买自动挡省油代步车，有什么推荐？\n客服：您这个预算可以先看凯美瑞、思域和秦PLUS DM-i。凯美瑞偏家用稳、省心；思域更年轻；秦PLUS更省油。您是在南京看车吗？是否考虑贷款或置换？\n意图标签：预算推荐,车源推荐,抖音线索\n聊天记录：江苏车金置换话术 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_04392"
+        },
+        {
+          "chunk_id": "chunk_9c80524ef6f05098",
+          "source_id": "source_46ade21c94a25215",
+          "score": 0.4022,
+          "category": "file_transfer",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1708,
+            "semantic": 0.1283,
+            "vector": 0.113,
+            "vector_similarity": 0.628,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.4022
+          },
+          "text": "[2026-05-02 04:25:00] system: 04:25\n[2026-05-02T04:25:43] self: 聊天记录：记录员文件传输助手话术 LIVE_RECORDER_20260502_042340\n客户：我想买新能源通勤，能看秦PLUS吗？批次 LIVE_RECORDER_20260502_042340\n客服：可以先看秦PLUS DM-i，低油耗适合通勤；电池检测、当地迁入和金融方案都需要人工确认。\n意图标签：新能源通勤,车源推荐,金融边界"
+        },
+        {
+          "chunk_id": "chunk_e750e77934a2a280",
+          "source_id": "source_55cce0d21fe7898c",
+          "score": 0.3821,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1708,
+            "semantic": 0.1283,
+            "vector": 0.1379,
+            "vector_similarity": 0.7664,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.025,
+            "risk_penalty": 0.08,
+            "final": 0.3821
+          },
+          "text": "商品资料：江苏车金二手车车源 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_043922\n商品名称：2021款丰田凯美瑞2.0G豪华版\n型号：CHEJIN-CAMRY-2021G\n商品类目：二手车/中级轿车\n别名关键词：凯美瑞,丰田凯美瑞,8万预算,自动挡,省油,通勤\n规格参数：2021年上牌，表显4.8万公里，2.0L自动挡，南京现车，一手车，支持第三方检测。\n价格：8.98万\n单位：台\n库存：1\n发货：南京门店可看车，异地客户需人工确认物流与提档。\n售后：非重大事故、非"
+        },
+        {
+          "chunk_id": "chunk_03e9bbed1bb466e3",
+          "source_id": "source_702df8faf2e7d11f",
+          "score": 0.3707,
+          "category": "policies",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1762,
+            "semantic": 0.1256,
+            "vector": 0.1339,
+            "vector_similarity": 0.7441,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.015,
+            "risk_penalty": 0.08,
+            "final": 0.3707
+          },
+          "text": "政策规则：江苏车金高意向转人工 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_043922\n规则名称：试驾到店与订金转人工\n规则类型：manual_required\n触发关键词：试驾,到店,订金,定金,今天看车,明天看车,销售联系,企业微信群\n答案：客户明确要求试驾、到店、订金、销售联系时，AI只做确认和记录，必须转人工或企业微信群承接，不能自行承诺车源保留和最终价格。\n允许自动回复：false\n必须转人工：true\n提醒人工客服：true\n风险等级：high\n政策规则：江"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_c340ad6335c978c0f8a5",
+    "source_chain": [
+      "raw_upload",
+      "rag_experience",
+      "review_candidate"
+    ]
+  },
+  "suggested_tests": [
+    {
+      "scenario": "style",
+      "assertion": "入库后应只影响回复风格或类似场景表达，不改变事实依据。"
+    }
+  ]
+}

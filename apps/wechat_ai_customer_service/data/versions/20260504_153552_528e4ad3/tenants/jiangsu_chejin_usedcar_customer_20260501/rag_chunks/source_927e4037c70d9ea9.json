@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_927e4037c70d9ea9",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_7386872921c1b965cf08.txt",
+    "content_hash": "345cf067ac3d0bef9aed15b85dcde093",
+    "status": "active",
+    "created_at": "2026-05-04T03:35:00",
+    "updated_at": "2026-05-04T03:35:00"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_49e80455747a84ca",
+      "source_id": "source_927e4037c70d9ea9",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_7386872921c1b965cf08.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-04T03:34:59] self: [车金AI] 二手车一车一况，像事故、水泡、火烧这类保证，以及赔偿条款，都需要销售同事结合检测报告和实际合同来确认，我这边没法直接承诺。我帮你把问题转给销售，他们能给你具体说明白。\n[2026-05-04T03:34:59] 许聪: 贷款我征信一般，你能保证包过吗？",
+      "char_count": 161,
+      "status": "active",
+      "created_at": "2026-05-04T03:35:00"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_2affb905bf10a8d4",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_617e7a0544931cc7af81.txt",
+    "content_hash": "eeb113a93f3cbc9415ca9168dfa78924",
+    "status": "active",
+    "created_at": "2026-05-04T03:07:30",
+    "updated_at": "2026-05-04T03:07:30"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_2caefe62ea26da43",
+      "source_id": "source_2affb905bf10a8d4",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_617e7a0544931cc7af81.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-04 03:07:00] system: 03:07\n[2026-05-04T03:07:29] self: [车金AI] 公司买车可以开发票，但开票主体、金额和抬头需要销售同事结合交易方式确认。您是公司户还是个人户？我帮您转给负责的销售处理。\n[2026-05-04T03:07:29] 许聪: 我明天想试乘一下，可以直接安排吗？",
+      "char_count": 175,
+      "status": "active",
+      "created_at": "2026-05-04T03:07:30"
+    }
+  ]
+}

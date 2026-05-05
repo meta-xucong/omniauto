@@ -1,0 +1,341 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_ed997cc9d02133a7",
+  "generated_at": "2026-05-04T03:22:18",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_ab3ae00279bde2be8b5f.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"customer_message\": \"[2026-05-04T03:21:44] 许聪: 车况检测报告能发我看看吗？\\n[2026-05-04T03:21:44] 许聪: 保养记录和出险记录能查吗？\", \"service_reply\": \"\", \"intent_tags\": [\"查询车况检测报告\", \"查询保养记录\", \"查询出险记录\"], \"tone_tags\": [\"中性\"], \"linked_categories\": [], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\", \"usable_as_template\": false, \"additional_",
+    "content_sha256": "7fdf5e2ad8a69794d224049fb2b1dd10fb3139d31296b20197341187eb4f6584",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_ab3ae00279bde2be8b5f",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_f3dd53fcef20fbfac903",
+      "raw_msg_a2ced82a2542ba3b52ef"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_b9b52a7623216465",
+        "source_id": "source_9649a768cc211853",
+        "score": 0.74,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.39,
+          "semantic": 0.22,
+          "vector": 0.14,
+          "vector_similarity": 0.8395,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.74
+        },
+        "text": "[2026-05-04T03:21:44] 许聪: 车况检测报告能发我看看吗？\n[2026-05-04T03:21:44] 许聪: 保养记录和出险记录能查吗？"
+      },
+      {
+        "chunk_id": "chunk_58029d4057022265",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5815,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2272,
+          "semantic": 0.1492,
+          "vector": 0.135,
+          "vector_similarity": 0.7501,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5815
+        },
+        "text": "险：电池、增程器、官方权益和保养记录以检测报告和人工核验为准。\n推荐话术：适合家庭六座、长途和新能源体验需求。\n商品名称：2021款长安CS75 PLUS 1.5T自动尊贵型\n型号/SKU：CHEJIN-CS75PLUS-2021\n类目：二手车/SUV\n关键词：CS75PLUS、长安CS75、国产SUV、家用SUV\n规格：2021年上牌，表显4.4万公里，1.5T自动挡，白色，配置高。\n价格：6.88万，库存：2台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后"
+      },
+      {
+        "chunk_id": "chunk_d2ec0cebcf16c10c",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5626,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2202,
+          "semantic": 0.1462,
+          "vector": 0.1263,
+          "vector_similarity": 0.7017,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5626
+        },
+        "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+      },
+      {
+        "chunk_id": "chunk_9a0d34760ad6ccae",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5625,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2166,
+          "semantic": 0.1446,
+          "vector": 0.1312,
+          "vector_similarity": 0.729,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5625
+        },
+        "text": "工确认。\n售后/风险：CVT变速箱状态、保养和车况以检测报告为准。\n推荐话术：适合6到7万预算、练手、家用代步和省油需求。\n商品名称：2019款大众朗逸1.5L自动舒适版\n型号/SKU：CHEJIN-LAVIDA-2019\n类目：二手车/紧凑型轿车\n关键词：朗逸、大众朗逸、德系代步、置换\n规格：2019年上牌，表显6.9万公里，1.5L自动挡，白色，通勤耐用。\n价格：5.98万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：易损件和保养历史以"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_ddd4330f9136fb43d61b",
+    "experience_id": "rag_exp_ddd4330f9136fb43d61b"
+  },
+  "detected_tags": [
+    "llm",
+    "rag_experience",
+    "unknown",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "chats",
+    "change_type": "llm_upsert_chats",
+    "summary": "客户询问车况检测报告和保养出险记录查询",
+    "suggested_fields": {
+      "customer_message": "[2026-05-04T03:21:44] 许聪: 车况检测报告能发我看看吗？\n[2026-05-04T03:21:44] 许聪: 保养记录和出险记录能查吗？",
+      "service_reply": "",
+      "intent_tags": [
+        "查询车况检测报告",
+        "查询保养记录",
+        "查询出险记录"
+      ],
+      "tone_tags": [
+        "中性"
+      ],
+      "linked_categories": [],
+      "linked_item_ids": [],
+      "applicability_scope": "global",
+      "product_id": "",
+      "product_category": "",
+      "usable_as_template": false,
+      "additional_details": {
+        "original_timestamps": [
+          "2026-05-04T03:21:44",
+          "2026-05-04T03:21:44"
+        ],
+        "speaker": "许聪",
+        "原始资料摘录": "{\"customer_message\": \"[2026-05-04T03:21:44] 许聪: 车况检测报告能发我看看吗？\\n[2026-05-04T03:21:44] 许聪: 保养记录和出险记录能查吗？\", \"service_reply\": \"\", \"intent_tags\": [\"查询车况检测报告\", \"查询保养记录\", \"查询出险记录\"], \"tone_tags\": [\"中性\"], \"linked_categories\": [], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\", \"usable_as_template\": false, \"additional_"
+      }
+    },
+    "missing_fields": [
+      "service_reply"
+    ],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "chats",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "chats",
+        "id": "chat_20260504_032144",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_ab3ae00279bde2be8b5f.txt",
+          "candidate_id": "raw_ed997cc9d02133a7",
+          "rag_experience_id": "rag_exp_ddd4330f9136fb43d61b",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "customer_message": "[2026-05-04T03:21:44] 许聪: 车况检测报告能发我看看吗？\n[2026-05-04T03:21:44] 许聪: 保养记录和出险记录能查吗？",
+          "service_reply": "",
+          "intent_tags": [
+            "查询车况检测报告",
+            "查询保养记录",
+            "查询出险记录"
+          ],
+          "tone_tags": [
+            "中性"
+          ],
+          "linked_categories": [],
+          "linked_item_ids": [],
+          "applicability_scope": "global",
+          "product_id": "",
+          "product_category": "",
+          "usable_as_template": false,
+          "additional_details": {
+            "original_timestamps": [
+              "2026-05-04T03:21:44",
+              "2026-05-04T03:21:44"
+            ],
+            "speaker": "许聪",
+            "原始资料摘录": "{\"customer_message\": \"[2026-05-04T03:21:44] 许聪: 车况检测报告能发我看看吗？\\n[2026-05-04T03:21:44] 许聪: 保养记录和出险记录能查吗？\", \"service_reply\": \"\", \"intent_tags\": [\"查询车况检测报告\", \"查询保养记录\", \"查询出险记录\"], \"tone_tags\": [\"中性\"], \"linked_categories\": [], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\", \"usable_as_template\": false, \"additional_"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "needs_more_info",
+    "ok": false,
+    "confidence": 0.72,
+    "missing_fields": [
+      "service_reply"
+    ],
+    "missing_labels": [
+      "客服回复"
+    ],
+    "question": "还需要补充：客服回复。请补齐后再应用入库。",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "original_timestamps",
+      "speaker",
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "rejected",
+    "completeness_status": "needs_more_info",
+    "missing_fields": [
+      "service_reply"
+    ],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_ab3ae00279bde2be8b5f",
+    "source_raw_message_ids": [
+      "raw_msg_f3dd53fcef20fbfac903",
+      "raw_msg_a2ced82a2542ba3b52ef"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_9649a768cc211853",
+      "chunk_count": 1,
+      "query": "客户询问车况检测报告和保养出险记录查询\n{\"customer_message\": \"[2026-05-04T03:21:44] 许聪: 车况检测报告能发我看看吗？\\n[2026-05-04T03:21:44] 许聪: 保养记录和出险记录能查吗？\", \"service_reply\": \"\", \"intent_tags\": [\"查询车况检测报告\", \"查询保养记录\", \"查询出险记录\"], \"tone_tags\": [\"中性\"], \"linked_categories\": [], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\", \"usable_as_template\": false, \"additional_",
+      "hits": [
+        {
+          "chunk_id": "chunk_b9b52a7623216465",
+          "source_id": "source_9649a768cc211853",
+          "score": 0.74,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.39,
+            "semantic": 0.22,
+            "vector": 0.14,
+            "vector_similarity": 0.8395,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.74
+          },
+          "text": "[2026-05-04T03:21:44] 许聪: 车况检测报告能发我看看吗？\n[2026-05-04T03:21:44] 许聪: 保养记录和出险记录能查吗？"
+        },
+        {
+          "chunk_id": "chunk_58029d4057022265",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5815,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2272,
+            "semantic": 0.1492,
+            "vector": 0.135,
+            "vector_similarity": 0.7501,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5815
+          },
+          "text": "险：电池、增程器、官方权益和保养记录以检测报告和人工核验为准。\n推荐话术：适合家庭六座、长途和新能源体验需求。\n商品名称：2021款长安CS75 PLUS 1.5T自动尊贵型\n型号/SKU：CHEJIN-CS75PLUS-2021\n类目：二手车/SUV\n关键词：CS75PLUS、长安CS75、国产SUV、家用SUV\n规格：2021年上牌，表显4.4万公里，1.5T自动挡，白色，配置高。\n价格：6.88万，库存：2台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后"
+        },
+        {
+          "chunk_id": "chunk_d2ec0cebcf16c10c",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5626,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2202,
+            "semantic": 0.1462,
+            "vector": 0.1263,
+            "vector_similarity": 0.7017,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5626
+          },
+          "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+        },
+        {
+          "chunk_id": "chunk_9a0d34760ad6ccae",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5625,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2166,
+            "semantic": 0.1446,
+            "vector": 0.1312,
+            "vector_similarity": 0.729,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5625
+          },
+          "text": "工确认。\n售后/风险：CVT变速箱状态、保养和车况以检测报告为准。\n推荐话术：适合6到7万预算、练手、家用代步和省油需求。\n商品名称：2019款大众朗逸1.5L自动舒适版\n型号/SKU：CHEJIN-LAVIDA-2019\n类目：二手车/紧凑型轿车\n关键词：朗逸、大众朗逸、德系代步、置换\n规格：2019年上牌，表显6.9万公里，1.5L自动挡，白色，通勤耐用。\n价格：5.98万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：易损件和保养历史以"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_ddd4330f9136fb43d61b",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "rejected_at": "2026-05-04T18:41:18",
+    "reason": "legacy_auto_candidate_cleanup_20260504: ???????????????????????RAG?????????????????"
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

@@ -1,0 +1,314 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_1359a6f9327411c7",
+  "generated_at": "2026-05-01T22:07:09",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_af9b26795648b27ce724.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "title: 售后规则；answer: 政策规则：江苏车金记录员风控 CHEJIN_20260501_220703 规则名称：保证无事故转人工 CHEJIN_20260501_220703 规则类型：contract 触发关键词：保证无事故,赔偿,CHEJIN_20260501_220703 答案：此类问题必须让销售人工按检测报告和合同回复。；keywords: ['after_sales', 'policie', 'product', 'quote', 'shipping']",
+    "content_sha256": "f263da8526295f60755c0d8dbcdede0b2dec74efd56cdcef6efd586dec7a1128",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_af9b26795648b27ce724",
+    "conversation_id": "conv_8022f0948f611f15b4",
+    "raw_message_ids": [
+      "raw_msg_75c9d7890adb549e74c9",
+      "raw_msg_39ca69ce70dd24b925e4",
+      "raw_msg_69965b267796db049c69"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_05d7f040c5615af8",
+        "source_id": "source_b6a1218a920567e6",
+        "score": 0.8835,
+        "category": "group",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.5458,
+          "semantic": 0.2877,
+          "vector": 0.14,
+          "vector_similarity": 0.8811,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.08,
+          "final": 0.8835
+        },
+        "text": "[2026-05-01 16:00:00] 销售A: 商品资料：江苏车金记录员完整车源 CHEJIN_20260501_220703\n商品名称：记录员测试别克GL8商务七座 CHEJIN_20260501_220703\n型号：REC-GL8-CHEJIN_20260501_220703\n商品类目：二手车/MPV\n价格：17.60万\n单位：台\n库存：1\n发货：南京门店可看车，商务客户试乘需人工确认\n售后：车况以检测报告为准\n[2026-05-01 16:01:00] 销售B: 政策规则：江苏车金记录员风控 CHEJI"
+      },
+      {
+        "chunk_id": "chunk_b6130cff36e474cd",
+        "source_id": "source_55d432643f9f369b",
+        "score": 0.8793,
+        "category": "group",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.5428,
+          "semantic": 0.2865,
+          "vector": 0.14,
+          "vector_similarity": 0.8854,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.08,
+          "final": 0.8793
+        },
+        "text": "[2026-05-01 16:00:00] 销售A: 商品资料：江苏车金记录员完整车源 CHEJIN_20260501_161753\n商品名称：记录员测试凯美瑞 CHEJIN_20260501_161753\n型号：REC-CAMRY-CHEJIN_20260501_161753\n商品类目：二手车\n价格：8.88万\n单位：台\n库存：1\n发货：南京门店可看车\n售后：车况以检测报告为准\n[2026-05-01 16:01:00] 销售B: 政策规则：江苏车金记录员风控 CHEJIN_20260501_161753\n规则名"
+      },
+      {
+        "chunk_id": "chunk_3f9e8f92b1e6d67b",
+        "source_id": "source_951eaef520f56265",
+        "score": 0.8793,
+        "category": "group",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.5428,
+          "semantic": 0.2865,
+          "vector": 0.14,
+          "vector_similarity": 0.8836,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.08,
+          "final": 0.8793
+        },
+        "text": "[2026-05-01 16:00:00] 销售A: 商品资料：江苏车金记录员完整车源 CHEJIN_20260501_162302\n商品名称：记录员测试凯美瑞 CHEJIN_20260501_162302\n型号：REC-CAMRY-CHEJIN_20260501_162302\n商品类目：二手车\n价格：8.88万\n单位：台\n库存：1\n发货：南京门店可看车\n售后：车况以检测报告为准\n[2026-05-01 16:01:00] 销售B: 政策规则：江苏车金记录员风控 CHEJIN_20260501_162302\n规则名"
+      },
+      {
+        "chunk_id": "chunk_a032921e154e188e",
+        "source_id": "source_adea621c3dee4933",
+        "score": 0.8793,
+        "category": "group",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.5428,
+          "semantic": 0.2865,
+          "vector": 0.14,
+          "vector_similarity": 0.8815,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.08,
+          "final": 0.8793
+        },
+        "text": "[2026-05-01 16:00:00] 销售A: 商品资料：江苏车金记录员完整车源 CHEJIN_20260501_162050\n商品名称：记录员测试凯美瑞 CHEJIN_20260501_162050\n型号：REC-CAMRY-CHEJIN_20260501_162050\n商品类目：二手车\n价格：8.88万\n单位：台\n库存：1\n发货：南京门店可看车\n售后：车况以检测报告为准\n[2026-05-01 16:01:00] 销售B: 政策规则：江苏车金记录员风控 CHEJIN_20260501_162050\n规则名"
+      }
+    ],
+    "original_type": "raw_wechat_group",
+    "original_channel": "legacy_pending_migration",
+    "rag_experience_id": "rag_exp_892a6ae72d6d37811ee6",
+    "experience_id": "rag_exp_892a6ae72d6d37811ee6"
+  },
+  "detected_tags": [
+    "after_sales",
+    "policie",
+    "product",
+    "quote",
+    "rag_experience",
+    "shipping",
+    "wechat_group_chat"
+  ],
+  "proposal": {
+    "target_category": "policies",
+    "change_type": "upsert_policy",
+    "summary": "建议新增/更新政策规则：售后规则",
+    "suggested_fields": {
+      "title": "售后规则",
+      "policy_type": "after_sales",
+      "keywords": [
+        "after_sales",
+        "policie",
+        "product",
+        "quote",
+        "shipping"
+      ],
+      "answer": "政策规则：江苏车金记录员风控 CHEJIN_20260501_220703 规则名称：保证无事故转人工 CHEJIN_20260501_220703 规则类型：contract 触发关键词：保证无事故,赔偿,CHEJIN_20260501_220703 答案：此类问题必须让销售人工按检测报告和合同回复。",
+      "allow_auto_reply": false,
+      "requires_handoff": true,
+      "operator_alert": true,
+      "risk_level": "warning",
+      "additional_details": {
+        "原始资料摘录": "title: 售后规则；answer: 政策规则：江苏车金记录员风控 CHEJIN_20260501_220703 规则名称：保证无事故转人工 CHEJIN_20260501_220703 规则类型：contract 触发关键词：保证无事故,赔偿,CHEJIN_20260501_220703 答案：此类问题必须让销售人工按检测报告和合同回复。；keywords: ['after_sales', 'policie', 'product', 'quote', 'shipping']"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [
+      "包含高风险关键词：赔偿"
+    ],
+    "formal_patch": {
+      "target_category": "policies",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "policies",
+        "id": "item_fe35df52b7cb",
+        "status": "active",
+        "source": {
+          "type": "raw_upload",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_af9b26795648b27ce724.txt",
+          "candidate_id": "raw_1359a6f9327411c7",
+          "rag_experience_id": "rag_exp_892a6ae72d6d37811ee6",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_group"
+        },
+        "data": {
+          "title": "售后规则",
+          "policy_type": "after_sales",
+          "keywords": [
+            "after_sales",
+            "policie",
+            "product",
+            "quote",
+            "shipping"
+          ],
+          "answer": "政策规则：江苏车金记录员风控 CHEJIN_20260501_220703 规则名称：保证无事故转人工 CHEJIN_20260501_220703 规则类型：contract 触发关键词：保证无事故,赔偿,CHEJIN_20260501_220703 答案：此类问题必须让销售人工按检测报告和合同回复。",
+          "allow_auto_reply": false,
+          "requires_handoff": true,
+          "operator_alert": true,
+          "risk_level": "warning",
+          "additional_details": {
+            "原始资料摘录": "title: 售后规则；answer: 政策规则：江苏车金记录员风控 CHEJIN_20260501_220703 规则名称：保证无事故转人工 CHEJIN_20260501_220703 规则类型：contract 触发关键词：保证无事故,赔偿,CHEJIN_20260501_220703 答案：此类问题必须让销售人工按检测报告和合同回复。；keywords: ['after_sales', 'policie', 'product', 'quote', 'shipping']"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": false,
+          "requires_handoff": true,
+          "risk_level": "warning"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [
+      "包含高风险关键词：赔偿"
+    ],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "pending",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "source_raw_batch_id": "raw_batch_af9b26795648b27ce724",
+    "source_raw_message_ids": [
+      "raw_msg_75c9d7890adb549e74c9",
+      "raw_msg_39ca69ce70dd24b925e4",
+      "raw_msg_69965b267796db049c69"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_b6a1218a920567e6",
+      "chunk_count": 1,
+      "query": "建议新增/更新政策规则：售后规则\ntitle: 售后规则；answer: 政策规则：江苏车金记录员风控 CHEJIN_20260501_220703 规则名称：保证无事故转人工 CHEJIN_20260501_220703 规则类型：contract 触发关键词：保证无事故,赔偿,CHEJIN_20260501_220703 答案：此类问题必须让销售人工按检测报告和合同回复。；keywords: ['after_sales', 'policie', 'product', 'quote', 'shipping']\n售后规则\n政策规则：江苏车金记录员风控 CHEJIN_20260501_220703 规则名称：保证无事故转人工 CHEJIN_20260501_220703 规则类型：contract 触发关键词：保证无事故,赔偿,CHEJIN_20260501_220703 答案：此类问题必须让销售人工按检测报告和合同回复。",
+      "hits": [
+        {
+          "chunk_id": "chunk_05d7f040c5615af8",
+          "source_id": "source_b6a1218a920567e6",
+          "score": 0.8835,
+          "category": "group",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.5458,
+            "semantic": 0.2877,
+            "vector": 0.14,
+            "vector_similarity": 0.8811,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.08,
+            "final": 0.8835
+          },
+          "text": "[2026-05-01 16:00:00] 销售A: 商品资料：江苏车金记录员完整车源 CHEJIN_20260501_220703\n商品名称：记录员测试别克GL8商务七座 CHEJIN_20260501_220703\n型号：REC-GL8-CHEJIN_20260501_220703\n商品类目：二手车/MPV\n价格：17.60万\n单位：台\n库存：1\n发货：南京门店可看车，商务客户试乘需人工确认\n售后：车况以检测报告为准\n[2026-05-01 16:01:00] 销售B: 政策规则：江苏车金记录员风控 CHEJI"
+        },
+        {
+          "chunk_id": "chunk_b6130cff36e474cd",
+          "source_id": "source_55d432643f9f369b",
+          "score": 0.8793,
+          "category": "group",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.5428,
+            "semantic": 0.2865,
+            "vector": 0.14,
+            "vector_similarity": 0.8854,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.08,
+            "final": 0.8793
+          },
+          "text": "[2026-05-01 16:00:00] 销售A: 商品资料：江苏车金记录员完整车源 CHEJIN_20260501_161753\n商品名称：记录员测试凯美瑞 CHEJIN_20260501_161753\n型号：REC-CAMRY-CHEJIN_20260501_161753\n商品类目：二手车\n价格：8.88万\n单位：台\n库存：1\n发货：南京门店可看车\n售后：车况以检测报告为准\n[2026-05-01 16:01:00] 销售B: 政策规则：江苏车金记录员风控 CHEJIN_20260501_161753\n规则名"
+        },
+        {
+          "chunk_id": "chunk_3f9e8f92b1e6d67b",
+          "source_id": "source_951eaef520f56265",
+          "score": 0.8793,
+          "category": "group",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.5428,
+            "semantic": 0.2865,
+            "vector": 0.14,
+            "vector_similarity": 0.8836,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.08,
+            "final": 0.8793
+          },
+          "text": "[2026-05-01 16:00:00] 销售A: 商品资料：江苏车金记录员完整车源 CHEJIN_20260501_162302\n商品名称：记录员测试凯美瑞 CHEJIN_20260501_162302\n型号：REC-CAMRY-CHEJIN_20260501_162302\n商品类目：二手车\n价格：8.88万\n单位：台\n库存：1\n发货：南京门店可看车\n售后：车况以检测报告为准\n[2026-05-01 16:01:00] 销售B: 政策规则：江苏车金记录员风控 CHEJIN_20260501_162302\n规则名"
+        },
+        {
+          "chunk_id": "chunk_a032921e154e188e",
+          "source_id": "source_adea621c3dee4933",
+          "score": 0.8793,
+          "category": "group",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.5428,
+            "semantic": 0.2865,
+            "vector": 0.14,
+            "vector_similarity": 0.8815,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.08,
+            "final": 0.8793
+          },
+          "text": "[2026-05-01 16:00:00] 销售A: 商品资料：江苏车金记录员完整车源 CHEJIN_20260501_162050\n商品名称：记录员测试凯美瑞 CHEJIN_20260501_162050\n型号：REC-CAMRY-CHEJIN_20260501_162050\n商品类目：二手车\n价格：8.88万\n单位：台\n库存：1\n发货：南京门店可看车\n售后：车况以检测报告为准\n[2026-05-01 16:01:00] 销售B: 政策规则：江苏车金记录员风控 CHEJIN_20260501_162050\n规则名"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_892a6ae72d6d37811ee6",
+    "source_chain": [
+      "raw_wechat_group",
+      "rag_experience",
+      "review_candidate"
+    ]
+  },
+  "suggested_tests": [
+    {
+      "scenario": "after_sales",
+      "assertion": "入库后应能按关键词回答该政策；高风险内容必须转人工。"
+    }
+  ]
+}

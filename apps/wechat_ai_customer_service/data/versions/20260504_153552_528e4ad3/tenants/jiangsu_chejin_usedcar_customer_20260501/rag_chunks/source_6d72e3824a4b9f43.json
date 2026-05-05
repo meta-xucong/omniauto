@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_6d72e3824a4b9f43",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_e6f019297011698f0eda.txt",
+    "content_hash": "71bf0f9429c9b5abff921dbc38b4aa7d",
+    "status": "active",
+    "created_at": "2026-05-04T03:23:14",
+    "updated_at": "2026-05-04T03:23:14"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_cea25e6c7bbc1d31",
+      "source_id": "source_6d72e3824a4b9f43",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_e6f019297011698f0eda.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-04T03:23:13] self: [车金AI] 检测报告和保养、出险记录都需要销售同事调取核实后才能发给您，我这边没法直接发。我马上帮您转给销售，麻烦您留个电话，他们直接联系您发。\n[2026-05-04T03:23:13] 许聪: 这车是不是非营运？有没有跑过网约车？",
+      "char_count": 146,
+      "status": "active",
+      "created_at": "2026-05-04T03:23:14"
+    }
+  ]
+}

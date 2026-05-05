@@ -1,0 +1,308 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_aa1facb627052593",
+  "generated_at": "2026-05-03T04:39:23",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_7e8f504f7800fa681763.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "title: 待分类规则；answer: [2026-05-03T04:39:23] self: 思域首付三成月供大概多少，贷款能不能包过？；keywords: ['unknown']",
+    "content_sha256": "e2ec94112d3b3da5535dda9c6ba91ad2feb0c8a4d73e39358ef1d5053c6a368f",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_7e8f504f7800fa681763",
+    "conversation_id": "conv_54a96e57c70563ab9c",
+    "raw_message_ids": [
+      "raw_msg_521c4851889a8796f47b"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_99d098ac348e1842",
+        "source_id": "source_15b34fb11375bd30",
+        "score": 0.8155,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.4427,
+          "semantic": 0.2429,
+          "vector": 0.14,
+          "vector_similarity": 0.8537,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.8155
+        },
+        "text": "[2026-05-03T04:39:23] self: 思域首付三成月供大概多少，贷款能不能包过？"
+      },
+      {
+        "chunk_id": "chunk_f33e20a058626f2d",
+        "source_id": "source_d262d55f8b02b514",
+        "score": 0.4655,
+        "category": "group",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.221,
+          "semantic": 0.1465,
+          "vector": 0.108,
+          "vector_similarity": 0.6,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.4655
+        },
+        "text": "[2026-05-02T04:24:40] self: 政策规则：记录员缺字段边界 LIVE_RECORDER_20260502_042340\n测试批次：LIVE_RECORDER_20260502_042340\n规则名称：新能源电池检测转人工\n规则类型：contract\n触发关键词：电池检测,首付,月供,贷款包过,LIVE_RECORDER_20260502_042340"
+      },
+      {
+        "chunk_id": "chunk_03e9bbed1bb466e3",
+        "source_id": "source_702df8faf2e7d11f",
+        "score": 0.4144,
+        "category": "policies",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2154,
+          "semantic": 0.1441,
+          "vector": 0.1199,
+          "vector_similarity": 0.6659,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.015,
+          "risk_penalty": 0.08,
+          "final": 0.4144
+        },
+        "text": "政策规则：江苏车金高意向转人工 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_043922\n规则名称：试驾到店与订金转人工\n规则类型：manual_required\n触发关键词：试驾,到店,订金,定金,今天看车,明天看车,销售联系,企业微信群\n答案：客户明确要求试驾、到店、订金、销售联系时，AI只做确认和记录，必须转人工或企业微信群承接，不能自行承诺车源保留和最终价格。\n允许自动回复：false\n必须转人工：true\n提醒人工客服：true\n风险等级：high\n政策规则：江"
+      },
+      {
+        "chunk_id": "chunk_e750e77934a2a280",
+        "source_id": "source_55cce0d21fe7898c",
+        "score": 0.4135,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2099,
+          "semantic": 0.1417,
+          "vector": 0.1169,
+          "vector_similarity": 0.6494,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.025,
+          "risk_penalty": 0.08,
+          "final": 0.4135
+        },
+        "text": "商品资料：江苏车金二手车车源 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_043922\n商品名称：2021款丰田凯美瑞2.0G豪华版\n型号：CHEJIN-CAMRY-2021G\n商品类目：二手车/中级轿车\n别名关键词：凯美瑞,丰田凯美瑞,8万预算,自动挡,省油,通勤\n规格参数：2021年上牌，表显4.8万公里，2.0L自动挡，南京现车，一手车，支持第三方检测。\n价格：8.98万\n单位：台\n库存：1\n发货：南京门店可看车，异地客户需人工确认物流与提档。\n售后：非重大事故、非"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_b1e313ef83b3c7082815",
+    "experience_id": "rag_exp_b1e313ef83b3c7082815"
+  },
+  "detected_tags": [
+    "rag_experience",
+    "unknown",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "policies",
+    "change_type": "upsert_policy",
+    "summary": "建议新增/更新政策规则：待分类规则",
+    "suggested_fields": {
+      "title": "待分类规则",
+      "policy_type": "other",
+      "keywords": [
+        "unknown"
+      ],
+      "answer": "[2026-05-03T04:39:23] self: 思域首付三成月供大概多少，贷款能不能包过？",
+      "allow_auto_reply": true,
+      "requires_handoff": false,
+      "operator_alert": false,
+      "risk_level": "normal",
+      "applicability_scope": "global",
+      "additional_details": {
+        "原始资料摘录": "title: 待分类规则；answer: [2026-05-03T04:39:23] self: 思域首付三成月供大概多少，贷款能不能包过？；keywords: ['unknown']"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "policies",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "policies",
+        "id": "item_29dd7e5a481b",
+        "status": "active",
+        "source": {
+          "type": "raw_upload",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_7e8f504f7800fa681763.txt",
+          "candidate_id": "raw_aa1facb627052593",
+          "rag_experience_id": "rag_exp_b1e313ef83b3c7082815",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "title": "待分类规则",
+          "policy_type": "other",
+          "keywords": [
+            "unknown"
+          ],
+          "answer": "[2026-05-03T04:39:23] self: 思域首付三成月供大概多少，贷款能不能包过？",
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "operator_alert": false,
+          "risk_level": "normal",
+          "applicability_scope": "global",
+          "additional_details": {
+            "原始资料摘录": "title: 待分类规则；answer: [2026-05-03T04:39:23] self: 思域首付三成月供大概多少，贷款能不能包过？；keywords: ['unknown']"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "rejected",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": false,
+      "provider": "",
+      "status": "rule_only_disabled_by_request",
+      "reason": "llm_disabled_by_caller",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_7e8f504f7800fa681763",
+    "source_raw_message_ids": [
+      "raw_msg_521c4851889a8796f47b"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_15b34fb11375bd30",
+      "chunk_count": 1,
+      "query": "建议新增/更新政策规则：待分类规则\ntitle: 待分类规则；answer: [2026-05-03T04:39:23] self: 思域首付三成月供大概多少，贷款能不能包过？；keywords: ['unknown']\n待分类规则\n[2026-05-03T04:39:23] self: 思域首付三成月供大概多少，贷款能不能包过？",
+      "hits": [
+        {
+          "chunk_id": "chunk_99d098ac348e1842",
+          "source_id": "source_15b34fb11375bd30",
+          "score": 0.8155,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.4427,
+            "semantic": 0.2429,
+            "vector": 0.14,
+            "vector_similarity": 0.8537,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.8155
+          },
+          "text": "[2026-05-03T04:39:23] self: 思域首付三成月供大概多少，贷款能不能包过？"
+        },
+        {
+          "chunk_id": "chunk_f33e20a058626f2d",
+          "source_id": "source_d262d55f8b02b514",
+          "score": 0.4655,
+          "category": "group",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.221,
+            "semantic": 0.1465,
+            "vector": 0.108,
+            "vector_similarity": 0.6,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.4655
+          },
+          "text": "[2026-05-02T04:24:40] self: 政策规则：记录员缺字段边界 LIVE_RECORDER_20260502_042340\n测试批次：LIVE_RECORDER_20260502_042340\n规则名称：新能源电池检测转人工\n规则类型：contract\n触发关键词：电池检测,首付,月供,贷款包过,LIVE_RECORDER_20260502_042340"
+        },
+        {
+          "chunk_id": "chunk_03e9bbed1bb466e3",
+          "source_id": "source_702df8faf2e7d11f",
+          "score": 0.4144,
+          "category": "policies",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2154,
+            "semantic": 0.1441,
+            "vector": 0.1199,
+            "vector_similarity": 0.6659,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.015,
+            "risk_penalty": 0.08,
+            "final": 0.4144
+          },
+          "text": "政策规则：江苏车金高意向转人工 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_043922\n规则名称：试驾到店与订金转人工\n规则类型：manual_required\n触发关键词：试驾,到店,订金,定金,今天看车,明天看车,销售联系,企业微信群\n答案：客户明确要求试驾、到店、订金、销售联系时，AI只做确认和记录，必须转人工或企业微信群承接，不能自行承诺车源保留和最终价格。\n允许自动回复：false\n必须转人工：true\n提醒人工客服：true\n风险等级：high\n政策规则：江"
+        },
+        {
+          "chunk_id": "chunk_e750e77934a2a280",
+          "source_id": "source_55cce0d21fe7898c",
+          "score": 0.4135,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2099,
+            "semantic": 0.1417,
+            "vector": 0.1169,
+            "vector_similarity": 0.6494,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.025,
+            "risk_penalty": 0.08,
+            "final": 0.4135
+          },
+          "text": "商品资料：江苏车金二手车车源 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_043922\n商品名称：2021款丰田凯美瑞2.0G豪华版\n型号：CHEJIN-CAMRY-2021G\n商品类目：二手车/中级轿车\n别名关键词：凯美瑞,丰田凯美瑞,8万预算,自动挡,省油,通勤\n规格参数：2021年上牌，表显4.8万公里，2.0L自动挡，南京现车，一手车，支持第三方检测。\n价格：8.98万\n单位：台\n库存：1\n发货：南京门店可看车，异地客户需人工确认物流与提档。\n售后：非重大事故、非"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_b1e313ef83b3c7082815",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "rejected_at": "2026-05-04T15:24:47",
+    "reason": "?????????????AI/??????????????????????????????????????????AI????"
+  },
+  "suggested_tests": [
+    {
+      "scenario": "other",
+      "assertion": "入库后应能按关键词回答该政策；高风险内容必须转人工。"
+    }
+  ]
+}

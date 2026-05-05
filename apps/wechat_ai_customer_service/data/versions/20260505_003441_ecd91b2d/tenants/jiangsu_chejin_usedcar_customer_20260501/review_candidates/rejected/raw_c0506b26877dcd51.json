@@ -1,0 +1,295 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_c0506b26877dcd51",
+  "generated_at": "2026-05-04T02:29:11",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_ab65115d35fa88926ecf.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"product_id\": \"model-3\", \"title\": \"Model 3 重点检查项\", \"content\": \"Model 3 重点检查电池健康、辅助驾驶权益和账号状态，需结合检测报告和实车确认，系统无法直接给出准确结论。\"}",
+    "content_sha256": "340beb65599585a56f039816b9489736bff84883ff9010c5e414ca34aa90fe47",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_ab65115d35fa88926ecf",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_7802c9938d6da2f93f4a",
+      "raw_msg_4f80296eddbedd9d3511"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_cd786001cc3051b2",
+        "source_id": "source_9d781bd39be1dcce",
+        "score": 0.7111,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.3992,
+          "semantic": 0.1819,
+          "vector": 0.14,
+          "vector_similarity": 0.786,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.7111
+        },
+        "text": "[2026-05-04T02:27:24] self: [车金AI] Model 3那台重点看电池健康、辅助驾驶权益和账号状态，但这些都要结合检测报告和实车才能确认，系统没法直接给您准话。我让负责这台车的同事跟您对接，帮您把关键点都核实清楚。\n[2026-05-04T02:27:24] 许聪: 蔚来ES6换电这块能说说吗？"
+      },
+      {
+        "chunk_id": "chunk_d2ec0cebcf16c10c",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.6167,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2557,
+          "semantic": 0.151,
+          "vector": 0.14,
+          "vector_similarity": 0.8219,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.6167
+        },
+        "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+      },
+      {
+        "chunk_id": "chunk_99cc4e7f8c7061b0",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5984,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.241,
+          "semantic": 0.1474,
+          "vector": 0.14,
+          "vector_similarity": 0.8236,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5984
+        },
+        "text": "、提档、当地新能源指标和运输方式。\n售后/风险：电池健康、辅助驾驶功能和官方权益以检测报告及账号核验为准。\n推荐话术：适合想体验纯电、智能化和低用车成本的客户，电池和权益必须人工确认。\n商品名称：2020款奥迪A4L 40TFSI时尚动感型\n型号/SKU：CHEJIN-A4L-2020\n类目：二手车/豪华轿车\n关键词：奥迪A4L、A4L、豪华轿车、婚庆、商务\n规格：2020年上牌，表显6.8万公里，2.0T自动挡，黑色，保养记录较完整。\n价格：15.88万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档"
+      },
+      {
+        "chunk_id": "chunk_9a0d34760ad6ccae",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5947,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2373,
+          "semantic": 0.1474,
+          "vector": 0.14,
+          "vector_similarity": 0.8357,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5947
+        },
+        "text": "工确认。\n售后/风险：CVT变速箱状态、保养和车况以检测报告为准。\n推荐话术：适合6到7万预算、练手、家用代步和省油需求。\n商品名称：2019款大众朗逸1.5L自动舒适版\n型号/SKU：CHEJIN-LAVIDA-2019\n类目：二手车/紧凑型轿车\n关键词：朗逸、大众朗逸、德系代步、置换\n规格：2019年上牌，表显6.9万公里，1.5L自动挡，白色，通勤耐用。\n价格：5.98万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：易损件和保养历史以"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_7ab1441f1c23a1483611",
+    "experience_id": "rag_exp_7ab1441f1c23a1483611"
+  },
+  "detected_tags": [
+    "llm",
+    "rag_experience",
+    "unknown",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "product_explanations",
+    "change_type": "llm_upsert_product_explanations",
+    "summary": "Model 3 重点检查项说明",
+    "suggested_fields": {
+      "product_id": "model-3",
+      "title": "Model 3 重点检查项",
+      "content": "Model 3 重点检查电池健康、辅助驾驶权益和账号状态，需结合检测报告和实车确认，系统无法直接给出准确结论。",
+      "additional_details": {
+        "原始资料摘录": "{\"product_id\": \"model-3\", \"title\": \"Model 3 重点检查项\", \"content\": \"Model 3 重点检查电池健康、辅助驾驶权益和账号状态，需结合检测报告和实车确认，系统无法直接给出准确结论。\"}"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "product_explanations",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "product_explanations",
+        "id": "model-3-key-inspection-points",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_ab65115d35fa88926ecf.txt",
+          "candidate_id": "raw_c0506b26877dcd51",
+          "rag_experience_id": "rag_exp_7ab1441f1c23a1483611",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "product_id": "model-3",
+          "title": "Model 3 重点检查项",
+          "content": "Model 3 重点检查电池健康、辅助驾驶权益和账号状态，需结合检测报告和实车确认，系统无法直接给出准确结论。",
+          "additional_details": {
+            "原始资料摘录": "{\"product_id\": \"model-3\", \"title\": \"Model 3 重点检查项\", \"content\": \"Model 3 重点检查电池健康、辅助驾驶权益和账号状态，需结合检测报告和实车确认，系统无法直接给出准确结论。\"}"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "rejected",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_ab65115d35fa88926ecf",
+    "source_raw_message_ids": [
+      "raw_msg_7802c9938d6da2f93f4a",
+      "raw_msg_4f80296eddbedd9d3511"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_9d781bd39be1dcce",
+      "chunk_count": 1,
+      "query": "Model 3 重点检查项说明\n{\"product_id\": \"model-3\", \"title\": \"Model 3 重点检查项\", \"content\": \"Model 3 重点检查电池健康、辅助驾驶权益和账号状态，需结合检测报告和实车确认，系统无法直接给出准确结论。\"}\nModel 3 重点检查项",
+      "hits": [
+        {
+          "chunk_id": "chunk_cd786001cc3051b2",
+          "source_id": "source_9d781bd39be1dcce",
+          "score": 0.7111,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.3992,
+            "semantic": 0.1819,
+            "vector": 0.14,
+            "vector_similarity": 0.786,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.7111
+          },
+          "text": "[2026-05-04T02:27:24] self: [车金AI] Model 3那台重点看电池健康、辅助驾驶权益和账号状态，但这些都要结合检测报告和实车才能确认，系统没法直接给您准话。我让负责这台车的同事跟您对接，帮您把关键点都核实清楚。\n[2026-05-04T02:27:24] 许聪: 蔚来ES6换电这块能说说吗？"
+        },
+        {
+          "chunk_id": "chunk_d2ec0cebcf16c10c",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.6167,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2557,
+            "semantic": 0.151,
+            "vector": 0.14,
+            "vector_similarity": 0.8219,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.6167
+          },
+          "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+        },
+        {
+          "chunk_id": "chunk_99cc4e7f8c7061b0",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5984,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.241,
+            "semantic": 0.1474,
+            "vector": 0.14,
+            "vector_similarity": 0.8236,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5984
+          },
+          "text": "、提档、当地新能源指标和运输方式。\n售后/风险：电池健康、辅助驾驶功能和官方权益以检测报告及账号核验为准。\n推荐话术：适合想体验纯电、智能化和低用车成本的客户，电池和权益必须人工确认。\n商品名称：2020款奥迪A4L 40TFSI时尚动感型\n型号/SKU：CHEJIN-A4L-2020\n类目：二手车/豪华轿车\n关键词：奥迪A4L、A4L、豪华轿车、婚庆、商务\n规格：2020年上牌，表显6.8万公里，2.0T自动挡，黑色，保养记录较完整。\n价格：15.88万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档"
+        },
+        {
+          "chunk_id": "chunk_9a0d34760ad6ccae",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5947,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2373,
+            "semantic": 0.1474,
+            "vector": 0.14,
+            "vector_similarity": 0.8357,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5947
+          },
+          "text": "工确认。\n售后/风险：CVT变速箱状态、保养和车况以检测报告为准。\n推荐话术：适合6到7万预算、练手、家用代步和省油需求。\n商品名称：2019款大众朗逸1.5L自动舒适版\n型号/SKU：CHEJIN-LAVIDA-2019\n类目：二手车/紧凑型轿车\n关键词：朗逸、大众朗逸、德系代步、置换\n规格：2019年上牌，表显6.9万公里，1.5L自动挡，白色，通勤耐用。\n价格：5.98万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：易损件和保养历史以"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_7ab1441f1c23a1483611",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "rejected_at": "2026-05-04T15:24:47",
+    "reason": "?????????????AI/??????????????????????????????????????????AI????"
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

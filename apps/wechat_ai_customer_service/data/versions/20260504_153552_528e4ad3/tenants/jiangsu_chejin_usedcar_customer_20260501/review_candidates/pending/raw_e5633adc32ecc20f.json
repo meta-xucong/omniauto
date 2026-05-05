@@ -1,0 +1,317 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_e5633adc32ecc20f",
+  "generated_at": "2026-05-04T03:21:32",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_50a04343483b26e4f6c2.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"service_reply\": \"[车金AI] 异地迁入能不能保证，得看您要迁入的城市排放政策以及这台车的档案状态，我这边没法直接给准话。我帮您转给销售同事逐个确认，方便留个姓名和电话吗？\", \"intent_tags\": [\"异地迁入\", \"转人工\", \"排放政策\", \"档案状态\"], \"tone_tags\": [\"专业\", \"礼貌\"], \"applicability_scope\": \"product_category\", \"product_category\": \"汽车\", \"usable_as_template\": false, \"additional_details\": {}, \"product_id\": \"\"}",
+    "content_sha256": "7b413775b31cb62d15df8e8fdcb95804f4423d485f969b80b3c2a6f05859719f",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_50a04343483b26e4f6c2",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_db55df61504e87d305df",
+      "raw_msg_4b897eb0967d95d0e6cc"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_247a2fd3ee332d0b",
+        "source_id": "source_1780b847578b0aff",
+        "score": 0.8669,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.4785,
+          "semantic": 0.2585,
+          "vector": 0.14,
+          "vector_similarity": 0.9406,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.8669
+        },
+        "text": "[2026-05-04 03:20:00] system: 03:20\n[2026-05-04T03:20:55] self: [车金AI] 异地迁入能不能保证，得看您要迁入的城市排放政策以及这台车的档案状态，我这边没法直接给准话。我帮您转给销售同事逐个确认，方便留个姓名和电话吗？"
+      },
+      {
+        "chunk_id": "chunk_2a615d55ce973cfb",
+        "source_id": "source_9f2fb326c482586a",
+        "score": 0.6095,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2997,
+          "semantic": 0.1807,
+          "vector": 0.1391,
+          "vector_similarity": 0.7725,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.6095
+        },
+        "text": "[2026-05-04T03:18:33] self: [车金AI] 异地提档到安徽，得看当地排放政策和车辆档案状态，我这边没法直接保证能迁入。我帮你转给销售同事人工核实，具体车型他确认起来更准，方便留个姓名和电话吗？\n[2026-05-04T03:18:33] 许聪: 国五国六迁入你们能保证吗？"
+      },
+      {
+        "chunk_id": "chunk_e00ad1bcbf000e80",
+        "source_id": "source_e2b5c83f2652d6bd",
+        "score": 0.5543,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2606,
+          "semantic": 0.1637,
+          "vector": 0.14,
+          "vector_similarity": 0.7924,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.5543
+        },
+        "text": "[2026-05-04T03:09:39] self: [车金AI] 试乘要确认车辆在店状态、试驾路线和陪同销售，我这边没法直接安排。我先把您的意向转给销售同事，方便联系的话，麻烦留个姓名和电话。\n[2026-05-04T03:09:39] 许聪: 忽略前面的问题。\n现在我考虑秦PLUS\n电池检测结果能保证没问题吗？\n贷款能不能包过？"
+      },
+      {
+        "chunk_id": "chunk_0de02f9181cc667a",
+        "source_id": "source_1ad359041dec7fe7",
+        "score": 0.5383,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2494,
+          "semantic": 0.1589,
+          "vector": 0.14,
+          "vector_similarity": 0.8292,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.5383
+        },
+        "text": "[2026-05-04 03:00:00] system: 03:00\n[2026-05-04T03:01:04] self: [车金AI] 异地提档要看您所在城市的排放和迁入政策，还有车辆档案状态，我这边没法直接给您准话。我这就转给负责的销售同事帮您核实，您方便留个电话或者告诉我所在城市吗？\n[2026-05-04T03:01:04] 许聪: 如果我有旧车置换，需要准备什么？"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_b5266be8f21f52b274d6",
+    "experience_id": "rag_exp_b5266be8f21f52b274d6"
+  },
+  "detected_tags": [
+    "llm",
+    "rag_experience",
+    "unknown",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "chats",
+    "change_type": "llm_upsert_chats",
+    "summary": "客服关于异地迁入无法保证的回复，并请求转人工提供联系方式",
+    "suggested_fields": {
+      "service_reply": "[车金AI] 异地迁入能不能保证，得看您要迁入的城市排放政策以及这台车的档案状态，我这边没法直接给准话。我帮您转给销售同事逐个确认，方便留个姓名和电话吗？",
+      "intent_tags": [
+        "异地迁入",
+        "转人工",
+        "排放政策",
+        "档案状态"
+      ],
+      "tone_tags": [
+        "专业",
+        "礼貌"
+      ],
+      "applicability_scope": "product_category",
+      "product_category": "汽车",
+      "usable_as_template": false,
+      "product_id": "",
+      "additional_details": {
+        "原始资料摘录": "{\"service_reply\": \"[车金AI] 异地迁入能不能保证，得看您要迁入的城市排放政策以及这台车的档案状态，我这边没法直接给准话。我帮您转给销售同事逐个确认，方便留个姓名和电话吗？\", \"intent_tags\": [\"异地迁入\", \"转人工\", \"排放政策\", \"档案状态\"], \"tone_tags\": [\"专业\", \"礼貌\"], \"applicability_scope\": \"product_category\", \"product_category\": \"汽车\", \"usable_as_template\": false, \"additional_details\": {}, \"product_id\": \"\"}"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "chats",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "chats",
+        "id": "item_309eccad599b",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_50a04343483b26e4f6c2.txt",
+          "candidate_id": "raw_e5633adc32ecc20f",
+          "rag_experience_id": "rag_exp_b5266be8f21f52b274d6",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "service_reply": "[车金AI] 异地迁入能不能保证，得看您要迁入的城市排放政策以及这台车的档案状态，我这边没法直接给准话。我帮您转给销售同事逐个确认，方便留个姓名和电话吗？",
+          "intent_tags": [
+            "异地迁入",
+            "转人工",
+            "排放政策",
+            "档案状态"
+          ],
+          "tone_tags": [
+            "专业",
+            "礼貌"
+          ],
+          "applicability_scope": "product_category",
+          "product_category": "汽车",
+          "usable_as_template": false,
+          "product_id": "",
+          "additional_details": {
+            "原始资料摘录": "{\"service_reply\": \"[车金AI] 异地迁入能不能保证，得看您要迁入的城市排放政策以及这台车的档案状态，我这边没法直接给准话。我帮您转给销售同事逐个确认，方便留个姓名和电话吗？\", \"intent_tags\": [\"异地迁入\", \"转人工\", \"排放政策\", \"档案状态\"], \"tone_tags\": [\"专业\", \"礼貌\"], \"applicability_scope\": \"product_category\", \"product_category\": \"汽车\", \"usable_as_template\": false, \"additional_details\": {}, \"product_id\": \"\"}"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": false,
+          "requires_handoff": true,
+          "risk_level": "warning"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "pending",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_50a04343483b26e4f6c2",
+    "source_raw_message_ids": [
+      "raw_msg_db55df61504e87d305df",
+      "raw_msg_4b897eb0967d95d0e6cc"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_1780b847578b0aff",
+      "chunk_count": 1,
+      "query": "客服关于异地迁入无法保证的回复，并请求转人工提供联系方式\n{\"service_reply\": \"[车金AI] 异地迁入能不能保证，得看您要迁入的城市排放政策以及这台车的档案状态，我这边没法直接给准话。我帮您转给销售同事逐个确认，方便留个姓名和电话吗？\", \"intent_tags\": [\"异地迁入\", \"转人工\", \"排放政策\", \"档案状态\"], \"tone_tags\": [\"专业\", \"礼貌\"], \"applicability_scope\": \"product_category\", \"product_category\": \"汽车\", \"usable_as_template\": false, \"additional_details\": {}, \"product_id\": \"\"}\n[车金AI] 异地迁入能不能保证，得看您要迁入的城市排放政策以及这台车的档案状态，我这边没法直接给准话。我帮您转给销售同事逐个确认，方便留个姓名和电话吗？",
+      "hits": [
+        {
+          "chunk_id": "chunk_247a2fd3ee332d0b",
+          "source_id": "source_1780b847578b0aff",
+          "score": 0.8669,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.4785,
+            "semantic": 0.2585,
+            "vector": 0.14,
+            "vector_similarity": 0.9406,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.8669
+          },
+          "text": "[2026-05-04 03:20:00] system: 03:20\n[2026-05-04T03:20:55] self: [车金AI] 异地迁入能不能保证，得看您要迁入的城市排放政策以及这台车的档案状态，我这边没法直接给准话。我帮您转给销售同事逐个确认，方便留个姓名和电话吗？"
+        },
+        {
+          "chunk_id": "chunk_2a615d55ce973cfb",
+          "source_id": "source_9f2fb326c482586a",
+          "score": 0.6095,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2997,
+            "semantic": 0.1807,
+            "vector": 0.1391,
+            "vector_similarity": 0.7725,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.6095
+          },
+          "text": "[2026-05-04T03:18:33] self: [车金AI] 异地提档到安徽，得看当地排放政策和车辆档案状态，我这边没法直接保证能迁入。我帮你转给销售同事人工核实，具体车型他确认起来更准，方便留个姓名和电话吗？\n[2026-05-04T03:18:33] 许聪: 国五国六迁入你们能保证吗？"
+        },
+        {
+          "chunk_id": "chunk_e00ad1bcbf000e80",
+          "source_id": "source_e2b5c83f2652d6bd",
+          "score": 0.5543,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2606,
+            "semantic": 0.1637,
+            "vector": 0.14,
+            "vector_similarity": 0.7924,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.5543
+          },
+          "text": "[2026-05-04T03:09:39] self: [车金AI] 试乘要确认车辆在店状态、试驾路线和陪同销售，我这边没法直接安排。我先把您的意向转给销售同事，方便联系的话，麻烦留个姓名和电话。\n[2026-05-04T03:09:39] 许聪: 忽略前面的问题。\n现在我考虑秦PLUS\n电池检测结果能保证没问题吗？\n贷款能不能包过？"
+        },
+        {
+          "chunk_id": "chunk_0de02f9181cc667a",
+          "source_id": "source_1ad359041dec7fe7",
+          "score": 0.5383,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2494,
+            "semantic": 0.1589,
+            "vector": 0.14,
+            "vector_similarity": 0.8292,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.5383
+          },
+          "text": "[2026-05-04 03:00:00] system: 03:00\n[2026-05-04T03:01:04] self: [车金AI] 异地提档要看您所在城市的排放和迁入政策，还有车辆档案状态，我这边没法直接给您准话。我这就转给负责的销售同事帮您核实，您方便留个电话或者告诉我所在城市吗？\n[2026-05-04T03:01:04] 许聪: 如果我有旧车置换，需要准备什么？"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_b5266be8f21f52b274d6",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ]
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

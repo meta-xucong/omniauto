@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_03feca78a8a1da52",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_a54d41036db2baad354f.txt",
+    "content_hash": "4665b3b97d568fd2488fec9c82469112",
+    "status": "active",
+    "created_at": "2026-05-04T02:34:26",
+    "updated_at": "2026-05-04T02:34:26"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_6dd37f560fde36e7",
+      "source_id": "source_03feca78a8a1da52",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_a54d41036db2baad354f.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-04T02:34:25] self: [车金AI] 许聪，Macan确实是高端豪华SUV，这台是2018款2.0T，23.8万，适合预算20万以上、注重品牌和外观的朋友。风险方面，像选配、产权状态、事故记录这些必须人工核验才能准确，我没法直接替您确认。我把您的需求转给销售，让他跟您对接吧，方便留个电话吗？\n[2026-05-04T02:34:25] 许聪: 福克斯那台是不是已经卖了？还有类似便宜练手车吗？",
+      "char_count": 213,
+      "status": "active",
+      "created_at": "2026-05-04T02:34:26"
+    }
+  ]
+}

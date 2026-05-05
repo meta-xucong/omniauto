@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_f57826a24c2d2572",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_6b36251a9f11bbc51eae.txt",
+    "content_hash": "1824f2f8d4e5d032222318da59236145",
+    "status": "active",
+    "created_at": "2026-05-03T20:36:31",
+    "updated_at": "2026-05-03T20:36:31"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_a5467ca9555680d4",
+      "source_id": "source_f57826a24c2d2572",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_6b36251a9f11bbc51eae.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-03T19:36:31] 客户: 李女士：我有一台2018年朗逸想置换宋PLUS，车在苏州，6.5万公里。\n演示批次：CHEJIN_DEMO_20260503_203628\n[2026-05-03T19:37:31] self: 客服：可以，麻烦补充是否有贷款、事故水泡火烧情况、期望价和车牌所在地，估价需要人工复核。\n演示批次：CHEJIN_DEMO_20260503_203628\n[2026-05-03T19:38:31] 客户: 李女士：新能源车电池是不是保八年？\n演示批次：CHEJIN_DEMO_20260503_203628\n[2026-05-03T19:39:31] self: 客服：三电质保要结合厂家政策、车辆权益和检测报告，具体由人工核验。\n演示批次：CHEJIN_DEMO_20260503_203628\n[2026-05-03T19:40:31] 客户: 李女士：如果迁不回苏州怎么办？\n演示批次：CHEJIN_DEMO_20260503_203628\n[2026-05-03T19:41:31] self: 客服：异地迁入要先查当地政策和车辆档案，我帮您转人工确认。\n演示批次：CHEJIN_DEMO_20260503_203628",
+      "char_count": 539,
+      "status": "active",
+      "created_at": "2026-05-03T20:36:31"
+    }
+  ]
+}

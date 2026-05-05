@@ -1,0 +1,332 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_249beb61cfe9de24",
+  "generated_at": "2026-05-04T03:29:29",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_c78554a139f25a0de437.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"title\": \"二手车售后、退车和赔付转接规则\", \"policy_type\": \"after_sales\", \"keywords\": [\"二手车\", \"售后\", \"退车\", \"赔付\", \"合同\", \"检测报告\"], \"applicability_scope\": \"product_category\", \"product_category\": \"二手车\", \"answer\": \"二手车售后、退车和赔付都要以合同、检测报告和实际约定为准，我这边没办法直接答复。我帮您转给销售同事，他们会逐项跟你说明白。\", \"allow_auto_reply\": false, \"requires_handoff\": true, \"handoff_reason\": \"售后、退车和赔付需人工确认\", \"risk_level\": \"",
+    "content_sha256": "2e58d867ec32203ec89ec1d1df85213fa1bcf7311e31abd823b0002d2f3360c0",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_c78554a139f25a0de437",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_922c707801510fbcb52a",
+      "raw_msg_ade7ed470b5a8d2e14b5"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_899e7c3270af2c20",
+        "source_id": "source_319d1c3634f0e043",
+        "score": 0.7245,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.4496,
+          "semantic": 0.2249,
+          "vector": 0.14,
+          "vector_similarity": 0.876,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.08,
+          "final": 0.7245
+        },
+        "text": "[2026-05-04T03:28:14] self: [车金AI] 二手车售后、退车和赔付都要以合同、检测报告和实际约定为准，我这边没办法直接答复。我帮您转给销售同事，他们会逐项跟你说明白。\n[2026-05-04T03:28:14] 许聪: 最低多少钱？你直接给我底价，我马上定"
+      },
+      {
+        "chunk_id": "chunk_b73fd7e249648300",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5772,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2218,
+          "semantic": 0.1455,
+          "vector": 0.14,
+          "vector_similarity": 0.8255,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5772
+        },
+        "text": "。\n商品名称：2022款五菱宏光MINIEV马卡龙臻享款\n型号/SKU：CHEJIN-MINIEV-2022\n类目：二手车/微型电动车\n关键词：宏光MINIEV、五菱mini、代步电车、练手车\n规格：2022年上牌，表显1.6万公里，纯电微型车，粉色，城市通勤。\n价格：2.88万，库存：1台\n物流/过户：微型电动车跨城运输和充电条件需人工确认。\n售后/风险：续航、电池和低温表现以检测报告和使用场景说明为准。\n推荐话术：适合短途通勤、练手、接送孩子，长途或高速需求不推荐。\n商品名称：2020款本田雅阁260TURBO"
+      },
+      {
+        "chunk_id": "chunk_d2ec0cebcf16c10c",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5729,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2196,
+          "semantic": 0.1432,
+          "vector": 0.14,
+          "vector_similarity": 0.8179,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5729
+        },
+        "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+      },
+      {
+        "chunk_id": "chunk_58029d4057022265",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5729,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2196,
+          "semantic": 0.1432,
+          "vector": 0.14,
+          "vector_similarity": 0.7873,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5729
+        },
+        "text": "险：电池、增程器、官方权益和保养记录以检测报告和人工核验为准。\n推荐话术：适合家庭六座、长途和新能源体验需求。\n商品名称：2021款长安CS75 PLUS 1.5T自动尊贵型\n型号/SKU：CHEJIN-CS75PLUS-2021\n类目：二手车/SUV\n关键词：CS75PLUS、长安CS75、国产SUV、家用SUV\n规格：2021年上牌，表显4.4万公里，1.5T自动挡，白色，配置高。\n价格：6.88万，库存：2台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_ae56c4756f885d96be61",
+    "experience_id": "rag_exp_ae56c4756f885d96be61"
+  },
+  "detected_tags": [
+    "after_sales",
+    "llm",
+    "quote",
+    "rag_experience",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "policies",
+    "change_type": "llm_upsert_policies",
+    "summary": "二手车售后、退车和赔付规则：须以合同和检测报告为准，AI无法直接答复，转销售同事处理。",
+    "suggested_fields": {
+      "title": "二手车售后、退车和赔付转接规则",
+      "policy_type": "after_sales",
+      "keywords": [
+        "二手车",
+        "售后",
+        "退车",
+        "赔付",
+        "合同",
+        "检测报告"
+      ],
+      "applicability_scope": "product_category",
+      "product_category": "二手车",
+      "answer": "二手车售后、退车和赔付都要以合同、检测报告和实际约定为准，我这边没办法直接答复。我帮您转给销售同事，他们会逐项跟你说明白。",
+      "allow_auto_reply": false,
+      "requires_handoff": true,
+      "handoff_reason": "售后、退车和赔付需人工确认",
+      "risk_level": "medium",
+      "product_id": "",
+      "additional_details": {
+        "timestamp": "2026-05-04T03:28:14",
+        "customer_follow_up": "最低多少钱？你直接给我底价，我马上定",
+        "原始资料摘录": "{\"title\": \"二手车售后、退车和赔付转接规则\", \"policy_type\": \"after_sales\", \"keywords\": [\"二手车\", \"售后\", \"退车\", \"赔付\", \"合同\", \"检测报告\"], \"applicability_scope\": \"product_category\", \"product_category\": \"二手车\", \"answer\": \"二手车售后、退车和赔付都要以合同、检测报告和实际约定为准，我这边没办法直接答复。我帮您转给销售同事，他们会逐项跟你说明白。\", \"allow_auto_reply\": false, \"requires_handoff\": true, \"handoff_reason\": \"售后、退车和赔付需人工确认\", \"risk_level\": \""
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "policies",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "policies",
+        "id": "used_car_after_sales_handoff",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_c78554a139f25a0de437.txt",
+          "candidate_id": "raw_249beb61cfe9de24",
+          "rag_experience_id": "rag_exp_ae56c4756f885d96be61",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "title": "二手车售后、退车和赔付转接规则",
+          "policy_type": "after_sales",
+          "keywords": [
+            "二手车",
+            "售后",
+            "退车",
+            "赔付",
+            "合同",
+            "检测报告"
+          ],
+          "applicability_scope": "product_category",
+          "product_category": "二手车",
+          "answer": "二手车售后、退车和赔付都要以合同、检测报告和实际约定为准，我这边没办法直接答复。我帮您转给销售同事，他们会逐项跟你说明白。",
+          "allow_auto_reply": false,
+          "requires_handoff": true,
+          "handoff_reason": "售后、退车和赔付需人工确认",
+          "risk_level": "medium",
+          "product_id": "",
+          "additional_details": {
+            "timestamp": "2026-05-04T03:28:14",
+            "customer_follow_up": "最低多少钱？你直接给我底价，我马上定",
+            "原始资料摘录": "{\"title\": \"二手车售后、退车和赔付转接规则\", \"policy_type\": \"after_sales\", \"keywords\": [\"二手车\", \"售后\", \"退车\", \"赔付\", \"合同\", \"检测报告\"], \"applicability_scope\": \"product_category\", \"product_category\": \"二手车\", \"answer\": \"二手车售后、退车和赔付都要以合同、检测报告和实际约定为准，我这边没办法直接答复。我帮您转给销售同事，他们会逐项跟你说明白。\", \"allow_auto_reply\": false, \"requires_handoff\": true, \"handoff_reason\": \"售后、退车和赔付需人工确认\", \"risk_level\": \""
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": false,
+          "requires_handoff": true,
+          "risk_level": "warning"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "customer_follow_up",
+      "timestamp",
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "rejected",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_c78554a139f25a0de437",
+    "source_raw_message_ids": [
+      "raw_msg_922c707801510fbcb52a",
+      "raw_msg_ade7ed470b5a8d2e14b5"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_319d1c3634f0e043",
+      "chunk_count": 1,
+      "query": "二手车售后、退车和赔付规则：须以合同和检测报告为准，AI无法直接答复，转销售同事处理。\n{\"title\": \"二手车售后、退车和赔付转接规则\", \"policy_type\": \"after_sales\", \"keywords\": [\"二手车\", \"售后\", \"退车\", \"赔付\", \"合同\", \"检测报告\"], \"applicability_scope\": \"product_category\", \"product_category\": \"二手车\", \"answer\": \"二手车售后、退车和赔付都要以合同、检测报告和实际约定为准，我这边没办法直接答复。我帮您转给销售同事，他们会逐项跟你说明白。\", \"allow_auto_reply\": false, \"requires_handoff\": true, \"handoff_reason\": \"售后、退车和赔付需人工确认\", \"risk_level\": \"\n二手车售后、退车和赔付转接规则\n二手车售后、退车和赔付都要以合同、检测报告和实际约定为准，我这边没办法直接答复。我帮您转给销售同事，他们会逐项跟你说明白。",
+      "hits": [
+        {
+          "chunk_id": "chunk_899e7c3270af2c20",
+          "source_id": "source_319d1c3634f0e043",
+          "score": 0.7245,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.4496,
+            "semantic": 0.2249,
+            "vector": 0.14,
+            "vector_similarity": 0.876,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.08,
+            "final": 0.7245
+          },
+          "text": "[2026-05-04T03:28:14] self: [车金AI] 二手车售后、退车和赔付都要以合同、检测报告和实际约定为准，我这边没办法直接答复。我帮您转给销售同事，他们会逐项跟你说明白。\n[2026-05-04T03:28:14] 许聪: 最低多少钱？你直接给我底价，我马上定"
+        },
+        {
+          "chunk_id": "chunk_b73fd7e249648300",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5772,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2218,
+            "semantic": 0.1455,
+            "vector": 0.14,
+            "vector_similarity": 0.8255,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5772
+          },
+          "text": "。\n商品名称：2022款五菱宏光MINIEV马卡龙臻享款\n型号/SKU：CHEJIN-MINIEV-2022\n类目：二手车/微型电动车\n关键词：宏光MINIEV、五菱mini、代步电车、练手车\n规格：2022年上牌，表显1.6万公里，纯电微型车，粉色，城市通勤。\n价格：2.88万，库存：1台\n物流/过户：微型电动车跨城运输和充电条件需人工确认。\n售后/风险：续航、电池和低温表现以检测报告和使用场景说明为准。\n推荐话术：适合短途通勤、练手、接送孩子，长途或高速需求不推荐。\n商品名称：2020款本田雅阁260TURBO"
+        },
+        {
+          "chunk_id": "chunk_d2ec0cebcf16c10c",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5729,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2196,
+            "semantic": 0.1432,
+            "vector": 0.14,
+            "vector_similarity": 0.8179,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5729
+          },
+          "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+        },
+        {
+          "chunk_id": "chunk_58029d4057022265",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5729,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2196,
+            "semantic": 0.1432,
+            "vector": 0.14,
+            "vector_similarity": 0.7873,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5729
+          },
+          "text": "险：电池、增程器、官方权益和保养记录以检测报告和人工核验为准。\n推荐话术：适合家庭六座、长途和新能源体验需求。\n商品名称：2021款长安CS75 PLUS 1.5T自动尊贵型\n型号/SKU：CHEJIN-CS75PLUS-2021\n类目：二手车/SUV\n关键词：CS75PLUS、长安CS75、国产SUV、家用SUV\n规格：2021年上牌，表显4.4万公里，1.5T自动挡，白色，配置高。\n价格：6.88万，库存：2台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_ae56c4756f885d96be61",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "rejected_at": "2026-05-04T15:24:46",
+    "reason": "?????????????AI/??????????????????????????????????????????AI????"
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

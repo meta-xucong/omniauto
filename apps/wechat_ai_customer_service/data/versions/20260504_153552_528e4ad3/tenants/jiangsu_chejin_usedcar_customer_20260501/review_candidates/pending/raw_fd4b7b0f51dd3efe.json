@@ -1,0 +1,339 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_fd4b7b0f51dd3efe",
+  "generated_at": "2026-05-04T02:49:53",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_215d22cd429897d4e38d.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"customer_message\": \"我只想要一台便宜、省心、不折腾的车\", \"service_reply\": \"[车金AI] 明白了，您想要年轻运动一点的轿车，动力别太弱。店里有两台挺对味的：2020款奥迪A4L 40TFSI时尚动感型，2.0T，黑色，参考价15.88万；还有2020款本田雅阁260TURBO精英版，1.5T，黑色，参考价10.88万。您这次预算大概多少？我帮您细看看哪台更合适。\", \"intent_tags\": [\"购车咨询\", \"预算咨询\", \"车型推荐\"], \"tone_tags\": [\"友好\", \"专业\"], \"linked_categories\": [\"轿车\"], \"linked_item_ids\": [\"audi_a4l_2020_40tfsi_fashion\", \"hon",
+    "content_sha256": "1707e02ae778fea7b0ed58d770841d238a7b62c0268284cf7ca4b8f550044bd7",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_215d22cd429897d4e38d",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_ffec8353a0e90387a8da",
+      "raw_msg_2d93f613b21226395a74",
+      "raw_msg_1bf0f5618b6cc8a20ab4"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_cf2bc43eb2c982f9",
+        "source_id": "source_6e942101e506db4d",
+        "score": 0.905,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.505,
+          "semantic": 0.27,
+          "vector": 0.14,
+          "vector_similarity": 0.9596,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.905
+        },
+        "text": "[2026-05-04 02:48:00] system: 02:48\n[2026-05-04T02:48:49] 许聪: 我只想要一台便宜、省心、不折腾的车\n[2026-05-04T02:48:49] self: [车金AI] 明白了，您想要年轻运动一点的轿车，动力别太弱。店里有两台挺对味的：2020款奥迪A4L 40TFSI时尚动感型，2.0T，黑色，参考价15.88万；还有2020款本田雅阁260TURBO精英版，1.5T，黑色，参考价10.88万。您这次预算大概多少？我帮您细看看哪台更合适。"
+      },
+      {
+        "chunk_id": "chunk_a3b1d42f7ca6ba6d",
+        "source_id": "source_a7430743de93dc38",
+        "score": 0.5703,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2769,
+          "semantic": 0.1708,
+          "vector": 0.1326,
+          "vector_similarity": 0.7368,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.5703
+        },
+        "text": "[2026-05-04T02:45:54] self: [车金AI] 好停好开的新能源，店里有两台挺合适的：一台2021款特斯拉Model 3标准续航，纯电、车身紧凑带辅助驾驶，参考价13.98万；另一台2022款比亚迪秦PLUS DM-i 55KM，插混省油，车身也不大，参考价8.68万。您这次给老婆开，预算大概多少？我帮您细看看哪台更符合。\n[2026-05-04T02:45:54] 许聪: 我想买个年轻点的轿车，别太肉"
+      },
+      {
+        "chunk_id": "chunk_99cc4e7f8c7061b0",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5603,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2101,
+          "semantic": 0.1418,
+          "vector": 0.1385,
+          "vector_similarity": 0.7693,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5603
+        },
+        "text": "、提档、当地新能源指标和运输方式。\n售后/风险：电池健康、辅助驾驶功能和官方权益以检测报告及账号核验为准。\n推荐话术：适合想体验纯电、智能化和低用车成本的客户，电池和权益必须人工确认。\n商品名称：2020款奥迪A4L 40TFSI时尚动感型\n型号/SKU：CHEJIN-A4L-2020\n类目：二手车/豪华轿车\n关键词：奥迪A4L、A4L、豪华轿车、婚庆、商务\n规格：2020年上牌，表显6.8万公里，2.0T自动挡，黑色，保养记录较完整。\n价格：15.88万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档"
+      },
+      {
+        "chunk_id": "chunk_d2ec0cebcf16c10c",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5545,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2082,
+          "semantic": 0.141,
+          "vector": 0.1353,
+          "vector_similarity": 0.7515,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5545
+        },
+        "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_2b251225b9d25f92f44d",
+    "experience_id": "rag_exp_2b251225b9d25f92f44d"
+  },
+  "detected_tags": [
+    "discount",
+    "llm",
+    "rag_experience",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "chats",
+    "change_type": "llm_upsert_chats",
+    "summary": "客户询问便宜省心不折腾的车，客服推荐奥迪A4L和雅阁",
+    "suggested_fields": {
+      "customer_message": "我只想要一台便宜、省心、不折腾的车",
+      "service_reply": "[车金AI] 明白了，您想要年轻运动一点的轿车，动力别太弱。店里有两台挺对味的：2020款奥迪A4L 40TFSI时尚动感型，2.0T，黑色，参考价15.88万；还有2020款本田雅阁260TURBO精英版，1.5T，黑色，参考价10.88万。您这次预算大概多少？我帮您细看看哪台更合适。",
+      "intent_tags": [
+        "购车咨询",
+        "预算咨询",
+        "车型推荐"
+      ],
+      "tone_tags": [
+        "友好",
+        "专业"
+      ],
+      "linked_categories": [
+        "轿车"
+      ],
+      "linked_item_ids": [
+        "audi_a4l_2020_40tfsi_fashion",
+        "honda_accord_2020_260turbo_elite"
+      ],
+      "applicability_scope": "specific_product",
+      "product_id": "audi_a4l_2020_40tfsi_fashion",
+      "product_category": "",
+      "usable_as_template": true,
+      "additional_details": {
+        "assistant_name": "车金AI",
+        "context": "客户表达了对便宜省心车辆的需求，客服主动询问预算并推荐两款轿车",
+        "原始资料摘录": "{\"customer_message\": \"我只想要一台便宜、省心、不折腾的车\", \"service_reply\": \"[车金AI] 明白了，您想要年轻运动一点的轿车，动力别太弱。店里有两台挺对味的：2020款奥迪A4L 40TFSI时尚动感型，2.0T，黑色，参考价15.88万；还有2020款本田雅阁260TURBO精英版，1.5T，黑色，参考价10.88万。您这次预算大概多少？我帮您细看看哪台更合适。\", \"intent_tags\": [\"购车咨询\", \"预算咨询\", \"车型推荐\"], \"tone_tags\": [\"友好\", \"专业\"], \"linked_categories\": [\"轿车\"], \"linked_item_ids\": [\"audi_a4l_2020_40tfsi_fashion\", \"hon"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "chats",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "chats",
+        "id": "cheap_reliable_car_chat_20260504",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_215d22cd429897d4e38d.txt",
+          "candidate_id": "raw_fd4b7b0f51dd3efe",
+          "rag_experience_id": "rag_exp_2b251225b9d25f92f44d",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "customer_message": "我只想要一台便宜、省心、不折腾的车",
+          "service_reply": "[车金AI] 明白了，您想要年轻运动一点的轿车，动力别太弱。店里有两台挺对味的：2020款奥迪A4L 40TFSI时尚动感型，2.0T，黑色，参考价15.88万；还有2020款本田雅阁260TURBO精英版，1.5T，黑色，参考价10.88万。您这次预算大概多少？我帮您细看看哪台更合适。",
+          "intent_tags": [
+            "购车咨询",
+            "预算咨询",
+            "车型推荐"
+          ],
+          "tone_tags": [
+            "友好",
+            "专业"
+          ],
+          "linked_categories": [
+            "轿车"
+          ],
+          "linked_item_ids": [
+            "audi_a4l_2020_40tfsi_fashion",
+            "honda_accord_2020_260turbo_elite"
+          ],
+          "applicability_scope": "specific_product",
+          "product_id": "audi_a4l_2020_40tfsi_fashion",
+          "product_category": "",
+          "usable_as_template": true,
+          "additional_details": {
+            "assistant_name": "车金AI",
+            "context": "客户表达了对便宜省心车辆的需求，客服主动询问预算并推荐两款轿车",
+            "原始资料摘录": "{\"customer_message\": \"我只想要一台便宜、省心、不折腾的车\", \"service_reply\": \"[车金AI] 明白了，您想要年轻运动一点的轿车，动力别太弱。店里有两台挺对味的：2020款奥迪A4L 40TFSI时尚动感型，2.0T，黑色，参考价15.88万；还有2020款本田雅阁260TURBO精英版，1.5T，黑色，参考价10.88万。您这次预算大概多少？我帮您细看看哪台更合适。\", \"intent_tags\": [\"购车咨询\", \"预算咨询\", \"车型推荐\"], \"tone_tags\": [\"友好\", \"专业\"], \"linked_categories\": [\"轿车\"], \"linked_item_ids\": [\"audi_a4l_2020_40tfsi_fashion\", \"hon"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "assistant_name",
+      "context",
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "pending",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_215d22cd429897d4e38d",
+    "source_raw_message_ids": [
+      "raw_msg_ffec8353a0e90387a8da",
+      "raw_msg_2d93f613b21226395a74",
+      "raw_msg_1bf0f5618b6cc8a20ab4"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_6e942101e506db4d",
+      "chunk_count": 1,
+      "query": "客户询问便宜省心不折腾的车，客服推荐奥迪A4L和雅阁\n{\"customer_message\": \"我只想要一台便宜、省心、不折腾的车\", \"service_reply\": \"[车金AI] 明白了，您想要年轻运动一点的轿车，动力别太弱。店里有两台挺对味的：2020款奥迪A4L 40TFSI时尚动感型，2.0T，黑色，参考价15.88万；还有2020款本田雅阁260TURBO精英版，1.5T，黑色，参考价10.88万。您这次预算大概多少？我帮您细看看哪台更合适。\", \"intent_tags\": [\"购车咨询\", \"预算咨询\", \"车型推荐\"], \"tone_tags\": [\"友好\", \"专业\"], \"linked_categories\": [\"轿车\"], \"linked_item_ids\": [\"audi_a4l_2020_40tfsi_fashion\", \"hon\n[车金AI] 明白了，您想要年轻运动一点的轿车，动力别太弱。店里有两台挺对味的：2020款奥迪A4L 40TFSI时尚动感型，2.0T，黑色，参考价15.88万；还有2020款本田雅阁260TURBO精英版，1.5T，黑色，参考价10.88万。您这次预算大概多少？我帮您细看看哪台更合适。",
+      "hits": [
+        {
+          "chunk_id": "chunk_cf2bc43eb2c982f9",
+          "source_id": "source_6e942101e506db4d",
+          "score": 0.905,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.505,
+            "semantic": 0.27,
+            "vector": 0.14,
+            "vector_similarity": 0.9596,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.905
+          },
+          "text": "[2026-05-04 02:48:00] system: 02:48\n[2026-05-04T02:48:49] 许聪: 我只想要一台便宜、省心、不折腾的车\n[2026-05-04T02:48:49] self: [车金AI] 明白了，您想要年轻运动一点的轿车，动力别太弱。店里有两台挺对味的：2020款奥迪A4L 40TFSI时尚动感型，2.0T，黑色，参考价15.88万；还有2020款本田雅阁260TURBO精英版，1.5T，黑色，参考价10.88万。您这次预算大概多少？我帮您细看看哪台更合适。"
+        },
+        {
+          "chunk_id": "chunk_a3b1d42f7ca6ba6d",
+          "source_id": "source_a7430743de93dc38",
+          "score": 0.5703,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2769,
+            "semantic": 0.1708,
+            "vector": 0.1326,
+            "vector_similarity": 0.7368,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.5703
+          },
+          "text": "[2026-05-04T02:45:54] self: [车金AI] 好停好开的新能源，店里有两台挺合适的：一台2021款特斯拉Model 3标准续航，纯电、车身紧凑带辅助驾驶，参考价13.98万；另一台2022款比亚迪秦PLUS DM-i 55KM，插混省油，车身也不大，参考价8.68万。您这次给老婆开，预算大概多少？我帮您细看看哪台更符合。\n[2026-05-04T02:45:54] 许聪: 我想买个年轻点的轿车，别太肉"
+        },
+        {
+          "chunk_id": "chunk_99cc4e7f8c7061b0",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5603,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2101,
+            "semantic": 0.1418,
+            "vector": 0.1385,
+            "vector_similarity": 0.7693,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5603
+          },
+          "text": "、提档、当地新能源指标和运输方式。\n售后/风险：电池健康、辅助驾驶功能和官方权益以检测报告及账号核验为准。\n推荐话术：适合想体验纯电、智能化和低用车成本的客户，电池和权益必须人工确认。\n商品名称：2020款奥迪A4L 40TFSI时尚动感型\n型号/SKU：CHEJIN-A4L-2020\n类目：二手车/豪华轿车\n关键词：奥迪A4L、A4L、豪华轿车、婚庆、商务\n规格：2020年上牌，表显6.8万公里，2.0T自动挡，黑色，保养记录较完整。\n价格：15.88万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档"
+        },
+        {
+          "chunk_id": "chunk_d2ec0cebcf16c10c",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5545,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2082,
+            "semantic": 0.141,
+            "vector": 0.1353,
+            "vector_similarity": 0.7515,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5545
+          },
+          "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_2b251225b9d25f92f44d",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ]
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

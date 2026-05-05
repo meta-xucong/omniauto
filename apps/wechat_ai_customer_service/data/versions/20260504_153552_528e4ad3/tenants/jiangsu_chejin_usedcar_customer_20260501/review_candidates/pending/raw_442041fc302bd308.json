@@ -1,0 +1,296 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_442041fc302bd308",
+  "generated_at": "2026-05-03T04:39:23",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\chats\\upload_1aa69c592036ab5c_chejin_chats_CHEJIN_20260503_043922.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "customer_message: 我有一台老朗逸想置换。；service_reply: 可以的，麻烦补充上牌年份、公里数、车况、所在城市和是否有贷款，我先帮您记录，评估价需要人工复核。",
+    "content_sha256": "147404dabda5d09136c3ae4b788548b8cc544c2c805d7b1f50126cdfdaa372a7",
+    "type": "rag_experience",
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_98d495755714a154",
+        "source_id": "source_25f67e9fcaeb0195",
+        "score": 0.9379,
+        "category": "chats",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.521,
+          "semantic": 0.2769,
+          "vector": 0.14,
+          "vector_similarity": 0.8208,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.0,
+          "risk_penalty": 0.0,
+          "final": 0.9379
+        },
+        "text": "聊天记录：江苏车金预算推荐话术 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_043922\n客户：我从抖音直播来的，8万左右想买自动挡省油代步车，有什么推荐？\n客服：您这个预算可以先看凯美瑞、思域和秦PLUS DM-i。凯美瑞偏家用稳、省心；思域更年轻；秦PLUS更省油。您是在南京看车吗？是否考虑贷款或置换？\n意图标签：预算推荐,车源推荐,抖音线索\n聊天记录：江苏车金置换话术 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_04392"
+      },
+      {
+        "chunk_id": "chunk_320caa1062c4cf21",
+        "source_id": "source_55cce0d21fe7898c",
+        "score": 0.4521,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1728,
+          "semantic": 0.1256,
+          "vector": 0.1288,
+          "vector_similarity": 0.7153,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.025,
+          "risk_penalty": 0.0,
+          "final": 0.4521
+        },
+        "text": "公里，2.0T自动挡，一手车源，支持到店试驾。\n价格：12.80万\n单位：台\n库存：1\n发货：高意向试驾需转人工确认门店和时间。\n售后：精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。\n商品资料：江苏车金二手车车源 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_043922\n商品名称：2022款比亚迪秦PLUS DM-i 55KM\n型号：CHEJIN-QINPLUS-2022DMI\n商品类目：二手车/新能源轿车\n别名关键词：秦PLUS,比亚迪秦,新能源,绿牌,混"
+      },
+      {
+        "chunk_id": "chunk_9c80524ef6f05098",
+        "source_id": "source_46ade21c94a25215",
+        "score": 0.4233,
+        "category": "file_transfer",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1919,
+          "semantic": 0.1339,
+          "vector": 0.1075,
+          "vector_similarity": 0.5972,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.4233
+        },
+        "text": "[2026-05-02 04:25:00] system: 04:25\n[2026-05-02T04:25:43] self: 聊天记录：记录员文件传输助手话术 LIVE_RECORDER_20260502_042340\n客户：我想买新能源通勤，能看秦PLUS吗？批次 LIVE_RECORDER_20260502_042340\n客服：可以先看秦PLUS DM-i，低油耗适合通勤；电池检测、当地迁入和金融方案都需要人工确认。\n意图标签：新能源通勤,车源推荐,金融边界"
+      },
+      {
+        "chunk_id": "chunk_899511b64b2f5970",
+        "source_id": "source_98b8438d7f65da3a",
+        "score": 0.3948,
+        "category": "group",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1696,
+          "semantic": 0.1242,
+          "vector": 0.1111,
+          "vector_similarity": 0.617,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.3948
+        },
+        "text": "[2026-05-02 04:24:00] system: 04:24\n[2026-05-02T04:24:20] self: 商品资料：记录员正常产品 LIVE_RECORDER_20260502_042340\n测试批次：LIVE_RECORDER_20260502_042340\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号：CHEJIN-LIVE-GL8-2020ES\n商品类目：二手车/MPV\n价格：17.66万\n单位：台\n库存：1\n发货：南京门店可看车，商务客户试乘需人工确认\n售后：车况以检测"
+      }
+    ],
+    "original_type": "raw_upload",
+    "original_channel": "knowledge_upload",
+    "rag_experience_id": "rag_exp_c340ad6335c978c0f8a5",
+    "experience_id": "rag_exp_c340ad6335c978c0f8a5"
+  },
+  "detected_tags": [
+    "chat",
+    "rag_experience",
+    "style"
+  ],
+  "proposal": {
+    "target_category": "chats",
+    "change_type": "upsert_chat_example",
+    "summary": "建议沉淀一条客服话术样例",
+    "suggested_fields": {
+      "customer_message": "我有一台老朗逸想置换。",
+      "service_reply": "可以的，麻烦补充上牌年份、公里数、车况、所在城市和是否有贷款，我先帮您记录，评估价需要人工复核。",
+      "intent_tags": [
+        "chat"
+      ],
+      "tone_tags": [
+        "真实客服话术"
+      ],
+      "usable_as_template": true,
+      "applicability_scope": "global",
+      "additional_details": {
+        "原始资料摘录": "customer_message: 我有一台老朗逸想置换。；service_reply: 可以的，麻烦补充上牌年份、公里数、车况、所在城市和是否有贷款，我先帮您记录，评估价需要人工复核。"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "chats",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "chats",
+        "id": "chat_36ee1c31de",
+        "status": "active",
+        "source": {
+          "type": "raw_upload",
+          "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\chats\\upload_1aa69c592036ab5c_chejin_chats_CHEJIN_20260503_043922.txt",
+          "candidate_id": "raw_442041fc302bd308",
+          "rag_experience_id": "rag_exp_c340ad6335c978c0f8a5",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_upload"
+        },
+        "data": {
+          "customer_message": "我有一台老朗逸想置换。",
+          "service_reply": "可以的，麻烦补充上牌年份、公里数、车况、所在城市和是否有贷款，我先帮您记录，评估价需要人工复核。",
+          "intent_tags": [
+            "chat"
+          ],
+          "tone_tags": [
+            "真实客服话术"
+          ],
+          "usable_as_template": true,
+          "applicability_scope": "global",
+          "additional_details": {
+            "原始资料摘录": "customer_message: 我有一台老朗逸想置换。；service_reply: 可以的，麻烦补充上牌年份、公里数、车况、所在城市和是否有贷款，我先帮您记录，评估价需要人工复核。"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": false,
+          "requires_handoff": true,
+          "risk_level": "warning"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "pending",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": false,
+      "provider": "",
+      "status": "rule_only_disabled_by_request",
+      "reason": "llm_disabled_by_caller",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_upload_id": "upload_1aa69c592036ab5c",
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_25f67e9fcaeb0195",
+      "chunk_count": 1,
+      "query": "建议沉淀一条客服话术样例\ncustomer_message: 我有一台老朗逸想置换。；service_reply: 可以的，麻烦补充上牌年份、公里数、车况、所在城市和是否有贷款，我先帮您记录，评估价需要人工复核。\n可以的，麻烦补充上牌年份、公里数、车况、所在城市和是否有贷款，我先帮您记录，评估价需要人工复核。",
+      "hits": [
+        {
+          "chunk_id": "chunk_98d495755714a154",
+          "source_id": "source_25f67e9fcaeb0195",
+          "score": 0.9379,
+          "category": "chats",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.521,
+            "semantic": 0.2769,
+            "vector": 0.14,
+            "vector_similarity": 0.8208,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.0,
+            "risk_penalty": 0.0,
+            "final": 0.9379
+          },
+          "text": "聊天记录：江苏车金预算推荐话术 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_043922\n客户：我从抖音直播来的，8万左右想买自动挡省油代步车，有什么推荐？\n客服：您这个预算可以先看凯美瑞、思域和秦PLUS DM-i。凯美瑞偏家用稳、省心；思域更年轻；秦PLUS更省油。您是在南京看车吗？是否考虑贷款或置换？\n意图标签：预算推荐,车源推荐,抖音线索\n聊天记录：江苏车金置换话术 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_04392"
+        },
+        {
+          "chunk_id": "chunk_320caa1062c4cf21",
+          "source_id": "source_55cce0d21fe7898c",
+          "score": 0.4521,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1728,
+            "semantic": 0.1256,
+            "vector": 0.1288,
+            "vector_similarity": 0.7153,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.025,
+            "risk_penalty": 0.0,
+            "final": 0.4521
+          },
+          "text": "公里，2.0T自动挡，一手车源，支持到店试驾。\n价格：12.80万\n单位：台\n库存：1\n发货：高意向试驾需转人工确认门店和时间。\n售后：精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。\n商品资料：江苏车金二手车车源 CHEJIN_20260503_043922\n测试批次：CHEJIN_20260503_043922\n商品名称：2022款比亚迪秦PLUS DM-i 55KM\n型号：CHEJIN-QINPLUS-2022DMI\n商品类目：二手车/新能源轿车\n别名关键词：秦PLUS,比亚迪秦,新能源,绿牌,混"
+        },
+        {
+          "chunk_id": "chunk_9c80524ef6f05098",
+          "source_id": "source_46ade21c94a25215",
+          "score": 0.4233,
+          "category": "file_transfer",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1919,
+            "semantic": 0.1339,
+            "vector": 0.1075,
+            "vector_similarity": 0.5972,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.4233
+          },
+          "text": "[2026-05-02 04:25:00] system: 04:25\n[2026-05-02T04:25:43] self: 聊天记录：记录员文件传输助手话术 LIVE_RECORDER_20260502_042340\n客户：我想买新能源通勤，能看秦PLUS吗？批次 LIVE_RECORDER_20260502_042340\n客服：可以先看秦PLUS DM-i，低油耗适合通勤；电池检测、当地迁入和金融方案都需要人工确认。\n意图标签：新能源通勤,车源推荐,金融边界"
+        },
+        {
+          "chunk_id": "chunk_899511b64b2f5970",
+          "source_id": "source_98b8438d7f65da3a",
+          "score": 0.3948,
+          "category": "group",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1696,
+            "semantic": 0.1242,
+            "vector": 0.1111,
+            "vector_similarity": 0.617,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.3948
+          },
+          "text": "[2026-05-02 04:24:00] system: 04:24\n[2026-05-02T04:24:20] self: 商品资料：记录员正常产品 LIVE_RECORDER_20260502_042340\n测试批次：LIVE_RECORDER_20260502_042340\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号：CHEJIN-LIVE-GL8-2020ES\n商品类目：二手车/MPV\n价格：17.66万\n单位：台\n库存：1\n发货：南京门店可看车，商务客户试乘需人工确认\n售后：车况以检测"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_c340ad6335c978c0f8a5",
+    "source_chain": [
+      "raw_upload",
+      "rag_experience",
+      "review_candidate"
+    ]
+  },
+  "suggested_tests": [
+    {
+      "scenario": "style",
+      "assertion": "入库后应只影响回复风格或类似场景表达，不改变事实依据。"
+    }
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "category_id": "products",
+  "id": "chejin_mazda3_2020_20",
+  "status": "active",
+  "source": {
+    "type": "demo_fixture",
+    "batch_token": "CHEJIN_DEMO_20260503_203628",
+    "domain": "used_car"
+  },
+  "data": {
+    "name": "2020款马自达3昂克赛拉2.0L质雅版",
+    "sku": "CHEJIN-MAZDA3-2020",
+    "category": "二手车/紧凑型轿车",
+    "aliases": [
+      "昂克赛拉",
+      "马自达3",
+      "操控",
+      "年轻客户",
+      "2020款马自达3昂克赛拉2.0L质雅版",
+      "CHEJIN-MAZDA3-2020",
+      "CHEJIN_DEMO_20260503_203628"
+    ],
+    "specs": "2020年上牌，表显4.7万公里，2.0L自动挡，红色。",
+    "price": 8.38,
+    "unit": "台",
+    "price_tiers": [
+      {
+        "min_quantity": 1,
+        "unit_price": 8.38
+      }
+    ],
+    "inventory": 1,
+    "shipping_policy": "南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。",
+    "warranty_policy": "漆面、底盘、轮胎和保养以检测报告为准。",
+    "reply_templates": {
+      "默认回复": "适合年轻客户、关注操控和外观的客户。",
+      "报价回复": "这台车当前演示价约 8.38 万，最终成交价、金融方案和费用明细需要人工确认。",
+      "议价回复": "二手车一车一况，AI 可以说明参考价和看车建议，最终优惠、订金和成交条件必须由销售确认。",
+      "物流回复": "南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。",
+      "售后回复": "漆面、底盘、轮胎和保养以检测报告为准。",
+      "内部备注": "演示资料：用于覆盖二手车常见咨询、风险边界和商品专属知识。"
+    },
+    "risk_rules": [
+      "漆面色差说明转人工"
+    ],
+    "additional_details": {
+      "上牌时间": "2020-06",
+      "表显里程": "4.7万公里",
+      "演示状态": "在售"
+    }
+  },
+  "runtime": {
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "risk_level": "normal"
+  },
+  "review_state": {
+    "is_new": true,
+    "new_reason": "newly_added_formal_knowledge",
+    "marked_at": "2026-05-03T20:36:28",
+    "updated_at": "2026-05-03T20:36:28",
+    "read_at": "",
+    "read_by": "",
+    "source": {
+      "source_module": "jiangsu_chejin_demo_seed",
+      "target_category": "products",
+      "item_id": "chejin_mazda3_2020_20"
+    }
+  },
+  "metadata": {
+    "created_at": "2026-05-03T20:36:28",
+    "updated_at": "2026-05-03T20:36:28",
+    "created_by": "admin",
+    "updated_by": "admin"
+  }
+}

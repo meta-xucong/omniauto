@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_01ace21c555b2019",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_b6cba4418af4db8c2392.txt",
+    "content_hash": "d3702e111e04d36f3cfbbe6ced9f8edc",
+    "status": "active",
+    "created_at": "2026-05-03T20:57:04",
+    "updated_at": "2026-05-03T20:57:04"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_8cacf1f23be77b1d",
+      "source_id": "source_01ace21c555b2019",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_b6cba4418af4db8c2392.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-03 19:52:00] system: 19:52\n[2026-05-03 20:56:00] system: 20:56\n[2026-05-03T20:57:04] self: [OmniAuto自测] 这个问题我当前无法直接确认，我先帮您记录并请示上级，稍后给您准确回复。\n[2026-05-03T20:57:04] self: 买7台商用冰箱能按10台价格吗？\n[live-regression:20260503191931:20:1]\n[2026-05-03T20:57:04] self: 客户资料\n姓名：周批次\n电话：13700003333\n地址：广州市天河区测试路3号\n产品：商用冰箱\n数量：7台\n[live-regression:20260503191931:20:2]\n[2026-05-03T20:57:04] self: 我从抖音直播来的，想看秦PLUS或者思域，预算8到9万，最好省油，能不能贷款包过？ CHEJIN_20260503_205541",
+      "char_count": 446,
+      "status": "active",
+      "created_at": "2026-05-03T20:57:04"
+    }
+  ]
+}

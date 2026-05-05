@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_811aa2358e7c4dbd",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_8cd14bfd9c2b6530fc3f.txt",
+    "content_hash": "bf3f699a9c7aa35c69227d28fc02e352",
+    "status": "active",
+    "created_at": "2026-05-04T02:14:10",
+    "updated_at": "2026-05-04T02:14:10"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_b337ce53075b8e8c",
+      "source_id": "source_811aa2358e7c4dbd",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_8cd14bfd9c2b6530fc3f.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-04T02:14:09] 许聪: A4L适合婚庆或者商务接待吗？",
+      "char_count": 41,
+      "status": "active",
+      "created_at": "2026-05-04T02:14:10"
+    }
+  ]
+}

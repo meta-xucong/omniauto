@@ -1,0 +1,310 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_508b1babfb9c0408",
+  "generated_at": "2026-05-04T02:48:00",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_a142dbad518de5daa9c3.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "title: 待分类规则；answer: [2026-05-04T02:45:54] self: [车金AI] 好停好开的新能源，店里有两台挺合适的：一台2021款特斯拉Model 3标准续航，纯电、车身紧凑带辅助驾驶，参考价13.98万；另一台2022款比亚迪秦PLUS DM-i 55KM，插混省油，车身也不大，参考价8.68万。您这次给老婆开，预算大概多少？我帮您细看看哪台更符合。 [2026-05-04T02:45:54] 许聪: 我想买个年轻点的轿车，别太肉；keywords: ['unknown']",
+    "content_sha256": "cfc9812658614e48629149819a063ffbb7aa216e598386f9a3d0f4f005fb57f8",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_a142dbad518de5daa9c3",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_4cf75d25af7ff2540f76",
+      "raw_msg_affac38d1357ab3dbea8"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_a3b1d42f7ca6ba6d",
+        "source_id": "source_a7430743de93dc38",
+        "score": 0.9816,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.5584,
+          "semantic": 0.2932,
+          "vector": 0.14,
+          "vector_similarity": 0.98,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.9816
+        },
+        "text": "[2026-05-04T02:45:54] self: [车金AI] 好停好开的新能源，店里有两台挺合适的：一台2021款特斯拉Model 3标准续航，纯电、车身紧凑带辅助驾驶，参考价13.98万；另一台2022款比亚迪秦PLUS DM-i 55KM，插混省油，车身也不大，参考价8.68万。您这次给老婆开，预算大概多少？我帮您细看看哪台更符合。\n[2026-05-04T02:45:54] 许聪: 我想买个年轻点的轿车，别太肉"
+      },
+      {
+        "chunk_id": "chunk_d2ec0cebcf16c10c",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5756,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2197,
+          "semantic": 0.1459,
+          "vector": 0.14,
+          "vector_similarity": 0.8127,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5756
+        },
+        "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+      },
+      {
+        "chunk_id": "chunk_9a0d34760ad6ccae",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5452,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1985,
+          "semantic": 0.1367,
+          "vector": 0.14,
+          "vector_similarity": 0.8082,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5452
+        },
+        "text": "工确认。\n售后/风险：CVT变速箱状态、保养和车况以检测报告为准。\n推荐话术：适合6到7万预算、练手、家用代步和省油需求。\n商品名称：2019款大众朗逸1.5L自动舒适版\n型号/SKU：CHEJIN-LAVIDA-2019\n类目：二手车/紧凑型轿车\n关键词：朗逸、大众朗逸、德系代步、置换\n规格：2019年上牌，表显6.9万公里，1.5L自动挡，白色，通勤耐用。\n价格：5.98万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：易损件和保养历史以"
+      },
+      {
+        "chunk_id": "chunk_99cc4e7f8c7061b0",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5342,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1908,
+          "semantic": 0.1334,
+          "vector": 0.14,
+          "vector_similarity": 0.7897,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5342
+        },
+        "text": "、提档、当地新能源指标和运输方式。\n售后/风险：电池健康、辅助驾驶功能和官方权益以检测报告及账号核验为准。\n推荐话术：适合想体验纯电、智能化和低用车成本的客户，电池和权益必须人工确认。\n商品名称：2020款奥迪A4L 40TFSI时尚动感型\n型号/SKU：CHEJIN-A4L-2020\n类目：二手车/豪华轿车\n关键词：奥迪A4L、A4L、豪华轿车、婚庆、商务\n规格：2020年上牌，表显6.8万公里，2.0T自动挡，黑色，保养记录较完整。\n价格：15.88万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_f1552ce90ab06d44f9c9",
+    "experience_id": "rag_exp_f1552ce90ab06d44f9c9"
+  },
+  "detected_tags": [
+    "rag_experience",
+    "unknown",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "policies",
+    "change_type": "upsert_policy",
+    "summary": "建议新增/更新政策规则：待分类规则",
+    "suggested_fields": {
+      "title": "待分类规则",
+      "policy_type": "other",
+      "keywords": [
+        "unknown"
+      ],
+      "answer": "[2026-05-04T02:45:54] self: [车金AI] 好停好开的新能源，店里有两台挺合适的：一台2021款特斯拉Model 3标准续航，纯电、车身紧凑带辅助驾驶，参考价13.98万；另一台2022款比亚迪秦PLUS DM-i 55KM，插混省油，车身也不大，参考价8.68万。您这次给老婆开，预算大概多少？我帮您细看看哪台更符合。 [2026-05-04T02:45:54] 许聪: 我想买个年轻点的轿车，别太肉",
+      "allow_auto_reply": true,
+      "requires_handoff": false,
+      "operator_alert": false,
+      "risk_level": "normal",
+      "applicability_scope": "global",
+      "additional_details": {
+        "原始资料摘录": "title: 待分类规则；answer: [2026-05-04T02:45:54] self: [车金AI] 好停好开的新能源，店里有两台挺合适的：一台2021款特斯拉Model 3标准续航，纯电、车身紧凑带辅助驾驶，参考价13.98万；另一台2022款比亚迪秦PLUS DM-i 55KM，插混省油，车身也不大，参考价8.68万。您这次给老婆开，预算大概多少？我帮您细看看哪台更符合。 [2026-05-04T02:45:54] 许聪: 我想买个年轻点的轿车，别太肉；keywords: ['unknown']"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "policies",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "policies",
+        "id": "item_9d191214e894",
+        "status": "active",
+        "source": {
+          "type": "raw_upload",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_a142dbad518de5daa9c3.txt",
+          "candidate_id": "raw_508b1babfb9c0408",
+          "rag_experience_id": "rag_exp_f1552ce90ab06d44f9c9",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "title": "待分类规则",
+          "policy_type": "other",
+          "keywords": [
+            "unknown"
+          ],
+          "answer": "[2026-05-04T02:45:54] self: [车金AI] 好停好开的新能源，店里有两台挺合适的：一台2021款特斯拉Model 3标准续航，纯电、车身紧凑带辅助驾驶，参考价13.98万；另一台2022款比亚迪秦PLUS DM-i 55KM，插混省油，车身也不大，参考价8.68万。您这次给老婆开，预算大概多少？我帮您细看看哪台更符合。 [2026-05-04T02:45:54] 许聪: 我想买个年轻点的轿车，别太肉",
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "operator_alert": false,
+          "risk_level": "normal",
+          "applicability_scope": "global",
+          "additional_details": {
+            "原始资料摘录": "title: 待分类规则；answer: [2026-05-04T02:45:54] self: [车金AI] 好停好开的新能源，店里有两台挺合适的：一台2021款特斯拉Model 3标准续航，纯电、车身紧凑带辅助驾驶，参考价13.98万；另一台2022款比亚迪秦PLUS DM-i 55KM，插混省油，车身也不大，参考价8.68万。您这次给老婆开，预算大概多少？我帮您细看看哪台更符合。 [2026-05-04T02:45:54] 许聪: 我想买个年轻点的轿车，别太肉；keywords: ['unknown']"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "rejected",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "",
+      "status": "rule_fallback_after_llm",
+      "reason": "policies_rules_used_after_llm_unavailable_or_invalid",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_a142dbad518de5daa9c3",
+    "source_raw_message_ids": [
+      "raw_msg_4cf75d25af7ff2540f76",
+      "raw_msg_affac38d1357ab3dbea8"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_a7430743de93dc38",
+      "chunk_count": 1,
+      "query": "建议新增/更新政策规则：待分类规则\ntitle: 待分类规则；answer: [2026-05-04T02:45:54] self: [车金AI] 好停好开的新能源，店里有两台挺合适的：一台2021款特斯拉Model 3标准续航，纯电、车身紧凑带辅助驾驶，参考价13.98万；另一台2022款比亚迪秦PLUS DM-i 55KM，插混省油，车身也不大，参考价8.68万。您这次给老婆开，预算大概多少？我帮您细看看哪台更符合。 [2026-05-04T02:45:54] 许聪: 我想买个年轻点的轿车，别太肉；keywords: ['unknown']\n待分类规则\n[2026-05-04T02:45:54] self: [车金AI] 好停好开的新能源，店里有两台挺合适的：一台2021款特斯拉Model 3标准续航，纯电、车身紧凑带辅助驾驶，参考价13.98万；另一台2022款比亚迪秦PLUS DM-i 55KM，插混省油，车身也不大，参考价8.68万。您这次给老婆开，预算大概多少？我帮您细看看哪台更符合。 [2026-05-04T02:45:54] 许聪: 我想买个年轻点的轿车，别太肉",
+      "hits": [
+        {
+          "chunk_id": "chunk_a3b1d42f7ca6ba6d",
+          "source_id": "source_a7430743de93dc38",
+          "score": 0.9816,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.5584,
+            "semantic": 0.2932,
+            "vector": 0.14,
+            "vector_similarity": 0.98,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.9816
+          },
+          "text": "[2026-05-04T02:45:54] self: [车金AI] 好停好开的新能源，店里有两台挺合适的：一台2021款特斯拉Model 3标准续航，纯电、车身紧凑带辅助驾驶，参考价13.98万；另一台2022款比亚迪秦PLUS DM-i 55KM，插混省油，车身也不大，参考价8.68万。您这次给老婆开，预算大概多少？我帮您细看看哪台更符合。\n[2026-05-04T02:45:54] 许聪: 我想买个年轻点的轿车，别太肉"
+        },
+        {
+          "chunk_id": "chunk_d2ec0cebcf16c10c",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5756,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2197,
+            "semantic": 0.1459,
+            "vector": 0.14,
+            "vector_similarity": 0.8127,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5756
+          },
+          "text": "8.68万，库存：1台\n物流/过户：新能源车需人工确认当地迁入政策、电池检测报告和充电条件。\n售后/风险：三电质保、动力电池检测和厂家权益以报告和厂家政策为准。\n推荐话术：适合通勤、省油、绿牌需求和网约车咨询，但三电与迁入政策需人工复核。\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号/SKU：CHEJIN-GL8-2020ES653T\n类目：二手车/MPV\n关键词：GL8、别克GL8、商务接待、七座、MPV\n规格：2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。\n价格：17.60万"
+        },
+        {
+          "chunk_id": "chunk_9a0d34760ad6ccae",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5452,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1985,
+            "semantic": 0.1367,
+            "vector": 0.14,
+            "vector_similarity": 0.8082,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5452
+          },
+          "text": "工确认。\n售后/风险：CVT变速箱状态、保养和车况以检测报告为准。\n推荐话术：适合6到7万预算、练手、家用代步和省油需求。\n商品名称：2019款大众朗逸1.5L自动舒适版\n型号/SKU：CHEJIN-LAVIDA-2019\n类目：二手车/紧凑型轿车\n关键词：朗逸、大众朗逸、德系代步、置换\n规格：2019年上牌，表显6.9万公里，1.5L自动挡，白色，通勤耐用。\n价格：5.98万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：易损件和保养历史以"
+        },
+        {
+          "chunk_id": "chunk_99cc4e7f8c7061b0",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5342,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1908,
+            "semantic": 0.1334,
+            "vector": 0.14,
+            "vector_similarity": 0.7897,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5342
+          },
+          "text": "、提档、当地新能源指标和运输方式。\n售后/风险：电池健康、辅助驾驶功能和官方权益以检测报告及账号核验为准。\n推荐话术：适合想体验纯电、智能化和低用车成本的客户，电池和权益必须人工确认。\n商品名称：2020款奥迪A4L 40TFSI时尚动感型\n型号/SKU：CHEJIN-A4L-2020\n类目：二手车/豪华轿车\n关键词：奥迪A4L、A4L、豪华轿车、婚庆、商务\n规格：2020年上牌，表显6.8万公里，2.0T自动挡，黑色，保养记录较完整。\n价格：15.88万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_f1552ce90ab06d44f9c9",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "rejected_at": "2026-05-04T15:24:46",
+    "reason": "?????????????AI/??????????????????????????????????????????AI????"
+  },
+  "suggested_tests": [
+    {
+      "scenario": "other",
+      "assertion": "入库后应能按关键词回答该政策；高风险内容必须转人工。"
+    }
+  ]
+}

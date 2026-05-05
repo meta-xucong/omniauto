@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_0ed2b6bda566abcd",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_1a4b0384bbe8b33dc2c1.txt",
+    "content_hash": "2c21ce0ba57199775069c20269aad73c",
+    "status": "active",
+    "created_at": "2026-05-03T20:48:06",
+    "updated_at": "2026-05-03T20:48:06"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_495c5ee3f41e5def",
+      "source_id": "source_0ed2b6bda566abcd",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_1a4b0384bbe8b33dc2c1.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-03T20:48:06] self: 宝马320Li那台今天能到店试驾吗 CHEJIN_DEMO_20260503_204800",
+      "char_count": 73,
+      "status": "active",
+      "created_at": "2026-05-03T20:48:06"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_acda00c2f371ad35",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_ac214dc70fe2a8e60a95.txt",
+    "content_hash": "41059803fa60c54fe3fbc2224e650091",
+    "status": "active",
+    "created_at": "2026-05-04T03:42:17",
+    "updated_at": "2026-05-04T03:42:17"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_e39f7b1a98d192a5",
+      "source_id": "source_acda00c2f371ad35",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_ac214dc70fe2a8e60a95.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-04T03:42:16] 许聪: 合同能不能写成别的价格？\n[2026-05-04T03:42:16] self: [车金AI] 发票金额要根据实际交易开，能不能少开一点，得让销售同事结合成交方式确认，我这边没法直接答复。我马上帮您转给销售对接，方便的话留个电话，他好第一时间联系您说明白。",
+      "char_count": 154,
+      "status": "active",
+      "created_at": "2026-05-04T03:42:17"
+    }
+  ]
+}

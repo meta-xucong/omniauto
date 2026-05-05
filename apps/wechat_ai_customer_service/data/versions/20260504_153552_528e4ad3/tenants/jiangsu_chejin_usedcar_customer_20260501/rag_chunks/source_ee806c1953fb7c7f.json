@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_ee806c1953fb7c7f",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "group",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_d96dd32eb28526631113.txt",
+    "content_hash": "2ac0276badf37305d9db904bf3cbd585",
+    "status": "active",
+    "created_at": "2026-05-03T09:33:13",
+    "updated_at": "2026-05-03T09:33:13"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_d52cbf862699a112",
+      "source_id": "source_ee806c1953fb7c7f",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "group",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_d96dd32eb28526631113.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-03 09:32:00] system: 09:32\n[2026-05-03T09:33:13] self: 商品资料：记录员正常产品 LIVE_RECORDER_20260503_093238\n测试批次：LIVE_RECORDER_20260503_093238\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号：CHEJIN-LIVE-GL8-2020ES\n商品类目：二手车/MPV\n价格：17.66万\n单位：台\n库存：1\n发货：南京门店可看车，商务客户试乘需人工确认\n售后：车况以检测报告为准，事故、水泡、火烧承诺必须人工确认",
+      "char_count": 281,
+      "status": "active",
+      "created_at": "2026-05-03T09:33:13"
+    }
+  ]
+}

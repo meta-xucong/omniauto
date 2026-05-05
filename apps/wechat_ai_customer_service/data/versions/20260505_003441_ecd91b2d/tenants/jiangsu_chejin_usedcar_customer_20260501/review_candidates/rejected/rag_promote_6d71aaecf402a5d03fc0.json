@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "candidate_id": "rag_promote_6d71aaecf402a5d03fc0",
+  "generated_at": "2026-05-03T00:01:06",
+  "source": {
+    "type": "rag_experience",
+    "experience_id": "rag_exp_78785b6f2855b8517269",
+    "rag_hit": {},
+    "evidence_excerpt": "Intake -> RAG experience: raw_wechat_group/group, candidates=1, evidence={\"name\": \"2020款别克GL8 ES陆尊653T豪华型\", \"sku\": \"CHEJIN-LIVE-GL8-2020ES\", \"category\": \"二手车/MPV\", \"pri…\n{\"name\": \"2020款别克GL8 ES陆尊653T豪华型\", \"sku\": \"CHEJIN-LIVE-GL8-2020ES\", \"category\": \"二手车/MPV\", \"price\": 17.66, \"unit\": \"台\", \"inventory\": 1, \"shipping_policy\": \"南京门店可看车，商务客户试乘需人工确认\", \"warranty_policy\": \"车况以检测报告为准，事故、水泡、火烧承诺必须人工确认\", \"additional_details\": {\"batch\": \"LIVE_RECORDER_20260502_042340\"}, \"price_tiers\": [{\"min_quantity\": 1.0, \"unit_price\": 17.66}]}"
+  },
+  "detected_tags": [
+    "rag_experience",
+    "chats"
+  ],
+  "proposal": {
+    "target_category": "chats",
+    "change_type": "rag_experience_promote",
+    "summary": "RAG experience -> chats: Intake -> RAG experience: raw_wechat_group/group, candidates=1, evidence={\"name…",
+    "suggested_fields": {
+      "service_reply": "{\"name\": \"2020款别克GL8 ES陆尊653T豪华型\", \"sku\": \"CHEJIN-LIVE-GL8-2020ES\", \"category\": \"二手车/MPV\", \"price\": 17.66, \"unit\": \"台\", \"inventory\": 1, \"shipping_policy\": \"南京门店可看车，商务客户试乘需人工确认\", \"warranty_policy\": \"车况以检测报告为准，事故、水泡、火烧承诺必须人工确认\", \"additional_details\": {\"batch\": \"LIVE_RECORDER_20260502_042340\"}, \"price_tiers\": [{\"min_quantity\": 1.0, \"unit_price\": 17.66}]}",
+      "intent_tags": [
+        "rag_experience"
+      ],
+      "tone_tags": [
+        "rag_reference"
+      ],
+      "additional_details": {
+        "rag_experience_id": "rag_exp_78785b6f2855b8517269",
+        "source_chunk_id": null,
+        "source_id": null,
+        "source_text": ""
+      }
+    },
+    "formal_patch": {
+      "target_category": "chats",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "chats",
+        "id": "rag_exp_78785b6f2855b8517269",
+        "status": "active",
+        "source": {
+          "type": "rag_experience",
+          "experience_id": "rag_exp_78785b6f2855b8517269"
+        },
+        "data": {
+          "service_reply": "{\"name\": \"2020款别克GL8 ES陆尊653T豪华型\", \"sku\": \"CHEJIN-LIVE-GL8-2020ES\", \"category\": \"二手车/MPV\", \"price\": 17.66, \"unit\": \"台\", \"inventory\": 1, \"shipping_policy\": \"南京门店可看车，商务客户试乘需人工确认\", \"warranty_policy\": \"车况以检测报告为准，事故、水泡、火烧承诺必须人工确认\", \"additional_details\": {\"batch\": \"LIVE_RECORDER_20260502_042340\"}, \"price_tiers\": [{\"min_quantity\": 1.0, \"unit_price\": 17.66}]}",
+          "intent_tags": [
+            "rag_experience"
+          ],
+          "tone_tags": [
+            "rag_reference"
+          ],
+          "additional_details": {
+            "rag_experience_id": "rag_exp_78785b6f2855b8517269",
+            "source_chunk_id": null,
+            "source_id": null,
+            "source_text": ""
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "review": {
+    "status": "rejected",
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "completeness_status": "ready",
+    "rag_experience_id": "rag_exp_78785b6f2855b8517269",
+    "rejected_at": "2026-05-03T00:09:51",
+    "reason": "????????????????JSON?????????????????SKU???"
+  },
+  "intake": {
+    "status": "ready",
+    "missing_fields": [],
+    "missing_labels": [],
+    "warnings": [],
+    "confidence": 0.72,
+    "question": ""
+  }
+}

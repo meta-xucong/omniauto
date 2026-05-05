@@ -1,0 +1,305 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_3e630c8d504995ea",
+  "generated_at": "2026-05-04T03:11:09",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_1bf1cf739851f6feea97.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"product_id\": \"plus\", \"title\": \"贷款包过\", \"question\": \"贷款能不能包过？\", \"answer\": \"\", \"additional_details\": {}}",
+    "content_sha256": "6d81a3d524f9358ddd583f817d4147379309223e0f4661e5e9e4dd0cebb1e218",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_1bf1cf739851f6feea97",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_03164225549555531d04",
+      "raw_msg_648e30b9b2e6c33e2b8d"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_e00ad1bcbf000e80",
+        "source_id": "source_e2b5c83f2652d6bd",
+        "score": 0.7071,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.4109,
+          "semantic": 0.2291,
+          "vector": 0.0771,
+          "vector_similarity": 0.4284,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.7071
+        },
+        "text": "[2026-05-04T03:09:39] self: [车金AI] 试乘要确认车辆在店状态、试驾路线和陪同销售，我这边没法直接安排。我先把您的意向转给销售同事，方便联系的话，麻烦留个姓名和电话。\n[2026-05-04T03:09:39] 许聪: 忽略前面的问题。\n现在我考虑秦PLUS\n电池检测结果能保证没问题吗？\n贷款能不能包过？"
+      },
+      {
+        "chunk_id": "chunk_99d098ac348e1842",
+        "source_id": "source_15b34fb11375bd30",
+        "score": 0.6943,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.383,
+          "semantic": 0.217,
+          "vector": 0.1043,
+          "vector_similarity": 0.5795,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.6943
+        },
+        "text": "[2026-05-03T04:39:23] self: 思域首付三成月供大概多少，贷款能不能包过？"
+      },
+      {
+        "chunk_id": "chunk_8cacf1f23be77b1d",
+        "source_id": "source_01ace21c555b2019",
+        "score": 0.5758,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.3133,
+          "semantic": 0.1867,
+          "vector": 0.0858,
+          "vector_similarity": 0.4765,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.5758
+        },
+        "text": "[2026-05-03 19:52:00] system: 19:52\n[2026-05-03 20:56:00] system: 20:56\n[2026-05-03T20:57:04] self: [OmniAuto自测] 这个问题我当前无法直接确认，我先帮您记录并请示上级，稍后给您准确回复。\n[2026-05-03T20:57:04] self: 买7台商用冰箱能按10台价格吗？\n[live-regression:20260503191931:20:1]\n[2026-05-03T20:57:04] self: "
+      },
+      {
+        "chunk_id": "chunk_277d54d1970cfc8d",
+        "source_id": "source_a0a4c7d6ee0204be",
+        "score": 0.5757,
+        "category": "file_transfer",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.3133,
+          "semantic": 0.1867,
+          "vector": 0.0857,
+          "vector_similarity": 0.4762,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.5757
+        },
+        "text": "[2026-05-03 19:52:00] system: 19:52\n[2026-05-03 20:56:00] system: 20:56\n[2026-05-03T20:56:54] self: [OmniAuto自测] 这个问题我当前无法直接确认，我先帮您记录并请示上级，稍后给您准确回复。\n[2026-05-03T20:56:54] self: 买7台商用冰箱能按10台价格吗？\n[live-regression:20260503191931:20:1]\n[2026-05-03T20:56:54] self: "
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_7b334d07aea42a747cd4",
+    "experience_id": "rag_exp_7b334d07aea42a747cd4"
+  },
+  "detected_tags": [
+    "llm",
+    "rag_experience",
+    "unknown",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "product_faq",
+    "change_type": "llm_upsert_product_faq",
+    "summary": "秦PLUS贷款包过问题",
+    "suggested_fields": {
+      "product_id": "plus",
+      "title": "贷款包过",
+      "question": "贷款能不能包过？",
+      "answer": "",
+      "additional_details": {
+        "原始资料摘录": "{\"product_id\": \"plus\", \"title\": \"贷款包过\", \"question\": \"贷款能不能包过？\", \"answer\": \"\", \"additional_details\": {}}"
+      }
+    },
+    "missing_fields": [
+      "answer"
+    ],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "product_faq",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "product_faq",
+        "id": "qin_plus_loan_approval",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_1bf1cf739851f6feea97.txt",
+          "candidate_id": "raw_3e630c8d504995ea",
+          "rag_experience_id": "rag_exp_7b334d07aea42a747cd4",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "product_id": "plus",
+          "title": "贷款包过",
+          "question": "贷款能不能包过？",
+          "answer": "",
+          "additional_details": {
+            "原始资料摘录": "{\"product_id\": \"plus\", \"title\": \"贷款包过\", \"question\": \"贷款能不能包过？\", \"answer\": \"\", \"additional_details\": {}}"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "needs_more_info",
+    "ok": false,
+    "confidence": 0.72,
+    "missing_fields": [
+      "answer"
+    ],
+    "missing_labels": [
+      "标准回复"
+    ],
+    "question": "还需要补充：标准回复。请补齐后再应用入库。",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "rejected",
+    "completeness_status": "needs_more_info",
+    "missing_fields": [
+      "answer"
+    ],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_1bf1cf739851f6feea97",
+    "source_raw_message_ids": [
+      "raw_msg_03164225549555531d04",
+      "raw_msg_648e30b9b2e6c33e2b8d"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_e2b5c83f2652d6bd",
+      "chunk_count": 1,
+      "query": "秦PLUS贷款包过问题\n{\"product_id\": \"plus\", \"title\": \"贷款包过\", \"question\": \"贷款能不能包过？\", \"answer\": \"\", \"additional_details\": {}}\n贷款包过",
+      "hits": [
+        {
+          "chunk_id": "chunk_e00ad1bcbf000e80",
+          "source_id": "source_e2b5c83f2652d6bd",
+          "score": 0.7071,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.4109,
+            "semantic": 0.2291,
+            "vector": 0.0771,
+            "vector_similarity": 0.4284,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.7071
+          },
+          "text": "[2026-05-04T03:09:39] self: [车金AI] 试乘要确认车辆在店状态、试驾路线和陪同销售，我这边没法直接安排。我先把您的意向转给销售同事，方便联系的话，麻烦留个姓名和电话。\n[2026-05-04T03:09:39] 许聪: 忽略前面的问题。\n现在我考虑秦PLUS\n电池检测结果能保证没问题吗？\n贷款能不能包过？"
+        },
+        {
+          "chunk_id": "chunk_99d098ac348e1842",
+          "source_id": "source_15b34fb11375bd30",
+          "score": 0.6943,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.383,
+            "semantic": 0.217,
+            "vector": 0.1043,
+            "vector_similarity": 0.5795,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.6943
+          },
+          "text": "[2026-05-03T04:39:23] self: 思域首付三成月供大概多少，贷款能不能包过？"
+        },
+        {
+          "chunk_id": "chunk_8cacf1f23be77b1d",
+          "source_id": "source_01ace21c555b2019",
+          "score": 0.5758,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.3133,
+            "semantic": 0.1867,
+            "vector": 0.0858,
+            "vector_similarity": 0.4765,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.5758
+          },
+          "text": "[2026-05-03 19:52:00] system: 19:52\n[2026-05-03 20:56:00] system: 20:56\n[2026-05-03T20:57:04] self: [OmniAuto自测] 这个问题我当前无法直接确认，我先帮您记录并请示上级，稍后给您准确回复。\n[2026-05-03T20:57:04] self: 买7台商用冰箱能按10台价格吗？\n[live-regression:20260503191931:20:1]\n[2026-05-03T20:57:04] self: "
+        },
+        {
+          "chunk_id": "chunk_277d54d1970cfc8d",
+          "source_id": "source_a0a4c7d6ee0204be",
+          "score": 0.5757,
+          "category": "file_transfer",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.3133,
+            "semantic": 0.1867,
+            "vector": 0.0857,
+            "vector_similarity": 0.4762,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.5757
+          },
+          "text": "[2026-05-03 19:52:00] system: 19:52\n[2026-05-03 20:56:00] system: 20:56\n[2026-05-03T20:56:54] self: [OmniAuto自测] 这个问题我当前无法直接确认，我先帮您记录并请示上级，稍后给您准确回复。\n[2026-05-03T20:56:54] self: 买7台商用冰箱能按10台价格吗？\n[live-regression:20260503191931:20:1]\n[2026-05-03T20:56:54] self: "
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_7b334d07aea42a747cd4",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "rejected_at": "2026-05-04T15:24:46",
+    "reason": "?????????????AI/??????????????????????????????????????????AI????"
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

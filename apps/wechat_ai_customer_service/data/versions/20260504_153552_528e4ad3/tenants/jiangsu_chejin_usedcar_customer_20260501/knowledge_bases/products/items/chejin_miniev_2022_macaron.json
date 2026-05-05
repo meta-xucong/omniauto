@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "category_id": "products",
+  "id": "chejin_miniev_2022_macaron",
+  "status": "active",
+  "source": {
+    "type": "demo_fixture",
+    "batch_token": "CHEJIN_DEMO_20260503_203628",
+    "domain": "used_car"
+  },
+  "data": {
+    "name": "2022款五菱宏光MINIEV马卡龙臻享款",
+    "sku": "CHEJIN-MINIEV-2022",
+    "category": "二手车/微型电动车",
+    "aliases": [
+      "宏光MINIEV",
+      "五菱mini",
+      "代步电车",
+      "练手车",
+      "2022款五菱宏光MINIEV马卡龙臻享款",
+      "CHEJIN-MINIEV-2022",
+      "CHEJIN_DEMO_20260503_203628"
+    ],
+    "specs": "2022年上牌，表显1.6万公里，纯电微型车，粉色，城市通勤。",
+    "price": 2.88,
+    "unit": "台",
+    "price_tiers": [
+      {
+        "min_quantity": 1,
+        "unit_price": 2.88
+      }
+    ],
+    "inventory": 1,
+    "shipping_policy": "微型电动车跨城运输和充电条件需人工确认。",
+    "warranty_policy": "续航、电池和低温表现以检测报告和使用场景说明为准。",
+    "reply_templates": {
+      "默认回复": "适合短途通勤、练手、接送孩子，长途或高速需求不推荐。",
+      "报价回复": "这台车当前演示价约 2.88 万，最终成交价、金融方案和费用明细需要人工确认。",
+      "议价回复": "二手车一车一况，AI 可以说明参考价和看车建议，最终优惠、订金和成交条件必须由销售确认。",
+      "物流回复": "微型电动车跨城运输和充电条件需人工确认。",
+      "售后回复": "续航、电池和低温表现以检测报告和使用场景说明为准。",
+      "内部备注": "演示资料：用于覆盖二手车常见咨询、风险边界和商品专属知识。"
+    },
+    "risk_rules": [
+      "续航承诺禁用",
+      "高速长途需求转人工"
+    ],
+    "additional_details": {
+      "上牌时间": "2022-05",
+      "表显里程": "1.6万公里",
+      "能源类型": "纯电",
+      "演示状态": "在售"
+    }
+  },
+  "runtime": {
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "risk_level": "normal"
+  },
+  "review_state": {
+    "is_new": true,
+    "new_reason": "newly_added_formal_knowledge",
+    "marked_at": "2026-05-03T20:36:28",
+    "updated_at": "2026-05-03T20:36:28",
+    "read_at": "",
+    "read_by": "",
+    "source": {
+      "source_module": "jiangsu_chejin_demo_seed",
+      "target_category": "products",
+      "item_id": "chejin_miniev_2022_macaron"
+    }
+  },
+  "metadata": {
+    "created_at": "2026-05-03T20:36:28",
+    "updated_at": "2026-05-03T20:36:28",
+    "created_by": "admin",
+    "updated_by": "admin"
+  }
+}

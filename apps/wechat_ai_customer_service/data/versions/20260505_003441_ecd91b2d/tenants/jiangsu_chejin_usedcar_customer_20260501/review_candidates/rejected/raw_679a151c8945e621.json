@@ -1,0 +1,316 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_679a151c8945e621",
+  "generated_at": "2026-05-03T09:34:25",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_d96dd32eb28526631113.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"product_id\": \"buick-gl8-2020-es\", \"title\": \"事故/水泡/火烧承诺人工确认规则\", \"keywords\": [\"事故\", \"水泡\", \"火烧\", \"承诺\"], \"answer\": \"车况以检测报告为准，事故、水泡、火烧承诺必须人工确认\", \"allow_auto_reply\": false, \"requires_handoff\": true, \"handoff_reason\": \"涉及事故/水泡/火烧承诺，需人工确认\", \"additional_details\": {}}",
+    "content_sha256": "2ac0276badf37305d9db904bf3cbd585fefc0c35bd82d906fc545a2978ae2fdb",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_d96dd32eb28526631113",
+    "conversation_id": "conv_1c4c2bfac8a6d1ae7d",
+    "raw_message_ids": [
+      "raw_msg_9fe11d22077dd94808f2",
+      "raw_msg_d7b95dfedbbc23c0c8c0"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_d52cbf862699a112",
+        "source_id": "source_ee806c1953fb7c7f",
+        "score": 0.7843,
+        "category": "group",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.4288,
+          "semantic": 0.2369,
+          "vector": 0.1287,
+          "vector_similarity": 0.715,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.7843
+        },
+        "text": "[2026-05-03 09:32:00] system: 09:32\n[2026-05-03T09:33:13] self: 商品资料：记录员正常产品 LIVE_RECORDER_20260503_093238\n测试批次：LIVE_RECORDER_20260503_093238\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号：CHEJIN-LIVE-GL8-2020ES\n商品类目：二手车/MPV\n价格：17.66万\n单位：台\n库存：1\n发货：南京门店可看车，商务客户试乘需人工确认\n售后：车况以检测"
+      },
+      {
+        "chunk_id": "chunk_899511b64b2f5970",
+        "source_id": "source_98b8438d7f65da3a",
+        "score": 0.7842,
+        "category": "group",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.4288,
+          "semantic": 0.2369,
+          "vector": 0.1285,
+          "vector_similarity": 0.7141,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.7842
+        },
+        "text": "[2026-05-02 04:24:00] system: 04:24\n[2026-05-02T04:24:20] self: 商品资料：记录员正常产品 LIVE_RECORDER_20260502_042340\n测试批次：LIVE_RECORDER_20260502_042340\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号：CHEJIN-LIVE-GL8-2020ES\n商品类目：二手车/MPV\n价格：17.66万\n单位：台\n库存：1\n发货：南京门店可看车，商务客户试乘需人工确认\n售后：车况以检测"
+      },
+      {
+        "chunk_id": "chunk_4a81b7ebc739fcc2",
+        "source_id": "source_0f8509369ffebef9",
+        "score": 0.7812,
+        "category": "group",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.4288,
+          "semantic": 0.2369,
+          "vector": 0.1256,
+          "vector_similarity": 0.6977,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.7812
+        },
+        "text": "[2026-05-03 08:21:00] system: 08:21\n[2026-05-03T08:22:12] self: 商品资料：记录员正常产品 LIVE_RECORDER_20260503_082131\n测试批次：LIVE_RECORDER_20260503_082131\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号：CHEJIN-LIVE-GL8-2020ES\n商品类目：二手车/MPV\n价格：17.66万\n单位：台\n库存：1\n发货：南京门店可看车，商务客户试乘需人工确认\n售后：车况以检测"
+      },
+      {
+        "chunk_id": "chunk_d4cf69be74b065ed",
+        "source_id": "source_ae5344337eddd346",
+        "score": 0.7762,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.3978,
+          "semantic": 0.2234,
+          "vector": 0.1301,
+          "vector_similarity": 0.7226,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.025,
+          "risk_penalty": 0.0,
+          "final": 0.7762
+        },
+        "text": "公里，2.0T自动挡，一手车源，支持到店试驾。\n价格：12.80万\n单位：台\n库存：1\n发货：高意向试驾需转人工确认门店和时间。\n售后：精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。\n商品资料：江苏车金二手车车源 CHEJIN_20260503_082804\n测试批次：CHEJIN_20260503_082804\n商品名称：2022款比亚迪秦PLUS DM-i 55KM\n型号：CHEJIN-QINPLUS-2022DMI\n商品类目：二手车/新能源轿车\n别名关键词：秦PLUS,比亚迪秦,新能源,绿牌,混"
+      }
+    ],
+    "original_type": "raw_wechat_group",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_23d19ba05c14fe640e00",
+    "experience_id": "rag_exp_23d19ba05c14fe640e00"
+  },
+  "detected_tags": [
+    "after_sales",
+    "llm",
+    "product",
+    "quote",
+    "rag_experience",
+    "shipping",
+    "wechat_group_chat"
+  ],
+  "proposal": {
+    "target_category": "product_rules",
+    "change_type": "llm_upsert_product_rules",
+    "summary": "事故/水泡/火烧承诺需人工确认规则",
+    "suggested_fields": {
+      "product_id": "buick-gl8-2020-es",
+      "title": "事故/水泡/火烧承诺人工确认规则",
+      "keywords": [
+        "事故",
+        "水泡",
+        "火烧",
+        "承诺"
+      ],
+      "answer": "车况以检测报告为准，事故、水泡、火烧承诺必须人工确认",
+      "allow_auto_reply": false,
+      "requires_handoff": true,
+      "handoff_reason": "涉及事故/水泡/火烧承诺，需人工确认",
+      "additional_details": {
+        "原始资料摘录": "{\"product_id\": \"buick-gl8-2020-es\", \"title\": \"事故/水泡/火烧承诺人工确认规则\", \"keywords\": [\"事故\", \"水泡\", \"火烧\", \"承诺\"], \"answer\": \"车况以检测报告为准，事故、水泡、火烧承诺必须人工确认\", \"allow_auto_reply\": false, \"requires_handoff\": true, \"handoff_reason\": \"涉及事故/水泡/火烧承诺，需人工确认\", \"additional_details\": {}}"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "product_rules",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "product_rules",
+        "id": "buick-gl8-2020-es-risk-confirm",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_d96dd32eb28526631113.txt",
+          "candidate_id": "raw_679a151c8945e621",
+          "rag_experience_id": "rag_exp_23d19ba05c14fe640e00",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_group"
+        },
+        "data": {
+          "product_id": "buick-gl8-2020-es",
+          "title": "事故/水泡/火烧承诺人工确认规则",
+          "keywords": [
+            "事故",
+            "水泡",
+            "火烧",
+            "承诺"
+          ],
+          "answer": "车况以检测报告为准，事故、水泡、火烧承诺必须人工确认",
+          "allow_auto_reply": false,
+          "requires_handoff": true,
+          "handoff_reason": "涉及事故/水泡/火烧承诺，需人工确认",
+          "additional_details": {
+            "原始资料摘录": "{\"product_id\": \"buick-gl8-2020-es\", \"title\": \"事故/水泡/火烧承诺人工确认规则\", \"keywords\": [\"事故\", \"水泡\", \"火烧\", \"承诺\"], \"answer\": \"车况以检测报告为准，事故、水泡、火烧承诺必须人工确认\", \"allow_auto_reply\": false, \"requires_handoff\": true, \"handoff_reason\": \"涉及事故/水泡/火烧承诺，需人工确认\", \"additional_details\": {}}"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": false,
+          "requires_handoff": true,
+          "risk_level": "warning"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "rejected",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_d96dd32eb28526631113",
+    "source_raw_message_ids": [
+      "raw_msg_9fe11d22077dd94808f2",
+      "raw_msg_d7b95dfedbbc23c0c8c0"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_ee806c1953fb7c7f",
+      "chunk_count": 1,
+      "query": "事故/水泡/火烧承诺需人工确认规则\n{\"product_id\": \"buick-gl8-2020-es\", \"title\": \"事故/水泡/火烧承诺人工确认规则\", \"keywords\": [\"事故\", \"水泡\", \"火烧\", \"承诺\"], \"answer\": \"车况以检测报告为准，事故、水泡、火烧承诺必须人工确认\", \"allow_auto_reply\": false, \"requires_handoff\": true, \"handoff_reason\": \"涉及事故/水泡/火烧承诺，需人工确认\", \"additional_details\": {}}\n事故/水泡/火烧承诺人工确认规则\n车况以检测报告为准，事故、水泡、火烧承诺必须人工确认",
+      "hits": [
+        {
+          "chunk_id": "chunk_d52cbf862699a112",
+          "source_id": "source_ee806c1953fb7c7f",
+          "score": 0.7843,
+          "category": "group",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.4288,
+            "semantic": 0.2369,
+            "vector": 0.1287,
+            "vector_similarity": 0.715,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.7843
+          },
+          "text": "[2026-05-03 09:32:00] system: 09:32\n[2026-05-03T09:33:13] self: 商品资料：记录员正常产品 LIVE_RECORDER_20260503_093238\n测试批次：LIVE_RECORDER_20260503_093238\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号：CHEJIN-LIVE-GL8-2020ES\n商品类目：二手车/MPV\n价格：17.66万\n单位：台\n库存：1\n发货：南京门店可看车，商务客户试乘需人工确认\n售后：车况以检测"
+        },
+        {
+          "chunk_id": "chunk_899511b64b2f5970",
+          "source_id": "source_98b8438d7f65da3a",
+          "score": 0.7842,
+          "category": "group",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.4288,
+            "semantic": 0.2369,
+            "vector": 0.1285,
+            "vector_similarity": 0.7141,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.7842
+          },
+          "text": "[2026-05-02 04:24:00] system: 04:24\n[2026-05-02T04:24:20] self: 商品资料：记录员正常产品 LIVE_RECORDER_20260502_042340\n测试批次：LIVE_RECORDER_20260502_042340\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号：CHEJIN-LIVE-GL8-2020ES\n商品类目：二手车/MPV\n价格：17.66万\n单位：台\n库存：1\n发货：南京门店可看车，商务客户试乘需人工确认\n售后：车况以检测"
+        },
+        {
+          "chunk_id": "chunk_4a81b7ebc739fcc2",
+          "source_id": "source_0f8509369ffebef9",
+          "score": 0.7812,
+          "category": "group",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.4288,
+            "semantic": 0.2369,
+            "vector": 0.1256,
+            "vector_similarity": 0.6977,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.7812
+          },
+          "text": "[2026-05-03 08:21:00] system: 08:21\n[2026-05-03T08:22:12] self: 商品资料：记录员正常产品 LIVE_RECORDER_20260503_082131\n测试批次：LIVE_RECORDER_20260503_082131\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号：CHEJIN-LIVE-GL8-2020ES\n商品类目：二手车/MPV\n价格：17.66万\n单位：台\n库存：1\n发货：南京门店可看车，商务客户试乘需人工确认\n售后：车况以检测"
+        },
+        {
+          "chunk_id": "chunk_d4cf69be74b065ed",
+          "source_id": "source_ae5344337eddd346",
+          "score": 0.7762,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.3978,
+            "semantic": 0.2234,
+            "vector": 0.1301,
+            "vector_similarity": 0.7226,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.025,
+            "risk_penalty": 0.0,
+            "final": 0.7762
+          },
+          "text": "公里，2.0T自动挡，一手车源，支持到店试驾。\n价格：12.80万\n单位：台\n库存：1\n发货：高意向试驾需转人工确认门店和时间。\n售后：精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。\n商品资料：江苏车金二手车车源 CHEJIN_20260503_082804\n测试批次：CHEJIN_20260503_082804\n商品名称：2022款比亚迪秦PLUS DM-i 55KM\n型号：CHEJIN-QINPLUS-2022DMI\n商品类目：二手车/新能源轿车\n别名关键词：秦PLUS,比亚迪秦,新能源,绿牌,混"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_23d19ba05c14fe640e00",
+    "source_chain": [
+      "raw_wechat_group",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "rejected_at": "2026-05-04T15:24:47",
+    "reason": "?????????????AI/??????????????????????????????????????????AI????"
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

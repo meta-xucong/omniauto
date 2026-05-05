@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_3255eb23cf1d9e7f",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_df8fe891509a352c3aee.txt",
+    "content_hash": "fba72b1acaa85d316d2be86aee01ce0e",
+    "status": "active",
+    "created_at": "2026-05-04T03:25:56",
+    "updated_at": "2026-05-04T03:25:56"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_40e674aac8716b84",
+      "source_id": "source_3255eb23cf1d9e7f",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_df8fe891509a352c3aee.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-04T03:25:55] self: [车金AI] 绿本是否抵押、查封，以及里程有没有调过，都需要销售同事查登记证和维保记录才能确认，我这边不能直接给结论。我帮您转给负责的销售，方便留个电话吗？他们直接联系您核实。",
+      "char_count": 116,
+      "status": "active",
+      "created_at": "2026-05-04T03:25:56"
+    }
+  ]
+}

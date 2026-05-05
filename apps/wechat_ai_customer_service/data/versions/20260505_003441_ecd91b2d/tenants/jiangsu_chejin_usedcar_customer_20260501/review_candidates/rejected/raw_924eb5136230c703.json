@@ -1,0 +1,319 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_924eb5136230c703",
+  "generated_at": "2026-05-04T03:49:21",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_9e6715e6131a1260f500.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"customer_message\": null, \"service_reply\": \"许哥，奔驰E级2021年以后的目前库里没查到现车信息，我帮您转给销售同事核实一下，方便留个电话吗？他查到后直接联系您。\", \"intent_tags\": [\"车辆库存查询\"], \"tone_tags\": [\"礼貌\"], \"linked_categories\": [\"汽车销售\"], \"applicability_scope\": \"product_category\", \"product_id\": \"\", \"product_category\": \"汽车销售\", \"additional_details\": {}}",
+    "content_sha256": "aa9a30835a5d02c0ae18e9d3af56409dd128627fd4c2b55c55013ef66c7fd82e",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_9e6715e6131a1260f500",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_839d64dc25847a8b7ff3",
+      "raw_msg_07c988ebf13f5a7d7e1d",
+      "raw_msg_d36c21588a1d2a3f7661"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_5ce004697dbee133",
+        "source_id": "source_edf4b496ba3529d7",
+        "score": 0.8216,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.4469,
+          "semantic": 0.2447,
+          "vector": 0.14,
+          "vector_similarity": 0.8994,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.8216
+        },
+        "text": "[2026-05-04 03:48:00] system: 03:48\n[2026-05-04T03:48:32] self: [车金AI] 许哥，奔驰E级2021年以后的目前库里没查到现车信息，我帮您转给销售同事核实一下，方便留个电话吗？他查到后直接联系您。\n[2026-05-04T03:48:32] 许聪: 坦克300有现车吗？"
+      },
+      {
+        "chunk_id": "chunk_20b1ed4080531862",
+        "source_id": "source_de4fa2163767901b",
+        "score": 0.5945,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2886,
+          "semantic": 0.1759,
+          "vector": 0.14,
+          "vector_similarity": 0.7798,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.5945
+        },
+        "text": "[2026-05-04T03:46:11] self: [车金AI] 许哥，奥德赛这款日系MPV我这边暂时没看到现车信息，需要让销售同事查一下库存和具体车况。我马上帮您转过去，您方便留个电话吗？他查到后第一时间联系您。\n[2026-05-04T03:46:11] 许聪: 有没有奔驰E级，最好2021以后的"
+      },
+      {
+        "chunk_id": "chunk_0d27f032aa229103",
+        "source_id": "source_58950035fd736f45",
+        "score": 0.5616,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2738,
+          "semantic": 0.1695,
+          "vector": 0.1284,
+          "vector_similarity": 0.7133,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.5616
+        },
+        "text": "[2026-05-04T03:24:34] 许聪: 绿本有没有抵押或者查封？\n[2026-05-04T03:24:34] 许聪: 表显公里数准不准？有没有调表？\n[2026-05-04T03:24:34] self: [车金AI] 营运性质有没有跑过网约车，我们得看登记证和实车记录来确认，我这边没法直接给准信。我马上帮您转给销售同事人工核实，方便留个电话吗？他们直接联系您。"
+      },
+      {
+        "chunk_id": "chunk_40e674aac8716b84",
+        "source_id": "source_3255eb23cf1d9e7f",
+        "score": 0.5523,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2663,
+          "semantic": 0.1662,
+          "vector": 0.1297,
+          "vector_similarity": 0.7206,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.5523
+        },
+        "text": "[2026-05-04T03:25:55] self: [车金AI] 绿本是否抵押、查封，以及里程有没有调过，都需要销售同事查登记证和维保记录才能确认，我这边不能直接给结论。我帮您转给负责的销售，方便留个电话吗？他们直接联系您核实。"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_3e1f2dcc6d2cbc885e71",
+    "experience_id": "rag_exp_3e1f2dcc6d2cbc885e71"
+  },
+  "detected_tags": [
+    "llm",
+    "rag_experience",
+    "unknown",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "chats",
+    "change_type": "llm_upsert_chats",
+    "summary": "车金AI对奔驰E级库存查询的回复，表示无现车并建议转销售",
+    "suggested_fields": {
+      "customer_message": null,
+      "service_reply": "许哥，奔驰E级2021年以后的目前库里没查到现车信息，我帮您转给销售同事核实一下，方便留个电话吗？他查到后直接联系您。",
+      "intent_tags": [
+        "车辆库存查询"
+      ],
+      "tone_tags": [
+        "礼貌"
+      ],
+      "linked_categories": [
+        "汽车销售"
+      ],
+      "applicability_scope": "product_category",
+      "product_id": "",
+      "product_category": "汽车销售",
+      "additional_details": {
+        "原始资料摘录": "{\"customer_message\": null, \"service_reply\": \"许哥，奔驰E级2021年以后的目前库里没查到现车信息，我帮您转给销售同事核实一下，方便留个电话吗？他查到后直接联系您。\", \"intent_tags\": [\"车辆库存查询\"], \"tone_tags\": [\"礼貌\"], \"linked_categories\": [\"汽车销售\"], \"applicability_scope\": \"product_category\", \"product_id\": \"\", \"product_category\": \"汽车销售\", \"additional_details\": {}}"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "chats",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "chats",
+        "id": "mercedes_e_class_inquiry_reply",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_9e6715e6131a1260f500.txt",
+          "candidate_id": "raw_924eb5136230c703",
+          "rag_experience_id": "rag_exp_3e1f2dcc6d2cbc885e71",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "customer_message": null,
+          "service_reply": "许哥，奔驰E级2021年以后的目前库里没查到现车信息，我帮您转给销售同事核实一下，方便留个电话吗？他查到后直接联系您。",
+          "intent_tags": [
+            "车辆库存查询"
+          ],
+          "tone_tags": [
+            "礼貌"
+          ],
+          "linked_categories": [
+            "汽车销售"
+          ],
+          "applicability_scope": "product_category",
+          "product_id": "",
+          "product_category": "汽车销售",
+          "additional_details": {
+            "原始资料摘录": "{\"customer_message\": null, \"service_reply\": \"许哥，奔驰E级2021年以后的目前库里没查到现车信息，我帮您转给销售同事核实一下，方便留个电话吗？他查到后直接联系您。\", \"intent_tags\": [\"车辆库存查询\"], \"tone_tags\": [\"礼貌\"], \"linked_categories\": [\"汽车销售\"], \"applicability_scope\": \"product_category\", \"product_id\": \"\", \"product_category\": \"汽车销售\", \"additional_details\": {}}"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "rejected",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_9e6715e6131a1260f500",
+    "source_raw_message_ids": [
+      "raw_msg_839d64dc25847a8b7ff3",
+      "raw_msg_07c988ebf13f5a7d7e1d",
+      "raw_msg_d36c21588a1d2a3f7661"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_edf4b496ba3529d7",
+      "chunk_count": 1,
+      "query": "车金AI对奔驰E级库存查询的回复，表示无现车并建议转销售\n{\"customer_message\": null, \"service_reply\": \"许哥，奔驰E级2021年以后的目前库里没查到现车信息，我帮您转给销售同事核实一下，方便留个电话吗？他查到后直接联系您。\", \"intent_tags\": [\"车辆库存查询\"], \"tone_tags\": [\"礼貌\"], \"linked_categories\": [\"汽车销售\"], \"applicability_scope\": \"product_category\", \"product_id\": \"\", \"product_category\": \"汽车销售\", \"additional_details\": {}}\n许哥，奔驰E级2021年以后的目前库里没查到现车信息，我帮您转给销售同事核实一下，方便留个电话吗？他查到后直接联系您。",
+      "hits": [
+        {
+          "chunk_id": "chunk_5ce004697dbee133",
+          "source_id": "source_edf4b496ba3529d7",
+          "score": 0.8216,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.4469,
+            "semantic": 0.2447,
+            "vector": 0.14,
+            "vector_similarity": 0.8994,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.8216
+          },
+          "text": "[2026-05-04 03:48:00] system: 03:48\n[2026-05-04T03:48:32] self: [车金AI] 许哥，奔驰E级2021年以后的目前库里没查到现车信息，我帮您转给销售同事核实一下，方便留个电话吗？他查到后直接联系您。\n[2026-05-04T03:48:32] 许聪: 坦克300有现车吗？"
+        },
+        {
+          "chunk_id": "chunk_20b1ed4080531862",
+          "source_id": "source_de4fa2163767901b",
+          "score": 0.5945,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2886,
+            "semantic": 0.1759,
+            "vector": 0.14,
+            "vector_similarity": 0.7798,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.5945
+          },
+          "text": "[2026-05-04T03:46:11] self: [车金AI] 许哥，奥德赛这款日系MPV我这边暂时没看到现车信息，需要让销售同事查一下库存和具体车况。我马上帮您转过去，您方便留个电话吗？他查到后第一时间联系您。\n[2026-05-04T03:46:11] 许聪: 有没有奔驰E级，最好2021以后的"
+        },
+        {
+          "chunk_id": "chunk_0d27f032aa229103",
+          "source_id": "source_58950035fd736f45",
+          "score": 0.5616,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2738,
+            "semantic": 0.1695,
+            "vector": 0.1284,
+            "vector_similarity": 0.7133,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.5616
+          },
+          "text": "[2026-05-04T03:24:34] 许聪: 绿本有没有抵押或者查封？\n[2026-05-04T03:24:34] 许聪: 表显公里数准不准？有没有调表？\n[2026-05-04T03:24:34] self: [车金AI] 营运性质有没有跑过网约车，我们得看登记证和实车记录来确认，我这边没法直接给准信。我马上帮您转给销售同事人工核实，方便留个电话吗？他们直接联系您。"
+        },
+        {
+          "chunk_id": "chunk_40e674aac8716b84",
+          "source_id": "source_3255eb23cf1d9e7f",
+          "score": 0.5523,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2663,
+            "semantic": 0.1662,
+            "vector": 0.1297,
+            "vector_similarity": 0.7206,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.5523
+          },
+          "text": "[2026-05-04T03:25:55] self: [车金AI] 绿本是否抵押、查封，以及里程有没有调过，都需要销售同事查登记证和维保记录才能确认，我这边不能直接给结论。我帮您转给负责的销售，方便留个电话吗？他们直接联系您核实。"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_3e1f2dcc6d2cbc885e71",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "rejected_at": "2026-05-04T18:41:18",
+    "reason": "legacy_auto_candidate_cleanup_20260504: ???????????????????????RAG?????????????????"
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

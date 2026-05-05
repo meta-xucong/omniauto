@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "category_id": "policies",
+  "id": "chejin_odometer_rule",
+  "status": "active",
+  "source": {
+    "type": "demo_fixture",
+    "batch_token": "CHEJIN_DEMO_20260503_203628",
+    "domain": "used_car"
+  },
+  "data": {
+    "title": "调表与里程解释边界",
+    "policy_type": "manual_required",
+    "keywords": [
+      "调表",
+      "真实里程",
+      "里程准不准",
+      "表显",
+      "CHEJIN_DEMO_20260503_203628"
+    ],
+    "applicability_scope": "global",
+    "product_category": "",
+    "answer": "AI 可说明页面展示为表显里程，真实使用情况以检测和维保记录综合判断；客户要求保证未调表时必须转人工。",
+    "allow_auto_reply": false,
+    "requires_handoff": true,
+    "handoff_reason": "odometer_claim",
+    "operator_alert": true,
+    "risk_level": "high",
+    "additional_details": {
+      "演示批次": "CHEJIN_DEMO_20260503_203628",
+      "面向客户解释": "前台可直接按自然语言理解，不需要客户理解技术字段。"
+    }
+  },
+  "runtime": {
+    "allow_auto_reply": false,
+    "requires_handoff": true,
+    "risk_level": "high",
+    "operator_alert": true
+  },
+  "review_state": {
+    "is_new": true,
+    "new_reason": "newly_added_formal_knowledge",
+    "marked_at": "2026-05-03T20:36:28",
+    "updated_at": "2026-05-03T20:36:28",
+    "read_at": "",
+    "read_by": "",
+    "source": {
+      "source_module": "jiangsu_chejin_demo_seed",
+      "target_category": "policies",
+      "item_id": "chejin_odometer_rule"
+    }
+  },
+  "metadata": {
+    "created_at": "2026-05-03T20:36:28",
+    "updated_at": "2026-05-03T20:36:28",
+    "created_by": "admin",
+    "updated_by": "admin"
+  }
+}

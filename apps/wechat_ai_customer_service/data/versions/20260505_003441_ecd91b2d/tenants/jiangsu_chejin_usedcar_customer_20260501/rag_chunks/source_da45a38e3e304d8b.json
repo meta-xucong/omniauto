@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_da45a38e3e304d8b",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_281f8d8030914c8d0155.txt",
+    "content_hash": "423e2cc9cb4b79d58827a96d454768d8",
+    "status": "active",
+    "created_at": "2026-05-04T03:03:36",
+    "updated_at": "2026-05-04T03:03:36"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_279ed8d7c79eec49",
+      "source_id": "source_da45a38e3e304d8b",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_281f8d8030914c8d0155.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-04T03:03:35] 许聪: 先不管前面的信息。GL8那台给我讲讲",
+      "char_count": 44,
+      "status": "active",
+      "created_at": "2026-05-04T03:03:36"
+    }
+  ]
+}

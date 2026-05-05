@@ -1,0 +1,285 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_79fe08b73264e271",
+  "generated_at": "2026-05-01T22:06:13",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\products\\upload_26dbe0010d073566_chejin_vehicles_CHEJIN_20260501_220610.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "name: 2020款本田思域220TURBO劲动版 CHEJIN_20260501_220610；sku: CHEJIN-CIVIC-CHEJIN_20260501_220610；category: 二手车/紧凑型轿车；price: 7.58；unit: 台；inventory: 1.0；shipping_policy: 门店看车后可协助过户，金融结果以资方审批为准。；warranty_policy: 车况以检测报告和合同约定为准，不承诺贷款必过。；raw_text: 商品资料：江苏车金二手车车源 CHEJIN_20260501_220610 商品名称：2020款本田思域220TURBO劲动版 CHEJIN_20260501_220610 型号：CHEJIN-CIVIC-CHEJIN_20260501_220",
+    "content_sha256": "818a1b98fd0295b0072fc98c7a5c4344208b305a6f89a7df4098f17dc3a8aea3",
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_4368d00ac26d7096",
+        "source_id": "source_8a6a5ad5b7c55a91",
+        "score": 0.9394,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.5689,
+          "semantic": 0.2856,
+          "vector": 0.14,
+          "vector_similarity": 0.8846,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.025,
+          "risk_penalty": 0.08,
+          "final": 0.9394
+        },
+        "text": "商品资料：江苏车金二手车车源 CHEJIN_20260501_220610\n商品名称：2021款丰田凯美瑞2.0G豪华版 CHEJIN_20260501_220610\n型号：CHEJIN-CAMRY-CHEJIN_20260501_220610\n商品类目：二手车/中级轿车\n别名关键词：凯美瑞,丰田凯美瑞,8万预算,自动挡,省油,通勤\n规格参数：2021年上牌，表显4.8万公里，2.0L自动挡，南京现车，一手车，支持第三方检测。\n价格：8.98万\n单位：台\n库存：1\n发货：南京门店可看车，异地客户需人工确认物流与提档"
+      },
+      {
+        "chunk_id": "chunk_57bc6629a5f0089b",
+        "source_id": "source_10cf1b39fdfe3f7d",
+        "score": 0.9327,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.564,
+          "semantic": 0.2836,
+          "vector": 0.14,
+          "vector_similarity": 0.8823,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.025,
+          "risk_penalty": 0.08,
+          "final": 0.9327
+        },
+        "text": "商品资料：江苏车金二手车车源 CHEJIN_20260501_161625\n商品名称：2021款丰田凯美瑞2.0G豪华版 CHEJIN_20260501_161625\n型号：CHEJIN-CAMRY-CHEJIN_20260501_161625\n商品类目：二手车/中级轿车\n别名关键词：凯美瑞,丰田凯美瑞,8万预算,自动挡,省油,通勤\n规格参数：2021年上牌，表显4.8万公里，2.0L自动挡，南京现车，一手车，支持第三方检测。\n价格：8.98万\n单位：台\n库存：1\n发货：南京门店可看车，异地客户需人工确认物流与提档"
+      },
+      {
+        "chunk_id": "chunk_1efa91b1e3733718",
+        "source_id": "source_52ba6659b70b3915",
+        "score": 0.9327,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.564,
+          "semantic": 0.2836,
+          "vector": 0.14,
+          "vector_similarity": 0.8845,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.025,
+          "risk_penalty": 0.08,
+          "final": 0.9327
+        },
+        "text": "商品资料：江苏车金二手车车源 CHEJIN_20260501_161600\n商品名称：2021款丰田凯美瑞2.0G豪华版 CHEJIN_20260501_161600\n型号：CHEJIN-CAMRY-CHEJIN_20260501_161600\n商品类目：二手车/中级轿车\n别名关键词：凯美瑞,丰田凯美瑞,8万预算,自动挡,省油,通勤\n规格参数：2021年上牌，表显4.8万公里，2.0L自动挡，南京现车，一手车，支持第三方检测。\n价格：8.98万\n单位：台\n库存：1\n发货：南京门店可看车，异地客户需人工确认物流与提档"
+      },
+      {
+        "chunk_id": "chunk_c704efb538bb1712",
+        "source_id": "source_54f7f8d857d969cd",
+        "score": 0.9327,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.564,
+          "semantic": 0.2836,
+          "vector": 0.14,
+          "vector_similarity": 0.8828,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.025,
+          "risk_penalty": 0.08,
+          "final": 0.9327
+        },
+        "text": "商品资料：江苏车金二手车车源 CHEJIN_20260501_161159\n商品名称：2021款丰田凯美瑞2.0G豪华版 CHEJIN_20260501_161159\n型号：CHEJIN-CAMRY-CHEJIN_20260501_161159\n商品类目：二手车/中级轿车\n别名关键词：凯美瑞,丰田凯美瑞,8万预算,自动挡,省油,通勤\n规格参数：2021年上牌，表显4.8万公里，2.0L自动挡，南京现车，一手车，支持第三方检测。\n价格：8.98万\n单位：台\n库存：1\n发货：南京门店可看车，异地客户需人工确认物流与提档"
+      }
+    ]
+  },
+  "detected_tags": [
+    "after_sales",
+    "company",
+    "product",
+    "quote",
+    "shipping",
+    "style"
+  ],
+  "proposal": {
+    "target_category": "products",
+    "change_type": "upsert_product",
+    "summary": "建议新增/更新商品：2020款本田思域220TURBO劲动版 CHEJIN_20260501_220610",
+    "suggested_fields": {
+      "name": "2020款本田思域220TURBO劲动版 CHEJIN_20260501_220610",
+      "sku": "CHEJIN-CIVIC-CHEJIN_20260501_220610",
+      "category": "二手车/紧凑型轿车",
+      "price": 7.58,
+      "unit": "台",
+      "inventory": 1.0,
+      "shipping_policy": "门店看车后可协助过户，金融结果以资方审批为准。",
+      "warranty_policy": "车况以检测报告和合同约定为准，不承诺贷款必过。",
+      "price_tiers": [
+        {
+          "min_quantity": 1.0,
+          "unit_price": 7.58
+        }
+      ],
+      "additional_details": {
+        "原始资料摘录": "name: 2020款本田思域220TURBO劲动版 CHEJIN_20260501_220610；sku: CHEJIN-CIVIC-CHEJIN_20260501_220610；category: 二手车/紧凑型轿车；price: 7.58；unit: 台；inventory: 1.0；shipping_policy: 门店看车后可协助过户，金融结果以资方审批为准。；warranty_policy: 车况以检测报告和合同约定为准，不承诺贷款必过。；raw_text: 商品资料：江苏车金二手车车源 CHEJIN_20260501_220610 商品名称：2020款本田思域220TURBO劲动版 CHEJIN_20260501_220610 型号：CHEJIN-CIVIC-CHEJIN_20260501_220"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "products",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "products",
+        "id": "chejin-civic-chejin_20260501_220610",
+        "status": "active",
+        "source": {
+          "type": "raw_upload",
+          "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\products\\upload_26dbe0010d073566_chejin_vehicles_CHEJIN_20260501_220610.txt",
+          "candidate_id": "raw_79fe08b73264e271"
+        },
+        "data": {
+          "name": "2020款本田思域220TURBO劲动版 CHEJIN_20260501_220610",
+          "sku": "CHEJIN-CIVIC-CHEJIN_20260501_220610",
+          "category": "二手车/紧凑型轿车",
+          "price": 7.58,
+          "unit": "台",
+          "inventory": 1.0,
+          "shipping_policy": "门店看车后可协助过户，金融结果以资方审批为准。",
+          "warranty_policy": "车况以检测报告和合同约定为准，不承诺贷款必过。",
+          "price_tiers": [
+            {
+              "min_quantity": 1.0,
+              "unit_price": 7.58
+            }
+          ],
+          "additional_details": {
+            "原始资料摘录": "name: 2020款本田思域220TURBO劲动版 CHEJIN_20260501_220610；sku: CHEJIN-CIVIC-CHEJIN_20260501_220610；category: 二手车/紧凑型轿车；price: 7.58；unit: 台；inventory: 1.0；shipping_policy: 门店看车后可协助过户，金融结果以资方审批为准。；warranty_policy: 车况以检测报告和合同约定为准，不承诺贷款必过。；raw_text: 商品资料：江苏车金二手车车源 CHEJIN_20260501_220610 商品名称：2020款本田思域220TURBO劲动版 CHEJIN_20260501_220610 型号：CHEJIN-CIVIC-CHEJIN_20260501_220"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "warning"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "rejected",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "source_upload_id": "upload_26dbe0010d073566",
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_8a6a5ad5b7c55a91",
+      "chunk_count": 2,
+      "query": "建议新增/更新商品：2020款本田思域220TURBO劲动版 CHEJIN_20260501_220610\nname: 2020款本田思域220TURBO劲动版 CHEJIN_20260501_220610；sku: CHEJIN-CIVIC-CHEJIN_20260501_220610；category: 二手车/紧凑型轿车；price: 7.58；unit: 台；inventory: 1.0；shipping_policy: 门店看车后可协助过户，金融结果以资方审批为准。；warranty_policy: 车况以检测报告和合同约定为准，不承诺贷款必过。；raw_text: 商品资料：江苏车金二手车车源 CHEJIN_20260501_220610 商品名称：2020款本田思域220TURBO劲动版 CHEJIN_20260501_220610 型号：CHEJIN-CIVIC-CHEJIN_20260501_220\n2020款本田思域220TURBO劲动版 CHEJIN_20260501_220610",
+      "hits": [
+        {
+          "chunk_id": "chunk_4368d00ac26d7096",
+          "source_id": "source_8a6a5ad5b7c55a91",
+          "score": 0.9394,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.5689,
+            "semantic": 0.2856,
+            "vector": 0.14,
+            "vector_similarity": 0.8846,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.025,
+            "risk_penalty": 0.08,
+            "final": 0.9394
+          },
+          "text": "商品资料：江苏车金二手车车源 CHEJIN_20260501_220610\n商品名称：2021款丰田凯美瑞2.0G豪华版 CHEJIN_20260501_220610\n型号：CHEJIN-CAMRY-CHEJIN_20260501_220610\n商品类目：二手车/中级轿车\n别名关键词：凯美瑞,丰田凯美瑞,8万预算,自动挡,省油,通勤\n规格参数：2021年上牌，表显4.8万公里，2.0L自动挡，南京现车，一手车，支持第三方检测。\n价格：8.98万\n单位：台\n库存：1\n发货：南京门店可看车，异地客户需人工确认物流与提档"
+        },
+        {
+          "chunk_id": "chunk_57bc6629a5f0089b",
+          "source_id": "source_10cf1b39fdfe3f7d",
+          "score": 0.9327,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.564,
+            "semantic": 0.2836,
+            "vector": 0.14,
+            "vector_similarity": 0.8823,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.025,
+            "risk_penalty": 0.08,
+            "final": 0.9327
+          },
+          "text": "商品资料：江苏车金二手车车源 CHEJIN_20260501_161625\n商品名称：2021款丰田凯美瑞2.0G豪华版 CHEJIN_20260501_161625\n型号：CHEJIN-CAMRY-CHEJIN_20260501_161625\n商品类目：二手车/中级轿车\n别名关键词：凯美瑞,丰田凯美瑞,8万预算,自动挡,省油,通勤\n规格参数：2021年上牌，表显4.8万公里，2.0L自动挡，南京现车，一手车，支持第三方检测。\n价格：8.98万\n单位：台\n库存：1\n发货：南京门店可看车，异地客户需人工确认物流与提档"
+        },
+        {
+          "chunk_id": "chunk_1efa91b1e3733718",
+          "source_id": "source_52ba6659b70b3915",
+          "score": 0.9327,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.564,
+            "semantic": 0.2836,
+            "vector": 0.14,
+            "vector_similarity": 0.8845,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.025,
+            "risk_penalty": 0.08,
+            "final": 0.9327
+          },
+          "text": "商品资料：江苏车金二手车车源 CHEJIN_20260501_161600\n商品名称：2021款丰田凯美瑞2.0G豪华版 CHEJIN_20260501_161600\n型号：CHEJIN-CAMRY-CHEJIN_20260501_161600\n商品类目：二手车/中级轿车\n别名关键词：凯美瑞,丰田凯美瑞,8万预算,自动挡,省油,通勤\n规格参数：2021年上牌，表显4.8万公里，2.0L自动挡，南京现车，一手车，支持第三方检测。\n价格：8.98万\n单位：台\n库存：1\n发货：南京门店可看车，异地客户需人工确认物流与提档"
+        },
+        {
+          "chunk_id": "chunk_c704efb538bb1712",
+          "source_id": "source_54f7f8d857d969cd",
+          "score": 0.9327,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.564,
+            "semantic": 0.2836,
+            "vector": 0.14,
+            "vector_similarity": 0.8828,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.025,
+            "risk_penalty": 0.08,
+            "final": 0.9327
+          },
+          "text": "商品资料：江苏车金二手车车源 CHEJIN_20260501_161159\n商品名称：2021款丰田凯美瑞2.0G豪华版 CHEJIN_20260501_161159\n型号：CHEJIN-CAMRY-CHEJIN_20260501_161159\n商品类目：二手车/中级轿车\n别名关键词：凯美瑞,丰田凯美瑞,8万预算,自动挡,省油,通勤\n规格参数：2021年上牌，表显4.8万公里，2.0L自动挡，南京现车，一手车，支持第三方检测。\n价格：8.98万\n单位：台\n库存：1\n发货：南京门店可看车，异地客户需人工确认物流与提档"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rejected_at": "2026-05-01T22:06:49",
+    "reason": "?????????????? rejected ??"
+  },
+  "suggested_tests": [
+    {
+      "scenario": "product_quote",
+      "assertion": "入库后应能按商品名称、别名或 SKU 回答报价、规格和发货信息。"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_0f54bb6e9571790b",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "upload",
+    "category": "policies",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\policies\\upload_87f83301381e4266_chejin_policies_CHEJIN_20260501_161600.txt",
+    "content_hash": "aa6f392c7fa4510003b8fb2b1f195455",
+    "status": "active",
+    "created_at": "2026-05-01T16:16:01",
+    "updated_at": "2026-05-01T16:16:01"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_f55b3105aad7be64",
+      "source_id": "source_0f54bb6e9571790b",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "upload",
+      "category": "policies",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\policies\\upload_87f83301381e4266_chejin_policies_CHEJIN_20260501_161600.txt",
+      "chunk_index": 0,
+      "text": "政策规则：江苏车金高意向转人工 CHEJIN_20260501_161600\n规则名称：试驾到店与订金转人工 CHEJIN_20260501_161600\n规则类型：manual_required\n触发关键词：试驾,到店,订金,定金,今天看车,明天看车,销售联系,企业微信群\n答案：客户明确要求试驾、到店、订金、销售联系时，AI只做确认和记录，必须转人工或企业微信群承接，不能自行承诺车源保留和最终价格。\n允许自动回复：false\n必须转人工：true\n提醒人工客服：true\n风险等级：high\n政策规则：江苏车金金融与车况合规 CHEJIN_20260501_161600\n规则名称：金融审批与车况承诺边界 CHEJIN_20260501_161600\n规则类型：contract\n触发关键词：贷款,按揭,首付,月供,征信,保证无事故,水泡,火烧,赔偿,退款\n答案：金融方案只能做初步说明，审批结果、利率、月供以资方审核为准；车况承诺必须以检测报告和合同为准，涉及赔偿、退款、纠纷必须转人工。\n允许自动回复：false\n必须转人工：true\n提醒人工客服：true\n风险等级：high\n政策规则：江苏车金沉睡客户唤醒 CHEJIN_20260501_161600\n规则名称：沉睡客户递减唤醒策略 CHEJIN_20260501_161600\n规则类型：other\n触发关键词：沉睡客户,唤醒,老线索,新车源,还在看车\n答案：首次唤醒只做轻提醒；3天未回复推同预算新车源；7天未回复询问需求是否变化；客户回复后停止自动唤醒并转入正常接待。\n允许自动回复：true\n必须转人工：false\n风险等级：normal",
+      "char_count": 706,
+      "status": "active",
+      "created_at": "2026-05-01T16:16:01"
+    }
+  ]
+}

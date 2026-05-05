@@ -1,0 +1,309 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_db08efc33679afe6",
+  "generated_at": "2026-05-04T02:31:16",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_6a1f29dfdad8c1bace29.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"customer_message\": \"理想ONE适合一家六口吗？\", \"service_reply\": \"\", \"applicability_scope\": \"specific_product\", \"product_id\": \"one\", \"additional_details\": {}, \"product_category\": \"\"}",
+    "content_sha256": "083c0ffdb6a8abeae7213932189cce5451e0f0f55c44c0efef9b37f46d5ef55a",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_6a1f29dfdad8c1bace29",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_f524dae9414a5405d271",
+      "raw_msg_cd303049d73d78390357",
+      "raw_msg_e56c1e571734e394ba8e"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_413120c5b2dfbe68",
+        "source_id": "source_8cd2ab3dca40559f",
+        "score": 0.5817,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.3133,
+          "semantic": 0.1561,
+          "vector": 0.1223,
+          "vector_similarity": 0.6795,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.5817
+        },
+        "text": "[2026-05-04 02:29:00] system: 02:29\n[2026-05-04T02:30:13] self: [车金AI] 蔚来ES6换电确实是它的一大特点，不过具体是电池租用还是买断、账号权益和当地政策这些，都得结合这台车的检测报告和厂家记录才能给准话。我让负责这台车的同事跟您对接，帮您把关键点都核实清楚。\n[2026-05-04T02:30:13] 许聪: 理想ONE适合一家六口吗？"
+      },
+      {
+        "chunk_id": "chunk_db0d04171a54c0f3",
+        "source_id": "source_3c99718cb66c8f34",
+        "score": 0.4635,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2111,
+          "semantic": 0.1364,
+          "vector": 0.126,
+          "vector_similarity": 0.6999,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.4635
+        },
+        "text": "[2026-05-04T02:18:35] self: [车金AI] 许聪，你问的这两台都还在。CR-V目前还有2台，11.98万，2020款两驱都市版，灰色，5.9万公里，家用空间挺适合一家三口。汉兰达那台是2018款七座，18.68万，黑色，8.8万公里，带老人小孩空间上确实比五座更从容，不过价格会高出不少。两个车的具体车况和四驱系统这些，还需要销售结合检测报告核实。你目前的预算大概在什么范围？是更倾向五座还是七座？"
+      },
+      {
+        "chunk_id": "chunk_2880218003265ab1",
+        "source_id": "source_bb395d5ecba99f8b",
+        "score": 0.451,
+        "category": "policies",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2196,
+          "semantic": 0.1315,
+          "vector": 0.1349,
+          "vector_similarity": 0.7497,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.045,
+          "risk_penalty": 0.08,
+          "final": 0.451
+        },
+        "text": "3628\n标准说明：AI 可以解释需要人工测算首付和月供，但不得承诺贷款包过、固定利率、固定月供或不查征信。\n规则：置换资料收集规则\n触发词：置换、卖车、旧车、评估、收车、CHEJIN_DEMO_20260503_203628\n标准说明：客户咨询置换时，AI 先收集旧车品牌车型、上牌时间、公里数、车况、城市、是否贷款和期望价；估价和收车价必须人工复核。\n规则：车况检测报告解释规则\n触发词：检测报告、第三方检测、车况、保养记录、CHEJIN_DEMO_20260503_203628\n标准说明：AI 可以提示车况以检测"
+      },
+      {
+        "chunk_id": "chunk_513e28be24e13248",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.4484,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1941,
+          "semantic": 0.1331,
+          "vector": 0.1313,
+          "vector_similarity": 0.7292,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.08,
+          "final": 0.4484
+        },
+        "text": "，白色。\n价格：6.98万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：车况以检测报告、合同和实车复核为准；事故、水泡、火烧、调表、抵押查封等风险问题必须人工确认。\n推荐话术：适合省油代步、保值、预算7万左右的客户。\n商品名称：2020款马自达3昂克赛拉2.0L质雅版\n型号/SKU：CHEJIN-MAZDA3-2020\n类目：二手车/紧凑型轿车\n关键词：昂克赛拉、马自达3、操控、年轻客户\n规格：2020年上牌，表显4.7万公里，2.0L自动"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_445b0dcbfd1692fa243b",
+    "experience_id": "rag_exp_445b0dcbfd1692fa243b"
+  },
+  "detected_tags": [
+    "company",
+    "llm",
+    "rag_experience",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "chats",
+    "change_type": "llm_upsert_chats",
+    "summary": "客户询问理想ONE是否适合六口之家",
+    "suggested_fields": {
+      "customer_message": "理想ONE适合一家六口吗？",
+      "service_reply": "",
+      "applicability_scope": "specific_product",
+      "product_id": "one",
+      "product_category": "",
+      "additional_details": {
+        "原始资料摘录": "{\"customer_message\": \"理想ONE适合一家六口吗？\", \"service_reply\": \"\", \"applicability_scope\": \"specific_product\", \"product_id\": \"one\", \"additional_details\": {}, \"product_category\": \"\"}"
+      }
+    },
+    "missing_fields": [
+      "service_reply"
+    ],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "chats",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "chats",
+        "id": "chat_lixiang_one_family",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_6a1f29dfdad8c1bace29.txt",
+          "candidate_id": "raw_db08efc33679afe6",
+          "rag_experience_id": "rag_exp_445b0dcbfd1692fa243b",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "customer_message": "理想ONE适合一家六口吗？",
+          "service_reply": "",
+          "applicability_scope": "specific_product",
+          "product_id": "one",
+          "product_category": "",
+          "additional_details": {
+            "原始资料摘录": "{\"customer_message\": \"理想ONE适合一家六口吗？\", \"service_reply\": \"\", \"applicability_scope\": \"specific_product\", \"product_id\": \"one\", \"additional_details\": {}, \"product_category\": \"\"}"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "needs_more_info",
+    "ok": false,
+    "confidence": 0.72,
+    "missing_fields": [
+      "service_reply"
+    ],
+    "missing_labels": [
+      "客服回复"
+    ],
+    "question": "还需要补充：客服回复。请补齐后再应用入库。",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "rejected",
+    "completeness_status": "needs_more_info",
+    "missing_fields": [
+      "service_reply"
+    ],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_6a1f29dfdad8c1bace29",
+    "source_raw_message_ids": [
+      "raw_msg_f524dae9414a5405d271",
+      "raw_msg_cd303049d73d78390357",
+      "raw_msg_e56c1e571734e394ba8e"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_8cd2ab3dca40559f",
+      "chunk_count": 1,
+      "query": "客户询问理想ONE是否适合六口之家\n{\"customer_message\": \"理想ONE适合一家六口吗？\", \"service_reply\": \"\", \"applicability_scope\": \"specific_product\", \"product_id\": \"one\", \"additional_details\": {}, \"product_category\": \"\"}",
+      "hits": [
+        {
+          "chunk_id": "chunk_413120c5b2dfbe68",
+          "source_id": "source_8cd2ab3dca40559f",
+          "score": 0.5817,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.3133,
+            "semantic": 0.1561,
+            "vector": 0.1223,
+            "vector_similarity": 0.6795,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.5817
+          },
+          "text": "[2026-05-04 02:29:00] system: 02:29\n[2026-05-04T02:30:13] self: [车金AI] 蔚来ES6换电确实是它的一大特点，不过具体是电池租用还是买断、账号权益和当地政策这些，都得结合这台车的检测报告和厂家记录才能给准话。我让负责这台车的同事跟您对接，帮您把关键点都核实清楚。\n[2026-05-04T02:30:13] 许聪: 理想ONE适合一家六口吗？"
+        },
+        {
+          "chunk_id": "chunk_db0d04171a54c0f3",
+          "source_id": "source_3c99718cb66c8f34",
+          "score": 0.4635,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2111,
+            "semantic": 0.1364,
+            "vector": 0.126,
+            "vector_similarity": 0.6999,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.4635
+          },
+          "text": "[2026-05-04T02:18:35] self: [车金AI] 许聪，你问的这两台都还在。CR-V目前还有2台，11.98万，2020款两驱都市版，灰色，5.9万公里，家用空间挺适合一家三口。汉兰达那台是2018款七座，18.68万，黑色，8.8万公里，带老人小孩空间上确实比五座更从容，不过价格会高出不少。两个车的具体车况和四驱系统这些，还需要销售结合检测报告核实。你目前的预算大概在什么范围？是更倾向五座还是七座？"
+        },
+        {
+          "chunk_id": "chunk_2880218003265ab1",
+          "source_id": "source_bb395d5ecba99f8b",
+          "score": 0.451,
+          "category": "policies",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2196,
+            "semantic": 0.1315,
+            "vector": 0.1349,
+            "vector_similarity": 0.7497,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.045,
+            "risk_penalty": 0.08,
+            "final": 0.451
+          },
+          "text": "3628\n标准说明：AI 可以解释需要人工测算首付和月供，但不得承诺贷款包过、固定利率、固定月供或不查征信。\n规则：置换资料收集规则\n触发词：置换、卖车、旧车、评估、收车、CHEJIN_DEMO_20260503_203628\n标准说明：客户咨询置换时，AI 先收集旧车品牌车型、上牌时间、公里数、车况、城市、是否贷款和期望价；估价和收车价必须人工复核。\n规则：车况检测报告解释规则\n触发词：检测报告、第三方检测、车况、保养记录、CHEJIN_DEMO_20260503_203628\n标准说明：AI 可以提示车况以检测"
+        },
+        {
+          "chunk_id": "chunk_513e28be24e13248",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.4484,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1941,
+            "semantic": 0.1331,
+            "vector": 0.1313,
+            "vector_similarity": 0.7292,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.08,
+            "final": 0.4484
+          },
+          "text": "，白色。\n价格：6.98万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：车况以检测报告、合同和实车复核为准；事故、水泡、火烧、调表、抵押查封等风险问题必须人工确认。\n推荐话术：适合省油代步、保值、预算7万左右的客户。\n商品名称：2020款马自达3昂克赛拉2.0L质雅版\n型号/SKU：CHEJIN-MAZDA3-2020\n类目：二手车/紧凑型轿车\n关键词：昂克赛拉、马自达3、操控、年轻客户\n规格：2020年上牌，表显4.7万公里，2.0L自动"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_445b0dcbfd1692fa243b",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "rejected_at": "2026-05-04T18:41:18",
+    "reason": "legacy_auto_candidate_cleanup_20260504: ???????????????????????RAG?????????????????"
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

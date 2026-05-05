@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "category_id": "policies",
+  "id": "chejin_appointment_rule",
+  "status": "active",
+  "source": {
+    "type": "demo_fixture",
+    "batch_token": "CHEJIN_DEMO_20260503_203628",
+    "domain": "used_car"
+  },
+  "data": {
+    "title": "看车预约与到店规则",
+    "policy_type": "company",
+    "keywords": [
+      "看车",
+      "到店",
+      "试驾",
+      "试乘",
+      "预约",
+      "CHEJIN_DEMO_20260503_203628"
+    ],
+    "applicability_scope": "global",
+    "product_category": "",
+    "answer": "客户提出到店、试驾或试乘时，AI 可以收集姓名、电话、目标车型和时间段，但具体车辆是否在店、钥匙、试驾路线和陪同人员必须转人工确认。",
+    "allow_auto_reply": false,
+    "requires_handoff": true,
+    "handoff_reason": "used_car_visit_appointment",
+    "operator_alert": true,
+    "risk_level": "high",
+    "additional_details": {
+      "演示批次": "CHEJIN_DEMO_20260503_203628",
+      "面向客户解释": "前台可直接按自然语言理解，不需要客户理解技术字段。"
+    }
+  },
+  "runtime": {
+    "allow_auto_reply": false,
+    "requires_handoff": true,
+    "risk_level": "high",
+    "operator_alert": true
+  },
+  "review_state": {
+    "is_new": false,
+    "new_reason": "newly_added_formal_knowledge",
+    "marked_at": "2026-05-03T20:36:28",
+    "updated_at": "2026-05-04T18:58:38",
+    "read_at": "2026-05-04T18:58:38",
+    "read_by": "codex_test_seed",
+    "source": {
+      "source_module": "jiangsu_chejin_demo_seed",
+      "target_category": "policies",
+      "item_id": "chejin_appointment_rule"
+    }
+  },
+  "metadata": {
+    "created_at": "2026-05-03T20:36:28",
+    "updated_at": "2026-05-04T18:58:38",
+    "created_by": "admin",
+    "updated_by": "admin",
+    "test_seed_direct_fill": true,
+    "test_seed_id": "direct_test_fill_20260504_v1",
+    "test_seed_note": "????????????????????????"
+  }
+}

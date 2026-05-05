@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_d8c8dfe8d0c4d7d0",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_4d7bc1a7dcf4800c8b5e.txt",
+    "content_hash": "3ccc4c3047232f9b9b3b1f3b6313c5cb",
+    "status": "active",
+    "created_at": "2026-05-01T16:16:03",
+    "updated_at": "2026-05-01T16:16:03"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_a2cd3154bf2eb5d8",
+      "source_id": "source_d8c8dfe8d0c4d7d0",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_4d7bc1a7dcf4800c8b5e.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-01T16:16:03] self: 你保证无事故吗，不对就赔我？",
+      "char_count": 42,
+      "status": "active",
+      "created_at": "2026-05-01T16:16:03"
+    }
+  ]
+}

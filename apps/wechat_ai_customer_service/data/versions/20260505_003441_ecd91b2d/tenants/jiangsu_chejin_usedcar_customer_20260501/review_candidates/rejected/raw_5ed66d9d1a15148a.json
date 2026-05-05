@@ -1,0 +1,307 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_5ed66d9d1a15148a",
+  "generated_at": "2026-05-03T20:56:48",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_9151b188a9ff726ef09b.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "name: 商用冰箱；unit: 台；raw_text: 产品：商用冰箱 数量：7台 [live-regression:20260503191931:20:2]",
+    "content_sha256": "b5f042a652b100a8cd21e91c63902ad67c090aeaa0d5ed314cde9edc0a062ad6",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_9151b188a9ff726ef09b",
+    "conversation_id": "conv_87036d2253c2c945ed",
+    "raw_message_ids": [
+      "raw_msg_04a7fb666fe6758aa2e9",
+      "raw_msg_78cc13cf5fa9db35617b",
+      "raw_msg_80e50c05106c36d45605",
+      "raw_msg_bdfc1d02f6ed31c706b6",
+      "raw_msg_0fc6450575562260324f"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_afdf97ee81e20bca",
+        "source_id": "source_ea710f934f896282",
+        "score": 0.6258,
+        "category": "file_transfer",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.3546,
+          "semantic": 0.2046,
+          "vector": 0.0765,
+          "vector_similarity": 0.4252,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.6258
+        },
+        "text": "[2026-05-03 19:52:00] system: 19:52\n[2026-05-03 20:56:00] system: 20:56\n[2026-05-03T20:56:47] self: 买7台商用冰箱能按10台价格吗？\n[live-regression:20260503191931:20:1]\n[2026-05-03T20:56:47] self: 客户资料\n姓名：周批次\n电话：13700003333\n地址：广州市天河区测试路3号\n产品：商用冰箱\n数量：7台\n[live-regression:2026"
+      },
+      {
+        "chunk_id": "chunk_9a0d34760ad6ccae",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.4572,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1731,
+          "semantic": 0.1418,
+          "vector": 0.0723,
+          "vector_similarity": 0.4019,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.4572
+        },
+        "text": "工确认。\n售后/风险：CVT变速箱状态、保养和车况以检测报告为准。\n推荐话术：适合6到7万预算、练手、家用代步和省油需求。\n商品名称：2019款大众朗逸1.5L自动舒适版\n型号/SKU：CHEJIN-LAVIDA-2019\n类目：二手车/紧凑型轿车\n关键词：朗逸、大众朗逸、德系代步、置换\n规格：2019年上牌，表显6.9万公里，1.5L自动挡，白色，通勤耐用。\n价格：5.98万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：易损件和保养历史以"
+      },
+      {
+        "chunk_id": "chunk_899511b64b2f5970",
+        "source_id": "source_98b8438d7f65da3a",
+        "score": 0.4305,
+        "category": "group",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2131,
+          "semantic": 0.1431,
+          "vector": 0.0843,
+          "vector_similarity": 0.4685,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.4305
+        },
+        "text": "[2026-05-02 04:24:00] system: 04:24\n[2026-05-02T04:24:20] self: 商品资料：记录员正常产品 LIVE_RECORDER_20260502_042340\n测试批次：LIVE_RECORDER_20260502_042340\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号：CHEJIN-LIVE-GL8-2020ES\n商品类目：二手车/MPV\n价格：17.66万\n单位：台\n库存：1\n发货：南京门店可看车，商务客户试乘需人工确认\n售后：车况以检测"
+      },
+      {
+        "chunk_id": "chunk_d52cbf862699a112",
+        "source_id": "source_ee806c1953fb7c7f",
+        "score": 0.406,
+        "category": "group",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1945,
+          "semantic": 0.1354,
+          "vector": 0.0861,
+          "vector_similarity": 0.4783,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.406
+        },
+        "text": "[2026-05-03 09:32:00] system: 09:32\n[2026-05-03T09:33:13] self: 商品资料：记录员正常产品 LIVE_RECORDER_20260503_093238\n测试批次：LIVE_RECORDER_20260503_093238\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号：CHEJIN-LIVE-GL8-2020ES\n商品类目：二手车/MPV\n价格：17.66万\n单位：台\n库存：1\n发货：南京门店可看车，商务客户试乘需人工确认\n售后：车况以检测"
+      }
+    ],
+    "original_type": "raw_wechat_file_transfer",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_83c7216254de3799bd9e",
+    "experience_id": "rag_exp_83c7216254de3799bd9e"
+  },
+  "detected_tags": [
+    "product",
+    "quote",
+    "rag_experience",
+    "wechat_file_transfer"
+  ],
+  "proposal": {
+    "target_category": "products",
+    "change_type": "upsert_product",
+    "summary": "建议新增/更新商品：商用冰箱",
+    "suggested_fields": {
+      "name": "商用冰箱",
+      "unit": "台",
+      "additional_details": {
+        "原始资料摘录": "name: 商用冰箱；unit: 台；raw_text: 产品：商用冰箱 数量：7台 [live-regression:20260503191931:20:2]"
+      }
+    },
+    "missing_fields": [
+      "price"
+    ],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "products",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "products",
+        "id": "item_1a5e7c688b5d",
+        "status": "active",
+        "source": {
+          "type": "raw_upload",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_9151b188a9ff726ef09b.txt",
+          "candidate_id": "raw_5ed66d9d1a15148a",
+          "rag_experience_id": "rag_exp_83c7216254de3799bd9e",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_file_transfer"
+        },
+        "data": {
+          "name": "商用冰箱",
+          "unit": "台",
+          "additional_details": {
+            "原始资料摘录": "name: 商用冰箱；unit: 台；raw_text: 产品：商用冰箱 数量：7台 [live-regression:20260503191931:20:2]"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "needs_more_info",
+    "ok": false,
+    "confidence": 0.72,
+    "missing_fields": [
+      "price"
+    ],
+    "missing_labels": [
+      "基础价格"
+    ],
+    "question": "还需要补充：基础价格。请补齐后再应用入库。",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "rejected",
+    "completeness_status": "needs_more_info",
+    "missing_fields": [
+      "price"
+    ],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": false,
+      "provider": "",
+      "status": "rule_only_disabled_by_request",
+      "reason": "llm_disabled_by_caller",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_9151b188a9ff726ef09b",
+    "source_raw_message_ids": [
+      "raw_msg_04a7fb666fe6758aa2e9",
+      "raw_msg_78cc13cf5fa9db35617b",
+      "raw_msg_80e50c05106c36d45605",
+      "raw_msg_bdfc1d02f6ed31c706b6",
+      "raw_msg_0fc6450575562260324f"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_ea710f934f896282",
+      "chunk_count": 1,
+      "query": "建议新增/更新商品：商用冰箱\nname: 商用冰箱；unit: 台；raw_text: 产品：商用冰箱 数量：7台 [live-regression:20260503191931:20:2]\n商用冰箱",
+      "hits": [
+        {
+          "chunk_id": "chunk_afdf97ee81e20bca",
+          "source_id": "source_ea710f934f896282",
+          "score": 0.6258,
+          "category": "file_transfer",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.3546,
+            "semantic": 0.2046,
+            "vector": 0.0765,
+            "vector_similarity": 0.4252,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.6258
+          },
+          "text": "[2026-05-03 19:52:00] system: 19:52\n[2026-05-03 20:56:00] system: 20:56\n[2026-05-03T20:56:47] self: 买7台商用冰箱能按10台价格吗？\n[live-regression:20260503191931:20:1]\n[2026-05-03T20:56:47] self: 客户资料\n姓名：周批次\n电话：13700003333\n地址：广州市天河区测试路3号\n产品：商用冰箱\n数量：7台\n[live-regression:2026"
+        },
+        {
+          "chunk_id": "chunk_9a0d34760ad6ccae",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.4572,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1731,
+            "semantic": 0.1418,
+            "vector": 0.0723,
+            "vector_similarity": 0.4019,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.4572
+          },
+          "text": "工确认。\n售后/风险：CVT变速箱状态、保养和车况以检测报告为准。\n推荐话术：适合6到7万预算、练手、家用代步和省油需求。\n商品名称：2019款大众朗逸1.5L自动舒适版\n型号/SKU：CHEJIN-LAVIDA-2019\n类目：二手车/紧凑型轿车\n关键词：朗逸、大众朗逸、德系代步、置换\n规格：2019年上牌，表显6.9万公里，1.5L自动挡，白色，通勤耐用。\n价格：5.98万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：易损件和保养历史以"
+        },
+        {
+          "chunk_id": "chunk_899511b64b2f5970",
+          "source_id": "source_98b8438d7f65da3a",
+          "score": 0.4305,
+          "category": "group",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2131,
+            "semantic": 0.1431,
+            "vector": 0.0843,
+            "vector_similarity": 0.4685,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.4305
+          },
+          "text": "[2026-05-02 04:24:00] system: 04:24\n[2026-05-02T04:24:20] self: 商品资料：记录员正常产品 LIVE_RECORDER_20260502_042340\n测试批次：LIVE_RECORDER_20260502_042340\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号：CHEJIN-LIVE-GL8-2020ES\n商品类目：二手车/MPV\n价格：17.66万\n单位：台\n库存：1\n发货：南京门店可看车，商务客户试乘需人工确认\n售后：车况以检测"
+        },
+        {
+          "chunk_id": "chunk_d52cbf862699a112",
+          "source_id": "source_ee806c1953fb7c7f",
+          "score": 0.406,
+          "category": "group",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1945,
+            "semantic": 0.1354,
+            "vector": 0.0861,
+            "vector_similarity": 0.4783,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.406
+          },
+          "text": "[2026-05-03 09:32:00] system: 09:32\n[2026-05-03T09:33:13] self: 商品资料：记录员正常产品 LIVE_RECORDER_20260503_093238\n测试批次：LIVE_RECORDER_20260503_093238\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号：CHEJIN-LIVE-GL8-2020ES\n商品类目：二手车/MPV\n价格：17.66万\n单位：台\n库存：1\n发货：南京门店可看车，商务客户试乘需人工确认\n售后：车况以检测"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_83c7216254de3799bd9e",
+    "source_chain": [
+      "raw_wechat_file_transfer",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "rejected_at": "2026-05-04T15:03:49",
+    "reason": "???????????????????????????????????????????????????"
+  },
+  "suggested_tests": [
+    {
+      "scenario": "product_quote",
+      "assertion": "入库后应能按商品名称、别名或 SKU 回答报价、规格和发货信息。"
+    }
+  ]
+}

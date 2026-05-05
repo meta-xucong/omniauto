@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_3c99718cb66c8f34",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_bb4270534d6012d604e1.txt",
+    "content_hash": "b08d6b01f7ec7800ec16f314624ed374",
+    "status": "active",
+    "created_at": "2026-05-04T02:18:36",
+    "updated_at": "2026-05-04T02:18:36"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_db0d04171a54c0f3",
+      "source_id": "source_3c99718cb66c8f34",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_bb4270534d6012d604e1.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-04T02:18:35] self: [车金AI] 许聪，你问的这两台都还在。CR-V目前还有2台，11.98万，2020款两驱都市版，灰色，5.9万公里，家用空间挺适合一家三口。汉兰达那台是2018款七座，18.68万，黑色，8.8万公里，带老人小孩空间上确实比五座更从容，不过价格会高出不少。两个车的具体车况和四驱系统这些，还需要销售结合检测报告核实。你目前的预算大概在什么范围？是更倾向五座还是七座？",
+      "char_count": 212,
+      "status": "active",
+      "created_at": "2026-05-04T02:18:36"
+    }
+  ]
+}

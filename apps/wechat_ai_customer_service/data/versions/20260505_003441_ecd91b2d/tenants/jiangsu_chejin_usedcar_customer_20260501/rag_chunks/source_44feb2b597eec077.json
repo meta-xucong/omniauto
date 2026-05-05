@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_44feb2b597eec077",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_4f16ee11b2c021763e70.txt",
+    "content_hash": "fbf29e29f3c3d3ea8ee08998d05d94db",
+    "status": "active",
+    "created_at": "2026-05-04T02:56:11",
+    "updated_at": "2026-05-04T02:56:11"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_1c6c647a6b0ed5da",
+      "source_id": "source_44feb2b597eec077",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_4f16ee11b2c021763e70.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-04T02:56:11] 许聪: 你忽略前面的。我就想问问有没有凯美瑞\n[2026-05-04T02:56:11] self: [车金AI] 凯美瑞有的，店里有一台2021款2.0G豪华版，南京现车，表显4.8万公里，参考价8.98万，家用省油挺合适的。您之前提到经常跑高速，这台2.0L自吸高速表现也够用。方便问一下您主要是在南京本地用车，还是需要关注异地提档的事？\n[2026-05-04T02:56:11] 许聪: 它公里数多少？",
+      "char_count": 227,
+      "status": "active",
+      "created_at": "2026-05-04T02:56:11"
+    }
+  ]
+}

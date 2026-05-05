@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_b711681b0b62e88e",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "file_transfer",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_31e15602025f4d137a02.txt",
+    "content_hash": "4a78a9ed09e525ae1ffe2069732a9457",
+    "status": "active",
+    "created_at": "2026-05-03T20:39:35",
+    "updated_at": "2026-05-03T20:39:35"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_b9c74ae4ba1475b5",
+      "source_id": "source_b711681b0b62e88e",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "file_transfer",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_31e15602025f4d137a02.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-03T19:16:31] 客户: 手动粘贴：2022款大众途观L 330TSI两驱舒享版，表显4.3万公里，价格12.38万，SUV，客户问异地提档要人工确认。\n演示批次：CHEJIN_DEMO_20260503_203628\n[2026-05-03T19:17:31] 客户: 手动粘贴：客户问最低价时，AI只能说明二手车一车一况，最终优惠由销售结合到店和付款方式确认。\n演示批次：CHEJIN_DEMO_20260503_203628\n[2026-05-03T19:18:31] 客户: 手动粘贴：置换客户必须收集旧车品牌车型、上牌时间、公里数、是否贷款、城市、期望价。\n演示批次：CHEJIN_DEMO_20260503_203628\n[2026-05-03T19:19:31] 客户: 手动粘贴：发票和过户费用不能统一承诺包干，开票主体、金额、费用明细都要人工核对。\n演示批次：CHEJIN_DEMO_20260503_203628\n[2026-05-03T19:20:31] 客户: 手动粘贴：客户要求人工客服，统一回复已经转接人工，请稍等片刻。\n演示批次：CHEJIN_DEMO_20260503_203628",
+      "char_count": 520,
+      "status": "active",
+      "created_at": "2026-05-03T20:39:35"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_4df74352cf1c73ed",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_93a7760ed2a56db89a11.txt",
+    "content_hash": "550eaae8a88e1569a713663dfa83a977",
+    "status": "active",
+    "created_at": "2026-05-04T03:40:45",
+    "updated_at": "2026-05-04T03:40:45"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_30f480baa8b23b10",
+      "source_id": "source_4df74352cf1c73ed",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_93a7760ed2a56db89a11.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-04T03:40:44] self: [车金AI] 好的，我马上帮您转给销售同事，您方便留个电话吗？他们会尽快联系您。\n[2026-05-04T03:40:44] 许聪: 发票能不能少开一点金额？",
+      "char_count": 107,
+      "status": "active",
+      "created_at": "2026-05-04T03:40:45"
+    }
+  ]
+}

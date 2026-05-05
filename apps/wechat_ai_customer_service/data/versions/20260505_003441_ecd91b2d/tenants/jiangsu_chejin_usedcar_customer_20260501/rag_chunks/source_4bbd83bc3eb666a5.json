@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_4bbd83bc3eb666a5",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_82267405ba70f614ee19.txt",
+    "content_hash": "54024dabeb7b884d7c6a05294908085f",
+    "status": "active",
+    "created_at": "2026-05-04T03:37:39",
+    "updated_at": "2026-05-04T03:37:39"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_6349a5bc6f66f3e1",
+      "source_id": "source_4bbd83bc3eb666a5",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_82267405ba70f614ee19.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-04 03:37:00] system: 03:37\n[2026-05-04T03:37:38] self: [车金AI] 许哥，首付和月供得让金融同事根据您选定的秦PLUS、贷款期数和资方方案来算，我这边直接给不了准数。我马上把信息转过去，稍后他会直接联系您出具体方案。\n[2026-05-04T03:37:38] 许聪: 我想开出去上高速试驾一圈，可以吗？",
+      "char_count": 189,
+      "status": "active",
+      "created_at": "2026-05-04T03:37:39"
+    }
+  ]
+}

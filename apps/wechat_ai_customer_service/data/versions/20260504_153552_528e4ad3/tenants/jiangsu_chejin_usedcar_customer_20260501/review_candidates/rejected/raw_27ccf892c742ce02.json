@@ -1,0 +1,316 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_27ccf892c742ce02",
+  "generated_at": "2026-05-04T02:26:10",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_1de61cb3a53c6c883c6e.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"product_id\": \"model_3\", \"title\": \"Model 3重点检查部位\", \"keywords\": [\"Model 3\", \"重点看\", \"检查\"], \"question\": \"Model 3那台要重点看哪些地方？\", \"answer\": \"\", \"additional_details\": {\"original_message\": \"[2026-05-04T02:25:36] 许聪: Model 3那台要重点看哪些地方？\"}}",
+    "content_sha256": "eaa896983ab1814fba8d6dc37bbd47b4966317494021073a2b4e2981ba1b5827",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_1de61cb3a53c6c883c6e",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_6189411162ba15264187"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_52478508b5b315a7",
+        "source_id": "source_bf539aef1e6920f9",
+        "score": 0.6902,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.3571,
+          "semantic": 0.2057,
+          "vector": 0.1373,
+          "vector_similarity": 0.7628,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.6902
+        },
+        "text": "[2026-05-04T02:25:36] 许聪: Model 3那台要重点看哪些地方？"
+      },
+      {
+        "chunk_id": "chunk_b97bf1fb55256e5d",
+        "source_id": "source_eca6d2f00f8573a5",
+        "score": 0.4108,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1797,
+          "semantic": 0.1286,
+          "vector": 0.1125,
+          "vector_similarity": 0.6252,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.4108
+        },
+        "text": "[2026-05-04T02:22:10] self: [车金AI] 两款都是省油省心的练手好车。轩逸1.6L更平顺省油，卡罗拉1.2T动力稍强、保值口碑也硬。目前我们有一台卡罗拉1.2T白色6.98万，和一台轩逸1.6L银色6.88万，都在南京门店。您主要在哪边用车？或者预算大概多少？\n[2026-05-04T02:22:10] 许聪: 朗逸那台可以置换吗？我有旧车"
+      },
+      {
+        "chunk_id": "chunk_7943d074129d3b59",
+        "source_id": "source_6bbbc7f540d0df8c",
+        "score": 0.4073,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1797,
+          "semantic": 0.1286,
+          "vector": 0.109,
+          "vector_similarity": 0.6058,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.4073
+        },
+        "text": "[2026-05-04T02:05:46] self: [车金AI] GL8确实是商务接待的热门选择，空间和舒适性都很好，而且2020款ES陆尊版内饰比较精致，不会显得老气。您目前预算大概多少？或者需要具体看配置吗？\n[2026-05-04T02:05:46] 许聪: 秦PLUS那台适合每天通勤吗？我主要市区跑"
+      },
+      {
+        "chunk_id": "chunk_db0d04171a54c0f3",
+        "source_id": "source_3c99718cb66c8f34",
+        "score": 0.3976,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1797,
+          "semantic": 0.1286,
+          "vector": 0.0993,
+          "vector_similarity": 0.5516,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.3976
+        },
+        "text": "[2026-05-04T02:18:35] self: [车金AI] 许聪，你问的这两台都还在。CR-V目前还有2台，11.98万，2020款两驱都市版，灰色，5.9万公里，家用空间挺适合一家三口。汉兰达那台是2018款七座，18.68万，黑色，8.8万公里，带老人小孩空间上确实比五座更从容，不过价格会高出不少。两个车的具体车况和四驱系统这些，还需要销售结合检测报告核实。你目前的预算大概在什么范围？是更倾向五座还是七座？"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_446a107bb3b36adf05a1",
+    "experience_id": "rag_exp_446a107bb3b36adf05a1"
+  },
+  "detected_tags": [
+    "llm",
+    "rag_experience",
+    "unknown",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "product_faq",
+    "change_type": "llm_upsert_product_faq",
+    "summary": "Model 3重点检查部位询问，暂无标准答复",
+    "suggested_fields": {
+      "product_id": "model_3",
+      "title": "Model 3重点检查部位",
+      "keywords": [
+        "Model 3",
+        "重点看",
+        "检查"
+      ],
+      "question": "Model 3那台要重点看哪些地方？",
+      "answer": "",
+      "additional_details": {
+        "original_message": "[2026-05-04T02:25:36] 许聪: Model 3那台要重点看哪些地方？",
+        "原始资料摘录": "{\"product_id\": \"model_3\", \"title\": \"Model 3重点检查部位\", \"keywords\": [\"Model 3\", \"重点看\", \"检查\"], \"question\": \"Model 3那台要重点看哪些地方？\", \"answer\": \"\", \"additional_details\": {\"original_message\": \"[2026-05-04T02:25:36] 许聪: Model 3那台要重点看哪些地方？\"}}"
+      }
+    },
+    "missing_fields": [
+      "answer"
+    ],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "product_faq",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "product_faq",
+        "id": "model3_inspection_faq",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_1de61cb3a53c6c883c6e.txt",
+          "candidate_id": "raw_27ccf892c742ce02",
+          "rag_experience_id": "rag_exp_446a107bb3b36adf05a1",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "product_id": "model_3",
+          "title": "Model 3重点检查部位",
+          "keywords": [
+            "Model 3",
+            "重点看",
+            "检查"
+          ],
+          "question": "Model 3那台要重点看哪些地方？",
+          "answer": "",
+          "additional_details": {
+            "original_message": "[2026-05-04T02:25:36] 许聪: Model 3那台要重点看哪些地方？",
+            "原始资料摘录": "{\"product_id\": \"model_3\", \"title\": \"Model 3重点检查部位\", \"keywords\": [\"Model 3\", \"重点看\", \"检查\"], \"question\": \"Model 3那台要重点看哪些地方？\", \"answer\": \"\", \"additional_details\": {\"original_message\": \"[2026-05-04T02:25:36] 许聪: Model 3那台要重点看哪些地方？\"}}"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "needs_more_info",
+    "ok": false,
+    "confidence": 0.72,
+    "missing_fields": [
+      "answer"
+    ],
+    "missing_labels": [
+      "标准回复"
+    ],
+    "question": "还需要补充：标准回复。请补齐后再应用入库。",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "original_message",
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "rejected",
+    "completeness_status": "needs_more_info",
+    "missing_fields": [
+      "answer"
+    ],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_1de61cb3a53c6c883c6e",
+    "source_raw_message_ids": [
+      "raw_msg_6189411162ba15264187"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_bf539aef1e6920f9",
+      "chunk_count": 1,
+      "query": "Model 3重点检查部位询问，暂无标准答复\n{\"product_id\": \"model_3\", \"title\": \"Model 3重点检查部位\", \"keywords\": [\"Model 3\", \"重点看\", \"检查\"], \"question\": \"Model 3那台要重点看哪些地方？\", \"answer\": \"\", \"additional_details\": {\"original_message\": \"[2026-05-04T02:25:36] 许聪: Model 3那台要重点看哪些地方？\"}}\nModel 3重点检查部位",
+      "hits": [
+        {
+          "chunk_id": "chunk_52478508b5b315a7",
+          "source_id": "source_bf539aef1e6920f9",
+          "score": 0.6902,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.3571,
+            "semantic": 0.2057,
+            "vector": 0.1373,
+            "vector_similarity": 0.7628,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.6902
+          },
+          "text": "[2026-05-04T02:25:36] 许聪: Model 3那台要重点看哪些地方？"
+        },
+        {
+          "chunk_id": "chunk_b97bf1fb55256e5d",
+          "source_id": "source_eca6d2f00f8573a5",
+          "score": 0.4108,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1797,
+            "semantic": 0.1286,
+            "vector": 0.1125,
+            "vector_similarity": 0.6252,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.4108
+          },
+          "text": "[2026-05-04T02:22:10] self: [车金AI] 两款都是省油省心的练手好车。轩逸1.6L更平顺省油，卡罗拉1.2T动力稍强、保值口碑也硬。目前我们有一台卡罗拉1.2T白色6.98万，和一台轩逸1.6L银色6.88万，都在南京门店。您主要在哪边用车？或者预算大概多少？\n[2026-05-04T02:22:10] 许聪: 朗逸那台可以置换吗？我有旧车"
+        },
+        {
+          "chunk_id": "chunk_7943d074129d3b59",
+          "source_id": "source_6bbbc7f540d0df8c",
+          "score": 0.4073,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1797,
+            "semantic": 0.1286,
+            "vector": 0.109,
+            "vector_similarity": 0.6058,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.4073
+          },
+          "text": "[2026-05-04T02:05:46] self: [车金AI] GL8确实是商务接待的热门选择，空间和舒适性都很好，而且2020款ES陆尊版内饰比较精致，不会显得老气。您目前预算大概多少？或者需要具体看配置吗？\n[2026-05-04T02:05:46] 许聪: 秦PLUS那台适合每天通勤吗？我主要市区跑"
+        },
+        {
+          "chunk_id": "chunk_db0d04171a54c0f3",
+          "source_id": "source_3c99718cb66c8f34",
+          "score": 0.3976,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1797,
+            "semantic": 0.1286,
+            "vector": 0.0993,
+            "vector_similarity": 0.5516,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.3976
+          },
+          "text": "[2026-05-04T02:18:35] self: [车金AI] 许聪，你问的这两台都还在。CR-V目前还有2台，11.98万，2020款两驱都市版，灰色，5.9万公里，家用空间挺适合一家三口。汉兰达那台是2018款七座，18.68万，黑色，8.8万公里，带老人小孩空间上确实比五座更从容，不过价格会高出不少。两个车的具体车况和四驱系统这些，还需要销售结合检测报告核实。你目前的预算大概在什么范围？是更倾向五座还是七座？"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_446a107bb3b36adf05a1",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "rejected_at": "2026-05-04T15:24:46",
+    "reason": "?????????????AI/??????????????????????????????????????????AI????"
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

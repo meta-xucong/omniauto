@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "category_id": "policies",
+  "id": "chejin_personal_info_rule",
+  "status": "active",
+  "source": {
+    "type": "demo_fixture",
+    "batch_token": "CHEJIN_DEMO_20260503_203628",
+    "domain": "used_car"
+  },
+  "data": {
+    "title": "客户隐私与资料收集规则",
+    "policy_type": "company",
+    "keywords": [
+      "身份证",
+      "手机号",
+      "征信",
+      "个人信息",
+      "CHEJIN_DEMO_20260503_203628"
+    ],
+    "applicability_scope": "global",
+    "product_category": "",
+    "answer": "AI 只收集完成咨询所需的基本联系方式和购车需求；身份证、征信、银行卡等敏感信息必须由人工通过正式流程处理。",
+    "allow_auto_reply": false,
+    "requires_handoff": true,
+    "handoff_reason": "privacy_sensitive_data",
+    "operator_alert": true,
+    "risk_level": "high",
+    "additional_details": {
+      "演示批次": "CHEJIN_DEMO_20260503_203628",
+      "面向客户解释": "前台可直接按自然语言理解，不需要客户理解技术字段。"
+    }
+  },
+  "runtime": {
+    "allow_auto_reply": false,
+    "requires_handoff": true,
+    "risk_level": "high",
+    "operator_alert": true
+  },
+  "review_state": {
+    "is_new": false,
+    "new_reason": "newly_added_formal_knowledge",
+    "marked_at": "2026-05-03T20:36:28",
+    "updated_at": "2026-05-04T18:58:38",
+    "read_at": "2026-05-04T18:58:38",
+    "read_by": "codex_test_seed",
+    "source": {
+      "source_module": "jiangsu_chejin_demo_seed",
+      "target_category": "policies",
+      "item_id": "chejin_personal_info_rule"
+    }
+  },
+  "metadata": {
+    "created_at": "2026-05-03T20:36:28",
+    "updated_at": "2026-05-04T18:58:38",
+    "created_by": "admin",
+    "updated_by": "admin",
+    "test_seed_direct_fill": true,
+    "test_seed_id": "direct_test_fill_20260504_v1",
+    "test_seed_note": "????????????????????????"
+  }
+}

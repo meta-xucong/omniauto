@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_9f2fb326c482586a",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_43965b269d983d5f16e6.txt",
+    "content_hash": "bd48575407a3fcebf89de725567dd32e",
+    "status": "active",
+    "created_at": "2026-05-04T03:18:34",
+    "updated_at": "2026-05-04T03:18:34"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_2a615d55ce973cfb",
+      "source_id": "source_9f2fb326c482586a",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_43965b269d983d5f16e6.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-04T03:18:33] self: [车金AI] 异地提档到安徽，得看当地排放政策和车辆档案状态，我这边没法直接保证能迁入。我帮你转给销售同事人工核实，具体车型他确认起来更准，方便留个姓名和电话吗？\n[2026-05-04T03:18:33] 许聪: 国五国六迁入你们能保证吗？",
+      "char_count": 149,
+      "status": "active",
+      "created_at": "2026-05-04T03:18:34"
+    }
+  ]
+}

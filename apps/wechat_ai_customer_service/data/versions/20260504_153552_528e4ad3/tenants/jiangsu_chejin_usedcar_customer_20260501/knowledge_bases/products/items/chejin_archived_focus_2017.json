@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "category_id": "products",
+  "id": "chejin_archived_focus_2017",
+  "status": "active",
+  "source": {
+    "type": "demo_fixture",
+    "batch_token": "CHEJIN_DEMO_20260503_203628",
+    "domain": "used_car"
+  },
+  "data": {
+    "name": "2017款福特福克斯1.6L自动风尚型",
+    "sku": "CHEJIN-FOCUS-2017-SOLD",
+    "category": "二手车/紧凑型轿车",
+    "aliases": [
+      "福克斯",
+      "已售案例",
+      "归档示例",
+      "2017款福特福克斯1.6L自动风尚型",
+      "CHEJIN-FOCUS-2017-SOLD",
+      "CHEJIN_DEMO_20260503_203628"
+    ],
+    "specs": "2017年上牌，表显8.6万公里，已售演示样本。",
+    "price": 3.98,
+    "unit": "台",
+    "price_tiers": [
+      {
+        "min_quantity": 1,
+        "unit_price": 3.98
+      }
+    ],
+    "inventory": 0,
+    "shipping_policy": "该车已售，仅保留为历史成交和归档演示。",
+    "warranty_policy": "已售车辆不参与推荐，类似车源可由人工重新匹配。",
+    "reply_templates": {
+      "默认回复": "这台是已售归档样本，客户咨询时应推荐相近库存。",
+      "报价回复": "这台车当前演示价约 3.98 万，最终成交价、金融方案和费用明细需要人工确认。",
+      "议价回复": "二手车一车一况，AI 可以说明参考价和看车建议，最终优惠、订金和成交条件必须由销售确认。",
+      "物流回复": "该车已售，仅保留为历史成交和归档演示。",
+      "售后回复": "已售车辆不参与推荐，类似车源可由人工重新匹配。",
+      "内部备注": "演示资料：用于覆盖二手车常见咨询、风险边界和商品专属知识。"
+    },
+    "risk_rules": [
+      "已售不可推荐"
+    ],
+    "additional_details": {
+      "上牌时间": "2017-05",
+      "表显里程": "8.6万公里",
+      "演示状态": "已售归档",
+      "display_archive_hint": true
+    }
+  },
+  "runtime": {
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "risk_level": "normal"
+  },
+  "review_state": {
+    "is_new": true,
+    "new_reason": "newly_added_formal_knowledge",
+    "marked_at": "2026-05-03T20:36:28",
+    "updated_at": "2026-05-03T20:36:28",
+    "read_at": "",
+    "read_by": "",
+    "source": {
+      "source_module": "jiangsu_chejin_demo_seed",
+      "target_category": "products",
+      "item_id": "chejin_archived_focus_2017"
+    }
+  },
+  "metadata": {
+    "created_at": "2026-05-03T20:36:28",
+    "updated_at": "2026-05-03T20:36:28",
+    "created_by": "admin",
+    "updated_by": "admin"
+  }
+}

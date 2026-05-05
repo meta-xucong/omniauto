@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "category_id": "chats",
+  "id": "chejin_sleep_wakeup_chat_new_stock",
+  "status": "active",
+  "source": {
+    "type": "test_fixture",
+    "batch_token": "CHEJIN_20260505_214257"
+  },
+  "data": {
+    "customer_message": "之前那台没买，现在还有新车源吗",
+    "service_reply": "有的，我先按您之前的预算和用途筛；如果预算或车型变了，直接告诉我，我会重新匹配。",
+    "intent_tags": [
+      "sleep_wakeup",
+      "reconversion"
+    ],
+    "tone_tags": [
+      "自然",
+      "克制"
+    ],
+    "usable_as_template": true
+  },
+  "runtime": {
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "risk_level": "normal"
+  },
+  "review_state": {
+    "is_new": true,
+    "new_reason": "newly_added_formal_knowledge",
+    "marked_at": "2026-05-05T21:43:00",
+    "updated_at": "2026-05-05T21:43:00",
+    "read_at": "",
+    "read_by": "",
+    "source": {
+      "source_module": "jiangsu_chejin_test",
+      "target_category": "chats",
+      "item_id": "chejin_sleep_wakeup_chat_new_stock"
+    }
+  },
+  "metadata": {
+    "created_at": "2026-05-05T21:43:00",
+    "updated_at": "2026-05-05T21:43:00",
+    "created_by": "admin",
+    "updated_by": "admin"
+  }
+}

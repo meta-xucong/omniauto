@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_150f197649e109c9",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_bda7434bd5e2140e372a.txt",
+    "content_hash": "f5021115781d36e7b17252d8c211f184",
+    "status": "active",
+    "created_at": "2026-05-04T02:02:41",
+    "updated_at": "2026-05-04T02:02:41"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_6da7a50a91cbaaa3",
+      "source_id": "source_150f197649e109c9",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_bda7434bd5e2140e372a.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-04T02:02:41] self: [车金AI] 两台车家用都挺合适的。雅阁会更兼顾商务一些，空间和动力感强一点，预算大概10到12万；凯美瑞偏家用稳定、省心，更侧重家用通勤，您之前看的凯美瑞8.98万就在预算内。您目前预算还是8到10万吗？我帮您看看哪台更合适。",
+      "char_count": 142,
+      "status": "active",
+      "created_at": "2026-05-04T02:02:41"
+    }
+  ]
+}

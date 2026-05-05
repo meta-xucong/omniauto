@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "category_id": "policies",
+  "id": "chejin_douyin_lead_first_reply",
+  "status": "active",
+  "source": {
+    "type": "test_fixture",
+    "batch_token": "CHEJIN_BASELINE_20260502"
+  },
+  "data": {
+    "title": "江苏车金抖音线索首轮接待",
+    "policy_type": "company",
+    "keywords": [
+      "抖音",
+      "直播",
+      "刚加",
+      "新来的"
+    ],
+    "answer": "抖音直播或新加微信线索可以由 AI 先问预算、用途、想看的车型和所在城市，并提示后续由销售确认到店或成交细节。",
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "operator_alert": false,
+    "risk_level": "normal"
+  },
+  "runtime": {
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "risk_level": "normal"
+  },
+  "review_state": {
+    "is_new": true,
+    "new_reason": "newly_added_formal_knowledge",
+    "marked_at": "2026-05-02T04:23:27",
+    "updated_at": "2026-05-02T04:23:27",
+    "read_at": "",
+    "read_by": "",
+    "source": {
+      "source_module": "jiangsu_chejin_test",
+      "target_category": "policies",
+      "item_id": "chejin_douyin_lead_first_reply"
+    }
+  },
+  "metadata": {
+    "created_at": "2026-05-02T04:23:27",
+    "updated_at": "2026-05-02T04:23:27",
+    "created_by": "admin",
+    "updated_by": "admin"
+  }
+}

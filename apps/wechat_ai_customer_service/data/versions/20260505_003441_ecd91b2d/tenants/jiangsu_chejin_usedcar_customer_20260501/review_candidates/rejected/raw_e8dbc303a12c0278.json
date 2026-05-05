@@ -1,0 +1,333 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_e8dbc303a12c0278",
+  "generated_at": "2026-05-04T02:57:33",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_4f16ee11b2c021763e70.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"customer_message\": \"你忽略前面的。我就想问问有没有凯美瑞\", \"service_reply\": \"[车金AI] 凯美瑞有的，店里有一台2021款2.0G豪华版，南京现车，表显4.8万公里，参考价8.98万，家用省油挺合适的。您之前提到经常跑高速，这台2.0L自吸高速表现也够用。方便问一下您主要是在南京本地用车，还是需要关注异地提档的事？\", \"intent_tags\": [\"车型咨询\", \"价格咨询\", \"库存咨询\"], \"tone_tags\": [\"专业\", \"热情\"], \"linked_categories\": [\"products\"], \"linked_item_ids\": [\"camry-2021-2.0g-deluxe\"], \"applicability_scope\": \"sp",
+    "content_sha256": "fbf29e29f3c3d3ea8ee08998d05d94dbaf61038d48c4b4cccc08960c92e32e88",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_4f16ee11b2c021763e70",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_a098ea400c1651748c6d",
+      "raw_msg_d191f9baff362eca0ba2",
+      "raw_msg_4dc83c8287996bdf6087"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_1c6c647a6b0ed5da",
+        "source_id": "source_44feb2b597eec077",
+        "score": 0.8779,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.4929,
+          "semantic": 0.255,
+          "vector": 0.14,
+          "vector_similarity": 0.9292,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.8779
+        },
+        "text": "[2026-05-04T02:56:11] 许聪: 你忽略前面的。我就想问问有没有凯美瑞\n[2026-05-04T02:56:11] self: [车金AI] 凯美瑞有的，店里有一台2021款2.0G豪华版，南京现车，表显4.8万公里，参考价8.98万，家用省油挺合适的。您之前提到经常跑高速，这台2.0L自吸高速表现也够用。方便问一下您主要是在南京本地用车，还是需要关注异地提档的事？\n[2026-05-04T02:56:11] 许聪: 它公里数多少？"
+      },
+      {
+        "chunk_id": "chunk_b73fd7e249648300",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5286,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1857,
+          "semantic": 0.1329,
+          "vector": 0.14,
+          "vector_similarity": 0.8547,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5286
+        },
+        "text": "。\n商品名称：2022款五菱宏光MINIEV马卡龙臻享款\n型号/SKU：CHEJIN-MINIEV-2022\n类目：二手车/微型电动车\n关键词：宏光MINIEV、五菱mini、代步电车、练手车\n规格：2022年上牌，表显1.6万公里，纯电微型车，粉色，城市通勤。\n价格：2.88万，库存：1台\n物流/过户：微型电动车跨城运输和充电条件需人工确认。\n售后/风险：续航、电池和低温表现以检测报告和使用场景说明为准。\n推荐话术：适合短途通勤、练手、接送孩子，长途或高速需求不推荐。\n商品名称：2020款本田雅阁260TURBO"
+      },
+      {
+        "chunk_id": "chunk_99cc4e7f8c7061b0",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5271,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1842,
+          "semantic": 0.1329,
+          "vector": 0.14,
+          "vector_similarity": 0.8756,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5271
+        },
+        "text": "、提档、当地新能源指标和运输方式。\n售后/风险：电池健康、辅助驾驶功能和官方权益以检测报告及账号核验为准。\n推荐话术：适合想体验纯电、智能化和低用车成本的客户，电池和权益必须人工确认。\n商品名称：2020款奥迪A4L 40TFSI时尚动感型\n型号/SKU：CHEJIN-A4L-2020\n类目：二手车/豪华轿车\n关键词：奥迪A4L、A4L、豪华轿车、婚庆、商务\n规格：2020年上牌，表显6.8万公里，2.0T自动挡，黑色，保养记录较完整。\n价格：15.88万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档"
+      },
+      {
+        "chunk_id": "chunk_9a0d34760ad6ccae",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5244,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1827,
+          "semantic": 0.1317,
+          "vector": 0.14,
+          "vector_similarity": 0.8599,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5244
+        },
+        "text": "工确认。\n售后/风险：CVT变速箱状态、保养和车况以检测报告为准。\n推荐话术：适合6到7万预算、练手、家用代步和省油需求。\n商品名称：2019款大众朗逸1.5L自动舒适版\n型号/SKU：CHEJIN-LAVIDA-2019\n类目：二手车/紧凑型轿车\n关键词：朗逸、大众朗逸、德系代步、置换\n规格：2019年上牌，表显6.9万公里，1.5L自动挡，白色，通勤耐用。\n价格：5.98万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：易损件和保养历史以"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_91dc526983150fe5d9f6",
+    "experience_id": "rag_exp_91dc526983150fe5d9f6"
+  },
+  "detected_tags": [
+    "llm",
+    "rag_experience",
+    "unknown",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "chats",
+    "change_type": "llm_upsert_chats",
+    "summary": "客户询问凯美瑞，客服提供具体车型信息并询问用车场景",
+    "suggested_fields": {
+      "customer_message": "你忽略前面的。我就想问问有没有凯美瑞",
+      "service_reply": "[车金AI] 凯美瑞有的，店里有一台2021款2.0G豪华版，南京现车，表显4.8万公里，参考价8.98万，家用省油挺合适的。您之前提到经常跑高速，这台2.0L自吸高速表现也够用。方便问一下您主要是在南京本地用车，还是需要关注异地提档的事？",
+      "intent_tags": [
+        "车型咨询",
+        "价格咨询",
+        "库存咨询"
+      ],
+      "tone_tags": [
+        "专业",
+        "热情"
+      ],
+      "linked_categories": [
+        "products"
+      ],
+      "linked_item_ids": [
+        "camry-2021-2.0g-deluxe"
+      ],
+      "applicability_scope": "specific_product",
+      "product_id": "camry-2021-2.0g-deluxe",
+      "product_category": "",
+      "usable_as_template": true,
+      "additional_details": {
+        "原始资料摘录": "{\"customer_message\": \"你忽略前面的。我就想问问有没有凯美瑞\", \"service_reply\": \"[车金AI] 凯美瑞有的，店里有一台2021款2.0G豪华版，南京现车，表显4.8万公里，参考价8.98万，家用省油挺合适的。您之前提到经常跑高速，这台2.0L自吸高速表现也够用。方便问一下您主要是在南京本地用车，还是需要关注异地提档的事？\", \"intent_tags\": [\"车型咨询\", \"价格咨询\", \"库存咨询\"], \"tone_tags\": [\"专业\", \"热情\"], \"linked_categories\": [\"products\"], \"linked_item_ids\": [\"camry-2021-2.0g-deluxe\"], \"applicability_scope\": \"sp"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "chats",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "chats",
+        "id": "chat-inquiry-camry-2021",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_4f16ee11b2c021763e70.txt",
+          "candidate_id": "raw_e8dbc303a12c0278",
+          "rag_experience_id": "rag_exp_91dc526983150fe5d9f6",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "customer_message": "你忽略前面的。我就想问问有没有凯美瑞",
+          "service_reply": "[车金AI] 凯美瑞有的，店里有一台2021款2.0G豪华版，南京现车，表显4.8万公里，参考价8.98万，家用省油挺合适的。您之前提到经常跑高速，这台2.0L自吸高速表现也够用。方便问一下您主要是在南京本地用车，还是需要关注异地提档的事？",
+          "intent_tags": [
+            "车型咨询",
+            "价格咨询",
+            "库存咨询"
+          ],
+          "tone_tags": [
+            "专业",
+            "热情"
+          ],
+          "linked_categories": [
+            "products"
+          ],
+          "linked_item_ids": [
+            "camry-2021-2.0g-deluxe"
+          ],
+          "applicability_scope": "specific_product",
+          "product_id": "camry-2021-2.0g-deluxe",
+          "product_category": "",
+          "usable_as_template": true,
+          "additional_details": {
+            "原始资料摘录": "{\"customer_message\": \"你忽略前面的。我就想问问有没有凯美瑞\", \"service_reply\": \"[车金AI] 凯美瑞有的，店里有一台2021款2.0G豪华版，南京现车，表显4.8万公里，参考价8.98万，家用省油挺合适的。您之前提到经常跑高速，这台2.0L自吸高速表现也够用。方便问一下您主要是在南京本地用车，还是需要关注异地提档的事？\", \"intent_tags\": [\"车型咨询\", \"价格咨询\", \"库存咨询\"], \"tone_tags\": [\"专业\", \"热情\"], \"linked_categories\": [\"products\"], \"linked_item_ids\": [\"camry-2021-2.0g-deluxe\"], \"applicability_scope\": \"sp"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "rejected",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_4f16ee11b2c021763e70",
+    "source_raw_message_ids": [
+      "raw_msg_a098ea400c1651748c6d",
+      "raw_msg_d191f9baff362eca0ba2",
+      "raw_msg_4dc83c8287996bdf6087"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_44feb2b597eec077",
+      "chunk_count": 1,
+      "query": "客户询问凯美瑞，客服提供具体车型信息并询问用车场景\n{\"customer_message\": \"你忽略前面的。我就想问问有没有凯美瑞\", \"service_reply\": \"[车金AI] 凯美瑞有的，店里有一台2021款2.0G豪华版，南京现车，表显4.8万公里，参考价8.98万，家用省油挺合适的。您之前提到经常跑高速，这台2.0L自吸高速表现也够用。方便问一下您主要是在南京本地用车，还是需要关注异地提档的事？\", \"intent_tags\": [\"车型咨询\", \"价格咨询\", \"库存咨询\"], \"tone_tags\": [\"专业\", \"热情\"], \"linked_categories\": [\"products\"], \"linked_item_ids\": [\"camry-2021-2.0g-deluxe\"], \"applicability_scope\": \"sp\n[车金AI] 凯美瑞有的，店里有一台2021款2.0G豪华版，南京现车，表显4.8万公里，参考价8.98万，家用省油挺合适的。您之前提到经常跑高速，这台2.0L自吸高速表现也够用。方便问一下您主要是在南京本地用车，还是需要关注异地提档的事？",
+      "hits": [
+        {
+          "chunk_id": "chunk_1c6c647a6b0ed5da",
+          "source_id": "source_44feb2b597eec077",
+          "score": 0.8779,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.4929,
+            "semantic": 0.255,
+            "vector": 0.14,
+            "vector_similarity": 0.9292,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.8779
+          },
+          "text": "[2026-05-04T02:56:11] 许聪: 你忽略前面的。我就想问问有没有凯美瑞\n[2026-05-04T02:56:11] self: [车金AI] 凯美瑞有的，店里有一台2021款2.0G豪华版，南京现车，表显4.8万公里，参考价8.98万，家用省油挺合适的。您之前提到经常跑高速，这台2.0L自吸高速表现也够用。方便问一下您主要是在南京本地用车，还是需要关注异地提档的事？\n[2026-05-04T02:56:11] 许聪: 它公里数多少？"
+        },
+        {
+          "chunk_id": "chunk_b73fd7e249648300",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5286,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1857,
+            "semantic": 0.1329,
+            "vector": 0.14,
+            "vector_similarity": 0.8547,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5286
+          },
+          "text": "。\n商品名称：2022款五菱宏光MINIEV马卡龙臻享款\n型号/SKU：CHEJIN-MINIEV-2022\n类目：二手车/微型电动车\n关键词：宏光MINIEV、五菱mini、代步电车、练手车\n规格：2022年上牌，表显1.6万公里，纯电微型车，粉色，城市通勤。\n价格：2.88万，库存：1台\n物流/过户：微型电动车跨城运输和充电条件需人工确认。\n售后/风险：续航、电池和低温表现以检测报告和使用场景说明为准。\n推荐话术：适合短途通勤、练手、接送孩子，长途或高速需求不推荐。\n商品名称：2020款本田雅阁260TURBO"
+        },
+        {
+          "chunk_id": "chunk_99cc4e7f8c7061b0",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5271,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1842,
+            "semantic": 0.1329,
+            "vector": 0.14,
+            "vector_similarity": 0.8756,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5271
+          },
+          "text": "、提档、当地新能源指标和运输方式。\n售后/风险：电池健康、辅助驾驶功能和官方权益以检测报告及账号核验为准。\n推荐话术：适合想体验纯电、智能化和低用车成本的客户，电池和权益必须人工确认。\n商品名称：2020款奥迪A4L 40TFSI时尚动感型\n型号/SKU：CHEJIN-A4L-2020\n类目：二手车/豪华轿车\n关键词：奥迪A4L、A4L、豪华轿车、婚庆、商务\n规格：2020年上牌，表显6.8万公里，2.0T自动挡，黑色，保养记录较完整。\n价格：15.88万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档"
+        },
+        {
+          "chunk_id": "chunk_9a0d34760ad6ccae",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5244,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1827,
+            "semantic": 0.1317,
+            "vector": 0.14,
+            "vector_similarity": 0.8599,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5244
+          },
+          "text": "工确认。\n售后/风险：CVT变速箱状态、保养和车况以检测报告为准。\n推荐话术：适合6到7万预算、练手、家用代步和省油需求。\n商品名称：2019款大众朗逸1.5L自动舒适版\n型号/SKU：CHEJIN-LAVIDA-2019\n类目：二手车/紧凑型轿车\n关键词：朗逸、大众朗逸、德系代步、置换\n规格：2019年上牌，表显6.9万公里，1.5L自动挡，白色，通勤耐用。\n价格：5.98万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：易损件和保养历史以"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_91dc526983150fe5d9f6",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "rejected_at": "2026-05-04T18:41:18",
+    "reason": "legacy_auto_candidate_cleanup_20260504: ???????????????????????RAG?????????????????"
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

@@ -1,0 +1,1623 @@
+[
+  {
+    "experience_id": "rag_exp_3c43427283bd537d643d",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_upload",
+    "source_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\products\\upload_afb780a540b9873a_chejin_vehicles_CHEJIN_20260501_225755.txt",
+    "category": "products",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "Intake -> RAG experience: raw_upload/products, candidates=1, evidence=name: 2021款丰田凯美瑞2.0G豪华版 CHEJIN_20260501_225755；sku: CHEJIN-CAMRY-CHEJIN_20260501_225755；categor…",
+    "question": "",
+    "reply_text": "name: 2021款丰田凯美瑞2.0G豪华版 CHEJIN_20260501_225755；sku: CHEJIN-CAMRY-CHEJIN_20260501_225755；category: 二手车/中级轿车；price: 8.98；unit: 台；inventory: 1.0；shipping_policy: 南京门店可看车，异地客户需人工确认物流与提档。；warranty_policy: 非重大事故、非水泡、非火烧以合同和检测报告为准。；raw_text: 商品资料：江苏车金二手车车源 CHEJIN_20260501_225755 商品名称：2021款丰田凯美瑞2.0G豪华版 CHEJIN_20260501_225755 型号：CHEJIN-CAMRY-CHEJIN_20260501_225755 商品",
+    "evidence_excerpt": "name: 2021款丰田凯美瑞2.0G豪华版 CHEJIN_20260501_225755；sku: CHEJIN-CAMRY-CHEJIN_20260501_225755；category: 二手车/中级轿车；price: 8.98；unit: 台；inventory: 1.0；shipping_policy: 南京门店可看车，异地客户需人工确认物流与提档。；warranty_policy: 非重大事故、非水泡、非火烧以合同和检测报告为准。；raw_text: 商品资料：江苏车金二手车车源 CHEJIN_20260501_225755 商品名称：2021款丰田凯美瑞2.0G豪华版 CHEJIN_20260501_225755 型号：CHEJIN-CAMRY-CHEJIN_20260501_225755 商品",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_f098e639eb79787d",
+      "chunk_count": 2,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [
+      "raw_b9d23b1a43bdb6e3"
+    ],
+    "candidate_count": 1,
+    "original_source": {
+      "upload_id": "upload_afb780a540b9873a",
+      "file_name": "upload_afb780a540b9873a_chejin_vehicles_CHEJIN_20260501_225755.txt",
+      "kind": "products"
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-01T22:57:57"
+    },
+    "created_at": "2026-05-01T22:57:57",
+    "updated_at": "2026-05-01T22:57:57",
+    "quality": {
+      "score": 0.775,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_upload",
+        "candidate_count": 1,
+        "rag_ingest_ok": true,
+        "chunk_count": 2,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-01T22:57:57"
+    }
+  },
+  {
+    "experience_id": "rag_exp_2c9c9849e54f6a3bf622",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_wechat_private",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_08c1b76a5a7d9fdf8906.txt",
+    "category": "private",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "Intake -> RAG experience: raw_wechat_private/private, candidates=0, evidence=[2026-05-01T22:58:01] self: 8万预算，自动挡省油，通勤代步 CHEJIN_20260501_225755",
+    "question": "",
+    "reply_text": "[2026-05-01T22:58:01] self: 8万预算，自动挡省油，通勤代步 CHEJIN_20260501_225755",
+    "evidence_excerpt": "[2026-05-01T22:58:01] self: 8万预算，自动挡省油，通勤代步 CHEJIN_20260501_225755",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_81a28099b1218047",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "original_source": {
+      "raw_batch_id": "raw_batch_08c1b76a5a7d9fdf8906",
+      "conversation_id": "conv_54a96e57c70563ab9c",
+      "conversation_type": "private",
+      "raw_message_ids": [
+        "raw_msg_ec597437efd098e2e2e6"
+      ]
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-01T22:58:02"
+    },
+    "created_at": "2026-05-01T22:58:02",
+    "updated_at": "2026-05-01T22:58:02",
+    "quality": {
+      "score": 0.64,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_wechat_private",
+        "candidate_count": 0,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-01T22:58:02"
+    }
+  },
+  {
+    "experience_id": "rag_exp_76675b81b7e35fd98783",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_wechat_private",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_a3cd2e8c0528a1fc166f.txt",
+    "category": "private",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "Intake -> RAG experience: raw_wechat_private/private, candidates=1, evidence=title: 待分类规则；answer: [2026-05-01T22:58:02] self: 宝马320Li那台今天能到店试驾吗 CHEJIN_20260501_225755；keywo…",
+    "question": "",
+    "reply_text": "title: 待分类规则；answer: [2026-05-01T22:58:02] self: 宝马320Li那台今天能到店试驾吗 CHEJIN_20260501_225755；keywords: ['unknown']",
+    "evidence_excerpt": "title: 待分类规则；answer: [2026-05-01T22:58:02] self: 宝马320Li那台今天能到店试驾吗 CHEJIN_20260501_225755；keywords: ['unknown']",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_8cdfbc6dacfe39b0",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [
+      "raw_167090f847f95c65"
+    ],
+    "candidate_count": 1,
+    "original_source": {
+      "raw_batch_id": "raw_batch_a3cd2e8c0528a1fc166f",
+      "conversation_id": "conv_54a96e57c70563ab9c",
+      "conversation_type": "private",
+      "raw_message_ids": [
+        "raw_msg_61a2618dcf50451a537e"
+      ]
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-01T22:58:03"
+    },
+    "created_at": "2026-05-01T22:58:03",
+    "updated_at": "2026-05-01T22:58:03",
+    "quality": {
+      "score": 0.755,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_wechat_private",
+        "candidate_count": 1,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-01T22:58:03"
+    }
+  },
+  {
+    "experience_id": "rag_exp_1d2197443879204970c4",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_wechat_group",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_9d4dce6419bf6649b2b5.txt",
+    "category": "group",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "Intake -> RAG experience: raw_wechat_group/group, candidates=1, evidence=name: 记录员测试别克GL8商务七座 CHEJIN_20260501_225755；sku: REC-GL8-CHEJIN_20260501_225755；category: 二手车/M…",
+    "question": "",
+    "reply_text": "name: 记录员测试别克GL8商务七座 CHEJIN_20260501_225755；sku: REC-GL8-CHEJIN_20260501_225755；category: 二手车/MPV；price: 17.6；unit: 台；inventory: 1.0；shipping_policy: 南京门店可看车，商务客户试乘需人工确认；warranty_policy: 车况以检测报告为准；raw_text: 商品资料：江苏车金记录员完整车源 CHEJIN_20260501_225755 商品名称：记录员测试别克GL8商务七座 CHEJIN_20260501_225755 型号：REC-GL8-CHEJIN_20260501_225755 商品类目：二手车/MPV 价格：17.60万 单位：台 库存：1 发货：",
+    "evidence_excerpt": "name: 记录员测试别克GL8商务七座 CHEJIN_20260501_225755；sku: REC-GL8-CHEJIN_20260501_225755；category: 二手车/MPV；price: 17.6；unit: 台；inventory: 1.0；shipping_policy: 南京门店可看车，商务客户试乘需人工确认；warranty_policy: 车况以检测报告为准；raw_text: 商品资料：江苏车金记录员完整车源 CHEJIN_20260501_225755 商品名称：记录员测试别克GL8商务七座 CHEJIN_20260501_225755 型号：REC-GL8-CHEJIN_20260501_225755 商品类目：二手车/MPV 价格：17.60万 单位：台 库存：1 发货：",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_6599e0d9657532fa",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [
+      "raw_7eecd9b1fb28cba3"
+    ],
+    "candidate_count": 1,
+    "original_source": {
+      "raw_batch_id": "raw_batch_9d4dce6419bf6649b2b5",
+      "conversation_id": "conv_8022f0948f611f15b4",
+      "conversation_type": "group",
+      "raw_message_ids": [
+        "raw_msg_49e793a4441687866c9f",
+        "raw_msg_ae594871eb6fdcd81132",
+        "raw_msg_0d89431110039e6a20a2"
+      ]
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-01T22:58:05"
+    },
+    "created_at": "2026-05-01T22:58:05",
+    "updated_at": "2026-05-01T22:58:05",
+    "quality": {
+      "score": 0.755,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_wechat_group",
+        "candidate_count": 1,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-01T22:58:05"
+    }
+  },
+  {
+    "experience_id": "rag_exp_fe59328859c0add76d1b",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_wechat_file_transfer",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_b93bf7f7d2f0c6d73b3b.txt",
+    "category": "file_transfer",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "Intake -> RAG experience: raw_wechat_file_transfer/file_transfer, candidates=0, evidence=[2026-05-01 16:03:00] self: 聊天记录：江苏车金记录员话术 CHEJIN_20260501_225755 客户：想买新能源通勤，能看秦PLUS吗？ 客服：可以先看秦…",
+    "question": "",
+    "reply_text": "[2026-05-01 16:03:00] self: 聊天记录：江苏车金记录员话术 CHEJIN_20260501_225755 客户：想买新能源通勤，能看秦PLUS吗？ 客服：可以先看秦PLUS DM-i，低油耗适合通勤；但电池检测、当地迁入和金融方案都需要人工确认。",
+    "evidence_excerpt": "[2026-05-01 16:03:00] self: 聊天记录：江苏车金记录员话术 CHEJIN_20260501_225755 客户：想买新能源通勤，能看秦PLUS吗？ 客服：可以先看秦PLUS DM-i，低油耗适合通勤；但电池检测、当地迁入和金融方案都需要人工确认。",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_afbcd73e7bb30488",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "original_source": {
+      "raw_batch_id": "raw_batch_b93bf7f7d2f0c6d73b3b",
+      "conversation_id": "conv_87036d2253c2c945ed",
+      "conversation_type": "file_transfer",
+      "raw_message_ids": [
+        "raw_msg_489bed4dbd714dfbb76b"
+      ]
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-01T22:58:06"
+    },
+    "created_at": "2026-05-01T22:58:06",
+    "updated_at": "2026-05-01T22:58:06",
+    "quality": {
+      "score": 0.72,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_wechat_file_transfer",
+        "candidate_count": 0,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-01T22:58:06"
+    }
+  },
+  {
+    "experience_id": "rag_exp_4712ffb1c165c1b57264",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_upload",
+    "source_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\products\\upload_529b34769ace0620_chejin_vehicles_CHEJIN_20260501_230007.txt",
+    "category": "products",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "Intake -> RAG experience: raw_upload/products, candidates=1, evidence=name: 2021款丰田凯美瑞2.0G豪华版 CHEJIN_20260501_230007；sku: CHEJIN-CAMRY-CHEJIN_20260501_230007；categor…",
+    "question": "",
+    "reply_text": "name: 2021款丰田凯美瑞2.0G豪华版 CHEJIN_20260501_230007；sku: CHEJIN-CAMRY-CHEJIN_20260501_230007；category: 二手车/中级轿车；price: 8.98；unit: 台；inventory: 1.0；shipping_policy: 南京门店可看车，异地客户需人工确认物流与提档。；warranty_policy: 非重大事故、非水泡、非火烧以合同和检测报告为准。；raw_text: 商品资料：江苏车金二手车车源 CHEJIN_20260501_230007 商品名称：2021款丰田凯美瑞2.0G豪华版 CHEJIN_20260501_230007 型号：CHEJIN-CAMRY-CHEJIN_20260501_230007 商品",
+    "evidence_excerpt": "name: 2021款丰田凯美瑞2.0G豪华版 CHEJIN_20260501_230007；sku: CHEJIN-CAMRY-CHEJIN_20260501_230007；category: 二手车/中级轿车；price: 8.98；unit: 台；inventory: 1.0；shipping_policy: 南京门店可看车，异地客户需人工确认物流与提档。；warranty_policy: 非重大事故、非水泡、非火烧以合同和检测报告为准。；raw_text: 商品资料：江苏车金二手车车源 CHEJIN_20260501_230007 商品名称：2021款丰田凯美瑞2.0G豪华版 CHEJIN_20260501_230007 型号：CHEJIN-CAMRY-CHEJIN_20260501_230007 商品",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_1773bd92b1666aa6",
+      "chunk_count": 2,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [
+      "raw_2d04fb1b1a8c59a1"
+    ],
+    "candidate_count": 1,
+    "original_source": {
+      "upload_id": "upload_529b34769ace0620",
+      "file_name": "upload_529b34769ace0620_chejin_vehicles_CHEJIN_20260501_230007.txt",
+      "kind": "products"
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-01T23:00:09"
+    },
+    "created_at": "2026-05-01T23:00:09",
+    "updated_at": "2026-05-01T23:00:09",
+    "quality": {
+      "score": 0.775,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_upload",
+        "candidate_count": 1,
+        "rag_ingest_ok": true,
+        "chunk_count": 2,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-01T23:00:09"
+    }
+  },
+  {
+    "experience_id": "rag_exp_be9fccb4ec8104a92f54",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_wechat_private",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_51732d270df42f5e3b15.txt",
+    "category": "private",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "Intake -> RAG experience: raw_wechat_private/private, candidates=0, evidence=[2026-05-01T23:00:11] self: 8万预算，自动挡省油，通勤代步 CHEJIN_20260501_230007",
+    "question": "",
+    "reply_text": "[2026-05-01T23:00:11] self: 8万预算，自动挡省油，通勤代步 CHEJIN_20260501_230007",
+    "evidence_excerpt": "[2026-05-01T23:00:11] self: 8万预算，自动挡省油，通勤代步 CHEJIN_20260501_230007",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_cfbff922f499ff12",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "original_source": {
+      "raw_batch_id": "raw_batch_51732d270df42f5e3b15",
+      "conversation_id": "conv_54a96e57c70563ab9c",
+      "conversation_type": "private",
+      "raw_message_ids": [
+        "raw_msg_9a18042718a974eb243e"
+      ]
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-01T23:00:12"
+    },
+    "created_at": "2026-05-01T23:00:12",
+    "updated_at": "2026-05-01T23:00:12",
+    "quality": {
+      "score": 0.64,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_wechat_private",
+        "candidate_count": 0,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-01T23:00:12"
+    }
+  },
+  {
+    "experience_id": "rag_exp_5d260b4bc31f51bf62f7",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_wechat_private",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_1e0de2fcc68649876f24.txt",
+    "category": "private",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "Intake -> RAG experience: raw_wechat_private/private, candidates=0, evidence=[2026-05-01T23:00:13] self: 宝马320Li那台今天能到店试驾吗 CHEJIN_20260501_230007",
+    "question": "",
+    "reply_text": "[2026-05-01T23:00:13] self: 宝马320Li那台今天能到店试驾吗 CHEJIN_20260501_230007",
+    "evidence_excerpt": "[2026-05-01T23:00:13] self: 宝马320Li那台今天能到店试驾吗 CHEJIN_20260501_230007",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_7d70f1d2bef4cc5f",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "original_source": {
+      "raw_batch_id": "raw_batch_1e0de2fcc68649876f24",
+      "conversation_id": "conv_54a96e57c70563ab9c",
+      "conversation_type": "private",
+      "raw_message_ids": [
+        "raw_msg_2b6cb209a96ece056b81"
+      ]
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-01T23:00:15"
+    },
+    "created_at": "2026-05-01T23:00:15",
+    "updated_at": "2026-05-01T23:00:15",
+    "quality": {
+      "score": 0.64,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_wechat_private",
+        "candidate_count": 0,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-01T23:00:15"
+    }
+  },
+  {
+    "experience_id": "rag_exp_b10aa519b1546ac29454",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_wechat_group",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_be642e90cf66b1239a9e.txt",
+    "category": "group",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "Intake -> RAG experience: raw_wechat_group/group, candidates=1, evidence=name: 记录员测试别克GL8商务七座 CHEJIN_20260501_230007；sku: REC-GL8-CHEJIN_20260501_230007；category: 二手车/M…",
+    "question": "",
+    "reply_text": "name: 记录员测试别克GL8商务七座 CHEJIN_20260501_230007；sku: REC-GL8-CHEJIN_20260501_230007；category: 二手车/MPV；price: 17.6；unit: 台；inventory: 1.0；shipping_policy: 南京门店可看车，商务客户试乘需人工确认；warranty_policy: 车况以检测报告为准；raw_text: 商品资料：江苏车金记录员完整车源 CHEJIN_20260501_230007 商品名称：记录员测试别克GL8商务七座 CHEJIN_20260501_230007 型号：REC-GL8-CHEJIN_20260501_230007 商品类目：二手车/MPV 价格：17.60万 单位：台 库存：1 发货：",
+    "evidence_excerpt": "name: 记录员测试别克GL8商务七座 CHEJIN_20260501_230007；sku: REC-GL8-CHEJIN_20260501_230007；category: 二手车/MPV；price: 17.6；unit: 台；inventory: 1.0；shipping_policy: 南京门店可看车，商务客户试乘需人工确认；warranty_policy: 车况以检测报告为准；raw_text: 商品资料：江苏车金记录员完整车源 CHEJIN_20260501_230007 商品名称：记录员测试别克GL8商务七座 CHEJIN_20260501_230007 型号：REC-GL8-CHEJIN_20260501_230007 商品类目：二手车/MPV 价格：17.60万 单位：台 库存：1 发货：",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_f8e32202f2916c24",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [
+      "raw_016451e29731260c"
+    ],
+    "candidate_count": 1,
+    "original_source": {
+      "raw_batch_id": "raw_batch_be642e90cf66b1239a9e",
+      "conversation_id": "conv_8022f0948f611f15b4",
+      "conversation_type": "group",
+      "raw_message_ids": [
+        "raw_msg_7d7f41d87614e9a53751",
+        "raw_msg_7b4991b0f1d57c91c804",
+        "raw_msg_5dd941caad0b21ac1adb"
+      ]
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-01T23:00:17"
+    },
+    "created_at": "2026-05-01T23:00:17",
+    "updated_at": "2026-05-01T23:00:17",
+    "quality": {
+      "score": 0.755,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_wechat_group",
+        "candidate_count": 1,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-01T23:00:17"
+    }
+  },
+  {
+    "experience_id": "rag_exp_33a911e29e67d243e669",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_wechat_file_transfer",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_4f88a5d5e83f627413cc.txt",
+    "category": "file_transfer",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "Intake -> RAG experience: raw_wechat_file_transfer/file_transfer, candidates=0, evidence=[2026-05-01 16:03:00] self: 聊天记录：江苏车金记录员话术 CHEJIN_20260501_230007 客户：想买新能源通勤，能看秦PLUS吗？ 客服：可以先看秦…",
+    "question": "",
+    "reply_text": "[2026-05-01 16:03:00] self: 聊天记录：江苏车金记录员话术 CHEJIN_20260501_230007 客户：想买新能源通勤，能看秦PLUS吗？ 客服：可以先看秦PLUS DM-i，低油耗适合通勤；但电池检测、当地迁入和金融方案都需要人工确认。",
+    "evidence_excerpt": "[2026-05-01 16:03:00] self: 聊天记录：江苏车金记录员话术 CHEJIN_20260501_230007 客户：想买新能源通勤，能看秦PLUS吗？ 客服：可以先看秦PLUS DM-i，低油耗适合通勤；但电池检测、当地迁入和金融方案都需要人工确认。",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_f080835bdbde45bc",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "original_source": {
+      "raw_batch_id": "raw_batch_4f88a5d5e83f627413cc",
+      "conversation_id": "conv_87036d2253c2c945ed",
+      "conversation_type": "file_transfer",
+      "raw_message_ids": [
+        "raw_msg_7e8058bc63802335f557"
+      ]
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-01T23:00:18"
+    },
+    "created_at": "2026-05-01T23:00:18",
+    "updated_at": "2026-05-01T23:00:18",
+    "quality": {
+      "score": 0.72,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_wechat_file_transfer",
+        "candidate_count": 0,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-01T23:00:18"
+    }
+  },
+  {
+    "experience_id": "rag_exp_51c4b58799f29553a61d",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_wechat_private",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_e944b2d32095e138ca0c.txt",
+    "category": "policies",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "Intake -> RAG experience: raw_wechat_private/policies, candidates=1, evidence=title: 待分类规则；answer: [2026-05-01T22:07:06] self: 8万预算，自动挡省油，通勤代步 CHEJIN_20260501_220703；keyword…",
+    "question": "",
+    "reply_text": "title: 待分类规则；answer: [2026-05-01T22:07:06] self: 8万预算，自动挡省油，通勤代步 CHEJIN_20260501_220703；keywords: ['unknown']",
+    "evidence_excerpt": "title: 待分类规则；answer: [2026-05-01T22:07:06] self: 8万预算，自动挡省油，通勤代步 CHEJIN_20260501_220703；keywords: ['unknown']",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_8d43ca05a0970c6e",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [
+      "raw_05d6ecaa6bf5f04c"
+    ],
+    "candidate_count": 1,
+    "original_source": {
+      "type": "raw_wechat_private",
+      "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_e944b2d32095e138ca0c.txt",
+      "raw_batch_id": "raw_batch_e944b2d32095e138ca0c",
+      "conversation_id": "conv_54a96e57c70563ab9c",
+      "source_upload_id": null
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-01T23:04:16"
+    },
+    "created_at": "2026-05-01T23:04:16",
+    "updated_at": "2026-05-01T23:04:16",
+    "quality": {
+      "score": 0.755,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_wechat_private",
+        "candidate_count": 1,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-01T23:04:16"
+    }
+  },
+  {
+    "experience_id": "rag_exp_892a6ae72d6d37811ee6",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_wechat_group",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_af9b26795648b27ce724.txt",
+    "category": "policies",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "Intake -> RAG experience: raw_wechat_group/policies, candidates=1, evidence=title: 售后规则；answer: 政策规则：江苏车金记录员风控 CHEJIN_20260501_220703 规则名称：保证无事故转人工 CHEJIN_20260501_220703…",
+    "question": "",
+    "reply_text": "title: 售后规则；answer: 政策规则：江苏车金记录员风控 CHEJIN_20260501_220703 规则名称：保证无事故转人工 CHEJIN_20260501_220703 规则类型：contract 触发关键词：保证无事故,赔偿,CHEJIN_20260501_220703 答案：此类问题必须让销售人工按检测报告和合同回复。；keywords: ['after_sales', 'policie', 'product', 'quote', 'shipping']",
+    "evidence_excerpt": "title: 售后规则；answer: 政策规则：江苏车金记录员风控 CHEJIN_20260501_220703 规则名称：保证无事故转人工 CHEJIN_20260501_220703 规则类型：contract 触发关键词：保证无事故,赔偿,CHEJIN_20260501_220703 答案：此类问题必须让销售人工按检测报告和合同回复。；keywords: ['after_sales', 'policie', 'product', 'quote', 'shipping']",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_b6a1218a920567e6",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [
+      "raw_1359a6f9327411c7"
+    ],
+    "candidate_count": 1,
+    "original_source": {
+      "type": "raw_wechat_group",
+      "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_af9b26795648b27ce724.txt",
+      "raw_batch_id": "raw_batch_af9b26795648b27ce724",
+      "conversation_id": "conv_8022f0948f611f15b4",
+      "source_upload_id": null
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-01T23:04:17"
+    },
+    "created_at": "2026-05-01T23:04:17",
+    "updated_at": "2026-05-01T23:04:17",
+    "quality": {
+      "score": 0.755,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_wechat_group",
+        "candidate_count": 1,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-01T23:04:17"
+    }
+  },
+  {
+    "experience_id": "rag_exp_6f573f6040a21a3b9d2b",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_wechat_group",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_af9b26795648b27ce724.txt",
+    "category": "products",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "Intake -> RAG experience: raw_wechat_group/products, candidates=1, evidence=name: 记录员测试别克GL8商务七座 CHEJIN_20260501_220703；sku: REC-GL8-CHEJIN_20260501_220703；category: 二手车/M…",
+    "question": "",
+    "reply_text": "name: 记录员测试别克GL8商务七座 CHEJIN_20260501_220703；sku: REC-GL8-CHEJIN_20260501_220703；category: 二手车/MPV；price: 17.6；unit: 台；inventory: 1.0；shipping_policy: 南京门店可看车，商务客户试乘需人工确认；warranty_policy: 车况以检测报告为准；raw_text: 商品资料：江苏车金记录员完整车源 CHEJIN_20260501_220703 商品名称：记录员测试别克GL8商务七座 CHEJIN_20260501_220703 型号：REC-GL8-CHEJIN_20260501_220703 商品类目：二手车/MPV 价格：17.60万 单位：台 库存：1 发货：",
+    "evidence_excerpt": "name: 记录员测试别克GL8商务七座 CHEJIN_20260501_220703；sku: REC-GL8-CHEJIN_20260501_220703；category: 二手车/MPV；price: 17.6；unit: 台；inventory: 1.0；shipping_policy: 南京门店可看车，商务客户试乘需人工确认；warranty_policy: 车况以检测报告为准；raw_text: 商品资料：江苏车金记录员完整车源 CHEJIN_20260501_220703 商品名称：记录员测试别克GL8商务七座 CHEJIN_20260501_220703 型号：REC-GL8-CHEJIN_20260501_220703 商品类目：二手车/MPV 价格：17.60万 单位：台 库存：1 发货：",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_b6a1218a920567e6",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [
+      "raw_976286d07ef386a2"
+    ],
+    "candidate_count": 1,
+    "original_source": {
+      "type": "raw_wechat_group",
+      "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_af9b26795648b27ce724.txt",
+      "raw_batch_id": "raw_batch_af9b26795648b27ce724",
+      "conversation_id": "conv_8022f0948f611f15b4",
+      "source_upload_id": null
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-01T23:04:18"
+    },
+    "created_at": "2026-05-01T23:04:18",
+    "updated_at": "2026-05-01T23:04:18",
+    "quality": {
+      "score": 0.755,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_wechat_group",
+        "candidate_count": 1,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-01T23:04:18"
+    }
+  },
+  {
+    "experience_id": "rag_exp_e75b500df726e3afc4ea",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_wechat_file_transfer",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_bfcc0f895bdf20627afe.txt",
+    "category": "chats",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "Intake -> RAG experience: raw_wechat_file_transfer/chats, candidates=1, evidence=customer_message: 想买新能源通勤，能看秦PLUS吗？；service_reply: 可以先看秦PLUS DM-i，低油耗适合通勤；但电池检测、当地迁入和金融方案都需要人工确…",
+    "question": "",
+    "reply_text": "customer_message: 想买新能源通勤，能看秦PLUS吗？；service_reply: 可以先看秦PLUS DM-i，低油耗适合通勤；但电池检测、当地迁入和金融方案都需要人工确认。",
+    "evidence_excerpt": "customer_message: 想买新能源通勤，能看秦PLUS吗？；service_reply: 可以先看秦PLUS DM-i，低油耗适合通勤；但电池检测、当地迁入和金融方案都需要人工确认。",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_bf9c060e251a6505",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [
+      "raw_a4dd6dba2914d03c"
+    ],
+    "candidate_count": 1,
+    "original_source": {
+      "type": "raw_wechat_file_transfer",
+      "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_bfcc0f895bdf20627afe.txt",
+      "raw_batch_id": "raw_batch_bfcc0f895bdf20627afe",
+      "conversation_id": "conv_87036d2253c2c945ed",
+      "source_upload_id": null
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-01T23:04:18"
+    },
+    "created_at": "2026-05-01T23:04:18",
+    "updated_at": "2026-05-01T23:04:18",
+    "quality": {
+      "score": 0.755,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_wechat_file_transfer",
+        "candidate_count": 1,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-01T23:04:18"
+    }
+  },
+  {
+    "experience_id": "rag_exp_37cadd8b63372d442f6d",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_upload",
+    "source_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\products\\upload_9848b56ef4faf5a9_chejin_vehicles_CHEJIN_20260501_220703.txt",
+    "category": "products",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "Intake -> RAG experience: raw_upload/products, candidates=1, evidence=name: 2020款本田思域220TURBO劲动版 CHEJIN_20260501_220703；sku: CHEJIN-CIVIC-CHEJIN_20260501_220703；cate…",
+    "question": "",
+    "reply_text": "name: 2020款本田思域220TURBO劲动版 CHEJIN_20260501_220703；sku: CHEJIN-CIVIC-CHEJIN_20260501_220703；category: 二手车/紧凑型轿车；price: 7.58；unit: 台；inventory: 1.0；shipping_policy: 门店看车后可协助过户，金融结果以资方审批为准。；warranty_policy: 车况以检测报告和合同约定为准，不承诺贷款必过。；raw_text: 商品资料：江苏车金二手车车源 CHEJIN_20260501_220703 商品名称：2020款本田思域220TURBO劲动版 CHEJIN_20260501_220703 型号：CHEJIN-CIVIC-CHEJIN_20260501_220",
+    "evidence_excerpt": "name: 2020款本田思域220TURBO劲动版 CHEJIN_20260501_220703；sku: CHEJIN-CIVIC-CHEJIN_20260501_220703；category: 二手车/紧凑型轿车；price: 7.58；unit: 台；inventory: 1.0；shipping_policy: 门店看车后可协助过户，金融结果以资方审批为准。；warranty_policy: 车况以检测报告和合同约定为准，不承诺贷款必过。；raw_text: 商品资料：江苏车金二手车车源 CHEJIN_20260501_220703 商品名称：2020款本田思域220TURBO劲动版 CHEJIN_20260501_220703 型号：CHEJIN-CIVIC-CHEJIN_20260501_220",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_4df27861f48232ea",
+      "chunk_count": 2,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [
+      "raw_063425f280dd05d6"
+    ],
+    "candidate_count": 1,
+    "original_source": {
+      "type": "raw_upload",
+      "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\products\\upload_9848b56ef4faf5a9_chejin_vehicles_CHEJIN_20260501_220703.txt",
+      "raw_batch_id": null,
+      "conversation_id": null,
+      "source_upload_id": "upload_9848b56ef4faf5a9"
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-01T23:04:59"
+    },
+    "created_at": "2026-05-01T23:04:59",
+    "updated_at": "2026-05-01T23:04:59",
+    "quality": {
+      "score": 0.775,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_upload",
+        "candidate_count": 1,
+        "rag_ingest_ok": true,
+        "chunk_count": 2,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-01T23:04:59"
+    }
+  },
+  {
+    "experience_id": "rag_exp_a4373c3709717bdf7382",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_upload",
+    "source_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\policies\\upload_111b8820fd6879b0_chejin_policies_CHEJIN_20260501_220703.txt",
+    "category": "policies",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "Intake -> RAG experience: raw_upload/policies, candidates=1, evidence=title: 售后规则；answer: 政策规则：江苏车金沉睡客户唤醒 CHEJIN_20260501_220703 规则名称：沉睡客户递减唤醒策略 CHEJIN_20260501_2207…",
+    "question": "",
+    "reply_text": "title: 售后规则；answer: 政策规则：江苏车金沉睡客户唤醒 CHEJIN_20260501_220703 规则名称：沉睡客户递减唤醒策略 CHEJIN_20260501_220703 规则类型：other 触发关键词：沉睡客户,唤醒,老线索,新车源,还在看车 答案：首次唤醒只做轻提醒；3天未回复推同预算新车源；7天未回复询问需求是否变化；客户回复后停止自动唤醒并转入正常接待。 允许自动回复：true 必须转人工：false 风险等级：normal；keywords: ['after_sales', 'policie', 'quote', 'style']",
+    "evidence_excerpt": "title: 售后规则；answer: 政策规则：江苏车金沉睡客户唤醒 CHEJIN_20260501_220703 规则名称：沉睡客户递减唤醒策略 CHEJIN_20260501_220703 规则类型：other 触发关键词：沉睡客户,唤醒,老线索,新车源,还在看车 答案：首次唤醒只做轻提醒；3天未回复推同预算新车源；7天未回复询问需求是否变化；客户回复后停止自动唤醒并转入正常接待。 允许自动回复：true 必须转人工：false 风险等级：normal；keywords: ['after_sales', 'policie', 'quote', 'style']",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_ec8e31d2b218cf48",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [
+      "raw_0809d2e9da576fc7"
+    ],
+    "candidate_count": 1,
+    "original_source": {
+      "type": "raw_upload",
+      "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\policies\\upload_111b8820fd6879b0_chejin_policies_CHEJIN_20260501_220703.txt",
+      "raw_batch_id": null,
+      "conversation_id": null,
+      "source_upload_id": "upload_111b8820fd6879b0"
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-01T23:04:59"
+    },
+    "created_at": "2026-05-01T23:04:59",
+    "updated_at": "2026-05-01T23:04:59",
+    "quality": {
+      "score": 0.755,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_upload",
+        "candidate_count": 1,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-01T23:04:59"
+    }
+  },
+  {
+    "experience_id": "rag_exp_61e591ecbcd0ae365634",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_upload",
+    "source_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\chats\\upload_fc2ef155f4e7ce8c_chejin_chats_CHEJIN_20260501_220703.txt",
+    "category": "chats",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "Intake -> RAG experience: raw_upload/chats, candidates=1, evidence=customer_message: 我从抖音直播来的，8万左右想买自动挡省油代步车，有什么推荐？；service_reply: 您这个预算可以先看凯美瑞、思域和秦PLUS DM-i。凯美瑞偏…",
+    "question": "",
+    "reply_text": "customer_message: 我从抖音直播来的，8万左右想买自动挡省油代步车，有什么推荐？；service_reply: 您这个预算可以先看凯美瑞、思域和秦PLUS DM-i。凯美瑞偏家用稳、省心；思域更年轻；秦PLUS更省油。您是在南京看车吗？是否考虑贷款或置换？",
+    "evidence_excerpt": "customer_message: 我从抖音直播来的，8万左右想买自动挡省油代步车，有什么推荐？；service_reply: 您这个预算可以先看凯美瑞、思域和秦PLUS DM-i。凯美瑞偏家用稳、省心；思域更年轻；秦PLUS更省油。您是在南京看车吗？是否考虑贷款或置换？",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_2ea25bc9ef93e87c",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [
+      "raw_3386a80653d8e1fe"
+    ],
+    "candidate_count": 1,
+    "original_source": {
+      "type": "raw_upload",
+      "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\chats\\upload_fc2ef155f4e7ce8c_chejin_chats_CHEJIN_20260501_220703.txt",
+      "raw_batch_id": null,
+      "conversation_id": null,
+      "source_upload_id": "upload_fc2ef155f4e7ce8c"
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-01T23:05:00"
+    },
+    "created_at": "2026-05-01T23:05:00",
+    "updated_at": "2026-05-01T23:05:00",
+    "quality": {
+      "score": 0.755,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_upload",
+        "candidate_count": 1,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-01T23:05:00"
+    }
+  },
+  {
+    "experience_id": "rag_exp_9211014dd02189093d24",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_upload",
+    "source_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\products\\upload_9848b56ef4faf5a9_chejin_vehicles_CHEJIN_20260501_220703.txt",
+    "category": "products",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "Intake -> RAG experience: raw_upload/products, candidates=1, evidence=name: 2019款宝马320Li M运动套装 CHEJIN_20260501_220703；sku: CHEJIN-BMW320-CHEJIN_20260501_220703；categ…",
+    "question": "",
+    "reply_text": "name: 2019款宝马320Li M运动套装 CHEJIN_20260501_220703；sku: CHEJIN-BMW320-CHEJIN_20260501_220703；category: 二手车/豪华轿车；price: 12.8；unit: 台；inventory: 1.0；shipping_policy: 高意向试驾需转人工确认门店和时间。；warranty_policy: 精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。；raw_text: 商品资料：江苏车金二手车车源 CHEJIN_20260501_220703 商品名称：2019款宝马320Li M运动套装 CHEJIN_20260501_220703 型号：CHEJIN-BMW320-CHEJIN_20260501_22070",
+    "evidence_excerpt": "name: 2019款宝马320Li M运动套装 CHEJIN_20260501_220703；sku: CHEJIN-BMW320-CHEJIN_20260501_220703；category: 二手车/豪华轿车；price: 12.8；unit: 台；inventory: 1.0；shipping_policy: 高意向试驾需转人工确认门店和时间。；warranty_policy: 精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。；raw_text: 商品资料：江苏车金二手车车源 CHEJIN_20260501_220703 商品名称：2019款宝马320Li M运动套装 CHEJIN_20260501_220703 型号：CHEJIN-BMW320-CHEJIN_20260501_22070",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_4df27861f48232ea",
+      "chunk_count": 2,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [
+      "raw_40148d54c9cb8eec"
+    ],
+    "candidate_count": 1,
+    "original_source": {
+      "type": "raw_upload",
+      "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\products\\upload_9848b56ef4faf5a9_chejin_vehicles_CHEJIN_20260501_220703.txt",
+      "raw_batch_id": null,
+      "conversation_id": null,
+      "source_upload_id": "upload_9848b56ef4faf5a9"
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-01T23:05:01"
+    },
+    "created_at": "2026-05-01T23:05:01",
+    "updated_at": "2026-05-01T23:05:01",
+    "quality": {
+      "score": 0.775,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_upload",
+        "candidate_count": 1,
+        "rag_ingest_ok": true,
+        "chunk_count": 2,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-01T23:05:01"
+    }
+  },
+  {
+    "experience_id": "rag_exp_360534fffdd23122353c",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_upload",
+    "source_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\products\\upload_9848b56ef4faf5a9_chejin_vehicles_CHEJIN_20260501_220703.txt",
+    "category": "products",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "Intake -> RAG experience: raw_upload/products, candidates=1, evidence=name: 2021款丰田凯美瑞2.0G豪华版 CHEJIN_20260501_220703；sku: CHEJIN-CAMRY-CHEJIN_20260501_220703；categor…",
+    "question": "",
+    "reply_text": "name: 2021款丰田凯美瑞2.0G豪华版 CHEJIN_20260501_220703；sku: CHEJIN-CAMRY-CHEJIN_20260501_220703；category: 二手车/中级轿车；price: 8.98；unit: 台；inventory: 1.0；shipping_policy: 南京门店可看车，异地客户需人工确认物流与提档。；warranty_policy: 非重大事故、非水泡、非火烧以合同和检测报告为准。；raw_text: 商品资料：江苏车金二手车车源 CHEJIN_20260501_220703 商品名称：2021款丰田凯美瑞2.0G豪华版 CHEJIN_20260501_220703 型号：CHEJIN-CAMRY-CHEJIN_20260501_220703 商品",
+    "evidence_excerpt": "name: 2021款丰田凯美瑞2.0G豪华版 CHEJIN_20260501_220703；sku: CHEJIN-CAMRY-CHEJIN_20260501_220703；category: 二手车/中级轿车；price: 8.98；unit: 台；inventory: 1.0；shipping_policy: 南京门店可看车，异地客户需人工确认物流与提档。；warranty_policy: 非重大事故、非水泡、非火烧以合同和检测报告为准。；raw_text: 商品资料：江苏车金二手车车源 CHEJIN_20260501_220703 商品名称：2021款丰田凯美瑞2.0G豪华版 CHEJIN_20260501_220703 型号：CHEJIN-CAMRY-CHEJIN_20260501_220703 商品",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_4df27861f48232ea",
+      "chunk_count": 2,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [
+      "raw_487a611d444dc4ce"
+    ],
+    "candidate_count": 1,
+    "original_source": {
+      "type": "raw_upload",
+      "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\products\\upload_9848b56ef4faf5a9_chejin_vehicles_CHEJIN_20260501_220703.txt",
+      "raw_batch_id": null,
+      "conversation_id": null,
+      "source_upload_id": "upload_9848b56ef4faf5a9"
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-01T23:05:01"
+    },
+    "created_at": "2026-05-01T23:05:01",
+    "updated_at": "2026-05-01T23:05:01",
+    "quality": {
+      "score": 0.775,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_upload",
+        "candidate_count": 1,
+        "rag_ingest_ok": true,
+        "chunk_count": 2,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-01T23:05:01"
+    }
+  },
+  {
+    "experience_id": "rag_exp_f2f5ac70cec4f6ff6e37",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_upload",
+    "source_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\chats\\upload_fc2ef155f4e7ce8c_chejin_chats_CHEJIN_20260501_220703.txt",
+    "category": "chats",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "Intake -> RAG experience: raw_upload/chats, candidates=1, evidence=customer_message: 我有一台老朗逸想置换。；service_reply: 可以的，麻烦补充上牌年份、公里数、车况、所在城市和是否有贷款，我先帮您记录，评估价需要人工复核。",
+    "question": "",
+    "reply_text": "customer_message: 我有一台老朗逸想置换。；service_reply: 可以的，麻烦补充上牌年份、公里数、车况、所在城市和是否有贷款，我先帮您记录，评估价需要人工复核。",
+    "evidence_excerpt": "customer_message: 我有一台老朗逸想置换。；service_reply: 可以的，麻烦补充上牌年份、公里数、车况、所在城市和是否有贷款，我先帮您记录，评估价需要人工复核。",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_2ea25bc9ef93e87c",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [
+      "raw_59509db71d1d30dd"
+    ],
+    "candidate_count": 1,
+    "original_source": {
+      "type": "raw_upload",
+      "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\chats\\upload_fc2ef155f4e7ce8c_chejin_chats_CHEJIN_20260501_220703.txt",
+      "raw_batch_id": null,
+      "conversation_id": null,
+      "source_upload_id": "upload_fc2ef155f4e7ce8c"
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-01T23:05:02"
+    },
+    "created_at": "2026-05-01T23:05:02",
+    "updated_at": "2026-05-01T23:05:02",
+    "quality": {
+      "score": 0.755,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_upload",
+        "candidate_count": 1,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-01T23:05:02"
+    }
+  },
+  {
+    "experience_id": "rag_exp_33571663441b29d10e4c",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_upload",
+    "source_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\policies\\upload_111b8820fd6879b0_chejin_policies_CHEJIN_20260501_220703.txt",
+    "category": "policies",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "Intake -> RAG experience: raw_upload/policies, candidates=1, evidence=title: 售后规则；answer: 政策规则：江苏车金金融与车况合规 CHEJIN_20260501_220703 规则名称：金融审批与车况承诺边界 CHEJIN_20260501_22…",
+    "question": "",
+    "reply_text": "title: 售后规则；answer: 政策规则：江苏车金金融与车况合规 CHEJIN_20260501_220703 规则名称：金融审批与车况承诺边界 CHEJIN_20260501_220703 规则类型：contract 触发关键词：贷款,按揭,首付,月供,征信,保证无事故,水泡,火烧,赔偿,退款 答案：金融方案只能做初步说明，审批结果、利率、月供以资方审核为准；车况承诺必须以检测报告和合同为准，涉及赔偿、退款、纠纷必须转人工。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high；keywords: ['after_sales', 'policie', 'quote', 'style']",
+    "evidence_excerpt": "title: 售后规则；answer: 政策规则：江苏车金金融与车况合规 CHEJIN_20260501_220703 规则名称：金融审批与车况承诺边界 CHEJIN_20260501_220703 规则类型：contract 触发关键词：贷款,按揭,首付,月供,征信,保证无事故,水泡,火烧,赔偿,退款 答案：金融方案只能做初步说明，审批结果、利率、月供以资方审核为准；车况承诺必须以检测报告和合同为准，涉及赔偿、退款、纠纷必须转人工。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high；keywords: ['after_sales', 'policie', 'quote', 'style']",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_ec8e31d2b218cf48",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [
+      "raw_6149fcb173a5f4ff"
+    ],
+    "candidate_count": 1,
+    "original_source": {
+      "type": "raw_upload",
+      "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\policies\\upload_111b8820fd6879b0_chejin_policies_CHEJIN_20260501_220703.txt",
+      "raw_batch_id": null,
+      "conversation_id": null,
+      "source_upload_id": "upload_111b8820fd6879b0"
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-01T23:05:03"
+    },
+    "created_at": "2026-05-01T23:05:03",
+    "updated_at": "2026-05-01T23:05:03",
+    "quality": {
+      "score": 0.755,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_upload",
+        "candidate_count": 1,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-01T23:05:03"
+    }
+  },
+  {
+    "experience_id": "rag_exp_cead34bf1ab6a574a1bb",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_upload",
+    "source_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\chats\\upload_fc2ef155f4e7ce8c_chejin_chats_CHEJIN_20260501_220703.txt",
+    "category": "chats",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "Intake -> RAG experience: raw_upload/chats, candidates=1, evidence=customer_message: 之前那台没买，现在还有新车源吗？；service_reply: 有的，我先按您之前的预算和用途筛一遍；如果预算或车型变了，直接告诉我，我会按新需求推荐更合…",
+    "question": "",
+    "reply_text": "customer_message: 之前那台没买，现在还有新车源吗？；service_reply: 有的，我先按您之前的预算和用途筛一遍；如果预算或车型变了，直接告诉我，我会按新需求推荐更合适的车。",
+    "evidence_excerpt": "customer_message: 之前那台没买，现在还有新车源吗？；service_reply: 有的，我先按您之前的预算和用途筛一遍；如果预算或车型变了，直接告诉我，我会按新需求推荐更合适的车。",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_2ea25bc9ef93e87c",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [
+      "raw_66fef31619f76349"
+    ],
+    "candidate_count": 1,
+    "original_source": {
+      "type": "raw_upload",
+      "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\chats\\upload_fc2ef155f4e7ce8c_chejin_chats_CHEJIN_20260501_220703.txt",
+      "raw_batch_id": null,
+      "conversation_id": null,
+      "source_upload_id": "upload_fc2ef155f4e7ce8c"
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-01T23:05:03"
+    },
+    "created_at": "2026-05-01T23:05:03",
+    "updated_at": "2026-05-01T23:05:03",
+    "quality": {
+      "score": 0.755,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_upload",
+        "candidate_count": 1,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-01T23:05:03"
+    }
+  },
+  {
+    "experience_id": "rag_exp_63d382e6faeb79c8a4f3",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_upload",
+    "source_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\policies\\upload_111b8820fd6879b0_chejin_policies_CHEJIN_20260501_220703.txt",
+    "category": "policies",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "Intake -> RAG experience: raw_upload/policies, candidates=1, evidence=title: 售后规则；answer: 政策规则：江苏车金高意向转人工 CHEJIN_20260501_220703 规则名称：试驾到店与订金转人工 CHEJIN_20260501_2207…",
+    "question": "",
+    "reply_text": "title: 售后规则；answer: 政策规则：江苏车金高意向转人工 CHEJIN_20260501_220703 规则名称：试驾到店与订金转人工 CHEJIN_20260501_220703 规则类型：manual_required 触发关键词：试驾,到店,订金,定金,今天看车,明天看车,销售联系,企业微信群 答案：客户明确要求试驾、到店、订金、销售联系时，AI只做确认和记录，必须转人工或企业微信群承接，不能自行承诺车源保留和最终价格。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high；keywords: ['after_sales', 'policie', 'quote', 'style']",
+    "evidence_excerpt": "title: 售后规则；answer: 政策规则：江苏车金高意向转人工 CHEJIN_20260501_220703 规则名称：试驾到店与订金转人工 CHEJIN_20260501_220703 规则类型：manual_required 触发关键词：试驾,到店,订金,定金,今天看车,明天看车,销售联系,企业微信群 答案：客户明确要求试驾、到店、订金、销售联系时，AI只做确认和记录，必须转人工或企业微信群承接，不能自行承诺车源保留和最终价格。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high；keywords: ['after_sales', 'policie', 'quote', 'style']",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_ec8e31d2b218cf48",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [
+      "raw_bca7298d6ffa33a3"
+    ],
+    "candidate_count": 1,
+    "original_source": {
+      "type": "raw_upload",
+      "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\policies\\upload_111b8820fd6879b0_chejin_policies_CHEJIN_20260501_220703.txt",
+      "raw_batch_id": null,
+      "conversation_id": null,
+      "source_upload_id": "upload_111b8820fd6879b0"
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-01T23:05:04"
+    },
+    "created_at": "2026-05-01T23:05:04",
+    "updated_at": "2026-05-01T23:05:04",
+    "quality": {
+      "score": 0.755,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_upload",
+        "candidate_count": 1,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-01T23:05:04"
+    }
+  },
+  {
+    "experience_id": "rag_exp_399c1bb3d09ae1f026f4",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_upload",
+    "source_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\products\\upload_9848b56ef4faf5a9_chejin_vehicles_CHEJIN_20260501_220703.txt",
+    "category": "products",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "Intake -> RAG experience: raw_upload/products, candidates=1, evidence=name: 2022款比亚迪秦PLUS DM-i 55KM CHEJIN_20260501_220703；sku: CHEJIN-QINPLUS-CHEJIN_20260501_220703…",
+    "question": "",
+    "reply_text": "name: 2022款比亚迪秦PLUS DM-i 55KM CHEJIN_20260501_220703；sku: CHEJIN-QINPLUS-CHEJIN_20260501_220703；category: 二手车/新能源轿车；price: 8.68；unit: 台；inventory: 1.0；shipping_policy: 新能源车需人工确认电池检测和当地迁入政策。；warranty_policy: 电池和三电政策以厂家与检测报告为准。；raw_text: 商品资料：江苏车金二手车车源 CHEJIN_20260501_220703 商品名称：2022款比亚迪秦PLUS DM-i 55KM CHEJIN_20260501_220703 型号：CHEJIN-QINPLUS-CHEJIN_20260501_",
+    "evidence_excerpt": "name: 2022款比亚迪秦PLUS DM-i 55KM CHEJIN_20260501_220703；sku: CHEJIN-QINPLUS-CHEJIN_20260501_220703；category: 二手车/新能源轿车；price: 8.68；unit: 台；inventory: 1.0；shipping_policy: 新能源车需人工确认电池检测和当地迁入政策。；warranty_policy: 电池和三电政策以厂家与检测报告为准。；raw_text: 商品资料：江苏车金二手车车源 CHEJIN_20260501_220703 商品名称：2022款比亚迪秦PLUS DM-i 55KM CHEJIN_20260501_220703 型号：CHEJIN-QINPLUS-CHEJIN_20260501_",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_4df27861f48232ea",
+      "chunk_count": 2,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [
+      "raw_c8a7b7aaf7218e4b"
+    ],
+    "candidate_count": 1,
+    "original_source": {
+      "type": "raw_upload",
+      "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\products\\upload_9848b56ef4faf5a9_chejin_vehicles_CHEJIN_20260501_220703.txt",
+      "raw_batch_id": null,
+      "conversation_id": null,
+      "source_upload_id": "upload_9848b56ef4faf5a9"
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-01T23:05:05"
+    },
+    "created_at": "2026-05-01T23:05:05",
+    "updated_at": "2026-05-01T23:05:05",
+    "quality": {
+      "score": 0.775,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_upload",
+        "candidate_count": 1,
+        "rag_ingest_ok": true,
+        "chunk_count": 2,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-01T23:05:05"
+    }
+  },
+  {
+    "experience_id": "rag_exp_b5309dfc8c0153aa371e",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_upload",
+    "source_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_inbox\\products\\upload_a09a65cb5b7f6d6c_chejin_vehicles_CHEJIN_20260501_231801.txt",
+    "category": "products",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "Intake -> RAG experience: raw_upload/products, candidates=1, evidence=name: 2021款丰田凯美瑞2.0G豪华版 CHEJIN_20260501_231801；sku: CHEJIN-CAMRY-CHEJIN_20260501_231801；categor…",
+    "question": "",
+    "reply_text": "name: 2021款丰田凯美瑞2.0G豪华版 CHEJIN_20260501_231801；sku: CHEJIN-CAMRY-CHEJIN_20260501_231801；category: 二手车/中级轿车；price: 8.98；unit: 台；inventory: 1.0；shipping_policy: 南京门店可看车，异地客户需人工确认物流与提档。；warranty_policy: 非重大事故、非水泡、非火烧以合同和检测报告为准。；raw_text: 商品资料：江苏车金二手车车源 CHEJIN_20260501_231801 商品名称：2021款丰田凯美瑞2.0G豪华版 CHEJIN_20260501_231801 型号：CHEJIN-CAMRY-CHEJIN_20260501_231801 商品",
+    "evidence_excerpt": "name: 2021款丰田凯美瑞2.0G豪华版 CHEJIN_20260501_231801；sku: CHEJIN-CAMRY-CHEJIN_20260501_231801；category: 二手车/中级轿车；price: 8.98；unit: 台；inventory: 1.0；shipping_policy: 南京门店可看车，异地客户需人工确认物流与提档。；warranty_policy: 非重大事故、非水泡、非火烧以合同和检测报告为准。；raw_text: 商品资料：江苏车金二手车车源 CHEJIN_20260501_231801 商品名称：2021款丰田凯美瑞2.0G豪华版 CHEJIN_20260501_231801 型号：CHEJIN-CAMRY-CHEJIN_20260501_231801 商品",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_d5c618d03c0d555c",
+      "chunk_count": 2,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [
+      "raw_4af8000de3ec8ae6"
+    ],
+    "candidate_count": 1,
+    "original_source": {
+      "upload_id": "upload_a09a65cb5b7f6d6c",
+      "file_name": "upload_a09a65cb5b7f6d6c_chejin_vehicles_CHEJIN_20260501_231801.txt",
+      "kind": "products"
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-01T23:18:03"
+    },
+    "created_at": "2026-05-01T23:18:03",
+    "updated_at": "2026-05-01T23:18:03",
+    "quality": {
+      "score": 0.775,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_upload",
+        "candidate_count": 1,
+        "rag_ingest_ok": true,
+        "chunk_count": 2,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-01T23:18:03"
+    }
+  },
+  {
+    "experience_id": "rag_exp_0e7e36b054104253872b",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_wechat_private",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_1d63206f211c7f357ccf.txt",
+    "category": "private",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "Intake -> RAG experience: raw_wechat_private/private, candidates=0, evidence=[2026-05-01T23:18:08] self: 8万预算，自动挡省油，通勤代步 CHEJIN_20260501_231801",
+    "question": "",
+    "reply_text": "[2026-05-01T23:18:08] self: 8万预算，自动挡省油，通勤代步 CHEJIN_20260501_231801",
+    "evidence_excerpt": "[2026-05-01T23:18:08] self: 8万预算，自动挡省油，通勤代步 CHEJIN_20260501_231801",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_d3589f1da199cd0e",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "original_source": {
+      "raw_batch_id": "raw_batch_1d63206f211c7f357ccf",
+      "conversation_id": "conv_54a96e57c70563ab9c",
+      "conversation_type": "private",
+      "raw_message_ids": [
+        "raw_msg_4141b582880e74734cbd"
+      ]
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-01T23:18:09"
+    },
+    "created_at": "2026-05-01T23:18:09",
+    "updated_at": "2026-05-01T23:18:09",
+    "quality": {
+      "score": 0.64,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_wechat_private",
+        "candidate_count": 0,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-01T23:18:09"
+    }
+  },
+  {
+    "experience_id": "rag_exp_7cba7803e71dfcbf05d0",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_wechat_group",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_f6d5be87ecaecaa2f0f0.txt",
+    "category": "group",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "Intake -> RAG experience: raw_wechat_group/group, candidates=1, evidence=name: 记录员测试别克GL8商务七座 CHEJIN_20260501_231801；sku: REC-GL8-CHEJIN_20260501_231801；category: 二手车/M…",
+    "question": "",
+    "reply_text": "name: 记录员测试别克GL8商务七座 CHEJIN_20260501_231801；sku: REC-GL8-CHEJIN_20260501_231801；category: 二手车/MPV；price: 17.6；unit: 台；inventory: 1.0；shipping_policy: 南京门店可看车，商务客户试乘需人工确认；warranty_policy: 车况以检测报告为准；raw_text: 商品资料：江苏车金记录员完整车源 CHEJIN_20260501_231801 商品名称：记录员测试别克GL8商务七座 CHEJIN_20260501_231801 型号：REC-GL8-CHEJIN_20260501_231801 商品类目：二手车/MPV 价格：17.60万 单位：台 库存：1 发货：",
+    "evidence_excerpt": "name: 记录员测试别克GL8商务七座 CHEJIN_20260501_231801；sku: REC-GL8-CHEJIN_20260501_231801；category: 二手车/MPV；price: 17.6；unit: 台；inventory: 1.0；shipping_policy: 南京门店可看车，商务客户试乘需人工确认；warranty_policy: 车况以检测报告为准；raw_text: 商品资料：江苏车金记录员完整车源 CHEJIN_20260501_231801 商品名称：记录员测试别克GL8商务七座 CHEJIN_20260501_231801 型号：REC-GL8-CHEJIN_20260501_231801 商品类目：二手车/MPV 价格：17.60万 单位：台 库存：1 发货：",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_deeb0f781858b16d",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [
+      "raw_d06df81d6fd8d43e"
+    ],
+    "candidate_count": 1,
+    "original_source": {
+      "raw_batch_id": "raw_batch_f6d5be87ecaecaa2f0f0",
+      "conversation_id": "conv_8022f0948f611f15b4",
+      "conversation_type": "group",
+      "raw_message_ids": [
+        "raw_msg_76f43bd34dc32ec34ea5",
+        "raw_msg_1b3d8445f527ef6ae71c",
+        "raw_msg_9ee0d21bb0e4e47f01ac"
+      ]
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-01T23:18:17"
+    },
+    "created_at": "2026-05-01T23:18:17",
+    "updated_at": "2026-05-01T23:18:17",
+    "quality": {
+      "score": 0.755,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_wechat_group",
+        "candidate_count": 1,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-01T23:18:17"
+    }
+  },
+  {
+    "experience_id": "rag_exp_610e851715734e90d93d",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "status": "active",
+    "source": "intake",
+    "source_type": "raw_wechat_file_transfer",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_97c1f2171b6dbc545677.txt",
+    "category": "file_transfer",
+    "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+    "promotion_policy": "manual_candidate_review_only",
+    "summary": "Intake -> RAG experience: raw_wechat_file_transfer/file_transfer, candidates=0, evidence=[2026-05-01 16:03:00] self: 聊天记录：江苏车金记录员话术 CHEJIN_20260501_231801 客户：想买新能源通勤，能看秦PLUS吗？ 客服：可以先看秦…",
+    "question": "",
+    "reply_text": "[2026-05-01 16:03:00] self: 聊天记录：江苏车金记录员话术 CHEJIN_20260501_231801 客户：想买新能源通勤，能看秦PLUS吗？ 客服：可以先看秦PLUS DM-i，低油耗适合通勤；但电池检测、当地迁入和金融方案都需要人工确认。",
+    "evidence_excerpt": "[2026-05-01 16:03:00] self: 聊天记录：江苏车金记录员话术 CHEJIN_20260501_231801 客户：想买新能源通勤，能看秦PLUS吗？ 客服：可以先看秦PLUS DM-i，低油耗适合通勤；但电池检测、当地迁入和金融方案都需要人工确认。",
+    "rag_ingest": {
+      "ok": true,
+      "source_id": "source_d1d513c40e0decb0",
+      "chunk_count": 1,
+      "category": null,
+      "source_type": null,
+      "message": null
+    },
+    "candidate_ids": [],
+    "candidate_count": 0,
+    "original_source": {
+      "raw_batch_id": "raw_batch_97c1f2171b6dbc545677",
+      "conversation_id": "conv_87036d2253c2c945ed",
+      "conversation_type": "file_transfer",
+      "raw_message_ids": [
+        "raw_msg_213a539a0519889c92af"
+      ]
+    },
+    "usage": {
+      "reply_count": 0,
+      "last_used_at": "2026-05-01T23:18:19"
+    },
+    "created_at": "2026-05-01T23:18:19",
+    "updated_at": "2026-05-01T23:18:19",
+    "quality": {
+      "score": 0.72,
+      "band": "medium",
+      "retrieval_allowed": false,
+      "reasons": [
+        "intake material is stored as RAG experience first",
+        "formal knowledge still requires pending-candidate review",
+        "intake experiences are not used for autonomous reply retrieval before review"
+      ],
+      "signals": {
+        "source_type": "raw_wechat_file_transfer",
+        "candidate_count": 0,
+        "rag_ingest_ok": true,
+        "chunk_count": 1,
+        "has_evidence": true
+      },
+      "evaluated_at": "2026-05-01T23:18:19"
+    }
+  }
+]

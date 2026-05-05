@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_8d43ca05a0970c6e",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_e944b2d32095e138ca0c.txt",
+    "content_hash": "2317a2e8e2f07363704d75086d3f523d",
+    "status": "active",
+    "created_at": "2026-05-01T22:07:06",
+    "updated_at": "2026-05-01T22:07:06"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_37616dd53fec33e4",
+      "source_id": "source_8d43ca05a0970c6e",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_e944b2d32095e138ca0c.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-01T22:07:06] self: 8万预算，自动挡省油，通勤代步 CHEJIN_20260501_220703",
+      "char_count": 66,
+      "status": "active",
+      "created_at": "2026-05-01T22:07:06"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_4dfc6ec9a32e5644",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "group",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_3232f5a1792eaec6ff2e.txt",
+    "content_hash": "b226f90ed2543d40b31bd8bd943bc3d2",
+    "status": "active",
+    "created_at": "2026-05-03T20:41:44",
+    "updated_at": "2026-05-03T20:41:44"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_4ca927d06003fa77",
+      "source_id": "source_4dfc6ec9a32e5644",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "group",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_3232f5a1792eaec6ff2e.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-03T19:06:31] 客户: 群资料：新增2024款理想L6 Pro，预算23万内，适合家庭，增程SUV，库存1台，客户问权益时转人工。\n演示批次：CHEJIN_DEMO_20260503_203628\n[2026-05-03T19:07:31] 客户: 群提醒：二手车过户通常要核身份证明、机动车登记证书、行驶证和号牌，异地迁入先查当地政策。\n演示批次：CHEJIN_DEMO_20260503_203628\n[2026-05-03T19:08:31] 客户: 客户王总问GL8商务接待，重点看内饰磨损、二排座椅、保养记录和试乘。\n演示批次：CHEJIN_DEMO_20260503_203628\n[2026-05-03T19:09:31] 客户: 新能源客户追问电池健康度、三电质保、续航衰减，一律让销售结合检测报告回复。\n演示批次：CHEJIN_DEMO_20260503_203628\n[2026-05-03T19:10:31] 客户: 边界噪音 CHEJIN_DEMO_20260503_203628：今晚大家记得下班关灯，这条不应该成为正式知识。\n演示批次：CHEJIN_DEMO_20260503_203628\n[2026-05-03T19:11:31] 客户: 售后话术：客户问退车赔偿，回复以合同、检测报告和人工说明为准，不做口头承诺。\n演示批次：CHEJIN_DEMO_20260503_203628",
+      "char_count": 621,
+      "status": "active",
+      "created_at": "2026-05-03T20:41:44"
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "category_id": "product_explanations",
+  "id": "chejin_qinplus_2022_dmi55_explanation",
+  "status": "active",
+  "source": {
+    "type": "demo_fixture",
+    "batch_token": "CHEJIN_DEMO_20260503_203628",
+    "domain": "used_car"
+  },
+  "data": {
+    "product_id": "chejin_qinplus_2022_dmi55",
+    "title": "比亚迪秦PLUS DM-i 55KM讲解重点",
+    "keywords": [
+      "2022款比亚迪秦PLUS DM-i 55KM",
+      "讲解",
+      "卖点",
+      "看车重点",
+      "CHEJIN_DEMO_20260503_203628"
+    ],
+    "content": "讲解 2022款比亚迪秦PLUS DM-i 55KM 时，先讲适合人群，再讲价格、里程和车况；客户追问合同、检测、金融、异地迁入时转人工。车况摘要：2022年上牌，表显3.2万公里，插电混动，白色，低油耗通勤。",
+    "additional_details": {
+      "关联商品": "2022款比亚迪秦PLUS DM-i 55KM",
+      "演示批次": "CHEJIN_DEMO_20260503_203628"
+    }
+  },
+  "runtime": {
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "risk_level": "normal",
+    "operator_alert": false
+  },
+  "review_state": {
+    "is_new": false,
+    "new_reason": "newly_added_formal_knowledge",
+    "marked_at": "2026-05-03T20:36:28",
+    "updated_at": "2026-05-04T18:58:39",
+    "read_at": "2026-05-04T18:58:39",
+    "read_by": "codex_test_seed",
+    "source": {
+      "source_module": "jiangsu_chejin_demo_seed",
+      "target_category": "product_explanations",
+      "item_id": "chejin_qinplus_2022_dmi55_explanation"
+    }
+  },
+  "metadata": {
+    "created_at": "2026-05-03T20:36:28",
+    "updated_at": "2026-05-04T18:58:39",
+    "created_by": "admin",
+    "updated_by": "admin",
+    "test_seed_direct_fill": true,
+    "test_seed_id": "direct_test_fill_20260504_v1",
+    "test_seed_note": "????????????????????????"
+  }
+}

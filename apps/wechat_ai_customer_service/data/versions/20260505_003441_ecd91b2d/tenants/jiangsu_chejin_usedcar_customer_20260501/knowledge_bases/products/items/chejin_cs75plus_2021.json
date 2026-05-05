@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "category_id": "products",
+  "id": "chejin_cs75plus_2021",
+  "status": "active",
+  "source": {
+    "type": "demo_fixture",
+    "batch_token": "CHEJIN_DEMO_20260503_203628",
+    "domain": "used_car"
+  },
+  "data": {
+    "name": "2021款长安CS75 PLUS 1.5T自动尊贵型",
+    "sku": "CHEJIN-CS75PLUS-2021",
+    "category": "二手车/SUV",
+    "aliases": [
+      "CS75PLUS",
+      "长安CS75",
+      "国产SUV",
+      "家用SUV",
+      "2021款长安CS75 PLUS 1.5T自动尊贵型",
+      "CHEJIN-CS75PLUS-2021",
+      "CHEJIN_DEMO_20260503_203628"
+    ],
+    "specs": "2021年上牌，表显4.4万公里，1.5T自动挡，白色，配置高。",
+    "price": 6.88,
+    "unit": "台",
+    "price_tiers": [
+      {
+        "min_quantity": 1,
+        "unit_price": 6.88
+      }
+    ],
+    "inventory": 2,
+    "shipping_policy": "南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。",
+    "warranty_policy": "车机、电子配置、底盘和保养以检测报告为准。",
+    "reply_templates": {
+      "默认回复": "适合预算7万左右、空间和配置优先的家庭客户。",
+      "报价回复": "这台车当前演示价约 6.88 万，最终成交价、金融方案和费用明细需要人工确认。",
+      "议价回复": "二手车一车一况，AI 可以说明参考价和看车建议，最终优惠、订金和成交条件必须由销售确认。",
+      "物流回复": "南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。",
+      "售后回复": "车机、电子配置、底盘和保养以检测报告为准。",
+      "内部备注": "演示资料：用于覆盖二手车常见咨询、风险边界和商品专属知识。"
+    },
+    "risk_rules": [
+      "电子配置转人工"
+    ],
+    "additional_details": {
+      "上牌时间": "2021-05",
+      "表显里程": "4.4万公里",
+      "库存说明": "两台相近车况",
+      "演示状态": "在售"
+    }
+  },
+  "runtime": {
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "risk_level": "normal"
+  },
+  "review_state": {
+    "is_new": false,
+    "new_reason": "newly_added_formal_knowledge",
+    "marked_at": "2026-05-03T20:36:28",
+    "updated_at": "2026-05-04T18:58:38",
+    "read_at": "2026-05-04T18:58:38",
+    "read_by": "codex_test_seed",
+    "source": {
+      "source_module": "jiangsu_chejin_demo_seed",
+      "target_category": "products",
+      "item_id": "chejin_cs75plus_2021"
+    }
+  },
+  "metadata": {
+    "created_at": "2026-05-03T20:36:28",
+    "updated_at": "2026-05-04T18:58:38",
+    "created_by": "admin",
+    "updated_by": "admin",
+    "test_seed_direct_fill": true,
+    "test_seed_id": "direct_test_fill_20260504_v1",
+    "test_seed_note": "????????????????????????"
+  }
+}

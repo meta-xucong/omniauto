@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_bf539aef1e6920f9",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_1de61cb3a53c6c883c6e.txt",
+    "content_hash": "eaa896983ab1814fba8d6dc37bbd47b4",
+    "status": "active",
+    "created_at": "2026-05-04T02:25:36",
+    "updated_at": "2026-05-04T02:25:36"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_52478508b5b315a7",
+      "source_id": "source_bf539aef1e6920f9",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_1de61cb3a53c6c883c6e.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-04T02:25:36] 许聪: Model 3那台要重点看哪些地方？",
+      "char_count": 44,
+      "status": "active",
+      "created_at": "2026-05-04T02:25:36"
+    }
+  ]
+}

@@ -1,0 +1,331 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_716100d8d8c5a1be",
+  "generated_at": "2026-05-04T03:54:54",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_132b1d1a4b6f755289a0.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"customer_message\": \"你们能不能做保险理赔代办？\", \"service_reply\": \"[车金AI] 许哥，5万以内的自动挡SUV目前库里没有完全匹配的现车，我让销售同事帮您留意一下相近的车源，方便留个电话吗？他查到后直接联系您。\", \"intent_tags\": [\"insurance_claim_handling\", \"vehicle_inquiry\", \"request_contact\"], \"tone_tags\": [\"helpful\", \"requesting\"], \"linked_categories\": [], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product",
+    "content_sha256": "d6c2dc752a6a1078d4fd8d071e2a77cdaafde9e201e50444726e2cd0205b941a",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_132b1d1a4b6f755289a0",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_6d69bce8c8aa966a8025",
+      "raw_msg_7e59ac046f91b6a78db8",
+      "raw_msg_db254b0edd9a02aaea6d"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_48f9c5e1df1051bf",
+        "source_id": "source_f59637a80fd43f55",
+        "score": 0.8887,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.4936,
+          "semantic": 0.2651,
+          "vector": 0.14,
+          "vector_similarity": 0.9554,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.8887
+        },
+        "text": "[2026-05-04 03:53:00] system: 03:53\n[2026-05-04T03:53:52] self: [车金AI] 许哥，5万以内的自动挡SUV目前库里没有完全匹配的现车，我让销售同事帮您留意一下相近的车源，方便留个电话吗？他查到后直接联系您。\n[2026-05-04T03:53:52] 许聪: 你们能不能做保险理赔代办？"
+      },
+      {
+        "chunk_id": "chunk_9e63ae068b82817d",
+        "source_id": "source_45537e325007626b",
+        "score": 0.5856,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2824,
+          "semantic": 0.1732,
+          "vector": 0.14,
+          "vector_similarity": 0.7953,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.5856
+        },
+        "text": "[2026-05-04T03:52:04] self: [车金AI] 许哥，比亚迪海鸥是新车吧？我这边暂时没看到准确的车源数据，得让销售同事帮您查一下。方便留个电话吗？他查到后第一时间联系您。\n[2026-05-04T03:52:04] 许聪: 有没有5万以内自动挡SUV？"
+      },
+      {
+        "chunk_id": "chunk_5ce004697dbee133",
+        "source_id": "source_edf4b496ba3529d7",
+        "score": 0.5712,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2765,
+          "semantic": 0.1706,
+          "vector": 0.1341,
+          "vector_similarity": 0.7451,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.5712
+        },
+        "text": "[2026-05-04 03:48:00] system: 03:48\n[2026-05-04T03:48:32] self: [车金AI] 许哥，奔驰E级2021年以后的目前库里没查到现车信息，我帮您转给销售同事核实一下，方便留个电话吗？他查到后直接联系您。\n[2026-05-04T03:48:32] 许聪: 坦克300有现车吗？"
+      },
+      {
+        "chunk_id": "chunk_20b1ed4080531862",
+        "source_id": "source_de4fa2163767901b",
+        "score": 0.522,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.239,
+          "semantic": 0.1543,
+          "vector": 0.1387,
+          "vector_similarity": 0.7703,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.522
+        },
+        "text": "[2026-05-04T03:46:11] self: [车金AI] 许哥，奥德赛这款日系MPV我这边暂时没看到现车信息，需要让销售同事查一下库存和具体车况。我马上帮您转过去，您方便留个电话吗？他查到后第一时间联系您。\n[2026-05-04T03:46:11] 许聪: 有没有奔驰E级，最好2021以后的"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_8ca02ac805bf4cb021bd",
+    "experience_id": "rag_exp_8ca02ac805bf4cb021bd"
+  },
+  "detected_tags": [
+    "llm",
+    "rag_experience",
+    "unknown",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "chats",
+    "change_type": "llm_upsert_chats",
+    "summary": "客户询问保险理赔代办，客服回复5万以内自动挡SUV无现车并提供销售跟进",
+    "suggested_fields": {
+      "customer_message": "你们能不能做保险理赔代办？",
+      "service_reply": "[车金AI] 许哥，5万以内的自动挡SUV目前库里没有完全匹配的现车，我让销售同事帮您留意一下相近的车源，方便留个电话吗？他查到后直接联系您。",
+      "intent_tags": [
+        "insurance_claim_handling",
+        "vehicle_inquiry",
+        "request_contact"
+      ],
+      "tone_tags": [
+        "helpful",
+        "requesting"
+      ],
+      "linked_categories": [],
+      "linked_item_ids": [],
+      "applicability_scope": "global",
+      "product_id": "",
+      "product_category": "",
+      "usable_as_template": false,
+      "additional_details": {
+        "original_timestamp": "2026-05-04T03:53:52",
+        "note": "客服回复针对的是之前关于SUV的询价，而非直接回答保险问题",
+        "原始资料摘录": "{\"customer_message\": \"你们能不能做保险理赔代办？\", \"service_reply\": \"[车金AI] 许哥，5万以内的自动挡SUV目前库里没有完全匹配的现车，我让销售同事帮您留意一下相近的车源，方便留个电话吗？他查到后直接联系您。\", \"intent_tags\": [\"insurance_claim_handling\", \"vehicle_inquiry\", \"request_contact\"], \"tone_tags\": [\"helpful\", \"requesting\"], \"linked_categories\": [], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "chats",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "chats",
+        "id": "chat_20260504_mixed",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_132b1d1a4b6f755289a0.txt",
+          "candidate_id": "raw_716100d8d8c5a1be",
+          "rag_experience_id": "rag_exp_8ca02ac805bf4cb021bd",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "customer_message": "你们能不能做保险理赔代办？",
+          "service_reply": "[车金AI] 许哥，5万以内的自动挡SUV目前库里没有完全匹配的现车，我让销售同事帮您留意一下相近的车源，方便留个电话吗？他查到后直接联系您。",
+          "intent_tags": [
+            "insurance_claim_handling",
+            "vehicle_inquiry",
+            "request_contact"
+          ],
+          "tone_tags": [
+            "helpful",
+            "requesting"
+          ],
+          "linked_categories": [],
+          "linked_item_ids": [],
+          "applicability_scope": "global",
+          "product_id": "",
+          "product_category": "",
+          "usable_as_template": false,
+          "additional_details": {
+            "original_timestamp": "2026-05-04T03:53:52",
+            "note": "客服回复针对的是之前关于SUV的询价，而非直接回答保险问题",
+            "原始资料摘录": "{\"customer_message\": \"你们能不能做保险理赔代办？\", \"service_reply\": \"[车金AI] 许哥，5万以内的自动挡SUV目前库里没有完全匹配的现车，我让销售同事帮您留意一下相近的车源，方便留个电话吗？他查到后直接联系您。\", \"intent_tags\": [\"insurance_claim_handling\", \"vehicle_inquiry\", \"request_contact\"], \"tone_tags\": [\"helpful\", \"requesting\"], \"linked_categories\": [], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "note",
+      "original_timestamp",
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "rejected",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_132b1d1a4b6f755289a0",
+    "source_raw_message_ids": [
+      "raw_msg_6d69bce8c8aa966a8025",
+      "raw_msg_7e59ac046f91b6a78db8",
+      "raw_msg_db254b0edd9a02aaea6d"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_f59637a80fd43f55",
+      "chunk_count": 1,
+      "query": "客户询问保险理赔代办，客服回复5万以内自动挡SUV无现车并提供销售跟进\n{\"customer_message\": \"你们能不能做保险理赔代办？\", \"service_reply\": \"[车金AI] 许哥，5万以内的自动挡SUV目前库里没有完全匹配的现车，我让销售同事帮您留意一下相近的车源，方便留个电话吗？他查到后直接联系您。\", \"intent_tags\": [\"insurance_claim_handling\", \"vehicle_inquiry\", \"request_contact\"], \"tone_tags\": [\"helpful\", \"requesting\"], \"linked_categories\": [], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product\n[车金AI] 许哥，5万以内的自动挡SUV目前库里没有完全匹配的现车，我让销售同事帮您留意一下相近的车源，方便留个电话吗？他查到后直接联系您。",
+      "hits": [
+        {
+          "chunk_id": "chunk_48f9c5e1df1051bf",
+          "source_id": "source_f59637a80fd43f55",
+          "score": 0.8887,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.4936,
+            "semantic": 0.2651,
+            "vector": 0.14,
+            "vector_similarity": 0.9554,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.8887
+          },
+          "text": "[2026-05-04 03:53:00] system: 03:53\n[2026-05-04T03:53:52] self: [车金AI] 许哥，5万以内的自动挡SUV目前库里没有完全匹配的现车，我让销售同事帮您留意一下相近的车源，方便留个电话吗？他查到后直接联系您。\n[2026-05-04T03:53:52] 许聪: 你们能不能做保险理赔代办？"
+        },
+        {
+          "chunk_id": "chunk_9e63ae068b82817d",
+          "source_id": "source_45537e325007626b",
+          "score": 0.5856,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2824,
+            "semantic": 0.1732,
+            "vector": 0.14,
+            "vector_similarity": 0.7953,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.5856
+          },
+          "text": "[2026-05-04T03:52:04] self: [车金AI] 许哥，比亚迪海鸥是新车吧？我这边暂时没看到准确的车源数据，得让销售同事帮您查一下。方便留个电话吗？他查到后第一时间联系您。\n[2026-05-04T03:52:04] 许聪: 有没有5万以内自动挡SUV？"
+        },
+        {
+          "chunk_id": "chunk_5ce004697dbee133",
+          "source_id": "source_edf4b496ba3529d7",
+          "score": 0.5712,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2765,
+            "semantic": 0.1706,
+            "vector": 0.1341,
+            "vector_similarity": 0.7451,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.5712
+          },
+          "text": "[2026-05-04 03:48:00] system: 03:48\n[2026-05-04T03:48:32] self: [车金AI] 许哥，奔驰E级2021年以后的目前库里没查到现车信息，我帮您转给销售同事核实一下，方便留个电话吗？他查到后直接联系您。\n[2026-05-04T03:48:32] 许聪: 坦克300有现车吗？"
+        },
+        {
+          "chunk_id": "chunk_20b1ed4080531862",
+          "source_id": "source_de4fa2163767901b",
+          "score": 0.522,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.239,
+            "semantic": 0.1543,
+            "vector": 0.1387,
+            "vector_similarity": 0.7703,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.522
+          },
+          "text": "[2026-05-04T03:46:11] self: [车金AI] 许哥，奥德赛这款日系MPV我这边暂时没看到现车信息，需要让销售同事查一下库存和具体车况。我马上帮您转过去，您方便留个电话吗？他查到后第一时间联系您。\n[2026-05-04T03:46:11] 许聪: 有没有奔驰E级，最好2021以后的"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_8ca02ac805bf4cb021bd",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "rejected_at": "2026-05-04T18:41:18",
+    "reason": "legacy_auto_candidate_cleanup_20260504: ???????????????????????RAG?????????????????"
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

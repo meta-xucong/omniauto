@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_282989c806b57084",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_de9e0196c86527642830.txt",
+    "content_hash": "82833ce4bf1c8e8da8aec2737b91cc36",
+    "status": "active",
+    "created_at": "2026-05-04T02:54:58",
+    "updated_at": "2026-05-04T02:54:58"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_9cfb2ddb3806e229",
+      "source_id": "source_282989c806b57084",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_de9e0196c86527642830.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-04 02:53:00] system: 02:53\n[2026-05-04T02:54:57] 许聪: 我的意思是，凯美瑞这款车有吗？\n[2026-05-04T02:54:57] self: [车金AI] 豪华品牌撑门面的话，店里有一台2020款奥迪A4L 40TFSI时尚动感型，2.0T，黑色，参考价15.88万，比较符合您的预算和需求。另外您之前提到想看凯美瑞，那台是家用省油取向，品牌上不如奥迪撑面子。您先看看A4L怎么样？稍后我让销售同事给您核实具体车况和价格。",
+      "char_count": 246,
+      "status": "active",
+      "created_at": "2026-05-04T02:54:58"
+    }
+  ]
+}

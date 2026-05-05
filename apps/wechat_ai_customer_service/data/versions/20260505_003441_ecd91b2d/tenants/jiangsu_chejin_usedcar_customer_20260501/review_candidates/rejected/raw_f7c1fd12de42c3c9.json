@@ -1,0 +1,327 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_f7c1fd12de42c3c9",
+  "generated_at": "2026-05-04T02:21:30",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_8baeb4aa4037e877f5ef.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"customer_message\": \"卡罗拉和轩逸哪个更省心？我新手练手\", \"service_reply\": \"\", \"intent_tags\": [\"产品对比\", \"新手购车\"], \"linked_categories\": [], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\", \"usable_as_template\": false, \"additional_details\": {\"timestamp\": \"2026-05-04T02:20:52\", \"sender\": \"许聪\"}}",
+    "content_sha256": "238978016691bd0d4de21072e9ac2d44da9290120f5bf062b76480f9ef485eda",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_8baeb4aa4037e877f5ef",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_9b395ffc3ccee7e6e763",
+      "raw_msg_c62ecb3632a892e39bdd"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_0a9126f46f8a5f5f",
+        "source_id": "source_6e354ee3fba45ee8",
+        "score": 0.7286,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.3821,
+          "semantic": 0.2166,
+          "vector": 0.14,
+          "vector_similarity": 0.8294,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.7286
+        },
+        "text": "[2026-05-04 02:18:00] system: 02:18\n[2026-05-04T02:20:52] 许聪: 卡罗拉和轩逸哪个更省心？我新手练手"
+      },
+      {
+        "chunk_id": "chunk_99cc4e7f8c7061b0",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.4604,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1396,
+          "semantic": 0.1269,
+          "vector": 0.124,
+          "vector_similarity": 0.6886,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.4604
+        },
+        "text": "、提档、当地新能源指标和运输方式。\n售后/风险：电池健康、辅助驾驶功能和官方权益以检测报告及账号核验为准。\n推荐话术：适合想体验纯电、智能化和低用车成本的客户，电池和权益必须人工确认。\n商品名称：2020款奥迪A4L 40TFSI时尚动感型\n型号/SKU：CHEJIN-A4L-2020\n类目：二手车/豪华轿车\n关键词：奥迪A4L、A4L、豪华轿车、婚庆、商务\n规格：2020年上牌，表显6.8万公里，2.0T自动挡，黑色，保养记录较完整。\n价格：15.88万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档"
+      },
+      {
+        "chunk_id": "chunk_9a0d34760ad6ccae",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.4514,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1359,
+          "semantic": 0.1256,
+          "vector": 0.12,
+          "vector_similarity": 0.6667,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.4514
+        },
+        "text": "工确认。\n售后/风险：CVT变速箱状态、保养和车况以检测报告为准。\n推荐话术：适合6到7万预算、练手、家用代步和省油需求。\n商品名称：2019款大众朗逸1.5L自动舒适版\n型号/SKU：CHEJIN-LAVIDA-2019\n类目：二手车/紧凑型轿车\n关键词：朗逸、大众朗逸、德系代步、置换\n规格：2019年上牌，表显6.9万公里，1.5L自动挡，白色，通勤耐用。\n价格：5.98万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：易损件和保养历史以"
+      },
+      {
+        "chunk_id": "chunk_2b56ca7d3ec3952e",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.4348,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1917,
+          "semantic": 0.1338,
+          "vector": 0.1193,
+          "vector_similarity": 0.6629,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.08,
+          "final": 0.4348
+        },
+        "text": "车/豪华SUV\n关键词：Macan、保时捷Macan、豪华SUV、高端车\n规格：2018年上牌，表显7.2万公里，2.0T自动挡，黑色，需预约看车。\n价格：23.80万，库存：1台\n物流/过户：高端车看车、试驾、订金和付款方案必须人工预约确认。\n售后/风险：保养、选配、事故记录、按揭和产权状态必须人工核验。\n推荐话术：适合预算20万以上、品牌和外观优先的客户，高端车必须转人工推进。\n商品名称：2021款比亚迪汉EV超长续航豪华型\n型号/SKU：CHEJIN-HANEV-2021\n类目：二手车/新能源轿车\n关键词：汉"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_5c4901e74a06db7edd6e",
+    "experience_id": "rag_exp_5c4901e74a06db7edd6e"
+  },
+  "detected_tags": [
+    "llm",
+    "rag_experience",
+    "unknown",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "chats",
+    "change_type": "llm_upsert_chats",
+    "summary": "客户询问卡罗拉和轩逸哪个更省心，表示新手练手",
+    "suggested_fields": {
+      "customer_message": "卡罗拉和轩逸哪个更省心？我新手练手",
+      "service_reply": "",
+      "intent_tags": [
+        "产品对比",
+        "新手购车"
+      ],
+      "linked_categories": [],
+      "linked_item_ids": [],
+      "applicability_scope": "global",
+      "product_id": "",
+      "product_category": "",
+      "usable_as_template": false,
+      "additional_details": {
+        "timestamp": "2026-05-04T02:20:52",
+        "sender": "许聪",
+        "原始资料摘录": "{\"customer_message\": \"卡罗拉和轩逸哪个更省心？我新手练手\", \"service_reply\": \"\", \"intent_tags\": [\"产品对比\", \"新手购车\"], \"linked_categories\": [], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\", \"usable_as_template\": false, \"additional_details\": {\"timestamp\": \"2026-05-04T02:20:52\", \"sender\": \"许聪\"}}"
+      }
+    },
+    "missing_fields": [
+      "service_reply"
+    ],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "chats",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "chats",
+        "id": "chat_20260504_021820",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_8baeb4aa4037e877f5ef.txt",
+          "candidate_id": "raw_f7c1fd12de42c3c9",
+          "rag_experience_id": "rag_exp_5c4901e74a06db7edd6e",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "customer_message": "卡罗拉和轩逸哪个更省心？我新手练手",
+          "service_reply": "",
+          "intent_tags": [
+            "产品对比",
+            "新手购车"
+          ],
+          "linked_categories": [],
+          "linked_item_ids": [],
+          "applicability_scope": "global",
+          "product_id": "",
+          "product_category": "",
+          "usable_as_template": false,
+          "additional_details": {
+            "timestamp": "2026-05-04T02:20:52",
+            "sender": "许聪",
+            "原始资料摘录": "{\"customer_message\": \"卡罗拉和轩逸哪个更省心？我新手练手\", \"service_reply\": \"\", \"intent_tags\": [\"产品对比\", \"新手购车\"], \"linked_categories\": [], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\", \"usable_as_template\": false, \"additional_details\": {\"timestamp\": \"2026-05-04T02:20:52\", \"sender\": \"许聪\"}}"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "needs_more_info",
+    "ok": false,
+    "confidence": 0.72,
+    "missing_fields": [
+      "service_reply"
+    ],
+    "missing_labels": [
+      "客服回复"
+    ],
+    "question": "还需要补充：客服回复。请补齐后再应用入库。",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "sender",
+      "timestamp",
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "rejected",
+    "completeness_status": "needs_more_info",
+    "missing_fields": [
+      "service_reply"
+    ],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_8baeb4aa4037e877f5ef",
+    "source_raw_message_ids": [
+      "raw_msg_9b395ffc3ccee7e6e763",
+      "raw_msg_c62ecb3632a892e39bdd"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_6e354ee3fba45ee8",
+      "chunk_count": 1,
+      "query": "客户询问卡罗拉和轩逸哪个更省心，表示新手练手\n{\"customer_message\": \"卡罗拉和轩逸哪个更省心？我新手练手\", \"service_reply\": \"\", \"intent_tags\": [\"产品对比\", \"新手购车\"], \"linked_categories\": [], \"linked_item_ids\": [], \"applicability_scope\": \"global\", \"product_id\": \"\", \"product_category\": \"\", \"usable_as_template\": false, \"additional_details\": {\"timestamp\": \"2026-05-04T02:20:52\", \"sender\": \"许聪\"}}",
+      "hits": [
+        {
+          "chunk_id": "chunk_0a9126f46f8a5f5f",
+          "source_id": "source_6e354ee3fba45ee8",
+          "score": 0.7286,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.3821,
+            "semantic": 0.2166,
+            "vector": 0.14,
+            "vector_similarity": 0.8294,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.7286
+          },
+          "text": "[2026-05-04 02:18:00] system: 02:18\n[2026-05-04T02:20:52] 许聪: 卡罗拉和轩逸哪个更省心？我新手练手"
+        },
+        {
+          "chunk_id": "chunk_99cc4e7f8c7061b0",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.4604,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1396,
+            "semantic": 0.1269,
+            "vector": 0.124,
+            "vector_similarity": 0.6886,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.4604
+          },
+          "text": "、提档、当地新能源指标和运输方式。\n售后/风险：电池健康、辅助驾驶功能和官方权益以检测报告及账号核验为准。\n推荐话术：适合想体验纯电、智能化和低用车成本的客户，电池和权益必须人工确认。\n商品名称：2020款奥迪A4L 40TFSI时尚动感型\n型号/SKU：CHEJIN-A4L-2020\n类目：二手车/豪华轿车\n关键词：奥迪A4L、A4L、豪华轿车、婚庆、商务\n规格：2020年上牌，表显6.8万公里，2.0T自动挡，黑色，保养记录较完整。\n价格：15.88万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档"
+        },
+        {
+          "chunk_id": "chunk_9a0d34760ad6ccae",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.4514,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1359,
+            "semantic": 0.1256,
+            "vector": 0.12,
+            "vector_similarity": 0.6667,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.4514
+          },
+          "text": "工确认。\n售后/风险：CVT变速箱状态、保养和车况以检测报告为准。\n推荐话术：适合6到7万预算、练手、家用代步和省油需求。\n商品名称：2019款大众朗逸1.5L自动舒适版\n型号/SKU：CHEJIN-LAVIDA-2019\n类目：二手车/紧凑型轿车\n关键词：朗逸、大众朗逸、德系代步、置换\n规格：2019年上牌，表显6.9万公里，1.5L自动挡，白色，通勤耐用。\n价格：5.98万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：易损件和保养历史以"
+        },
+        {
+          "chunk_id": "chunk_2b56ca7d3ec3952e",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.4348,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1917,
+            "semantic": 0.1338,
+            "vector": 0.1193,
+            "vector_similarity": 0.6629,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.08,
+            "final": 0.4348
+          },
+          "text": "车/豪华SUV\n关键词：Macan、保时捷Macan、豪华SUV、高端车\n规格：2018年上牌，表显7.2万公里，2.0T自动挡，黑色，需预约看车。\n价格：23.80万，库存：1台\n物流/过户：高端车看车、试驾、订金和付款方案必须人工预约确认。\n售后/风险：保养、选配、事故记录、按揭和产权状态必须人工核验。\n推荐话术：适合预算20万以上、品牌和外观优先的客户，高端车必须转人工推进。\n商品名称：2021款比亚迪汉EV超长续航豪华型\n型号/SKU：CHEJIN-HANEV-2021\n类目：二手车/新能源轿车\n关键词：汉"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_5c4901e74a06db7edd6e",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "rejected_at": "2026-05-04T18:41:18",
+    "reason": "legacy_auto_candidate_cleanup_20260504: ???????????????????????RAG?????????????????"
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

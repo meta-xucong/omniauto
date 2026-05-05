@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_276aa9710d99ba89",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_c43d9b545c0f08237e0e.txt",
+    "content_hash": "62ef5d651003ed6644c08584b30d333a",
+    "status": "active",
+    "created_at": "2026-05-04T02:15:27",
+    "updated_at": "2026-05-04T02:15:27"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_b9a93b1c9ad9b43e",
+      "source_id": "source_276aa9710d99ba89",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_c43d9b545c0f08237e0e.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-04T02:15:26] self: [车金AI] A4L黑色外观比较大气，婚庆车队或者商务接待都挺合适的。目前我们有一台2020款黑色，6.8万公里，15.88万，定位偏商务通勤和品牌升级。您之前看的预算大概在什么范围？或者更看重哪方面？",
+      "char_count": 129,
+      "status": "active",
+      "created_at": "2026-05-04T02:15:27"
+    }
+  ]
+}

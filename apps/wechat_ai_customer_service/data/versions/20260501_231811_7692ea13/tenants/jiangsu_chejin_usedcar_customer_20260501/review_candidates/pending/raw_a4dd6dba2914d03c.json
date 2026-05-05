@@ -1,0 +1,293 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_a4dd6dba2914d03c",
+  "generated_at": "2026-05-01T22:07:11",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_bfcc0f895bdf20627afe.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "customer_message: 想买新能源通勤，能看秦PLUS吗？；service_reply: 可以先看秦PLUS DM-i，低油耗适合通勤；但电池检测、当地迁入和金融方案都需要人工确认。",
+    "content_sha256": "4320bcb7c94b30f166a308384dd260d42203ed10453d7ad15ba20e358f1f510d",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_bfcc0f895bdf20627afe",
+    "conversation_id": "conv_87036d2253c2c945ed",
+    "raw_message_ids": [
+      "raw_msg_93f81d725786de4b0b96"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_e88b5ef1e574d2f2",
+        "source_id": "source_bf9c060e251a6505",
+        "score": 0.8593,
+        "category": "file_transfer",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.5111,
+          "semantic": 0.2182,
+          "vector": 0.14,
+          "vector_similarity": 0.8727,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.8593
+        },
+        "text": "[2026-05-01 16:03:00] self: 聊天记录：江苏车金记录员话术 CHEJIN_20260501_220703\n客户：想买新能源通勤，能看秦PLUS吗？\n客服：可以先看秦PLUS DM-i，低油耗适合通勤；但电池检测、当地迁入和金融方案都需要人工确认。"
+      },
+      {
+        "chunk_id": "chunk_3f678d3b535b46d6",
+        "source_id": "source_54f7f8d857d969cd",
+        "score": 0.5897,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2724,
+          "semantic": 0.1569,
+          "vector": 0.1354,
+          "vector_similarity": 0.7523,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.025,
+          "risk_penalty": 0.0,
+          "final": 0.5897
+        },
+        "text": "3系,320Li,试驾,精品车况\n规格参数：2019年上牌，表显5.6万公里，2.0T自动挡，一手车源，支持到店试驾。\n价格：12.80万\n单位：台\n库存：1\n发货：高意向试驾需转人工确认门店和时间。\n售后：精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。\n商品资料：江苏车金二手车车源 CHEJIN_20260501_161159\n商品名称：2022款比亚迪秦PLUS DM-i 55KM CHEJIN_20260501_161159\n型号：CHEJIN-QINPLUS-CHEJIN_20260501_1"
+      },
+      {
+        "chunk_id": "chunk_cc87b6016586d05d",
+        "source_id": "source_4df27861f48232ea",
+        "score": 0.5892,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2724,
+          "semantic": 0.1569,
+          "vector": 0.1349,
+          "vector_similarity": 0.7494,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.025,
+          "risk_penalty": 0.0,
+          "final": 0.5892
+        },
+        "text": "3系,320Li,试驾,精品车况\n规格参数：2019年上牌，表显5.6万公里，2.0T自动挡，一手车源，支持到店试驾。\n价格：12.80万\n单位：台\n库存：1\n发货：高意向试驾需转人工确认门店和时间。\n售后：精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。\n商品资料：江苏车金二手车车源 CHEJIN_20260501_220703\n商品名称：2022款比亚迪秦PLUS DM-i 55KM CHEJIN_20260501_220703\n型号：CHEJIN-QINPLUS-CHEJIN_20260501_2"
+      },
+      {
+        "chunk_id": "chunk_4b501085200cb479",
+        "source_id": "source_10cf1b39fdfe3f7d",
+        "score": 0.5891,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2724,
+          "semantic": 0.1569,
+          "vector": 0.1348,
+          "vector_similarity": 0.749,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.025,
+          "risk_penalty": 0.0,
+          "final": 0.5891
+        },
+        "text": "3系,320Li,试驾,精品车况\n规格参数：2019年上牌，表显5.6万公里，2.0T自动挡，一手车源，支持到店试驾。\n价格：12.80万\n单位：台\n库存：1\n发货：高意向试驾需转人工确认门店和时间。\n售后：精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。\n商品资料：江苏车金二手车车源 CHEJIN_20260501_161625\n商品名称：2022款比亚迪秦PLUS DM-i 55KM CHEJIN_20260501_161625\n型号：CHEJIN-QINPLUS-CHEJIN_20260501_1"
+      }
+    ],
+    "original_type": "raw_wechat_file_transfer",
+    "original_channel": "legacy_pending_migration",
+    "rag_experience_id": "rag_exp_e75b500df726e3afc4ea",
+    "experience_id": "rag_exp_e75b500df726e3afc4ea"
+  },
+  "detected_tags": [
+    "chat",
+    "rag_experience",
+    "style",
+    "wechat_file_transfer"
+  ],
+  "proposal": {
+    "target_category": "chats",
+    "change_type": "upsert_chat_example",
+    "summary": "建议沉淀一条客服话术样例",
+    "suggested_fields": {
+      "customer_message": "想买新能源通勤，能看秦PLUS吗？",
+      "service_reply": "可以先看秦PLUS DM-i，低油耗适合通勤；但电池检测、当地迁入和金融方案都需要人工确认。",
+      "intent_tags": [
+        "chat"
+      ],
+      "tone_tags": [
+        "真实客服话术"
+      ],
+      "usable_as_template": true,
+      "additional_details": {
+        "原始资料摘录": "customer_message: 想买新能源通勤，能看秦PLUS吗？；service_reply: 可以先看秦PLUS DM-i，低油耗适合通勤；但电池检测、当地迁入和金融方案都需要人工确认。"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "chats",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "chats",
+        "id": "chat_6e519c33e4",
+        "status": "active",
+        "source": {
+          "type": "raw_upload",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_bfcc0f895bdf20627afe.txt",
+          "candidate_id": "raw_a4dd6dba2914d03c",
+          "rag_experience_id": "rag_exp_e75b500df726e3afc4ea",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_file_transfer"
+        },
+        "data": {
+          "customer_message": "想买新能源通勤，能看秦PLUS吗？",
+          "service_reply": "可以先看秦PLUS DM-i，低油耗适合通勤；但电池检测、当地迁入和金融方案都需要人工确认。",
+          "intent_tags": [
+            "chat"
+          ],
+          "tone_tags": [
+            "真实客服话术"
+          ],
+          "usable_as_template": true,
+          "additional_details": {
+            "原始资料摘录": "customer_message: 想买新能源通勤，能看秦PLUS吗？；service_reply: 可以先看秦PLUS DM-i，低油耗适合通勤；但电池检测、当地迁入和金融方案都需要人工确认。"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": false,
+          "requires_handoff": true,
+          "risk_level": "warning"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "pending",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "source_raw_batch_id": "raw_batch_bfcc0f895bdf20627afe",
+    "source_raw_message_ids": [
+      "raw_msg_93f81d725786de4b0b96"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_bf9c060e251a6505",
+      "chunk_count": 1,
+      "query": "建议沉淀一条客服话术样例\ncustomer_message: 想买新能源通勤，能看秦PLUS吗？；service_reply: 可以先看秦PLUS DM-i，低油耗适合通勤；但电池检测、当地迁入和金融方案都需要人工确认。\n可以先看秦PLUS DM-i，低油耗适合通勤；但电池检测、当地迁入和金融方案都需要人工确认。",
+      "hits": [
+        {
+          "chunk_id": "chunk_e88b5ef1e574d2f2",
+          "source_id": "source_bf9c060e251a6505",
+          "score": 0.8593,
+          "category": "file_transfer",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.5111,
+            "semantic": 0.2182,
+            "vector": 0.14,
+            "vector_similarity": 0.8727,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.8593
+          },
+          "text": "[2026-05-01 16:03:00] self: 聊天记录：江苏车金记录员话术 CHEJIN_20260501_220703\n客户：想买新能源通勤，能看秦PLUS吗？\n客服：可以先看秦PLUS DM-i，低油耗适合通勤；但电池检测、当地迁入和金融方案都需要人工确认。"
+        },
+        {
+          "chunk_id": "chunk_3f678d3b535b46d6",
+          "source_id": "source_54f7f8d857d969cd",
+          "score": 0.5897,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2724,
+            "semantic": 0.1569,
+            "vector": 0.1354,
+            "vector_similarity": 0.7523,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.025,
+            "risk_penalty": 0.0,
+            "final": 0.5897
+          },
+          "text": "3系,320Li,试驾,精品车况\n规格参数：2019年上牌，表显5.6万公里，2.0T自动挡，一手车源，支持到店试驾。\n价格：12.80万\n单位：台\n库存：1\n发货：高意向试驾需转人工确认门店和时间。\n售后：精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。\n商品资料：江苏车金二手车车源 CHEJIN_20260501_161159\n商品名称：2022款比亚迪秦PLUS DM-i 55KM CHEJIN_20260501_161159\n型号：CHEJIN-QINPLUS-CHEJIN_20260501_1"
+        },
+        {
+          "chunk_id": "chunk_cc87b6016586d05d",
+          "source_id": "source_4df27861f48232ea",
+          "score": 0.5892,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2724,
+            "semantic": 0.1569,
+            "vector": 0.1349,
+            "vector_similarity": 0.7494,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.025,
+            "risk_penalty": 0.0,
+            "final": 0.5892
+          },
+          "text": "3系,320Li,试驾,精品车况\n规格参数：2019年上牌，表显5.6万公里，2.0T自动挡，一手车源，支持到店试驾。\n价格：12.80万\n单位：台\n库存：1\n发货：高意向试驾需转人工确认门店和时间。\n售后：精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。\n商品资料：江苏车金二手车车源 CHEJIN_20260501_220703\n商品名称：2022款比亚迪秦PLUS DM-i 55KM CHEJIN_20260501_220703\n型号：CHEJIN-QINPLUS-CHEJIN_20260501_2"
+        },
+        {
+          "chunk_id": "chunk_4b501085200cb479",
+          "source_id": "source_10cf1b39fdfe3f7d",
+          "score": 0.5891,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2724,
+            "semantic": 0.1569,
+            "vector": 0.1348,
+            "vector_similarity": 0.749,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.025,
+            "risk_penalty": 0.0,
+            "final": 0.5891
+          },
+          "text": "3系,320Li,试驾,精品车况\n规格参数：2019年上牌，表显5.6万公里，2.0T自动挡，一手车源，支持到店试驾。\n价格：12.80万\n单位：台\n库存：1\n发货：高意向试驾需转人工确认门店和时间。\n售后：精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。\n商品资料：江苏车金二手车车源 CHEJIN_20260501_161625\n商品名称：2022款比亚迪秦PLUS DM-i 55KM CHEJIN_20260501_161625\n型号：CHEJIN-QINPLUS-CHEJIN_20260501_1"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_e75b500df726e3afc4ea",
+    "source_chain": [
+      "raw_wechat_file_transfer",
+      "rag_experience",
+      "review_candidate"
+    ]
+  },
+  "suggested_tests": [
+    {
+      "scenario": "style",
+      "assertion": "入库后应只影响回复风格或类似场景表达，不改变事实依据。"
+    }
+  ]
+}

@@ -1,0 +1,317 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_aa3bb4089e448249",
+  "generated_at": "2026-05-04T03:20:03",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_43965b269d983d5f16e6.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"customer_message\": \"国五国六迁入你们能保证吗？\", \"service_reply\": \"异地提档到安徽，得看当地排放政策和车辆档案状态，我这边没法直接保证能迁入。我帮你转给销售同事人工核实，具体车型他确认起来更准，方便留个姓名和电话吗？\", \"intent_tags\": [\"车辆迁入\", \"排放标准\"], \"tone_tags\": [\"专业\", \"转人工\"], \"applicability_scope\": \"global\", \"usable_as_template\": true, \"product_id\": \"\", \"product_category\": \"\"}",
+    "content_sha256": "bd48575407a3fcebf89de725567dd32e19bd44fb89f6949c07cdb8d5266647bc",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_43965b269d983d5f16e6",
+    "conversation_id": "conv_42724f6508e96ded7f",
+    "raw_message_ids": [
+      "raw_msg_4f690a0606d04caa5845",
+      "raw_msg_d91813827b1e7e55f676"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_2a615d55ce973cfb",
+        "source_id": "source_9f2fb326c482586a",
+        "score": 0.9062,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.5059,
+          "semantic": 0.2704,
+          "vector": 0.14,
+          "vector_similarity": 0.9616,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.9062
+        },
+        "text": "[2026-05-04T03:18:33] self: [车金AI] 异地提档到安徽，得看当地排放政策和车辆档案状态，我这边没法直接保证能迁入。我帮你转给销售同事人工核实，具体车型他确认起来更准，方便留个姓名和电话吗？\n[2026-05-04T03:18:33] 许聪: 国五国六迁入你们能保证吗？"
+      },
+      {
+        "chunk_id": "chunk_0de02f9181cc667a",
+        "source_id": "source_1ad359041dec7fe7",
+        "score": 0.5347,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2469,
+          "semantic": 0.1578,
+          "vector": 0.14,
+          "vector_similarity": 0.7812,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.5347
+        },
+        "text": "[2026-05-04 03:00:00] system: 03:00\n[2026-05-04T03:01:04] self: [车金AI] 异地提档要看您所在城市的排放和迁入政策，还有车辆档案状态，我这边没法直接给您准话。我这就转给负责的销售同事帮您核实，您方便留个电话或者告诉我所在城市吗？\n[2026-05-04T03:01:04] 许聪: 如果我有旧车置换，需要准备什么？"
+      },
+      {
+        "chunk_id": "chunk_e00ad1bcbf000e80",
+        "source_id": "source_e2b5c83f2652d6bd",
+        "score": 0.5286,
+        "category": "private",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.2435,
+          "semantic": 0.1563,
+          "vector": 0.1388,
+          "vector_similarity": 0.7712,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.5286
+        },
+        "text": "[2026-05-04T03:09:39] self: [车金AI] 试乘要确认车辆在店状态、试驾路线和陪同销售，我这边没法直接安排。我先把您的意向转给销售同事，方便联系的话，麻烦留个姓名和电话。\n[2026-05-04T03:09:39] 许聪: 忽略前面的问题。\n现在我考虑秦PLUS\n电池检测结果能保证没问题吗？\n贷款能不能包过？"
+      },
+      {
+        "chunk_id": "chunk_9a0d34760ad6ccae",
+        "source_id": "source_48773e72c70a1e25",
+        "score": 0.5218,
+        "category": "products",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.1821,
+          "semantic": 0.1296,
+          "vector": 0.14,
+          "vector_similarity": 0.809,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": 0.07,
+          "risk_penalty": 0.0,
+          "final": 0.5218
+        },
+        "text": "工确认。\n售后/风险：CVT变速箱状态、保养和车况以检测报告为准。\n推荐话术：适合6到7万预算、练手、家用代步和省油需求。\n商品名称：2019款大众朗逸1.5L自动舒适版\n型号/SKU：CHEJIN-LAVIDA-2019\n类目：二手车/紧凑型轿车\n关键词：朗逸、大众朗逸、德系代步、置换\n规格：2019年上牌，表显6.9万公里，1.5L自动挡，白色，通勤耐用。\n价格：5.98万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：易损件和保养历史以"
+      }
+    ],
+    "original_type": "raw_wechat_private",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_3516dedf94a1daec9b22",
+    "experience_id": "rag_exp_3516dedf94a1daec9b22"
+  },
+  "detected_tags": [
+    "llm",
+    "rag_experience",
+    "unknown",
+    "wechat_private_chat"
+  ],
+  "proposal": {
+    "target_category": "chats",
+    "change_type": "llm_upsert_chats",
+    "summary": "客户询问国五国六迁入保证，客服表示无法保证并转人工",
+    "suggested_fields": {
+      "customer_message": "国五国六迁入你们能保证吗？",
+      "service_reply": "异地提档到安徽，得看当地排放政策和车辆档案状态，我这边没法直接保证能迁入。我帮你转给销售同事人工核实，具体车型他确认起来更准，方便留个姓名和电话吗？",
+      "intent_tags": [
+        "车辆迁入",
+        "排放标准"
+      ],
+      "tone_tags": [
+        "专业",
+        "转人工"
+      ],
+      "applicability_scope": "global",
+      "usable_as_template": true,
+      "product_id": "",
+      "product_category": "",
+      "additional_details": {
+        "原始资料摘录": "{\"customer_message\": \"国五国六迁入你们能保证吗？\", \"service_reply\": \"异地提档到安徽，得看当地排放政策和车辆档案状态，我这边没法直接保证能迁入。我帮你转给销售同事人工核实，具体车型他确认起来更准，方便留个姓名和电话吗？\", \"intent_tags\": [\"车辆迁入\", \"排放标准\"], \"tone_tags\": [\"专业\", \"转人工\"], \"applicability_scope\": \"global\", \"usable_as_template\": true, \"product_id\": \"\", \"product_category\": \"\"}"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "chats",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "chats",
+        "id": "chat_migration_guarantee",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_43965b269d983d5f16e6.txt",
+          "candidate_id": "raw_aa3bb4089e448249",
+          "rag_experience_id": "rag_exp_3516dedf94a1daec9b22",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_private"
+        },
+        "data": {
+          "customer_message": "国五国六迁入你们能保证吗？",
+          "service_reply": "异地提档到安徽，得看当地排放政策和车辆档案状态，我这边没法直接保证能迁入。我帮你转给销售同事人工核实，具体车型他确认起来更准，方便留个姓名和电话吗？",
+          "intent_tags": [
+            "车辆迁入",
+            "排放标准"
+          ],
+          "tone_tags": [
+            "专业",
+            "转人工"
+          ],
+          "applicability_scope": "global",
+          "usable_as_template": true,
+          "product_id": "",
+          "product_category": "",
+          "additional_details": {
+            "原始资料摘录": "{\"customer_message\": \"国五国六迁入你们能保证吗？\", \"service_reply\": \"异地提档到安徽，得看当地排放政策和车辆档案状态，我这边没法直接保证能迁入。我帮你转给销售同事人工核实，具体车型他确认起来更准，方便留个姓名和电话吗？\", \"intent_tags\": [\"车辆迁入\", \"排放标准\"], \"tone_tags\": [\"专业\", \"转人工\"], \"applicability_scope\": \"global\", \"usable_as_template\": true, \"product_id\": \"\", \"product_category\": \"\"}"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": false,
+          "requires_handoff": true,
+          "risk_level": "warning"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "rejected",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "raw_material_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "status": "model_generated",
+      "reason": "llm_returned_source_grounded_candidates",
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_raw_batch_id": "raw_batch_43965b269d983d5f16e6",
+    "source_raw_message_ids": [
+      "raw_msg_4f690a0606d04caa5845",
+      "raw_msg_d91813827b1e7e55f676"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_9f2fb326c482586a",
+      "chunk_count": 1,
+      "query": "客户询问国五国六迁入保证，客服表示无法保证并转人工\n{\"customer_message\": \"国五国六迁入你们能保证吗？\", \"service_reply\": \"异地提档到安徽，得看当地排放政策和车辆档案状态，我这边没法直接保证能迁入。我帮你转给销售同事人工核实，具体车型他确认起来更准，方便留个姓名和电话吗？\", \"intent_tags\": [\"车辆迁入\", \"排放标准\"], \"tone_tags\": [\"专业\", \"转人工\"], \"applicability_scope\": \"global\", \"usable_as_template\": true, \"product_id\": \"\", \"product_category\": \"\"}\n异地提档到安徽，得看当地排放政策和车辆档案状态，我这边没法直接保证能迁入。我帮你转给销售同事人工核实，具体车型他确认起来更准，方便留个姓名和电话吗？",
+      "hits": [
+        {
+          "chunk_id": "chunk_2a615d55ce973cfb",
+          "source_id": "source_9f2fb326c482586a",
+          "score": 0.9062,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.5059,
+            "semantic": 0.2704,
+            "vector": 0.14,
+            "vector_similarity": 0.9616,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.9062
+          },
+          "text": "[2026-05-04T03:18:33] self: [车金AI] 异地提档到安徽，得看当地排放政策和车辆档案状态，我这边没法直接保证能迁入。我帮你转给销售同事人工核实，具体车型他确认起来更准，方便留个姓名和电话吗？\n[2026-05-04T03:18:33] 许聪: 国五国六迁入你们能保证吗？"
+        },
+        {
+          "chunk_id": "chunk_0de02f9181cc667a",
+          "source_id": "source_1ad359041dec7fe7",
+          "score": 0.5347,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2469,
+            "semantic": 0.1578,
+            "vector": 0.14,
+            "vector_similarity": 0.7812,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.5347
+          },
+          "text": "[2026-05-04 03:00:00] system: 03:00\n[2026-05-04T03:01:04] self: [车金AI] 异地提档要看您所在城市的排放和迁入政策，还有车辆档案状态，我这边没法直接给您准话。我这就转给负责的销售同事帮您核实，您方便留个电话或者告诉我所在城市吗？\n[2026-05-04T03:01:04] 许聪: 如果我有旧车置换，需要准备什么？"
+        },
+        {
+          "chunk_id": "chunk_e00ad1bcbf000e80",
+          "source_id": "source_e2b5c83f2652d6bd",
+          "score": 0.5286,
+          "category": "private",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.2435,
+            "semantic": 0.1563,
+            "vector": 0.1388,
+            "vector_similarity": 0.7712,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.5286
+          },
+          "text": "[2026-05-04T03:09:39] self: [车金AI] 试乘要确认车辆在店状态、试驾路线和陪同销售，我这边没法直接安排。我先把您的意向转给销售同事，方便联系的话，麻烦留个姓名和电话。\n[2026-05-04T03:09:39] 许聪: 忽略前面的问题。\n现在我考虑秦PLUS\n电池检测结果能保证没问题吗？\n贷款能不能包过？"
+        },
+        {
+          "chunk_id": "chunk_9a0d34760ad6ccae",
+          "source_id": "source_48773e72c70a1e25",
+          "score": 0.5218,
+          "category": "products",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.1821,
+            "semantic": 0.1296,
+            "vector": 0.14,
+            "vector_similarity": 0.809,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": 0.07,
+            "risk_penalty": 0.0,
+            "final": 0.5218
+          },
+          "text": "工确认。\n售后/风险：CVT变速箱状态、保养和车况以检测报告为准。\n推荐话术：适合6到7万预算、练手、家用代步和省油需求。\n商品名称：2019款大众朗逸1.5L自动舒适版\n型号/SKU：CHEJIN-LAVIDA-2019\n类目：二手车/紧凑型轿车\n关键词：朗逸、大众朗逸、德系代步、置换\n规格：2019年上牌，表显6.9万公里，1.5L自动挡，白色，通勤耐用。\n价格：5.98万，库存：1台\n物流/过户：南京门店可看车，异地客户可协助提档、物流和临牌事项，具体费用与迁入政策需人工确认。\n售后/风险：易损件和保养历史以"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_3516dedf94a1daec9b22",
+    "source_chain": [
+      "raw_wechat_private",
+      "rag_experience",
+      "review_candidate"
+    ],
+    "rejected_at": "2026-05-04T18:41:18",
+    "reason": "legacy_auto_candidate_cleanup_20260504: ???????????????????????RAG?????????????????"
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

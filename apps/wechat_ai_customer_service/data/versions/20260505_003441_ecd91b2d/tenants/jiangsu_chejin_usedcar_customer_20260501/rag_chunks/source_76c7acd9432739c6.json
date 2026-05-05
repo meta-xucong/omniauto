@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_76c7acd9432739c6",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "file_transfer",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_7d7d3f5177feaa036d5b.txt",
+    "content_hash": "fab8a60def7f4d05eeae3169f5602de6",
+    "status": "active",
+    "created_at": "2026-05-03T08:29:05",
+    "updated_at": "2026-05-03T08:29:05"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_b77b8bd728c6865f",
+      "source_id": "source_76c7acd9432739c6",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "file_transfer",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_7d7d3f5177feaa036d5b.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-03T08:29:05] self: 我从抖音直播来的，想看秦PLUS或者思域，预算8到9万，最好省油，能不能贷款包过？ CHEJIN_20260503_082804",
+      "char_count": 92,
+      "status": "active",
+      "created_at": "2026-05-03T08:29:05"
+    }
+  ]
+}

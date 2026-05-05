@@ -1,0 +1,191 @@
+{
+  "schema_version": 1,
+  "candidate_id": "raw_780fd867cde6a5a5",
+  "generated_at": "2026-05-02T04:24:25",
+  "source": {
+    "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_67996a827b284cf4f839.txt",
+    "suffix": ".txt",
+    "evidence_excerpt": "{\"name\": \"2020款别克GL8 ES陆尊653T豪华型\", \"sku\": \"CHEJIN-LIVE-GL8-2020ES\", \"category\": \"二手车/MPV\", \"price\": 17.66, \"unit\": \"台\", \"inventory\": 1, \"shipping_policy\": \"南京门店可看车，商务客户试乘需人工确认\", \"warranty_policy\": \"车况以检测报告为准，事故、水泡、火烧承诺必须人工确认\", \"additional_details\": {\"batch\": \"LIVE_RECORDER_20260502_042340\"}, \"price_tiers\": [{\"min_quantity\": 1.0, \"unit_price\": 17.66}]}",
+    "content_sha256": "82e8be37875f1e1369442c3d4e9a828f70bd203dd24392249eefe3d421aef232",
+    "type": "rag_experience",
+    "raw_batch_id": "raw_batch_67996a827b284cf4f839",
+    "conversation_id": "conv_1c4c2bfac8a6d1ae7d",
+    "raw_message_ids": [
+      "raw_msg_ba50ae47d9f2b4c280c3",
+      "raw_msg_90962205117a079e668d"
+    ],
+    "rag_hits": [
+      {
+        "chunk_id": "chunk_899511b64b2f5970",
+        "source_id": "source_98b8438d7f65da3a",
+        "score": 0.9409,
+        "category": "group",
+        "product_id": "",
+        "retrieval_mode": "hybrid_lexical_semantic",
+        "scoring": {
+          "lexical": 0.53,
+          "semantic": 0.2809,
+          "vector": 0.14,
+          "vector_similarity": 0.8672,
+          "phrase": 0.0,
+          "product": 0.0,
+          "boost": -0.01,
+          "risk_penalty": 0.0,
+          "final": 0.9409
+        },
+        "text": "[2026-05-02 04:24:00] system: 04:24\n[2026-05-02T04:24:20] self: 商品资料：记录员正常产品 LIVE_RECORDER_20260502_042340\n测试批次：LIVE_RECORDER_20260502_042340\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号：CHEJIN-LIVE-GL8-2020ES\n商品类目：二手车/MPV\n价格：17.66万\n单位：台\n库存：1\n发货：南京门店可看车，商务客户试乘需人工确认\n售后：车况以检测"
+      }
+    ],
+    "original_type": "raw_wechat_group",
+    "original_channel": "wechat_raw_message",
+    "rag_experience_id": "rag_exp_78785b6f2855b8517269",
+    "experience_id": "rag_exp_78785b6f2855b8517269"
+  },
+  "detected_tags": [
+    "after_sales",
+    "llm",
+    "product",
+    "quote",
+    "rag_experience",
+    "shipping",
+    "wechat_group_chat"
+  ],
+  "proposal": {
+    "target_category": "products",
+    "change_type": "llm_upsert_products",
+    "summary": "2020款别克GL8 ES陆尊653T豪华型二手车商品资料",
+    "suggested_fields": {
+      "name": "2020款别克GL8 ES陆尊653T豪华型",
+      "sku": "CHEJIN-LIVE-GL8-2020ES",
+      "category": "二手车/MPV",
+      "price": 17.66,
+      "unit": "台",
+      "inventory": 1,
+      "shipping_policy": "南京门店可看车，商务客户试乘需人工确认",
+      "warranty_policy": "车况以检测报告为准，事故、水泡、火烧承诺必须人工确认",
+      "price_tiers": [
+        {
+          "min_quantity": 1.0,
+          "unit_price": 17.66
+        }
+      ],
+      "additional_details": {
+        "batch": "LIVE_RECORDER_20260502_042340",
+        "原始资料摘录": "{\"name\": \"2020款别克GL8 ES陆尊653T豪华型\", \"sku\": \"CHEJIN-LIVE-GL8-2020ES\", \"category\": \"二手车/MPV\", \"price\": 17.66, \"unit\": \"台\", \"inventory\": 1, \"shipping_policy\": \"南京门店可看车，商务客户试乘需人工确认\", \"warranty_policy\": \"车况以检测报告为准，事故、水泡、火烧承诺必须人工确认\", \"additional_details\": {\"batch\": \"LIVE_RECORDER_20260502_042340\"}, \"price_tiers\": [{\"min_quantity\": 1.0, \"unit_price\": 17.66}]}"
+      }
+    },
+    "missing_fields": [],
+    "warnings": [],
+    "formal_patch": {
+      "target_category": "products",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "products",
+        "id": "2020_gl8_es_luzun_653t",
+        "status": "active",
+        "source": {
+          "type": "deepseek_upload_learning",
+          "path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_67996a827b284cf4f839.txt",
+          "candidate_id": "raw_780fd867cde6a5a5",
+          "rag_experience_id": "rag_exp_78785b6f2855b8517269",
+          "candidate_source_type": "rag_experience",
+          "original_type": "raw_wechat_group"
+        },
+        "data": {
+          "name": "2020款别克GL8 ES陆尊653T豪华型",
+          "sku": "CHEJIN-LIVE-GL8-2020ES",
+          "category": "二手车/MPV",
+          "price": 17.66,
+          "unit": "台",
+          "inventory": 1,
+          "shipping_policy": "南京门店可看车，商务客户试乘需人工确认",
+          "warranty_policy": "车况以检测报告为准，事故、水泡、火烧承诺必须人工确认",
+          "price_tiers": [
+            {
+              "min_quantity": 1.0,
+              "unit_price": 17.66
+            }
+          ],
+          "additional_details": {
+            "batch": "LIVE_RECORDER_20260502_042340",
+            "原始资料摘录": "{\"name\": \"2020款别克GL8 ES陆尊653T豪华型\", \"sku\": \"CHEJIN-LIVE-GL8-2020ES\", \"category\": \"二手车/MPV\", \"price\": 17.66, \"unit\": \"台\", \"inventory\": 1, \"shipping_policy\": \"南京门店可看车，商务客户试乘需人工确认\", \"warranty_policy\": \"车况以检测报告为准，事故、水泡、火烧承诺必须人工确认\", \"additional_details\": {\"batch\": \"LIVE_RECORDER_20260502_042340\"}, \"price_tiers\": [{\"min_quantity\": 1.0, \"unit_price\": 17.66}]}"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "warning"
+        }
+      }
+    }
+  },
+  "intake": {
+    "status": "ready",
+    "ok": true,
+    "confidence": 0.72,
+    "missing_fields": [],
+    "missing_labels": [],
+    "question": "",
+    "warnings": [],
+    "preserved_detail_keys": [
+      "batch",
+      "原始资料摘录"
+    ]
+  },
+  "review": {
+    "status": "pending",
+    "completeness_status": "ready",
+    "missing_fields": [],
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "source_raw_batch_id": "raw_batch_67996a827b284cf4f839",
+    "source_raw_message_ids": [
+      "raw_msg_ba50ae47d9f2b4c280c3",
+      "raw_msg_90962205117a079e668d"
+    ],
+    "rag_evidence": {
+      "enabled": true,
+      "ok": true,
+      "source_id": "source_98b8438d7f65da3a",
+      "chunk_count": 1,
+      "query": "2020款别克GL8 ES陆尊653T豪华型二手车商品资料\n{\"name\": \"2020款别克GL8 ES陆尊653T豪华型\", \"sku\": \"CHEJIN-LIVE-GL8-2020ES\", \"category\": \"二手车/MPV\", \"price\": 17.66, \"unit\": \"台\", \"inventory\": 1, \"shipping_policy\": \"南京门店可看车，商务客户试乘需人工确认\", \"warranty_policy\": \"车况以检测报告为准，事故、水泡、火烧承诺必须人工确认\", \"additional_details\": {\"batch\": \"LIVE_RECORDER_20260502_042340\"}, \"price_tiers\": [{\"min_quantity\": 1.0, \"unit_price\": 17.66}]}\n2020款别克GL8 ES陆尊653T豪华型",
+      "hits": [
+        {
+          "chunk_id": "chunk_899511b64b2f5970",
+          "source_id": "source_98b8438d7f65da3a",
+          "score": 0.9409,
+          "category": "group",
+          "product_id": "",
+          "retrieval_mode": "hybrid_lexical_semantic",
+          "scoring": {
+            "lexical": 0.53,
+            "semantic": 0.2809,
+            "vector": 0.14,
+            "vector_similarity": 0.8672,
+            "phrase": 0.0,
+            "product": 0.0,
+            "boost": -0.01,
+            "risk_penalty": 0.0,
+            "final": 0.9409
+          },
+          "text": "[2026-05-02 04:24:00] system: 04:24\n[2026-05-02T04:24:20] self: 商品资料：记录员正常产品 LIVE_RECORDER_20260502_042340\n测试批次：LIVE_RECORDER_20260502_042340\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号：CHEJIN-LIVE-GL8-2020ES\n商品类目：二手车/MPV\n价格：17.66万\n单位：台\n库存：1\n发货：南京门店可看车，商务客户试乘需人工确认\n售后：车况以检测"
+        }
+      ],
+      "rag_can_authorize": false,
+      "structured_priority": true
+    },
+    "rag_experience_id": "rag_exp_78785b6f2855b8517269",
+    "source_chain": [
+      "raw_wechat_group",
+      "rag_experience",
+      "review_candidate"
+    ]
+  },
+  "suggested_tests": [
+    {
+      "scenario": "llm_upload_learning",
+      "assertion": "人工确认候选字段、缺失项和额外信息后再入库。"
+    }
+  ]
+}

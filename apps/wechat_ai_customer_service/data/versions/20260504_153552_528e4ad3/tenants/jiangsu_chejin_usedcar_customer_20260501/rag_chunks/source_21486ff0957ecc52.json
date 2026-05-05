@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_21486ff0957ecc52",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_3ce57ddfdc1402c131f1.txt",
+    "content_hash": "2aa4fd6be26b2603be2f620d4b2aa839",
+    "status": "active",
+    "created_at": "2026-05-04T03:31:00",
+    "updated_at": "2026-05-04T03:31:00"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_26db5dab2e86590f",
+      "source_id": "source_21486ff0957ecc52",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_3ce57ddfdc1402c131f1.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-04T03:30:59] 许聪: 秦PLUS，我先微信转你个人1000块定金，帮我锁车",
+      "char_count": 52,
+      "status": "active",
+      "created_at": "2026-05-04T03:31:00"
+    }
+  ]
+}

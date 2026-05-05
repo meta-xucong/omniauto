@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_8d4f29aafd5df1a9",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_fccdc1a63ba5001c9749.txt",
+    "content_hash": "bec58299de217e5705eec2102d08da52",
+    "status": "active",
+    "created_at": "2026-05-04T04:06:04",
+    "updated_at": "2026-05-04T04:06:04"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_2db8782c7c1b8651",
+      "source_id": "source_8d4f29aafd5df1a9",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_fccdc1a63ba5001c9749.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-04 04:04:00] system: 04:04\n[2026-05-04T04:06:04] 许聪: 如果今天聊得差不多，下一步正常怎么走？",
+      "char_count": 81,
+      "status": "active",
+      "created_at": "2026-05-04T04:06:04"
+    }
+  ]
+}

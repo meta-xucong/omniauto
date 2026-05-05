@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_1780b847578b0aff",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "private",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_50a04343483b26e4f6c2.txt",
+    "content_hash": "7b413775b31cb62d15df8e8fdcb95804",
+    "status": "active",
+    "created_at": "2026-05-04T03:20:56",
+    "updated_at": "2026-05-04T03:20:56"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_247a2fd3ee332d0b",
+      "source_id": "source_1780b847578b0aff",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "private",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_50a04343483b26e4f6c2.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-04 03:20:00] system: 03:20\n[2026-05-04T03:20:55] self: [车金AI] 异地迁入能不能保证，得看您要迁入的城市排放政策以及这台车的档案状态，我这边没法直接给准话。我帮您转给销售同事逐个确认，方便留个姓名和电话吗？",
+      "char_count": 141,
+      "status": "active",
+      "created_at": "2026-05-04T03:20:56"
+    }
+  ]
+}

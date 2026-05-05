@@ -1,0 +1,32 @@
+{
+  "source": {
+    "source_id": "source_04014938e0f90ae8",
+    "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+    "layer": "tenant",
+    "source_type": "wechat_raw_message",
+    "category": "group",
+    "product_id": "",
+    "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_c3555b647c6cb5bcc3cd.txt",
+    "content_hash": "7ef72eb0b516d679a161b0df96da7494",
+    "status": "active",
+    "created_at": "2026-05-03T08:28:07",
+    "updated_at": "2026-05-03T08:28:07"
+  },
+  "chunks": [
+    {
+      "chunk_id": "chunk_6f72fffbee0e7b4d",
+      "source_id": "source_04014938e0f90ae8",
+      "tenant_id": "jiangsu_chejin_usedcar_customer_20260501",
+      "layer": "tenant",
+      "source_type": "wechat_raw_message",
+      "category": "group",
+      "product_id": "",
+      "source_path": "D:\\AI\\AI_RPA\\runtime\\apps\\wechat_ai_customer_service\\tenants\\jiangsu_chejin_usedcar_customer_20260501\\raw_messages\\learning_batches\\raw_batch_c3555b647c6cb5bcc3cd.txt",
+      "chunk_index": 0,
+      "text": "[2026-05-01 16:00:00] 销售A: 商品资料：江苏车金记录员完整车源 CHEJIN_20260503_082804\n测试批次：CHEJIN_20260503_082804\n商品名称：2020款别克GL8 ES陆尊653T豪华型\n型号：CHEJIN-REC-GL8-2020ES\n商品类目：二手车/MPV\n价格：17.60万\n单位：台\n库存：1\n发货：南京门店可看车，商务客户试乘需人工确认\n售后：车况以检测报告为准\n[2026-05-01 16:01:00] 销售B: 政策规则：江苏车金记录员风控 CHEJIN_20260503_082804\n测试批次：CHEJIN_20260503_082804\n规则名称：保证无事故转人工\n规则类型：contract\n触发关键词：保证无事故,赔偿,CHEJIN_20260503_082804\n答案：此类问题必须让销售人工按检测报告和合同回复。\n[2026-05-01 16:02:00] 销售C: 边界噪音：CHEJIN_20260503_082804_NOISE 今天午饭吃什么，这不是车源也不是客服知识。",
+      "char_count": 484,
+      "status": "active",
+      "created_at": "2026-05-03T08:28:07"
+    }
+  ]
+}
