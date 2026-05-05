@@ -73,6 +73,59 @@ CREATE TABLE IF NOT EXISTS {schema}.uploads (
 CREATE INDEX IF NOT EXISTS idx_uploads_tenant_kind
   ON {schema}.uploads (tenant_id, kind);
 
+CREATE TABLE IF NOT EXISTS {schema}.raw_conversations (
+  tenant_id text NOT NULL,
+  conversation_id text PRIMARY KEY,
+  conversation_type text NOT NULL DEFAULT 'unknown',
+  target_name text NOT NULL DEFAULT '',
+  display_name text NOT NULL DEFAULT '',
+  status text NOT NULL DEFAULT 'active',
+  learning_enabled boolean NOT NULL DEFAULT true,
+  payload jsonb NOT NULL DEFAULT '{{}}'::jsonb,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_raw_conversations_tenant_type
+  ON {schema}.raw_conversations (tenant_id, conversation_type, status);
+
+CREATE TABLE IF NOT EXISTS {schema}.raw_messages (
+  tenant_id text NOT NULL,
+  raw_message_id text PRIMARY KEY,
+  conversation_id text NOT NULL,
+  dedupe_key text NOT NULL,
+  message_id text NOT NULL DEFAULT '',
+  sender text NOT NULL DEFAULT '',
+  sender_role text NOT NULL DEFAULT 'unknown',
+  content_type text NOT NULL DEFAULT 'text',
+  content text NOT NULL DEFAULT '',
+  message_time text NOT NULL DEFAULT '',
+  learning_enabled boolean NOT NULL DEFAULT true,
+  payload jsonb NOT NULL DEFAULT '{{}}'::jsonb,
+  observed_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  UNIQUE (tenant_id, dedupe_key)
+);
+
+CREATE INDEX IF NOT EXISTS idx_raw_messages_conversation_time
+  ON {schema}.raw_messages (tenant_id, conversation_id, observed_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_raw_messages_content
+  ON {schema}.raw_messages USING gin (payload jsonb_path_ops);
+
+CREATE TABLE IF NOT EXISTS {schema}.raw_message_batches (
+  tenant_id text NOT NULL,
+  batch_id text PRIMARY KEY,
+  conversation_id text NOT NULL DEFAULT '',
+  reason text NOT NULL DEFAULT '',
+  message_ids jsonb NOT NULL DEFAULT '[]'::jsonb,
+  payload jsonb NOT NULL DEFAULT '{{}}'::jsonb,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_raw_message_batches_conversation
+  ON {schema}.raw_message_batches (tenant_id, conversation_id, created_at DESC);
+
 CREATE TABLE IF NOT EXISTS {schema}.audit_events (
   event_id bigserial PRIMARY KEY,
   tenant_id text NOT NULL,

@@ -82,8 +82,6 @@ def current_auth_context(request: Request) -> AuthContext:
 def resource_for_path(path: str) -> str:
     if path.startswith("/api/sync/shared"):
         return "shared_knowledge"
-    if path.startswith("/api/shared-knowledge"):
-        return "shared_knowledge"
     if path.startswith("/api/sync/commands"):
         return "commands"
     if path.startswith("/api/sync/update"):
@@ -103,14 +101,14 @@ def resource_for_path(path: str) -> str:
 
 def action_for_request(path: str, method: str) -> str:
     method = method.upper()
-    if method in READ_METHODS:
-        return "read"
     if path.startswith("/api/sync/commands"):
         return "execute"
     if path.startswith("/api/sync/update"):
         return "sync"
     if path.startswith("/api/sync/shared"):
         return "sync"
+    if method in READ_METHODS:
+        return "read"
     if path.startswith("/api/sync"):
         return "backup"
     if method == "DELETE":

@@ -1,6 +1,6 @@
-﻿"""闅愬舰娴忚鍣ㄥ紩鎿?
+"""隐形浏览器引擎
 
-鍩轰簬 Playwright + browser-use 鐞嗗康灏佽锛屾彁渚涚畝娲佺殑 Pythonic API.
+基于 Playwright + browser-use 理念封装，提供简洁的 Pythonic API.
 """
 
 import asyncio
@@ -33,7 +33,7 @@ from ..utils.fingerprint import FingerprintRotator
 
 
 def _find_system_chrome() -> Optional[str]:
-    """鑷姩鎺㈡祴绯荤粺涓畨瑁呯殑 Google Chrome 鍙墽琛屾枃浠惰矾寰?"""
+    """自动探测系统中安装的 Google Chrome 可执行文件路径."""
     candidates = [
         r"C:\Program Files\Google\Chrome\Application\chrome.exe",
         r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
@@ -46,11 +46,11 @@ def _find_system_chrome() -> Optional[str]:
 
 
 class StealthBrowser:
-    """鍩轰簬 Playwright 鐨勯殣褰㈡祻瑙堝櫒灏佽.
+    """基于 Playwright 的隐形浏览器封装.
 
-    鏀寔鍙嶆娴嬪惎鍔ㄥ弬鏁般€佺湡瀹?Chrome Profile銆佸鏍囩椤点€乮frame 鍒囨崲.
-    鏂板锛氳嚜鍔ㄤ紭鍏堜娇鐢ㄧ郴缁熷畨瑁呯殑 Google Chrome锛坈hannel="chrome"锛夛紝
-          浠ュ強鏀寔閫氳繃 CDP 杩炴帴鐢ㄦ埛宸茶繍琛岀殑 Chrome 瀹炰緥.
+    支持反检测启动参数、真实 Chrome Profile、多标签页、iframe 切换.
+    新增：自动优先使用系统安装的 Google Chrome（channel="chrome"），
+          以及支持通过 CDP 连接用户已运行的 Chrome 实例.
     """
 
     def __init__(
@@ -106,7 +106,7 @@ class StealthBrowser:
             artifact_dir_getter=lambda: self._recovery_artifact_dir,
         )
 
-        # 鎸囩汗杞崲
+        # 指纹轮换
         if rotate_fingerprint:
             self._fp = FingerprintRotator(user_data_dir=user_data_dir, viewport=viewport)
         else:
@@ -147,10 +147,10 @@ class StealthBrowser:
         self._user_agent = value
 
     async def start(self) -> "StealthBrowser":
-        """鍚姩娴忚鍣ㄥ疄渚?"""
+        """启动浏览器实例."""
         self._playwright = await async_playwright().start()
 
-        # 妯″紡 A: 閫氳繃 CDP 杩炴帴宸茶繍琛岀殑 Chrome
+        # 模式 A: 通过 CDP 连接已运行的 Chrome
         if self.cdp_url:
             self._browser = await self._playwright.chromium.connect_over_cdp(self.cdp_url)
             contexts = list(self._browser.contexts)
@@ -191,7 +191,7 @@ class StealthBrowser:
 
         system_chrome = _find_system_chrome() if self.use_system_chrome else None
         if system_chrome:
-            # Playwright 鎺ㄨ崘浠?channel="chrome" 杩炴帴绯荤粺瀹夎鐨?Chrome
+            # Playwright 推荐使用 channel="chrome" 连接系统安装的 Chrome
             launch_args["channel"] = "chrome"
 
         # Context configuration aligned with a typical China-based browser profile.
@@ -253,7 +253,7 @@ class StealthBrowser:
         """Navigate to a URL and optionally wait for login or verification handling."""
 
         if self._page is None:
-            raise RuntimeError("娴忚鍣ㄦ湭鍚姩锛岃鍏堣皟鐢?start()")
+            raise RuntimeError("浏览器未启动，请先调用 start()")
 
         await self.recover_from_interruptions("before_goto")
 
@@ -265,7 +265,7 @@ class StealthBrowser:
         if not self.auto_handle_login:
             return
 
-        # 蹇€熻矾寰勶細URL 涓庡厓绱犲潎鏃犵櫥褰曠壒寰佹椂鐩存帴璺宠繃
+        # 快速路径：URL 与元素均无登录特征时直接跳过
         url_lower = self._page.url.lower()
         quick_signals = [
             "login", "signin", "auth", "passport", "logon",
@@ -292,7 +292,7 @@ class StealthBrowser:
 
             if await is_login_page(self._page) and auth_file.exists():
                 await self._auth_manager.load(self._page, site_key)
-                # 鍒锋柊鎴栭噸鏂板鑸互搴旂敤 Cookie
+                # 刷新或重新导航以应用 Cookie
                 await self._page.goto(url, wait_until=wait_until)
                 await asyncio.sleep(2)
 
@@ -322,7 +322,7 @@ class StealthBrowser:
 
         if mode == "no_scroll":
             await asyncio.sleep(random.uniform(2.0, 4.5))
-        # 鍏堝仠鐣欙紝璁╅〉闈㈢ǔ瀹?
+        # 先停留，让页面稳定
         await asyncio.sleep(random.uniform(1.0, 2.5))
 
         if mode == "scroll_down_up":
@@ -364,21 +364,22 @@ class StealthBrowser:
             pass
 
     async def _click_impl(self, selector: str, delay: Optional[tuple[float, float]] = None) -> None:
-        # 鎿嶄綔鍓嶉殢鏈哄欢杩燂紙妯℃嫙浜虹被鍙嶅簲鏃堕棿锛?        await asyncio.sleep(random.uniform(0.5, 1.5))
+        # 操作前随机延迟（模拟人类反应时间）
+        await asyncio.sleep(random.uniform(0.5, 1.5))
         if delay:
             await asyncio.sleep(random.uniform(*delay))
 
-        # 1. 鑾峰彇鐩爣鍏冪礌涓績鍧愭爣
+        # 1. 获取目标元素中心坐标
         box = await self._page.locator(selector).bounding_box()
         if box:
             target_x = box["x"] + box["width"] / 2
             target_y = box["y"] + box["height"] / 2
 
-            # 2. 鑾峰彇褰撳墠榧犳爣浣嶇疆锛堝鏋滄棤娉曡幏鍙栧垯榛樿宸︿笂瑙掗檮杩戯級
+            # 2. 获取当前鼠标位置（如果无法获取则默认左上角附近）
             current_pos = await self._page.evaluate("() => { try { return {x: window.__lastMouseX || 0, y: window.__lastMouseY || 0}; } catch(e) { return {x:0,y:0}; } }")
             start_x, start_y = current_pos.get("x", 0), current_pos.get("y", 0)
 
-            # 3. 鍏堢Щ鍔ㄥ埌涓€涓殢鏈轰腑闂寸偣锛堟ā鎷熶汉绫讳笉浼氬畬鍏ㄧ洿绾跨Щ鍔級
+            # 3. 先移动到一个随机中间点（模拟人类不会完全直线移动）
             mid_x = random.uniform(100, self.viewport["width"] - 100)
             mid_y = random.uniform(100, self.viewport["height"] - 100)
             mid_points = bezier_curve((start_x, start_y), (mid_x, mid_y), num_points=15, spread=120)
@@ -388,27 +389,28 @@ class StealthBrowser:
 
             await asyncio.sleep(random.uniform(0.2, 0.5))
 
-            # 4. 鍐嶄粠涓棿鐐规部璐濆灏旀洸绾跨Щ鍔ㄥ埌鐩爣鍏冪礌
+            # 4. 再从中间点沿贝塞尔曲线移动到目标元素
             end_points = bezier_curve((mid_x, mid_y), (target_x, target_y), num_points=20, spread=80)
             for px, py in end_points:
                 await self._page.mouse.move(px, py)
                 await asyncio.sleep(random.uniform(0.005, 0.015))
 
-            # 璁板綍鏈€鍚庨紶鏍囦綅缃?            await self._page.evaluate(f"() => {{ window.__lastMouseX = {target_x}; window.__lastMouseY = {target_y}; }}")
+            # 记录最后鼠标位置
+            await self._page.evaluate(f"() => {{ window.__lastMouseX = {target_x}; window.__lastMouseY = {target_y}; }}")
 
-            # 5. 鍦ㄧ洰鏍囦笂鏂规偓鍋滀竴灏忎細鍎垮啀鐐瑰嚮
+            # 5. 在目标上方悬停一小会儿再点击
             await asyncio.sleep(random.uniform(0.2, 0.6))
             await self._page.mouse.down()
             await asyncio.sleep(random.uniform(0.05, 0.15))
             await self._page.mouse.up()
         else:
-            # 鍏冪礌涓嶅彲瑙佹椂鍥為€€鍒版爣鍑?click
+            # 元素不可见时回退到标准 click
             await self._page.click(selector)
 
     async def click(self, selector: str, delay: Optional[tuple[float, float]] = None) -> None:
         """Click an element with a human-like fallback path."""
         if self._page is None:
-            raise RuntimeError("娴忚鍣ㄦ湭鍚姩")
+            raise RuntimeError("浏览器未启动")
 
         await self.recover_from_interruptions("before_click")
 
@@ -436,17 +438,18 @@ class StealthBrowser:
         interval: tuple[float, float] = (0.05, 0.25),
         clear: bool = True,
     ) -> None:
-        # 鑱氱劍鍓嶇殑鑷劧鍋滈】
+        # 聚焦前的自然停顿
         await asyncio.sleep(random.uniform(0.3, 0.8))
 
         if clear:
             await self._page.fill(selector, "")
             await asyncio.sleep(random.uniform(0.2, 0.5))
 
-        # 浣跨敤 Playwright 鐨?type锛屽苟浼犻€掗殢鏈哄欢杩燂紙姣忓瓧 50~250ms锛?        delay_ms = random.uniform(interval[0] * 1000, interval[1] * 1000)
+        # 使用 Playwright 的 type，并传递随机延迟（每字 50~250ms）
+        delay_ms = random.uniform(interval[0] * 1000, interval[1] * 1000)
         await self._page.type(selector, text, delay=delay_ms)
 
-        # 杈撳叆瀹屾垚鍚庣殑闅忔満鍋滈】锛堟ā鎷熺敤鎴锋鏌ヨ緭鍏ュ唴瀹癸級
+        # 输入完成后的随机停顿（模拟用户检查输入内容）
         await asyncio.sleep(random.uniform(0.5, 1.2))
 
     async def type_text(
@@ -458,7 +461,7 @@ class StealthBrowser:
     ) -> None:
         """Type text into an element with recovery-aware fallbacks."""
         if self._page is None:
-            raise RuntimeError("娴忚鍣ㄦ湭鍚姩")
+            raise RuntimeError("浏览器未启动")
 
         await self.recover_from_interruptions("before_type_text")
 
@@ -491,7 +494,7 @@ class StealthBrowser:
     async def extract_text(self, selector: str) -> str:
         """Extract inner text for a selector."""
         if self._page is None:
-            raise RuntimeError("娴忚鍣ㄦ湭鍚姩")
+            raise RuntimeError("浏览器未启动")
         await self.recover_from_interruptions("before_extract_text")
         element = await self._page.query_selector(selector)
         if element is None:
@@ -501,14 +504,14 @@ class StealthBrowser:
     async def extract_attribute(self, selector: str, attribute: str) -> str:
         """Extract an attribute value for a selector."""
         if self._page is None:
-            raise RuntimeError("娴忚鍣ㄦ湭鍚姩")
+            raise RuntimeError("浏览器未启动")
         await self.recover_from_interruptions("before_extract_attribute")
         return await self._page.get_attribute(selector, attribute) or ""
 
     async def screenshot(self, path: Optional[str] = None) -> str:
         """Capture a screenshot and return its path."""
         if self._page is None:
-            raise RuntimeError("娴忚鍣ㄦ湭鍚姩")
+            raise RuntimeError("浏览器未启动")
         if path is None:
             artifact_dir = Path("runtime/test_artifacts/screenshots/browser")
             artifact_dir.mkdir(parents=True, exist_ok=True)
@@ -519,13 +522,13 @@ class StealthBrowser:
     async def evaluate(self, expression: str) -> Any:
         """Evaluate JavaScript in the page context."""
         if self._page is None:
-            raise RuntimeError("娴忚鍣ㄦ湭鍚姩")
+            raise RuntimeError("浏览器未启动")
         return await self._page.evaluate(expression)
 
     async def wait_for_selector(self, selector: str, timeout: int = 10000) -> None:
         """Wait for a selector to appear."""
         if self._page is None:
-            raise RuntimeError("娴忚鍣ㄦ湭鍚姩")
+            raise RuntimeError("浏览器未启动")
         await self.recover_from_interruptions("before_wait_for_selector")
         try:
             await self._page.wait_for_selector(selector, timeout=timeout)
@@ -539,7 +542,7 @@ class StealthBrowser:
     async def scroll_to_bottom(self) -> None:
         """Scroll to the bottom of the page."""
         if self._page is None:
-            raise RuntimeError("娴忚鍣ㄦ湭鍚姩")
+            raise RuntimeError("浏览器未启动")
         await self._page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
 
     @property

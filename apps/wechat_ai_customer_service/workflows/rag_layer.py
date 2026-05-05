@@ -29,12 +29,15 @@ from apps.wechat_ai_customer_service.knowledge_paths import (  # noqa: E402
     tenant_rag_index_root,
     tenant_rag_sources_root,
 )
+from apps.wechat_ai_customer_service.platform_understanding_rules import (  # noqa: E402
+    rag_terms,
+    semantic_equivalents as visible_semantic_equivalents,
+)
 from apps.wechat_ai_customer_service.storage import get_postgres_store, load_storage_config  # noqa: E402
 
 
 SUPPORTED_SUFFIXES = {".txt", ".md", ".json", ".csv"}
-DEFAULT_SOURCE_TYPES = {"upload", "chat_log", "product_doc", "policy_doc", "erp_export", "manual"}
-HIGH_RISK_TERMS = {"最低价", "账期", "月结", "赔偿", "退款", "合同", "盖章", "安装费", "先发货", "虚开"}
+DEFAULT_SOURCE_TYPES = {"upload", "chat_log", "product_doc", "policy_doc", "erp_export", "manual", "wechat_raw_message"}
 RETRIEVAL_MODE = "hybrid_lexical_semantic"
 VECTOR_DIMENSIONS = 96
 SOURCE_TYPE_BOOSTS = {
@@ -43,6 +46,7 @@ SOURCE_TYPE_BOOSTS = {
     "policy_doc": 0.03,
     "erp_export": 0.02,
     "rag_experience": 0.02,
+    "wechat_raw_message": -0.01,
     "chat_log": -0.02,
 }
 CATEGORY_BOOSTS = {
@@ -53,27 +57,6 @@ CATEGORY_BOOSTS = {
     "policies": 0.015,
     "rag_experience": 0.01,
 }
-SEMANTIC_EQUIVALENTS: dict[str, tuple[str, ...]] = {
-    "公寓": ("酒店", "酒店公寓", "民宿", "长租公寓"),
-    "民宿": ("酒店", "公寓", "酒店公寓", "客房"),
-    "酒店": ("公寓", "民宿", "酒店公寓", "客房"),
-    "客房": ("酒店", "民宿", "公寓", "酒店公寓"),
-    "型号": ("型号命名", "型号说明", "命名规则", "规格型号"),
-    "命名": ("型号命名", "型号说明", "命名规则"),
-    "怎么看": ("说明", "解读", "命名规则", "型号说明"),
-    "预留电源": ("供电方式", "电池", "外接电源", "电源"),
-    "供电": ("供电方式", "电池", "外接电源", "电源"),
-    "安装": ("安装前", "门厚", "开孔", "开门方向", "锁体"),
-    "门厚": ("安装", "开孔", "锁体", "开门方向"),
-    "开孔": ("安装", "门厚", "锁体", "开门方向"),
-    "适合": ("适用", "场景", "用途", "适配"),
-    "场景": ("适合", "适用", "用途", "适配"),
-    "办公": ("办公室", "会议室", "企业", "办公场景"),
-    "午休": ("午睡", "折叠床", "办公室", "临时休息"),
-    "净水": ("饮水", "过滤", "滤芯", "水质"),
-}
-
-
 class RagService:
     def __init__(
         self,
@@ -298,7 +281,7 @@ class RagService:
                     "vector_dimensions": VECTOR_DIMENSIONS,
                     "term_count": len(terms),
                     "semantic_term_count": len(semantic_terms),
-                    "risk_terms": sorted(term for term in HIGH_RISK_TERMS if term in text),
+                    "risk_terms": sorted(term for term in rag_terms("high_risk_terms") if term in text),
                 }
             )
         payload = {
@@ -586,7 +569,8 @@ def expand_semantic_terms(text: str, terms: set[str] | list[str] | tuple[str, ..
     expanded = set(base)
     for term in list(base):
         expanded.update(semantic_equivalents(term))
-    for term, equivalents in SEMANTIC_EQUIVALENTS.items():
+    configured_equivalents = visible_semantic_equivalents()
+    for term, equivalents in configured_equivalents.items():
         if term in normalized:
             expanded.add(term)
             expanded.update(equivalents)
@@ -598,8 +582,9 @@ def expand_semantic_terms(text: str, terms: set[str] | list[str] | tuple[str, ..
 
 def semantic_equivalents(term: str) -> set[str]:
     normalized = normalize_search_text(term)
-    equivalents = set(SEMANTIC_EQUIVALENTS.get(normalized, ()))
-    for key, values in SEMANTIC_EQUIVALENTS.items():
+    configured_equivalents = visible_semantic_equivalents()
+    equivalents = set(configured_equivalents.get(normalized, ()))
+    for key, values in configured_equivalents.items():
         if normalized in values:
             equivalents.add(key)
             equivalents.update(values)

@@ -5,11 +5,12 @@ from __future__ import annotations
 from typing import Any
 
 try:  # pragma: no cover - supports both package and script imports.
-    from .knowledge_index import BUSINESS_INTENTS, KnowledgeHit, KnowledgeIndex, detect_intent_tags
+    from .knowledge_index import KnowledgeHit, KnowledgeIndex, business_intents, detect_intent_tags, infer_intent_tags_from_hits
     from .knowledge_runtime import KnowledgeRuntime
 except ImportError:  # pragma: no cover
-    from knowledge_index import BUSINESS_INTENTS, KnowledgeHit, KnowledgeIndex, detect_intent_tags
+    from knowledge_index import KnowledgeHit, KnowledgeIndex, business_intents, detect_intent_tags, infer_intent_tags_from_hits
     from knowledge_runtime import KnowledgeRuntime
+from apps.wechat_ai_customer_service.platform_understanding_rules import map_of_lists
 
 
 HIGH_RISK_LEVELS = {"high"}
@@ -27,6 +28,7 @@ class EvidenceResolver:
         context = context or {}
         intent_tags = detect_intent_tags(text)
         hits = self.index.search(text, context=context, intent_tags=intent_tags, limit=limit)
+        intent_tags = infer_intent_tags_from_hits(intent_tags, hits)
         evidence_items = [build_evidence_item(hit, intent_tags) for hit in hits]
         safety = build_safety_summary(intent_tags, evidence_items)
         return {
@@ -50,9 +52,11 @@ def build_evidence_item(hit: KnowledgeHit, intent_tags: list[str]) -> dict[str, 
     explicit_auto_reply = data.get("allow_auto_reply") if data_has_auto_reply else runtime.get("allow_auto_reply", True)
     explicit_requires_handoff = data.get("requires_handoff") if data_has_handoff else runtime.get("requires_handoff", False)
     runtime_requires_handoff = bool(runtime.get("requires_handoff", False)) and not data_has_handoff
+    shared_risk_control = hit.category_id == "risk_control"
     requires_handoff = bool(
         runtime_requires_handoff
         or explicit_requires_handoff
+        or shared_risk_control
         or risk_level in HIGH_RISK_LEVELS
         or explicit_auto_reply is False
     )
@@ -65,11 +69,12 @@ def build_evidence_item(hit: KnowledgeHit, intent_tags: list[str]) -> dict[str, 
         "matched_fields": list(hit.matched_fields),
         "match_reason": hit.match_reason,
         "confidence": hit.confidence,
+        "knowledge_layer": knowledge_layer(item),
         "reply_excerpt": reply_excerpt(hit, intent_tags),
         "allow_auto_reply": allow_auto_reply,
         "requires_handoff": requires_handoff,
         "risk_level": risk_level,
-        "handoff_reason": str(data.get("handoff_reason") or ("auto_reply_disabled" if explicit_auto_reply is False else "") or ("high_risk_item" if risk_level in HIGH_RISK_LEVELS else "")),
+        "handoff_reason": str(data.get("handoff_reason") or ("shared_risk_control" if shared_risk_control else "") or ("auto_reply_disabled" if explicit_auto_reply is False else "") or ("high_risk_item" if risk_level in HIGH_RISK_LEVELS else "")),
     }
 
 
@@ -83,6 +88,8 @@ def reply_excerpt(hit: KnowledgeHit, intent_tags: list[str]) -> str:
         return clip(str(data.get("service_reply") or ""))
     if hit.category_id == "global_guidelines":
         return clip(str(data.get("guideline_text") or data.get("service_reply") or ""))
+    if hit.category_id in {"reply_style", "risk_control"}:
+        return clip(str(data.get("guideline_text") or data.get("service_reply") or data.get("answer") or data.get("content") or ""))
     if hit.category_id in PRODUCT_SCOPED_CATEGORY_IDS:
         return clip(str(data.get("answer") or data.get("content") or ""))
     for field in hit.resolver.get("reply_fields", []) or []:
@@ -120,7 +127,7 @@ def build_safety_summary(intent_tags: list[str], evidence_items: list[dict[str, 
     if "handoff" in intent_tags:
         reasons.append("handoff_intent_detected")
         must_handoff = True
-    has_business_evidence = any(item.get("category_id") in {"products", "policies", *PRODUCT_SCOPED_CATEGORY_IDS} for item in evidence_items)
+    has_business_evidence = has_authoritative_business_evidence(intent_tags, evidence_items)
     for item in evidence_items:
         if item.get("requires_handoff"):
             if item.get("category_id") == "chats" and has_business_evidence:
@@ -133,7 +140,7 @@ def build_safety_summary(intent_tags: list[str], evidence_items: list[dict[str, 
     style_only = bool(set(intent_tags) <= {"greeting", "small_talk"})
     customer_data_only = "customer_data" in intent_tags and not (set(intent_tags) - {"customer_data"})
     if not has_business_evidence and not style_only and not customer_data_only:
-        if "unknown" in intent_tags or not has_chat_evidence or (set(intent_tags) & BUSINESS_INTENTS):
+        if "unknown" in intent_tags or not has_chat_evidence or (set(intent_tags) & business_intents()):
             reasons.append("no_relevant_business_evidence")
             must_handoff = True
     return {
@@ -141,6 +148,32 @@ def build_safety_summary(intent_tags: list[str], evidence_items: list[dict[str, 
         "must_handoff": must_handoff,
         "reasons": dedupe(reasons),
     }
+
+
+def has_authoritative_business_evidence(intent_tags: list[str], evidence_items: list[dict[str, Any]]) -> bool:
+    tag_set = set(intent_tags)
+    for item in evidence_items:
+        category_id = str(item.get("category_id") or "")
+        if category_id == "products" or category_id in PRODUCT_SCOPED_CATEGORY_IDS:
+            return True
+        if category_id == "policies" and policy_item_matches_intent(item, tag_set):
+            return True
+    return False
+
+
+def policy_item_matches_intent(item: dict[str, Any], tag_set: set[str]) -> bool:
+    key = (str(item.get("item_id") or "") + " " + str(item.get("title") or "")).strip().lower()
+    matched_fields = {str(value).lower() for value in item.get("matched_fields", []) or []}
+    if matched_fields & {"keywords", "title", "question", "customer_message"}:
+        return True
+    for configured_key, configured_tags in map_of_lists("policy_key_tags").items():
+        fragments = {fragment for fragment in configured_key.split("_") if fragment}
+        tags = set(configured_tags)
+        if configured_key in key or any(fragment in key for fragment in fragments):
+            return bool(tags & tag_set)
+    if "policy_type" in matched_fields:
+        return bool(tag_set & business_intents())
+    return False
 
 
 def matched_categories(evidence_items: list[dict[str, Any]]) -> list[str]:
@@ -170,3 +203,8 @@ def dedupe(values: list[str]) -> list[str]:
         seen.add(value)
         result.append(value)
     return result
+
+
+def knowledge_layer(item: dict[str, Any]) -> str:
+    metadata = item.get("metadata") if isinstance(item.get("metadata"), dict) else {}
+    return str(item.get("_knowledge_layer") or metadata.get("knowledge_layer") or "tenant")

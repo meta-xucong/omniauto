@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import hashlib
 import json
-import os
 import re
 import urllib.error
 import urllib.request
@@ -16,18 +15,22 @@ from typing import Any
 from .audit_log import append_audit
 from .knowledge_base_store import KnowledgeBaseStore, product_scoped_category_records
 from .knowledge_compiler import KnowledgeCompiler
+from .rag_experience_auto_review import auto_review_rag_experience
 from .knowledge_registry import KnowledgeRegistry
 from .knowledge_schema_manager import KnowledgeSchemaManager
+from apps.wechat_ai_customer_service.knowledge_paths import tenant_runtime_root
+from apps.wechat_ai_customer_service.llm_config import read_secret, resolve_deepseek_base_url, resolve_deepseek_max_tokens, resolve_deepseek_tier_model, resolve_deepseek_timeout
+from apps.wechat_ai_customer_service.platform_understanding_rules import intent_keywords, product_keywords, risk_keywords
 from apps.wechat_ai_customer_service.workflows.knowledge_intake import evaluate_intake_item
+from apps.wechat_ai_customer_service.workflows.rag_experience_store import RagExperienceStore
+from apps.wechat_ai_customer_service.workflows.rag_layer import RagService
 from apps.wechat_ai_customer_service.workflows.knowledge_runtime import PRODUCT_SCOPED_SCHEMAS
 
 
 APP_ROOT = Path(__file__).resolve().parents[2]
 PROJECT_ROOT = APP_ROOT.parents[1]
 SESSIONS_ROOT = PROJECT_ROOT / "runtime" / "apps" / "wechat_ai_customer_service" / "admin" / "generator_sessions"
-DEFAULT_DEEPSEEK_BASE_URL = "https://api.deepseek.com"
-DEFAULT_DEEPSEEK_MODEL = "deepseek-chat"
-HIGH_RISK_KEYWORDS = ("账期", "月结", "赔偿", "免单", "虚开", "返钱", "保价", "独家", "最低价")
+LLM_ASSIST_POLICY_VERSION = "knowledge_llm_assist_v1"
 FRIENDLY_FIELD_LABELS = {
     "price_tiers": "批量价格",
     "reply_templates": "客服回复内容",
@@ -160,6 +163,52 @@ class KnowledgeGenerator:
         append_audit("generator_item_saved", {"session_id": session_id, "category_id": category_id, "item_id": item["id"]})
         return {"ok": True, "session": session, "item": saved["item"], "compile": compile_result}
 
+    def confirm_session_to_rag_experience(self, session_id: str, *, use_llm: bool = True) -> dict[str, Any]:
+        session = self.require_session(session_id)
+        if session.get("status") != "ready":
+            return {"ok": False, "message": "generator session is not ready to become RAG experience", "session": session}
+        category_id = str(session.get("category_id") or "")
+        item = session.get("draft_item") if isinstance(session.get("draft_item"), dict) else {}
+        evidence = json.dumps(
+            {
+                "category_id": category_id,
+                "category_name": session.get("category_name"),
+                "summary_rows": session.get("summary_rows") or [],
+                "draft_item": item,
+                "source": "manual_admin_entry",
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
+        root = tenant_runtime_root() / "manual_rag_entries"
+        root.mkdir(parents=True, exist_ok=True)
+        path = root / f"{session_id}.json"
+        path.write_text(evidence + "\n", encoding="utf-8")
+        rag = RagService()
+        rag_ingest = rag.ingest_file(path, source_type="manual_admin_entry", category=category_id, rebuild_index=True)
+        store = RagExperienceStore()
+        experience = store.record_intake(
+            source_type="manual_admin_entry",
+            source_path=str(path),
+            category=category_id,
+            evidence_excerpt=evidence,
+            rag_ingest=rag_ingest,
+            candidate_ids=[],
+            original_source={"type": "manual_admin_entry", "session_id": session_id, "category_id": category_id},
+        )
+        reviewed = auto_review_rag_experience(experience, store=store, use_llm=use_llm)
+        session.update(
+            {
+                "status": "sent_to_rag_experience",
+                "rag_experience_id": experience.get("experience_id"),
+                "updated_at": now(),
+                "question": "",
+            }
+        )
+        self.write_session(session)
+        append_audit("generator_rag_experience_created", {"session_id": session_id, "category_id": category_id, "experience_id": experience.get("experience_id")})
+        return {"ok": True, "session": session, "item": reviewed, "rag_ingest": rag_ingest}
+
     def _advance(
         self,
         session: dict[str, Any],
@@ -223,6 +272,7 @@ class KnowledgeGenerator:
                 "warnings": warnings,
                 "summary_rows": build_summary_rows(schema, item),
                 "intake": validation,
+                "llm_assist": candidate.get("llm_assist") if isinstance(candidate.get("llm_assist"), dict) else session.get("llm_assist", {}),
             }
         )
         self.write_session(session)
@@ -254,17 +304,30 @@ class KnowledgeGenerator:
                     [*to_string_list(candidate.get("warnings")), *to_string_list(heuristic.get("warnings"))]
                 )
                 candidate["provider"] = "deepseek"
+                candidate["llm_assist"] = generator_llm_assist(
+                    status="model_generated",
+                    attempted=True,
+                    provider="deepseek",
+                    reason="deepseek_returned_structured_candidate",
+                )
                 return candidate
+            llm_error = str(llm_result.get("error") or "llm_unavailable_or_invalid")
         candidate = heuristic_candidate(message, preferred_category_id=preferred_category_id)
         candidate["provider"] = "heuristic"
+        candidate["llm_assist"] = generator_llm_assist(
+            status="rule_fallback_after_llm" if use_llm else "rule_only_disabled_by_request",
+            attempted=use_llm,
+            provider="",
+            reason=llm_error if use_llm else "llm_disabled_by_caller",
+        )
         return candidate
 
     def _call_deepseek(self, session: dict[str, Any], message: str, *, preferred_category_id: str) -> dict[str, Any]:
         api_key = read_secret("DEEPSEEK_API_KEY")
         if not api_key:
             return {"ok": False, "error": "DEEPSEEK_API_KEY is not set"}
-        base_url = read_secret("DEEPSEEK_BASE_URL") or DEFAULT_DEEPSEEK_BASE_URL
-        model = read_secret("DEEPSEEK_MODEL") or DEFAULT_DEEPSEEK_MODEL
+        base_url = resolve_deepseek_base_url(read_secret_fn=read_secret)
+        model = resolve_deepseek_tier_model(tier="pro", read_secret_fn=read_secret)
         prompt_pack = self._build_prompt_pack(session, message, preferred_category_id=preferred_category_id)
         payload = {
             "model": model,
@@ -273,7 +336,7 @@ class KnowledgeGenerator:
                 {"role": "user", "content": json.dumps(prompt_pack["user"], ensure_ascii=False)},
             ],
             "temperature": 0.2,
-            "max_tokens": 1200,
+            "max_tokens": resolve_deepseek_max_tokens(2400, read_secret_fn=read_secret),
         }
         request = urllib.request.Request(
             url=base_url.rstrip("/") + "/chat/completions",
@@ -282,7 +345,7 @@ class KnowledgeGenerator:
             method="POST",
         )
         try:
-            with urllib.request.urlopen(request, timeout=45) as response:
+            with urllib.request.urlopen(request, timeout=resolve_deepseek_timeout(120, read_secret_fn=read_secret)) as response:
                 data = json.loads(response.read().decode("utf-8"))
         except urllib.error.HTTPError as exc:
             body = exc.read().decode("utf-8", errors="replace")
@@ -406,9 +469,25 @@ def infer_category(text: str) -> str:
         return "erp_exports"
     if has_any(text, ["客户说", "客服说", "话术", "聊天", "回复风格", "怎么回"]):
         return "chats"
-    if has_any(text, ["开票", "发票", "付款", "合同", "售后", "退换", "月结", "账期", "人工", "物流规则", "规则"]):
+    policy_terms = [
+        *intent_keywords().get("invoice", []),
+        *intent_keywords().get("payment", []),
+        *intent_keywords().get("after_sales", []),
+        *intent_keywords().get("shipping", []),
+        *intent_keywords().get("handoff", []),
+        "规则",
+    ]
+    if has_any(text, policy_terms):
         return "policies"
-    if has_any(text, ["商品", "价格", "单价", "型号", "库存", "发货", "规格", "sku", "报价"]):
+    product_terms = [
+        *intent_keywords().get("product", []),
+        *product_keywords("quote"),
+        *product_keywords("stock"),
+        *product_keywords("shipping"),
+        *product_keywords("spec"),
+        "sku",
+    ]
+    if has_any(text, product_terms):
         return "products"
     return "policies"
 
@@ -699,7 +778,7 @@ def normalize_field_value(value: Any, field_type: str) -> Any:
 
 def normalize_runtime(category_id: str, data: dict[str, Any], warnings: list[Any], existing: Any) -> dict[str, Any]:
     runtime = existing if isinstance(existing, dict) else {}
-    risk = bool(warnings) or any(keyword in json.dumps(data, ensure_ascii=False) for keyword in HIGH_RISK_KEYWORDS)
+    risk = bool(warnings) or any(keyword in json.dumps(data, ensure_ascii=False) for keyword in risk_keywords("knowledge_generator"))
     hard_handoff = any(keyword in json.dumps(data, ensure_ascii=False) for keyword in ("禁止自动回复", "不可自动回复", "不能自动回复", "必须转人工"))
     explicit_auto_reply = data.get("allow_auto_reply")
     explicit_handoff = data.get("requires_handoff")
@@ -882,13 +961,13 @@ def short_title(text: str) -> str:
 
 def infer_policy_type(text: str) -> str:
     mapping = [
-        ("invoice", ["开票", "发票"]),
-        ("payment", ["付款", "支付", "月结", "账期"]),
-        ("logistics", ["物流", "发货", "运费"]),
-        ("after_sales", ["售后", "退换", "保修"]),
-        ("discount", ["优惠", "折扣", "还价", "议价"]),
+        ("invoice", intent_keywords().get("invoice", [])),
+        ("payment", intent_keywords().get("payment", [])),
+        ("logistics", intent_keywords().get("shipping", [])),
+        ("after_sales", intent_keywords().get("after_sales", [])),
+        ("discount", intent_keywords().get("discount", [])),
         ("contract", ["合同", "协议"]),
-        ("manual_required", ["人工", "请示", "上级"]),
+        ("manual_required", intent_keywords().get("handoff", [])),
     ]
     for policy_type, keywords in mapping:
         if has_any(text, keywords):
@@ -898,14 +977,16 @@ def infer_policy_type(text: str) -> str:
 
 def keyword_tags(text: str) -> list[str]:
     tags = []
-    for keyword in ["开票", "付款", "物流", "售后", "优惠", "报价", "库存", "发货", "人工", "闲聊"]:
-        if keyword in text:
-            tags.append(keyword)
+    for keyword_group in ("invoice", "payment", "shipping", "after_sales", "discount", "quote", "stock", "handoff", "small_talk"):
+        for keyword in intent_keywords().get(keyword_group, []):
+            if keyword in text:
+                tags.append(keyword)
+                break
     return tags
 
 
 def risk_warnings(text: str) -> list[str]:
-    return [f"包含高风险关键词：{keyword}" for keyword in HIGH_RISK_KEYWORDS if keyword in text]
+    return [f"包含高风险关键词：{keyword}" for keyword in risk_keywords("knowledge_generator") if keyword in text]
 
 
 def safe_item_id(category_id: str, hint: str, data: dict[str, Any]) -> str:
@@ -939,20 +1020,6 @@ def now() -> str:
     return datetime.now().isoformat(timespec="seconds")
 
 
-def read_secret(name: str) -> str:
-    value = os.getenv(name)
-    if value:
-        return value
-    try:
-        import winreg
-
-        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, "Environment") as key:
-            registry_value, _ = winreg.QueryValueEx(key, name)
-            return str(registry_value)
-    except Exception:
-        return ""
-
-
 def parse_json_object(text: str) -> dict[str, Any] | None:
     try:
         payload = json.loads(text)
@@ -966,6 +1033,19 @@ def parse_json_object(text: str) -> dict[str, Any] | None:
         except json.JSONDecodeError:
             return None
     return payload if isinstance(payload, dict) else None
+
+
+def generator_llm_assist(*, status: str, attempted: bool, provider: str, reason: str) -> dict[str, Any]:
+    return {
+        "policy_version": LLM_ASSIST_POLICY_VERSION,
+        "stage": "manual_description_to_draft_knowledge",
+        "attempted": bool(attempted),
+        "provider": provider,
+        "status": status,
+        "reason": reason,
+        "fallback_allowed": True,
+        "human_approval_required": True,
+    }
 
 
 def normalize_text(text: str) -> str:

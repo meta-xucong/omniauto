@@ -6,6 +6,8 @@ import json
 import re
 from typing import Any
 
+from apps.wechat_ai_customer_service.platform_understanding_rules import risk_keywords
+
 
 BUSINESS_REQUIRED_FIELDS = {
     "products": ["name", "price", "unit"],
@@ -17,7 +19,6 @@ BUSINESS_REQUIRED_FIELDS = {
     "product_explanations": ["product_id", "title", "content"],
 }
 
-HIGH_RISK_KEYWORDS = ("账期", "月结", "赔偿", "免单", "虚开", "返钱", "保价", "独家", "最低价", "保证效果")
 HARD_HANDOFF_KEYWORDS = ("禁止自动回复", "不可自动回复", "不能自动回复", "全部转人工", "整单转人工", "必须转人工")
 ADDITIONAL_DETAILS_FIELD = "additional_details"
 
@@ -139,7 +140,7 @@ def field_labels(schema: dict[str, Any], field_ids: list[str]) -> list[str]:
 def risk_warnings(data: dict[str, Any]) -> list[str]:
     text = json.dumps(data, ensure_ascii=False)
     warnings = []
-    for keyword in HIGH_RISK_KEYWORDS:
+    for keyword in risk_keywords("knowledge_intake"):
         if keyword in text:
             warnings.append(f"包含高风险关键词：{keyword}")
     for keyword in HARD_HANDOFF_KEYWORDS:

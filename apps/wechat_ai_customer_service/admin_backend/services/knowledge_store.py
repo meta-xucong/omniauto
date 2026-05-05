@@ -7,13 +7,16 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from .knowledge_base_store import KnowledgeBaseStore, product_scoped_category_records
 from .knowledge_compiler import KnowledgeCompiler
-from .knowledge_deduper import KnowledgeDeduper
+from .raw_message_store import RawMessageStore
 from apps.wechat_ai_customer_service.knowledge_paths import (
     SHARED_KNOWLEDGE_ROOT,
     TENANTS_ROOT,
     default_admin_knowledge_base_root,
     tenant_product_item_knowledge_root,
+    tenant_raw_inbox_root,
+    tenant_review_candidates_root,
 )
 from apps.wechat_ai_customer_service.workflows.knowledge_runtime import KnowledgeRuntime
 
@@ -22,8 +25,6 @@ APP_ROOT = Path(__file__).resolve().parents[2]
 STRUCTURED_ROOT = APP_ROOT / "data" / "structured"
 KNOWLEDGE_BASE_ROOT = default_admin_knowledge_base_root()
 PROMPTS_ROOT = APP_ROOT / "prompts"
-REVIEW_ROOT = APP_ROOT / "data" / "review_candidates"
-RAW_INBOX_ROOT = APP_ROOT / "data" / "raw_inbox"
 
 
 class KnowledgeStore:
@@ -34,8 +35,8 @@ class KnowledgeStore:
         self.shared_knowledge_root = SHARED_KNOWLEDGE_ROOT
         self.tenants_root = TENANTS_ROOT
         self.product_item_knowledge_root = tenant_product_item_knowledge_root()
-        self.review_root = self.app_root / "data" / "review_candidates"
-        self.raw_inbox_root = self.app_root / "data" / "raw_inbox"
+        self.review_root = tenant_review_candidates_root()
+        self.raw_inbox_root = tenant_raw_inbox_root()
         self.prompts_root = self.app_root / "prompts"
         self.runtime = KnowledgeRuntime()
         self.compiler = KnowledgeCompiler(runtime=self.runtime)
@@ -61,6 +62,8 @@ class KnowledgeStore:
         approved_count = count_json_files(self.review_root / "approved")
         rejected_count = count_json_files(self.review_root / "rejected")
         raw_file_count = count_supported_files(self.raw_inbox_root)
+        raw_message_summary = RawMessageStore().summary()
+        new_knowledge_count = self.count_new_knowledge_items()
         return {
             "ok": True,
             "created_at": datetime.now().isoformat(timespec="seconds"),
@@ -76,6 +79,10 @@ class KnowledgeStore:
                 "approved_candidates": approved_count,
                 "rejected_candidates": rejected_count,
                 "raw_files": raw_file_count,
+                "raw_conversations": raw_message_summary.get("conversation_count", 0),
+                "raw_messages": raw_message_summary.get("message_count", 0),
+                "raw_message_batches": raw_message_summary.get("batch_count", 0),
+                "new_knowledge": new_knowledge_count,
             },
             "paths": {
                 "knowledge_base_root": str(self.knowledge_base_root),
@@ -95,6 +102,22 @@ class KnowledgeStore:
                 "manifest": file_mtime(self.manifest_path),
             },
         }
+
+    def count_new_knowledge_items(self) -> int:
+        base_store = KnowledgeBaseStore()
+        category_ids = [str(item.get("id") or "") for item in self.runtime.list_categories(enabled_only=True)]
+        category_ids.extend(str(item.get("id") or "") for item in product_scoped_category_records())
+        count = 0
+        for category_id in sorted(set(item for item in category_ids if item)):
+            try:
+                items = base_store.list_items(category_id, include_archived=False)
+            except FileNotFoundError:
+                continue
+            for item in items:
+                review_state = item.get("review_state") if isinstance(item.get("review_state"), dict) else {}
+                if review_state.get("is_new"):
+                    count += 1
+        return count
 
     def manifest(self) -> dict[str, Any]:
         return self.compiler.compile()["manifest"]
@@ -167,22 +190,7 @@ def count_json_files(path: Path) -> int:
 
 
 def count_visible_pending_candidates(path: Path) -> int:
-    if not path.exists():
-        return 0
-    deduper = KnowledgeDeduper()
-    count = 0
-    for item_path in path.glob("*.json"):
-        if not item_path.is_file():
-            continue
-        try:
-            candidate = json.loads(item_path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
-            continue
-        duplicate = deduper.check_candidate(candidate)
-        if duplicate.get("duplicate") and duplicate.get("source") == "knowledge_base":
-            continue
-        count += 1
-    return count
+    return count_json_files(path)
 
 
 def count_supported_files(path: Path) -> int:

@@ -4,8 +4,12 @@ from __future__ import annotations
 
 from typing import Any
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 
+from apps.wechat_ai_customer_service.auth.models import Role
+from apps.wechat_ai_customer_service.platform_safety_rules import load_platform_safety_rules, save_platform_safety_rules
+from apps.wechat_ai_customer_service.platform_understanding_rules import load_platform_understanding_rules, save_platform_understanding_rules
+from ..auth_context import current_auth_context
 from ..services.diagnostics_service import DiagnosticsService
 from ..services.handoff_store import HandoffStore
 from ..services.knowledge_store import KnowledgeStore
@@ -49,6 +53,62 @@ def runtime_locks() -> dict[str, Any]:
 def readiness() -> dict[str, Any]:
     report = monitor.readiness()
     return {"ok": report["ok"], "report": report}
+
+
+@router.get("/platform-safety-rules")
+def platform_safety_rules(request: Request) -> dict[str, Any]:
+    context = current_auth_context(request)
+    payload = load_platform_safety_rules()
+    item = payload.get("item", {})
+    return {
+        "ok": bool(payload.get("ok")),
+        "path": payload.get("path"),
+        "error": payload.get("error", ""),
+        "editable": context.role == Role.ADMIN,
+        "item": item,
+    }
+
+
+@router.put("/platform-safety-rules")
+def update_platform_safety_rules(request: Request, payload: dict[str, Any]) -> dict[str, Any]:
+    context = current_auth_context(request)
+    if context.role != Role.ADMIN:
+        return {"ok": False, "detail": "only admin can update platform safety rules"}
+    item = payload.get("item") if isinstance(payload.get("item"), dict) else payload
+    result = save_platform_safety_rules(item)
+    return {
+        "ok": bool(result.get("ok")),
+        "path": result.get("path"),
+        "item": result.get("item"),
+    }
+
+
+@router.get("/platform-understanding-rules")
+def platform_understanding_rules(request: Request) -> dict[str, Any]:
+    context = current_auth_context(request)
+    payload = load_platform_understanding_rules()
+    item = payload.get("item", {})
+    return {
+        "ok": bool(payload.get("ok")),
+        "path": payload.get("path"),
+        "error": payload.get("error", ""),
+        "editable": context.role == Role.ADMIN,
+        "item": item,
+    }
+
+
+@router.put("/platform-understanding-rules")
+def update_platform_understanding_rules(request: Request, payload: dict[str, Any]) -> dict[str, Any]:
+    context = current_auth_context(request)
+    if context.role != Role.ADMIN:
+        return {"ok": False, "detail": "only admin can update platform understanding rules"}
+    item = payload.get("item") if isinstance(payload.get("item"), dict) else payload
+    result = save_platform_understanding_rules(item)
+    return {
+        "ok": bool(result.get("ok")),
+        "path": result.get("path"),
+        "item": result.get("item"),
+    }
 
 
 @router.post("/heartbeat/{component_id}")

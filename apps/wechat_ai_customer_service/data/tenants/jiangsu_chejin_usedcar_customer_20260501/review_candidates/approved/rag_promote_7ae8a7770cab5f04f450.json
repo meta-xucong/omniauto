@@ -1,0 +1,163 @@
+{
+  "schema_version": 1,
+  "candidate_id": "rag_promote_7ae8a7770cab5f04f450",
+  "generated_at": "2026-05-06T02:33:45",
+  "source": {
+    "type": "rag_experience",
+    "experience_id": "rag_exp_4caf5450bf3b4b4dc7ac",
+    "rag_hit": {},
+    "evidence_excerpt": "RAG经验：raw_upload/policies，摘要=政策规则：江苏车金高意向转人工 CHEJIN_20260505_205249 测试批次：CHEJIN_20260505_205249 规则名称：试驾到店与订金转人工 规则类型：manual_…\n政策规则：江苏车金高意向转人工 CHEJIN_20260505_205249 测试批次：CHEJIN_20260505_205249 规则名称：试驾到店与订金转人工 规则类型：manual_required 触发关键词：试驾,到店,订金,定金,今天看车,明天看车,销售联系,企业微信群 答案：客户明确要求试驾、到店、订金、销售联系时，AI只做确认和记录，必须转人工或企业微信群承接，不能自行承诺车源保留和最终价格。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high 政策规则：江苏车金金融与车况合规 CHEJIN_20260505_205249 测试批次：CHEJIN_20260505_205249 规则名称：金融审批与车况承诺边界 规则类型：contract 触发关键词：贷款,按揭,首付,月供,征信,保证无事故,水泡,火烧,赔偿,退款 答案：金融方案只能做初步说明，审批结果、利率、月供以资方审核为准；车况承诺必须以检测报告和合同为准，涉及赔偿、退款、纠纷必须转人工。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high 政策规则：江苏车金沉睡客户唤醒 CHEJIN_20260505_205249 测试批次：CHEJIN_20260505_205249 规则名称：沉睡客户递减唤醒策略 规则类型：other 触发关键词：沉睡客户,唤醒,老线索,新车源,还在看车 答案：首次唤醒只做轻提醒；3天未回复推同预算新车源；7天未回复询问需求是否变化；客户回复后停止自动唤醒并转入正常接待。 允许自动回复：true 必须转人工：false 风险等级：normal"
+  },
+  "detected_tags": [
+    "rag_experience",
+    "chats"
+  ],
+  "proposal": {
+    "target_category": "chats",
+    "change_type": "rag_experience_promote",
+    "summary": "从AI经验整理：这是江苏车金公司内部的一套客服规则，规定了什么时候必须把客户转给人工客服、AI不能自己瞎承诺金融和车况、以及怎么温柔地唤醒很久没联系的老客户，避免惹出客诉。（聊天话术）",
+    "suggested_fields": {
+      "customer_message": "这是江苏车金公司内部的一套客服规则，规定了什么时候必须把客户转给人工客服、AI不能自己瞎承诺金融和车况、以及怎么温柔地唤醒很久没联系的老客户，避免惹出客诉。",
+      "service_reply": "true 风险等级：high 政策规则：江苏车金金融与车况合规 CHEJIN_20260505_205249 测试批次：CHEJIN_20260505_205249 规则名称：金融审批与车况承诺边界 规则类型：contract 触发关键词：贷款,按揭,首付,月供,征信,保证无事故,水泡,火烧,赔偿,退款 答案：金融方案只能做初步说明，审批结果、利率、月供以资方审核为准；车况承诺必须以检测报告和合同为准，涉及赔偿、退款、纠纷必须转人工。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high 政策规则：江苏车金沉睡客户唤醒 CHEJIN_20260505_205249 测试批次：CHEJIN_20260505_205249 规则名称：沉睡客户递减唤醒策略 规则类型：other 触发关键词：沉睡客户,唤醒,老线索,新车源,还在看车 答案：首次唤醒只做轻提醒；3天未回复推同预算新车源；7天未回复询问需求是否变化；客户回复后停止自动唤醒并转入正常接待。 允许自动回复：true 必须转人工：false 风险等级：normal",
+      "intent_tags": [
+        "rag_experience"
+      ],
+      "tone_tags": [
+        "rag_reference"
+      ],
+      "additional_details": {
+        "rag_experience_id": "rag_exp_4caf5450bf3b4b4dc7ac",
+        "source_chunk_id": null,
+        "source_id": null,
+        "source_text": ""
+      }
+    },
+    "formal_patch": {
+      "target_category": "chats",
+      "operation": "upsert_item",
+      "item": {
+        "schema_version": 1,
+        "category_id": "chats",
+        "id": "ai",
+        "status": "active",
+        "source": {
+          "type": "rag_experience",
+          "experience_id": "rag_exp_4caf5450bf3b4b4dc7ac"
+        },
+        "data": {
+          "customer_message": "这是江苏车金公司内部的一套客服规则，规定了什么时候必须把客户转给人工客服、AI不能自己瞎承诺金融和车况、以及怎么温柔地唤醒很久没联系的老客户，避免惹出客诉。",
+          "service_reply": "true 风险等级：high 政策规则：江苏车金金融与车况合规 CHEJIN_20260505_205249 测试批次：CHEJIN_20260505_205249 规则名称：金融审批与车况承诺边界 规则类型：contract 触发关键词：贷款,按揭,首付,月供,征信,保证无事故,水泡,火烧,赔偿,退款 答案：金融方案只能做初步说明，审批结果、利率、月供以资方审核为准；车况承诺必须以检测报告和合同为准，涉及赔偿、退款、纠纷必须转人工。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high 政策规则：江苏车金沉睡客户唤醒 CHEJIN_20260505_205249 测试批次：CHEJIN_20260505_205249 规则名称：沉睡客户递减唤醒策略 规则类型：other 触发关键词：沉睡客户,唤醒,老线索,新车源,还在看车 答案：首次唤醒只做轻提醒；3天未回复推同预算新车源；7天未回复询问需求是否变化；客户回复后停止自动唤醒并转入正常接待。 允许自动回复：true 必须转人工：false 风险等级：normal",
+          "intent_tags": [
+            "rag_experience"
+          ],
+          "tone_tags": [
+            "rag_reference"
+          ],
+          "additional_details": {
+            "rag_experience_id": "rag_exp_4caf5450bf3b4b4dc7ac",
+            "source_chunk_id": null,
+            "source_id": null,
+            "source_text": ""
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        },
+        "review_state": {
+          "is_new": true,
+          "new_reason": "newly_added_formal_knowledge",
+          "marked_at": "2026-05-06T02:37:41",
+          "updated_at": "2026-05-06T02:37:41",
+          "read_at": "",
+          "read_by": "",
+          "source": {
+            "source_module": "candidate",
+            "candidate_id": "rag_promote_7ae8a7770cab5f04f450",
+            "target_category": "chats",
+            "item_id": "ai"
+          }
+        }
+      }
+    }
+  },
+  "review": {
+    "status": "approved",
+    "requires_human_approval": true,
+    "allowed_auto_apply": false,
+    "completeness_status": "ready",
+    "rag_experience_id": "rag_exp_4caf5450bf3b4b4dc7ac",
+    "llm_assist": {
+      "policy_version": "knowledge_llm_assist_v1",
+      "stage": "rag_experience_to_review_candidate",
+      "attempted": true,
+      "provider": "deepseek",
+      "model": "deepseek-v4-pro",
+      "status": "model_generated",
+      "reason": "model_generated",
+      "recommended_action": "promote_to_pending",
+      "formal_knowledge_comparison": {
+        "overlap_level": "medium",
+        "matched_title": "这条经验是江苏车金公司的客服政策规则，规定了什么时候必须转人工、哪些事情AI不能自己承诺、怎么唤醒老客户等，用来防止AI乱答应客户要求，避免客诉和风险。",
+        "matched_category": "chats",
+        "matched_item_id": "ai-ai",
+        "similarity": 0.61,
+        "same_points": [
+          "都包含转人工触发条件（试驾、到店、订金等）",
+          "都强调金融方案只能初步说明，以资方审核为准",
+          "都包含沉睡客户唤醒策略的步骤"
+        ],
+        "differences": [
+          "当前经验是分条列出三条明确的规则（转人工、金融合规、唤醒），已有知识是概括性描述",
+          "当前经验有具体的批次号、触发关键词和风险等级，已有知识没有这些执行细节",
+          "当前经验明确区分了允许自动回复和必须转人工的规则，已有知识没做这种粒度区分"
+        ],
+        "conclusion": "当前正式知识库有相近内容，建议只核对差异点：这条经验是江苏车金公司的客服政策规则，规定了什么时候必须转人工、哪些事情AI不能自己承诺、怎么唤醒老客户等，用来防止AI乱答应客户要求，避免客诉和风险。"
+      },
+      "fallback_allowed": true,
+      "human_approval_required": true
+    },
+    "source_authority": {
+      "allowed": true,
+      "category": "chats",
+      "source_types": [
+        "intake",
+        "raw_upload"
+      ],
+      "observed_wechat": false,
+      "contains_model_reply": false,
+      "policy_version": "source_authority_v1"
+    },
+    "applied": true,
+    "applied_at": "2026-05-06T02:37:41",
+    "version_snapshot": {
+      "version_id": "20260506_023740_b76f75ca",
+      "created_at": "2026-05-06T02:37:40",
+      "reason": "before candidate native apply",
+      "metadata": {
+        "candidate_id": "rag_promote_7ae8a7770cab5f04f450",
+        "target_category": "chats",
+        "item_id": "ai"
+      },
+      "structured_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\versions\\20260506_023740_b76f75ca\\structured",
+      "knowledge_base_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\versions\\20260506_023740_b76f75ca\\knowledge_bases",
+      "shared_knowledge_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\versions\\20260506_023740_b76f75ca\\shared_knowledge",
+      "tenants_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\versions\\20260506_023740_b76f75ca\\tenants",
+      "raw_backup_package_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\versions\\20260506_023740_b76f75ca\\download\\backup_f232378b38a6fe7ac728.zip",
+      "readable_export_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\versions\\20260506_023740_b76f75ca\\download\\readable\\local_20260506_023740_b76f75ca_readable.xlsx",
+      "download_package_path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\versions\\20260506_023740_b76f75ca\\download\\20260506_023740_b76f75ca_complete_backup.zip",
+      "download_package_bytes": 1207191
+    },
+    "target_category": "chats",
+    "item_id": "ai"
+  },
+  "intake": {
+    "status": "ready",
+    "missing_fields": [],
+    "missing_labels": [],
+    "warnings": [],
+    "confidence": 0.72,
+    "question": ""
+  }
+}

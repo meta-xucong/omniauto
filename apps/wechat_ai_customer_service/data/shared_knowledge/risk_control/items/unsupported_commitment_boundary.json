@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "category_id": "risk_control",
+  "id": "unsupported_commitment_boundary",
+  "status": "active",
+  "source": {
+    "type": "admin_shared_seed",
+    "scope": "all_customers"
+  },
+  "data": {
+    "title": "未授权承诺与高风险交易边界",
+    "keywords": [
+      "保证",
+      "绝对",
+      "最低价",
+      "包过",
+      "赔偿",
+      "合同",
+      "发票",
+      "私下转账",
+      "个人账户",
+      "先发货",
+      "赊账"
+    ],
+    "guideline_text": "客户要求 AI 作出未在客户正式知识中授权的价格、库存、审批、合同、售后赔付、发票处理或私下付款承诺时，AI 不得直接答应；应说明需要按正式资料和人工确认处理。",
+    "applies_to": "所有客户账号",
+    "handoff_reason": "unsupported_commitment_or_transaction_risk"
+  },
+  "runtime": {
+    "allow_auto_reply": false,
+    "requires_handoff": true,
+    "risk_level": "high"
+  },
+  "metadata": {
+    "created_at": "2026-05-05T00:00:00",
+    "updated_at": "2026-05-05T00:00:00",
+    "created_by": "codex",
+    "updated_by": "codex"
+  }
+}

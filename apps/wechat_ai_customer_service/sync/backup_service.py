@@ -13,6 +13,8 @@ from apps.wechat_ai_customer_service.knowledge_paths import (
     SHARED_KNOWLEDGE_ROOT,
     TENANTS_ROOT,
     active_tenant_id,
+    runtime_app_root,
+    tenant_runtime_root,
     tenant_runtime_backups_root,
     tenant_root,
 )
@@ -21,6 +23,7 @@ from .manifest import file_entry, stable_digest
 
 
 DERIVED_DIRS = {"rag_chunks", "rag_index", "rag_cache"}
+RUNTIME_SKIP_DIRS = {"backups"}
 SKIP_SUFFIXES = {".tmp", ".lock"}
 
 
@@ -45,7 +48,7 @@ class BackupService:
 
         files: list[dict[str, Any]] = []
         with zipfile.ZipFile(package_path, "w", compression=zipfile.ZIP_DEFLATED) as package:
-            roots = self.roots_for_scope(scope, tenant)
+            roots = self.roots_for_scope(scope, tenant, include_runtime=include_runtime)
             for label, root in roots:
                 for path in iter_backup_files(root, include_derived=include_derived):
                     relative = path.relative_to(root).as_posix()
@@ -74,16 +77,24 @@ class BackupService:
             "manifest": manifest,
         }
 
-    def roots_for_scope(self, scope: str, tenant_id: str) -> list[tuple[str, Path]]:
+    def roots_for_scope(self, scope: str, tenant_id: str, *, include_runtime: bool = False) -> list[tuple[str, Path]]:
         if scope == "shared":
-            return [("shared_knowledge", SHARED_KNOWLEDGE_ROOT)]
+            roots = [("shared_knowledge", SHARED_KNOWLEDGE_ROOT)]
+            if include_runtime:
+                roots.append(("runtime/shared", runtime_app_root() / "shared_knowledge"))
+            return roots
         if scope == "tenant":
-            return [(f"tenants/{tenant_id}", tenant_root(tenant_id))]
+            roots = [(f"tenants/{tenant_id}", tenant_root(tenant_id))]
+            if include_runtime:
+                roots.append((f"runtime/tenants/{tenant_id}", tenant_runtime_root(tenant_id)))
+            return roots
         if scope == "all":
             roots = [("shared_knowledge", SHARED_KNOWLEDGE_ROOT)]
             if TENANTS_ROOT.exists():
                 for path in sorted(item for item in TENANTS_ROOT.iterdir() if item.is_dir()):
                     roots.append((f"tenants/{path.name}", path))
+            if include_runtime and runtime_app_root().exists():
+                roots.append(("runtime", runtime_app_root()))
             return roots
         raise ValueError(f"unsupported backup scope: {scope}")
 
@@ -96,6 +107,8 @@ def iter_backup_files(root: Path, *, include_derived: bool) -> list[Path]:
         if path.suffix in SKIP_SUFFIXES:
             continue
         if "__pycache__" in path.parts:
+            continue
+        if any(part in RUNTIME_SKIP_DIRS for part in path.relative_to(root).parts):
             continue
         if not include_derived and any(part in DERIVED_DIRS for part in path.relative_to(root).parts):
             continue

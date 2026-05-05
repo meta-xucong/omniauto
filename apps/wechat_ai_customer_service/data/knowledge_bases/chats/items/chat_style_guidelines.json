@@ -2,7 +2,7 @@
   "schema_version": 1,
   "category_id": "chats",
   "id": "chat_style_guidelines",
-  "status": "active",
+  "status": "archived",
   "source": {
     "type": "deepseek_upload_learning",
     "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\raw_inbox\\products\\upload_5de0c2bb46fb1848_03_chat_records_new_energy_storage.md",
@@ -32,7 +32,7 @@
   },
   "metadata": {
     "created_at": "2026-04-27T02:15:15",
-    "updated_at": "2026-04-27T02:15:15",
+    "updated_at": "2026-05-05T20:52:59",
     "created_by": "admin",
     "updated_by": "admin"
   }

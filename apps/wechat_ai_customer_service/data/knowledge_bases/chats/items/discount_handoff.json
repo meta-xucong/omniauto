@@ -4,8 +4,8 @@
   "id": "discount_handoff",
   "status": "active",
   "source": {
-    "type": "migration",
-    "path": "structured/style_examples.json"
+    "type": "admin_draft",
+    "legacy_target": "style_examples"
   },
   "data": {
     "customer_message": "",
@@ -20,14 +20,14 @@
     "usable_as_template": true
   },
   "runtime": {
-    "allow_auto_reply": true,
+    "allow_auto_reply": false,
     "requires_handoff": true,
     "risk_level": "high"
   },
   "metadata": {
-    "created_at": "2026-04-26T17:58:50",
-    "updated_at": "2026-04-26T17:58:50",
-    "created_by": "migration",
-    "updated_by": "migration"
+    "created_at": "2026-05-05T20:53:04",
+    "updated_at": "2026-05-05T20:53:04",
+    "created_by": "admin",
+    "updated_by": "admin"
   }
 }

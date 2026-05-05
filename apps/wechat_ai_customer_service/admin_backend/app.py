@@ -12,15 +12,19 @@ from fastapi.staticfiles import StaticFiles
 from .api.auth import compat_router as auth_compat_router
 from .api.auth import router as auth_router
 from .api.candidates import router as candidates_router
+from .api.customer_service import router as customer_service_router
 from .api.diagnostics import router as diagnostics_router
 from .api.drafts import router as drafts_router
+from .api.exports import router as exports_router
 from .api.generator import router as generator_router
 from .api.handoffs import router as handoffs_router
 from .api.jobs import router as jobs_router
 from .api.knowledge import router as knowledge_router
 from .api.learning import router as learning_router
+from .api.product_console import router as product_console_router
 from .api.rag import router as rag_router
-from .api.shared_knowledge import router as shared_knowledge_router
+from .api.raw_messages import router as raw_messages_router
+from .api.recorder import router as recorder_router
 from .api.system import router as system_router
 from .api.sync import router as sync_router
 from .api.tenants import router as tenants_router
@@ -42,18 +46,31 @@ def create_app() -> FastAPI:
 
     app.add_middleware(AuthTenantMiddleware)
 
+    @app.middleware("http")
+    async def prevent_admin_static_cache(request, call_next):
+        response = await call_next(request)
+        path = request.url.path
+        if path == "/" or path.startswith("/static/"):
+            response.headers["Cache-Control"] = "no-store, max-age=0"
+            response.headers["Pragma"] = "no-cache"
+        return response
+
     app.include_router(auth_router)
     app.include_router(auth_compat_router)
     app.include_router(candidates_router)
+    app.include_router(customer_service_router)
     app.include_router(diagnostics_router)
     app.include_router(drafts_router)
+    app.include_router(exports_router)
     app.include_router(generator_router)
     app.include_router(handoffs_router)
     app.include_router(jobs_router)
     app.include_router(knowledge_router)
     app.include_router(learning_router)
+    app.include_router(product_console_router)
     app.include_router(rag_router)
-    app.include_router(shared_knowledge_router)
+    app.include_router(raw_messages_router)
+    app.include_router(recorder_router)
     app.include_router(system_router)
     app.include_router(sync_router)
     app.include_router(tenants_router)

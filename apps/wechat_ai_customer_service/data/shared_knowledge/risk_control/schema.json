@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "category_id": "risk_control",
+  "display_name": "共享风险边界",
+  "description": "适合所有客户账号使用的公共风险处理原则。客户专属正式知识命中同类内容时，客户专属知识优先。",
+  "item_title_field": "title",
+  "item_subtitle_field": "applies_to",
+  "fields": [
+    {
+      "id": "title",
+      "label": "规则名称",
+      "type": "short_text",
+      "required": true,
+      "searchable": true,
+      "form_order": 10
+    },
+    {
+      "id": "keywords",
+      "label": "风险关键词",
+      "type": "tags",
+      "required": false,
+      "searchable": true,
+      "form_order": 20
+    },
+    {
+      "id": "guideline_text",
+      "label": "处理规则",
+      "type": "long_text",
+      "required": true,
+      "searchable": true,
+      "form_order": 30
+    },
+    {
+      "id": "applies_to",
+      "label": "适用场景",
+      "type": "long_text",
+      "required": false,
+      "searchable": true,
+      "form_order": 40
+    },
+    {
+      "id": "handoff_reason",
+      "label": "转人工原因",
+      "type": "short_text",
+      "required": false,
+      "searchable": true,
+      "form_order": 50
+    }
+  ]
+}

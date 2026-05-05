@@ -1,0 +1,124 @@
+{
+  "schema_version": 1,
+  "title": "平台通用理解词典",
+  "description": "所有客户通用的基础意图、检索和归类词典。这里只放通用语言理解词，不放某个行业、某个客户、某个商品的专属规则。",
+  "last_updated": "2026-05-06T00:00:00+08:00",
+  "intent_keywords": {
+    "greeting": ["你好", "您好", "hello", "在吗"],
+    "catalog": ["有哪些商品", "有什么商品", "商品列表", "产品列表", "产品介绍", "商品介绍", "主营产品", "卖什么"],
+    "quote": ["价格", "报价", "多少钱", "费用", "单价", "总价", "一共", "合计", "共多少钱", "怎么报价"],
+    "discount": ["优惠", "便宜", "最低", "折扣", "能少", "少点", "还价", "议价", "贵", "能按", "按", "算吗"],
+    "stock": ["库存", "现货", "有货"],
+    "shipping": ["物流", "快递", "运费", "包邮", "发货", "发到", "发往", "送到", "寄到", "到货", "送货", "上楼", "送货上楼", "几天到", "几天", "多久", "大概多久"],
+    "warranty": ["售后", "保修", "质保", "坏了", "退换"],
+    "spec": ["规格", "型号", "参数", "尺寸"],
+    "invoice": ["发票", "开票", "专票", "普票", "税号", "电子发票"],
+    "payment": ["付款", "支付", "对公", "转账", "收款", "银行账号", "账户"],
+    "company": ["你们公司", "公司名称", "公司叫什么", "公司信息", "公司地址", "你们地址", "在哪里", "营业时间", "客服电话", "主营范围", "主营业务", "开票信息", "生产方", "厂家", "对外客服人设", "客服人设"],
+    "after_sales": ["售后", "保修", "质保", "坏了", "退换", "退货", "换货", "破损", "退款", "赔偿", "投诉"],
+    "customer_data": ["姓名", "电话", "手机", "地址", "收件", "联系人"],
+    "small_talk": ["哈哈", "随便看看", "先看看", "靠谱吗", "靠谱不", "可靠", "辛苦", "谢谢", "挺快", "忙", "客服", "小姐姐", "小哥"],
+    "style": ["客户：", "客服：", "用户：", "回复："],
+    "product": ["产品", "商品", "规格", "型号", "数量", "采购", "参数", "尺寸", "材质", "配置", "类目"],
+    "scene_product": ["推荐", "适合", "用途", "场景", "用来", "使用", "对比", "哪款", "哪种", "怎么选", "想找", "能放"],
+    "handoff": ["人工", "转人工", "投诉", "退款", "退货", "赔偿", "生气", "不满意", "法务", "律师", "合同", "月结", "账期", "赊账", "安装", "上门", "免单", "白送", "先发货", "月底结", "虚开", "伪造", "假发票"]
+  },
+  "intent_groups": {
+    "business": ["catalog", "quote", "discount", "stock", "shipping", "warranty", "spec", "invoice", "payment", "company", "after_sales", "scene_product", "handoff"],
+    "product_context": ["quote", "discount", "shipping", "stock", "warranty", "spec"],
+    "product_related": ["quote", "discount", "stock", "shipping", "warranty", "spec", "scene_product"],
+    "rag_authority_block": ["quote", "discount", "stock", "shipping", "invoice", "payment", "after_sales", "handoff", "customer_data"],
+    "rag_soft_reference": ["scene_product", "spec", "catalog", "small_talk", "greeting"],
+    "rag_soft_actions": ["answer_from_evidence", "ask_for_contact_fields", "review_or_default_reply", "reply_small_talk", "reply_greeting"]
+  },
+  "policy_type_to_intent": {
+    "catalog": "catalog",
+    "product_catalog": "catalog",
+    "company_profile": "company",
+    "company": "company",
+    "invoice_policy": "invoice",
+    "invoice": "invoice",
+    "payment_policy": "payment",
+    "payment": "payment",
+    "logistics_policy": "shipping",
+    "logistics": "shipping",
+    "shipping": "shipping",
+    "after_sales_policy": "after_sales",
+    "after_sales": "after_sales",
+    "discount": "discount",
+    "contract": "handoff",
+    "manual_required": "handoff"
+  },
+  "policy_tags": {
+    "catalog": "catalog_policy",
+    "company": "company_profile",
+    "invoice": "invoice_policy",
+    "payment": "payment_policy",
+    "shipping": "logistics_policy",
+    "after_sales": "after_sales_policy"
+  },
+  "policy_type_tags": {
+    "catalog": ["catalog", "product"],
+    "product_catalog": ["catalog", "product"],
+    "company": ["company"],
+    "invoice": ["invoice"],
+    "payment": ["payment"],
+    "logistics": ["shipping"],
+    "shipping": ["shipping"],
+    "after_sales": ["after_sales", "warranty"],
+    "discount": ["discount", "shipping"],
+    "contract": ["handoff"],
+    "manual_required": ["handoff"]
+  },
+  "policy_key_tags": {
+    "catalog_policy": ["catalog", "product"],
+    "company_profile": ["company"],
+    "invoice_policy": ["invoice"],
+    "payment_policy": ["payment"],
+    "logistics_policy": ["shipping"],
+    "after_sales_policy": ["after_sales", "warranty"],
+    "discount_policy": ["discount", "shipping"]
+  },
+  "product_knowledge_keywords": {
+    "quote": ["价格", "报价", "多少钱", "费用", "单价", "总价", "怎么报价", "一共", "合计", "总共"],
+    "stock": ["库存", "现货", "有货"],
+    "shipping": ["发货", "多久", "物流", "运费", "包邮", "到货", "送货", "上楼", "送货上楼"],
+    "warranty": ["售后", "保修", "质保", "坏了", "退换"],
+    "discount": ["优惠", "便宜", "最低", "折扣", "贵"],
+    "spec": ["规格", "型号", "参数", "尺寸"],
+    "approval": ["申请", "请示", "特批", "破例", "抹零", "再便宜", "便宜点", "最低价"],
+    "catalog": ["有哪些商品", "有什么商品", "商品列表", "产品列表", "产品介绍", "商品介绍", "卖什么", "主营产品"]
+  },
+  "semantic_equivalents": {
+    "型号": ["型号命名", "型号说明", "命名规则", "规格型号"],
+    "命名": ["型号命名", "型号说明", "命名规则"],
+    "怎么看": ["说明", "解读", "命名规则", "型号说明"],
+    "适合": ["适用", "场景", "用途", "适配"],
+    "场景": ["适合", "适用", "用途", "适配"],
+    "推荐": ["建议", "适合", "优先看", "可以考虑"],
+    "对比": ["比较", "区别", "怎么选", "更适合"]
+  },
+  "rag": {
+    "high_risk_terms": ["最低价", "账期", "月结", "赔偿", "退款", "合同", "盖章", "安装费", "上门安装", "先发货", "赊账", "白条", "虚开发票", "假发票", "包赔", "保证到", "保证效果", "虚开"],
+    "soft_reference_categories": ["product_explanations", "product_faq", "product_rules", "products"],
+    "soft_reference_source_types": ["product_doc", "manual"]
+  },
+  "risk_keywords": {
+    "knowledge_intake": ["账期", "月结", "赔偿", "免单", "虚开", "返钱", "保价", "独家", "最低价", "保证效果"],
+    "knowledge_generator": ["账期", "月结", "赔偿", "免单", "虚开", "返钱", "保价", "独家", "最低价"],
+    "diagnostics": ["月结", "账期", "赔偿", "退款", "虚开", "伪造", "免单", "白送"],
+    "hard_handoff": ["禁止自动回复", "不可自动回复", "不能自动回复", "全部转人工", "整单转人工", "必须转人工", "请示", "上级", "人工", "审核"],
+    "review_warning": ["最低价", "赔偿", "退款", "账期", "合同", "保证", "一定", "必须", "人工", "确认", "承诺"]
+  },
+  "customer_data_field_labels": {
+    "name": ["姓名", "客户姓名", "联系人", "收件人", "名字"],
+    "phone": ["电话", "手机号", "手机", "联系电话", "联系方式"],
+    "address": ["地址", "收货地址", "寄送地址", "详细地址"],
+    "product": ["产品", "商品", "需求", "采购", "品名"],
+    "quantity": ["数量", "件数", "采购量", "数量需求"],
+    "spec": ["规格", "型号", "尺寸", "参数"],
+    "budget": ["预算", "价格", "报价", "费用"],
+    "note": ["备注", "说明", "其他", "补充"]
+  },
+  "quantity_units": ["台", "个", "件", "只", "箱", "套", "张", "条", "把", "瓶", "支", "包", "米", "kg", "公斤", "千克", "斤"]
+}

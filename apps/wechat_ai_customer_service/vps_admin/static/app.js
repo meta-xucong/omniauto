@@ -385,7 +385,6 @@ async function refresh() {
     document.querySelector("#login-pill").textContent = "admin 已登录";
     document.querySelector("#login-pill").classList.add("is-ok");
     renderAll();
-    hideMessage();
   } catch (error) {
     if (String(error.message || "").includes("401")) logout();
     showMessage(error.message || "刷新失败");
@@ -519,28 +518,131 @@ function renderCustomerData() {
 
 function renderSharedKnowledge() {
   const snapshots = state.data.shared?.snapshots || [];
-  const pending = state.data.proposals.filter((item) => item.status === "pending_review").length;
-  renderInto("shared-cards", metricCards([["正式库条目", state.data.sharedLibrary.length || 0], ["候选待审", pending], ["本地快照", snapshots.length]]));
+  const proposals = state.data.proposals || [];
+  const pendingProposals = proposals.filter((item) => item.status === "pending_review");
+  const archivedProposals = proposals.filter((item) => ["rejected", "void"].includes(item.status));
+  renderInto("shared-cards", metricCards([["候选待审", pendingProposals.length], ["正式库条目", state.data.sharedLibrary.length || 0], ["已发布补丁", state.data.patches.length || 0], ["已归档候选", archivedProposals.length]]));
   renderInto("shared-library-list", `<h3>正式共享库</h3>${state.data.sharedLibrary.map((item) => `
-    <button class="record-row record-button" data-action="view-library" data-item-id="${escapeAttr(item.item_id)}">
-      <div class="row-title"><strong>${escapeHtml(item.title || item.item_id)}</strong><span class="status-chip ${item.status === "active" ? "ok" : "warning"}">${escapeHtml(item.status || "active")}</span></div>
-      <span>分类：${escapeHtml(sharedCategoryLabel(item.category_id))} · 关键词：${escapeHtml((item.keywords || []).join("、") || "-")}</span>
-      <span>${escapeHtml(trimText(sharedItemContent(item), 140))}</span>
-      <span class="button-row"><span class="status-chip">点击查看和编辑</span></span>
-    </button>
+    <details class="record-row collapsible-record">
+      <summary class="collapse-summary">
+        <div class="row-title"><strong>${escapeHtml(item.title || item.item_id)}</strong><span class="status-chip ${item.status === "active" ? "ok" : "warning"}">${escapeHtml(item.status || "active")}</span></div>
+      </summary>
+      <div class="record-body">
+        <span>分类：${escapeHtml(sharedCategoryLabel(item.category_id))} · 关键词：${escapeHtml((item.keywords || []).join("、") || "-")}</span>
+        <span>${escapeHtml(trimText(sharedItemContent(item), 140))}</span>
+        <div class="button-row">
+          <button class="secondary-button" data-action="view-library" data-item-id="${escapeAttr(item.item_id)}">查看和编辑</button>
+        </div>
+      </div>
+    </details>
   `).join("") || empty("正式共享库暂无条目")}`);
-  renderInto("shared-proposal-list", `<h3>候选库</h3>${state.data.proposals.map((item) => `
+  const archivedHtml = archivedProposals.length
+    ? `<details class="archive-section">
+        <summary><strong>已拒绝 / 已作废归档</strong><span class="status-chip">${archivedProposals.length} 条</span></summary>
+        <div class="archive-body">${archivedProposals.map((item) => sharedProposalCard(item, {archived: true})).join("")}</div>
+      </details>`
+    : "";
+  renderInto("shared-proposal-list", `<h3>候选待审核</h3>${pendingProposals.map((item) => sharedProposalCard(item)).join("") || empty("暂无待审核候选")}${archivedHtml}`);
+  const recentPatches = (state.data.patches || []).slice(0, 10);
+  renderInto("shared-patch-list", `<h3>已发布补丁（最近 10 条）</h3>${recentPatches.map((item) => `
     <div class="record-row">
-      <div class="row-title"><strong>${escapeHtml(item.title || item.proposal_id)}</strong><span class="status-chip ${item.status === "pending_review" ? "warning" : "ok"}">${proposalStatus(item.status)}</span></div>
-      <span>来源客户：${escapeHtml(customerNameForTenant(item.tenant_id) || item.tenant_id || "-")} · ${escapeHtml(item.created_at || "")}</span>
-      <span>${escapeHtml(proposalPreview(item))}</span>
+      <div class="row-title">
+        <strong>${escapeHtml(item.version || item.patch_id)}</strong>
+        <span class="status-chip ${patchSignatureClass(item)}">${escapeHtml(item.signature_label || (item.signature ? "已签名" : "本地模式未签名"))}</span>
+      </div>
+      <span>补丁编号：${escapeHtml(item.patch_id)} · 来源候选：${escapeHtml(item.source_proposal_id || "-")} · 条目：${escapeHtml((item.library_item_ids || []).join("、") || "-")}</span>
+      <span>操作数量：${escapeHtml(String((item.operations || []).length))} · 发布时间：${escapeHtml(item.created_at || "-")}</span>
+      ${patchDeliveryHtml(item.delivery)}
       <div class="button-row">
-        <button class="secondary-button" data-action="accept-proposal" data-proposal-id="${escapeAttr(item.proposal_id)}" ${item.status !== "pending_review" ? "disabled" : ""}>采纳</button>
-        <button class="secondary-button" data-action="reject-proposal" data-proposal-id="${escapeAttr(item.proposal_id)}" ${item.status !== "pending_review" ? "disabled" : ""}>拒绝</button>
-        <button class="secondary-button danger-button" data-action="void-proposal" data-proposal-id="${escapeAttr(item.proposal_id)}" ${item.status !== "pending_review" ? "disabled" : ""}>作废</button>
+        <button class="primary-button" data-action="push-shared-patch" data-patch-id="${escapeAttr(item.patch_id)}">推送到客户电脑</button>
       </div>
     </div>
-  `).join("") || empty("暂无共享知识候选")}`);
+  `).join("") || empty("暂无已发布补丁。采纳候选后会自动生成补丁。")}`);
+}
+
+function patchSignatureClass(item) {
+  if (item.signature_status === "signed" || item.signature) return "ok";
+  return item.signature_status === "unsigned_required" ? "danger" : "warning";
+}
+
+function patchDeliveryHtml(delivery) {
+  if (!delivery || !delivery.counts) {
+    return `<div class="patch-delivery muted">尚未推送到客户电脑。</div>`;
+  }
+  const counts = delivery.counts || {};
+  const statusText = patchDeliveryOverallLabel(delivery.overall_status);
+  const targets = delivery.targets || [];
+  const targetHtml = targets.slice(0, 8).map((target) => `
+    <div class="delivery-target ${target.delivery_status || "queued"}">
+      <div>
+        <strong>${escapeHtml(target.tenant_name || target.tenant_id || "-")}</strong>
+        <span>${escapeHtml(target.node_name || target.node_id || "客户电脑")} · ${escapeHtml(target.node_last_seen_at || "未上报在线时间")}</span>
+      </div>
+      <span class="status-chip ${deliveryStatusClass(target.delivery_status)}">${deliveryStatusLabel(target.delivery_status)}</span>
+    </div>
+  `).join("");
+  return `
+    <div class="patch-delivery">
+      <div class="delivery-summary">
+        <strong>${escapeHtml(statusText)}</strong>
+        <span>共 ${counts.total || 0} 台：已生效 ${counts.applied || 0}、等待 ${Number(counts.queued || 0) + Number(counts.sent || 0)}、失败 ${counts.failed || 0}</span>
+      </div>
+      ${targetHtml ? `<div class="delivery-target-list">${targetHtml}</div>` : `<span class="muted">尚未推送到客户电脑。</span>`}
+    </div>
+  `;
+}
+
+function patchDeliveryOverallLabel(value) {
+  return {
+    not_pushed: "尚未推送",
+    pending: "已发起，等待客户电脑领取或生效",
+    applied: "已全部生效",
+    failed: "部分客户电脑失败",
+  }[value] || value || "尚未推送";
+}
+
+function deliveryStatusLabel(value) {
+  return {
+    queued: "未领取",
+    sent: "已领取待回报",
+    applied: "已生效",
+    failed: "失败",
+  }[value] || value || "-";
+}
+
+function deliveryStatusClass(value) {
+  return value === "applied" ? "ok" : value === "failed" ? "danger" : "warning";
+}
+
+function sharedPatchPushMessage(payload) {
+  const delivery = payload.delivery || payload.patch?.delivery || {};
+  const counts = delivery.counts || {};
+  const queued = Number(counts.queued || 0) + Number(counts.sent || 0);
+  return `已创建 ${payload.commands?.length || counts.total || 0} 条推送命令。已生效 ${counts.applied || 0} 台，等待客户电脑轮询/重启 ${queued} 台，失败 ${counts.failed || 0} 台。详情已显示在该补丁下方。`;
+}
+
+function sharedProposalCard(item, {archived = false} = {}) {
+  const actionable = item.status === "pending_review";
+  return `
+    <details class="record-row collapsible-record ${actionable ? "is-pending" : "is-reviewed"}">
+      <summary class="collapse-summary">
+        <div class="row-title"><strong>${escapeHtml(item.title || item.proposal_id)}</strong><span class="status-chip ${proposalStatusChipClass(item.status)}">${proposalStatus(item.status)}</span></div>
+      </summary>
+      <div class="record-body">
+        <span>来源客户：${escapeHtml(customerNameForTenant(item.tenant_id) || item.tenant_id || "-")} · ${escapeHtml(item.created_at || "")}</span>
+        <span>${escapeHtml(proposalPreview(item))}</span>
+        ${proposalReviewAssistSummaryHtml(item)}
+        <div class="button-row">
+          <button class="secondary-button" data-action="view-proposal" data-proposal-id="${escapeAttr(item.proposal_id)}">${archived ? "查看归档详情" : "查看详情"}</button>
+          ${archived ? "" : `
+            <button class="secondary-button" data-action="accept-proposal" data-proposal-id="${escapeAttr(item.proposal_id)}" ${!actionable ? "disabled" : ""}>采纳</button>
+            <button class="secondary-button" data-action="reject-proposal" data-proposal-id="${escapeAttr(item.proposal_id)}" ${!actionable ? "disabled" : ""}>拒绝</button>
+            <button class="secondary-button danger-button" data-action="void-proposal" data-proposal-id="${escapeAttr(item.proposal_id)}" ${!actionable ? "disabled" : ""}>作废</button>
+          `}
+        </div>
+      </div>
+    </details>
+  `;
 }
 
 function renderNodes() {
@@ -576,9 +678,13 @@ function renderBackupRestore() {
 function renderUpdates() {
   renderInto("release-list", `<h3>版本记录</h3>${state.data.releases.map((item) => `
     <div class="record-row">
-      <strong>${escapeHtml(item.version)} · ${channelLabel(item.channel)}</strong>
+      <div class="row-title"><strong>${escapeHtml(item.version)} · ${channelLabel(item.channel)}</strong><span class="status-chip ${item.sha256 ? "ok" : "warning"}">${item.sha256 ? "有校验码" : "待补校验"}</span></div>
       <span>${escapeHtml(item.title || "未命名版本")} · ${escapeHtml(item.artifact_url || "未填写更新包地址")}</span>
+      <span>SHA256：${escapeHtml(trimText(item.sha256 || "-", 24))} · 签名：${escapeHtml(trimText(item.signature || "-", 24))}</span>
       <span>${escapeHtml(item.notes || "")}</span>
+      <div class="button-row">
+        <button class="secondary-button" data-action="push-release-check" data-release-id="${escapeAttr(item.release_id)}">通知客户电脑检查更新</button>
+      </div>
     </div>
   `).join("") || empty("暂无版本记录")}`);
 }
@@ -635,7 +741,19 @@ function renderAudit() {
 
 function bindStaticActions() {
   document.querySelector("#sync-shared").addEventListener("click", async () => {
-    await runAction(() => api("/v1/admin/shared/sync-local", {method: "POST", body: "{}"}), "已把本机共享公共知识同步为服务端快照。");
+    await runAction(
+      () => api("/v1/admin/shared/sync-local", {method: "POST", body: "{}"}),
+      (result) => {
+        const summary = result.snapshot?.summary || {};
+        return `已保存云端正式共享库快照：${summary.item_count || 0} 条知识、${summary.category_count || 0} 个分类。这个操作只记录云端正式库状态，不会直接修改客户电脑。`;
+      }
+    );
+  });
+  document.querySelector("#generate-shared-candidates")?.addEventListener("click", async () => {
+    await runAction(
+      () => api("/v1/admin/shared/proposals/generate-from-formal", {method: "POST", body: JSON.stringify({use_llm: true, limit: 80, only_unscanned: true})}),
+      "已检查未处理的客户正式知识，并把适合的内容提交到候选共享公共知识库。"
+    );
   });
   document.querySelector("#backup-all").addEventListener("click", async () => {
     await runAction(() => api("/v1/admin/backups/local-now", {method: "POST", body: JSON.stringify({scope: "all", tenant_id: "default"})}), "已完成一键全量备份。");
@@ -672,6 +790,9 @@ function bindStaticActions() {
     channel: form.get("channel"),
     title: form.get("title"),
     artifact_url: form.get("artifact_url"),
+    sha256: form.get("sha256"),
+    signature: form.get("signature"),
+    notes: form.get("notes"),
   }), "版本记录已创建。");
 }
 
@@ -848,6 +969,9 @@ async function handlePageAction(event) {
     } else if (action === "view-library") {
       await showLibraryDetail(button.dataset.itemId);
       return;
+    } else if (action === "view-proposal") {
+      showProposalDetail(button.dataset.proposalId);
+      return;
     } else if (action === "edit-library") {
       await editLibraryItem(button.dataset.itemId);
       return;
@@ -861,6 +985,22 @@ async function handlePageAction(event) {
       await reviewProposal(button.dataset.proposalId, "reject", "候选已拒绝。");
     } else if (action === "void-proposal") {
       await reviewProposal(button.dataset.proposalId, "void", "候选已作废。");
+    } else if (action === "refresh-proposal-assist") {
+      button.disabled = true;
+      button.textContent = "AI复核中...";
+      await api(`/v1/admin/shared/proposals/${encodeURIComponent(button.dataset.proposalId)}/review-assist`, {
+        method: "POST",
+        body: JSON.stringify({use_llm: true}),
+      });
+      showMessage("AI 已重新复核这条共享候选。", "ok");
+    } else if (action === "push-shared-patch") {
+      if (!confirm("确认把这个共享知识补丁推送给所有已连接的客户电脑吗？")) return;
+      const pushed = await api(`/v1/admin/shared/patches/${encodeURIComponent(button.dataset.patchId)}/push`, {method: "POST", body: JSON.stringify({})});
+      showMessage(sharedPatchPushMessage(pushed), "ok");
+    } else if (action === "push-release-check") {
+      if (!confirm("确认通知所有客户电脑检查这个版本更新吗？不会自动安装。")) return;
+      await api(`/v1/admin/releases/${encodeURIComponent(button.dataset.releaseId)}/push`, {method: "POST", body: JSON.stringify({mode: "check_update"})});
+      showMessage("已创建检查更新命令。客户电脑轮询后会看到版本记录。", "ok");
     } else if (action === "delete-backup") {
       if (!confirm("确认删除这条备份记录吗？如果它关联了服务端备份文件，也会一并清理。")) return;
       await api(`/v1/admin/backups/${encodeURIComponent(button.dataset.requestId)}`, {method: "DELETE"});
@@ -885,9 +1025,9 @@ function bindForm(selector, path, toPayload, successText) {
 
 async function runAction(action, successText) {
   try {
-    await action();
-    showMessage(successText, "ok");
+    const result = await action();
     await refresh();
+    showMessage(typeof successText === "function" ? successText(result) : successText, "ok");
   } catch (error) {
     showMessage(error.message || "操作失败");
   }
@@ -901,24 +1041,66 @@ async function showPackageDetail(packageId) {
   const manifest = item.manifest || {};
   detail.classList.remove("is-hidden");
   detail.innerHTML = `
-    <h3>客户数据包详情</h3>
-    <div class="record-row">
-      <div class="row-title"><strong>${escapeHtml(displayCustomerName(item))}</strong><span class="status-chip ok">${formatBytes(item.bytes || 0)}</span></div>
-      <span>创建时间：${escapeHtml(item.created_at || "-")} · 备份编号：${escapeHtml(item.backup_id || "-")}</span>
-      <span>文件位置：${escapeHtml(item.package_path || "-")}</span>
+    <div class="package-detail-shell">
+      <div class="package-detail-head">
+        <div>
+          <p class="eyebrow">客户数据包详情</p>
+          <h3>${escapeHtml(displayCustomerName(item))}</h3>
+        </div>
+        <span class="status-chip ok">${formatBytes(item.bytes || 0)}</span>
+      </div>
+      <div class="package-detail-meta">
+        <span><b>创建时间</b>${escapeHtml(item.created_at || "-")}</span>
+        <span><b>备份编号</b>${escapeHtml(item.backup_id || "-")}</span>
+        <span><b>文件位置</b>${escapeHtml(item.package_path || "-")}</span>
+      </div>
     </div>
-    <div class="metric-grid">${metricCards(packageMetrics(summary))}</div>
-    <div class="record-row">
-      <strong>这些数据是什么？</strong>
-      <span>正式知识、商品专属知识、RAG 资料和 RAG 经验是客户本地客服系统使用的数据层。想看正文，请点“下载可读知识表”，会导出 Excel；底部的 path、sha256、bytes 只是备份包技术清单，用于校验和还原，不是加密后的知识正文。</span>
+    <div class="metric-grid package-detail-metrics">${metricCards(packageMetrics(summary))}</div>
+    <div class="package-detail-note">
+      <div>
+        <strong>这些数据是什么？</strong>
+        <span>正式知识、商品专属知识、RAG 资料和 RAG 经验是客户本地客服系统使用的数据层。想看正文，请点“下载可读知识表”，会导出 Excel。</span>
+        <span>底部的 path、sha256、bytes 是备份包技术清单，用于校验和还原，平时不需要阅读。</span>
+      </div>
       <div class="button-row">
         <button class="primary-button" data-action="download-readable-package" data-package-id="${escapeAttr(item.package_id)}">下载可读知识表</button>
         <button class="secondary-button" data-action="download-package" data-package-id="${escapeAttr(item.package_id)}">下载原始备份包</button>
       </div>
     </div>
-    <details class="record-row">
+    <details class="record-row package-technical-list">
       <summary><strong>技术校验清单</strong><span>共 ${manifest.files?.length || 0} 个文件，平时不需要阅读。</span></summary>
       <div class="compact-table">${manifestRows(manifest)}</div>
+    </details>
+  `;
+}
+
+function showProposalDetail(proposalId) {
+  const item = (state.data.proposals || []).find((proposal) => proposal.proposal_id === proposalId);
+  if (!item) {
+    showMessage("没有找到这条共享知识候选。");
+    return;
+  }
+  const detail = document.querySelector("#shared-proposal-detail");
+  const operations = item.operations || [];
+  detail.classList.remove("is-hidden");
+  detail.innerHTML = `
+    <h3>共享知识候选详情</h3>
+    <div class="record-row">
+      <div class="row-title"><strong>${escapeHtml(item.title || item.proposal_id)}</strong><span class="status-chip ${proposalStatusChipClass(item.status)}">${proposalStatus(item.status)}</span></div>
+      <span>来源客户：${escapeHtml(customerNameForTenant(item.tenant_id) || item.tenant_id || "-")} · 提交时间：${escapeHtml(item.created_at || "-")}</span>
+      <span>${escapeHtml(item.summary || "没有额外说明")}</span>
+      <p>${escapeHtml(proposalPreview(item))}</p>
+      ${proposalReviewAssistDetailHtml(item)}
+      <div class="button-row">
+        <button class="secondary-button" data-action="refresh-proposal-assist" data-proposal-id="${escapeAttr(item.proposal_id)}" ${item.status !== "pending_review" ? "disabled" : ""}>AI复核建议</button>
+        <button class="secondary-button" data-action="accept-proposal" data-proposal-id="${escapeAttr(item.proposal_id)}" ${item.status !== "pending_review" ? "disabled" : ""}>采纳并生成补丁</button>
+        <button class="secondary-button" data-action="reject-proposal" data-proposal-id="${escapeAttr(item.proposal_id)}" ${item.status !== "pending_review" ? "disabled" : ""}>拒绝</button>
+        <button class="secondary-button danger-button" data-action="void-proposal" data-proposal-id="${escapeAttr(item.proposal_id)}" ${item.status !== "pending_review" ? "disabled" : ""}>作废</button>
+      </div>
+    </div>
+    <details class="record-row">
+      <summary><strong>将生成的补丁内容</strong><span>共 ${operations.length} 个操作，平时只需确认路径和正文。</span></summary>
+      ${operations.map((operation) => operationPreviewHtml(operation)).join("") || empty("没有可展示的补丁操作")}
     </details>
   `;
 }
@@ -987,7 +1169,21 @@ async function editLibraryItem(itemId) {
 
 async function reviewProposal(proposalId, action, messageText) {
   await api(`/v1/admin/shared/proposals/${encodeURIComponent(proposalId)}/review`, {method: "POST", body: JSON.stringify({action})});
+  document.querySelector("#shared-proposal-detail")?.classList.add("is-hidden");
   showMessage(messageText, "ok");
+}
+
+function operationPreviewHtml(operation) {
+  const content = operation?.content || {};
+  const data = content.data && typeof content.data === "object" ? content.data : content;
+  const body = data.guideline_text || data.content || data.answer || data.body || JSON.stringify(content);
+  return `
+    <div class="record-row compact-row">
+      <strong>${escapeHtml(operation?.path || "-")}</strong>
+      <span>动作：${escapeHtml(operation?.op || "-")} · 标题：${escapeHtml(data.title || content.title || content.id || "-")}</span>
+      <span>${escapeHtml(trimText(body, 220))}</span>
+    </div>
+  `;
 }
 
 function packageMetrics(summary) {
@@ -1022,6 +1218,68 @@ function proposalPreview(item) {
   const title = data.title || content.title || content.id || item.summary || "";
   const body = data.guideline_text || data.content || content.content || "";
   return [title, body].filter(Boolean).join("：") || item.summary || "候选内容等待管理员查看";
+}
+
+function proposalReviewAssistSummaryHtml(item) {
+  const assist = item.review_assist || {};
+  if (!assist.summary) return `<span class="status-chip warning">等待 AI 审核建议</span>`;
+  const chipClass = assist.recommendation === "accept" ? "ok" : assist.recommendation === "reject" ? "danger" : "warning";
+  return `<span class="assist-line"><span class="status-chip ${chipClass}">${escapeHtml(assistRecommendationLabel(assist))}</span><span>${escapeHtml(assist.summary)}</span></span>`;
+}
+
+function proposalReviewAssistDetailHtml(item) {
+  const assist = item.review_assist || {};
+  if (!assist.summary) {
+    return `
+      <div class="assist-card">
+        <strong>AI审核建议</strong>
+        <span>还没有复核结果。点击“AI复核建议”后，系统会从通用性、重复性和风险三个角度给出建议。</span>
+      </div>
+    `;
+  }
+  const chipClass = assist.recommendation === "accept" ? "ok" : assist.recommendation === "reject" ? "danger" : "warning";
+  const reasons = (assist.reasons || []).map((text) => `<li>${escapeHtml(text)}</li>`).join("");
+  const risks = (assist.risks || []).map((text) => `<li>${escapeHtml(text)}</li>`).join("");
+  const checklist = (assist.admin_checklist || []).map((text) => `<li>${escapeHtml(text)}</li>`).join("");
+  const matches = (assist.existing_matches || []).map((match) => `
+    <div class="mini-match">
+      <strong>${escapeHtml(match.title || match.item_id || "已有共享知识")}</strong>
+      <span>${escapeHtml(match.reason || "可能重复")} · ${escapeHtml(match.level || assist.duplicate_level || "possible")}</span>
+    </div>
+  `).join("");
+  return `
+    <div class="assist-card">
+      <div class="row-title">
+        <strong>AI审核建议</strong>
+        <span class="status-chip ${chipClass}">${escapeHtml(assistRecommendationLabel(assist))}</span>
+      </div>
+      <span>${escapeHtml(assist.summary)}</span>
+      <span>通用性评分：${escapeHtml(String(assist.universal_score ?? "-"))} · 重复程度：${escapeHtml(duplicateLevelLabel(assist.duplicate_level))} · ${assist.llm_used ? "已调用大模型" : "规则预判"}</span>
+      ${reasons ? `<ul>${reasons}</ul>` : ""}
+      ${risks ? `<strong>风险提醒</strong><ul>${risks}</ul>` : ""}
+      ${matches ? `<strong>可能重合的正式共享知识</strong>${matches}` : ""}
+      ${checklist ? `<strong>admin 确认清单</strong><ul>${checklist}</ul>` : ""}
+    </div>
+  `;
+}
+
+function assistRecommendationLabel(assist) {
+  const prefix = assist?.llm_used ? "AI建议" : "系统预判";
+  const action = {accept: "采纳", reject: "不采纳", revise: "先修改"}[assist?.recommendation] || "先修改";
+  return `${prefix}：${action}`;
+}
+
+function duplicateLevelLabel(value) {
+  return {none: "未发现明显重复", possible: "可能重复", high: "高度重复"}[value] || value || "-";
+}
+
+function proposalSourceLabel(item) {
+  const source = String(item?.source || "");
+  if (source.includes("formal_knowledge_universal_llm")) return "AI 从客户正式知识库提炼";
+  if (source.includes("formal_knowledge_universal_heuristic")) return "系统从客户正式知识库预筛";
+  if (source.includes("formal_knowledge_universal")) return "客户正式知识库提炼";
+  if (source.includes("local")) return "客户端上传候选";
+  return source || "候选共享公共知识";
 }
 
 function splitKeywords(value) {
@@ -1134,7 +1392,7 @@ function commandStatus(value) {
 }
 
 function commandTypeLabel(value) {
-  return {backup_all: "备份全部数据", backup_tenant: "备份客户数据", restore_backup: "还原备份", pull_shared_patch: "拉取共享知识补丁", check_update: "检查更新", push_update: "推送更新"}[value] || value || "-";
+  return {backup_all: "备份全部数据", backup_tenant: "备份客户数据", restore_backup: "还原备份", pull_shared_patch: "刷新云端共享知识", check_update: "检查更新", push_update: "推送更新"}[value] || value || "-";
 }
 
 function channelLabel(value) {
@@ -1143,6 +1401,10 @@ function channelLabel(value) {
 
 function proposalStatus(value) {
   return {pending_review: "待审核", accepted: "已采纳", rejected: "已拒绝", void: "已作废"}[value] || value || "-";
+}
+
+function proposalStatusChipClass(value) {
+  return {pending_review: "warning", accepted: "ok", rejected: "muted", void: "muted"}[value] || "warning";
 }
 
 function actionLabel(value) {

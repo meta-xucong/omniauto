@@ -526,15 +526,15 @@ def check_rag_answer_layer_blocks_authority_or_risk_terms() -> None:
     }
     scoped_result = maybe_build_rag_reply(
         config=scoped,
-        text="鍨嬪彿鍛藉悕涓€鑸€庝箞鐪嬶紵",
+        text="型号命名一般怎么看？",
         decision=ReplyDecision(
-            reply_text="榛樿鍥炲",
+            reply_text="默认回复",
             rule_name=None,
             matched=False,
             need_handoff=False,
             reason="no_rule_matched",
         ),
-        reply_text="榛樿鍥炲",
+        reply_text="默认回复",
         intent_assist={
             "intent": "product_detail",
             "recommended_action": "answer_from_evidence",

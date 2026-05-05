@@ -1,5 +1,7 @@
 # WeChat AI Customer Service Multi-Tenant VPS-LOCAL Requirements
 
+> 2026-05-05 更新：多租户共享公共知识以 VPS 云端正式库为唯一来源。客户端本地 `data/shared_knowledge` 只保留为 legacy 目录，默认 runtime 读取的是云端快照缓存。
+
 ## 1. Goal
 
 把当前微信自动客服升级为多账户、多租户、本地优先、VPS 协同的交付版本。

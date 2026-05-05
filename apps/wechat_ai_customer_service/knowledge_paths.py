@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import os
 import re
+import json
 from contextlib import contextmanager
 from contextvars import ContextVar, Token
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterator
 
@@ -85,6 +87,20 @@ def tenant_rag_cache_root(tenant_id: str | None = None) -> Path:
     return tenant_rag_root(tenant_id) / "rag_cache"
 
 
+def tenant_review_candidates_root(tenant_id: str | None = None) -> Path:
+    tenant_id = active_tenant_id(tenant_id)
+    if tenant_id == DEFAULT_TENANT_ID:
+        return DATA_ROOT / "review_candidates"
+    return tenant_root(tenant_id) / "review_candidates"
+
+
+def tenant_raw_inbox_root(tenant_id: str | None = None) -> Path:
+    tenant_id = active_tenant_id(tenant_id)
+    if tenant_id == DEFAULT_TENANT_ID:
+        return DATA_ROOT / "raw_inbox"
+    return tenant_root(tenant_id) / "raw_inbox"
+
+
 def tenant_sync_root(tenant_id: str | None = None) -> Path:
     return tenant_root(tenant_id) / "sync"
 
@@ -101,12 +117,71 @@ def runtime_app_root() -> Path:
     return APP_ROOT.parents[1] / "runtime" / "apps" / "wechat_ai_customer_service"
 
 
+def shared_runtime_cache_root() -> Path:
+    return runtime_app_root() / "cache" / "shared_knowledge"
+
+
+def shared_runtime_snapshot_path() -> Path:
+    return shared_runtime_cache_root() / "snapshot.json"
+
+
+def shared_runtime_cache_valid(now: datetime | None = None) -> bool:
+    snapshot_path = shared_runtime_snapshot_path()
+    if not snapshot_path.exists():
+        return False
+    try:
+        payload = json.loads(snapshot_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return False
+    if not isinstance(payload, dict):
+        return False
+    if str(payload.get("source") or "") != "cloud_official_shared_library":
+        return False
+    expires_at = parse_cloud_time(str(payload.get("expires_at") or ""))
+    if expires_at is None:
+        cache_policy = payload.get("cache_policy") if isinstance(payload.get("cache_policy"), dict) else {}
+        expires_at = parse_cloud_time(str(cache_policy.get("expires_at") or ""))
+    if expires_at is None:
+        return False
+    current = now or datetime.now(timezone.utc)
+    if current.tzinfo is None:
+        current = current.replace(tzinfo=timezone.utc)
+    return expires_at > current
+
+
+def parse_cloud_time(value: str) -> datetime | None:
+    text = str(value or "").strip()
+    if not text:
+        return None
+    try:
+        parsed = datetime.fromisoformat(text.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed
+
+
 def tenant_runtime_root(tenant_id: str | None = None) -> Path:
     return runtime_app_root() / "tenants" / active_tenant_id(tenant_id)
 
 
 def tenant_runtime_admin_root(tenant_id: str | None = None) -> Path:
     return tenant_runtime_root(tenant_id) / "admin"
+
+
+def tenant_admin_upload_index_path(tenant_id: str | None = None) -> Path:
+    tenant_id = active_tenant_id(tenant_id)
+    if tenant_id == DEFAULT_TENANT_ID:
+        return runtime_app_root() / "admin" / "uploads_index.json"
+    return tenant_runtime_admin_root(tenant_id) / "uploads_index.json"
+
+
+def tenant_admin_jobs_root(tenant_id: str | None = None) -> Path:
+    tenant_id = active_tenant_id(tenant_id)
+    if tenant_id == DEFAULT_TENANT_ID:
+        return runtime_app_root() / "admin" / "jobs"
+    return tenant_runtime_admin_root(tenant_id) / "jobs"
 
 
 def tenant_runtime_state_root(tenant_id: str | None = None) -> Path:
@@ -130,11 +205,12 @@ def default_admin_knowledge_base_root(tenant_id: str | None = None) -> Path:
 
 def runtime_knowledge_roots(tenant_id: str | None = None) -> list[Path]:
     roots: list[Path] = []
-    if (SHARED_KNOWLEDGE_ROOT / "registry.json").exists():
-        roots.append(SHARED_KNOWLEDGE_ROOT)
     tenant_root_path = tenant_knowledge_base_root(tenant_id)
     if (tenant_root_path / "registry.json").exists():
         roots.append(tenant_root_path)
     elif (LEGACY_KNOWLEDGE_BASE_ROOT / "registry.json").exists():
         roots.append(LEGACY_KNOWLEDGE_BASE_ROOT)
+    shared_cache_root = shared_runtime_cache_root()
+    if (shared_cache_root / "registry.json").exists() and shared_runtime_cache_valid():
+        roots.append(shared_cache_root)
     return roots

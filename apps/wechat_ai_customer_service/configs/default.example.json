@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "rules_path": "apps/wechat_ai_customer_service/configs/customer_service_rules.example.json",
+  "rules_path": "apps/wechat_ai_customer_service/configs/platform_fallback_rules.example.json",
   "state_path": "runtime/apps/wechat_ai_customer_service/state/guarded_workflow_state.json",
   "audit_log_path": "runtime/apps/wechat_ai_customer_service/logs/audit.jsonl",
   "poll": {
@@ -33,11 +33,91 @@
     "max_reply_chars": 220,
     "max_snippet_chars": 130
   },
+  "llm_reply_synthesis": {
+    "enabled": false,
+    "provider": "manual_json",
+    "mode": "guarded_auto",
+    "shadow_mode": false,
+    "require_evidence": true,
+    "require_structured_for_authority": true,
+    "fallback_to_existing_reply": true,
+    "max_history_messages": 40,
+    "history_char_budget": 12000,
+    "max_rag_hits": 5,
+    "max_rag_text_chars": 900,
+    "max_catalog_candidates": 8,
+    "quality_priority": true,
+    "model_routing": {
+      "enabled": true,
+      "default_tier": "flash",
+      "flash_model": "deepseek-v4-flash",
+      "pro_model": "deepseek-v4-pro",
+      "force_model_tier": "",
+      "pro_intent_tags": [
+        "payment",
+        "invoice",
+        "after_sales",
+        "handoff",
+        "customer_data"
+      ],
+      "pro_safety_reasons": [
+        "matched_faq_requires_handoff",
+        "invoice_amount_entity",
+        "contract_risk",
+        "payment_boundary",
+        "price_approval_required"
+      ],
+      "pro_when_must_handoff": true,
+      "pro_when_rag_only_authority": true,
+      "pro_when_long_context": false,
+      "pro_when_long_message": false,
+      "pro_min_history_count": 80,
+      "pro_min_message_chars": 420
+    },
+    "profiles": {
+      "flash": {
+        "max_history_messages": 12,
+        "history_char_budget": 5000,
+        "max_rag_hits": 3,
+        "max_rag_text_chars": 360,
+        "max_catalog_candidates": 5,
+        "max_tokens": 1800,
+        "temperature": 0.35
+      },
+      "pro": {
+        "max_history_messages": 40,
+        "history_char_budget": 12000,
+        "max_rag_hits": 5,
+        "max_rag_text_chars": 900,
+        "max_catalog_candidates": 8,
+        "max_tokens": 3200,
+        "temperature": 0.38
+      }
+    },
+    "cost_controls": {
+      "enabled": true,
+      "max_llm_calls_per_run": 0,
+      "skip_llm_when_deterministic_reply": false,
+      "safe_deterministic_rule_names": []
+    },
+    "min_confidence": 0.62,
+    "max_reply_chars": 520,
+    "max_tokens": 3200,
+    "temperature": 0.38,
+    "retry_count": 2,
+    "include_evidence_pack_in_audit": false,
+    "candidate_json_path": "",
+    "platform_safety_rules_path": "apps/wechat_ai_customer_service/configs/platform_safety_rules.example.json",
+    "platform_understanding_rules_path": "apps/wechat_ai_customer_service/configs/platform_understanding_rules.example.json"
+  },
   "data_capture": {
     "enabled": true,
     "workbook_path": "runtime/apps/wechat_ai_customer_service/test_artifacts/customer_leads.xlsx",
     "sheet_name": "客户线索",
-    "required_fields": ["name", "phone"],
+    "required_fields": [
+      "name",
+      "phone"
+    ],
     "write_on_send_only": false,
     "success_reply": "客户资料已记录，我会尽快为您继续处理。",
     "incomplete_reply": "我看到了客户资料，但还缺少：{missing_fields}。请补充后我再记录。"

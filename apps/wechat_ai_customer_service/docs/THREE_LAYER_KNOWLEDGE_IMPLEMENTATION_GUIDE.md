@@ -1,5 +1,7 @@
 # Three-Layer Knowledge Implementation Guide
 
+> 2026-05-05 更新：shared layer 的正式写入入口已经收敛到 VPS 云端审核流程。客户端不再直接维护本地正式共享库，runtime 默认读取云端快照缓存。
+
 ## Phase 1: Documents And State
 
 Create architecture, implementation, and migration documents. Reset long-running task state to the current objective.

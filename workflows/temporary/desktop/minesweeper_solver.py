@@ -551,7 +551,7 @@ class MinesweeperSolver:
 
     def dump_dialog_controls(self, tag: str) -> None:
         lines = []
-        for keyword in ["????", "????", "???"]:
+        for keyword in ["游戏失败", "退出游戏", "新游戏"]:
             hwnd = self.find_dialog_hwnd([keyword])
             if hwnd is None:
                 continue
@@ -4030,7 +4030,7 @@ class MinesweeperSolver:
     def start_attempt(self) -> np.ndarray:
         if self.is_session_locked():
             self.write_stop_summary("session_locked")
-            raise RuntimeError("绯荤粺褰撳墠澶勪簬閿佸睆/鐧诲綍鐣岄潰锛屾棤娉曠户缁壂闆疯嚜鍔ㄥ寲")
+            raise RuntimeError("系统当前处于锁屏/登录界面，无法继续扫雷自动化")
         if self.reuse_existing_game and self.find_minesweeper_hwnd() is not None:
             try:
                 self.ensure_window()

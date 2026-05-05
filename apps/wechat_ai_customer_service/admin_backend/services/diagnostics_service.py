@@ -18,6 +18,7 @@ from .knowledge_deduper import duplicate_text, normalize_price_tiers, normalized
 from .knowledge_registry import KnowledgeRegistry
 from .knowledge_schema_manager import KnowledgeSchemaManager
 from apps.wechat_ai_customer_service.knowledge_paths import active_tenant_id
+from apps.wechat_ai_customer_service.platform_understanding_rules import risk_keywords
 from apps.wechat_ai_customer_service.storage import get_postgres_store, load_storage_config
 
 
@@ -25,7 +26,6 @@ APP_ROOT = Path(__file__).resolve().parents[2]
 PROJECT_ROOT = APP_ROOT.parents[1]
 DIAGNOSTICS_ROOT = PROJECT_ROOT / "runtime" / "apps" / "wechat_ai_customer_service" / "admin" / "diagnostics"
 IGNORES_PATH = PROJECT_ROOT / "runtime" / "apps" / "wechat_ai_customer_service" / "admin" / "diagnostic_ignores.json"
-HIGH_RISK_KEYWORDS = ["月结", "账期", "赔偿", "退款", "虚开", "伪造", "免单", "白送"]
 TOKEN_BUDGET_NOTICE_THRESHOLD = 7000
 KNOWLEDGE_DUPLICATE_SIMILARITY_THRESHOLD = 0.94
 
@@ -598,7 +598,7 @@ class DiagnosticsService:
             if not faq.get("answer"):
                 issues.append({"severity": "error", "title": "FAQ 答案为空", "detail": intent, "target": intent})
             answer = str(faq.get("answer") or "")
-            if any(keyword in answer for keyword in HIGH_RISK_KEYWORDS) and not faq.get("needs_handoff"):
+            if any(keyword in answer for keyword in risk_keywords("diagnostics")) and not faq.get("needs_handoff"):
                 issues.append({"severity": "warning", "title": "高风险 FAQ 未标记人工", "detail": intent, "target": intent})
 
     def _validate_style_examples(self, content: dict[str, Any], issues: list[dict[str, Any]]) -> None:

@@ -16,7 +16,7 @@ from apps.wechat_ai_customer_service.auth.passwords import hash_password, valida
 from apps.wechat_ai_customer_service.knowledge_paths import DEFAULT_TENANT_ID, active_tenant_id, runtime_app_root
 
 from .models import AuthContext, AuthSession, AuthUser, Role, role_from_value, session_from_payload
-from .vps_client import VpsAuthClient, VpsClientError
+from .vps_client import VpsAuthClient, VpsClientError, discover_vps_base_url
 
 
 @dataclass(frozen=True)
@@ -34,7 +34,7 @@ class AuthSettings:
 def load_auth_settings() -> AuthSettings:
     return AuthSettings(
         required=parse_bool(os.getenv("WECHAT_AUTH_REQUIRED"), default=False),
-        vps_base_url=(os.getenv("WECHAT_VPS_BASE_URL") or "").strip().rstrip("/"),
+        vps_base_url=discover_vps_base_url(),
         timeout_seconds=float(os.getenv("WECHAT_VPS_TIMEOUT_SECONDS") or "8"),
         local_session_hours=max(1, int(os.getenv("WECHAT_LOCAL_SESSION_HOURS") or "12")),
         session_path=Path(os.getenv("WECHAT_LOCAL_SESSION_PATH") or runtime_app_root() / "auth" / "sessions.json"),
@@ -74,6 +74,7 @@ class AuthService:
         device_id: str = "",
         device_name: str = "",
     ) -> dict[str, Any]:
+        admin_login = is_admin_username(username)
         if self.settings.vps_base_url:
             try:
                 result = self.vps.start_login(
@@ -83,6 +84,8 @@ class AuthService:
                     device_id=device_id,
                     device_name=device_name,
                 )
+                if admin_login and result.get("requires_initialization"):
+                    raise PermissionError("客户端 admin 使用服务端统一账号登录；请先在服务端后台完成 admin 首次设置。")
                 session_payload = result.get("session") if isinstance(result.get("session"), dict) else None
                 if session_payload:
                     session = session_from_payload({**session_payload, "source": "vps"})
@@ -90,8 +93,15 @@ class AuthService:
                     result["session"] = session.to_dict()
                 return result
             except VpsClientError as exc:
+                if admin_login:
+                    message = str(exc)
+                    if "HTTP 401" in message or "invalid credentials" in message.lower():
+                        raise PermissionError("admin 登录失败：请使用服务端 admin 当前密码。") from exc
+                    raise PermissionError(f"客户端 admin 使用服务端统一账号登录，当前无法连接服务端：{exc}") from exc
                 if self.settings.required and not self.can_fallback_to_local_initialization(username=username, password=password, error=exc):
                     raise
+        if admin_login:
+            raise PermissionError("客户端 admin 使用服务端统一账号登录；当前未发现服务端，请启动服务端或配置 WECHAT_VPS_BASE_URL。")
         return self.local_start_login(
             username=username,
             password=password,
@@ -101,6 +111,8 @@ class AuthService:
         )
 
     def can_fallback_to_local_initialization(self, *, username: str, password: str, error: Exception | None = None) -> bool:
+        if is_admin_username(username):
+            return False
         if error is not None:
             message = str(error).lower()
             if not any(marker in message for marker in {"404", "not found", "account initialization required", "authentication required"}):
@@ -172,13 +184,22 @@ class AuthService:
         return self.local_session_from_account(account, username=username, tenant_id=tenant_id)
 
     def local_session_from_account(self, account: dict[str, Any], *, username: str, tenant_id: str | None = None) -> AuthSession:
-        tenant = active_tenant_id(tenant_id or account.get("active_tenant_id") or DEFAULT_TENANT_ID)
+        role = role_from_value(account.get("role"))
+        tenant_ids = tuple(str(item) for item in account.get("tenant_ids", []) if str(item))
+        requested_tenant = active_tenant_id(tenant_id) if tenant_id else ""
+        account_tenant = active_tenant_id(account.get("active_tenant_id") or (tenant_ids[0] if tenant_ids else DEFAULT_TENANT_ID))
+        if role == Role.ADMIN or "*" in tenant_ids:
+            tenant = requested_tenant or account_tenant or DEFAULT_TENANT_ID
+        elif requested_tenant and requested_tenant not in tenant_ids:
+            tenant = account_tenant
+        else:
+            tenant = requested_tenant or account_tenant
         now_value = datetime.now(timezone.utc)
         session_id = "sess_" + secrets.token_urlsafe(24)
         user = AuthUser(
             user_id=str(account.get("user_id") or username),
-            role=role_from_value(account.get("role")),
-            tenant_ids=tuple(str(item) for item in account.get("tenant_ids", [tenant]) if str(item)),
+            role=role,
+            tenant_ids=tenant_ids or (tenant,),
             display_name=str(account.get("display_name") or username),
             username=username,
             resource_scopes=tuple(str(item) for item in account.get("resource_scopes", ["*"]) if str(item)),
@@ -251,6 +272,8 @@ class AuthService:
         if not isinstance(challenge, dict) or str(challenge.get("purpose") or "") not in {"initialize_account_pending", "initialize_account"}:
             raise PermissionError("initialization challenge expired or not found")
         username = str(challenge.get("username") or "")
+        if is_admin_username(username):
+            raise PermissionError("客户端 admin 账号由服务端统一管理，不能在本地客户端初始化。")
         self.ensure_local_email_available(email, except_username=username)
         code = self.email.make_code()
         delivery = self.email.deliver_code(email=email, code=code, username=username, purpose="initialize_account")
@@ -281,6 +304,8 @@ class AuthService:
     def local_verify_account_initialization(self, *, challenge_id: str, code: str) -> dict[str, Any]:
         challenge = self.consume_local_code_challenge(challenge_id=challenge_id, code=code, allowed_purposes={"initialize_account"})
         username = str(challenge.get("username") or "")
+        if is_admin_username(username):
+            raise PermissionError("客户端 admin 账号由服务端统一管理，不能在本地客户端初始化。")
         email = normalize_email(str(challenge.get("email") or ""))
         new_hash = str(challenge.get("new_password_hash") or "")
         if not username or not email or not new_hash:
@@ -317,6 +342,8 @@ class AuthService:
         account = local_account(username)
         if not local_password_matches(account, password):
             raise PermissionError("invalid local credentials")
+        if is_admin_username(username):
+            raise PermissionError("客户端 admin 使用服务端统一账号登录；本地客户端只允许 customer 和 guest 走首次登录。")
         if local_account_needs_initialization(account):
             return self.local_create_initialization_challenge(
                 account=account,
@@ -592,6 +619,8 @@ class AuthService:
         if token:
             session = self.get_session(token)
             if session and not session.expired():
+                if session.user.role == Role.ADMIN and session.source != "vps":
+                    return None
                 tenant = active_tenant_id(tenant_id or session.active_tenant_id)
                 return AuthContext(session=session, tenant_id=tenant, strict=self.settings.required, authenticated=True)
         if not self.settings.required:
@@ -952,3 +981,7 @@ def parse_bool(value: str | None, *, default: bool = False) -> bool:
     if value is None or value.strip() == "":
         return default
     return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def is_admin_username(username: str | None) -> bool:
+    return str(username or "").strip().lower() == "admin"

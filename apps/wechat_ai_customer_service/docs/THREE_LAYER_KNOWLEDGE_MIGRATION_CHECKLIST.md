@@ -1,5 +1,7 @@
 # Three-Layer Knowledge Migration Checklist
 
+> 2026-05-05 更新：本清单中的 `data/shared_knowledge` 迁移项现在只代表 legacy 本地数据留存。新链路以云端 `shared_library` 为正式共享公共知识库，并由客户端拉取只读快照。
+
 ## Before Migration
 
 - Confirm the current tenant ID. Default: `default`.
@@ -37,4 +39,3 @@ The migration script should classify these existing examples as product-scoped:
 - Product-scoped rules only appear when the related product is matched or active in context.
 - Existing customer-service regressions still pass.
 - Live File Transfer Assistant test passes or is blocked only by external WeChat availability.
-

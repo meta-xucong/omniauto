@@ -34,6 +34,12 @@ def can_access(context: AuthContext, *, resource: str, action: str, tenant_id: s
             return user.has_tenant(tenant)
         return False
 
+    if resource == "commands":
+        return user.role == Role.CUSTOMER and action == "execute" and user.has_tenant(tenant)
+
+    if resource == "updates":
+        return user.role == Role.CUSTOMER and action == "sync" and user.has_tenant(tenant)
+
     if resource in {"commands", "updates"}:
         return False
 

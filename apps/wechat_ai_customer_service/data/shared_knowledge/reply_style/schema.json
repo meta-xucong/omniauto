@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "category_id": "reply_style",
+  "display_name": "共享回复口吻",
+  "description": "适合所有客户账号使用的公共表达方式。客户专属话术命中同类内容时，客户专属话术优先。",
+  "item_title_field": "title",
+  "item_subtitle_field": "applies_to",
+  "fields": [
+    {
+      "id": "title",
+      "label": "话术名称",
+      "type": "short_text",
+      "required": true,
+      "searchable": true,
+      "form_order": 10
+    },
+    {
+      "id": "keywords",
+      "label": "触发关键词",
+      "type": "tags",
+      "required": false,
+      "searchable": true,
+      "form_order": 20
+    },
+    {
+      "id": "guideline_text",
+      "label": "表达方式",
+      "type": "long_text",
+      "required": true,
+      "searchable": true,
+      "form_order": 30
+    },
+    {
+      "id": "applies_to",
+      "label": "适用场景",
+      "type": "long_text",
+      "required": false,
+      "searchable": true,
+      "form_order": 40
+    }
+  ]
+}

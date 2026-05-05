@@ -75,9 +75,9 @@
       "allow_llm_handoff": true,
       "min_apply_confidence": 0.55,
       "include_prompt_in_audit": false,
-      "model": "deepseek-chat",
+      "model": "deepseek-v4-flash",
       "base_url": "https://api.deepseek.com",
-      "timeout_seconds": 60,
+      "timeout_seconds": 120,
       "candidate_json_path": ""
     }
   },

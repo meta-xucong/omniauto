@@ -12,14 +12,11 @@ from pathlib import Path
 from typing import Any
 
 from .audit_log import append_audit
-from apps.wechat_ai_customer_service.knowledge_paths import active_tenant_id
+from apps.wechat_ai_customer_service.knowledge_paths import active_tenant_id, tenant_admin_upload_index_path, tenant_raw_inbox_root
 from apps.wechat_ai_customer_service.storage import get_postgres_store, load_storage_config
 
 
 APP_ROOT = Path(__file__).resolve().parents[2]
-PROJECT_ROOT = APP_ROOT.parents[1]
-RAW_INBOX_ROOT = APP_ROOT / "data" / "raw_inbox"
-UPLOAD_INDEX_PATH = PROJECT_ROOT / "runtime" / "apps" / "wechat_ai_customer_service" / "admin" / "uploads_index.json"
 WORKFLOWS_ROOT = APP_ROOT / "workflows"
 if str(WORKFLOWS_ROOT) not in sys.path:
     sys.path.insert(0, str(WORKFLOWS_ROOT))
@@ -31,6 +28,11 @@ SPREADSHEET_SUFFIXES = {".xlsx"}
 
 
 class UploadStore:
+    def __init__(self, *, tenant_id: str | None = None) -> None:
+        self.tenant_id = active_tenant_id(tenant_id)
+        self.raw_inbox_root = tenant_raw_inbox_root(self.tenant_id)
+        self.index_path = tenant_admin_upload_index_path(self.tenant_id)
+
     def save_upload(self, filename: str, content: bytes, kind: str) -> dict[str, Any]:
         if kind not in ALLOWED_KINDS:
             return {"ok": False, "message": f"unsupported kind: {kind}"}
@@ -56,7 +58,7 @@ class UploadStore:
         safe_name = re.sub(r"[^A-Za-z0-9_.\-\u4e00-\u9fff]", "_", Path(filename).name)
         if stored_suffix != suffix:
             safe_name = safe_name + stored_suffix
-        target_dir = RAW_INBOX_ROOT / kind
+        target_dir = self.raw_inbox_root / kind
         target_dir.mkdir(parents=True, exist_ok=True)
         target_path = target_dir / f"{upload_id}_{safe_name}"
         target_path.write_bytes(stored_content)
@@ -78,7 +80,7 @@ class UploadStore:
         db = postgres_store()
         config = load_storage_config()
         if db:
-            db.upsert_upload(active_tenant_id(), record)
+            db.upsert_upload(active_tenant_id(self.tenant_id), record)
             if not config.mirror_files:
                 append_audit("upload_created", {"upload_id": upload_id, "kind": kind, "path": str(target_path)})
                 return {"ok": True, "item": record}
@@ -89,12 +91,12 @@ class UploadStore:
     def list_uploads(self) -> list[dict[str, Any]]:
         db = postgres_store()
         if db:
-            records = db.list_uploads(active_tenant_id())
+            records = db.list_uploads(active_tenant_id(self.tenant_id))
             if records:
                 return records
-        if not UPLOAD_INDEX_PATH.exists():
+        if not self.index_path.exists():
             return []
-        return json.loads(UPLOAD_INDEX_PATH.read_text(encoding="utf-8"))
+        return json.loads(self.index_path.read_text(encoding="utf-8"))
 
     def get_upload(self, upload_id: str) -> dict[str, Any] | None:
         for item in self.list_uploads():
@@ -112,9 +114,9 @@ class UploadStore:
         file_path = Path(str(target.get("path") or ""))
         try:
             resolved_file = file_path.resolve()
-            raw_root = RAW_INBOX_ROOT.resolve()
+            raw_root = self.raw_inbox_root.resolve()
             if raw_root in resolved_file.parents and resolved_file.exists():
-                RagService().delete_source_by_path(file_path)
+                RagService(tenant_id=self.tenant_id).delete_source_by_path(file_path)
                 resolved_file.unlink()
                 deleted_file = True
         except OSError:
@@ -122,7 +124,7 @@ class UploadStore:
         db = postgres_store()
         config = load_storage_config()
         if db:
-            db.delete_upload(active_tenant_id(), upload_id)
+            db.delete_upload(active_tenant_id(self.tenant_id), upload_id)
             if not config.mirror_files:
                 append_audit("upload_deleted", {"upload_id": upload_id, "path": str(file_path), "deleted_file": deleted_file})
                 return {"ok": True, "item": target, "deleted_file": deleted_file}
@@ -139,14 +141,14 @@ class UploadStore:
                 item["learned_at"] = datetime.now().isoformat(timespec="seconds")
                 db = postgres_store()
                 if db:
-                    db.upsert_upload(active_tenant_id(), item)
+                    db.upsert_upload(active_tenant_id(self.tenant_id), item)
         if postgres_store() and not load_storage_config().mirror_files:
             return
         self.write_index(records)
 
     def write_index(self, records: list[dict[str, Any]]) -> None:
-        UPLOAD_INDEX_PATH.parent.mkdir(parents=True, exist_ok=True)
-        UPLOAD_INDEX_PATH.write_text(json.dumps(records, ensure_ascii=False, indent=2), encoding="utf-8")
+        self.index_path.parent.mkdir(parents=True, exist_ok=True)
+        self.index_path.write_text(json.dumps(records, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
 def spreadsheet_to_text(content: bytes) -> str:

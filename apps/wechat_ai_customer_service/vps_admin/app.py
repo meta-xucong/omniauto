@@ -367,13 +367,25 @@ def create_app(*, state_path: Path | None = None) -> FastAPI:
     def sync_local_shared(actor: AuthSession = Depends(current_admin)) -> dict[str, Any]:
         return {"ok": True, "snapshot": app.state.shared_service.sync_local_snapshot(actor=actor)}
 
+    @app.post("/v1/admin/shared/proposals/generate-from-formal")
+    def generate_shared_proposals_from_formal(payload: dict[str, Any] | None = None, actor: AuthSession = Depends(current_admin)) -> dict[str, Any]:
+        return {"ok": True, **app.state.shared_service.generate_universal_proposals(payload or {}, actor=actor)}
+
     @app.post("/v1/admin/shared/proposals/{proposal_id}/review")
     def review_shared_proposal(proposal_id: str, payload: dict[str, Any], actor: AuthSession = Depends(current_admin)) -> dict[str, Any]:
         return {"ok": True, **app.state.shared_service.review_proposal(proposal_id, payload, actor=actor)}
 
+    @app.post("/v1/admin/shared/proposals/{proposal_id}/review-assist")
+    def refresh_shared_proposal_review_assist(proposal_id: str, payload: dict[str, Any] | None = None, actor: AuthSession = Depends(current_admin)) -> dict[str, Any]:
+        return {"ok": True, **app.state.shared_service.refresh_proposal_review_assist(proposal_id, payload or {}, actor=actor)}
+
     @app.get("/v1/admin/shared/patches")
     def list_shared_patches(_: AuthSession = Depends(current_admin)) -> dict[str, Any]:
-        return {"ok": True, "patches": app.state.shared_service.list_patches()}
+        return {"ok": True, "patches": app.state.shared_service.list_patches(limit=10)}
+
+    @app.post("/v1/admin/shared/patches/{patch_id}/push")
+    def push_shared_patch(patch_id: str, payload: dict[str, Any] | None = None, actor: AuthSession = Depends(current_admin)) -> dict[str, Any]:
+        return {"ok": True, **app.state.shared_service.push_patch(patch_id, payload or {}, actor=actor)}
 
     @app.post("/v1/admin/backups")
     def request_backup(payload: dict[str, Any], actor: AuthSession = Depends(current_admin)) -> dict[str, Any]:
@@ -410,6 +422,10 @@ def create_app(*, state_path: Path | None = None) -> FastAPI:
     @app.post("/v1/admin/releases")
     def create_release(payload: dict[str, Any], actor: AuthSession = Depends(current_admin)) -> dict[str, Any]:
         return {"ok": True, "release": app.state.release_service.create_release(payload, actor=actor)}
+
+    @app.post("/v1/admin/releases/{release_id}/push")
+    def push_release(release_id: str, payload: dict[str, Any] | None = None, actor: AuthSession = Depends(current_admin)) -> dict[str, Any]:
+        return {"ok": True, **app.state.release_service.push_release(release_id, payload or {}, actor=actor)}
 
     @app.get("/v1/admin/audit")
     def list_audit(_: AuthSession = Depends(current_admin)) -> dict[str, Any]:
@@ -463,9 +479,22 @@ def create_app(*, state_path: Path | None = None) -> FastAPI:
         actor_id = session.user.user_id if session else "local-node"
         return {"ok": True, "proposal": app.state.shared_service.submit_proposal(payload, actor_id=actor_id)}
 
+    @app.get("/v1/shared/knowledge")
+    def get_shared_knowledge_snapshot(
+        request: Request,
+        tenant_id: str = Query(default="default"),
+        since_version: str = Query(default=""),
+        node_id: str = Query(default=""),
+        x_node_token: str = Header(default=""),
+        authorization: str = Header(default=""),
+    ) -> dict[str, Any]:
+        authorize_local_endpoint(request, authorization=authorization, node_id=node_id, node_token=x_node_token)
+        snapshot = app.state.shared_service.official_snapshot(tenant_id=tenant_id, since_version=since_version)
+        return {"ok": True, "snapshot": snapshot, "not_modified": bool(snapshot.get("not_modified"))}
+
     @app.get("/v1/shared/patches")
     def list_published_patches() -> dict[str, Any]:
-        return {"ok": True, "patches": app.state.shared_service.list_patches()}
+        return {"ok": True, "patches": app.state.shared_service.list_patches(include_delivery=False)}
 
     @app.get("/v1/updates/latest")
     def latest_update(channel: str = Query(default="stable")) -> dict[str, Any]:

@@ -160,8 +160,22 @@ def check_experience_layer_active_and_discarded_retrieval() -> None:
             },
         },
     )
+    record = store.update_metadata(
+        record["experience_id"],
+        {
+            "experience_review": {
+                "status": "kept",
+                "kept_reason": "enterprise eval keeps this experience for retrieval",
+            },
+            "reviewed_by_user": True,
+        },
+        rebuild_index=True,
+    )
     active = service.search("办公室午休床占不占地方", product_id="fb-100", limit=10)
-    assert_true(any(hit.get("source_id") == record["experience_id"] for hit in active.get("hits", [])), "active experience should be searchable")
+    assert_true(
+        any(hit.get("source_id") == record["experience_id"] for hit in active.get("hits", [])),
+        "manually kept experience should be searchable",
+    )
     low_record = store.record_reply(
         target="eval",
         message_ids=["eval-exp-low"],

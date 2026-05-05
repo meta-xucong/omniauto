@@ -1,8 +1,8 @@
 """Generate review-only candidates from raw WeChat customer-service materials.
 
-This workflow never edits formal structured business data directly. It scans raw
-inbox files and produces evidence-bound candidates. Candidates are promoted only
-after an operator approves/applies them in the admin console.
+This workflow never edits formal structured business data directly. In the
+current governed flow, raw materials should first become RAG experiences; direct
+candidate writes are blocked unless an explicit legacy environment flag is set.
 """
 
 from __future__ import annotations
@@ -31,27 +31,16 @@ PROJECT_ROOT = APP_ROOT.parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from apps.wechat_ai_customer_service.knowledge_paths import default_admin_knowledge_base_root  # noqa: E402
+from apps.wechat_ai_customer_service.knowledge_paths import default_admin_knowledge_base_root, tenant_raw_inbox_root, tenant_review_candidates_root  # noqa: E402
+from apps.wechat_ai_customer_service.llm_config import read_secret, resolve_deepseek_base_url, resolve_deepseek_max_tokens, resolve_deepseek_tier_model, resolve_deepseek_timeout  # noqa: E402
+from apps.wechat_ai_customer_service.platform_understanding_rules import intent_keywords, product_keywords, quantity_unit_pattern, rag_terms, risk_keywords  # noqa: E402
 from apps.wechat_ai_customer_service.workflows.knowledge_runtime import PRODUCT_SCOPED_SCHEMAS  # noqa: E402
 
-RAW_INBOX_ROOT = APP_ROOT / "data" / "raw_inbox"
-PENDING_ROOT = APP_ROOT / "data" / "review_candidates" / "pending"
+RAW_INBOX_ROOT = tenant_raw_inbox_root()
+PENDING_ROOT = tenant_review_candidates_root() / "pending"
 SUPPORTED_SUFFIXES = {".txt", ".md", ".json", ".csv"}
 DEFAULT_KINDS = {"products", "chats", "policies", "erp_exports", "product_faq", "product_rules", "product_explanations"}
-DEFAULT_DEEPSEEK_BASE_URL = "https://api.deepseek.com"
-DEFAULT_DEEPSEEK_MODEL = "deepseek-chat"
-
-TAG_KEYWORDS: dict[str, list[str]] = {
-    "product": ["产品", "商品", "型号", "规格", "库存", "现货", "sku"],
-    "quote": ["价格", "报价", "多少钱", "单价", "元", "费用", "售价"],
-    "discount": ["优惠", "折扣", "最低价", "便宜", "议价", "阶梯价"],
-    "company": ["公司名称", "主营范围", "主营业务", "公司信息", "开票信息", "生产方", "厂家", "对外客服人设", "客服人设"],
-    "invoice": ["发票", "开票", "专票", "普票", "税号"],
-    "shipping": ["物流", "快递", "运费", "包邮", "发货", "到货"],
-    "payment": ["付款", "支付", "对公", "转账", "账户"],
-    "after_sales": ["售后", "保修", "质保", "退换", "退款"],
-    "style": ["客户：", "客服：", "用户：", "回复："],
-}
+LLM_ASSIST_POLICY_VERSION = "knowledge_llm_assist_v1"
 
 HEADER_ALIASES: dict[str, str] = {
     "商品": "name",
@@ -68,6 +57,18 @@ HEADER_ALIASES: dict[str, str] = {
     "类别": "category",
     "类目": "category",
     "category": "category",
+    "适用范围": "applicability_scope",
+    "applicability_scope": "applicability_scope",
+    "商品ID": "product_id",
+    "商品 ID": "product_id",
+    "关联商品ID": "product_id",
+    "关联商品 ID": "product_id",
+    "product_id": "product_id",
+    "product_sku": "product_id",
+    "商品专属类目": "product_category",
+    "商品适用类目": "product_category",
+    "关联商品类目": "product_category",
+    "product_category": "product_category",
     "别名": "aliases",
     "别名关键词": "aliases",
     "客户常用叫法": "aliases",
@@ -126,16 +127,6 @@ HEADER_ALIASES: dict[str, str] = {
     "external_id": "external_id",
 }
 
-POLICY_TAG_TO_TYPE = {
-    "company": "company",
-    "invoice": "invoice",
-    "shipping": "logistics",
-    "payment": "payment",
-    "after_sales": "after_sales",
-    "discount": "discount",
-}
-
-
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--raw-root", type=Path, default=RAW_INBOX_ROOT)
@@ -161,16 +152,22 @@ def generate_candidates(raw_root: Path, pending_root: Path, limit: int, write: b
     for path in files:
         candidates.extend(build_candidates(path))
     written = []
+    write_blocked = False
     if write:
-        pending_root.mkdir(parents=True, exist_ok=True)
-        for candidate in candidates:
-            output_path = pending_root / f"{candidate['candidate_id']}.json"
-            output_path.write_text(json.dumps(candidate, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-            written.append(str(output_path))
+        if os.environ.get("OMNIAUTO_ALLOW_DIRECT_CANDIDATE_WRITE") == "1":
+            pending_root.mkdir(parents=True, exist_ok=True)
+            for candidate in candidates:
+                output_path = pending_root / f"{candidate['candidate_id']}.json"
+                output_path.write_text(json.dumps(candidate, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+                written.append(str(output_path))
+        else:
+            write_blocked = True
 
     return {
         "ok": True,
         "dry_run": not write,
+        "write_blocked": write_blocked,
+        "strict_promotion_policy": "direct candidate writes are disabled; create RAG experiences first and promote manually",
         "raw_root": str(raw_root),
         "pending_root": str(pending_root),
         "files_seen": len(files),
@@ -201,7 +198,7 @@ def candidate_build_order(raw_kind: str, tags: list[str], text: str) -> list[str
     }
     tag_set = set(tags)
     if tag_set & {"product", "quote"}:
-        scores["products"] += 3
+        scores["products"] += 5 if has_product_signal(text) else 3
     if "style" in tag_set:
         scores["chats"] += 4
     if tag_set & {"invoice", "shipping", "payment", "after_sales", "discount"}:
@@ -220,21 +217,30 @@ def candidate_build_order(raw_kind: str, tags: list[str], text: str) -> list[str
 
 
 def has_product_signal(text: str) -> bool:
-    return bool(re.search(r"(商品|产品|型号|sku|SKU|规格|售价|单价|库存)", text))
+    terms = [
+        *intent_keywords().get("product", []),
+        *product_keywords("spec"),
+        *product_keywords("quote"),
+        *product_keywords("stock"),
+        "sku",
+        "SKU",
+        "售价",
+    ]
+    return any(term and term in text for term in terms)
 
 
 def looks_like_company_profile_text(text: str) -> bool:
     normalized = str(text or "")
-    company_signals = ["公司名称", "主营范围", "主营业务", "公司信息", "对外客服人设", "客服人设", "生产方", "厂家", "开票信息"]
+    company_signals = intent_keywords().get("company", [])
     return any(signal in normalized for signal in company_signals) or bool(re.search(r"[\u4e00-\u9fffA-Za-z0-9（）()]+(?:有限公司|有限责任公司|股份有限公司)", normalized))
 
 
-def build_candidate(path: Path, *, use_llm: bool = False) -> dict[str, Any] | None:
+def build_candidate(path: Path, *, use_llm: bool = True) -> dict[str, Any] | None:
     candidates = build_candidates(path, use_llm=use_llm)
     return candidates[0] if candidates else None
 
 
-def build_candidates(path: Path, *, use_llm: bool = False) -> list[dict[str, Any]]:
+def build_candidates(path: Path, *, use_llm: bool = True) -> list[dict[str, Any]]:
     text = read_text(path)
     if not text.strip():
         return []
@@ -243,11 +249,23 @@ def build_candidates(path: Path, *, use_llm: bool = False) -> list[dict[str, Any
     if use_llm:
         llm_candidates = build_llm_candidates(path, text, tags, raw_kind)
         if llm_candidates:
+            mark_candidates_llm_assist(
+                llm_candidates,
+                status="model_generated",
+                attempted=True,
+                provider="deepseek",
+                reason="llm_returned_source_grounded_candidates",
+            )
             return llm_candidates
 
     section_candidates = build_labeled_section_candidates(path, text, tags)
     if section_candidates:
-        return section_candidates
+        return mark_candidates_llm_assist(
+            section_candidates,
+            status="rule_fallback_after_llm" if use_llm else "rule_only_disabled_by_request",
+            attempted=use_llm,
+            reason="labeled_sections_used_after_llm_unavailable_or_invalid" if use_llm else "llm_disabled_by_caller",
+        )
 
     builders = {
         "products": build_product_candidates,
@@ -258,21 +276,74 @@ def build_candidates(path: Path, *, use_llm: bool = False) -> list[dict[str, Any
     for kind in candidate_build_order(raw_kind, tags, text):
         candidates = builders[kind](path, text, tags)
         if candidates:
-            return candidates
+            return mark_candidates_llm_assist(
+                candidates,
+                status="rule_fallback_after_llm" if use_llm else "rule_only_disabled_by_request",
+                attempted=use_llm,
+                reason=f"{kind}_rules_used_after_llm_unavailable_or_invalid" if use_llm else "llm_disabled_by_caller",
+            )
 
     if "style" in tags:
         candidates = build_chat_candidates(path, text, tags)
         if candidates:
-            return candidates
+            return mark_candidates_llm_assist(
+                candidates,
+                status="rule_fallback_after_llm" if use_llm else "rule_only_disabled_by_request",
+                attempted=use_llm,
+                reason="chat_style_rules_used_after_llm_unavailable_or_invalid" if use_llm else "llm_disabled_by_caller",
+            )
     if set(tags) & {"invoice", "shipping", "payment", "after_sales", "discount"}:
         candidates = build_policy_candidates(path, text, tags)
         if candidates:
-            return candidates
+            return mark_candidates_llm_assist(
+                candidates,
+                status="rule_fallback_after_llm" if use_llm else "rule_only_disabled_by_request",
+                attempted=use_llm,
+                reason="policy_rules_used_after_llm_unavailable_or_invalid" if use_llm else "llm_disabled_by_caller",
+            )
     if set(tags) & {"product", "quote"}:
         candidates = build_product_candidates(path, text, tags)
         if candidates:
-            return candidates
-    return [build_manual_policy_candidate(path, text, tags)]
+            return mark_candidates_llm_assist(
+                candidates,
+                status="rule_fallback_after_llm" if use_llm else "rule_only_disabled_by_request",
+                attempted=use_llm,
+                reason="product_rules_used_after_llm_unavailable_or_invalid" if use_llm else "llm_disabled_by_caller",
+            )
+    if should_make_manual_policy_candidate(raw_kind, tags, text):
+        return mark_candidates_llm_assist(
+            [build_manual_policy_candidate(path, text, tags)],
+            status="rule_fallback_after_llm" if use_llm else "rule_only_disabled_by_request",
+            attempted=use_llm,
+            reason="manual_policy_rule_used_after_llm_unavailable_or_invalid" if use_llm else "llm_disabled_by_caller",
+        )
+    return []
+
+
+def should_make_manual_policy_candidate(raw_kind: str, tags: list[str], text: str) -> bool:
+    if raw_kind in {"policies", "product_rules", "product_faq", "product_explanations"}:
+        return True
+    tag_set = set(tags)
+    if tag_set & {"company", "invoice", "shipping", "payment", "after_sales", "discount"}:
+        return True
+    policy_signals = [
+        "规则",
+        "政策",
+        "标准回复",
+        "必须",
+        "禁止",
+        "不可",
+        "转人工",
+        "售后",
+        "保修",
+        "开票",
+        "发票",
+        "付款",
+        "支付",
+        "物流",
+        "发货",
+    ]
+    return any(signal in text for signal in policy_signals)
 
 
 def build_labeled_section_candidates(path: Path, text: str, tags: list[str]) -> list[dict[str, Any]]:
@@ -319,14 +390,18 @@ def split_labeled_sections(text: str) -> list[dict[str, str]]:
         if kind:
             flush()
             current_kind = kind
-            current_lines = [line]
+            current_lines = [strip_transcript_prefix(line)]
         elif current_kind:
-            current_lines.append(line)
+            if is_transcript_message_line(line):
+                flush()
+                continue
+            current_lines.append(strip_transcript_prefix(line))
     flush()
-    return sections if len(sections) > 1 else []
+    return sections
 
 
 def labeled_section_kind(line: str) -> str:
+    line = strip_transcript_prefix(line)
     patterns = [
         ("products", r"^(?:商品资料|产品资料|新增商品|商品|产品)\s*[:：]"),
         ("policies", r"^(?:政策规则|规则|政策|售后规则|发货规则|物流政策|开票政策|付款政策|退换规则)\s*[:：]"),
@@ -337,6 +412,14 @@ def labeled_section_kind(line: str) -> str:
         if re.search(pattern, line, flags=re.IGNORECASE):
             return kind
     return ""
+
+
+def strip_transcript_prefix(line: str) -> str:
+    return re.sub(r"^\[[^\]]+\]\s+[^:：]{1,40}[:：]\s*", "", str(line or "").strip())
+
+
+def is_transcript_message_line(line: str) -> bool:
+    return bool(re.match(r"^\[[^\]]+\]\s+[^:：]{1,40}[:：]\s*", str(line or "").strip()))
 
 
 def build_product_candidates(path: Path, text: str, tags: list[str]) -> list[dict[str, Any]]:
@@ -507,6 +590,7 @@ def build_chat_candidates(path: Path, text: str, tags: list[str]) -> list[dict[s
             "linked_item_ids": split_tags(pair.get("linked_item_ids")),
             "usable_as_template": True,
         }
+        data.update(infer_applicability_fields(pair))
         if isinstance(pair.get("extra_fields"), dict):
             data["extra_fields"] = pair["extra_fields"]
         item_id = safe_item_id(f"chat_{stable_digest(str(pair), 10)}", fallback_seed=f"{path}:{index}:{pair}")
@@ -591,6 +675,7 @@ def build_policy_candidates(path: Path, text: str, tags: list[str]) -> list[dict
             "operator_alert": bool_from_text(row.get("operator_alert")) or requires_handoff,
             "risk_level": clean_text(row.get("risk_level")) or ("warning" if requires_handoff else "normal"),
         }
+        data.update(infer_applicability_fields(row))
         if isinstance(row.get("extra_fields"), dict):
             data["extra_fields"] = row["extra_fields"]
         item_id = safe_item_id(clean_text(row.get("id")) or title, fallback_seed=f"{path}:{index}:{data}")
@@ -756,10 +841,17 @@ def build_llm_candidates(path: Path, text: str, tags: list[str], raw_kind: str) 
         "raw_kind_from_upload": raw_kind,
         "detected_tags": tags,
         "product_scoped_storage_rule": "If knowledge only applies to one concrete product, use product_faq/product_rules/product_explanations and fill data.product_id.",
+        "general_knowledge_scope_rule": (
+            "For chats and policies, classify applicability_scope as global, product_category, or specific_product. "
+            "Use specific_product only when the text clearly names one concrete product and fill data.product_id. "
+            "Use product_category when the text applies to a class of products and fill data.product_category. "
+            "Use global only when it is safe for all products."
+        ),
         "rules": [
             "根据内容判断 category_id，不要盲从 raw_kind_from_upload。",
             "一个商品/一条政策/一段话术/一条 ERP 记录生成一个 item。",
             "公司名称、主营范围、开票主体、生产方、厂家、客服人设等公司主体信息必须归入 policies，policy_type 使用 company；不要归入 products。",
+            "聊天话术和政策规则必须思考适用范围：全部商品通用、某类商品适用、还是指定商品适用。",
             "缺失关键字段时不要编造，保留已有信息并写入 missing_fields。",
             "无法放入既有字段的内容必须写入 data.additional_details。",
             "高风险承诺写入 warnings。",
@@ -835,6 +927,9 @@ def candidate_from_llm_record(path: Path, text: str, tags: list[str], record: di
 
 def normalize_llm_record_data(category_id: str, data: dict[str, Any]) -> dict[str, Any]:
     normalized = dict(data)
+    if category_id in {"chats", "policies"}:
+        normalized.update(infer_applicability_fields(normalized))
+        return normalized
     if category_id != "products":
         return normalized
     raw_tiers = normalized.get("price_tiers")
@@ -974,8 +1069,8 @@ def call_deepseek_json(prompt: dict[str, Any]) -> dict[str, Any]:
     api_key = read_secret("DEEPSEEK_API_KEY")
     if not api_key:
         return {}
-    base_url = read_secret("DEEPSEEK_BASE_URL") or DEFAULT_DEEPSEEK_BASE_URL
-    model = read_secret("DEEPSEEK_MODEL") or DEFAULT_DEEPSEEK_MODEL
+    base_url = resolve_deepseek_base_url(read_secret_fn=read_secret)
+    model = resolve_deepseek_tier_model(tier="pro", read_secret_fn=read_secret)
     payload = {
         "model": model,
         "messages": [
@@ -990,7 +1085,7 @@ def call_deepseek_json(prompt: dict[str, Any]) -> dict[str, Any]:
             {"role": "user", "content": json.dumps(prompt, ensure_ascii=False)},
         ],
         "temperature": 0.1,
-        "max_tokens": 2200,
+        "max_tokens": resolve_deepseek_max_tokens(4096, read_secret_fn=read_secret),
         "response_format": {"type": "json_object"},
     }
     request = urllib.request.Request(
@@ -1000,26 +1095,12 @@ def call_deepseek_json(prompt: dict[str, Any]) -> dict[str, Any]:
         method="POST",
     )
     try:
-        with urllib.request.urlopen(request, timeout=60) as response:
+        with urllib.request.urlopen(request, timeout=resolve_deepseek_timeout(120, read_secret_fn=read_secret)) as response:
             data = json.loads(response.read().decode("utf-8"))
     except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError, OSError, json.JSONDecodeError):
         return {}
     content = data.get("choices", [{}])[0].get("message", {}).get("content", "")
     return parse_json_object(str(content or "")) or {}
-
-
-def read_secret(name: str) -> str:
-    value = os.getenv(name)
-    if value:
-        return value
-    try:
-        import winreg
-
-        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, "Environment") as key:
-            registry_value, _ = winreg.QueryValueEx(key, name)
-            return str(registry_value)
-    except Exception:
-        return ""
 
 
 def parse_json_object(text: str) -> dict[str, Any] | None:
@@ -1035,6 +1116,92 @@ def parse_json_object(text: str) -> dict[str, Any] | None:
         except json.JSONDecodeError:
             return None
     return payload if isinstance(payload, dict) else None
+
+
+def mark_candidates_llm_assist(
+    candidates: list[dict[str, Any]],
+    *,
+    status: str,
+    attempted: bool,
+    provider: str = "",
+    reason: str = "",
+) -> list[dict[str, Any]]:
+    candidates = [candidate for candidate in candidates if not candidate_reject_reason(candidate)]
+    for candidate in candidates:
+        mark_candidate_llm_assist(candidate, status=status, attempted=attempted, provider=provider, reason=reason)
+    return candidates
+
+
+def candidate_reject_reason(candidate: dict[str, Any]) -> str:
+    proposal = candidate.get("proposal") if isinstance(candidate.get("proposal"), dict) else {}
+    category_id = str(proposal.get("target_category") or "")
+    patch = proposal.get("formal_patch") if isinstance(proposal.get("formal_patch"), dict) else {}
+    item = patch.get("item") if isinstance(patch.get("item"), dict) else {}
+    data = item.get("data") if isinstance(item.get("data"), dict) else {}
+    if not data:
+        data = proposal.get("suggested_fields") if isinstance(proposal.get("suggested_fields"), dict) else {}
+    payload_text = json.dumps(
+        {
+            "summary": proposal.get("summary"),
+            "evidence": (candidate.get("source") or {}).get("evidence_excerpt") if isinstance(candidate.get("source"), dict) else "",
+            "data": data,
+        },
+        ensure_ascii=False,
+    )
+    if generated_from_pipeline_trace(payload_text):
+        return "pipeline_trace_not_business_knowledge"
+    if category_id == "products" and not (data.get("name") or data.get("sku")):
+        return "product_candidate_missing_product_identity"
+    if category_id == "policies":
+        title = str(data.get("title") or proposal.get("summary") or "")
+        keywords = [str(item) for item in data.get("keywords", []) or [] if str(item)] if isinstance(data.get("keywords"), list) else []
+        answer = str(data.get("answer") or "")
+        if "待分类规则" in title or keywords == ["unknown"]:
+            return "generic_unknown_policy_candidate"
+        if len(answer.strip()) < 8 and not data.get("requires_handoff"):
+            return "policy_candidate_too_weak"
+    if category_id == "chats":
+        if not str(data.get("customer_message") or "").strip():
+            return "chat_candidate_missing_customer_question"
+        if len(str(data.get("service_reply") or "").strip()) < 8:
+            return "chat_candidate_missing_reply"
+    if category_id in PRODUCT_SCOPED_SCHEMAS and not str(data.get("product_id") or "").strip():
+        return "product_scoped_candidate_missing_product"
+    return ""
+
+
+def generated_from_pipeline_trace(text: str) -> bool:
+    markers = (
+        "RAG experience ->",
+        "Intake -> RAG experience",
+        "candidates=",
+        "raw_wechat_group/group",
+        "raw_wechat_private/private",
+    )
+    return any(marker in str(text or "") for marker in markers)
+
+
+def mark_candidate_llm_assist(
+    candidate: dict[str, Any],
+    *,
+    status: str,
+    attempted: bool,
+    provider: str = "",
+    reason: str = "",
+) -> None:
+    review = candidate.setdefault("review", {})
+    existing = review.get("llm_assist") if isinstance(review.get("llm_assist"), dict) else {}
+    review["llm_assist"] = {
+        **existing,
+        "policy_version": LLM_ASSIST_POLICY_VERSION,
+        "stage": "raw_material_to_review_candidate",
+        "attempted": bool(attempted),
+        "provider": provider or existing.get("provider") or "",
+        "status": status,
+        "reason": reason,
+        "fallback_allowed": True,
+        "human_approval_required": True,
+    }
 
 
 def make_native_candidate(
@@ -1169,9 +1336,12 @@ def canonicalize_row(row: dict[str, Any]) -> dict[str, Any]:
 
 
 def free_text_product_row(text: str) -> dict[str, Any]:
-    name = extract_after_labels(text, ["商品资料", "产品资料", "商品", "产品", "新增商品", "商品名称"])
+    name = clean_product_name(extract_after_labels(text, ["商品名称", "产品名称", "新增商品", "商品", "产品", "商品资料", "产品资料"]))
     sku = extract_after_labels(text, ["型号", "SKU", "sku"])
     price = extract_price(text)
+    category = extract_after_labels(text, ["商品类目", "商品类别", "产品类别", "类目", "类别"])
+    unit = extract_after_labels(text, ["单位", "计价单位"])
+    inventory = number_from_text(extract_after_labels(text, ["库存"]))
     specs = extract_after_labels(text, ["具体描述", "描述", "规格"])
     shipping = extract_after_labels(text, ["发货", "物流"])
     warranty = extract_after_labels(text, ["售后", "保修"])
@@ -1179,9 +1349,11 @@ def free_text_product_row(text: str) -> dict[str, Any]:
         {
             "name": name,
             "sku": sku,
+            "category": category,
             "specs": specs,
             "price": price,
-            "unit": infer_unit({"price": text}),
+            "unit": unit or infer_unit({"price": text}),
+            "inventory": inventory,
             "shipping_policy": shipping,
             "warranty_policy": warranty,
             "raw_text": text,
@@ -1201,23 +1373,45 @@ def detect_tags(text: str) -> list[str]:
     normalized = text.lower()
     tags = [
         tag
-        for tag, keywords in TAG_KEYWORDS.items()
+        for tag, keywords in review_tag_keywords().items()
         if any(keyword.lower() in normalized for keyword in keywords)
     ]
     return sorted(set(tags))
 
 
+def review_tag_keywords() -> dict[str, list[str]]:
+    return {
+        "product": [*intent_keywords().get("product", []), *product_keywords("spec"), *product_keywords("stock"), "sku"],
+        "quote": [*intent_keywords().get("quote", []), *product_keywords("quote"), "元", "售价"],
+        "discount": [*intent_keywords().get("discount", []), "阶梯价"],
+        "company": intent_keywords().get("company", []),
+        "invoice": intent_keywords().get("invoice", []),
+        "shipping": intent_keywords().get("shipping", []),
+        "payment": intent_keywords().get("payment", []),
+        "after_sales": intent_keywords().get("after_sales", []),
+        "style": intent_keywords().get("style", []),
+    }
+
+
 def extract_price(text: str) -> float | None:
+    labeled = re.search(r"(?:价格|售价|单价)\s*[:：]\s*(\d+(?:\.\d+)?)", text, flags=re.IGNORECASE)
+    if labeled:
+        return float(labeled.group(1))
     match = re.search(r"(\d+(?:\.\d+)?)\s*(?:元|块|块钱)", text)
     return float(match.group(1)) if match else None
 
 
 def extract_after_labels(text: str, labels: list[str]) -> str:
     for label in labels:
-        match = re.search(rf"{re.escape(label)}\s*[:：]\s*([^\n；;，,]+)", text, flags=re.IGNORECASE)
+        match = re.search(rf"{re.escape(label)}\s*[:：]\s*([^\n]+)", text, flags=re.IGNORECASE)
         if match:
-            return match.group(1).strip()
+            return match.group(1).strip(" \t；;，,")
     return ""
+
+
+def clean_product_name(value: str) -> str:
+    text = clean_text(value)
+    return re.split(r"[，,；;。]", text, maxsplit=1)[0].strip() if text else ""
 
 
 def number_from_text(value: Any) -> float | None:
@@ -1239,6 +1433,90 @@ def split_tags(value: Any) -> list[str]:
         return []
     parts = re.split(r"[,，;；、|/\n]+", text)
     return [part.strip() for part in parts if part.strip()]
+
+
+def infer_applicability_fields(data: dict[str, Any]) -> dict[str, str]:
+    """Normalize merchant/LLM scope hints for general chats and policies."""
+    raw_scope = clean_text(data.get("applicability_scope") or data.get("适用范围")).lower()
+    product_id = first_non_empty(
+        data.get("product_id"),
+        data.get("product_sku"),
+        data.get("sku"),
+        first_tag(data.get("linked_item_ids")),
+    )
+    product_category = first_non_empty(
+        data.get("product_category"),
+        data.get("商品类目"),
+        scope_category_hint(data.get("category")),
+        product_category_from_linked_categories(data.get("linked_categories")),
+    )
+    scope = normalize_scope_label(raw_scope)
+    if product_id:
+        scope = "specific_product"
+    elif product_category and scope != "global":
+        scope = "product_category"
+    elif scope not in {"global", "product_category", "specific_product"}:
+        scope = "global"
+    if scope == "specific_product" and not product_id:
+        scope = "product_category" if product_category else "global"
+    if scope == "product_category" and not product_category:
+        scope = "global"
+    return {
+        "applicability_scope": scope,
+        "product_id": safe_scope_product_id(product_id) if scope == "specific_product" else "",
+        "product_category": product_category if scope == "product_category" else "",
+    }
+
+
+def normalize_scope_label(value: str) -> str:
+    text = clean_text(value).lower()
+    if text in {"global", "all", "all_products", "全部", "全部商品", "通用", "全局", "所有商品通用"}:
+        return "global"
+    if text in {"product_category", "category", "类目", "商品类目", "某类商品", "商品类目适用"}:
+        return "product_category"
+    if text in {"specific_product", "product", "指定商品", "单品", "商品专属", "某个商品"}:
+        return "specific_product"
+    return text
+
+
+def first_non_empty(*values: Any) -> str:
+    for value in values:
+        text = clean_text(value)
+        if text:
+            return text
+    return ""
+
+
+def first_tag(value: Any) -> str:
+    tags = split_tags(value)
+    return tags[0] if tags else ""
+
+
+def product_category_from_linked_categories(value: Any) -> str:
+    ignored = {"products", "product", "policies", "policy", "chats", "chat", "faqs", "faq", "erp_exports"}
+    for tag in split_tags(value):
+        if tag.lower() not in ignored:
+            return tag
+    return ""
+
+
+def scope_category_hint(value: Any) -> str:
+    text = clean_text(value)
+    if not text:
+        return ""
+    if text.lower() in {"products", "product", "policies", "policy", "chats", "chat", "erp_exports"}:
+        return ""
+    if clean_policy_type(text):
+        return ""
+    return text
+
+
+def safe_scope_product_id(value: str) -> str:
+    text = clean_text(value)
+    if not text:
+        return ""
+    normalized = re.sub(r"[^A-Za-z0-9_.-]+", "_", text).strip("_.-").lower()
+    return normalized or text
 
 
 def clean_text(value: Any) -> str:
@@ -1280,9 +1558,21 @@ def clean_policy_type(value: Any) -> str:
 
 def policy_type_from_tags(tags: list[str]) -> str:
     for tag in tags:
-        if tag in POLICY_TAG_TO_TYPE:
-            return POLICY_TAG_TO_TYPE[tag]
+        policy_type = policy_tag_to_type().get(tag)
+        if policy_type:
+            return policy_type
     return "other"
+
+
+def policy_tag_to_type() -> dict[str, str]:
+    return {
+        "company": "company",
+        "invoice": "invoice",
+        "shipping": "logistics",
+        "payment": "payment",
+        "after_sales": "after_sales",
+        "discount": "discount",
+    }
 
 
 def policy_title_from_tags(tags: list[str], text: str) -> str:
@@ -1324,24 +1614,23 @@ def infer_unit(row: dict[str, Any]) -> str:
     match = re.search(r"元\s*/\s*([^\s,，;；]+)", text)
     if match:
         return match.group(1).strip()
-    match = re.search(r"\d+(?:\.\d+)?\s*(个|件|台|张|只|套|箱|条|支|瓶|包|米|kg|公斤)\s*(?:装|起|以上|及以上|/|每)?", text, flags=re.IGNORECASE)
+    match = re.search(rf"\d+(?:\.\d+)?\s*({quantity_unit_pattern()})\s*(?:装|起|以上|及以上|/|每)?", text, flags=re.IGNORECASE)
     if match:
         return match.group(1).strip()
     return ""
 
 
 def runtime_flags_from_text(text: str) -> dict[str, Any]:
-    high_risk_words = ["最低价", "赔偿", "退款", "账期", "合同", "保证", "一定", "必须"]
-    requires_handoff = any(word in text for word in ["请示", "上级", "人工", "不能自动", "审核"])
-    risk_level = "warning" if requires_handoff or any(word in text for word in high_risk_words) else "normal"
+    requires_handoff = any(word in text for word in risk_keywords("hard_handoff"))
+    warning_words = set(rag_terms("high_risk_terms")) | set(risk_keywords("review_warning"))
+    risk_level = "warning" if requires_handoff or any(word in text for word in warning_words) else "normal"
     return {"allow_auto_reply": not requires_handoff, "requires_handoff": requires_handoff, "risk_level": risk_level}
 
 
 def product_runtime_flags_from_data(data: dict[str, Any]) -> dict[str, Any]:
     text = json.dumps(data, ensure_ascii=False)
-    hard_handoff_words = ["禁止自动回复", "不可自动回复", "不能自动回复", "全部转人工", "整单转人工"]
-    warning_words = ["最低价", "赔偿", "退款", "账期", "合同", "保证", "必须", "人工", "确认", "承诺"]
-    requires_handoff = any(word in text for word in hard_handoff_words)
+    requires_handoff = any(word in text for word in risk_keywords("hard_handoff"))
+    warning_words = set(rag_terms("high_risk_terms")) | set(risk_keywords("review_warning"))
     risk_level = "warning" if requires_handoff or any(word in text for word in warning_words) else "normal"
     return {"allow_auto_reply": not requires_handoff, "requires_handoff": requires_handoff, "risk_level": risk_level}
 

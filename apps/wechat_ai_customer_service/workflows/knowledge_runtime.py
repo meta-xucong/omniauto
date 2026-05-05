@@ -14,15 +14,19 @@ from typing import Any, Iterable
 try:  # pragma: no cover - supports package imports and direct workflow scripts.
     from apps.wechat_ai_customer_service.knowledge_paths import (
         LEGACY_KNOWLEDGE_BASE_ROOT,
+        SHARED_KNOWLEDGE_ROOT,
         active_tenant_id,
         default_admin_knowledge_base_root,
         runtime_knowledge_roots,
+        shared_runtime_cache_root,
         tenant_product_item_knowledge_root,
     )
     from apps.wechat_ai_customer_service.storage import get_postgres_store, load_storage_config
 except ImportError:  # pragma: no cover
     APP_PACKAGE_ROOT = Path(__file__).resolve().parents[1]
     LEGACY_KNOWLEDGE_BASE_ROOT = APP_PACKAGE_ROOT / "data" / "knowledge_bases"
+    SHARED_KNOWLEDGE_ROOT = APP_PACKAGE_ROOT / "data" / "shared_knowledge"
+    shared_runtime_cache_root = lambda: APP_PACKAGE_ROOT.parents[1] / "runtime" / "apps" / "wechat_ai_customer_service" / "cache" / "shared_knowledge"
     active_tenant_id = lambda tenant_id=None: tenant_id or "default"
     default_admin_knowledge_base_root = lambda tenant_id=None: LEGACY_KNOWLEDGE_BASE_ROOT
     runtime_knowledge_roots = lambda tenant_id=None: [LEGACY_KNOWLEDGE_BASE_ROOT]
@@ -196,23 +200,48 @@ class KnowledgeRuntime:
     def items_root(self, category_id: str) -> Path:
         return self.category_root(category_id) / "items"
 
-    def list_items(self, category_id: str, *, include_archived: bool = False) -> list[dict[str, Any]]:
+    def list_items(
+        self,
+        category_id: str,
+        *,
+        include_archived: bool = False,
+        include_unacknowledged: bool = False,
+    ) -> list[dict[str, Any]]:
         db = postgres_store(self.tenant_id)
         if db and not self.single_root_mode:
             layer_items: list[dict[str, Any]] = []
             if category_id in PRODUCT_SCOPED_SCHEMAS:
                 layer_items.extend(
-                    db.list_knowledge_items(self.tenant_id, layer="tenant_product", category_id=category_id, include_archived=include_archived)
+                    [
+                        mark_layer(item, "tenant_product")
+                        for item in db.list_knowledge_items(self.tenant_id, layer="tenant_product", category_id=category_id, include_archived=include_archived)
+                    ]
                 )
             else:
                 layer_items.extend(
-                    db.list_knowledge_items(self.tenant_id, layer="shared", category_id=category_id, include_archived=include_archived)
+                    [
+                        mark_layer(item, "tenant")
+                        for item in db.list_knowledge_items(self.tenant_id, layer="tenant", category_id=category_id, include_archived=include_archived)
+                    ]
                 )
                 layer_items.extend(
-                    db.list_knowledge_items(self.tenant_id, layer="tenant", category_id=category_id, include_archived=include_archived)
+                    [
+                        mark_layer(item, "shared")
+                        for item in db.list_knowledge_items(self.tenant_id, layer="shared", category_id=category_id, include_archived=include_archived)
+                    ]
                 )
             if layer_items:
-                return layer_items
+                return filter_runtime_items(
+                    layer_items,
+                    include_archived=include_archived,
+                    include_unacknowledged=include_unacknowledged,
+                )
+        if category_id in PRODUCT_SCOPED_SCHEMAS:
+            return self.list_file_product_scoped_items(
+                category_id,
+                include_archived=include_archived,
+                include_unacknowledged=include_unacknowledged,
+            )
         items = []
         for root in self.roots:
             category = self.get_category_from_root(root, category_id)
@@ -225,24 +254,36 @@ class KnowledgeRuntime:
                 item = read_json(path)
                 if not include_archived and item.get("status") == "archived":
                     continue
-                items.append(item)
-        return items
+                items.append(mark_layer(item, layer_for_root(root)))
+        return filter_runtime_items(
+            items,
+            include_archived=include_archived,
+            include_unacknowledged=include_unacknowledged,
+        )
 
-    def get_item(self, category_id: str, item_id: str) -> dict[str, Any] | None:
+    def get_item(
+        self,
+        category_id: str,
+        item_id: str,
+        *,
+        include_unacknowledged: bool = False,
+    ) -> dict[str, Any] | None:
         db = postgres_store(self.tenant_id)
         if db and not self.single_root_mode:
             if category_id in PRODUCT_SCOPED_SCHEMAS:
                 for item in db.list_knowledge_items(self.tenant_id, layer="tenant_product", category_id=category_id, include_archived=True):
                     if str(item.get("id") or "") == item_id:
-                        return None if item.get("status") == "archived" else item
+                        marked = mark_layer(item, "tenant_product")
+                        return marked if item_is_runtime_usable(marked, include_unacknowledged=include_unacknowledged) else None
             else:
-                for layer in ("shared", "tenant"):
+                for layer in ("tenant", "shared"):
                     item = db.get_knowledge_item(self.tenant_id, layer=layer, category_id=category_id, item_id=item_id)
                     if item:
-                        return None if item.get("status") == "archived" else item
+                        marked = mark_layer(item, layer)
+                        return marked if item_is_runtime_usable(marked, include_unacknowledged=include_unacknowledged) else None
         if category_id in PRODUCT_SCOPED_SCHEMAS:
             for _kind, _schema, _resolver, item in self.iter_all_product_scoped_items():
-                if str(item.get("id") or "") == item_id and item.get("status") != "archived":
+                if str(item.get("id") or "") == item_id and item_is_runtime_usable(item, include_unacknowledged=include_unacknowledged):
                     return item
             return None
         for root in self.roots:
@@ -255,9 +296,8 @@ class KnowledgeRuntime:
             if not path.exists():
                 continue
             item = read_json(path)
-            if item.get("status") == "archived":
-                return None
-            return item
+            marked = mark_layer(item, layer_for_root(root))
+            return marked if item_is_runtime_usable(marked, include_unacknowledged=include_unacknowledged) else None
         return None
 
     def iter_reply_items(self) -> Iterable[tuple[dict[str, Any], dict[str, Any], dict[str, Any], dict[str, Any]]]:
@@ -270,7 +310,7 @@ class KnowledgeRuntime:
                     resolver = self.load_resolver(category_id)
                 except FileNotFoundError:
                     continue
-                for item in self.list_items(category_id):
+                for item in self.list_items(category_id, include_unacknowledged=False):
                     yield category, schema, resolver, item
             return
         for root in self.roots:
@@ -283,9 +323,10 @@ class KnowledgeRuntime:
                     continue
                 for path in sorted(items_root.glob("*.json")):
                     item = read_json(path)
-                    if item.get("status") == "archived":
+                    marked = mark_layer(item, layer_for_root(root))
+                    if not item_is_runtime_usable(marked, include_unacknowledged=False):
                         continue
-                    yield category, schema, resolver, item
+                    yield category, schema, resolver, marked
 
     def list_categories_from_root(self, root: Path, *, reply_only: bool = False) -> list[dict[str, Any]]:
         categories = [item for item in self.load_registry_from_root(root).get("categories", []) or [] if item.get("enabled", True)]
@@ -297,9 +338,12 @@ class KnowledgeRuntime:
         self,
         product_ids: Iterable[str],
     ) -> Iterable[tuple[dict[str, Any], dict[str, Any], dict[str, Any], dict[str, Any]]]:
+        allowed_product_ids = self.runtime_usable_product_ids()
         db = postgres_store(self.tenant_id)
         if db and not self.single_root_mode:
             for product_id in sorted({str(item) for item in product_ids if str(item)}):
+                if product_id not in allowed_product_ids:
+                    continue
                 for kind, category_id in PRODUCT_SCOPED_KINDS.items():
                     category = {
                         "id": category_id,
@@ -318,9 +362,13 @@ class KnowledgeRuntime:
                         category_id=category_id,
                         product_id=product_id,
                     ):
-                        yield category, schema, resolver, item
+                        marked = mark_layer(item, "tenant_product")
+                        if item_is_runtime_usable(marked, include_unacknowledged=False):
+                            yield category, schema, resolver, marked
             return
         for product_id in sorted({str(item) for item in product_ids if str(item)}):
+            if product_id not in allowed_product_ids:
+                continue
             product_root = (self.product_item_root / product_id).resolve()
             if self.product_item_root not in product_root.parents and product_root != self.product_item_root:
                 continue
@@ -341,19 +389,66 @@ class KnowledgeRuntime:
                 resolver = PRODUCT_SCOPED_RESOLVERS[category_id]
                 for path in sorted(kind_root.glob("*.json")):
                     item = read_json(path)
-                    if item.get("status") == "archived":
-                        continue
                     item.setdefault("category_id", category_id)
                     item.setdefault("data", {})
                     item["data"].setdefault("product_id", product_id)
-                    yield category, schema, resolver, item
+                    marked = mark_layer(item, "tenant_product")
+                    if not item_is_runtime_usable(marked, include_unacknowledged=False):
+                        continue
+                    yield category, schema, resolver, marked
+
+    def list_file_product_scoped_items(
+        self,
+        category_id: str,
+        *,
+        include_archived: bool = False,
+        include_unacknowledged: bool = False,
+    ) -> list[dict[str, Any]]:
+        if category_id not in PRODUCT_SCOPED_SCHEMAS or not self.product_item_root.exists():
+            return []
+        kind = ""
+        for candidate_kind, candidate_category_id in PRODUCT_SCOPED_KINDS.items():
+            if candidate_category_id == category_id:
+                kind = candidate_kind
+                break
+        if not kind:
+            return []
+        items: list[dict[str, Any]] = []
+        for product_root in sorted(path for path in self.product_item_root.iterdir() if path.is_dir()):
+            kind_root = product_root / kind
+            if not kind_root.exists():
+                continue
+            for path in sorted(kind_root.glob("*.json")):
+                item = read_json(path)
+                if not include_archived and item.get("status") == "archived":
+                    continue
+                item.setdefault("category_id", category_id)
+                item.setdefault("data", {})
+                item["data"].setdefault("product_id", product_root.name)
+                items.append(mark_layer(item, "tenant_product"))
+        items = filter_runtime_items(
+            items,
+            include_archived=include_archived,
+            include_unacknowledged=include_unacknowledged,
+        )
+        if include_unacknowledged:
+            return items
+        allowed_product_ids = self.runtime_usable_product_ids()
+        return [item for item in items if str((item.get("data") or {}).get("product_id") or "") in allowed_product_ids]
 
     def iter_all_product_scoped_items(self) -> Iterable[tuple[str, dict[str, Any], dict[str, Any], dict[str, Any]]]:
         db = postgres_store(self.tenant_id)
         if db and not self.single_root_mode:
+            allowed_product_ids = self.runtime_usable_product_ids()
             for category_id in PRODUCT_SCOPED_SCHEMAS:
                 for item in db.list_knowledge_items(self.tenant_id, layer="tenant_product", category_id=category_id):
-                    yield category_id, PRODUCT_SCOPED_SCHEMAS[category_id], PRODUCT_SCOPED_RESOLVERS[category_id], item
+                    marked = mark_layer(item, "tenant_product")
+                    if not item_is_runtime_usable(marked, include_unacknowledged=False):
+                        continue
+                    product_id = str((marked.get("data") or {}).get("product_id") or "")
+                    if product_id and product_id not in allowed_product_ids:
+                        continue
+                    yield category_id, PRODUCT_SCOPED_SCHEMAS[category_id], PRODUCT_SCOPED_RESOLVERS[category_id], marked
             return
         if not self.product_item_root.exists():
             return
@@ -361,9 +456,61 @@ class KnowledgeRuntime:
         for category, schema, resolver, item in self.iter_product_scoped_items(product_ids):
             yield str(category.get("id") or ""), schema, resolver, item
 
+    def runtime_usable_product_ids(self) -> set[str]:
+        return {str(item.get("id") or "") for item in self.list_items("products", include_unacknowledged=False) if str(item.get("id") or "")}
+
 
 def read_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def layer_for_root(root: Path) -> str:
+    try:
+        resolved = root.resolve()
+        if resolved in {SHARED_KNOWLEDGE_ROOT.resolve(), shared_runtime_cache_root().resolve()}:
+            return "shared"
+    except OSError:
+        pass
+    return "tenant"
+
+
+def mark_layer(item: dict[str, Any], layer: str) -> dict[str, Any]:
+    marked = dict(item)
+    marked["_knowledge_layer"] = layer
+    metadata = marked.get("metadata") if isinstance(marked.get("metadata"), dict) else {}
+    marked["metadata"] = {**metadata, "knowledge_layer": layer}
+    return marked
+
+
+def filter_runtime_items(
+    items: list[dict[str, Any]],
+    *,
+    include_archived: bool = False,
+    include_unacknowledged: bool = False,
+) -> list[dict[str, Any]]:
+    return [
+        item
+        for item in items
+        if item_is_runtime_usable(
+            item,
+            include_archived=include_archived,
+            include_unacknowledged=include_unacknowledged,
+        )
+    ]
+
+
+def item_is_runtime_usable(
+    item: dict[str, Any],
+    *,
+    include_archived: bool = False,
+    include_unacknowledged: bool = False,
+) -> bool:
+    if not include_archived and str(item.get("status") or "active") == "archived":
+        return False
+    if include_unacknowledged:
+        return True
+    review_state = item.get("review_state") if isinstance(item.get("review_state"), dict) else {}
+    return not bool(review_state.get("is_new"))
 
 
 def postgres_store(tenant_id: str):

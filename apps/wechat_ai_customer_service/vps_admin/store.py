@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import os
 import threading
+import time
 import uuid
 from copy import deepcopy
 from datetime import datetime, timezone
@@ -30,6 +31,7 @@ STATE_KEYS = (
     "shared_proposals",
     "shared_library",
     "shared_patches",
+    "shared_scan_state",
     "backup_requests",
     "restore_requests",
     "customer_data_packages",
@@ -74,7 +76,14 @@ class VpsAdminStore:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         temp = self.path.with_suffix(self.path.suffix + ".tmp")
         temp.write_text(json.dumps(state, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-        os.replace(temp, self.path)
+        for attempt in range(6):
+            try:
+                os.replace(temp, self.path)
+                return
+            except PermissionError:
+                if attempt == 5:
+                    raise
+                time.sleep(0.05 * (attempt + 1))
 
 
 def default_state_path() -> Path:

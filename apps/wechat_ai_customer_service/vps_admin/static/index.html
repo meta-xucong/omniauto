@@ -198,11 +198,28 @@
             <div class="section-head">
               <div>
                 <h2>共享公共知识</h2>
-                <p>Local 上传的新内容先进入候选库；管理员采纳后才会进入正式共享库并生成更新补丁。</p>
+                <p>Local 只从 customer 正式知识提交候选；管理员采纳后进入云端正式共享库，客户电脑收到通知后拉取云端快照。</p>
               </div>
-              <button class="secondary-button" id="sync-shared">同步本机共享知识快照</button>
+              <div class="button-row">
+                <button class="primary-button" id="generate-shared-candidates">AI 提炼候选共享知识</button>
+                <button class="secondary-button" id="sync-shared" title="保存云端正式共享库当前状态，作为可审计快照，不会直接改客户电脑。">保存云端正式库快照</button>
+              </div>
+            </div>
+            <div class="inline-help">
+              <strong>云端正式库快照</strong>
+              <span>用于记录云端正式共享公共知识的状态，方便审计和排查；推送命令只通知客户电脑刷新云端快照。</span>
+            </div>
+            <div class="flow-guide server-flow-guide">
+              <div><strong>1. 候选待审</strong><span>来自客户 Local 上传</span></div>
+              <div><strong>2. 正式共享库</strong><span>admin 确认后的公共知识</span></div>
+              <div><strong>3. 生成发布记录</strong><span>每次采纳都会留下 patch 审计记录</span></div>
+              <div><strong>4. 手动推送</strong><span>客户电脑轮询后刷新云端快照</span></div>
             </div>
             <div class="metric-grid" id="shared-cards"></div>
+            <div class="split-layout single-main">
+              <div class="compact-list" id="shared-proposal-list"></div>
+              <div class="compact-list" id="shared-library-list"></div>
+            </div>
             <div class="workflow-section is-visible">
               <h2>新增正式共享知识</h2>
               <form class="shared-library-form compact-form" id="library-form">
@@ -227,10 +244,8 @@
                 <div class="form-actions"><button class="primary-button" type="submit">加入正式库</button></div>
               </form>
             </div>
-            <div class="split-layout single-main">
-              <div class="compact-list" id="shared-library-list"></div>
-              <div class="compact-list" id="shared-proposal-list"></div>
-            </div>
+            <div class="compact-list compact-list-small" id="shared-patch-list"></div>
+            <div class="detail-drawer is-hidden" id="shared-proposal-detail"></div>
             <div class="detail-drawer is-hidden" id="shared-detail"></div>
           </article>
 
@@ -276,6 +291,9 @@
                 <label class="form-field"><span>渠道</span><select name="channel"><option value="stable">稳定版</option><option value="canary">灰度版</option><option value="dev">开发版</option></select></label>
                 <label class="form-field"><span>标题</span><input name="title" /></label>
                 <label class="form-field wide-field"><span>更新包地址</span><input name="artifact_url" placeholder="https://你的域名/downloads/wechat-ai-cs-0.2.0.zip" /></label>
+                <label class="form-field wide-field"><span>SHA256 校验码</span><input name="sha256" placeholder="可选，用于后续安装包校验" /></label>
+                <label class="form-field wide-field"><span>签名</span><input name="signature" placeholder="可选，正式更新建议填写" /></label>
+                <label class="form-field full-field"><span>更新说明</span><textarea name="notes" rows="3" placeholder="这次更新解决了什么、客户需要注意什么"></textarea></label>
                 <button class="primary-button" type="submit">登记版本</button>
               </form>
             </div>

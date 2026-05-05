@@ -12,8 +12,11 @@
     {"id": "tone_tags", "label": "语气标签", "type": "tags", "required": false, "searchable": true, "form_order": 40},
     {"id": "linked_categories", "label": "关联门类", "type": "tags", "required": false, "form_order": 50},
     {"id": "linked_item_ids", "label": "关联知识", "type": "tags", "required": false, "form_order": 60},
-    {"id": "usable_as_template", "label": "可作为话术模板", "type": "boolean", "required": false, "default": true, "form_order": 70},
-    {"id": "additional_details", "label": "补充信息", "type": "object", "required": false, "searchable": true, "form_order": 80}
+    {"id": "applicability_scope", "label": "适用范围", "type": "single_select", "required": false, "default": "global", "options": ["global", "product_category", "specific_product"], "form_order": 70},
+    {"id": "product_id", "label": "关联商品 ID", "type": "short_text", "required": false, "searchable": true, "form_order": 80},
+    {"id": "product_category", "label": "关联商品类目", "type": "short_text", "required": false, "searchable": true, "form_order": 90},
+    {"id": "usable_as_template", "label": "可作为话术模板", "type": "boolean", "required": false, "default": true, "form_order": 100},
+    {"id": "additional_details", "label": "补充信息", "type": "object", "required": false, "searchable": true, "form_order": 110}
   ],
   "validation": {
     "unique_fields": ["id"],

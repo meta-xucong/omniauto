@@ -267,12 +267,28 @@ def check_local_email_otp_and_password_change() -> None:
     os.environ["WECHAT_LOCAL_TRUSTED_DEVICE_PATH"] = str(TEST_ROOT / "local_admin_trusted_devices.json")
     admin_client = TestClient(create_local_app())
     admin_started = admin_client.post("/api/auth/login/start", json={"username": "admin", "password": "1234.abcd", "tenant_id": "default"})
-    assert_status(admin_started, 200, "start local admin initialization with global OTP relaxed")
-    assert_true(admin_started.json().get("requires_initialization"), "local admin first login requires initialization")
-    initialize_local_account(admin_client, admin_started.json(), email="admin@example.local", new_password="admin.5678")
-    admin_started = admin_client.post("/api/auth/login/start", json={"username": "admin", "password": "admin.5678", "tenant_id": "default", "device_id": "local-admin-fresh"})
-    assert_status(admin_started, 200, "start local admin login with global OTP relaxed")
-    assert_true(admin_started.json().get("requires_verification"), "local admin always requires email verification")
+    assert_equal(admin_started.status_code, 401, "local client admin cannot initialize without VPS")
+    assert_true("服务端统一账号" in admin_started.text, "local client admin points to server authorization")
+    stale_session_path = Path(os.environ["WECHAT_LOCAL_SESSION_PATH"])
+    stale_session_path.parent.mkdir(parents=True, exist_ok=True)
+    stale_session_path.write_text(
+        json.dumps(
+            [
+                {
+                    "session_id": "stale-local-admin",
+                    "token": "stale-local-admin",
+                    "user": {"user_id": "local-admin", "role": "admin", "tenant_ids": ["*"], "display_name": "Local Admin", "username": "admin"},
+                    "active_tenant_id": "default",
+                    "source": "local",
+                }
+            ],
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    stale_me = admin_client.get("/api/auth/me", headers={"Authorization": "Bearer stale-local-admin"})
+    assert_equal(stale_me.status_code, 401, "stale local admin sessions are rejected")
 
 
 def verify_started_login(client: TestClient, body: dict[str, Any], *, trust_device: bool = False) -> str:
@@ -359,6 +375,7 @@ def set_common_otp_env() -> None:
     os.environ["WECHAT_EMAIL_OTP_REQUIRED"] = "1"
     os.environ["WECHAT_EMAIL_OTP_DEBUG"] = "1"
     os.environ["WECHAT_EMAIL_OUTBOX_PATH"] = str(TEST_ROOT / "email_outbox.jsonl")
+    os.environ["WECHAT_VPS_AUTO_DISCOVER"] = "0"
 
 
 def auth_headers(token: str) -> dict[str, str]:
@@ -389,6 +406,7 @@ def snapshot_env() -> dict[str, str | None]:
     keys = [
         "WECHAT_AUTH_REQUIRED",
         "WECHAT_VPS_BASE_URL",
+        "WECHAT_VPS_AUTO_DISCOVER",
         "WECHAT_VPS_ADMIN_USERNAME",
         "WECHAT_VPS_ADMIN_PASSWORD",
         "WECHAT_VPS_ADMIN_EMAIL",

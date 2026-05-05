@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "category_id": "chats",
+  "id": "ai",
+  "status": "archived",
+  "source": {
+    "type": "rag_experience",
+    "experience_id": "rag_exp_4caf5450bf3b4b4dc7ac"
+  },
+  "data": {
+    "customer_message": "这是江苏车金公司内部的一套客服规则，规定了什么时候必须把客户转给人工客服、AI不能自己瞎承诺金融和车况、以及怎么温柔地唤醒很久没联系的老客户，避免惹出客诉。",
+    "service_reply": "true 风险等级：high 政策规则：江苏车金金融与车况合规 CHEJIN_20260505_205249 测试批次：CHEJIN_20260505_205249 规则名称：金融审批与车况承诺边界 规则类型：contract 触发关键词：贷款,按揭,首付,月供,征信,保证无事故,水泡,火烧,赔偿,退款 答案：金融方案只能做初步说明，审批结果、利率、月供以资方审核为准；车况承诺必须以检测报告和合同为准，涉及赔偿、退款、纠纷必须转人工。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high 政策规则：江苏车金沉睡客户唤醒 CHEJIN_20260505_205249 测试批次：CHEJIN_20260505_205249 规则名称：沉睡客户递减唤醒策略 规则类型：other 触发关键词：沉睡客户,唤醒,老线索,新车源,还在看车 答案：首次唤醒只做轻提醒；3天未回复推同预算新车源；7天未回复询问需求是否变化；客户回复后停止自动唤醒并转入正常接待。 允许自动回复：true 必须转人工：false 风险等级：normal",
+    "intent_tags": [
+      "rag_experience"
+    ],
+    "tone_tags": [
+      "rag_reference"
+    ],
+    "additional_details": {
+      "rag_experience_id": "rag_exp_4caf5450bf3b4b4dc7ac",
+      "source_chunk_id": null,
+      "source_id": null,
+      "source_text": ""
+    }
+  },
+  "runtime": {
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "risk_level": "normal"
+  },
+  "review_state": {
+    "is_new": true,
+    "new_reason": "newly_added_formal_knowledge",
+    "marked_at": "2026-05-06T02:37:41",
+    "updated_at": "2026-05-06T02:37:41",
+    "read_at": "",
+    "read_by": "",
+    "source": {
+      "source_module": "candidate",
+      "candidate_id": "rag_promote_7ae8a7770cab5f04f450",
+      "target_category": "chats",
+      "item_id": "ai"
+    }
+  },
+  "metadata": {
+    "created_at": "2026-05-06T02:37:41",
+    "updated_at": "2026-05-06T02:39:19",
+    "created_by": "admin",
+    "updated_by": "admin"
+  }
+}

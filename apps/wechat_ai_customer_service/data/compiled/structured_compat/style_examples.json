@@ -2,71 +2,56 @@
   "schema_version": 1,
   "examples": [
     {
-      "id": "chat_851791b208",
-      "message": "哈哈谢谢，您需要查商品、报价或发货售后都可以直接发我。",
+      "id": "ai-ai",
+      "message": "true 风险等级：high 政策规则：江苏车金金融与车况合规 CHEJIN_20260505_205853 测试批次：CHEJIN_20260505_205853 规则名称：金融审批与车况承诺边界 规则类型：contract 触发关键词：贷款,按揭,首付,月供,征信,保证无事故,水泡,火烧,赔偿,退款 答案：金融方案只能做初步说明，审批结果、利率、月供以资方审核为准；车况承诺必须以检测报告和合同为准，涉及赔偿、退款、纠纷必须转人工。 允许自动回复：false 必须转人工：true 提醒人工客服：true 风险等级：high 政策规则：江苏车金沉睡客户唤醒 CHEJIN_20260505_205853 测试批次：CHEJIN_20260505_205853 规则名称：沉睡客户递减唤醒策略 规则类型：other 触发关键词：沉睡客户,唤醒,老线索,新车源,还在看车 答案：首次唤醒只做轻提醒；3天未回复推同预算新车源；7天未回复询问需求是否变化；客户回复后停止自动唤醒并转入正常接待。 允许自动回复：true 必须转人工：false 风险等级：normal",
       "intent_tags": [
-        "after_sales",
-        "product",
-        "quote",
-        "shipping"
+        "rag_experience"
       ],
       "tone_tags": [
-        "真实客服话术"
+        "rag_reference"
       ],
-      "customer_message": "你们客服还挺快的",
-      "details": "原始资料摘录: customer_message: 你们客服还挺快的；service_reply: 哈哈谢谢，您需要查商品、报价或发货售后都可以直接发我。"
+      "customer_message": "这条经验是江苏车金公司的客服政策规则，规定了什么时候必须转人工、哪些事情AI不能自己承诺、怎么唤醒老客户等，用来防止AI乱答应客户要求，避免客诉和风险。",
+      "details": "rag_experience_id: rag_exp_816a8be10cee4fd1f666"
     },
     {
-      "id": "data_missing",
-      "message": "资料我看到了，还差联系人电话，您补一下我就一起登记。",
-      "intent_tags": [
-        "customer_data"
-      ]
-    },
-    {
-      "id": "discount_handoff",
-      "message": "这个价格我这边不能直接拍板，我先帮您记录一下，稍后请示后给您准话。",
-      "intent_tags": [
-        "discount",
-        "handoff"
-      ]
-    },
-    {
-      "id": "over_boundary_handoff",
-      "message": "这个已经超出我能直接确认的范围，我先帮您记录下来，稍后请示后给您准话。",
-      "intent_tags": [
-        "handoff"
-      ]
-    },
-    {
-      "id": "quote_detail_request",
-      "message": "好的，您把具体产品、数量和收货城市发我，我帮您核一下价格和运费。",
-      "intent_tags": [
-        "quote"
-      ]
-    },
-    {
-      "id": "scene_product_association",
-      "message": "您这个场景我大概明白，可以先按库里的相近产品给您对一下，但价格和政策我只按现有资料说。",
+      "id": "chejin_budget_chat_commuter",
+      "message": "可以优先看凯美瑞、思域、秦PLUS DM-i，先确认城市、贷款、置换和到店时间。",
       "intent_tags": [
         "scene_product",
-        "product"
-      ]
+        "catalog",
+        "quote"
+      ],
+      "tone_tags": [
+        "专业",
+        "克制"
+      ],
+      "customer_message": "8万预算自动挡省油代步"
     },
     {
-      "id": "small_talk_service_pivot",
-      "message": "哈哈没事，您先慢慢看。我这边主要帮您查商品、报价和发货售后，看到合适的产品直接发我名称和数量就行。",
+      "id": "chejin_sleep_wakeup_chat_new_stock",
+      "message": "有的，我先按您之前的预算和用途筛；如果预算或车型变了，直接告诉我，我会重新匹配。",
       "intent_tags": [
-        "small_talk"
-      ]
+        "sleep_wakeup",
+        "reconversion"
+      ],
+      "tone_tags": [
+        "自然",
+        "克制"
+      ],
+      "customer_message": "之前那台没买，现在还有新车源吗"
     },
     {
-      "id": "unknown_handoff",
-      "message": "这个问题我当前没有足够依据直接确认，我先帮您记录并转人工处理。",
+      "id": "chejin_trade_in_chat_collect",
+      "message": "可以置换。麻烦补充旧车品牌车型、上牌年份、公里数、车况、所在城市和是否有贷款，估价需要人工复核。",
       "intent_tags": [
-        "unknown",
-        "handoff"
-      ]
+        "trade_in",
+        "lead_capture"
+      ],
+      "tone_tags": [
+        "专业",
+        "克制"
+      ],
+      "customer_message": "我有一台老朗逸想置换"
     },
     {
       "id": "customer_service_style_guidelines",

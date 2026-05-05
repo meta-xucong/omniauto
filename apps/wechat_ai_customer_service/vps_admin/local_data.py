@@ -14,6 +14,8 @@ from apps.wechat_ai_customer_service.knowledge_paths import (
     tenant_rag_chunks_root,
     tenant_rag_index_root,
     tenant_rag_sources_root,
+    tenant_review_candidates_root,
+    tenant_runtime_root,
     tenant_root,
 )
 from apps.wechat_ai_customer_service.sync.manifest import stable_digest
@@ -27,6 +29,10 @@ def build_tenant_data_summary(tenant_id: str | None = None) -> dict[str, Any]:
     rag_sources = tenant_rag_sources_root(tenant)
     rag_chunks = tenant_rag_chunks_root(tenant)
     rag_index = tenant_rag_index_root(tenant)
+    runtime_root = tenant_runtime_root(tenant)
+    raw_root = runtime_root / "raw_messages"
+    uploads_index = runtime_root / "admin" / "uploads_index.json"
+    candidates_root = tenant_review_candidates_root(tenant)
     return {
         "tenant_id": tenant,
         "root": str(root),
@@ -42,6 +48,24 @@ def build_tenant_data_summary(tenant_id: str | None = None) -> dict[str, Any]:
             "sources": tree_summary(rag_sources),
             "chunks": tree_summary(rag_chunks),
             "index": tree_summary(rag_index),
+        },
+        "raw_messages": {
+            "root": str(raw_root),
+            "message_count": len(read_json(raw_root / "messages.json", default=[])),
+            "conversation_count": len(read_json(raw_root / "conversations.json", default=[])),
+            "batch_count": len(read_json(raw_root / "batches.json", default=[])),
+            "files": tree_summary(raw_root),
+        },
+        "review_candidates": {
+            "root": str(candidates_root),
+            "pending_count": count_json_files(candidates_root / "pending"),
+            "accepted_count": count_json_files(candidates_root / "accepted"),
+            "rejected_count": count_json_files(candidates_root / "rejected"),
+            "files": tree_summary(candidates_root),
+        },
+        "uploads": {
+            "root": str(uploads_index),
+            "item_count": len(read_json(uploads_index, default=[])),
         },
     }
 
@@ -143,6 +167,12 @@ def count_directories(root: Path) -> int:
     if not root.exists():
         return 0
     return sum(1 for item in root.iterdir() if item.is_dir())
+
+
+def count_json_files(root: Path) -> int:
+    if not root.exists():
+        return 0
+    return sum(1 for item in root.glob("*.json") if item.is_file())
 
 
 def read_json(path: Path, *, default: Any) -> Any:

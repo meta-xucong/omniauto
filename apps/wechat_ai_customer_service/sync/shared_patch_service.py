@@ -15,11 +15,118 @@ from apps.wechat_ai_customer_service.knowledge_paths import SHARED_KNOWLEDGE_ROO
 
 ALLOWED_OPS = {"upsert_json"}
 
+SHARED_CATEGORY_DEFINITIONS: dict[str, dict[str, Any]] = {
+    "global_guidelines": {
+        "registry": {
+            "id": "global_guidelines",
+            "name": "Global Assistant Guidelines",
+            "kind": "global",
+            "path": "global_guidelines",
+            "enabled": True,
+            "participates_in_reply": True,
+            "participates_in_learning": False,
+            "participates_in_diagnostics": True,
+            "sort_order": 10,
+        },
+        "schema": {
+            "schema_version": 1,
+            "category_id": "global_guidelines",
+            "display_name": "共享通用客服原则",
+            "item_title_field": "title",
+            "fields": [
+                {"id": "title", "label": "标题", "type": "short_text", "required": True},
+                {"id": "keywords", "label": "关键词", "type": "tags", "required": False},
+                {"id": "guideline_text", "label": "规则内容", "type": "long_text", "required": True},
+                {"id": "applies_to", "label": "适用场景", "type": "long_text", "required": False},
+            ],
+        },
+        "resolver": {
+            "schema_version": 1,
+            "category_id": "global_guidelines",
+            "match_fields": ["title", "keywords", "guideline_text", "applies_to"],
+            "intent_fields": ["keywords"],
+            "reply_fields": ["guideline_text", "applies_to"],
+            "minimum_confidence": 0.34,
+            "default_action": "shared_guideline_context",
+        },
+    },
+    "reply_style": {
+        "registry": {
+            "id": "reply_style",
+            "name": "共享回复口吻",
+            "kind": "global",
+            "path": "reply_style",
+            "enabled": True,
+            "participates_in_reply": True,
+            "participates_in_learning": False,
+            "participates_in_diagnostics": True,
+            "sort_order": 75,
+        },
+        "schema": {
+            "schema_version": 1,
+            "category_id": "reply_style",
+            "display_name": "共享回复口吻",
+            "item_title_field": "title",
+            "fields": [
+                {"id": "title", "label": "标题", "type": "short_text", "required": True},
+                {"id": "keywords", "label": "触发关键词", "type": "tags", "required": False},
+                {"id": "guideline_text", "label": "表达方式", "type": "long_text", "required": True},
+                {"id": "applies_to", "label": "适用场景", "type": "long_text", "required": False},
+            ],
+        },
+        "resolver": {
+            "schema_version": 1,
+            "category_id": "reply_style",
+            "match_fields": ["title", "keywords", "guideline_text", "applies_to"],
+            "intent_fields": ["keywords"],
+            "reply_fields": ["guideline_text", "applies_to"],
+            "minimum_confidence": 0.34,
+            "default_action": "shared_reply_style_context",
+        },
+    },
+    "risk_control": {
+        "registry": {
+            "id": "risk_control",
+            "name": "共享风险边界",
+            "kind": "global",
+            "path": "risk_control",
+            "enabled": True,
+            "participates_in_reply": True,
+            "participates_in_learning": False,
+            "participates_in_diagnostics": True,
+            "sort_order": 25,
+        },
+        "schema": {
+            "schema_version": 1,
+            "category_id": "risk_control",
+            "display_name": "共享风险边界",
+            "item_title_field": "title",
+            "fields": [
+                {"id": "title", "label": "标题", "type": "short_text", "required": True},
+                {"id": "keywords", "label": "风险关键词", "type": "tags", "required": False},
+                {"id": "guideline_text", "label": "处理规则", "type": "long_text", "required": True},
+                {"id": "applies_to", "label": "适用场景", "type": "long_text", "required": False},
+                {"id": "handoff_reason", "label": "转人工原因", "type": "short_text", "required": False},
+            ],
+        },
+        "resolver": {
+            "schema_version": 1,
+            "category_id": "risk_control",
+            "match_fields": ["title", "keywords", "guideline_text", "applies_to", "handoff_reason"],
+            "intent_fields": ["keywords"],
+            "risk_fields": ["keywords", "guideline_text", "handoff_reason"],
+            "reply_fields": ["guideline_text", "handoff_reason"],
+            "minimum_confidence": 0.34,
+            "default_action": "shared_risk_control",
+        },
+    },
+}
+
 
 class SharedPatchService:
-    def __init__(self, *, root: Path | None = None, signing_secret: str = "") -> None:
+    def __init__(self, *, root: Path | None = None, signing_secret: str | None = None) -> None:
         self.root = (root or SHARED_KNOWLEDGE_ROOT).resolve()
-        self.signing_secret = signing_secret or os.getenv("WECHAT_SHARED_PATCH_SECRET", "")
+        self.signing_secret = os.getenv("WECHAT_SHARED_PATCH_SECRET", "") if signing_secret is None else signing_secret
 
     def preview(self, patch: dict[str, Any]) -> dict[str, Any]:
         operations = self.validate_patch(patch)
@@ -44,6 +151,7 @@ class SharedPatchService:
         applied = []
         for operation in operations:
             target = self.target_path(operation["path"])
+            self.ensure_category_support(operation["path"])
             target.parent.mkdir(parents=True, exist_ok=True)
             write_json(target, operation.get("content", {}))
             applied.append({"op": operation["op"], "path": operation["path"], "target_path": str(target)})
@@ -89,6 +197,29 @@ class SharedPatchService:
             raise ValueError(f"shared patch path escapes root: {relative_path}")
         return target
 
+    def ensure_category_support(self, relative_path: str) -> None:
+        category_id = relative_path.replace("\\", "/").lstrip("/").split("/", 1)[0]
+        definition = SHARED_CATEGORY_DEFINITIONS.get(category_id)
+        if not definition:
+            return
+        registry_path = self.root / "registry.json"
+        registry = read_json(registry_path, default={"schema_version": 1, "scope": "wechat_ai_customer_service_shared", "categories": []})
+        if not isinstance(registry, dict):
+            registry = {"schema_version": 1, "scope": "wechat_ai_customer_service_shared", "categories": []}
+        categories = registry.get("categories") if isinstance(registry.get("categories"), list) else []
+        category_ids = {str(item.get("id") or item.get("category_id") or "") for item in categories if isinstance(item, dict)}
+        if category_id not in category_ids:
+            categories.append(dict(definition["registry"]))
+            registry["categories"] = categories
+            registry["updated_at"] = now()
+            write_json(registry_path, registry)
+        category_root = self.root / category_id
+        category_root.mkdir(parents=True, exist_ok=True)
+        for file_name in ("schema.json", "resolver.json"):
+            path = category_root / file_name
+            if not path.exists():
+                write_json(path, definition[file_name.removesuffix(".json")])
+
     def verify_signature(self, patch: dict[str, Any]) -> bool:
         signature = str(patch.get("signature") or "")
         if not signature:
@@ -121,6 +252,7 @@ def read_json(path: Path, *, default: Any) -> Any:
 
 
 def write_json(path: Path, payload: Any) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
     temp = path.with_suffix(path.suffix + ".tmp")
     temp.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     os.replace(temp, path)

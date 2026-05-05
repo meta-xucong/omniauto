@@ -5,23 +5,22 @@ from __future__ import annotations
 import json
 import re
 from difflib import SequenceMatcher
-from pathlib import Path
 from typing import Any
 
 from .knowledge_base_store import KnowledgeBaseStore
+from apps.wechat_ai_customer_service.knowledge_paths import tenant_review_candidates_root
 from apps.wechat_ai_customer_service.workflows.knowledge_runtime import PRODUCT_SCOPED_SCHEMAS
 
 
-APP_ROOT = Path(__file__).resolve().parents[2]
-REVIEW_ROOT = APP_ROOT / "data" / "review_candidates"
 SIMILARITY_THRESHOLD = 0.92
 
 
 class KnowledgeDeduper:
     def __init__(self, base_store: KnowledgeBaseStore | None = None) -> None:
         self.base_store = base_store or KnowledgeBaseStore()
+        self._existing_cache: dict[tuple[str, bool], list[dict[str, Any]]] = {}
 
-    def check_candidate(self, candidate: dict[str, Any]) -> dict[str, Any]:
+    def check_candidate(self, candidate: dict[str, Any], *, include_review_candidates: bool = True) -> dict[str, Any]:
         patch = (((candidate.get("proposal") or {}).get("formal_patch")) or {})
         category_id = str(patch.get("target_category") or "")
         item = patch.get("item") if isinstance(patch.get("item"), dict) else {}
@@ -33,10 +32,13 @@ class KnowledgeDeduper:
         if not candidate_fp:
             return {"duplicate": False}
 
-        for existing in self.base_store.list_items(category_id, include_archived=False):
+        for existing in self._list_existing_items(category_id):
             result = compare_item(category_id, item_id, candidate_fp, item, existing, source="knowledge_base")
             if result.get("duplicate"):
                 return result
+
+        if not include_review_candidates:
+            return {"duplicate": False}
 
         for existing_candidate in iter_review_candidates():
             if str(existing_candidate.get("candidate_id") or "") == str(candidate.get("candidate_id") or ""):
@@ -59,6 +61,12 @@ class KnowledgeDeduper:
                 return result
         return {"duplicate": False}
 
+    def _list_existing_items(self, category_id: str) -> list[dict[str, Any]]:
+        cache_key = (category_id, False)
+        if cache_key not in self._existing_cache:
+            self._existing_cache[cache_key] = self.base_store.list_items(category_id, include_archived=False)
+        return self._existing_cache[cache_key]
+
 
 def compare_item(
     category_id: str,
@@ -78,7 +86,7 @@ def compare_item(
     similarity = SequenceMatcher(None, candidate_fp, existing_fp).ratio()
     if item_id and existing_id and item_id == existing_id and similarity >= 0.98:
         return duplicate_result("same_id_near_same_content", source, existing_id, similarity)
-    if similarity >= SIMILARITY_THRESHOLD:
+    if category_id != "chats" and similarity >= SIMILARITY_THRESHOLD:
         return duplicate_result("highly_similar_content", source, existing_id, similarity)
     candidate_key = semantic_key(category_id, candidate_item)
     existing_key = semantic_key(category_id, existing_item)
@@ -248,8 +256,9 @@ def as_float(value: Any) -> float | None:
 
 def iter_review_candidates() -> list[dict[str, Any]]:
     items: list[dict[str, Any]] = []
+    review_root = tenant_review_candidates_root()
     for status in ("pending", "approved"):
-        root = REVIEW_ROOT / status
+        root = review_root / status
         if not root.exists():
             continue
         for path in root.glob("*.json"):

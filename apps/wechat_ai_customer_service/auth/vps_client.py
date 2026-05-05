@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import os
+import time
 import urllib.error
 import urllib.request
 from typing import Any
@@ -12,6 +14,59 @@ from .models import AuthSession, session_from_payload
 
 class VpsClientError(RuntimeError):
     pass
+
+
+_DISCOVERY_CACHE: dict[str, Any] = {"key": None, "value": "", "expires_at": 0.0}
+
+
+def discover_vps_base_url() -> str:
+    configured = (os.getenv("WECHAT_VPS_BASE_URL") or "").strip().rstrip("/")
+    if configured:
+        return configured
+    if not _parse_bool_env(os.getenv("WECHAT_VPS_AUTO_DISCOVER"), default=True):
+        return ""
+    candidates = [
+        item.strip().rstrip("/")
+        for item in (os.getenv("WECHAT_VPS_DISCOVERY_URLS") or "http://127.0.0.1:8766,http://localhost:8766").split(",")
+        if item.strip()
+    ]
+    timeout = _safe_float(os.getenv("WECHAT_VPS_DISCOVERY_TIMEOUT_SECONDS"), default=0.35)
+    cache_seconds = max(0.0, _safe_float(os.getenv("WECHAT_VPS_DISCOVERY_CACHE_SECONDS"), default=10.0))
+    cache_key = (tuple(candidates), timeout, cache_seconds)
+    now = time.monotonic()
+    if _DISCOVERY_CACHE.get("key") == cache_key and now < float(_DISCOVERY_CACHE.get("expires_at") or 0):
+        return str(_DISCOVERY_CACHE.get("value") or "")
+    discovered = ""
+    for base_url in candidates:
+        if _vps_health_ok(base_url, timeout=timeout):
+            discovered = base_url
+            break
+    _DISCOVERY_CACHE.update({"key": cache_key, "value": discovered, "expires_at": now + cache_seconds})
+    return discovered
+
+
+def _vps_health_ok(base_url: str, *, timeout: float) -> bool:
+    if not base_url:
+        return False
+    request = urllib.request.Request(base_url.rstrip("/") + "/v1/health", headers={"Accept": "application/json"}, method="GET")
+    try:
+        with urllib.request.urlopen(request, timeout=timeout) as response:
+            return 200 <= int(getattr(response, "status", 200)) < 500
+    except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError, OSError):
+        return False
+
+
+def _parse_bool_env(value: str | None, *, default: bool = False) -> bool:
+    if value is None or value == "":
+        return default
+    return str(value).strip().lower() in {"1", "true", "yes", "on", "y"}
+
+
+def _safe_float(value: str | None, *, default: float) -> float:
+    try:
+        return float(value) if value not in {None, ""} else default
+    except (TypeError, ValueError):
+        return default
 
 
 class VpsAuthClient:

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import shutil
+import zipfile
 import uuid
 from datetime import datetime
 from pathlib import Path
@@ -17,6 +18,8 @@ from apps.wechat_ai_customer_service.knowledge_paths import (
     default_admin_knowledge_base_root,
 )
 from apps.wechat_ai_customer_service.storage import get_postgres_store, load_storage_config
+from apps.wechat_ai_customer_service.sync import BackupService
+from apps.wechat_ai_customer_service.exports.readable_export import build_customer_readable_workbook
 
 
 APP_ROOT = Path(__file__).resolve().parents[2]
@@ -54,6 +57,7 @@ class VersionStore:
             "shared_knowledge_path": str(shared_target),
             "tenants_path": str(tenants_target),
         }
+        payload.update(build_download_bundle(version_id, version_root))
         (version_root / "metadata.json").write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
         db = postgres_store()
         if db:
@@ -84,6 +88,20 @@ class VersionStore:
         if not metadata_path.exists():
             return None
         return json.loads(metadata_path.read_text(encoding="utf-8"))
+
+    def download_path(self, version_id: str) -> Path:
+        metadata = self.get_version(version_id)
+        if not metadata:
+            raise FileNotFoundError(version_id)
+        package_path = Path(str(metadata.get("download_package_path") or ""))
+        if not package_path.exists() or not package_path.is_file():
+            version_root = VERSIONS_ROOT / version_id
+            metadata.update(build_download_bundle(version_id, version_root))
+            (version_root / "metadata.json").write_text(json.dumps(metadata, ensure_ascii=False, indent=2), encoding="utf-8")
+            package_path = Path(str(metadata.get("download_package_path") or ""))
+        if not package_path.exists() or not package_path.is_file():
+            raise FileNotFoundError(version_id)
+        return package_path
 
     def rollback(self, version_id: str) -> dict[str, Any]:
         version_root = VERSIONS_ROOT / version_id
@@ -173,8 +191,14 @@ def remove_version_directory(path: Path) -> None:
 
 def replace_tree(source: Path, target: Path) -> None:
     if target.exists():
-        shutil.rmtree(target)
-    shutil.copytree(source, target)
+        for child in target.iterdir():
+            if child.is_dir():
+                shutil.rmtree(child)
+            else:
+                child.unlink()
+    else:
+        target.mkdir(parents=True, exist_ok=True)
+    shutil.copytree(source, target, dirs_exist_ok=True)
 
 
 def refresh_postgres_formal_knowledge() -> None:
@@ -203,6 +227,40 @@ def refresh_postgres_formal_knowledge() -> None:
             item["payload"],
             product_id=item.get("product_id", ""),
         )
+
+
+def build_download_bundle(version_id: str, version_root: Path) -> dict[str, Any]:
+    tenant_id = active_tenant_id()
+    bundle_root = version_root / "download"
+    bundle_root.mkdir(parents=True, exist_ok=True)
+    backup = BackupService(output_root=bundle_root).build_backup(
+        scope="tenant",
+        tenant_id=tenant_id,
+        include_derived=True,
+        include_runtime=True,
+    )
+    raw_package = Path(str(backup.get("package_path") or ""))
+    readable_record = {
+        "package_id": f"local_{version_id}",
+        "account_username": tenant_id,
+        "tenant_id": tenant_id,
+        "backup_id": backup.get("backup_id"),
+        "package_path": str(raw_package),
+        "bytes": backup.get("bytes"),
+        "manifest": backup.get("manifest"),
+    }
+    readable_path = build_customer_readable_workbook(readable_record, raw_package, output_root=bundle_root / "readable")
+    bundle_path = bundle_root / f"{version_id}_complete_backup.zip"
+    with zipfile.ZipFile(bundle_path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+        archive.write(raw_package, "原始数据备份.zip")
+        archive.write(readable_path, "可读知识表.xlsx")
+        archive.writestr("备份说明.json", json.dumps(readable_record, ensure_ascii=False, indent=2))
+    return {
+        "raw_backup_package_path": str(raw_package),
+        "readable_export_path": str(readable_path),
+        "download_package_path": str(bundle_path),
+        "download_package_bytes": bundle_path.stat().st_size,
+    }
 
 
 def postgres_store():

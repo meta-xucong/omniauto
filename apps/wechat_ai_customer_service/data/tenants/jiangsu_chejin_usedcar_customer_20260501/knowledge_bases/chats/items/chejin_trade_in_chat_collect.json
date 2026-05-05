@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "category_id": "chats",
+  "id": "chejin_trade_in_chat_collect",
+  "status": "active",
+  "source": {
+    "type": "test_fixture",
+    "batch_token": "CHEJIN_20260505_214257"
+  },
+  "data": {
+    "customer_message": "我有一台老朗逸想置换",
+    "service_reply": "可以置换。麻烦补充旧车品牌车型、上牌年份、公里数、车况、所在城市和是否有贷款，估价需要人工复核。",
+    "intent_tags": [
+      "trade_in",
+      "lead_capture"
+    ],
+    "tone_tags": [
+      "专业",
+      "克制"
+    ],
+    "usable_as_template": true
+  },
+  "runtime": {
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "risk_level": "normal"
+  },
+  "review_state": {
+    "is_new": false,
+    "new_reason": "newly_added_formal_knowledge",
+    "marked_at": "2026-05-05T21:43:00",
+    "updated_at": "2026-05-06T02:28:24",
+    "read_at": "2026-05-06T02:28:24",
+    "read_by": "admin",
+    "source": {
+      "source_module": "jiangsu_chejin_test",
+      "target_category": "chats",
+      "item_id": "chejin_trade_in_chat_collect"
+    }
+  },
+  "metadata": {
+    "created_at": "2026-05-05T21:43:00",
+    "updated_at": "2026-05-06T02:28:24",
+    "created_by": "admin",
+    "updated_by": "admin"
+  }
+}

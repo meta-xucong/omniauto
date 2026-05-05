@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import shutil
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -11,7 +12,16 @@ from fastapi import APIRouter, HTTPException, Request
 
 from ..auth_context import current_auth_context
 from apps.wechat_ai_customer_service.auth import assert_allowed
-from apps.wechat_ai_customer_service.knowledge_paths import TENANTS_ROOT, active_tenant_id, normalize_tenant_id, tenant_metadata_path, tenant_root
+from apps.wechat_ai_customer_service.knowledge_paths import (
+    DEFAULT_TENANT_ID,
+    LEGACY_KNOWLEDGE_BASE_ROOT,
+    TENANTS_ROOT,
+    active_tenant_id,
+    normalize_tenant_id,
+    tenant_knowledge_base_root,
+    tenant_metadata_path,
+    tenant_root,
+)
 
 
 router = APIRouter(prefix="/api/tenants", tags=["tenants"])
@@ -52,6 +62,7 @@ def create_tenant(request: Request, payload: dict[str, Any]) -> dict[str, Any]:
     (root / "product_item_knowledge").mkdir(parents=True, exist_ok=True)
     (root / "rag_sources").mkdir(parents=True, exist_ok=True)
     (root / "rag_experience").mkdir(parents=True, exist_ok=True)
+    initialize_tenant_knowledge_base(tenant_id)
     write_json(tenant_metadata_path(tenant_id), metadata)
     return {"ok": True, "item": tenant_summary(tenant_id)}
 
@@ -77,6 +88,32 @@ def tenant_summary(tenant_id: str) -> dict[str, Any]:
         "sync": metadata.get("sync") if isinstance(metadata.get("sync"), dict) else {},
         "updated_at": file_mtime(tenant_metadata_path(tenant_id)),
     }
+
+
+def initialize_tenant_knowledge_base(tenant_id: str) -> None:
+    target = tenant_knowledge_base_root(tenant_id)
+    source = tenant_knowledge_base_root(DEFAULT_TENANT_ID)
+    if not (source / "registry.json").exists():
+        source = LEGACY_KNOWLEDGE_BASE_ROOT
+    registry = read_json(source / "registry.json", default={})
+    if not registry:
+        return
+    write_json(target / "registry.json", registry)
+    for category in registry.get("categories", []) or []:
+        category_path = str(category.get("path") or category.get("id") or "").strip()
+        if not category_path:
+            continue
+        source_category = source / category_path
+        target_category = target / category_path
+        target_items = target_category / "items"
+        target_items.mkdir(parents=True, exist_ok=True)
+        (target_items / ".gitkeep").write_text("\n", encoding="utf-8")
+        for filename in ("schema.json", "resolver.json"):
+            source_file = source_category / filename
+            target_file = target_category / filename
+            if source_file.exists() and not target_file.exists():
+                target_file.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(source_file, target_file)
 
 
 def read_json(path: Path, *, default: Any) -> Any:

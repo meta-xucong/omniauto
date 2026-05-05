@@ -10,50 +10,12 @@ from __future__ import annotations
 import re
 from typing import Any
 
+from apps.wechat_ai_customer_service.platform_understanding_rules import intent_group, rag_terms
+
 
 DEFAULT_MAX_REPLY_CHARS = 220
 DEFAULT_MAX_SNIPPET_CHARS = 130
 DEFAULT_MIN_HIT_SCORE = 0.12
-
-AUTHORITY_TAGS = {
-    "quote",
-    "discount",
-    "stock",
-    "shipping",
-    "invoice",
-    "payment",
-    "after_sales",
-    "handoff",
-    "customer_data",
-}
-SOFT_REFERENCE_TAGS = {"scene_product", "spec", "catalog", "small_talk", "greeting"}
-SOFT_ACTIONS = {
-    "answer_from_evidence",
-    "ask_for_contact_fields",
-    "review_or_default_reply",
-    "reply_small_talk",
-    "reply_greeting",
-}
-RISK_TERMS = {
-    "最低价",
-    "账期",
-    "月结",
-    "赔偿",
-    "退款",
-    "退货",
-    "合同",
-    "盖章",
-    "安装费",
-    "上门安装",
-    "先发货",
-    "赊账",
-    "白条",
-    "虚开发票",
-    "假发票",
-    "包赔",
-    "保证到",
-    "保证效果",
-}
 
 
 def maybe_build_rag_reply(
@@ -155,7 +117,7 @@ def rag_reply_allowed_for_decision(
     matched = bool(getattr(decision, "matched", False))
     if rule_name in {"customer_data_capture", "customer_data_incomplete"}:
         return False
-    if intent_tags & AUTHORITY_TAGS:
+    if intent_tags & intent_group("rag_authority_block"):
         return False
     if product_knowledge.get("matched"):
         return bool(settings.get("apply_to_matched_product", False))
@@ -164,7 +126,7 @@ def rag_reply_allowed_for_decision(
     if not matched or reason == "no_rule_matched":
         if not bool(settings.get("apply_to_unmatched", True)):
             return False
-        return bool((intent_tags & SOFT_REFERENCE_TAGS) or candidate_action in SOFT_ACTIONS)
+        return bool((intent_tags & intent_group("rag_soft_reference")) or candidate_action in intent_group("rag_soft_actions"))
     return False
 
 
@@ -242,7 +204,7 @@ def hit_has_risk(hit: dict[str, Any]) -> bool:
 
 
 def has_risk_terms(text: str) -> bool:
-    return any(term in text for term in RISK_TERMS)
+    return any(term in text for term in rag_terms("high_risk_terms"))
 
 
 def clean_snippet(text: str, *, max_chars: int) -> str:

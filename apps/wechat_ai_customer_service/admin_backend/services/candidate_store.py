@@ -11,24 +11,27 @@ from pathlib import Path
 from typing import Any
 
 from .audit_log import append_audit
+from .candidate_badges import enrich_candidate
 from .diagnostics_service import DiagnosticsService
 from .draft_store import DraftStore
+from .formal_review_state import mark_item_new
 from .knowledge_base_store import KnowledgeBaseStore
 from .knowledge_compiler import KnowledgeCompiler
 from .knowledge_deduper import KnowledgeDeduper, normalize_key, normalize_price_tiers
 from .version_store import VersionStore
-from apps.wechat_ai_customer_service.knowledge_paths import active_tenant_id
+from apps.wechat_ai_customer_service.knowledge_paths import active_tenant_id, tenant_review_candidates_root
+from apps.wechat_ai_customer_service.platform_understanding_rules import intent_keywords
 from apps.wechat_ai_customer_service.storage import get_postgres_store, load_storage_config
 from apps.wechat_ai_customer_service.workflows.knowledge_intake import evaluate_intake_item
 
 
 APP_ROOT = Path(__file__).resolve().parents[2]
-REVIEW_ROOT = APP_ROOT / "data" / "review_candidates"
 STRUCTURED_ROOT = APP_ROOT / "data" / "structured"
 TARGET_FILES = {
     "product_knowledge": STRUCTURED_ROOT / "product_knowledge.example.json",
     "style_examples": STRUCTURED_ROOT / "style_examples.json",
 }
+PRODUCT_SCOPED_TARGET_CATEGORIES = {"product_faq", "product_rules", "product_explanations"}
 
 
 class CandidateStore:
@@ -40,7 +43,7 @@ class CandidateStore:
         self.base_store = KnowledgeBaseStore()
         self.deduper = KnowledgeDeduper(self.base_store)
 
-    def list_candidates(self, status: str) -> list[dict[str, Any]]:
+    def list_candidates(self, status: str, *, compact: bool = False) -> list[dict[str, Any]]:
         db_items: list[dict[str, Any]] = []
         db = postgres_store()
         if db:
@@ -49,21 +52,16 @@ class CandidateStore:
         root = self.status_root(status)
         items = [json.loads(path.read_text(encoding="utf-8")) for path in sorted(root.glob("*.json"), reverse=True)] if root.exists() else []
         items = filter_candidates_by_status(items, status)
-        if status != "pending":
-            return merge_candidates(db_items, items)
-        visible_items = []
-        for item in merge_candidates(db_items, items):
-            duplicate = self.deduper.check_candidate(item)
-            if duplicate.get("duplicate") and duplicate.get("source") == "knowledge_base":
-                continue
-            visible_items.append(item)
-        return visible_items
+        enriched = [enrich_candidate(item) for item in merge_candidates(db_items, items)]
+        if compact:
+            return [compact_candidate(item) for item in enriched]
+        return enriched
 
     def get_candidate(self, candidate_id: str) -> dict[str, Any] | None:
         path = self.find_path(candidate_id)
         if not path:
             return None
-        return json.loads(path.read_text(encoding="utf-8"))
+        return enrich_candidate(json.loads(path.read_text(encoding="utf-8")))
 
     def update_candidate(self, candidate_id: str, patch: dict[str, Any]) -> dict[str, Any]:
         path = self.require_path(candidate_id)
@@ -73,7 +71,7 @@ class CandidateStore:
         path.write_text(json.dumps(candidate, ensure_ascii=False, indent=2), encoding="utf-8")
         upsert_candidate_to_db(candidate)
         append_audit("candidate_updated", {"candidate_id": candidate_id})
-        return {"ok": True, "item": candidate}
+        return {"ok": True, "item": enrich_candidate(candidate)}
 
     def supplement_candidate(self, candidate_id: str, data: dict[str, Any]) -> dict[str, Any]:
         path = self.require_path(candidate_id)
@@ -94,7 +92,7 @@ class CandidateStore:
         path.write_text(json.dumps(candidate, ensure_ascii=False, indent=2), encoding="utf-8")
         upsert_candidate_to_db(candidate)
         append_audit("candidate_supplemented", {"candidate_id": candidate_id, "target_category": target_category})
-        return {"ok": True, "item": candidate}
+        return {"ok": True, "item": enrich_candidate(candidate)}
 
     def change_candidate_category(self, candidate_id: str, target_category: str) -> dict[str, Any]:
         path = self.require_path(candidate_id)
@@ -108,6 +106,13 @@ class CandidateStore:
         source_data = source_item.get("data") if isinstance(source_item.get("data"), dict) else {}
         evidence = str((candidate.get("source") or {}).get("evidence_excerpt") or "")
         transformed_data = transform_candidate_data_for_category(source_data, target_category, evidence, schema)
+        if target_category in PRODUCT_SCOPED_TARGET_CATEGORIES:
+            product_id = str(transformed_data.get("product_id") or "").strip()
+            if not product_id or not self.base_store.get_item("products", product_id):
+                return {
+                    "ok": False,
+                    "message": "商品专属知识必须先绑定到一个已存在商品。请从商品库的商品详情里维护专属问答、规则或解释。",
+                }
         item_id = safe_candidate_item_id(
             str(
                 transformed_data.get("sku")
@@ -139,27 +144,27 @@ class CandidateStore:
         path.write_text(json.dumps(candidate, ensure_ascii=False, indent=2), encoding="utf-8")
         upsert_candidate_to_db(candidate)
         append_audit("candidate_category_changed", {"candidate_id": candidate_id, "target_category": target_category})
-        return {"ok": True, "item": candidate}
+        return {"ok": True, "item": enrich_candidate(candidate)}
 
     def reject(self, candidate_id: str, reason: str) -> dict[str, Any]:
-        candidate = self.get_candidate(candidate_id)
         source = self.require_path(candidate_id)
+        candidate = json.loads(source.read_text(encoding="utf-8"))
         candidate.setdefault("review", {}).update(
             {"status": "rejected", "rejected_at": datetime.now().isoformat(timespec="seconds"), "reason": reason}
         )
         target = self.status_root("rejected") / source.name
         self.move_candidate(source, target, candidate)
         append_audit("candidate_rejected", {"candidate_id": candidate_id, "reason": reason})
-        return {"ok": True, "item": candidate}
+        return {"ok": True, "item": enrich_candidate(candidate)}
 
     def approve(self, candidate_id: str) -> dict[str, Any]:
-        candidate = self.get_candidate(candidate_id)
         source = self.require_path(candidate_id)
+        candidate = json.loads(source.read_text(encoding="utf-8"))
         candidate.setdefault("review", {}).update({"status": "approved", "approved_at": datetime.now().isoformat(timespec="seconds")})
         target = self.status_root("approved") / source.name
         self.move_candidate(source, target, candidate)
         append_audit("candidate_approved", {"candidate_id": candidate_id})
-        return {"ok": True, "item": candidate}
+        return {"ok": True, "item": enrich_candidate(candidate)}
 
     def apply(self, candidate_id: str) -> dict[str, Any]:
         source = self.require_path(candidate_id)
@@ -235,6 +240,16 @@ class CandidateStore:
             "before candidate native apply",
             {"candidate_id": candidate_id, "target_category": target_category, "item_id": item_id},
         )
+        item = mark_item_new(
+            item,
+            {
+                "source_module": "candidate",
+                "candidate_id": candidate_id,
+                "target_category": target_category,
+                "item_id": item_id,
+            },
+        )
+        patch["item"] = item
         result = self.base_store.save_item(target_category, item)
         if not result.get("ok"):
             return {"ok": False, "message": "save failed", "validation": result}
@@ -260,7 +275,7 @@ class CandidateStore:
                 "version_id": snapshot["version_id"],
             },
         )
-        return {"ok": True, "item": candidate, "snapshot": snapshot, "saved_item": result.get("item")}
+        return {"ok": True, "item": enrich_candidate(candidate), "snapshot": snapshot, "saved_item": result.get("item")}
 
     def merge_existing_context(self, target_category: str, item: dict[str, Any]) -> dict[str, Any]:
         if target_category != "products":
@@ -330,13 +345,14 @@ class CandidateStore:
         return patch if isinstance(patch, dict) else None
 
     def status_root(self, status: str) -> Path:
-        root = REVIEW_ROOT / status
+        root = tenant_review_candidates_root() / status
         root.mkdir(parents=True, exist_ok=True)
         return root
 
     def find_path(self, candidate_id: str) -> Path | None:
+        root = tenant_review_candidates_root()
         for status in ("pending", "approved", "rejected"):
-            path = REVIEW_ROOT / status / f"{candidate_id}.json"
+            path = root / status / f"{candidate_id}.json"
             if path.exists():
                 return path
         return None
@@ -387,6 +403,67 @@ def filter_candidates_by_status(items: list[dict[str, Any]], status: str) -> lis
         if item_status == expected:
             filtered.append(item)
     return filtered
+
+
+def compact_candidate(candidate: dict[str, Any]) -> dict[str, Any]:
+    proposal = candidate.get("proposal") if isinstance(candidate.get("proposal"), dict) else {}
+    formal_patch = proposal.get("formal_patch") if isinstance(proposal.get("formal_patch"), dict) else {}
+    item = formal_patch.get("item") if isinstance(formal_patch.get("item"), dict) else {}
+    data = item.get("data") if isinstance(item.get("data"), dict) else {}
+    return {
+        "candidate_id": candidate.get("candidate_id"),
+        "generated_at": candidate.get("generated_at"),
+        "review": compact_candidate_review(candidate.get("review")),
+        "intake": compact_candidate_intake(candidate.get("intake")),
+        "proposal": {
+            "summary": proposal.get("summary") or "",
+            "formal_patch": {
+                "target_category": formal_patch.get("target_category") or proposal.get("target_category") or "",
+                "operation": formal_patch.get("operation") or "",
+                "item": {
+                    "id": item.get("id") or "",
+                    "data": compact_candidate_data(data),
+                },
+            },
+        },
+        "display_badges": candidate.get("display_badges") if isinstance(candidate.get("display_badges"), list) else [],
+        "source_summary": candidate.get("source_summary") if isinstance(candidate.get("source_summary"), dict) else {},
+        "primary_status": candidate.get("primary_status") or "",
+        "can_promote": candidate.get("can_promote"),
+    }
+
+
+def compact_candidate_review(value: Any) -> dict[str, Any]:
+    review = value if isinstance(value, dict) else {}
+    keys = ["status", "completeness_status", "applied", "updated_at", "created_at"]
+    return {key: review.get(key) for key in keys if review.get(key) not in (None, "", [], {})}
+
+
+def compact_candidate_intake(value: Any) -> dict[str, Any]:
+    intake = value if isinstance(value, dict) else {}
+    keys = ["status"]
+    return {key: intake.get(key) for key in keys if intake.get(key) not in (None, "", [], {})}
+
+
+def compact_candidate_data(data: dict[str, Any]) -> dict[str, Any]:
+    fields = [
+        "name",
+        "title",
+        "sku",
+        "category",
+        "customer_message",
+        "question",
+        "answer",
+        "service_reply",
+        "policy_type",
+        "price",
+        "unit",
+        "inventory",
+        "product_id",
+        "product_category",
+        "applicability_scope",
+    ]
+    return {field: data.get(field) for field in fields if data.get(field) not in (None, "", [], {})}
 
 
 def merge_product_data(existing_data: dict[str, Any], candidate_data: dict[str, Any]) -> dict[str, Any]:
@@ -462,13 +539,16 @@ def transform_to_policy_data(source_data: dict[str, Any], evidence: str) -> dict
             "title": title,
             "policy_type": policy_type,
             "keywords": keywords,
+            "applicability_scope": source_data.get("applicability_scope") or "global",
+            "product_id": source_data.get("product_id") or details.get("product_id") or "",
+            "product_category": source_data.get("product_category") or source_data.get("category") or details.get("商品类目") or "",
             "answer": answer,
             "allow_auto_reply": source_data.get("allow_auto_reply", True),
             "requires_handoff": source_data.get("requires_handoff", False),
             "handoff_reason": source_data.get("handoff_reason", ""),
             "operator_alert": source_data.get("operator_alert", False),
             "risk_level": source_data.get("risk_level") or "normal",
-            "additional_details": merge_non_empty_dicts(details, remaining_details(source_data, {"title", "policy_type", "keywords", "answer", "allow_auto_reply", "requires_handoff", "handoff_reason", "operator_alert", "risk_level"})),
+            "additional_details": merge_non_empty_dicts(details, remaining_details(source_data, {"title", "policy_type", "keywords", "applicability_scope", "product_id", "product_category", "category", "answer", "allow_auto_reply", "requires_handoff", "handoff_reason", "operator_alert", "risk_level"})),
         }
     )
 
@@ -520,7 +600,10 @@ def transform_to_chat_data(source_data: dict[str, Any], evidence: str) -> dict[s
             "intent_tags": to_list(source_data.get("intent_tags") or source_data.get("keywords")) or ["general"],
             "tone_tags": to_list(source_data.get("tone_tags")) or ["人工整理"],
             "linked_categories": to_list(source_data.get("linked_categories")),
-            "additional_details": remaining_details(source_data, {"customer_message", "question", "service_reply", "answer", "intent_tags", "keywords", "tone_tags", "linked_categories"}),
+            "applicability_scope": source_data.get("applicability_scope") or "global",
+            "product_id": source_data.get("product_id") or "",
+            "product_category": source_data.get("product_category") or source_data.get("category") or "",
+            "additional_details": remaining_details(source_data, {"customer_message", "question", "service_reply", "answer", "intent_tags", "keywords", "tone_tags", "linked_categories", "applicability_scope", "product_id", "product_category", "category"}),
         }
     )
 
@@ -600,7 +683,7 @@ def safe_product_id(value: str) -> str:
 
 def looks_like_company_data(data: dict[str, Any], evidence: str = "") -> bool:
     payload = json.dumps(data, ensure_ascii=False) + "\n" + str(evidence or "")
-    signals = ["公司名称", "主营范围", "主营业务", "公司信息", "对外客服人设", "客服人设", "开票信息", "生产方", "厂家"]
+    signals = intent_keywords().get("company", [])
     return any(signal in payload for signal in signals) or bool(re.search(r"[\u4e00-\u9fffA-Za-z0-9（）()]+(?:有限公司|有限责任公司|股份有限公司)", payload))
 
 
@@ -746,9 +829,9 @@ def postgres_store():
     return store if store.available() else None
 
 
-def upsert_candidate_to_db(candidate: dict[str, Any]) -> None:
+def upsert_candidate_to_db(candidate: dict[str, Any], *, tenant_id: str | None = None) -> None:
     db = postgres_store()
     if not db:
         return
     review = candidate.get("review") if isinstance(candidate.get("review"), dict) else {}
-    db.upsert_candidate(active_tenant_id(), candidate, status=str(review.get("status") or "pending"))
+    db.upsert_candidate(active_tenant_id(tenant_id), candidate, status=str(review.get("status") or "pending"))

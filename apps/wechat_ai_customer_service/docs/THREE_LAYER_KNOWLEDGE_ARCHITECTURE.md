@@ -1,5 +1,7 @@
 # WeChat AI Customer Service Three-Layer Knowledge Architecture
 
+> 2026-05-05 更新：shared layer 的正式来源已从客户端本地目录迁移为 VPS 云端 `shared_library`。客户端 runtime 使用云端快照缓存承载 shared layer，legacy `data/shared_knowledge` 默认不再参与检索。
+
 ## Goal
 
 The WeChat AI customer-service app must support multiple customer tenants while still allowing shared assistant knowledge to improve over time. Knowledge is separated by ownership and applicability so the runtime can load only the useful slice for each reply.

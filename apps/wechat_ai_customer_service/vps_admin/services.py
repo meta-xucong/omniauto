@@ -3,7 +3,12 @@
 from __future__ import annotations
 
 import json
+import hmac
+import os
+import re
 import secrets
+from hashlib import sha256
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -11,8 +16,21 @@ from fastapi import HTTPException
 
 from apps.wechat_ai_customer_service.auth.email_verification import EmailVerificationService, email_settings_from_config, normalize_email
 from apps.wechat_ai_customer_service.auth.models import AuthSession, Role
-from apps.wechat_ai_customer_service.knowledge_paths import DEFAULT_TENANT_ID, active_tenant_id, runtime_app_root
-from apps.wechat_ai_customer_service.sync import BackupService
+from apps.wechat_ai_customer_service.auth.session import read_local_account_overrides_from_env
+from apps.wechat_ai_customer_service.knowledge_paths import (
+    DEFAULT_TENANT_ID,
+    TENANTS_ROOT,
+    active_tenant_id,
+    runtime_app_root,
+    tenant_knowledge_base_root,
+    tenant_metadata_path,
+)
+from apps.wechat_ai_customer_service.sync import BackupService, SharedPatchService
+from apps.wechat_ai_customer_service.workflows.generate_review_candidates import (
+    call_deepseek_json,
+    compact_excerpt,
+    stable_digest,
+)
 
 from .auth import (
     VpsAdminAuthService,
@@ -24,7 +42,7 @@ from .auth import (
     require_customer_or_guest,
 )
 from .local_data import build_shared_knowledge_snapshot, build_tenant_data_summary
-from .readable_export import build_customer_readable_workbook
+from apps.wechat_ai_customer_service.exports.readable_export import build_customer_readable_workbook
 from .store import VpsAdminStore, append_audit, now_iso
 
 
@@ -33,8 +51,12 @@ class TenantService:
         self.store = store
 
     def list_tenants(self) -> list[dict[str, Any]]:
-        tenants = self.store.read().get("tenants", {})
-        return sorted(tenants.values(), key=lambda item: str(item.get("tenant_id") or ""))
+        def mutate(state: dict[str, Any]) -> list[dict[str, Any]]:
+            seed_local_customer_accounts(state)
+            tenants = state.get("tenants", {})
+            return sorted(tenants.values(), key=lambda item: str(item.get("tenant_id") or ""))
+
+        return self.store.update(mutate)
 
     def create_tenant(self, payload: dict[str, Any], *, actor: AuthSession) -> dict[str, Any]:
         tenant_id = active_tenant_id(payload.get("tenant_id") or payload.get("id") or make_id("tenant"))
@@ -110,8 +132,8 @@ class OverviewService:
             "latest_data_package": latest_data_package,
             "recommendations": [
                 {
-                    "title": "共享公共知识已和客户专业知识分层",
-                    "detail": "共享公共知识位于 data/shared_knowledge；客户正式知识、商品专属知识和 RAG 数据位于 tenant 目录。",
+                    "title": "云端正式共享库已和客户专业知识分层",
+                    "detail": "共享公共知识以云端 shared_library 为唯一正式来源；客户正式知识、商品专属知识和 RAG 数据仍位于 tenant 目录。",
                     "status": "ok",
                 },
                 {
@@ -235,9 +257,12 @@ class UserService:
         self.auth = auth
 
     def list_users(self) -> list[dict[str, Any]]:
-        state = self.store.read()
-        users = state.get("users", {})
-        return sorted((self.public_user_with_access(item, state=state) for item in users.values()), key=lambda item: str(item.get("username") or ""))
+        def mutate(state: dict[str, Any]) -> list[dict[str, Any]]:
+            seed_local_customer_accounts(state)
+            users = state.get("users", {})
+            return sorted((self.public_user_with_access(item, state=state) for item in users.values()), key=lambda item: str(item.get("username") or ""))
+
+        return self.store.update(mutate)
 
     def create_user(self, payload: dict[str, Any], *, actor: AuthSession) -> dict[str, Any]:
         username = str(payload.get("username") or "").strip()
@@ -394,6 +419,7 @@ class CustomerDataService:
             raise HTTPException(status_code=400, detail="account_username or tenant_id required")
 
         state = self.store.read()
+        seed_local_customer_accounts(state)
         user = None
         if username:
             for candidate in state.get("users", {}).values():
@@ -413,7 +439,12 @@ class CustomerDataService:
         if tenant not in state.get("tenants", {}):
             raise HTTPException(status_code=404, detail=f"tenant not found: {tenant}")
 
-        backup = BackupService(output_root=runtime_app_root() / "vps_admin" / "customer_packages").build_backup(scope="tenant", tenant_id=tenant)
+        backup = BackupService(output_root=runtime_app_root() / "vps_admin" / "customer_packages").build_backup(
+            scope="tenant",
+            tenant_id=tenant,
+            include_derived=True,
+            include_runtime=True,
+        )
         summary = build_tenant_data_summary(tenant)
         package_id = f"data_pkg_{username or tenant}_{backup['backup_id']}"
         package = {
@@ -431,6 +462,7 @@ class CustomerDataService:
         }
 
         def mutate(next_state: dict[str, Any]) -> dict[str, Any]:
+            seed_local_customer_accounts(next_state)
             ensure_tenant_exists(next_state, tenant)
             next_state["customer_data_packages"][package_id] = package
             append_audit(
@@ -480,7 +512,7 @@ class CustomerDataService:
     def readable_export_path(self, package_id: str) -> Path:
         record = self.get_package(package_id)
         package_path = self.package_path(package_id)
-        return build_customer_readable_workbook(record, package_path)
+        return build_customer_readable_workbook(record, package_path, output_root=runtime_app_root() / "vps_admin" / "readable_exports")
 
     def delete_package(self, package_id: str, *, actor: AuthSession) -> dict[str, Any]:
         def mutate(state: dict[str, Any]) -> dict[str, Any]:
@@ -526,7 +558,12 @@ class CustomerDataService:
             "created_at": now_iso(),
             "updated_at": now_iso(),
         }
-        backup = BackupService(output_root=runtime_app_root() / "vps_admin" / "customer_packages").build_backup(scope="tenant", tenant_id=tenant)
+        backup = BackupService(output_root=runtime_app_root() / "vps_admin" / "customer_packages").build_backup(
+            scope="tenant",
+            tenant_id=tenant,
+            include_derived=True,
+            include_runtime=True,
+        )
         summary = build_tenant_data_summary(tenant)
         package_id = f"data_pkg_{username}_{backup['backup_id']}"
         package = {
@@ -660,6 +697,8 @@ class CommandService:
                 node = state["local_nodes"][node_id]
                 if tenant not in node.get("tenant_ids", []):
                     raise HTTPException(status_code=403, detail="node is not authorized for this tenant")
+                node["status"] = "online"
+                node["last_seen_at"] = now_iso()
             commands: list[dict[str, Any]] = []
             for record in state["commands"].values():
                 if record.get("tenant_id") != tenant:
@@ -724,6 +763,10 @@ class SharedKnowledgeService:
             return sorted(normalized, key=lambda item: str(item.get("updated_at") or item.get("created_at") or ""), reverse=True)
 
         return self.store.update(mutate)
+
+    def official_snapshot(self, *, tenant_id: str = "", since_version: str = "") -> dict[str, Any]:
+        state = self.store.read()
+        return build_official_shared_knowledge_snapshot(state, tenant_id=tenant_id, since_version=since_version)
 
     def get_library_item(self, item_id: str) -> dict[str, Any]:
         def mutate(state: dict[str, Any]) -> dict[str, Any]:
@@ -807,6 +850,7 @@ class SharedKnowledgeService:
         operations = payload.get("operations")
         if not isinstance(operations, list) or not operations:
             raise HTTPException(status_code=400, detail="proposal operations required")
+        source_meta = payload.get("source_meta") if isinstance(payload.get("source_meta"), dict) else {}
         record = {
             "proposal_id": proposal_id,
             "tenant_id": tenant_id,
@@ -814,14 +858,35 @@ class SharedKnowledgeService:
             "summary": str(payload.get("summary") or ""),
             "operations": operations,
             "source": str(payload.get("source") or "local"),
+            "source_meta": source_meta,
             "status": "pending_review",
             "created_by": actor_id,
             "created_at": now_iso(),
             "updated_at": now_iso(),
         }
+        if isinstance(payload.get("review_assist"), dict):
+            record["review_assist"] = normalize_shared_review_assist(payload.get("review_assist"), provider="submitted_review_assist")
 
         def mutate(state: dict[str, Any]) -> dict[str, Any]:
             ensure_tenant_exists(state, tenant_id)
+            seed_shared_library_if_empty(state)
+            duplicate = find_duplicate_shared_proposal(record, state)
+            if duplicate:
+                return {**duplicate, "skip_reason": "already_pending_or_reviewed"}
+            if shared_proposal_matches_library(record, state.get("shared_library", {}).values()):
+                existing = {
+                    **record,
+                    "status": "skipped",
+                    "skip_reason": "already_in_shared_library",
+                    "updated_at": now_iso(),
+                }
+                return existing
+            if "review_assist" not in record:
+                record["review_assist"] = build_shared_proposal_review_assist(
+                    record,
+                    state.get("shared_library", {}).values(),
+                    use_llm=True,
+                )
             state["shared_proposals"][proposal_id] = record
             append_audit(state, actor_id=actor_id, action="submit_shared_proposal", target_type="shared_proposal", target_id=proposal_id)
             return record
@@ -832,6 +897,149 @@ class SharedKnowledgeService:
         proposals = self.store.read().get("shared_proposals", {})
         return sorted(proposals.values(), key=lambda item: str(item.get("created_at") or ""), reverse=True)
 
+    def generate_universal_proposals(self, payload: dict[str, Any], *, actor: AuthSession) -> dict[str, Any]:
+        use_llm = payload.get("use_llm", True) is not False
+        limit = clamp_int(payload.get("limit"), default=30, minimum=1, maximum=200)
+        requested_tenant = active_tenant_id(payload.get("tenant_id")) if str(payload.get("tenant_id") or "").strip() else ""
+        only_unscanned = payload.get("only_unscanned", True) is not False
+        rescan = bool(payload.get("rescan") or payload.get("force"))
+
+        def mutate(state: dict[str, Any]) -> dict[str, Any]:
+            seed_local_customer_accounts(state)
+            seed_shared_library_if_empty(state)
+            scan_state = state.setdefault("shared_scan_state", {})
+            collected_entries = collect_universal_formal_entries(state, limit=limit, tenant_id=requested_tenant)
+            entries = filter_unscanned_formal_entries(collected_entries, scan_state, only_unscanned=only_unscanned, rescan=rescan)
+            suggestions = build_universal_shared_suggestions(entries, use_llm=use_llm)
+            created: list[dict[str, Any]] = []
+            skipped: list[dict[str, Any]] = []
+            suggested_formal_keys: set[str] = set()
+            for suggestion in suggestions:
+                source_key = str(suggestion.get("source_key") or "")
+                formal_keys = formal_source_keys_for_suggestion(suggestion)
+                suggested_formal_keys.update(formal_keys)
+                duplicate = find_duplicate_shared_suggestion(suggestion, state)
+                if duplicate:
+                    reason = str(duplicate.get("reason") or "duplicate")
+                    skipped.append({"source_key": source_key, "reason": reason})
+                    mark_shared_scan_state(
+                        scan_state,
+                        formal_keys,
+                        status=reason,
+                        detail={"proposal_id": duplicate.get("proposal_id"), "library_item_id": duplicate.get("library_item_id")},
+                        use_llm=use_llm,
+                    )
+                    continue
+                proposal_id = "proposal_shared_" + stable_digest(f"{source_key}:{suggestion.get('title')}", 18)
+                content = build_shared_content_from_suggestion(suggestion)
+                proposal = {
+                    "proposal_id": proposal_id,
+                    "tenant_id": str(suggestion.get("tenant_id") or DEFAULT_TENANT_ID),
+                    "title": str(suggestion.get("title") or proposal_id),
+                    "summary": str(suggestion.get("summary") or "AI 从客户正式知识库提炼出的通用共享知识候选。"),
+                    "operations": [
+                        {
+                            "op": "upsert_json",
+                            "path": f"{content['category_id']}/items/{content['id']}.json",
+                            "content": content,
+                        }
+                    ],
+                    "source": str(suggestion.get("provider") or "formal_knowledge_universal_extraction"),
+                    "source_meta": {
+                        "source_key": source_key,
+                        "source_items": suggestion.get("source_items", []),
+                        "universal_reason": suggestion.get("universal_reason", ""),
+                        "llm_used": bool(suggestion.get("llm_used")),
+                    },
+                    "status": "pending_review",
+                    "created_by": actor.user.user_id,
+                    "created_at": now_iso(),
+                    "updated_at": now_iso(),
+                }
+                proposal["review_assist"] = build_shared_proposal_review_assist(
+                    proposal,
+                    state.get("shared_library", {}).values(),
+                    use_llm=use_llm,
+                )
+                state["shared_proposals"][proposal_id] = proposal
+                mark_shared_scan_state(
+                    scan_state,
+                    formal_keys,
+                    status="proposed",
+                    detail={"proposal_id": proposal_id, "source_key": source_key},
+                    use_llm=use_llm,
+                )
+                created.append(proposal)
+            not_recommended_keys = [
+                str(entry.get("source_key") or "")
+                for entry in entries
+                if str(entry.get("source_key") or "") and str(entry.get("source_key") or "") not in suggested_formal_keys
+            ]
+            mark_shared_scan_state(
+                scan_state,
+                not_recommended_keys,
+                status="not_recommended",
+                detail={"reason": "LLM/规则判断不适合进入共享公共知识候选"},
+                use_llm=use_llm,
+            )
+            append_audit(
+                state,
+                actor_id=actor.user.user_id,
+                action="generate_shared_universal_proposals",
+                target_type="shared_proposal",
+                target_id="bulk",
+                detail={
+                    "created_count": len(created),
+                    "skipped_count": len(skipped),
+                    "entry_count": len(entries),
+                    "collected_count": len(collected_entries),
+                    "only_unscanned": only_unscanned,
+                    "use_llm": use_llm,
+                },
+            )
+            return {
+                "created": created,
+                "skipped": skipped,
+                "entry_count": len(entries),
+                "collected_count": len(collected_entries),
+                "scan": {
+                    "only_unscanned": only_unscanned,
+                    "rescan": rescan,
+                    "checked_count": len(entries),
+                    "newly_marked_not_recommended": len(not_recommended_keys),
+                    "scan_state_count": len(scan_state),
+                },
+                "provider": suggestions[0].get("provider") if suggestions else "none",
+            }
+
+        return self.store.update(mutate)
+
+    def refresh_proposal_review_assist(self, proposal_id: str, payload: dict[str, Any], *, actor: AuthSession) -> dict[str, Any]:
+        use_llm = payload.get("use_llm", True) is not False
+
+        def mutate(state: dict[str, Any]) -> dict[str, Any]:
+            if proposal_id not in state["shared_proposals"]:
+                raise HTTPException(status_code=404, detail=f"proposal not found: {proposal_id}")
+            seed_shared_library_if_empty(state)
+            proposal = state["shared_proposals"][proposal_id]
+            proposal["review_assist"] = build_shared_proposal_review_assist(
+                proposal,
+                state.get("shared_library", {}).values(),
+                use_llm=use_llm,
+            )
+            proposal["updated_at"] = now_iso()
+            append_audit(
+                state,
+                actor_id=actor.user.user_id,
+                action="refresh_shared_proposal_review_assist",
+                target_type="shared_proposal",
+                target_id=proposal_id,
+                detail={"use_llm": use_llm},
+            )
+            return {"proposal": proposal, "review_assist": proposal.get("review_assist")}
+
+        return self.store.update(mutate)
+
     def review_proposal(self, proposal_id: str, payload: dict[str, Any], *, actor: AuthSession) -> dict[str, Any]:
         action = str(payload.get("action") or "").strip().lower()
         if action not in {"accept", "reject", "void"}:
@@ -841,19 +1049,20 @@ class SharedKnowledgeService:
             if proposal_id not in state["shared_proposals"]:
                 raise HTTPException(status_code=404, detail=f"proposal not found: {proposal_id}")
             proposal = state["shared_proposals"][proposal_id]
+            seed_shared_library_if_empty(state)
+            if not isinstance(proposal.get("review_assist"), dict):
+                proposal["review_assist"] = build_shared_proposal_review_assist(
+                    proposal,
+                    state.get("shared_library", {}).values(),
+                    use_llm=payload.get("use_llm", True) is not False,
+                )
             proposal["reviewed_by"] = actor.user.user_id
             proposal["reviewed_at"] = now_iso()
             proposal["review_note"] = str(payload.get("note") or "")
             proposal["updated_at"] = now_iso()
+            formal_keys = shared_proposal_formal_source_keys(proposal)
             if action == "accept":
                 patch_id = str(payload.get("patch_id") or make_id("patch"))
-                library_items = upsert_shared_library_from_operations(
-                    state,
-                    proposal.get("operations", []),
-                    actor_id=actor.user.user_id,
-                    source=f"proposal:{proposal_id}",
-                    tenant_id=str(proposal.get("tenant_id") or ""),
-                )
                 patch = {
                     "schema_version": 1,
                     "patch_id": patch_id,
@@ -862,45 +1071,121 @@ class SharedKnowledgeService:
                     "tenant_id": proposal.get("tenant_id"),
                     "operations": proposal.get("operations", []),
                     "status": "published",
-                    "library_item_ids": [item.get("item_id") for item in library_items],
                     "created_by": actor.user.user_id,
                     "created_at": now_iso(),
                 }
+                validate_shared_patch_payload(patch)
+                library_items = upsert_shared_library_from_operations(
+                    state,
+                    proposal.get("operations", []),
+                    actor_id=actor.user.user_id,
+                    source=f"proposal:{proposal_id}",
+                    tenant_id=str(proposal.get("tenant_id") or ""),
+                )
+                if not library_items:
+                    raise HTTPException(status_code=400, detail="proposal did not produce shared library items")
+                patch["library_item_ids"] = [item.get("item_id") for item in library_items]
+                patch = sign_shared_patch_if_configured(patch)
                 state["shared_patches"][patch_id] = patch
                 proposal["status"] = "accepted"
                 proposal["patch_id"] = patch_id
+                mark_shared_scan_state(
+                    state.setdefault("shared_scan_state", {}),
+                    formal_keys,
+                    status="accepted",
+                    detail={"proposal_id": proposal_id, "patch_id": patch_id},
+                    use_llm=bool((proposal.get("source_meta") or {}).get("llm_used")),
+                )
                 append_audit(state, actor_id=actor.user.user_id, action="accept_shared_proposal", target_type="shared_proposal", target_id=proposal_id)
                 return {"proposal": proposal, "patch": patch, "library_items": library_items}
             proposal["status"] = "rejected" if action == "reject" else "void"
+            mark_shared_scan_state(
+                state.setdefault("shared_scan_state", {}),
+                formal_keys,
+                status=proposal["status"],
+                detail={"proposal_id": proposal_id},
+                use_llm=bool((proposal.get("source_meta") or {}).get("llm_used")),
+            )
             append_audit(state, actor_id=actor.user.user_id, action=f"{action}_shared_proposal", target_type="shared_proposal", target_id=proposal_id)
             return {"proposal": proposal, "patch": None, "library_items": []}
 
         return self.store.update(mutate)
 
-    def list_patches(self) -> list[dict[str, Any]]:
-        patches = self.store.read().get("shared_patches", {})
-        return sorted(patches.values(), key=lambda item: str(item.get("created_at") or ""), reverse=True)
+    def list_patches(self, *, limit: int | None = None, include_delivery: bool = True) -> list[dict[str, Any]]:
+        state = self.store.read()
+        patches = sorted(state.get("shared_patches", {}).values(), key=lambda item: str(item.get("created_at") or ""), reverse=True)
+        if limit is not None:
+            patches = patches[: max(1, int(limit))]
+        return [public_shared_patch_record(item, state, include_delivery=include_delivery) for item in patches if isinstance(item, dict)]
+
+    def push_patch(self, patch_id: str, payload: dict[str, Any], *, actor: AuthSession) -> dict[str, Any]:
+        target_tenant = str(payload.get("tenant_id") or "").strip()
+        target_node = str(payload.get("node_id") or "").strip()
+
+        def mutate(state: dict[str, Any]) -> dict[str, Any]:
+            patch = state.get("shared_patches", {}).get(patch_id)
+            if not isinstance(patch, dict):
+                raise HTTPException(status_code=404, detail=f"shared patch not found: {patch_id}")
+            validate_shared_patch_payload(patch, require_signature=bool(os.getenv("WECHAT_SHARED_PATCH_SECRET", "").strip()))
+            nodes = select_target_nodes(state, tenant_id=target_tenant, node_id=target_node)
+            if not nodes:
+                raise HTTPException(status_code=404, detail="no matching local nodes to push patch")
+            commands = []
+            for node in nodes:
+                tenant_ids = [active_tenant_id(item) for item in node.get("tenant_ids", []) if str(item).strip()]
+                command_tenant = active_tenant_id(target_tenant or (tenant_ids[0] if tenant_ids else DEFAULT_TENANT_ID))
+                command = command_record(
+                    command_type="pull_shared_patch",
+                    tenant_id=command_tenant,
+                    node_id=str(node.get("node_id") or ""),
+                    payload={
+                        "patch_id": patch_id,
+                        "version": patch.get("version"),
+                        "patch": patch,
+                        "apply": True,
+                    },
+                    actor_id=actor.user.user_id,
+                )
+                state["commands"][command["command_id"]] = command
+                commands.append(command)
+            patch["last_pushed_at"] = now_iso()
+            patch["last_push_command_ids"] = [command.get("command_id") for command in commands]
+            patch["last_push_target"] = {"tenant_id": target_tenant, "node_id": target_node}
+            patch["updated_at"] = now_iso()
+            append_audit(
+                state,
+                actor_id=actor.user.user_id,
+                action="push_shared_patch",
+                target_type="shared_patch",
+                target_id=patch_id,
+                detail={"command_count": len(commands), "tenant_id": target_tenant, "node_id": target_node},
+            )
+            return {"patch": public_shared_patch_record(patch, state), "commands": commands, "delivery": shared_patch_delivery_status(patch, state)}
+
+        return self.store.update(mutate)
 
     def overview(self) -> dict[str, Any]:
         state = self.store.read()
         snapshots = sorted(state.get("shared_snapshots", {}).values(), key=lambda item: str(item.get("created_at") or ""), reverse=True)
+        official = build_official_shared_knowledge_snapshot(state)
         return {
-            "local": build_shared_knowledge_snapshot(),
+            "local": official,
+            "official": official,
+            "local_legacy": build_shared_knowledge_snapshot(),
             "snapshots": snapshots,
             "latest_snapshot": snapshots[0] if snapshots else None,
         }
 
     def sync_local_snapshot(self, *, actor: AuthSession) -> dict[str, Any]:
-        snapshot = build_shared_knowledge_snapshot()
+        snapshot = build_official_shared_knowledge_snapshot(self.store.read())
         snapshot_id = str("shared_snapshot_" + make_id("sync"))
         record = {
             "snapshot_id": snapshot_id,
-            "source": "local_shared_knowledge",
+            "source": "cloud_official_shared_library",
             "summary": {
                 "category_count": len(snapshot.get("categories", [])),
                 "item_count": len(snapshot.get("items", [])),
-                "file_count": snapshot.get("file_summary", {}).get("file_count", 0),
-                "json_file_count": snapshot.get("file_summary", {}).get("json_file_count", 0),
+                "version": snapshot.get("version", ""),
             },
             "snapshot": snapshot,
             "created_by": actor.user.user_id,
@@ -986,7 +1271,12 @@ class BackupRestoreService:
         if scope not in {"tenant", "shared", "all"}:
             raise HTTPException(status_code=400, detail="backup scope must be tenant, shared, or all")
         tenant_id = active_tenant_id(payload.get("tenant_id") or DEFAULT_TENANT_ID)
-        backup = BackupService(output_root=runtime_app_root() / "vps_admin" / "backups").build_backup(scope=scope, tenant_id=tenant_id)
+        backup = BackupService(output_root=runtime_app_root() / "vps_admin" / "backups").build_backup(
+            scope=scope,
+            tenant_id=tenant_id,
+            include_derived=True,
+            include_runtime=True,
+        )
         request_id = make_id("backup")
         package_id = f"data_pkg_{backup['backup_id']}"
         summary = build_tenant_data_summary(tenant_id) if scope in {"tenant", "all"} else build_shared_knowledge_snapshot()
@@ -1091,6 +1381,8 @@ class ReleaseService:
             "title": str(payload.get("title") or ""),
             "notes": str(payload.get("notes") or ""),
             "artifact_url": str(payload.get("artifact_url") or ""),
+            "sha256": str(payload.get("sha256") or ""),
+            "signature": str(payload.get("signature") or ""),
             "status": str(payload.get("status") or "published"),
             "created_by": actor.user.user_id,
             "created_at": now_iso(),
@@ -1115,11 +1407,180 @@ class ReleaseService:
                 return release
         return None
 
+    def push_release(self, release_id: str, payload: dict[str, Any], *, actor: AuthSession) -> dict[str, Any]:
+        target_tenant = str(payload.get("tenant_id") or "").strip()
+        target_node = str(payload.get("node_id") or "").strip()
+        mode = str(payload.get("mode") or "check_update").strip()
+        if mode not in {"check_update", "push_update"}:
+            raise HTTPException(status_code=400, detail="release push mode must be check_update or push_update")
+
+        def mutate(state: dict[str, Any]) -> dict[str, Any]:
+            release = state.get("releases", {}).get(release_id)
+            if not isinstance(release, dict):
+                raise HTTPException(status_code=404, detail=f"release not found: {release_id}")
+            nodes = select_target_nodes(state, tenant_id=target_tenant, node_id=target_node)
+            if not nodes:
+                raise HTTPException(status_code=404, detail="no matching local nodes to push release")
+            commands = []
+            for node in nodes:
+                tenant_ids = [active_tenant_id(item) for item in node.get("tenant_ids", []) if str(item).strip()]
+                command_tenant = active_tenant_id(target_tenant or (tenant_ids[0] if tenant_ids else DEFAULT_TENANT_ID))
+                command = command_record(
+                    command_type=mode,
+                    tenant_id=command_tenant,
+                    node_id=str(node.get("node_id") or ""),
+                    payload={"release_id": release_id, "release": release},
+                    actor_id=actor.user.user_id,
+                )
+                state["commands"][command["command_id"]] = command
+                commands.append(command)
+            append_audit(
+                state,
+                actor_id=actor.user.user_id,
+                action="push_release",
+                target_type="release",
+                target_id=release_id,
+                detail={"command_count": len(commands), "mode": mode, "tenant_id": target_tenant, "node_id": target_node},
+            )
+            return {"release": release, "commands": commands}
+
+        return self.store.update(mutate)
+
 
 def public_node(record: dict[str, Any], *, include_token: bool = False) -> dict[str, Any]:
     if include_token:
         return dict(record)
     return {key: value for key, value in record.items() if key != "node_token"}
+
+
+def command_record(
+    *,
+    command_type: str,
+    tenant_id: str,
+    node_id: str,
+    payload: dict[str, Any],
+    actor_id: str,
+) -> dict[str, Any]:
+    return {
+        "command_id": make_id("cmd"),
+        "type": command_type,
+        "tenant_id": active_tenant_id(tenant_id),
+        "node_id": node_id,
+        "payload": payload if isinstance(payload, dict) else {},
+        "status": "queued",
+        "attempts": 0,
+        "created_by": actor_id,
+        "created_at": now_iso(),
+        "updated_at": now_iso(),
+    }
+
+
+def public_shared_patch_record(patch: dict[str, Any], state: dict[str, Any], *, include_delivery: bool = True) -> dict[str, Any]:
+    record = dict(patch)
+    signature_required = bool(os.getenv("WECHAT_SHARED_PATCH_SECRET", "").strip())
+    if record.get("signature"):
+        signature_status = "signed"
+        signature_label = "已签名"
+    elif signature_required:
+        signature_status = "unsigned_required"
+        signature_label = "未签名，不能推送"
+    else:
+        signature_status = "unsigned_allowed"
+        signature_label = "本地模式未签名"
+    record["signature_required"] = signature_required
+    record["signature_status"] = signature_status
+    record["signature_label"] = signature_label
+    if include_delivery:
+        record["delivery"] = shared_patch_delivery_status(record, state)
+    return record
+
+
+def shared_patch_delivery_status(patch: dict[str, Any], state: dict[str, Any]) -> dict[str, Any]:
+    patch_id = str(patch.get("patch_id") or "")
+    related_commands = [
+        item
+        for item in state.get("commands", {}).values()
+        if isinstance(item, dict)
+        and str(item.get("type") or "") == "pull_shared_patch"
+        and str((item.get("payload") if isinstance(item.get("payload"), dict) else {}).get("patch_id") or "") == patch_id
+    ]
+    related_commands = sorted(related_commands, key=lambda item: str(item.get("created_at") or ""), reverse=True)
+    targets = [shared_patch_command_target(item, state) for item in related_commands]
+    counts = {
+        "total": len(targets),
+        "queued": sum(1 for item in targets if item.get("delivery_status") == "queued"),
+        "sent": sum(1 for item in targets if item.get("delivery_status") == "sent"),
+        "applied": sum(1 for item in targets if item.get("delivery_status") == "applied"),
+        "failed": sum(1 for item in targets if item.get("delivery_status") == "failed"),
+    }
+    if counts["total"] == 0:
+        overall_status = "not_pushed"
+    elif counts["failed"]:
+        overall_status = "failed"
+    elif counts["applied"] == counts["total"]:
+        overall_status = "applied"
+    elif counts["sent"] or counts["queued"]:
+        overall_status = "pending"
+    else:
+        overall_status = "pending"
+    return {
+        "patch_id": patch_id,
+        "overall_status": overall_status,
+        "counts": counts,
+        "targets": targets,
+        "last_pushed_at": patch.get("last_pushed_at") or "",
+        "last_push_command_ids": patch.get("last_push_command_ids") if isinstance(patch.get("last_push_command_ids"), list) else [],
+    }
+
+
+def shared_patch_command_target(command: dict[str, Any], state: dict[str, Any]) -> dict[str, Any]:
+    node_id = str(command.get("node_id") or "")
+    tenant_id = active_tenant_id(command.get("tenant_id"))
+    node = state.get("local_nodes", {}).get(node_id) if node_id else None
+    if not isinstance(node, dict):
+        node = {}
+    tenant = state.get("tenants", {}).get(tenant_id)
+    if not isinstance(tenant, dict):
+        tenant = {}
+    status = str(command.get("status") or "queued")
+    delivery_status = {
+        "queued": "queued",
+        "sent": "sent",
+        "succeeded": "applied",
+        "failed": "failed",
+    }.get(status, status or "queued")
+    result = command.get("result") if isinstance(command.get("result"), dict) else {}
+    return {
+        "command_id": command.get("command_id"),
+        "tenant_id": tenant_id,
+        "tenant_name": tenant.get("display_name") or tenant_id,
+        "node_id": node_id,
+        "node_name": node.get("display_name") or node_id or "未指定客户端",
+        "node_status": node.get("status") or "unknown",
+        "node_last_seen_at": node.get("last_seen_at") or "",
+        "command_status": status,
+        "delivery_status": delivery_status,
+        "attempts": int(command.get("attempts") or 0),
+        "created_at": command.get("created_at") or "",
+        "sent_at": command.get("sent_at") or "",
+        "completed_at": command.get("completed_at") or "",
+        "error": command.get("error") or "",
+        "result": result,
+    }
+
+
+def select_target_nodes(state: dict[str, Any], *, tenant_id: str = "", node_id: str = "") -> list[dict[str, Any]]:
+    nodes = [item for item in state.get("local_nodes", {}).values() if isinstance(item, dict)]
+    if node_id:
+        nodes = [item for item in nodes if str(item.get("node_id") or "") == node_id]
+    if tenant_id:
+        tenant = active_tenant_id(tenant_id)
+        nodes = [
+            item
+            for item in nodes
+            if tenant in [active_tenant_id(value) for value in item.get("tenant_ids", []) if str(value).strip()]
+        ]
+    return nodes
 
 
 def customer_tenant_record(*, username: str, tenant_id: str) -> dict[str, Any]:
@@ -1131,6 +1592,66 @@ def customer_tenant_record(*, username: str, tenant_id: str) -> dict[str, Any]:
         "metadata": {"source": "customer_account", "account_username": username},
         "created_at": now_iso(),
         "updated_at": now_iso(),
+    }
+
+
+def seed_local_customer_accounts(state: dict[str, Any]) -> None:
+    """Mirror Local Console customer accounts into the VPS admin view."""
+    accounts = read_local_account_overrides_from_env()
+    for username, account in accounts.items():
+        if not isinstance(account, dict) or str(account.get("role") or "") != Role.CUSTOMER.value:
+            continue
+        tenant_ids = [active_tenant_id(item) for item in account.get("tenant_ids", []) if str(item).strip()]
+        if not tenant_ids:
+            tenant_ids = [active_tenant_id(account.get("active_tenant_id") or username)]
+        for tenant_id in tenant_ids:
+            if tenant_id not in state.get("tenants", {}):
+                state["tenants"][tenant_id] = local_customer_tenant_record(account, tenant_id)
+        user_id = str(account.get("user_id") or username)
+        existing = state.get("users", {}).get(user_id)
+        if existing and str(existing.get("role") or "") != Role.CUSTOMER.value:
+            continue
+        record = {
+            "user_id": user_id,
+            "username": str(account.get("username") or username),
+            "display_name": str(account.get("display_name") or account.get("username") or username),
+            "email": normalize_email(str(account.get("email") or "")),
+            "role": Role.CUSTOMER.value,
+            "tenant_ids": tenant_ids,
+            "resource_scopes": account.get("resource_scopes") if isinstance(account.get("resource_scopes"), list) else ["*"],
+            "status": str(account.get("status") or "active"),
+            "source": "local_client_account",
+            "created_at": str(account.get("created_at") or account.get("initialized_at") or now_iso()),
+            "updated_at": str(account.get("updated_at") or now_iso()),
+        }
+        if account.get("password_hash"):
+            record["password_hash"] = str(account.get("password_hash") or "")
+        state["users"][user_id] = {**record, **({"password_hash": existing.get("password_hash")} if existing and existing.get("password_hash") and not record.get("password_hash") else {})}
+    if TENANTS_ROOT.exists():
+        for path in sorted(item for item in TENANTS_ROOT.iterdir() if item.is_dir()):
+            tenant_id = active_tenant_id(path.name)
+            if tenant_id not in state.get("tenants", {}):
+                state["tenants"][tenant_id] = local_customer_tenant_record({}, tenant_id)
+
+
+def local_customer_tenant_record(account: dict[str, Any], tenant_id: str) -> dict[str, Any]:
+    metadata = {}
+    try:
+        payload = json.loads(tenant_metadata_path(tenant_id).read_text(encoding="utf-8"))
+        if isinstance(payload, dict):
+            metadata = payload
+    except Exception:
+        metadata = {}
+    username = str(account.get("username") or metadata.get("account_username") or tenant_id)
+    display = str(account.get("display_name") or metadata.get("display_name") or metadata.get("name") or username)
+    return {
+        "tenant_id": active_tenant_id(tenant_id),
+        "display_name": display,
+        "status": "active",
+        "sync_enabled": True,
+        "metadata": {"source": "local_client_account", "account_username": username, **(metadata if isinstance(metadata, dict) else {})},
+        "created_at": str(account.get("created_at") or account.get("initialized_at") or now_iso()),
+        "updated_at": str(account.get("updated_at") or now_iso()),
     }
 
 
@@ -1170,6 +1691,929 @@ def customer_user_by_tenant(state: dict[str, Any], tenant_id: str) -> dict[str, 
         if tenant in tenant_ids:
             return user
     return None
+
+
+UNIVERSAL_FORMAL_CATEGORIES = {"policies", "chats", "custom"}
+PRODUCT_SPECIFIC_HINTS = {
+    "product_id",
+    "product_category",
+    "product_ids",
+    "sku",
+    "vin",
+    "stock_no",
+    "inventory",
+    "car_id",
+    "车辆编号",
+    "车架号",
+    "库存",
+    "在售",
+    "已售",
+}
+TENANT_PRIVATE_FIELD_HINTS = {
+    "customer_id",
+    "customer_name",
+    "customer_phone",
+    "customer_wechat",
+    "lead_id",
+    "lead_name",
+    "contact_name",
+    "contact_phone",
+    "phone",
+    "mobile",
+    "wechat",
+    "address",
+    "order_id",
+    "contract_id",
+    "conversation_id",
+    "group_id",
+    "session_id",
+    "门店",
+    "客户姓名",
+    "手机号",
+    "微信号",
+    "联系人",
+    "地址",
+    "订单号",
+}
+PRODUCT_SPECIFIC_TEXT_HINTS = {
+    "新能源",
+    "电池检测",
+    "首付",
+    "月供",
+    "车贷",
+    "贷款包过",
+    "金融方案",
+    "按揭",
+    "置换",
+    "定金",
+    "凯美瑞",
+    "雅阁",
+    "朗逸",
+    "轩逸",
+    "宝马",
+    "奔驰",
+    "奥迪",
+    "丰田",
+    "本田",
+    "大众",
+    "日产",
+    "这台车",
+    "该车",
+    "车况",
+    "公里",
+    "万公里",
+    "售价",
+    "报价",
+    "库存",
+    "VIN",
+    "二手车",
+    "车辆",
+    "车型",
+    "车源",
+    "看车",
+    "试驾",
+    "过户",
+    "上牌",
+    "检测报告",
+    "事故",
+    "水泡",
+    "火烧",
+}
+TENANT_PRIVATE_TEXT_HINTS = {
+    "杭州",
+    "南京",
+    "余杭",
+    "江苏",
+    "浙江",
+    "仓库",
+    "测试仓",
+    "对公账户",
+    "银行账户",
+    "开户行",
+    "税号",
+    "客服电话",
+    "售后电话",
+    "营业执照",
+    "开户许可证",
+    "开票资料",
+    "开票时效",
+    "发货时效",
+    "包邮",
+    "满减",
+    "促销",
+    "活动规则",
+    "供应商入库",
+    "江苏车金",
+    "销冠",
+    "本公司",
+    "我司",
+    "本司",
+    "我们公司",
+    "本店",
+    "门店",
+    "线下",
+    "直播间",
+    "文件传输助手",
+    "测试群",
+    "偷数据测试",
+    "客户姓名",
+    "客户信息",
+    "客户资料",
+    "手机号",
+    "联系电话",
+    "微信号",
+    "联系地址",
+    "订单号",
+    "合同号",
+    "客户预算",
+    "购车意向",
+    "内部备注",
+    "内部规则",
+    "专属政策",
+    "专属优惠",
+}
+STRICT_UNIVERSAL_TOPIC_HINTS = {
+    "转人工",
+    "转接人工",
+    "人工接管",
+    "人工客服",
+    "人工确认",
+    "人工审核",
+    "人工处理",
+    "请示",
+    "不能直接承诺",
+    "不能直接确认",
+    "不能直接同意",
+    "不能直接拍板",
+    "不得承诺",
+    "没有足够依据",
+    "超出权限",
+    "超出范围",
+    "敏感",
+    "隐私",
+    "投诉",
+    "退款",
+    "赔偿",
+    "法务",
+    "违法",
+    "违规",
+    "风险",
+    "人工客服",
+    "转人工",
+    "人工服务",
+    "转接人工",
+    "请稍等",
+    "稍等片刻",
+    "礼貌",
+    "感谢",
+    "抱歉",
+    "无法确认",
+    "不能确认",
+    "不确定",
+    "需要核实",
+    "人工确认",
+    "不要承诺",
+    "不能承诺",
+    "敏感信息",
+    "隐私",
+    "风险提示",
+    "以人工确认为准",
+}
+PRIVATE_DATA_PATTERNS = (
+    re.compile(r"1[3-9]\d{9}"),
+    re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b"),
+    re.compile(r"\b\d{15,18}[0-9Xx]?\b"),
+    re.compile(r"\d+(?:\.\d+)?\s*(?:元|万元|万|块|￥)"),
+)
+
+SHARED_SCAN_TERMINAL_STATUSES = {
+    "proposed",
+    "uploaded",
+    "not_recommended",
+    "already_pending_or_reviewed",
+    "already_in_shared_library",
+    "duplicate",
+    "accepted",
+    "rejected",
+    "void",
+}
+
+
+def collect_universal_formal_entries(
+    state: dict[str, Any],
+    *,
+    limit: int,
+    tenant_id: str = "",
+) -> list[dict[str, Any]]:
+    """Collect tenant formal knowledge that may be safe to promote as shared public knowledge."""
+    tenants = [active_tenant_id(tenant_id)] if tenant_id else universal_scan_tenant_ids(state)
+    entries: list[dict[str, Any]] = []
+    for tenant in tenants:
+        kb_root = tenant_knowledge_base_root(tenant)
+        if not kb_root.exists():
+            continue
+        for category_dir in sorted(path for path in kb_root.iterdir() if path.is_dir()):
+            category_id = category_dir.name
+            if category_id not in UNIVERSAL_FORMAL_CATEGORIES:
+                continue
+            items_dir = category_dir / "items"
+            if not items_dir.exists():
+                continue
+            for path in sorted(items_dir.glob("*.json")):
+                payload = read_json_file(path, default={})
+                if not isinstance(payload, dict):
+                    continue
+                entry = formal_item_entry(tenant, category_id, path, payload)
+                if not is_universal_formal_entry(entry):
+                    continue
+                entries.append(entry)
+                if len(entries) >= limit:
+                    return entries
+    return entries
+
+
+def universal_scan_tenant_ids(state: dict[str, Any]) -> list[str]:
+    tenants: set[str] = set()
+    for user in state.get("users", {}).values():
+        if not isinstance(user, dict) or user.get("role") != Role.CUSTOMER.value:
+            continue
+        tenants.update(active_tenant_id(item) for item in user.get("tenant_ids", []) if str(item).strip())
+    tenants.update(active_tenant_id(item) for item in state.get("tenants", {}).keys() if str(item).strip())
+    return sorted(tenants)
+
+
+def formal_item_entry(tenant_id: str, category_id: str, path: Path, payload: dict[str, Any]) -> dict[str, Any]:
+    data = payload.get("data") if isinstance(payload.get("data"), dict) else payload
+    title = str(data.get("title") or data.get("name") or payload.get("title") or payload.get("id") or path.stem)
+    body = formal_item_body(data)
+    keywords = normalize_text_list(data.get("keywords") or data.get("intent_tags") or data.get("tone_tags"))
+    source_key = f"{tenant_id}:{category_id}:{payload.get('id') or path.stem}:{stable_digest(title + body, 16)}"
+    return {
+        "tenant_id": active_tenant_id(tenant_id),
+        "category_id": category_id,
+        "item_id": str(payload.get("id") or path.stem),
+        "path": str(path),
+        "status": str(payload.get("status") or data.get("status") or "active"),
+        "title": title,
+        "body": body,
+        "keywords": keywords,
+        "data": data,
+        "source_key": source_key,
+    }
+
+
+def formal_item_body(data: dict[str, Any]) -> str:
+    parts = []
+    for key in ("answer", "service_reply", "guideline_text", "content", "body", "customer_message"):
+        value = data.get(key)
+        if value:
+            parts.append(str(value))
+    return "\n".join(parts)
+
+
+def is_universal_formal_entry(entry: dict[str, Any]) -> bool:
+    if str(entry.get("status") or "active") != "active":
+        return False
+    data = entry.get("data") if isinstance(entry.get("data"), dict) else {}
+    for key in PRODUCT_SPECIFIC_HINTS:
+        if data.get(key):
+            return False
+    if has_private_structured_fields(data):
+        return False
+    scope = str(data.get("applicability_scope") or data.get("scope") or "").strip().lower()
+    if scope in {"product", "product_specific", "item", "sku", "category_specific", "specific_product", "product_category"}:
+        return False
+    text = f"{entry.get('title')}\n{entry.get('body')}\n{' '.join(entry.get('keywords') or [])}"
+    if any(hint in text for hint in PRODUCT_SPECIFIC_TEXT_HINTS):
+        return False
+    if looks_tenant_private_or_industry_specific(text):
+        return False
+    if not str(entry.get("body") or "").strip():
+        return False
+    return True
+
+
+def build_universal_shared_suggestions(entries: list[dict[str, Any]], *, use_llm: bool) -> list[dict[str, Any]]:
+    if not entries:
+        return []
+    if use_llm:
+        llm_suggestions = llm_universal_shared_suggestions(entries)
+        if llm_suggestions is not None:
+            return llm_suggestions
+    return heuristic_universal_shared_suggestions(entries)
+
+
+def llm_universal_shared_suggestions(entries: list[dict[str, Any]]) -> list[dict[str, Any]] | None:
+    prompt = {
+        "task": "从每个客户的正式知识库中，严格筛选极少数真正适合进入候选共享公共知识库的内容。不要直接入正式库。",
+        "rules": [
+            "共享公共知识必须能安全给所有账号、所有行业使用；只保留跨行业通用客服原则、礼貌话术、人工转接、安全边界和隐私/风险提醒。",
+            "绝大多数客户正式知识都不应该进入共享公共知识库；不确定时不要输出。",
+            "禁止把某个客户自己的规则、行业经验、门店流程、商品政策、聊天客户资料改写成看似通用的公共规则。",
+            "凡是包含具体客户、公司、门店、城市、群聊、联系人、手机号、微信号、订单、商品、车型、价格、库存、报价、售后承诺、物流承诺、账期、优惠、内部备注的内容，一律不要输出。",
+            "二手车、车辆、检测报告、试驾、过户、门店看车等行业规则只能留在该 customer 自己的正式知识库，不能进入共享公共知识库。",
+            "必须基于输入，不要编造新政策。",
+            "输出 suggestions 数组；如果没有足够通用的内容，返回空数组。",
+            "每条包含 title, category_id, guideline_text, keywords, applies_to, universal_reason, source_keys, universal_score。",
+            "category_id 只能是 global_guidelines, reply_style, risk_control。",
+        ],
+        "negative_examples": [
+            "某门店可看车、某城市物流、某商品库存价格、某车型检测承诺、某客户联系方式、某客户优惠政策。",
+            "把“南京门店可看车”改写成“门店可看车需确认”也不允许，因为原始依据属于单一客户/单一行业。",
+            "把某 customer 的售后、报价、账期、合同规则泛化给所有 customer 使用也不允许。",
+        ],
+        "entries": [
+            {
+                "source_key": item["source_key"],
+                "tenant_id": item["tenant_id"],
+                "category_id": item["category_id"],
+                "item_id": item["item_id"],
+                "title": item["title"],
+                "keywords": item["keywords"],
+                "body": compact_excerpt(item["body"], 700),
+            }
+            for item in entries[:80]
+        ],
+    }
+    result = call_deepseek_json(prompt)
+    if not result:
+        return None
+    raw_suggestions = result.get("suggestions") if isinstance(result.get("suggestions"), list) else []
+    suggestions = []
+    by_key = {item["source_key"]: item for item in entries}
+    for raw in raw_suggestions:
+        if not isinstance(raw, dict):
+            continue
+        source_keys = [str(key) for key in raw.get("source_keys", []) if str(key).strip()]
+        source_items = [by_key[key] for key in source_keys if key in by_key]
+        if not source_items:
+            source_key = str(raw.get("source_key") or "").strip()
+            if source_key in by_key:
+                source_items = [by_key[source_key]]
+        if not source_items:
+            continue
+        suggestion = normalize_universal_suggestion(raw, source_items, provider="formal_knowledge_universal_llm", llm_used=True)
+        if suggestion and is_strictly_shareable_suggestion(suggestion, source_items):
+            suggestions.append(suggestion)
+    return suggestions
+
+
+def heuristic_universal_shared_suggestions(entries: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    suggestions = []
+    for entry in entries:
+        if not entry_has_strict_universal_topic(entry):
+            continue
+        suggestion = normalize_universal_suggestion(
+            {
+                "title": entry["title"],
+                "category_id": shared_category_for_formal_entry(entry),
+                "guideline_text": entry["body"],
+                "keywords": entry["keywords"],
+                "applies_to": "所有客户都可能遇到的通用客服场景",
+                "universal_reason": "该条正式知识没有绑定具体商品、库存或价格，可由管理员审核是否沉淀为共享公共知识。",
+            },
+            [entry],
+            provider="formal_knowledge_universal_heuristic",
+            llm_used=False,
+        )
+        if suggestion and is_strictly_shareable_suggestion(suggestion, [entry]):
+            suggestions.append(suggestion)
+    return suggestions
+
+
+def normalize_universal_suggestion(
+    raw: dict[str, Any],
+    source_items: list[dict[str, Any]],
+    *,
+    provider: str,
+    llm_used: bool,
+) -> dict[str, Any] | None:
+    title = str(raw.get("title") or source_items[0].get("title") or "").strip()
+    guideline = str(raw.get("guideline_text") or raw.get("content") or source_items[0].get("body") or "").strip()
+    if not title or not guideline:
+        return None
+    source_keys = [str(item.get("source_key") or "") for item in source_items if str(item.get("source_key") or "").strip()]
+    merged_key = stable_digest("|".join(source_keys) + title + guideline, 18)
+    tenant_id = str(source_items[0].get("tenant_id") or DEFAULT_TENANT_ID)
+    category_id = sanitize_shared_category(raw.get("category_id") or shared_category_for_formal_entry(source_items[0]))
+    return {
+        "id": f"shared_{merged_key}",
+        "tenant_id": tenant_id,
+        "category_id": category_id,
+        "title": title,
+        "guideline_text": compact_excerpt(guideline, 1200),
+        "keywords": normalize_text_list(raw.get("keywords")) or merged_keywords(source_items),
+        "applies_to": str(raw.get("applies_to") or "所有客户都可能遇到的通用客服场景"),
+        "universal_reason": str(raw.get("universal_reason") or "来自客户正式知识库，未绑定具体商品，适合管理员审核为共享公共知识。"),
+        "universal_score": raw.get("universal_score"),
+        "source_key": merged_key,
+        "source_items": [
+            {
+                "tenant_id": item.get("tenant_id"),
+                "category_id": item.get("category_id"),
+                "item_id": item.get("item_id"),
+                "source_key": item.get("source_key"),
+            }
+            for item in source_items
+        ],
+        "provider": provider,
+        "llm_used": llm_used,
+    }
+
+
+def looks_product_specific_suggestion(suggestion: dict[str, Any]) -> bool:
+    text = f"{suggestion.get('title')}\n{suggestion.get('guideline_text')}\n{' '.join(suggestion.get('keywords') or [])}"
+    return any(hint in text for hint in PRODUCT_SPECIFIC_TEXT_HINTS)
+
+
+def is_strictly_shareable_suggestion(suggestion: dict[str, Any], source_items: list[dict[str, Any]]) -> bool:
+    text = f"{suggestion.get('title')}\n{suggestion.get('guideline_text')}\n{suggestion.get('applies_to')}\n{suggestion.get('universal_reason')}\n{' '.join(suggestion.get('keywords') or [])}"
+    if looks_product_specific_suggestion(suggestion):
+        return False
+    if looks_tenant_private_or_industry_specific(text):
+        return False
+    try:
+        score = int(float(suggestion.get("universal_score")))
+    except (TypeError, ValueError):
+        score = 0
+    if suggestion.get("llm_used") and score < 85:
+        return False
+    if not entry_has_strict_universal_topic({"title": suggestion.get("title"), "body": suggestion.get("guideline_text"), "keywords": suggestion.get("keywords") or []}):
+        return False
+    return all(is_universal_formal_entry(item) for item in source_items)
+
+
+def has_private_structured_fields(data: dict[str, Any]) -> bool:
+    if not isinstance(data, dict):
+        return False
+    for key, value in data.items():
+        key_text = str(key or "").strip().lower()
+        if any(hint.lower() in key_text for hint in TENANT_PRIVATE_FIELD_HINTS):
+            if value not in (None, "", [], {}):
+                return True
+        if isinstance(value, dict) and has_private_structured_fields(value):
+            return True
+        if isinstance(value, list):
+            for item in value:
+                if isinstance(item, dict) and has_private_structured_fields(item):
+                    return True
+    return False
+
+
+def looks_tenant_private_or_industry_specific(text: str) -> bool:
+    value = str(text or "")
+    if any(hint in value for hint in TENANT_PRIVATE_TEXT_HINTS):
+        return True
+    if any(pattern.search(value) for pattern in PRIVATE_DATA_PATTERNS):
+        return True
+    return False
+
+
+def entry_has_strict_universal_topic(entry: dict[str, Any]) -> bool:
+    text = f"{entry.get('title')}\n{entry.get('body')}\n{' '.join(entry.get('keywords') or [])}"
+    return any(hint in text for hint in STRICT_UNIVERSAL_TOPIC_HINTS)
+
+
+def merged_keywords(source_items: list[dict[str, Any]]) -> list[str]:
+    values: list[str] = []
+    for item in source_items:
+        values.extend(item.get("keywords") or [])
+    deduped: list[str] = []
+    for value in values:
+        text = str(value).strip()
+        if text and text not in deduped:
+            deduped.append(text)
+    return deduped[:12]
+
+
+def shared_category_for_formal_entry(entry: dict[str, Any]) -> str:
+    data = entry.get("data") if isinstance(entry.get("data"), dict) else {}
+    text = f"{entry.get('title')}\n{entry.get('body')}\n{' '.join(entry.get('keywords') or [])}".lower()
+    policy_type = str(data.get("policy_type") or "").lower()
+    if "risk" in text or "handoff" in text or "转人工" in text or "人工" in text or policy_type in {"manual_required", "risk_control"}:
+        return "risk_control"
+    if str(entry.get("category_id") or "") == "chats":
+        return "reply_style"
+    return "global_guidelines"
+
+
+def sanitize_shared_category(value: Any) -> str:
+    category = str(value or "").strip()
+    allowed = {"global_guidelines", "reply_style", "risk_control"}
+    return category if category in allowed else "global_guidelines"
+
+
+def build_shared_content_from_suggestion(suggestion: dict[str, Any]) -> dict[str, Any]:
+    category_id = sanitize_shared_category(suggestion.get("category_id"))
+    item_id = str(suggestion.get("id") or f"shared_{stable_digest(str(suggestion), 16)}")
+    risk_control = category_id == "risk_control"
+    data = {
+        "title": str(suggestion.get("title") or item_id),
+        "guideline_text": str(suggestion.get("guideline_text") or ""),
+        "keywords": normalize_text_list(suggestion.get("keywords")),
+        "applies_to": str(suggestion.get("applies_to") or ""),
+    }
+    if risk_control:
+        data.update(
+            {
+                "allow_auto_reply": False,
+                "requires_handoff": True,
+                "handoff_reason": str(suggestion.get("handoff_reason") or "shared_risk_control"),
+            }
+        )
+    return {
+        "schema_version": 1,
+        "id": item_id,
+        "item_id": item_id,
+        "category_id": category_id,
+        "title": str(suggestion.get("title") or item_id),
+        "status": "active",
+        "keywords": normalize_text_list(suggestion.get("keywords")),
+        "applies_to": str(suggestion.get("applies_to") or ""),
+        "content": str(suggestion.get("guideline_text") or ""),
+        "guideline_text": str(suggestion.get("guideline_text") or ""),
+        "notes": f"候选理由：{suggestion.get('universal_reason') or ''}".strip(),
+        "source": {
+            "type": "formal_knowledge_universal_extraction",
+            "provider": suggestion.get("provider"),
+            "tenant_id": suggestion.get("tenant_id"),
+            "source_items": suggestion.get("source_items") or [],
+            "llm_used": bool(suggestion.get("llm_used")),
+        },
+        "data": data,
+        "runtime": {
+            "allow_auto_reply": not risk_control,
+            "requires_handoff": risk_control,
+            "risk_level": "high" if risk_control else "normal",
+        },
+    }
+
+
+def filter_unscanned_formal_entries(
+    entries: list[dict[str, Any]],
+    scan_state: dict[str, Any],
+    *,
+    only_unscanned: bool,
+    rescan: bool,
+) -> list[dict[str, Any]]:
+    if rescan or not only_unscanned:
+        return entries
+    filtered: list[dict[str, Any]] = []
+    for entry in entries:
+        source_key = str(entry.get("source_key") or "")
+        record = scan_state.get(source_key) if source_key else None
+        status = str(record.get("status") or "") if isinstance(record, dict) else ""
+        if status in SHARED_SCAN_TERMINAL_STATUSES:
+            continue
+        filtered.append(entry)
+    return filtered
+
+
+def mark_shared_scan_state(
+    scan_state: dict[str, Any],
+    source_keys: list[str] | set[str],
+    *,
+    status: str,
+    detail: dict[str, Any] | None = None,
+    use_llm: bool = False,
+) -> None:
+    now = now_iso()
+    for key in source_keys:
+        source_key = str(key or "").strip()
+        if not source_key:
+            continue
+        scan_state[source_key] = {
+            "source_key": source_key,
+            "status": status,
+            "detail": detail or {},
+            "llm_used": bool(use_llm),
+            "checked_at": now,
+            "updated_at": now,
+        }
+
+
+def formal_source_keys_for_suggestion(suggestion: dict[str, Any]) -> list[str]:
+    keys: list[str] = []
+    for item in suggestion.get("source_items") or []:
+        if isinstance(item, dict):
+            key = str(item.get("source_key") or "").strip()
+            if key and key not in keys:
+                keys.append(key)
+    return keys
+
+
+def shared_proposal_formal_source_keys(proposal: dict[str, Any]) -> list[str]:
+    keys: list[str] = []
+    meta = proposal.get("source_meta") if isinstance(proposal.get("source_meta"), dict) else {}
+    for item in meta.get("source_items") or []:
+        if isinstance(item, dict):
+            key = str(item.get("source_key") or "").strip()
+            if key and key not in keys:
+                keys.append(key)
+    for operation in proposal.get("operations") or []:
+        if not isinstance(operation, dict):
+            continue
+        content = operation.get("content") if isinstance(operation.get("content"), dict) else {}
+        source = content.get("source") if isinstance(content.get("source"), dict) else {}
+        for item in source.get("source_items") or []:
+            if isinstance(item, dict):
+                key = str(item.get("source_key") or "").strip()
+                if key and key not in keys:
+                    keys.append(key)
+    return keys
+
+
+def shared_proposal_source_keys(proposal: dict[str, Any]) -> set[str]:
+    keys = set(shared_proposal_formal_source_keys(proposal))
+    meta = proposal.get("source_meta") if isinstance(proposal.get("source_meta"), dict) else {}
+    source_key = str(meta.get("source_key") or "").strip()
+    if source_key:
+        keys.add(source_key)
+    return keys
+
+
+def shared_library_source_keys(record: dict[str, Any]) -> set[str]:
+    data = record.get("data") if isinstance(record.get("data"), dict) else {}
+    source = data.get("source") if isinstance(data.get("source"), dict) else {}
+    keys = set()
+    for item in source.get("source_items") or []:
+        if isinstance(item, dict):
+            key = str(item.get("source_key") or "").strip()
+            if key:
+                keys.add(key)
+    return keys
+
+
+def find_duplicate_shared_proposal(proposal: dict[str, Any], state: dict[str, Any]) -> dict[str, Any] | None:
+    source_keys = shared_proposal_source_keys(proposal)
+    title_fp = shared_text_fingerprint(proposal.get("title"))
+    content_fp = shared_text_fingerprint(proposal_readable_content(proposal))
+    for existing in state.get("shared_proposals", {}).values():
+        if not isinstance(existing, dict):
+            continue
+        if str(existing.get("proposal_id") or "") == str(proposal.get("proposal_id") or ""):
+            continue
+        if source_keys and source_keys.intersection(shared_proposal_source_keys(existing)):
+            return existing
+        if title_fp and content_fp and title_fp == shared_text_fingerprint(existing.get("title")) and content_fp == shared_text_fingerprint(proposal_readable_content(existing)):
+            return existing
+    return None
+
+
+def shared_proposal_matches_library(proposal: dict[str, Any], records: Any) -> dict[str, Any] | None:
+    source_keys = shared_proposal_source_keys(proposal)
+    title_fp = shared_text_fingerprint(proposal.get("title"))
+    content_fp = shared_text_fingerprint(proposal_readable_content(proposal))
+    for record in records:
+        if not isinstance(record, dict):
+            continue
+        if source_keys and source_keys.intersection(shared_library_source_keys(record)):
+            return record
+        if title_fp and title_fp == shared_text_fingerprint(record.get("title")):
+            existing_content_fp = shared_text_fingerprint(record.get("content") or readable_shared_content(record.get("data") if isinstance(record.get("data"), dict) else {}))
+            if content_fp and content_fp == existing_content_fp:
+                return record
+    return None
+
+
+def find_duplicate_shared_suggestion(suggestion: dict[str, Any], state: dict[str, Any]) -> dict[str, Any] | None:
+    proposal = {
+        "title": suggestion.get("title"),
+        "source_meta": {
+            "source_key": suggestion.get("source_key"),
+            "source_items": suggestion.get("source_items") or [],
+        },
+        "operations": [
+            {
+                "content": build_shared_content_from_suggestion(suggestion),
+            }
+        ],
+    }
+    duplicate_proposal = find_duplicate_shared_proposal(proposal, state)
+    if duplicate_proposal:
+        return {
+            "reason": "already_pending_or_reviewed",
+            "proposal_id": duplicate_proposal.get("proposal_id"),
+        }
+    duplicate_library = shared_proposal_matches_library(proposal, state.get("shared_library", {}).values())
+    if duplicate_library:
+        return {
+            "reason": "already_in_shared_library",
+            "library_item_id": duplicate_library.get("item_id"),
+        }
+    return None
+
+
+def proposal_readable_content(proposal: dict[str, Any]) -> str:
+    parts: list[str] = []
+    if proposal.get("summary"):
+        parts.append(str(proposal.get("summary")))
+    for operation in proposal.get("operations") or []:
+        if not isinstance(operation, dict):
+            continue
+        content = operation.get("content") if isinstance(operation.get("content"), dict) else {}
+        if content:
+            parts.append(readable_shared_content(content) or readable_shared_content(content.get("data") if isinstance(content.get("data"), dict) else {}) or json.dumps(content, ensure_ascii=False, sort_keys=True))
+    return "\n".join(part for part in parts if part)
+
+
+def shared_text_fingerprint(value: Any) -> str:
+    text = "".join(str(value or "").lower().split())
+    return stable_digest(text, 18) if text else ""
+
+
+def build_shared_proposal_review_assist(
+    proposal: dict[str, Any],
+    library_records: Any,
+    *,
+    use_llm: bool,
+) -> dict[str, Any]:
+    matches = shared_review_existing_matches(proposal, library_records)
+    if use_llm:
+        llm = llm_shared_proposal_review_assist(proposal, matches)
+        if llm:
+            return llm
+    return heuristic_shared_proposal_review_assist(proposal, matches)
+
+
+def llm_shared_proposal_review_assist(proposal: dict[str, Any], matches: list[dict[str, Any]]) -> dict[str, Any]:
+    prompt = {
+        "task": "帮助 admin 审核一条候选共享公共知识。请判断它是否适合给所有客户使用。",
+        "decision_standard": [
+            "共享公共知识必须跨行业、跨客户普遍适用，例如客服礼貌表达、人工转接、风险提示、通用售后沟通方式。",
+            "不得包含某个客户、行业、商品、车型、库存、价格、门店、物流承诺、内部流程、特定优惠。",
+            "不得把单个 customer 的规则泛化改写成公共知识；如果依据来自门店、行业、车型、客户资料或内部备注，应建议拒绝。",
+            "必须和已有共享公共知识做重复/高度重合比对；若高度重合，应优先建议拒绝或合并，而不是直接采纳。",
+            "只根据输入内容判断；不确定时建议先修改或拒绝。",
+        ],
+        "proposal": {
+            "proposal_id": proposal.get("proposal_id"),
+            "title": proposal.get("title"),
+            "summary": proposal.get("summary"),
+            "content": compact_excerpt(proposal_readable_content(proposal), 1200),
+            "source": proposal.get("source"),
+            "source_meta": proposal.get("source_meta") if isinstance(proposal.get("source_meta"), dict) else {},
+        },
+        "existing_shared_matches": matches[:6],
+        "output_schema": {
+            "recommendation": "accept|reject|revise",
+            "universal_score": "0-100",
+            "summary": "普通人能看懂的一句话解释",
+            "reasons": ["为什么适合或不适合共享"],
+            "risks": ["采纳前需要注意的风险"],
+            "duplicate_level": "none|possible|high",
+            "existing_matches": [{"item_id": "已有条目ID", "title": "标题", "reason": "重合原因"}],
+            "admin_checklist": ["admin 审核时需要确认的点"],
+        },
+    }
+    result = call_deepseek_json(prompt)
+    if not result:
+        return {}
+    return normalize_shared_review_assist(result, provider="shared_review_llm", llm_used=True, fallback_matches=matches)
+
+
+def heuristic_shared_proposal_review_assist(proposal: dict[str, Any], matches: list[dict[str, Any]]) -> dict[str, Any]:
+    text = f"{proposal.get('title')}\n{proposal_readable_content(proposal)}"
+    product_specific = any(hint in text for hint in PRODUCT_SPECIFIC_TEXT_HINTS)
+    tenant_private = looks_tenant_private_or_industry_specific(text)
+    lacks_universal_topic = not entry_has_strict_universal_topic({"title": proposal.get("title"), "body": proposal_readable_content(proposal), "keywords": []})
+    duplicate_level = "high" if any(item.get("level") == "high" for item in matches) else ("possible" if matches else "none")
+    if product_specific or tenant_private:
+        recommendation = "reject"
+        score = 25
+        summary = "这条候选疑似绑定了具体客户、行业、商品、价格、库存或车辆信息，不适合作为所有客户共用的公共知识。"
+    elif lacks_universal_topic:
+        recommendation = "revise"
+        score = 50
+        summary = "这条候选没有明显的跨行业公共客服原则，建议先不要进入共享公共知识库。"
+    elif duplicate_level == "high":
+        recommendation = "reject"
+        score = 45
+        summary = "这条候选和已有共享公共知识高度重合，建议不要重复收录。"
+    elif duplicate_level == "possible":
+        recommendation = "revise"
+        score = 65
+        summary = "这条候选看起来有通用价值，但需要先确认是否和已有共享知识重复。"
+    else:
+        recommendation = "accept"
+        score = 78
+        summary = "这条候选没有明显商品或客户绑定信息，可由 admin 继续审核是否收录。"
+    reasons = []
+    if product_specific or tenant_private:
+        reasons.append("文本中出现了可能指向特定客户、行业、门店、商品、价格、库存、车型或车况的表达。")
+    if lacks_universal_topic:
+        reasons.append("系统没有识别到足够明确的跨行业公共客服原则。")
+    if matches:
+        reasons.append("系统已找到可能重复的共享知识条目，需要先比对。")
+    if not reasons:
+        reasons.append("候选内容来自正式知识库，当前没有发现明显商品专属或客户专属信息。")
+    return normalize_shared_review_assist(
+        {
+            "recommendation": recommendation,
+            "universal_score": score,
+            "summary": summary,
+            "reasons": reasons,
+            "risks": ["采纳前请确认这条规则不会把某个客户的承诺误推给所有客户。"],
+            "duplicate_level": duplicate_level,
+            "existing_matches": matches,
+            "admin_checklist": ["确认不含具体客户、商品、价格、库存、门店和行业限定。", "确认和已有共享知识不重复。"],
+        },
+        provider="shared_review_heuristic",
+        llm_used=False,
+        fallback_matches=matches,
+    )
+
+
+def normalize_shared_review_assist(
+    raw: Any,
+    *,
+    provider: str,
+    llm_used: bool | None = None,
+    fallback_matches: list[dict[str, Any]] | None = None,
+) -> dict[str, Any]:
+    data = raw if isinstance(raw, dict) else {}
+    recommendation = str(data.get("recommendation") or "").strip().lower()
+    if recommendation not in {"accept", "reject", "revise"}:
+        recommendation = "revise"
+    try:
+        score = int(float(data.get("universal_score")))
+    except (TypeError, ValueError):
+        score = 0
+    duplicate_level = str(data.get("duplicate_level") or "").strip().lower()
+    if duplicate_level not in {"none", "possible", "high"}:
+        duplicate_level = "possible" if fallback_matches else "none"
+    matches = data.get("existing_matches") if isinstance(data.get("existing_matches"), list) else fallback_matches or []
+    clean_matches = []
+    for item in matches[:8]:
+        if not isinstance(item, dict):
+            continue
+        clean_matches.append(
+            {
+                "item_id": str(item.get("item_id") or ""),
+                "title": str(item.get("title") or ""),
+                "reason": str(item.get("reason") or item.get("match_reason") or ""),
+                "level": str(item.get("level") or item.get("duplicate_level") or duplicate_level or "possible"),
+            }
+        )
+    used_llm = bool(llm_used if llm_used is not None else data.get("llm_used"))
+    label_prefix = "AI建议" if used_llm else "系统预判"
+    label_action = {"accept": "采纳", "reject": "不采纳", "revise": "先修改"}[recommendation]
+    return {
+        "provider": provider,
+        "llm_used": used_llm,
+        "recommendation": recommendation,
+        "recommendation_label": f"{label_prefix}：{label_action}",
+        "universal_score": max(0, min(100, score)),
+        "duplicate_level": duplicate_level,
+        "summary": str(data.get("summary") or "请结合候选内容和已有共享知识进行人工判断。"),
+        "reasons": normalize_text_list(data.get("reasons"))[:8],
+        "risks": normalize_text_list(data.get("risks") or data.get("risk_notes"))[:8],
+        "existing_matches": clean_matches,
+        "admin_checklist": normalize_text_list(data.get("admin_checklist") or data.get("what_to_check"))[:8],
+        "checked_at": now_iso(),
+    }
+
+
+def shared_review_existing_matches(proposal: dict[str, Any], library_records: Any) -> list[dict[str, Any]]:
+    source_keys = shared_proposal_source_keys(proposal)
+    title_fp = shared_text_fingerprint(proposal.get("title"))
+    content_fp = shared_text_fingerprint(proposal_readable_content(proposal))
+    matches: list[dict[str, Any]] = []
+    for record in library_records:
+        if not isinstance(record, dict):
+            continue
+        level = ""
+        reason = ""
+        if source_keys and source_keys.intersection(shared_library_source_keys(record)):
+            level = "high"
+            reason = "来自同一个正式知识来源"
+        elif title_fp and title_fp == shared_text_fingerprint(record.get("title")):
+            level = "possible"
+            reason = "标题高度接近"
+        existing_content = record.get("content") or readable_shared_content(record.get("data") if isinstance(record.get("data"), dict) else {})
+        if content_fp and content_fp == shared_text_fingerprint(existing_content):
+            level = "high"
+            reason = "正文高度一致"
+        if level:
+            matches.append(
+                {
+                    "item_id": str(record.get("item_id") or ""),
+                    "title": str(record.get("title") or record.get("item_id") or ""),
+                    "reason": reason,
+                    "level": level,
+                    "content": compact_excerpt(str(existing_content or ""), 240),
+                }
+            )
+    return matches[:8]
+
+
+def read_json_file(path: Path, *, default: Any) -> Any:
+    if not path.exists():
+        return default
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return default
 
 
 def build_shared_library_record(
@@ -1232,6 +2676,123 @@ def public_shared_library_record(record: dict[str, Any]) -> dict[str, Any]:
     return result
 
 
+def build_official_shared_knowledge_snapshot(
+    state: dict[str, Any],
+    *,
+    tenant_id: str = "",
+    since_version: str = "",
+) -> dict[str, Any]:
+    tenant = active_tenant_id(tenant_id or DEFAULT_TENANT_ID)
+    generated_at = now_iso()
+    items = [
+        public_shared_library_record(item)
+        for item in state.get("shared_library", {}).values()
+        if isinstance(item, dict) and str(item.get("status") or "active") == "active"
+    ]
+    items = sorted(items, key=lambda item: (str(item.get("category_id") or ""), str(item.get("title") or item.get("item_id") or "")))
+    version = official_shared_snapshot_version(items)
+    base = {
+        "schema_version": 1,
+        "source": "cloud_official_shared_library",
+        "version": version,
+        "tenant_id": tenant,
+        "generated_at": generated_at,
+        **shared_snapshot_cache_policy(version=version, tenant_id=tenant, issued_at=generated_at),
+        "deleted_item_ids": [],
+    }
+    if since_version and str(since_version) == version:
+        return {**base, "not_modified": True, "categories": [], "items": []}
+    return {
+        **base,
+        "not_modified": False,
+        "categories": official_shared_snapshot_categories(items),
+        "items": items,
+    }
+
+
+def official_shared_snapshot_version(items: list[dict[str, Any]]) -> str:
+    fingerprints = [
+        {
+            "item_id": item.get("item_id"),
+            "category_id": item.get("category_id"),
+            "title": item.get("title"),
+            "content": item.get("content"),
+            "keywords": item.get("keywords"),
+            "applies_to": item.get("applies_to"),
+            "status": item.get("status"),
+            "updated_at": item.get("updated_at"),
+        }
+        for item in items
+    ]
+    return "shared_" + stable_digest(json.dumps(fingerprints, ensure_ascii=False, sort_keys=True), 20)
+
+
+def shared_snapshot_cache_policy(*, version: str, tenant_id: str, issued_at: str) -> dict[str, Any]:
+    ttl_seconds = clamp_int(os.getenv("WECHAT_SHARED_SNAPSHOT_TTL_SECONDS"), default=1800, minimum=60, maximum=86400)
+    refresh_after_seconds = clamp_int(os.getenv("WECHAT_SHARED_SNAPSHOT_REFRESH_AFTER_SECONDS"), default=min(300, max(60, ttl_seconds // 3)), minimum=30, maximum=ttl_seconds)
+    issued = parse_iso_datetime(issued_at) or datetime.now(timezone.utc)
+    refresh_after_at = (issued + timedelta(seconds=refresh_after_seconds)).isoformat(timespec="seconds")
+    expires_at = (issued + timedelta(seconds=ttl_seconds)).isoformat(timespec="seconds")
+    lease_id = "shared_lease_" + stable_digest(f"{tenant_id}:{version}:{issued_at}", 20)
+    cache_policy = {
+        "mode": "cloud_authoritative_lease",
+        "ttl_seconds": ttl_seconds,
+        "refresh_after_seconds": refresh_after_seconds,
+        "issued_at": issued.isoformat(timespec="seconds"),
+        "refresh_after_at": refresh_after_at,
+        "expires_at": expires_at,
+        "lease_id": lease_id,
+        "requires_cloud_refresh": True,
+    }
+    return {
+        "ttl_seconds": ttl_seconds,
+        "refresh_after_seconds": refresh_after_seconds,
+        "issued_at": cache_policy["issued_at"],
+        "refresh_after_at": refresh_after_at,
+        "expires_at": expires_at,
+        "lease_id": lease_id,
+        "cache_policy": cache_policy,
+    }
+
+
+def clamp_int(value: Any, *, default: int, minimum: int, maximum: int) -> int:
+    try:
+        number = int(value)
+    except (TypeError, ValueError):
+        number = default
+    return max(minimum, min(maximum, number))
+
+
+def parse_iso_datetime(value: str) -> datetime | None:
+    text = str(value or "").strip()
+    if not text:
+        return None
+    try:
+        parsed = datetime.fromisoformat(text.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed
+
+
+def official_shared_snapshot_categories(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    grouped: dict[str, int] = {}
+    for item in items:
+        category_id = str(item.get("category_id") or "global_guidelines")
+        grouped[category_id] = grouped.get(category_id, 0) + 1
+    return [
+        {
+            "category_id": category_id,
+            "name": category_id,
+            "kind": "global",
+            "enabled": True,
+            "item_count": count,
+        }
+        for category_id, count in sorted(grouped.items())
+    ]
+
+
 def readable_shared_data(data: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(data, dict):
         return {}
@@ -1271,26 +2832,6 @@ def looks_like_json_object(value: str) -> bool:
 
 def seed_shared_library_if_empty(state: dict[str, Any]) -> None:
     state.setdefault("shared_library", {})
-    if state["shared_library"]:
-        return
-    snapshot = build_shared_knowledge_snapshot()
-    for item in snapshot.get("items", []):
-        if not isinstance(item, dict):
-            continue
-        payload = item.get("payload") if isinstance(item.get("payload"), dict) else item
-        record = build_shared_library_record(
-            {
-                **payload,
-                "item_id": item.get("item_id") or payload.get("id"),
-                "category_id": item.get("category_id") or payload.get("category_id"),
-                "title": item.get("title") or payload.get("title"),
-                "status": item.get("status") or payload.get("status") or "active",
-                "data": payload,
-            },
-            actor_id="system",
-            source="local_shared_snapshot",
-        )
-        state["shared_library"][record["item_id"]] = record
 
 
 def upsert_shared_library_from_operations(
@@ -1326,6 +2867,25 @@ def upsert_shared_library_from_operations(
         state["shared_library"][record["item_id"]] = record
         updated.append(record)
     return updated
+
+
+def validate_shared_patch_payload(patch: dict[str, Any], *, require_signature: bool = False) -> dict[str, Any]:
+    root = runtime_app_root() / "vps_admin" / "shared_patch_validation"
+    service = SharedPatchService(root=root, signing_secret="" if not require_signature else os.getenv("WECHAT_SHARED_PATCH_SECRET", ""))
+    try:
+        return service.preview(patch)
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+def sign_shared_patch_if_configured(patch: dict[str, Any]) -> dict[str, Any]:
+    secret = os.getenv("WECHAT_SHARED_PATCH_SECRET", "").strip()
+    if not secret:
+        return dict(patch)
+    signed = {key: value for key, value in patch.items() if key != "signature"}
+    payload = json.dumps(signed, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    signed["signature"] = hmac.new(secret.encode("utf-8"), payload, sha256).hexdigest()
+    return signed
 
 
 def delete_managed_file(path: Path) -> bool:

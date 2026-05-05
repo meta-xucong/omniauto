@@ -6,6 +6,7 @@ import json
 import os
 import shutil
 import sys
+import uuid
 from io import BytesIO
 from pathlib import Path
 from typing import Any, Callable
@@ -17,13 +18,19 @@ from openpyxl import load_workbook
 APP_ROOT = Path(__file__).resolve().parents[1]
 PROJECT_ROOT = APP_ROOT.parents[1]
 TEST_ROOT = PROJECT_ROOT / "runtime" / "apps" / "wechat_ai_customer_service" / "test_artifacts" / "vps_admin_control_plane"
+TEST_RUN_ID = uuid.uuid4().hex[:8]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from apps.wechat_ai_customer_service.vps_admin.app import create_app  # noqa: E402
+from apps.wechat_ai_customer_service.knowledge_paths import tenant_knowledge_base_root  # noqa: E402
 
 
 _ADMIN_TOKEN_CACHE = ""
+
+
+def test_email(username: str) -> str:
+    return f"{username}-{TEST_RUN_ID}@example.local"
 
 
 def main() -> int:
@@ -35,12 +42,14 @@ def main() -> int:
         os.environ["WECHAT_VPS_ADMIN_EMAIL"] = "admin@example.local"
         os.environ["WECHAT_VPS_ADMIN_USER_ID"] = "platform-admin"
         os.environ["WECHAT_VPS_NODE_ENROLLMENT_TOKEN"] = "enroll-test"
+        os.environ["WECHAT_SHARED_PATCH_SECRET"] = "shared-secret-test"
         os.environ["WECHAT_EMAIL_OTP_REQUIRED"] = "1"
         os.environ["WECHAT_EMAIL_OTP_DEBUG"] = "1"
         os.environ["WECHAT_EMAIL_OUTBOX_PATH"] = str(TEST_ROOT / "email_outbox.jsonl")
         client = TestClient(create_app(state_path=TEST_ROOT / "state.json"))
         checks: list[Callable[[TestClient], None]] = [
             check_admin_login_hidden_and_reserved,
+            check_local_client_accounts_are_mirrored,
             check_tenant_customer_guest_flow,
             check_local_node_and_command_roundtrip,
             check_shared_knowledge_review_flow,
@@ -67,7 +76,11 @@ def check_admin_login_hidden_and_reserved(client: TestClient) -> None:
     token = admin_token(client)
     users = client.get("/v1/admin/users", headers=auth_headers(token))
     assert_status(users, 200, "list users")
-    assert_true(not users.json().get("users"), "admin is not listed as stored user")
+    listed_users = users.json().get("users", [])
+    assert_true(
+        all(item.get("role") != "admin" and item.get("username") != "admin" for item in listed_users),
+        "admin is not listed as stored user",
+    )
 
     forbidden = client.post(
         "/v1/admin/users",
@@ -75,6 +88,55 @@ def check_admin_login_hidden_and_reserved(client: TestClient) -> None:
         json={"username": "shadow-admin", "password": "x", "role": "admin", "tenant_ids": ["tenant_a"]},
     )
     assert_equal(forbidden.status_code, 400, "stored admin is forbidden")
+
+
+def check_local_client_accounts_are_mirrored(client: TestClient) -> None:
+    token = admin_token(client)
+    local_accounts_path = TEST_ROOT / "local_accounts.json"
+    old_path = os.environ.get("WECHAT_LOCAL_ACCOUNTS_STATE_PATH")
+    local_accounts_path.parent.mkdir(parents=True, exist_ok=True)
+    local_accounts_path.write_text(
+        json.dumps(
+            {
+                "accounts": {
+                    "local_usedcar_customer": {
+                        "user_id": "local_usedcar_customer",
+                        "username": "local_usedcar_customer",
+                        "display_name": "Local Usedcar Customer",
+                        "role": "customer",
+                        "tenant_ids": ["local_usedcar_tenant"],
+                        "status": "active",
+                    },
+                    "local_trade_customer": {
+                        "user_id": "local_trade_customer",
+                        "username": "local_trade_customer",
+                        "display_name": "Local Trade Customer",
+                        "role": "customer",
+                        "tenant_ids": ["local_trade_tenant"],
+                        "status": "active",
+                    },
+                }
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    os.environ["WECHAT_LOCAL_ACCOUNTS_STATE_PATH"] = str(local_accounts_path)
+    try:
+        users = client.get("/v1/admin/users", headers=auth_headers(token))
+        assert_status(users, 200, "list users with local mirrors")
+        usernames = {item.get("username") for item in users.json().get("users", [])}
+        assert_true({"local_usedcar_customer", "local_trade_customer"}.issubset(usernames), "VPS should show Local customer accounts")
+        tenants = client.get("/v1/admin/tenants", headers=auth_headers(token))
+        assert_status(tenants, 200, "list tenants with local mirrors")
+        tenant_ids = {item.get("tenant_id") for item in tenants.json().get("tenants", [])}
+        assert_true({"local_usedcar_tenant", "local_trade_tenant"}.issubset(tenant_ids), "VPS should mirror Local customer data spaces")
+    finally:
+        if old_path is None:
+            os.environ.pop("WECHAT_LOCAL_ACCOUNTS_STATE_PATH", None)
+        else:
+            os.environ["WECHAT_LOCAL_ACCOUNTS_STATE_PATH"] = old_path
 
 
 def check_tenant_customer_guest_flow(client: TestClient) -> None:
@@ -109,7 +171,7 @@ def check_tenant_customer_guest_flow(client: TestClient) -> None:
         username="customer_auto",
         password="customer-pass",
         tenant_id="customer_auto",
-        email="customer_auto@example.local",
+        email=test_email("customer_auto"),
         new_password="customer-auto.5678",
     )
     assert_true(bool(customer_auto_token), "same-name customer login")
@@ -118,7 +180,7 @@ def check_tenant_customer_guest_flow(client: TestClient) -> None:
         username="guest_auto",
         password="guest-pass",
         tenant_id="customer_auto",
-        email="guest_auto@example.local",
+        email=test_email("guest_auto"),
         new_password="guest-auto.5678",
     )
     assert_true(bool(guest_auto_token), "admin-assigned guest login")
@@ -154,7 +216,7 @@ def check_tenant_customer_guest_flow(client: TestClient) -> None:
         username="customer_a",
         password="customer-pass",
         tenant_id="tenant_a",
-        email="customer_a@example.local",
+        email=test_email("customer_a"),
         new_password="customer-a.5678",
     )
     customer_me = client.get("/v1/auth/me", headers=auth_headers(customer_token))
@@ -166,7 +228,7 @@ def check_tenant_customer_guest_flow(client: TestClient) -> None:
         username="guest_a",
         password="guest-pass",
         tenant_id="tenant_a",
-        email="guest_a@example.local",
+        email=test_email("guest_a"),
         new_password="guest-a.5678",
     )
     guest_me = client.get("/v1/auth/me", headers=auth_headers(guest_token))
@@ -229,6 +291,20 @@ def check_local_node_and_command_roundtrip(client: TestClient) -> None:
 
 def check_shared_knowledge_review_flow(client: TestClient) -> None:
     token = admin_token(client)
+    patch_node = client.post(
+        "/v1/local/nodes/register",
+        headers={"X-Enrollment-Token": "enroll-test"},
+        json={
+            "node_id": "local_tenant_a_patch_01",
+            "display_name": "Local Tenant A Patch 01",
+            "tenant_ids": ["tenant_a"],
+            "version": "0.1.0-test",
+            "capabilities": ["pull_shared_patch"],
+        },
+    )
+    assert_status(patch_node, 200, "register shared patch node")
+    patch_node_token = patch_node.json()["node"]["node_token"]
+
     manual = client.post(
         "/v1/admin/shared/library",
         headers=auth_headers(token),
@@ -259,6 +335,95 @@ def check_shared_knowledge_review_flow(client: TestClient) -> None:
     deleted = client.delete("/v1/admin/shared/library/manual_console_rule", headers=auth_headers(token))
     assert_status(deleted, 200, "delete shared library item")
 
+    probe_dir = tenant_knowledge_base_root("default") / "policies" / "items"
+    universal_probe = probe_dir / "vps_shared_universal_probe.json"
+    private_probe = probe_dir / "vps_shared_private_probe.json"
+    probe_dir.mkdir(parents=True, exist_ok=True)
+    universal_probe.write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "id": "vps_shared_universal_probe",
+                "category_id": "policies",
+                "status": "active",
+                "data": {
+                    "title": "通用人工转接说明",
+                    "answer": "当客户明确要求人工服务时，应说明已经转接人工客服并请稍等片刻。",
+                    "keywords": ["人工客服", "转接人工"],
+                    "applicability_scope": "global",
+                },
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    private_probe.write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "id": "vps_shared_private_probe",
+                "category_id": "policies",
+                "status": "active",
+                "data": {
+                    "title": "江苏车金客户跟进规则",
+                    "answer": "江苏车金南京门店客户张三手机号13800138000，咨询二手车试驾和过户，必须由门店销售跟进。",
+                    "keywords": ["江苏车金", "南京门店", "二手车"],
+                    "applicability_scope": "global",
+                },
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    try:
+        generated = client.post(
+            "/v1/admin/shared/proposals/generate-from-formal",
+            headers=auth_headers(token),
+            json={"tenant_id": "default", "use_llm": False, "limit": 50},
+        )
+        assert_status(generated, 200, "generate shared candidates from formal knowledge")
+        created = generated.json().get("created", [])
+        assert_true(created, "formal knowledge extraction should create candidate shared proposals")
+        assert_true(
+            all("江苏车金" not in json.dumps(item, ensure_ascii=False) for item in created),
+            "customer-private formal knowledge must not become shared candidates",
+        )
+        generated_proposal = created[0]
+        assert_equal(generated_proposal.get("status"), "pending_review", "generated shared proposal must wait for admin review")
+        assert_true(
+            str(generated_proposal.get("source") or "").startswith("formal_knowledge_universal"),
+            "generated shared proposal source should identify formal-knowledge extraction",
+        )
+        assert_true(
+            generated_proposal.get("source_meta", {}).get("llm_used") is False,
+            "use_llm false should record that LLM was not used",
+        )
+        assert_true(
+            generated_proposal.get("review_assist", {}).get("recommendation") in {"accept", "reject", "revise"},
+            "generated shared proposal should include admin review assist",
+        )
+        rejected_generated = client.post(
+            f"/v1/admin/shared/proposals/{generated_proposal['proposal_id']}/review",
+            headers=auth_headers(token),
+            json={"action": "reject", "note": "test cleanup"},
+        )
+        assert_status(rejected_generated, 200, "reject generated shared candidate")
+        assert_equal(rejected_generated.json()["proposal"]["status"], "rejected", "generated candidate can be rejected by admin")
+        generated_again = client.post(
+            "/v1/admin/shared/proposals/generate-from-formal",
+            headers=auth_headers(token),
+            json={"tenant_id": "default", "use_llm": False, "limit": 50, "only_unscanned": True},
+        )
+        assert_status(generated_again, 200, "generate shared candidates only unscanned")
+        assert_equal(generated_again.json().get("created", []), [], "already checked formal knowledge should not generate duplicates")
+        assert_true(generated_again.json().get("scan", {}).get("scan_state_count", 0) >= 1, "formal scan state should be persisted")
+    finally:
+        for path in (universal_probe, private_probe):
+            if path.exists():
+                path.unlink()
+
     proposal = client.post(
         "/v1/shared/proposals",
         json={
@@ -276,6 +441,16 @@ def check_shared_knowledge_review_flow(client: TestClient) -> None:
     )
     assert_status(proposal, 200, "submit shared proposal")
     proposal_id = proposal.json()["proposal"]["proposal_id"]
+    refreshed_assist = client.post(
+        f"/v1/admin/shared/proposals/{proposal_id}/review-assist",
+        headers=auth_headers(token),
+        json={"use_llm": False},
+    )
+    assert_status(refreshed_assist, 200, "refresh proposal review assist")
+    assert_true(
+        refreshed_assist.json()["review_assist"].get("recommendation") in {"accept", "reject", "revise"},
+        "proposal review assist has a recommendation",
+    )
 
     reviewed = client.post(
         f"/v1/admin/shared/proposals/{proposal_id}/review",
@@ -285,10 +460,83 @@ def check_shared_knowledge_review_flow(client: TestClient) -> None:
     assert_status(reviewed, 200, "accept proposal")
     assert_equal(reviewed.json()["proposal"]["status"], "accepted", "proposal accepted")
     assert_equal(reviewed.json()["patch"]["status"], "published", "patch published")
+    assert_true(bool(reviewed.json()["patch"].get("signature")), "published patch is signed when secret is configured")
     assert_true(reviewed.json()["library_items"], "accepted proposal writes official library")
+    patch_id = reviewed.json()["patch"]["patch_id"]
+    patches_before_push = client.get("/v1/admin/shared/patches", headers=auth_headers(token))
+    assert_status(patches_before_push, 200, "list shared patches before push")
+    listed_patch = next(item for item in patches_before_push.json()["patches"] if item["patch_id"] == patch_id)
+    assert_equal(listed_patch["delivery"]["overall_status"], "not_pushed", "new patch starts without delivery")
+
+    pushed = client.post(
+        f"/v1/admin/shared/patches/{patch_id}/push",
+        headers=auth_headers(token),
+        json={"tenant_id": "tenant_a", "node_id": "local_tenant_a_patch_01"},
+    )
+    assert_status(pushed, 200, "push shared patch to tenant nodes")
+    assert_true(pushed.json()["commands"], "patch push creates commands")
+    assert_equal(pushed.json()["commands"][0]["type"], "pull_shared_patch", "patch push command type")
+    assert_equal(pushed.json()["commands"][0]["payload"]["patch"]["patch_id"], patch_id, "patch command carries full patch")
+    assert_equal(pushed.json()["delivery"]["counts"]["total"], 1, "patch delivery tracks one target")
+    assert_equal(pushed.json()["delivery"]["overall_status"], "pending", "patch push starts pending delivery")
+    command_id = pushed.json()["commands"][0]["command_id"]
+
+    patch_poll = client.get(
+        "/v1/local/commands?tenant_id=tenant_a&node_id=local_tenant_a_patch_01",
+        headers={"X-Node-Token": patch_node_token},
+    )
+    assert_status(patch_poll, 200, "patch node polls shared patch command")
+    assert_equal(patch_poll.json()["commands"][0]["command_id"], command_id, "patch command delivered to target node")
+    patches_after_poll = client.get("/v1/admin/shared/patches", headers=auth_headers(token))
+    assert_status(patches_after_poll, 200, "list shared patches after poll")
+    polled_patch = next(item for item in patches_after_poll.json()["patches"] if item["patch_id"] == patch_id)
+    assert_equal(polled_patch["delivery"]["counts"]["sent"], 1, "patch delivery shows sent before apply result")
+
+    patch_result = client.post(
+        f"/v1/local/commands/{command_id}/result",
+        headers={"X-Node-Token": patch_node_token},
+        json={"command_id": command_id, "accepted": True, "result": {"ok": True, "applied": {"ok": True}}},
+    )
+    assert_status(patch_result, 200, "patch node reports apply result")
+    patches_after_apply = client.get("/v1/admin/shared/patches", headers=auth_headers(token))
+    assert_status(patches_after_apply, 200, "list shared patches after apply")
+    applied_patch = next(item for item in patches_after_apply.json()["patches"] if item["patch_id"] == patch_id)
+    assert_equal(applied_patch["delivery"]["overall_status"], "applied", "patch delivery becomes applied")
+    assert_equal(applied_patch["delivery"]["targets"][0]["node_id"], "local_tenant_a_patch_01", "patch delivery includes target node")
+
     library = client.get("/v1/admin/shared/library/after_sale_policy", headers=auth_headers(token))
     assert_status(library, 200, "accepted proposal library item")
     assert_equal(library.json()["item"]["title"], "After Sale", "accepted proposal title")
+    cloud_snapshot = client.get("/v1/shared/knowledge?tenant_id=tenant_a", headers=auth_headers(token))
+    assert_status(cloud_snapshot, 200, "cloud official shared snapshot")
+    snapshot = cloud_snapshot.json()["snapshot"]
+    assert_true(any(item.get("item_id") == "after_sale_policy" for item in snapshot.get("items", [])), "cloud snapshot includes accepted library item")
+    not_modified = client.get(f"/v1/shared/knowledge?tenant_id=tenant_a&since_version={snapshot['version']}", headers=auth_headers(token))
+    assert_status(not_modified, 200, "cloud official shared snapshot not modified")
+    assert_equal(not_modified.json()["snapshot"].get("not_modified"), True, "cloud snapshot supports version short circuit")
+
+    unsafe = client.post(
+        "/v1/shared/proposals",
+        json={
+            "tenant_id": "tenant_a",
+            "title": "Unsafe shared proposal",
+            "summary": "Should be rejected at review time",
+            "operations": [
+                {
+                    "op": "upsert_json",
+                    "path": "../escape.json",
+                    "content": {"schema_version": 1, "id": "escape", "data": {"title": "bad"}},
+                }
+            ],
+        },
+    )
+    assert_status(unsafe, 200, "submit unsafe proposal")
+    unsafe_review = client.post(
+        f"/v1/admin/shared/proposals/{unsafe.json()['proposal']['proposal_id']}/review",
+        headers=auth_headers(token),
+        json={"action": "accept"},
+    )
+    assert_equal(unsafe_review.status_code, 400, "unsafe proposal cannot be accepted")
 
 
 def check_restore_release_and_latest_update(client: TestClient) -> None:
@@ -304,13 +552,32 @@ def check_restore_release_and_latest_update(client: TestClient) -> None:
     release = client.post(
         "/v1/admin/releases",
         headers=auth_headers(token),
-        json={"version": "0.2.0-test", "channel": "stable", "title": "Test release", "artifact_url": "https://example.invalid/release.zip"},
+        json={
+            "version": "0.2.0-test",
+            "channel": "stable",
+            "title": "Test release",
+            "artifact_url": "https://example.invalid/release.zip",
+            "sha256": "0" * 64,
+            "signature": "sig-test",
+            "notes": "Test release notes",
+        },
     )
     assert_status(release, 200, "create release")
+    assert_equal(release.json()["release"]["sha256"], "0" * 64, "release sha256 stored")
+    release_id = release.json()["release"]["release_id"]
+    pushed_release = client.post(
+        f"/v1/admin/releases/{release_id}/push",
+        headers=auth_headers(token),
+        json={"tenant_id": "tenant_a", "mode": "check_update"},
+    )
+    assert_status(pushed_release, 200, "push release check command")
+    assert_true(pushed_release.json()["commands"], "release push creates commands")
+    assert_equal(pushed_release.json()["commands"][0]["type"], "check_update", "release push command type")
 
     latest = client.get("/v1/updates/latest?channel=stable")
     assert_status(latest, 200, "latest update")
     assert_equal(latest.json()["update"]["version"], "0.2.0-test", "latest version")
+    assert_equal(latest.json()["update"]["signature"], "sig-test", "latest signature")
 
 
 def check_customer_data_shared_sync_and_full_backup_entries(client: TestClient) -> None:
@@ -329,6 +596,9 @@ def check_customer_data_shared_sync_and_full_backup_entries(client: TestClient) 
     test01_workbook = load_workbook(BytesIO(test01_readable.content), read_only=True)
     assert_true("正式-商品资料" in test01_workbook.sheetnames, "test01 readable export splits product formal knowledge")
     assert_true("正式-政策规则" in test01_workbook.sheetnames, "test01 readable export splits policy formal knowledge")
+    assert_true("原始聊天" in test01_workbook.sheetnames, "readable export includes raw message sheet")
+    assert_true("待确认知识" in test01_workbook.sheetnames, "readable export includes pending candidate sheet")
+    assert_true("导入资料" in test01_workbook.sheetnames, "readable export includes upload sheet")
     assert_true(test01_workbook["正式-政策规则"].max_row >= 2, "test01 policy knowledge sheet includes rows")
 
     customer_data = client.get("/v1/admin/customer-data", headers=auth_headers(token))
@@ -353,14 +623,16 @@ def check_customer_data_shared_sync_and_full_backup_entries(client: TestClient) 
     workbook = load_workbook(BytesIO(readable.content), read_only=True)
     assert_true(any(name.startswith("正式") for name in workbook.sheetnames), "readable export has formal category sheets")
     assert_true(any(name.startswith("商品专属") for name in workbook.sheetnames), "readable export has product knowledge sheets")
+    assert_true({"原始聊天", "待确认知识", "导入资料"}.issubset(set(workbook.sheetnames)), "readable export matches latest client data structure")
     deleted = client.delete(f"/v1/admin/customer-data/{package_id}", headers=auth_headers(token))
     assert_status(deleted, 200, "customer package delete")
     assert_equal(deleted.json()["package"]["package_id"], package_id, "deleted package id")
 
     shared_overview = client.get("/v1/admin/shared/overview", headers=auth_headers(token))
     assert_status(shared_overview, 200, "shared overview")
-    assert_true(shared_overview.json()["local"]["structure"]["separated"] is True, "shared structure separated")
-    assert_true(shared_overview.json()["local"]["items"], "shared items are visible")
+    assert_equal(shared_overview.json()["official"]["source"], "cloud_official_shared_library", "shared overview uses cloud official source")
+    assert_true(shared_overview.json()["official"]["items"], "cloud official shared items are visible")
+    assert_true(shared_overview.json()["local_legacy"]["structure"]["separated"] is True, "legacy local shared structure remains inspectable")
 
     shared_sync = client.post("/v1/admin/shared/sync-local", headers=auth_headers(token), json={})
     assert_status(shared_sync, 200, "sync shared snapshot")
@@ -390,12 +662,23 @@ def check_vps_console_chinese_shell(client: TestClient) -> None:
     response = client.get("/")
     assert_status(response, 200, "console index")
     html = response.text
+    js = client.get("/static/app.js")
+    assert_status(js, 200, "console app js")
     assert_true('id="login-screen"' in html, "VPS login uses a separate screen")
     assert_true('id="logout-button"' in html, "VPS console has logout entry")
     assert_true("登录服务端" in html, "console login title is Chinese")
     assert_true("访客可查看客户" in html, "guest access selector is user-readable")
     assert_true("打包所选客户数据" in html, "selected customer package button visible")
     assert_true("客户电脑连接" in html, "local node wording is user-readable")
+    assert_true("共享公共知识" in html, "shared knowledge navigation visible")
+    assert_true("候选共享公共知识库" not in html, "shared candidate review is merged into shared knowledge")
+    assert_true("AI 提炼候选共享知识" in html, "shared candidate generation action is visible")
+    assert_true("AI复核建议" in js.text and "review-assist" in js.text, "shared candidate review assist action is visible")
+    assert_true("pendingProposals" in js.text and "archivedProposals" in js.text, "candidate list only shows pending items with archive access")
+    assert_true('id="sync-shared"' in html and 'id="shared-patch-list"' in html, "shared snapshot and patch list controls are visible")
+    assert_true("slice(0, 10)" in js.text and "patchDeliveryHtml" in js.text, "published shared patches are capped and show delivery status")
+    assert_true("sharedPatchPushMessage" in js.text, "shared patch push action reports target delivery feedback")
+    assert_true("已拒绝 / 已作废归档" in js.text, "voided or rejected candidates are archived behind a collapsed entry")
     assert_true("标准操作方法" in html, "release update operation method visible")
     assert_true("客户租户" not in html, "tenant jargon is hidden from console UI")
     assert_true("生成 test01 测试客户" not in html, "test01 bootstrap is hidden from console UI")
@@ -526,6 +809,7 @@ ENV_KEYS = (
     "WECHAT_VPS_ADMIN_EMAIL",
     "WECHAT_VPS_ADMIN_USER_ID",
     "WECHAT_VPS_NODE_ENROLLMENT_TOKEN",
+    "WECHAT_SHARED_PATCH_SECRET",
     "WECHAT_VPS_ADMIN_STATE_PATH",
     "WECHAT_EMAIL_OTP_REQUIRED",
     "WECHAT_EMAIL_OTP_DEBUG",

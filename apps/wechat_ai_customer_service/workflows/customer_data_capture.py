@@ -10,6 +10,8 @@ from typing import Any
 
 from openpyxl import Workbook, load_workbook
 
+from apps.wechat_ai_customer_service.platform_understanding_rules import map_of_lists
+
 
 HEADERS = [
     "received_at",
@@ -26,16 +28,8 @@ HEADERS = [
     "raw_text",
 ]
 
-FIELD_LABELS = {
-    "name": ["姓名", "客户姓名", "联系人", "收件人", "名字"],
-    "phone": ["电话", "手机号", "手机", "联系电话", "联系方式"],
-    "address": ["地址", "收货地址", "寄送地址", "详细地址"],
-    "product": ["产品", "商品", "需求", "采购", "品名"],
-    "quantity": ["数量", "件数", "采购量", "数量需求"],
-    "spec": ["规格", "型号", "尺寸", "参数"],
-    "budget": ["预算", "价格", "报价", "费用"],
-    "note": ["备注", "说明", "其他", "补充"],
-}
+def field_labels() -> dict[str, list[str]]:
+    return map_of_lists("customer_data_field_labels")
 
 
 @dataclass(frozen=True)
@@ -55,7 +49,7 @@ def extract_customer_data(text: str, required_fields: list[str] | None = None) -
     if phone:
         fields["phone"] = phone
 
-    for field, labels in FIELD_LABELS.items():
+    for field, labels in field_labels().items():
         if field == "phone" and fields.get("phone"):
             continue
         value = extract_labeled_value(normalized, labels)
@@ -190,6 +184,10 @@ def extract_phone(text: str) -> str:
 
 
 def extract_labeled_value(text: str, labels: list[str]) -> str:
+    line_value = extract_labeled_line_value(text, labels)
+    if line_value:
+        return line_value
+
     label_pattern = "|".join(re.escape(label) for label in labels)
     pattern = re.compile(
         rf"(?:^|[\n,;，；\s])(?:{label_pattern})\s*(?:[:=：]|是|为)?\s*"
@@ -203,8 +201,32 @@ def extract_labeled_value(text: str, labels: list[str]) -> str:
     return cleanup_field_value(value)[:200]
 
 
+def extract_labeled_line_value(text: str, labels: list[str]) -> str:
+    sorted_labels = sorted(labels, key=len, reverse=True)
+    for raw_line in re.split(r"[\n,;，；]", text):
+        line = raw_line.strip(" ,;.，；。:：")
+        if not line:
+            continue
+        for label in sorted_labels:
+            escaped = re.escape(label)
+            match = re.match(rf"^{escaped}\s*(?:[:=：]|是|为)\s*(.+)$", line, re.IGNORECASE)
+            if match:
+                value = cleanup_field_value(match.group(1))
+                if value:
+                    return value[:200]
+            if label in field_labels().get("name", []):
+                compact_match = re.match(rf"^{escaped}\s*([\u4e00-\u9fff·]{{2,8}})$", line)
+                if compact_match:
+                    value = normalize_name(compact_match.group(1))
+                    if is_plain_chinese_name(value):
+                        return value[:200]
+    return ""
+
+
 def cleanup_field_value(value: str) -> str:
+    value = re.sub(r"\[live-regression:[^\]]+\]", " ", value)
     value = re.sub(r"\s+", " ", value).strip(" ,;.，；。:：")
+    value = re.split(rf"\s+(?:{all_label_pattern()})\s*(?:[:=：]|是|为)?", value, maxsplit=1, flags=re.IGNORECASE)[0]
     value = re.sub(r"(?:姓名|客户姓名|联系人|收件人|名字|电话|手机号|手机|联系电话|联系方式)\s*$", "", value)
     return value.strip(" ,;.，；。:：")
 
@@ -241,9 +263,6 @@ def is_plain_chinese_name(value: str) -> bool:
     blocked_words = {
         "产品",
         "商品",
-        "冰箱",
-        "商用冰箱",
-        "滤芯",
         "地址",
         "电话",
         "报价",
@@ -255,7 +274,6 @@ def is_plain_chinese_name(value: str) -> bool:
         "客户信息",
         "收货信息",
         "联系方式",
-        "净水器滤芯",
         "测试路",
         "你好",
         "您好",
@@ -270,10 +288,6 @@ def is_plain_chinese_name(value: str) -> bool:
         "推荐",
         "想找",
         "找个",
-        "能放",
-        "饮料",
-        "冷柜",
-        "冰柜",
         "随便",
         "看看",
         "挺快",
@@ -284,14 +298,7 @@ def is_plain_chinese_name(value: str) -> bool:
     blocked_fragments = {
         "地方",
         "接近",
-        "小店",
-        "饮料",
-        "冷柜",
-        "办公室",
-        "仓库",
-        "快递",
         "舒服",
-        "腰疼",
         "随便",
         "看看",
         "预算",
@@ -320,6 +327,6 @@ def is_plain_chinese_name(value: str) -> bool:
 
 def all_label_pattern() -> str:
     labels = []
-    for items in FIELD_LABELS.values():
+    for items in field_labels().values():
         labels.extend(items)
     return "|".join(re.escape(label) for label in sorted(set(labels), key=len, reverse=True))

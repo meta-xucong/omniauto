@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import argparse
 import copy
+import hashlib
 import json
 import os
 import sys
@@ -26,9 +27,10 @@ from pathlib import Path
 from typing import Any
 
 APP_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = APP_ROOT.parents[1]
 ADAPTERS_ROOT = APP_ROOT / "adapters"
 WORKFLOWS_ROOT = Path(__file__).resolve().parent
-for path in (WORKFLOWS_ROOT, APP_ROOT, ADAPTERS_ROOT):
+for path in (PROJECT_ROOT, WORKFLOWS_ROOT, APP_ROOT, ADAPTERS_ROOT):
     if str(path) not in sys.path:
         sys.path.insert(0, str(path))
 
@@ -40,11 +42,19 @@ from customer_intent_assist import (
     validate_llm_candidate,
 )
 from customer_service_loop import BOT_PREFIX, ReplyDecision, decide_reply, format_reply, load_rules
+from apps.wechat_ai_customer_service.platform_safety_rules import guard_term_set, load_platform_safety_rules
 from knowledge_loader import build_evidence_pack
+from llm_reply_synthesis import maybe_synthesize_reply
 from product_knowledge import decide_product_knowledge_reply, load_product_knowledge
 from rag_answer_layer import maybe_build_rag_reply
 from rag_experience_store import record_rag_reply_experience
 from wechat_connector import FILE_TRANSFER_ASSISTANT, ROOT, WeChatConnector
+from apps.wechat_ai_customer_service.admin_backend.services.customer_service_runtime import (
+    summarize_listener_result,
+    write_runtime_status,
+)
+from admin_backend.services.customer_service_settings import CustomerServiceSettings
+from admin_backend.services.raw_message_store import RawMessageStore
 
 
 CONFIG_PATH = ROOT / "apps/wechat_ai_customer_service/configs/default.example.json"
@@ -144,9 +154,13 @@ def main() -> int:
     args = parser.parse_args()
 
     try:
+        write_runtime_status("thinking", "正在读取微信消息并调用必要的大模型。")
         result = run_workflow(args)
     except Exception as exc:
+        write_runtime_status("idle", "本轮处理出错，监听会自动重试。", last_error=repr(exc))
         result = {"ok": False, "error": repr(exc)}
+    else:
+        write_runtime_status("idle", "本轮微信消息处理完成。", **summarize_listener_result(result))
 
     print_json(result)
     return 0 if result.get("ok") else 1
@@ -154,6 +168,7 @@ def main() -> int:
 
 def run_workflow(args: argparse.Namespace) -> dict[str, Any]:
     config = load_config(args.config)
+    config = apply_local_customer_service_settings(config)
     state_path = resolve_path(config.get("state_path"))
     audit_path = resolve_path(config.get("audit_log_path"))
     rules = load_rules(resolve_path(config.get("rules_path")))
@@ -242,6 +257,14 @@ def process_target(
     payload = connector.get_messages(target.name, exact=target.exact)
     if not payload.get("ok"):
         return base_event(target, "error", {"messages": payload})
+    raw_capture = maybe_record_raw_messages(target, config, payload.get("messages", []) or [])
+    console_settings = config.get("_local_customer_service_settings", {}) or {}
+    if console_settings.get("enabled") is False:
+        return base_event(target, "skipped", {"reason": "customer_service_disabled", "raw_capture": raw_capture})
+    if str(console_settings.get("reply_mode") or "") == "record_only":
+        return base_event(target, "skipped", {"reason": "record_only_mode", "raw_capture": raw_capture})
+    if str(console_settings.get("reply_mode") or "") == "manual_assist":
+        send = False
 
     batch = select_batch(
         payload.get("messages", []) or [],
@@ -251,10 +274,17 @@ def process_target(
         config=config,
     )
     if not batch:
-        return base_event(target, "skipped", {"reason": "no eligible unprocessed text messages"})
+        return base_event(target, "skipped", {"reason": "no eligible unprocessed text messages", "raw_capture": raw_capture})
 
     combined = "\n".join(str(item.get("content") or "") for item in batch)
     message_ids = [str(item.get("id") or "") for item in batch]
+    write_runtime_status(
+        "thinking",
+        f"正在处理「{target.name}」的 {len(batch)} 条新消息。",
+        target=target.name,
+        message_count=len(batch),
+        message_ids=message_ids,
+    )
     if send:
         backoff = get_rate_limit_backoff(target_state, message_ids)
         if backoff:
@@ -300,6 +330,7 @@ def process_target(
                 "reply_text": reply_text,
             },
             "data_capture": data_capture,
+            "raw_capture": raw_capture,
             "product_knowledge": product_knowledge,
             "intent_assist": skipped_intent_assist(config, "not_evaluated_yet"),
             "dry_run": not send,
@@ -385,17 +416,98 @@ def process_target(
             "reply_text": reply_text,
         }
 
-    operator_handoff = should_operator_handoff(
+    llm_synthesis = maybe_synthesize_reply(
+        config=config,
+        target_name=target.name,
+        target_state=target_state,
+        batch=batch,
+        combined=combined,
+        decision=decision,
+        reply_text=reply_text,
+        intent_assist=event["intent_assist"],
+        rag_reply=rag_reply,
+        llm_reply=llm_reply,
+        product_knowledge=product_knowledge,
+        data_capture=data_capture,
+        raw_capture=raw_capture,
+    )
+    event["llm_reply_synthesis"] = llm_synthesis
+    if llm_synthesis.get("applied"):
+        decision = ReplyDecision(
+            reply_text=str(llm_synthesis.get("raw_reply_text") or ""),
+            rule_name=str(llm_synthesis.get("rule_name") or "llm_synthesis_reply"),
+            matched=True,
+            need_handoff=bool(llm_synthesis.get("needs_handoff")),
+            reason=str(llm_synthesis.get("reason") or "guarded_llm_synthesis"),
+        )
+        if decision.need_handoff:
+            handoff_raw = str(llm_synthesis.get("raw_reply_text") or "").strip()
+            if handoff_raw:
+                reply_text = format_reply(handoff_raw, configured_reply_prefix(config))
+            else:
+                reply_text = format_reply(handoff_acknowledgement_text(config), configured_reply_prefix(config))
+        else:
+            reply_text = format_reply(str(llm_synthesis.get("raw_reply_text") or ""), configured_reply_prefix(config))
+            clear_no_relevant_handoff_after_safe_synthesis(event["intent_assist"], llm_synthesis)
+        event["decision"] = {
+            **decision.__dict__,
+            "raw_reply_text": decision.reply_text,
+            "reply_text": reply_text,
+        }
+
+    if send:
+        freshness = detect_newer_messages_before_send(
+            connector=connector,
+            target=target,
+            target_state=target_state,
+            batch=batch,
+            config=config,
+        )
+        event["freshness_check"] = freshness
+        if freshness.get("has_newer_messages"):
+            event["action"] = "skipped"
+            event["reason"] = "newer_message_arrived_during_reply_build"
+            write_runtime_status(
+                "idle",
+                "客户刚刚又发了新消息，本轮旧回复已暂停，下一轮会合并最新上下文再答。",
+                target=target.name,
+                last_action="skipped",
+                last_reason=event["reason"],
+            )
+            return event
+
+    handoff_enabled = (config.get("handoff", {}) or {}).get("enabled", True) is not False
+    operator_handoff_required = should_operator_handoff(
         decision,
         product_knowledge,
         fallback_allowed,
         intent_assist=event["intent_assist"],
     )
+    operator_handoff = handoff_enabled and operator_handoff_required
+    if send and operator_handoff_required and not handoff_enabled:
+        event["action"] = "skipped"
+        event["reason"] = "operator_handoff_disabled"
+        event["intent_assist"]["handoff_disabled"] = True
+        return event
     if send and operator_handoff:
         reason = handoff_reason(decision, product_knowledge, intent_assist=event["intent_assist"])
         if data_capture.get("enabled") and data_capture.get("is_customer_data"):
             data_capture["write_requested"] = write_data
-            data_capture["write_skipped_reason"] = "operator_handoff_required"
+            if data_capture.get("complete") and write_data:
+                if customer_data_write_allowed_before_handoff(event["intent_assist"]):
+                    write_customer_data_if_ready(config, target, data_capture)
+                    if not data_capture.get("write_result", {}).get("ok"):
+                        event["data_capture"] = data_capture
+                        event["action"] = "blocked"
+                        event["reason"] = "customer data was not written before operator handoff"
+                        event["intent_assist"] = skipped_intent_assist(config, "customer_data_write_blocked_before_handoff")
+                        return event
+                else:
+                    data_capture["write_skipped_reason"] = "operator_handoff_required"
+            elif data_capture.get("complete"):
+                data_capture["write_skipped_reason"] = "operator_handoff_required_write_data_false"
+            else:
+                data_capture["write_skipped_reason"] = "operator_handoff_required"
             event["data_capture"] = data_capture
         handoff_reply_text = build_operator_handoff_reply_text(
             config,
@@ -403,6 +515,7 @@ def process_target(
             product_knowledge,
             reply_text,
             intent_assist=event["intent_assist"],
+            combined=combined,
         )
         event["decision"]["reply_text"] = handoff_reply_text
         event["decision"]["need_handoff"] = True
@@ -414,6 +527,8 @@ def process_target(
             event["action"] = "error"
             event["ok"] = False
             return event
+        reply_trace_id = build_reply_trace_id(target.name, batch, handoff_reply_text)
+        event["reply_trace_id"] = reply_trace_id
         alert = record_operator_alert(
             config=config,
             target_state=target_state,
@@ -430,17 +545,24 @@ def process_target(
             reason=reason,
             status="open",
             operator_alert=alert,
+            reply_trace_id=reply_trace_id,
+            reply_text=handoff_reply_text,
         )
-        mark_processed(target_state, batch, handoff_reply_text)
+        mark_processed(target_state, batch, handoff_reply_text, reply_trace_id=reply_trace_id, send_result=verified)
         record_reply_timestamp(target_state)
+        finalize_data_capture_state(target_state, data_capture)
         event["operator_alert"] = alert
         event["action"] = "handoff_sent"
         return event
 
     if send and not decision.matched and not fallback_allowed:
-        mark_handoff(target_state, batch, reason="no_rule_matched", status="open")
-        event["action"] = "handoff"
-        event["reason"] = "fallback reply blocked"
+        if handoff_enabled:
+            mark_handoff(target_state, batch, reason="no_rule_matched", status="open")
+            event["action"] = "handoff"
+            event["reason"] = "fallback reply blocked"
+        else:
+            event["action"] = "skipped"
+            event["reason"] = "fallback reply blocked and operator handoff disabled"
         event["intent_assist"] = skipped_intent_assist(config, "fallback_reply_blocked")
         return event
 
@@ -471,6 +593,8 @@ def process_target(
             event["action"] = "error"
             event["ok"] = False
             return event
+        reply_trace_id = build_reply_trace_id(target.name, batch, reply_text)
+        event["reply_trace_id"] = reply_trace_id
         finalize_data_capture_state(target_state, data_capture)
         record = maybe_record_rag_experience(
             target=target,
@@ -478,10 +602,11 @@ def process_target(
             combined=combined,
             reply_text=reply_text,
             event=event,
+            reply_trace_id=reply_trace_id,
         )
         if record:
             event["rag_experience"] = record
-        mark_processed(target_state, batch, reply_text)
+        mark_processed(target_state, batch, reply_text, reply_trace_id=reply_trace_id, send_result=verified)
         record_reply_timestamp(target_state)
         event["action"] = "sent"
         return event
@@ -498,6 +623,56 @@ def process_target(
         mark_processed(target_state, batch, reply_text)
         event["marked_processed"] = True
     return event
+
+
+def maybe_record_raw_messages(target: TargetConfig, config: dict[str, Any], messages: list[dict[str, Any]]) -> dict[str, Any]:
+    settings = config.get("raw_messages", {}) or {}
+    console_settings = config.get("_local_customer_service_settings", {}) or {}
+    if console_settings.get("record_messages") is False:
+        return {"enabled": False, "reason": "customer_service_record_messages_disabled"}
+    if settings.get("enabled", True) is False:
+        return {"enabled": False}
+    normalized_messages = [item for item in messages if isinstance(item, dict) and str(item.get("content") or "").strip()]
+    if not normalized_messages:
+        return {"enabled": True, "ok": True, "inserted_count": 0, "duplicate_count": 0}
+    try:
+        store = RawMessageStore()
+        result = store.upsert_messages(
+            {
+                "target_name": target.name,
+                "display_name": target.name,
+                "conversation_type": str(settings.get("conversation_type") or infer_raw_conversation_type(target.name)),
+                "status": "active",
+                "exact": target.exact,
+                "record_self": True,
+                "learning_enabled": settings.get("learning_enabled", True) is not False,
+                "notify_enabled": bool(settings.get("notify_enabled", False)),
+                "source": {"type": "customer_service_listener"},
+            },
+            normalized_messages,
+            source_module="customer_service",
+            learning_enabled=settings.get("learning_enabled", True) is not False,
+            create_batch=True,
+            batch_reason="customer_service_poll",
+        )
+        if settings.get("auto_learn", False) and result.get("batch"):
+            from admin_backend.services.raw_message_learning_service import RawMessageLearningService
+
+            result["learning"] = RawMessageLearningService().process_batch(
+                str(result["batch"].get("batch_id") or ""),
+                use_llm=settings.get("use_llm", True) is not False,
+            )
+        return {"enabled": True, **result}
+    except Exception as exc:
+        return {"enabled": True, "ok": False, "error": repr(exc)}
+
+
+def infer_raw_conversation_type(target_name: str) -> str:
+    if target_name == FILE_TRANSFER_ASSISTANT:
+        return "file_transfer"
+    if "群" in target_name or "chatroom" in target_name.lower():
+        return "group"
+    return "private"
 
 
 def handle_rate_limit_block(
@@ -542,6 +717,7 @@ def maybe_record_rag_experience(
     combined: str,
     reply_text: str,
     event: dict[str, Any],
+    reply_trace_id: str = "",
 ) -> dict[str, Any] | None:
     rag_reply = event.get("rag_reply", {}) or {}
     if not rag_reply.get("applied"):
@@ -555,6 +731,7 @@ def maybe_record_rag_experience(
             raw_reply_text=str(rag_reply.get("raw_reply_text") or reply_text),
             intent_assist=event.get("intent_assist", {}) or {},
             rag_reply=rag_reply,
+            reply_trace_id=reply_trace_id,
         )
     except Exception as exc:
         event["rag_experience_error"] = repr(exc)
@@ -588,22 +765,42 @@ def build_operator_handoff_reply_text(
     product_knowledge: dict[str, Any],
     current_reply_text: str,
     intent_assist: dict[str, Any] | None = None,
+    combined: str = "",
 ) -> str:
+    if decision.rule_name == "llm_synthesis_handoff" and str(current_reply_text or "").strip():
+        return current_reply_text
     if evidence_requires_handoff(intent_assist):
-        return format_reply(handoff_acknowledgement_text(config), configured_reply_prefix(config))
+        return format_reply(handoff_acknowledgement_text(config, combined=combined), configured_reply_prefix(config))
     if product_knowledge.get("auto_reply_allowed") is False:
-        return format_reply(handoff_acknowledgement_text(config), configured_reply_prefix(config))
+        return format_reply(handoff_acknowledgement_text(config, combined=combined), configured_reply_prefix(config))
     if product_knowledge.get("reply_text"):
         return current_reply_text
     return format_reply(handoff_acknowledgement_text(config), configured_reply_prefix(config))
 
 
-def handoff_acknowledgement_text(config: dict[str, Any]) -> str:
+def handoff_acknowledgement_text(config: dict[str, Any], *, combined: str = "") -> str:
     settings = config.get("handoff", {}) or {}
-    return str(
+    text = str(
         settings.get("acknowledgement_reply")
         or "这个问题我当前无法直接确认，我先帮您记录并请示上级，稍后给您准确回复。"
     )
+    if handoff_acknowledgement_is_formulaic(text):
+        if "直接按" in str(combined or ""):
+            return "这类价格我不能直接确认，需要请示上级后才能给准话。"
+        return "这点我不能直接替您拍板，我先把问题记下，让负责的同事核实后给您准话。"
+    return text
+
+
+def handoff_acknowledgement_is_formulaic(text: str) -> bool:
+    formulaic_terms = (
+        "收到，我先记录",
+        "稍后继续处理",
+        "请示上级",
+        "这个问题需要销售人工确认，我先帮您记录并提醒同事跟进",
+        "我先帮您记录并提醒同事跟进",
+        "当前无法直接确认，我先帮您记录",
+    )
+    return any(term in str(text or "") for term in formulaic_terms)
 
 
 def handoff_reason(
@@ -774,12 +971,16 @@ def decide_reply_with_data_capture(
     if data_capture.get("is_customer_data"):
         if data_capture.get("complete"):
             reply = data_capture_reply(config, data_capture, complete=True)
+            needs_handoff = visible_platform_terms_hit(
+                combined,
+                settings=config.get("llm_reply_synthesis", {}) or {},
+            )
             return ReplyDecision(
                 reply_text=reply,
                 rule_name="customer_data_capture",
                 matched=True,
-                need_handoff=False,
-                reason="customer_data_complete",
+                need_handoff=needs_handoff,
+                reason="customer_data_complete_requires_handoff" if needs_handoff else "customer_data_complete",
             )
         reply = data_capture_reply(config, data_capture, complete=False)
         return ReplyDecision(
@@ -820,6 +1021,61 @@ def maybe_match_product_knowledge(
     )
     result["path"] = str(path)
     return result
+
+
+def apply_local_customer_service_settings(config: dict[str, Any]) -> dict[str, Any]:
+    """Overlay Local Console switches onto the workflow config used by the listener."""
+    merged = copy.deepcopy(config)
+    try:
+        settings = CustomerServiceSettings().get()
+    except Exception:
+        return merged
+    merged["_local_customer_service_settings"] = settings
+    use_llm = settings.get("use_llm", True) is not False
+    raw_messages = dict(merged.get("raw_messages", {}) or {})
+    raw_messages["enabled"] = settings.get("record_messages", True) is not False
+    raw_messages["auto_learn"] = settings.get("auto_learn", True) is not False
+    raw_messages["use_llm"] = use_llm
+    merged["raw_messages"] = raw_messages
+
+    intent_assist = dict(merged.get("intent_assist", {}) or {})
+    intent_assist["enabled"] = use_llm
+    intent_assist["mode"] = str(intent_assist.get("mode") or "heuristic")
+    llm_advisory = dict(intent_assist.get("llm_advisory", {}) or {})
+    llm_advisory["enabled"] = use_llm
+    if use_llm and str(llm_advisory.get("provider") or "manual_json") == "manual_json" and not str(llm_advisory.get("candidate_json_path") or "").strip():
+        llm_advisory["provider"] = "deepseek"
+    llm_advisory.setdefault("advisory_only", True)
+    llm_advisory.setdefault("apply_to_reply", False)
+    intent_assist["llm_advisory"] = llm_advisory
+    merged["intent_assist"] = intent_assist
+
+    rag_response = dict(merged.get("rag_response", {}) or {})
+    rag_response["enabled"] = settings.get("rag_enabled", True) is not False
+    merged["rag_response"] = rag_response
+
+    llm_synthesis = dict(merged.get("llm_reply_synthesis", {}) or {})
+    llm_synthesis["enabled"] = use_llm and settings.get("llm_reply_synthesis_enabled", True) is not False
+    if use_llm and str(llm_synthesis.get("provider") or "manual_json") == "manual_json" and not str(llm_synthesis.get("candidate_json_path") or "").strip() and not isinstance(llm_synthesis.get("candidate"), dict):
+        llm_synthesis["provider"] = "deepseek"
+    llm_synthesis.setdefault("mode", "guarded_auto")
+    llm_synthesis.setdefault("require_evidence", True)
+    llm_synthesis.setdefault("require_structured_for_authority", True)
+    llm_synthesis.setdefault("fallback_to_existing_reply", True)
+    merged["llm_reply_synthesis"] = llm_synthesis
+
+    data_capture = dict(merged.get("data_capture", {}) or {})
+    data_capture["enabled"] = settings.get("data_capture_enabled", True) is not False
+    merged["data_capture"] = data_capture
+
+    handoff = dict(merged.get("handoff", {}) or {})
+    handoff["enabled"] = settings.get("handoff_enabled", True) is not False
+    merged["handoff"] = handoff
+
+    operator_alert = dict(merged.get("operator_alert", {}) or {})
+    operator_alert["enabled"] = settings.get("operator_alert_enabled", True) is not False
+    merged["operator_alert"] = operator_alert
+    return merged
 
 
 def update_conversation_context(target_state: dict[str, Any], product_knowledge: dict[str, Any]) -> None:
@@ -888,6 +1144,7 @@ def maybe_analyze_intent(
         },
     }
     safety = payload.get("evidence", {}).get("safety", {}) or {}
+    clear_no_relevant_handoff_after_safe_rule_match(safety, decision, combined=combined, settings=config.get("llm_reply_synthesis", {}) or {})
     if isinstance(safety, dict) and safety.get("must_handoff"):
         reasons = [str(item) for item in safety.get("reasons", []) or [] if str(item)]
         payload["needs_handoff"] = True
@@ -904,6 +1161,39 @@ def maybe_analyze_intent(
         heuristic=result,
     )
     return payload
+
+
+def clear_no_relevant_handoff_after_safe_rule_match(
+    safety: dict[str, Any],
+    decision: ReplyDecision,
+    *,
+    combined: str,
+    settings: dict[str, Any],
+) -> None:
+    if not isinstance(safety, dict) or not safety.get("must_handoff"):
+        return
+    reasons = {str(item) for item in safety.get("reasons", []) or [] if str(item)}
+    if not reasons or not reasons <= {"no_relevant_business_evidence"}:
+        return
+    if not decision.matched or decision.need_handoff or not str(decision.reply_text or "").strip():
+        return
+    if visible_platform_terms_hit(combined, settings=settings):
+        return
+    safety["must_handoff"] = False
+    safety["allowed_auto_reply"] = True
+    safety["reasons"] = []
+    safety["configured_rule_match_override"] = True
+
+
+def visible_platform_terms_hit(text: str, *, settings: dict[str, Any]) -> bool:
+    platform_rules = load_platform_safety_rules(settings).get("item", {})
+    clean = "".join(str(text or "").split())
+    groups = (
+        "forbidden_reply_terms",
+        "appointment_commitment_terms",
+        "commitment_terms",
+    )
+    return any(term and term in clean for group in groups for term in guard_term_set(platform_rules, group))
 
 
 def build_intent_context(
@@ -1341,6 +1631,17 @@ def evidence_requires_handoff(intent_assist: dict[str, Any] | None) -> bool:
     return bool(evidence_safety(intent_assist).get("must_handoff"))
 
 
+def customer_data_write_allowed_before_handoff(intent_assist: dict[str, Any] | None) -> bool:
+    """Allow lead capture before handoff only when the handoff is not approval/risk driven."""
+    safety = evidence_safety(intent_assist)
+    reasons = {str(item) for item in safety.get("reasons", []) or [] if str(item)}
+    discount_check = safety.get("discount_check", {}) or {}
+    if isinstance(discount_check, dict) and discount_check.get("needs_handoff"):
+        return False
+    blocking_fragments = ("discount", "approval", "below_public_tier", "price_or_policy")
+    return not any(fragment in reason for reason in reasons for fragment in blocking_fragments)
+
+
 def evidence_handoff_reason(intent_assist: dict[str, Any] | None) -> str:
     safety = evidence_safety(intent_assist)
     if not safety.get("must_handoff"):
@@ -1349,6 +1650,30 @@ def evidence_handoff_reason(intent_assist: dict[str, Any] | None) -> str:
     if reasons:
         return "evidence_safety:" + ",".join(reasons)
     return "evidence_safety_must_handoff"
+
+
+def clear_no_relevant_handoff_after_safe_synthesis(
+    intent_assist: dict[str, Any] | None,
+    llm_synthesis: dict[str, Any],
+) -> None:
+    if not isinstance(intent_assist, dict):
+        return
+    if not llm_synthesis.get("applied") or llm_synthesis.get("needs_handoff"):
+        return
+    guard = llm_synthesis.get("guard", {}) or {}
+    if guard.get("action") != "send_reply" or guard.get("reason") != "guard_passed":
+        return
+    summary = llm_synthesis.get("evidence_summary", {}) or {}
+    if int(summary.get("structured_evidence_count") or 0) <= 0 and int(summary.get("rag_hit_count") or 0) <= 0:
+        return
+    safety = evidence_safety(intent_assist)
+    reasons = {str(item) for item in safety.get("reasons", []) or [] if str(item)}
+    if not reasons or not reasons <= {"no_relevant_business_evidence"}:
+        return
+    safety["must_handoff"] = False
+    safety["allowed_auto_reply"] = True
+    safety["reasons"] = []
+    safety["llm_synthesis_soft_evidence_override"] = True
 
 
 def bootstrap_target(
@@ -1430,6 +1755,53 @@ def select_batch(
         if len(selected) >= max(1, max_batch_messages):
             break
     return list(reversed(selected))
+
+
+def detect_newer_messages_before_send(
+    *,
+    connector: WeChatConnector,
+    target: TargetConfig,
+    target_state: dict[str, Any],
+    batch: list[dict[str, Any]],
+    config: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Prevent sending a stale LLM reply when the customer talks during thinking."""
+    original_ids = [str(item.get("id") or "") for item in batch if str(item.get("id") or "")]
+    if not original_ids:
+        return {"ok": True, "has_newer_messages": False, "reason": "empty_batch"}
+    payload = connector.get_messages(target.name, exact=target.exact)
+    if not payload.get("ok"):
+        return {"ok": False, "has_newer_messages": False, "reason": "latest_read_failed", "messages": payload}
+    messages = payload.get("messages", []) or []
+    latest_original_index = -1
+    original_set = set(original_ids)
+    for index, message in enumerate(messages):
+        if str(message.get("id") or "") in original_set:
+            latest_original_index = max(latest_original_index, index)
+    if latest_original_index < 0:
+        return {"ok": True, "has_newer_messages": False, "reason": "original_batch_not_found"}
+    processed = set(target_state.get("processed_message_ids", []))
+    handoff = set(target_state.get("handoff_message_ids", []))
+    newer: list[dict[str, Any]] = []
+    for message in messages[latest_original_index + 1 :]:
+        message_id = str(message.get("id") or "")
+        content = str(message.get("content") or "").strip()
+        sender = str(message.get("sender") or "")
+        if not message_id or message_id in processed or message_id in handoff or message_id in original_set:
+            continue
+        if message.get("type") != "text" or not content:
+            continue
+        if is_bot_reply_content(content, config):
+            continue
+        if sender == "self" and not target.allow_self_for_test:
+            continue
+        newer.append({"id": message_id, "content": content[:220], "sender": sender})
+    return {
+        "ok": True,
+        "has_newer_messages": bool(newer),
+        "newer_message_ids": [item["id"] for item in newer],
+        "newer_messages": newer[:5],
+    }
 
 
 def check_rate_limit(target_state: dict[str, Any], config: dict[str, Any]) -> dict[str, Any]:
@@ -1609,21 +1981,45 @@ def record_reply_timestamp(target_state: dict[str, Any]) -> None:
     target_state["reply_timestamps"] = timestamps[-MAX_STORED_IDS:]
 
 
-def mark_processed(target_state: dict[str, Any], batch: list[dict[str, Any]], reply_text: str) -> None:
+def build_reply_trace_id(target_name: str, batch: list[dict[str, Any]], reply_text: str) -> str:
+    message_ids = [str(item.get("id") or "") for item in batch if str(item.get("id") or "")]
+    seed = json.dumps(
+        {
+            "target": target_name,
+            "message_ids": message_ids,
+            "reply_text": str(reply_text or ""),
+            "question": [str(item.get("content") or "") for item in batch],
+        },
+        ensure_ascii=False,
+        sort_keys=True,
+    )
+    return "reply_trace_" + hashlib.sha256(seed.encode("utf-8")).hexdigest()[:20]
+
+
+def mark_processed(
+    target_state: dict[str, Any],
+    batch: list[dict[str, Any]],
+    reply_text: str,
+    *,
+    reply_trace_id: str = "",
+    send_result: dict[str, Any] | None = None,
+) -> None:
     processed = list(target_state.get("processed_message_ids", []))
     for message in batch:
         message_id = str(message.get("id") or "")
         if message_id and message_id not in processed:
             processed.append(message_id)
     target_state["processed_message_ids"] = processed[-MAX_STORED_IDS:]
-    target_state.setdefault("sent_replies", []).append(
-        {
-            "message_ids": [item.get("id") for item in batch],
-            "message_contents": [item.get("content") for item in batch],
-            "reply_text": reply_text,
-            "processed_at": datetime.now().isoformat(timespec="seconds"),
-        }
-    )
+    entry = {
+        "reply_trace_id": reply_trace_id or build_reply_trace_id("", batch, reply_text),
+        "message_ids": [item.get("id") for item in batch],
+        "message_contents": [item.get("content") for item in batch],
+        "reply_text": reply_text,
+        "processed_at": datetime.now().isoformat(timespec="seconds"),
+    }
+    if send_result:
+        entry["send_verified"] = bool(send_result.get("verified"))
+    target_state.setdefault("sent_replies", []).append(entry)
 
 
 def mark_handoff(
@@ -1632,6 +2028,8 @@ def mark_handoff(
     reason: str,
     status: str = "open",
     operator_alert: dict[str, Any] | None = None,
+    reply_trace_id: str = "",
+    reply_text: str = "",
 ) -> None:
     handoff = list(target_state.get("handoff_message_ids", []))
     for message in batch:
@@ -1640,8 +2038,10 @@ def mark_handoff(
             handoff.append(message_id)
     target_state["handoff_message_ids"] = handoff[-MAX_STORED_IDS:]
     event = {
+        "reply_trace_id": reply_trace_id or build_reply_trace_id("", batch, reply_text),
         "message_ids": [item.get("id") for item in batch],
         "message_contents": [item.get("content") for item in batch],
+        "reply_text": reply_text,
         "reason": reason,
         "status": status,
         "created_at": datetime.now().isoformat(timespec="seconds"),

@@ -1,5 +1,7 @@
 # VPS Admin 功能复核与优化说明
 
+> 2026-05-05 更新：本文中“共享公共知识位于 `data/shared_knowledge`”的描述已降级为 legacy 本地数据说明。正式共享公共知识以 VPS 云端 `shared_library` 为准，客户端只读取 runtime 云端快照缓存。
+
 ## 已按本轮需求补齐
 
 - VPS admin 控制台改为与 local 客户端一致的中文玻璃面板风格。

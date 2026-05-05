@@ -93,6 +93,7 @@ class RagExperienceStore:
         raw_reply_text: str,
         intent_assist: dict[str, Any],
         rag_reply: dict[str, Any],
+        reply_trace_id: str = "",
     ) -> dict[str, Any]:
         now_text = now()
         hit = rag_reply.get("hit", {}) or {}
@@ -118,6 +119,7 @@ class RagExperienceStore:
             "reply_text": normalize_space(raw_reply_text or reply_text),
             "target": target,
             "message_ids": message_ids,
+            "reply_trace_id": reply_trace_id,
             "intent": intent_assist.get("intent"),
             "recommended_action": intent_assist.get("recommended_action"),
             "safety": (intent_assist.get("evidence", {}) or {}).get("safety", {}),
@@ -155,6 +157,7 @@ class RagExperienceStore:
                         "reply_text": record["reply_text"],
                         "target": record["target"],
                         "message_ids": record["message_ids"],
+                        "reply_trace_id": record.get("reply_trace_id") or existing.get("reply_trace_id"),
                         "intent": record["intent"],
                         "recommended_action": record["recommended_action"],
                         "safety": record["safety"],
@@ -188,6 +191,7 @@ class RagExperienceStore:
                         "reply_text": record["reply_text"],
                         "target": record["target"],
                         "message_ids": record["message_ids"],
+                        "reply_trace_id": record.get("reply_trace_id") or existing.get("reply_trace_id"),
                         "intent": record["intent"],
                         "recommended_action": record["recommended_action"],
                         "safety": record["safety"],
@@ -205,6 +209,63 @@ class RagExperienceStore:
         self._write(records)
         rebuild_rag_index_safely(self.tenant_id)
         return record
+
+    def record_intake(
+        self,
+        *,
+        source_type: str,
+        source_path: str = "",
+        category: str = "",
+        evidence_excerpt: str = "",
+        rag_ingest: dict[str, Any] | None = None,
+        candidate_ids: list[str] | None = None,
+        original_source: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        """Record uploaded or captured source material as a review-only RAG experience."""
+        now_text = now()
+        candidate_ids = [str(item) for item in candidate_ids or [] if str(item)]
+        rag_ingest = rag_ingest or {}
+        fingerprint = stable_digest(
+            "|".join(
+                [
+                    self.tenant_id,
+                    normalize_space(source_type),
+                    normalize_space(source_path),
+                    normalize_space(category),
+                    normalize_space(str((original_source or {}).get("raw_batch_id") or "")),
+                    stable_digest(normalize_space(evidence_excerpt), 24),
+                    stable_digest("|".join(candidate_ids), 24),
+                ]
+            ),
+            20,
+        )
+        record = {
+            "experience_id": "rag_exp_" + fingerprint,
+            "tenant_id": self.tenant_id,
+            "status": "active",
+            "source": "intake",
+            "source_type": source_type,
+            "source_path": source_path,
+            "category": category,
+            "formal_knowledge_policy": "experience_only_not_formal_knowledge",
+            "promotion_policy": "manual_candidate_review_only",
+            "summary": summarize_intake_experience(source_type, category, evidence_excerpt, candidate_ids),
+            "question": "",
+            "reply_text": normalize_space(evidence_excerpt),
+            "evidence_excerpt": truncate(normalize_space(evidence_excerpt), 1200),
+            "rag_ingest": compact_rag_ingest(rag_ingest),
+            "candidate_ids": candidate_ids,
+            "candidate_count": len(candidate_ids),
+            "original_source": original_source or {},
+            "usage": {
+                "reply_count": 0,
+                "last_used_at": now_text,
+            },
+            "created_at": now_text,
+            "updated_at": now_text,
+        }
+        record["quality"] = score_record_quality(record)
+        return self._upsert_record(record, increment_usage=False)
 
     def discard(self, experience_id: str, *, reason: str = "") -> dict[str, Any]:
         return self.update_status(
@@ -244,7 +305,7 @@ class RagExperienceStore:
                 for key, value in extra.items():
                     item[key] = value
                 item["updated_at"] = now_text
-                item["quality"] = score_experience_quality(item)
+                item["quality"] = score_record_quality(item)
                 db.upsert_rag_experience(item)
                 rebuild_rag_index_safely(self.tenant_id)
                 if not config.mirror_files:
@@ -264,7 +325,7 @@ class RagExperienceStore:
             for key, value in extra.items():
                 item[key] = value
             item["updated_at"] = now_text
-            item["quality"] = score_experience_quality(item)
+            item["quality"] = score_record_quality(item)
             records[index] = item
             self._write(records)
             rebuild_rag_index_safely(self.tenant_id)
@@ -294,7 +355,7 @@ class RagExperienceStore:
                     continue
                 item.update(metadata)
                 item["updated_at"] = now()
-                item["quality"] = score_experience_quality(item)
+                item["quality"] = score_record_quality(item)
                 db.upsert_rag_experience(item)
                 if rebuild_index:
                     rebuild_rag_index_safely(self.tenant_id)
@@ -308,7 +369,7 @@ class RagExperienceStore:
                 continue
             item.update(metadata)
             item["updated_at"] = now()
-            item["quality"] = score_experience_quality(item)
+            item["quality"] = score_record_quality(item)
             records[index] = item
             self._write(records)
             if rebuild_index:
@@ -336,6 +397,37 @@ class RagExperienceStore:
         compact = records[-MAX_RECORDS:]
         self.path.write_text(json.dumps(compact, ensure_ascii=False, indent=2), encoding="utf-8")
 
+    def _upsert_record(self, record: dict[str, Any], *, increment_usage: bool) -> dict[str, Any]:
+        db = postgres_store(self.tenant_id)
+        config = load_storage_config()
+        if db:
+            existing = next(
+                (
+                    item
+                    for item in db.list_rag_experiences(self.tenant_id, status="all", limit=500)
+                    if item.get("experience_id") == record["experience_id"]
+                ),
+                None,
+            )
+            if existing:
+                record = merge_experience_record(existing, record, increment_usage=increment_usage)
+            db.upsert_rag_experience(record)
+            rebuild_rag_index_safely(self.tenant_id)
+            if not config.mirror_files:
+                return record
+        records = self._read()
+        for index, existing in enumerate(records):
+            if existing.get("experience_id") != record["experience_id"]:
+                continue
+            records[index] = merge_experience_record(existing, record, increment_usage=increment_usage)
+            self._write(records)
+            rebuild_rag_index_safely(self.tenant_id)
+            return records[index]
+        records.append(record)
+        self._write(records)
+        rebuild_rag_index_safely(self.tenant_id)
+        return record
+
 
 def record_rag_reply_experience(
     *,
@@ -346,6 +438,7 @@ def record_rag_reply_experience(
     raw_reply_text: str,
     intent_assist: dict[str, Any],
     rag_reply: dict[str, Any],
+    reply_trace_id: str = "",
 ) -> dict[str, Any] | None:
     if not rag_reply.get("applied"):
         return None
@@ -357,7 +450,48 @@ def record_rag_reply_experience(
         raw_reply_text=raw_reply_text,
         intent_assist=intent_assist,
         rag_reply=rag_reply,
+        reply_trace_id=reply_trace_id,
     )
+
+
+def merge_experience_record(existing: dict[str, Any], record: dict[str, Any], *, increment_usage: bool) -> dict[str, Any]:
+    now_text = now()
+    merged = dict(existing)
+    created_at = merged.get("created_at") or record.get("created_at")
+    merged.update(record)
+    merged["created_at"] = created_at
+    merged["status"] = existing.get("status") or record.get("status") or "active"
+    merged["updated_at"] = now_text
+    usage = dict(existing.get("usage", {}) or {})
+    next_usage = dict(record.get("usage", {}) or {})
+    if increment_usage:
+        usage["reply_count"] = int(usage.get("reply_count", 1) or 1) + 1
+    elif "reply_count" in next_usage:
+        usage["reply_count"] = next_usage.get("reply_count")
+    usage["last_used_at"] = now_text
+    merged["usage"] = usage
+    merged["quality"] = score_record_quality(merged)
+    return merged
+
+
+def summarize_intake_experience(source_type: str, category: str, evidence_excerpt: str, candidate_ids: list[str]) -> str:
+    source_label = source_type or "intake"
+    category_label = category or "unknown"
+    excerpt = truncate(normalize_space(evidence_excerpt), 96)
+    return f"RAG经验：{source_label}/{category_label}，摘要={excerpt}"
+
+
+def compact_rag_ingest(rag_ingest: dict[str, Any]) -> dict[str, Any]:
+    if not isinstance(rag_ingest, dict):
+        return {}
+    return {
+        "ok": bool(rag_ingest.get("ok")),
+        "source_id": rag_ingest.get("source_id"),
+        "chunk_count": rag_ingest.get("chunk_count", 0),
+        "category": rag_ingest.get("category"),
+        "source_type": rag_ingest.get("source_type"),
+        "message": rag_ingest.get("message"),
+    }
 
 
 def summarize_experience(question: str, reply_text: str, hit: dict[str, Any]) -> str:
@@ -375,8 +509,9 @@ def summarize_experience(question: str, reply_text: str, hit: dict[str, Any]) ->
 def with_quality(item: dict[str, Any]) -> dict[str, Any]:
     enriched = dict(item)
     quality = enriched.get("quality")
-    if not isinstance(quality, dict) or "retrieval_allowed" not in quality:
-        quality = score_experience_quality(enriched)
+    signals = quality.get("signals", {}) if isinstance(quality, dict) else {}
+    if not isinstance(quality, dict) or "retrieval_allowed" not in quality or "review_allows_retrieval" not in signals:
+        quality = score_record_quality(enriched)
     enriched["quality"] = quality
     return enriched
 
@@ -384,8 +519,65 @@ def with_quality(item: dict[str, Any]) -> dict[str, Any]:
 def experience_is_retrievable(item: dict[str, Any]) -> bool:
     if str(item.get("status") or "active") != "active":
         return False
-    quality = item.get("quality") if isinstance(item.get("quality"), dict) else score_experience_quality(item)
+    if not experience_review_allows_retrieval(item):
+        return False
+    quality = item.get("quality") if isinstance(item.get("quality"), dict) else score_record_quality(item)
     return bool(quality.get("retrieval_allowed"))
+
+
+def experience_review_allows_retrieval(item: dict[str, Any]) -> bool:
+    """Only approved reply experiences can participate in automatic retrieval."""
+    if str(item.get("source") or "") == "intake":
+        return False
+    review = item.get("experience_review") if isinstance(item.get("experience_review"), dict) else {}
+    review_status = str(review.get("status") or "")
+    if review_status == "auto_kept":
+        return True
+    return bool(item.get("reviewed_by_user") and review_status == "kept")
+
+
+def score_record_quality(item: dict[str, Any]) -> dict[str, Any]:
+    if str(item.get("source") or "") == "intake":
+        return score_intake_experience_quality(item)
+    return score_experience_quality(item)
+
+
+def score_intake_experience_quality(item: dict[str, Any]) -> dict[str, Any]:
+    evidence = normalize_space(str(item.get("evidence_excerpt") or item.get("reply_text") or ""))
+    candidate_count = int(coerce_float(item.get("candidate_count"), 0))
+    rag_ingest = item.get("rag_ingest", {}) or {}
+    rag_ok = bool(rag_ingest.get("ok"))
+    chunk_count = int(coerce_float(rag_ingest.get("chunk_count"), 0))
+    score = 0.34
+    if evidence:
+        score += 0.16
+    if len(evidence) >= 80:
+        score += 0.08
+    if rag_ok:
+        score += 0.12
+    if chunk_count:
+        score += min(0.08, chunk_count * 0.02)
+    if candidate_count:
+        score += min(0.14, candidate_count * 0.035)
+    score = round(max(0.0, min(0.84, score)), 3)
+    return {
+        "score": score,
+        "band": "medium" if score >= 0.62 else "low",
+        "retrieval_allowed": False,
+        "reasons": [
+            "intake material is stored as RAG experience first",
+            "formal knowledge still requires pending-candidate review",
+            "intake experiences are not used for autonomous reply retrieval before review",
+        ],
+        "signals": {
+            "source_type": item.get("source_type"),
+            "candidate_count": candidate_count,
+            "rag_ingest_ok": rag_ok,
+            "chunk_count": chunk_count,
+            "has_evidence": bool(evidence),
+        },
+        "evaluated_at": now(),
+    }
 
 
 def score_experience_quality(item: dict[str, Any]) -> dict[str, Any]:
@@ -445,15 +637,19 @@ def score_experience_quality(item: dict[str, Any]) -> dict[str, Any]:
     enough_hit_score = hit_score >= QUALITY_RETRIEVAL_MIN_HIT_SCORE or (
         hit_score >= QUALITY_REPEATABLE_MIN_HIT_SCORE and reply_count >= QUALITY_REPEATABLE_REPLY_COUNT
     )
-    retrieval_allowed = not blockers and enough_hit_score and score >= QUALITY_RETRIEVAL_MIN_SCORE
+    quality_allows_retrieval = not blockers and enough_hit_score and score >= QUALITY_RETRIEVAL_MIN_SCORE
+    review_allows_retrieval = experience_review_allows_retrieval(item)
+    retrieval_allowed = quality_allows_retrieval and review_allows_retrieval
     if blockers:
         band = "blocked"
     elif score >= 0.72:
         band = "high"
-    elif retrieval_allowed:
+    elif quality_allows_retrieval:
         band = "medium"
     else:
         band = "low"
+    if quality_allows_retrieval and not review_allows_retrieval:
+        reasons.append("尚未人工确认保留在经验层")
     reasons.append("允许参与 RAG 经验检索" if retrieval_allowed else "暂不参与 RAG 经验检索")
     return {
         "score": score,
@@ -469,6 +665,8 @@ def score_experience_quality(item: dict[str, Any]) -> dict[str, Any]:
             "blocked_action": blocked_action,
             "has_text": has_text,
             "has_source": has_source,
+            "quality_allows_retrieval": quality_allows_retrieval,
+            "review_allows_retrieval": review_allows_retrieval,
         },
         "evaluated_at": now(),
     }

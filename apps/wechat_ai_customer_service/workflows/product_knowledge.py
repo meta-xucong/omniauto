@@ -7,15 +7,10 @@ import re
 from pathlib import Path
 from typing import Any
 
-
-QUOTE_KEYWORDS = ["价格", "报价", "多少钱", "费用", "单价", "总价", "怎么报价"]
-STOCK_KEYWORDS = ["库存", "现货", "有货"]
-SHIPPING_KEYWORDS = ["发货", "多久", "物流", "运费", "包邮", "到货", "送货", "上楼", "送货上楼"]
-WARRANTY_KEYWORDS = ["售后", "保修", "质保", "坏了", "退换"]
-DISCOUNT_KEYWORDS = ["优惠", "便宜", "最低", "折扣", "贵"]
-SPEC_KEYWORDS = ["规格", "型号", "参数", "尺寸"]
-APPROVAL_KEYWORDS = ["申请", "请示", "特批", "破例", "抹零", "再便宜", "便宜点", "最低价"]
-CATALOG_KEYWORDS = ["有哪些商品", "有什么商品", "商品列表", "产品列表", "产品介绍", "商品介绍", "卖什么", "主营产品"]
+from apps.wechat_ai_customer_service.platform_understanding_rules import (
+    product_keywords,
+    quantity_unit_pattern,
+)
 
 
 def load_product_knowledge(path: Path) -> dict[str, Any]:
@@ -34,7 +29,7 @@ def decide_product_knowledge_reply(
     faq = match_faq(normalized, knowledge)
     intent = detect_intent(normalized)
 
-    if has_any(normalized, CATALOG_KEYWORDS):
+    if has_any(normalized, product_keywords("catalog")):
         return build_catalog_result(knowledge)
 
     product = match_product(normalized, knowledge)
@@ -223,24 +218,24 @@ def build_catalog_result(knowledge: dict[str, Any]) -> dict[str, Any]:
 
 def detect_intent(normalized_text: str) -> str:
     if (
-        has_any(normalized_text, APPROVAL_KEYWORDS)
-        or re.search(r"按\s*\d+\s*(个|件|台|套|箱|条|把|瓶)?\s*的?价", normalized_text)
+        has_any(normalized_text, product_keywords("approval"))
+        or re.search(rf"按\s*\d+\s*(?:{quantity_unit_pattern()})?\s*的?价", normalized_text)
         or extract_requested_unit_price(normalized_text) is not None
     ):
         return "discount"
-    if has_any(normalized_text, DISCOUNT_KEYWORDS):
+    if has_any(normalized_text, product_keywords("discount")):
         return "discount"
-    if has_any(normalized_text, QUOTE_KEYWORDS) or has_any(normalized_text, ["一共", "合计", "总共"]):
+    if has_any(normalized_text, product_keywords("quote")):
         return "quote"
-    if has_any(normalized_text, WARRANTY_KEYWORDS):
+    if has_any(normalized_text, product_keywords("warranty")):
         return "warranty"
-    if has_any(normalized_text, STOCK_KEYWORDS):
+    if has_any(normalized_text, product_keywords("stock")):
         return "stock"
-    if has_any(normalized_text, SHIPPING_KEYWORDS):
+    if has_any(normalized_text, product_keywords("shipping")):
         return "shipping"
-    if has_any(normalized_text, SPEC_KEYWORDS):
+    if has_any(normalized_text, product_keywords("spec")):
         return "spec"
-    if re.search(r"\d+\s*(个|件|台|套|箱|条|把|瓶|kg|千克|斤)", normalized_text, re.IGNORECASE):
+    if re.search(rf"\d+\s*({quantity_unit_pattern()})", normalized_text, re.IGNORECASE):
         return "quote"
     return "product_info"
 
@@ -389,7 +384,7 @@ def has_any(text: str, keywords: list[str]) -> bool:
 
 
 def extract_quantity(text: str) -> float | None:
-    match = re.search(r"(\d+(?:\.\d+)?)\s*(个|件|台|套|箱|条|把|瓶|kg|千克|斤)", text, re.IGNORECASE)
+    match = re.search(rf"(\d+(?:\.\d+)?)\s*({quantity_unit_pattern()})", text, re.IGNORECASE)
     if not match:
         return None
     try:
@@ -466,8 +461,8 @@ def safe_float(value: Any) -> float | None:
 
 def extract_requested_unit_price(text: str) -> float | None:
     patterns = [
-        r"(\d+(?:\.\d+)?)\s*元?\s*/\s*(?:个|件|台|套|箱|条|把|瓶|kg|千克|斤)",
-        r"(\d+(?:\.\d+)?)\s*元\s*(?:一|每)?(?:个|件|台|套|箱|条|把|瓶)",
+        rf"(\d+(?:\.\d+)?)\s*元?\s*/\s*(?:{quantity_unit_pattern()})",
+        rf"(\d+(?:\.\d+)?)\s*元\s*(?:一|每)?(?:{quantity_unit_pattern()})",
         r"按\s*(\d+(?:\.\d+)?)\s*(?:元)?",
     ]
     for pattern in patterns:
@@ -483,8 +478,8 @@ def extract_requested_unit_price(text: str) -> float | None:
 
 def extract_requested_tier_quantity(text: str) -> float | None:
     patterns = [
-        r"按\s*(\d+(?:\.\d+)?)\s*(?:个|件|台|套|箱|条|把|瓶)?\s*的?价",
-        r"(\d+(?:\.\d+)?)\s*(?:个|件|台|套|箱|条|把|瓶)?\s*起?的?价",
+        rf"按\s*(\d+(?:\.\d+)?)\s*(?:{quantity_unit_pattern()})?\s*的?价",
+        rf"(\d+(?:\.\d+)?)\s*(?:{quantity_unit_pattern()})?\s*起?的?价",
     ]
     for pattern in patterns:
         match = re.search(pattern, text, re.IGNORECASE)
@@ -598,7 +593,7 @@ def detect_approval_required(
             "requested_unit_price": requested_unit_price,
             "eligible_unit_price": eligible_price,
         }
-    if has_any(normalized, APPROVAL_KEYWORDS) and requested_unit_price is not None and eligible_price is None:
+    if has_any(normalized, product_keywords("approval")) and requested_unit_price is not None and eligible_price is None:
         return {
             "required": True,
             "reason": "requested_discount_without_known_policy",

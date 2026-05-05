@@ -77,18 +77,23 @@
           <div class="brand-mark">OA</div>
           <div>
             <div class="brand-title">OmniAuto</div>
-            <div class="brand-subtitle">知识管理台</div>
+            <div class="brand-subtitle">微信运营工作台</div>
           </div>
         </div>
         <nav class="nav-list" aria-label="主导航">
-          <button class="nav-item is-active" data-view="overview">总览</button>
-          <button class="nav-item" data-view="knowledge">知识库</button>
-          <button class="nav-item admin-only-nav is-hidden" data-view="shared_public">共享公共知识库</button>
-          <button class="nav-item" data-view="intake">知识录入与学习</button>
-          <button class="nav-item" data-view="ai_reference">AI参考资料</button>
-          <button class="nav-item" data-view="diagnostics">一键检测</button>
-          <button class="nav-item" data-view="versions">备份还原</button>
-          <button class="nav-item" data-view="security">账号安全</button>
+          <div class="nav-group-title">业务工作台</div>
+          <button class="nav-item is-active" data-view="customer_service">微信智能客服</button>
+          <button class="nav-item" data-view="recorder">AI智能记录员</button>
+          <div class="nav-group-title">知识成长中心</div>
+          <button class="nav-item" data-view="knowledge_center">知识首页</button>
+          <button class="nav-item nav-product-special" data-view="product_catalog">商品库</button>
+          <button class="nav-item" data-view="ai_reference">RAG经验池<span class="tab-count-badge is-hidden nav-badge" id="rag-experience-nav-badge">0</span></button>
+          <button class="nav-item" data-view="candidates">待确认知识<span class="tab-count-badge is-hidden nav-badge" id="candidate-nav-badge">0</span></button>
+          <button class="nav-item" data-view="knowledge">正式知识库</button>
+          <button class="nav-item" data-view="uploads">资料导入</button>
+          <button class="nav-item" data-view="diagnostics">知识检测</button>
+          <div class="nav-group-title">系统</div>
+          <button class="nav-item" data-view="settings">系统设置</button>
         </nav>
       </aside>
 
@@ -96,10 +101,14 @@
         <header class="topbar glass-panel">
           <div>
             <p class="eyebrow">OmniAuto Local Console</p>
-            <h1 id="view-title">总览</h1>
+            <h1 id="view-title">微信智能客服</h1>
           </div>
           <div class="topbar-actions">
-            <select id="tenant-select" aria-label="tenant"></select>
+            <div class="tenant-switcher tenant-display" id="current-account-space" title="管理员可以切换本机客户数据空间；客户账号只看自己的知识库、记录员消息和设置。">
+              <span>当前账号</span>
+              <strong id="current-account-label">读取中...</strong>
+              <select id="tenant-select" class="is-hidden" aria-label="切换客户数据空间"></select>
+            </div>
             <div class="status-pill" id="auth-pill">Role</div>
             <div class="status-pill" id="sync-pill">Sync</div>
             <div class="status-pill" id="health-pill">连接中</div>
@@ -109,10 +118,10 @@
 
         <section class="hero glass-panel">
           <div>
-            <p class="eyebrow">Knowledge Operations</p>
-            <h2>把正式知识、资料学习、AI参考资料和系统检测分开管理，新增资料只需上传、整理、确认三步。</h2>
+            <p class="eyebrow">Wechat Operations</p>
+            <h2>微信智能客服负责回复，AI智能记录员负责记录，知识成长中心负责审核和管理。</h2>
           </div>
-          <div class="hero-metrics">
+          <div class="hero-metrics hero-metrics-compact">
             <div><span id="metric-products">-</span><label>商品</label></div>
             <div><span id="metric-candidates">-</span><label>待审核</label></div>
             <div><span id="metric-diagnostics">-</span><label>检测</label></div>
@@ -120,21 +129,142 @@
         </section>
 
         <section class="content-grid">
-          <article class="glass-panel content-card view-panel is-visible" data-panel="overview">
+          <article class="glass-panel content-card view-panel is-visible" data-panel="customer_service">
             <div class="section-head">
-              <h2>运行总览</h2>
+              <div>
+                <h2>微信智能客服</h2>
+                <p>控制自动回复是否开启，以及客服采用哪种工作模式。</p>
+              </div>
+              <button class="secondary-button" id="refresh-customer-service">刷新</button>
+            </div>
+            <div class="metric-grid metric-grid-tight metric-grid-four" id="customer-service-cards">
+              <div class="status-card loading"><strong><span class="loading-spinner" aria-hidden="true"></span>正在加载客服控制台</strong><span>正在读取自动客服状态。</span></div>
+            </div>
+            <div class="console-layout">
+              <section class="control-panel">
+                <div class="runtime-status-card is-stopped" id="customer-service-runtime-card">
+                  <div class="runtime-status-main">
+                    <span class="service-state-dot is-stopped"></span>
+                    <div>
+                      <strong>已停止</strong>
+                      <p>正在读取自动客服运行状态...</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="control-row">
+                  <div>
+                    <strong>客服总开关</strong>
+                    <span id="customer-service-status">读取中...</span>
+                  </div>
+                  <label class="switch-line"><input id="customer-service-enabled" type="checkbox" /> 开启</label>
+                </div>
+                <label class="form-field">
+                  <span>工作模式</span>
+                  <select id="customer-service-mode"></select>
+                </label>
+                <div class="setting-grid">
+                  <label class="checkbox-line"><input id="customer-record-messages" type="checkbox" /> 记录客服对话</label>
+                  <label class="checkbox-line"><input id="customer-auto-learn" type="checkbox" /> 自动整理为RAG经验</label>
+                  <label class="checkbox-line"><input id="customer-use-llm" type="checkbox" /> 使用大模型辅助整理</label>
+                  <label class="checkbox-line"><input id="customer-rag-enabled" type="checkbox" /> 使用RAG经验辅助回答</label>
+                  <label class="checkbox-line"><input id="customer-data-capture" type="checkbox" /> 识别客户线索</label>
+                  <label class="checkbox-line"><input id="customer-handoff" type="checkbox" /> 风险问题转人工</label>
+                  <label class="checkbox-line"><input id="customer-operator-alert" type="checkbox" /> 需要人工时提醒</label>
+                </div>
+                <button class="primary-button" id="customer-save-settings">保存客服设置</button>
+              </section>
+              <section class="helper-card">
+                <strong>客户可以只用记录员，不开自动回复。</strong>
+                <span>选择“只记录不回复”或直接关闭客服总开关，系统仍可记录和整理聊天内容。</span>
+              </section>
+            </div>
+          </article>
+
+          <article class="glass-panel content-card view-panel" data-panel="knowledge_center">
+            <div class="section-head">
+              <div>
+                <h2>知识成长中心</h2>
+                <p>按 RAG经验、候选知识、正式知识的顺序管理客户自己的知识成长。</p>
+              </div>
               <button class="secondary-button" id="refresh-overview">刷新</button>
             </div>
-            <div class="metric-grid" id="overview-cards"></div>
+            <div class="metric-grid metric-grid-tight metric-grid-four" id="overview-cards">
+              <div class="status-card loading"><strong><span class="loading-spinner" aria-hidden="true"></span>正在加载总览</strong><span>正在统计知识和系统状态。</span></div>
+            </div>
+            <div class="module-grid">
+              <button class="module-card nav-shortcut product-module-card" data-view="product_catalog"><strong>商品库</strong><span>商品资料是特殊主数据，可在商品库内单独上传、确认和入库。</span></button>
+              <button class="module-card nav-shortcut" data-view="ai_reference"><strong>RAG经验池</strong><span>所有资料和聊天内容先进入这里，由 AI 给出处理建议。</span></button>
+              <button class="module-card nav-shortcut" data-view="candidates"><strong>待确认知识</strong><span>像审核清单一样确认AI建议加入的知识。</span></button>
+              <button class="module-card nav-shortcut" data-view="knowledge"><strong>正式知识库</strong><span>管理已生效的商品、政策和话术。</span></button>
+              <button class="module-card nav-shortcut" data-view="uploads"><strong>资料导入</strong><span>上传政策规则、聊天记录和普通资料；整理后先进入RAG经验池。</span></button>
+              <button class="module-card nav-shortcut" data-view="diagnostics"><strong>知识检测</strong><span>检查知识冲突、缺失和运行风险。</span></button>
+            </div>
+          </article>
+
+          <article class="glass-panel content-card view-panel" data-panel="product_catalog">
+            <div class="section-head">
+              <div>
+                <h2>商品库</h2>
+                <p>像电商后台一样查看在售商品、价格、库存和商品专属问答。</p>
+              </div>
+              <div class="button-row">
+                <button class="secondary-button" id="refresh-product-catalog">刷新</button>
+                <button class="primary-button" id="new-product-from-catalog">上传商品资料</button>
+              </div>
+            </div>
+            <div class="metric-grid metric-grid-tight metric-grid-four" id="product-catalog-cards">
+              <div class="status-card loading"><strong><span class="loading-spinner" aria-hidden="true"></span>正在加载商品统计</strong><span>请稍等。</span></div>
+            </div>
+            <div class="product-command">
+              <label class="form-field wide-field">
+                <span>用一句话修改商品库</span>
+                <input id="product-command-input" placeholder="例如：凯美瑞卖出 1 台；GL8 库存改成 2 台；新增商品..." />
+              </label>
+              <button class="primary-button" id="run-product-command">执行</button>
+            </div>
+            <div class="product-upload-panel is-hidden" id="product-upload-panel">
+              <div class="section-head sub-head">
+                <div>
+                  <h2>上传商品资料</h2>
+                  <p>这里上传的是商品主数据。AI 会先整理成商品草稿，字段完整后才能确认直接入库。</p>
+                </div>
+                <button class="secondary-button" id="close-product-upload-panel">收起</button>
+              </div>
+              <div class="upload-box">
+                <label class="form-field wide-field">
+                  <span>商品资料文件</span>
+                  <input id="product-upload-file" type="file" accept=".txt,.md,.json,.csv,.xlsx" />
+                </label>
+                <button class="primary-button" id="upload-product-doc">AI分析商品资料</button>
+              </div>
+              <div id="product-upload-result" class="product-upload-result">
+                <div class="empty-state">上传商品资料后，会在这里展示 AI 建议、缺失字段和可编辑商品草稿。</div>
+              </div>
+            </div>
+            <div class="split-layout product-layout">
+              <div class="list-pane" id="product-catalog-list">
+                <div class="status-card loading"><strong><span class="loading-spinner" aria-hidden="true"></span>正在加载商品库</strong><span>正在读取商品和库存。</span></div>
+              </div>
+              <div class="detail-pane form-pane" id="product-catalog-detail">
+                <div class="status-card loading"><strong><span class="loading-spinner" aria-hidden="true"></span>正在加载商品详情</strong><span>请稍等。</span></div>
+              </div>
+            </div>
           </article>
 
           <article class="glass-panel content-card view-panel" data-panel="knowledge">
             <div class="section-head">
-              <h2>正式知识</h2>
+              <div>
+                <h2>正式知识库</h2>
+                <p>这里管理已经生效的结构化知识；商品库存和上下架请优先到商品库操作。</p>
+              </div>
               <div class="button-row">
                 <select id="category-select" aria-label="知识门类"></select>
                 <button class="secondary-button" id="create-category">新增门类</button>
               </div>
+            </div>
+            <div class="helper-card">
+              <strong>商品库是业务后台，正式知识库是结构化编辑器。</strong>
+              <span>商品资料会在两个地方共用同一份数据；商品专属问答、规则和解释请从商品详情进入，避免脱离商品单独编辑。</span>
             </div>
             <div class="section-head sub-head">
               <input class="search-input" id="knowledge-search" placeholder="搜索名称、关键词、话术" />
@@ -147,60 +277,41 @@
               </div>
             </div>
             <div class="split-layout">
-              <div class="list-pane" id="knowledge-list"></div>
-              <div class="detail-pane form-pane" id="knowledge-detail">等待加载</div>
-            </div>
-          </article>
-
-          <article class="glass-panel content-card view-panel" data-panel="shared_public">
-            <div class="section-head">
-              <div>
-                <h2>共享公共知识库</h2>
-                <p>这是本地全局共享知识，只对 admin 可见。客户账号不会看到这个入口，也不能直接修改公共库。</p>
+              <div class="list-pane" id="knowledge-list">
+                <div class="status-card loading"><strong><span class="loading-spinner" aria-hidden="true"></span>正在加载正式知识库</strong><span>正在读取知识条目。</span></div>
               </div>
-              <div class="button-row">
-                <button class="secondary-button" id="refresh-shared-public">刷新</button>
-                <button class="primary-button" id="upload-shared-candidates">上传新增候选到 VPS</button>
+              <div class="detail-pane form-pane" id="knowledge-detail">
+                <div class="status-card loading"><strong><span class="loading-spinner" aria-hidden="true"></span>正在加载详情</strong><span>请稍等。</span></div>
               </div>
-            </div>
-            <div class="workflow-section is-visible">
-              <h2>新增共享知识</h2>
-              <form class="form-grid compact-form" id="shared-public-form">
-                <label class="form-field"><span>条目 ID</span><input name="item_id" placeholder="可留空自动生成" /></label>
-                <label class="form-field"><span>分类</span><input name="category_id" value="global_guidelines" /></label>
-                <label class="form-field"><span>标题</span><input name="title" required /></label>
-                <label class="form-field wide-field"><span>正文</span><input name="content" required /></label>
-                <button class="primary-button" type="submit">保存到共享库</button>
-              </form>
-            </div>
-            <div class="split-layout">
-              <div class="list-pane" id="shared-public-list"></div>
-              <div class="detail-pane form-pane" id="shared-public-detail">等待加载</div>
             </div>
           </article>
 
           <article class="glass-panel content-card view-panel" data-panel="intake">
             <div class="section-head">
               <div>
-                <h2>知识录入与学习</h2>
-                <p>上传资料、让 AI 整理、逐条确认入库都在这里完成；正式生效后会进入“知识库”。</p>
+                <h2>资料导入</h2>
+                <p>导入资料后，AI 会先整理成 RAG 经验；是否升级为候选知识，需要用户在 RAG经验池里手动确认。</p>
               </div>
               <div class="button-row">
-                <button class="workflow-tab is-active" data-group="intake" data-tab="generator">AI生成知识</button>
-                <button class="workflow-tab" data-group="intake" data-tab="uploads">导入资料</button>
-                <button class="workflow-tab" data-group="intake" data-tab="candidates">待确认知识</button>
+                <button class="workflow-tab is-active" data-group="intake" data-tab="uploads">资料导入</button>
+                <button class="workflow-tab" data-group="intake" data-tab="generator">手动创建</button>
+                <button class="workflow-tab" data-group="intake" data-tab="rag_experiences">跳转到RAG经验池<span class="tab-count-badge is-hidden" id="rag-experience-tab-badge">0</span></button>
               </div>
             </div>
 
             <div class="flow-guide">
-              <div class="flow-step"><strong>1. 放入资料</strong><span>上传文件、粘贴描述，或导入聊天记录。</span></div>
-              <div class="flow-step"><strong>2. AI整理</strong><span>自动归类、去重、找缺失字段。</span></div>
-              <div class="flow-step"><strong>3. 人工确认</strong><span>点“应用”后才进入正式知识库。</span></div>
+              <div class="flow-step"><strong>1. 原始内容</strong><span>资料、聊天、群聊、文件传输助手</span></div>
+              <div class="flow-step"><strong>2. RAG经验池</strong><span>归纳为可追溯 RAG 经验</span></div>
+              <div class="flow-step"><strong>3. 待确认知识</strong><span>已完善、待完善、需确认</span></div>
+              <div class="flow-step"><strong>4. 正式知识库</strong><span>人工应用后生效</span></div>
             </div>
 
             <section class="workflow-section is-visible" data-intake-tab="generator">
               <div class="section-head sub-head">
-                <h2>AI生成知识</h2>
+                <div>
+                  <h2>手动整理为RAG经验</h2>
+                  <p>管理员主动录入的内容也会先进入 RAG经验池；确认有价值后再手动升级为待确认知识。</p>
+                </div>
                 <div class="button-row">
                   <select id="generator-category">
                     <option value="">自动判断门类</option>
@@ -217,7 +328,7 @@
                   </label>
                   <button class="primary-button" id="send-generator">生成/补充</button>
                   <div class="generator-summary" id="generator-summary"></div>
-                  <button class="primary-button" id="confirm-generator" disabled>确认保存到知识库</button>
+                  <button class="primary-button" id="confirm-generator" disabled>确认加入RAG经验池</button>
                 </div>
               </div>
             </section>
@@ -225,14 +336,14 @@
             <section class="workflow-section" data-intake-tab="uploads">
               <div class="section-head sub-head">
                 <div>
-                  <h2>导入资料</h2>
-                  <p>选择资料类型后直接选文件，系统会自动上传；上传后点击“AI整理资料”生成待确认知识。</p>
+                  <h2>资料导入</h2>
+                  <p>上传文件后，点击“整理未处理资料”，AI 会把内容整理进 RAG经验池，并给出下一步建议。</p>
                 </div>
                 <button class="primary-button is-hidden" id="upload-button" type="button">手动上传</button>
               </div>
               <div class="helper-card">
-                <strong>聊天记录也按同一流程处理。</strong>
-                <span>上传聊天记录后，AI 会提取可复用话术或规则，先放入“待确认知识”；不会自动写入正式库。</span>
+                <strong>这里才需要整理按钮。</strong>
+                <span>资料整理后不会直接生成待确认知识；请到 RAG经验池查看 AI 建议，再决定是否升级。</span>
               </div>
               <div class="upload-zone">
                 <input id="upload-file" type="file" multiple />
@@ -242,58 +353,129 @@
                   <option value="policies">政策规则</option>
                   <option value="erp_exports">ERP 导出</option>
                 </select>
-                <button class="primary-button" id="run-learning">AI整理资料</button>
+                <button class="primary-button" id="run-learning">整理未处理资料</button>
               </div>
-              <div id="upload-list" class="compact-list"></div>
+              <div id="upload-list" class="compact-list">
+                <div class="status-card loading"><strong><span class="loading-spinner" aria-hidden="true"></span>正在加载上传资料</strong><span>正在读取文件列表。</span></div>
+              </div>
             </section>
 
             <section class="workflow-section" data-intake-tab="candidates">
               <div class="section-head sub-head">
                 <div>
                   <h2>待确认知识</h2>
-                  <p>AI整理出的内容都在这里逐条确认。只有点“应用”后，才会写入正式知识库。</p>
+                  <p>请像看商品资料和客服话术一样检查内容。正确就加入，有问题就修改，不需要懂技术。</p>
                 </div>
-                <button class="primary-button" id="run-learning-from-candidates">AI整理资料</button>
+                <button class="secondary-button" id="refresh-candidates">刷新</button>
               </div>
               <div class="helper-card">
-                <strong>候选来自上传资料、聊天记录或知识生成器。</strong>
-                <span>可补充字段、切换类型、应用入库或拒绝；不合适的内容不会影响正式客服。</span>
+                <strong>这里不展示底层结构。</strong>
+                <span>页面只告诉你：这条知识是什么、从哪来、是否缺信息、确认后会加入哪里。</span>
               </div>
               <div class="split-layout">
-                <div class="list-pane" id="candidate-list"></div>
-                <div class="detail-pane form-pane" id="candidate-detail">暂无候选</div>
+                <div class="list-pane" id="candidate-list">
+                  <div class="status-card loading">
+                    <strong><span class="loading-spinner" aria-hidden="true"></span>正在加载待确认知识</strong>
+                    <span>如果候选内容较多，可能需要几秒钟。</span>
+                  </div>
+                </div>
+                <div class="detail-pane form-pane" id="candidate-detail">正在读取候选内容...</div>
               </div>
             </section>
+          </article>
+
+          <article class="glass-panel content-card view-panel" data-panel="recorder">
+            <div class="section-head">
+              <div>
+                <h2>AI智能记录员</h2>
+                <p>记录、选择会话、整理批次和导出资料；知识晋升交给知识成长中心。</p>
+              </div>
+              <div class="button-row">
+                <button class="secondary-button" id="recorder-discover">识别会话</button>
+                <button class="primary-button" id="recorder-capture">立即记录</button>
+              </div>
+            </div>
+            <div class="helper-card">
+              <strong>记录员只负责采集和整理。</strong>
+              <span>记录内容先进入RAG经验池；是否升级为待确认知识，需要用户手动确认。</span>
+            </div>
+            <div class="recorder-toolbar">
+              <label class="checkbox-line"><input id="recorder-notify" type="checkbox" /> 收录后在群内提示</label>
+              <label class="checkbox-line"><input id="recorder-auto-learn" type="checkbox" /> 自动整理为RAG经验</label>
+              <label class="checkbox-line"><input id="recorder-use-llm" type="checkbox" /> 使用大模型辅助提取</label>
+              <button class="secondary-button" id="recorder-save-settings">保存设置</button>
+              <button class="secondary-button" id="export-knowledge-type">按类型导出Excel</button>
+              <button class="secondary-button" id="export-knowledge-time">按时间导出Excel</button>
+            </div>
+            <div class="metric-grid metric-grid-tight metric-grid-four" id="recorder-cards">
+              <div class="status-card loading"><strong><span class="loading-spinner" aria-hidden="true"></span>正在加载记录员状态</strong><span>请稍等。</span></div>
+            </div>
+            <div class="split-layout">
+              <div class="list-pane" id="recorder-group-list">
+                <div class="status-card loading"><strong><span class="loading-spinner" aria-hidden="true"></span>正在加载会话列表</strong><span>正在读取群聊和私聊。</span></div>
+              </div>
+              <div class="detail-pane form-pane" id="recorder-detail">
+                <div class="status-card loading"><strong><span class="loading-spinner" aria-hidden="true"></span>正在加载聊天记录</strong><span>请稍等。</span></div>
+              </div>
+            </div>
           </article>
 
           <article class="glass-panel content-card view-panel" data-panel="ai_reference">
             <div class="section-head">
               <div>
-                <h2>AI参考资料</h2>
-                <p>这里存放 AI 回答时可参考的资料和对话经验。它们不是正式规则，风险问题仍以知识库和安全规则为准。</p>
+                <h2>RAG经验池</h2>
+                <p>优先查看 AI 从资料和对话里归纳出的经验；资料片段只作为证据参考。</p>
               </div>
               <div class="button-row">
-                <button class="workflow-tab is-active" data-group="reference" data-tab="sources">已导入资料</button>
-                <button class="workflow-tab" data-group="reference" data-tab="experiences">对话中学到的经验</button>
+                <button class="workflow-tab is-active" data-group="reference" data-tab="experiences">RAG经验清单<span class="tab-count-badge is-hidden" id="rag-experience-tab-badge">0</span></button>
+                <button class="workflow-tab" data-group="reference" data-tab="sources">资料片段</button>
               </div>
             </div>
 
-            <section class="workflow-section is-visible" data-reference-tab="sources">
+            <section class="workflow-section is-visible" data-reference-tab="experiences">
               <div class="section-head sub-head">
-                <h2>已导入资料</h2>
+                <div>
+                  <h2>RAG经验清单</h2>
+                  <p>这里是 AI 读完资料或真实对话后留下的经验总结和处理建议。</p>
+                </div>
+                <button class="secondary-button" id="refresh-rag-experiences">刷新经验</button>
+              </div>
+              <div class="helper-card">
+                <strong>经验层不等于正式知识。</strong>
+                <span>所有渠道获取到的信息先在这里沉淀。未确认的经验不会参与回答；需要变成稳定规则时，先手动升级为待确认知识，再人工确认进入正式知识库。</span>
+              </div>
+              <div class="metric-grid metric-grid-tight metric-grid-three" id="rag-experience-cards">
+                <div class="status-card loading"><strong><span class="loading-spinner" aria-hidden="true"></span>正在加载RAG经验统计</strong><span>请稍等。</span></div>
+              </div>
+              <div id="rag-experience-list" class="compact-list">
+                <div class="status-card loading"><strong><span class="loading-spinner" aria-hidden="true"></span>正在加载RAG经验清单</strong><span>如果经验较多，可能需要几秒钟。</span></div>
+              </div>
+            </section>
+
+            <section class="workflow-section" data-reference-tab="sources">
+              <div class="section-head sub-head">
+                <h2>资料片段</h2>
                 <div class="button-row">
                   <button class="secondary-button" id="refresh-rag">刷新状态</button>
                   <button class="primary-button" id="rebuild-rag">重建索引</button>
                 </div>
               </div>
               <div class="helper-card">
-                <strong>这些资料只用于辅助检索和审核证据。</strong>
+                <strong>资料片段是证据层。</strong>
                 <span>正式回复仍以结构化知识库和安全规则为准；价格、优惠、赔偿、合同或账期不会只凭参考资料自动决定。</span>
               </div>
-              <div class="metric-grid" id="rag-status-cards"></div>
-              <div id="rag-analytics" class="compact-list compact-list-small">等待运营分析</div>
-              <div id="rag-source-list" class="compact-list compact-list-small">等待资料源列表</div>
-              <div id="rag-chunk-list" class="compact-list compact-list-small">等待资料切片预览</div>
+              <div class="metric-grid metric-grid-tight metric-grid-four" id="rag-status-cards">
+                <div class="status-card loading"><strong><span class="loading-spinner" aria-hidden="true"></span>正在加载资料片段</strong><span>请稍等。</span></div>
+              </div>
+              <div id="rag-analytics" class="compact-list compact-list-small">
+                <div class="status-card loading"><strong><span class="loading-spinner" aria-hidden="true"></span>正在加载运营分析</strong><span>请稍等。</span></div>
+              </div>
+              <div id="rag-source-list" class="compact-list compact-list-small">
+                <div class="status-card loading"><strong><span class="loading-spinner" aria-hidden="true"></span>正在加载资料源列表</strong><span>请稍等。</span></div>
+              </div>
+              <div id="rag-chunk-list" class="compact-list compact-list-small">
+                <div class="status-card loading"><strong><span class="loading-spinner" aria-hidden="true"></span>正在加载资料切片预览</strong><span>请稍等。</span></div>
+              </div>
               <div class="rag-search-grid">
                 <label class="form-field">
                   <span>检索问题</span>
@@ -307,27 +489,11 @@
               </div>
               <div id="rag-results" class="compact-list">等待检索</div>
             </section>
-
-            <section class="workflow-section" data-reference-tab="experiences">
-              <div class="section-head sub-head">
-                <div>
-                  <h2>对话中学到的经验</h2>
-                  <p>客服在参考资料场景里形成的可复用回答概括，默认作为经验参考，但不会写入正式知识库。</p>
-                </div>
-                <button class="secondary-button" id="refresh-rag-experiences">刷新经验</button>
-              </div>
-              <div class="helper-card">
-                <strong>这里展示的是经验层，不是正式业务规则。</strong>
-                <span>不合适的经验可以一键废弃；需要变成正式规则时，仍应通过知识录入与学习进入知识库。</span>
-              </div>
-              <div class="metric-grid" id="rag-experience-cards"></div>
-              <div id="rag-experience-list" class="compact-list">等待加载</div>
-            </section>
           </article>
 
           <article class="glass-panel content-card view-panel" data-panel="diagnostics">
             <div class="section-head">
-              <h2>一键检测</h2>
+              <h2>知识检测</h2>
               <div class="button-row">
                 <button class="secondary-button" id="quick-diagnostics">快速检测</button>
                 <button class="primary-button" id="full-diagnostics">全量检测</button>
@@ -336,66 +502,150 @@
             <div id="diagnostics-report" class="report-panel">等待检测</div>
           </article>
 
-          <article class="glass-panel content-card view-panel" data-panel="versions">
+          <article class="glass-panel content-card view-panel" data-panel="settings">
+            <div class="section-head">
+              <div>
+                <h2>系统设置</h2>
+                <p>管理账号安全、备份还原和后续客户端辅助设置。</p>
+              </div>
+            </div>
+            <section class="settings-section">
+              <div class="section-head sub-head">
+                <div>
+                  <h2>备份还原</h2>
+                  <p>仅保留最近 20 条备份快照，超过数量的旧备份会自动清理。</p>
+                </div>
+                <div class="button-row">
+                  <button class="primary-button" id="create-backup">一键备份</button>
+                  <button class="secondary-button" id="refresh-versions">刷新</button>
+                </div>
+              </div>
+              <div id="version-list" class="compact-list">
+                <div class="status-card loading"><strong><span class="loading-spinner" aria-hidden="true"></span>正在加载备份快照</strong><span>请稍等。</span></div>
+              </div>
+            </section>
+            <section class="settings-section">
+              <div class="section-head security-head">
+                <div>
+                  <h2>账号安全</h2>
+                  <p>维护当前账号的登录密码和验证码邮箱。</p>
+                </div>
+              </div>
+              <div class="security-summary" id="local-security-summary">账号安全信息读取中...</div>
+              <div class="security-grid">
+                <section class="security-panel">
+                  <div class="security-panel-head">
+                    <h3>修改密码</h3>
+                    <span>保存后请用新密码重新登录</span>
+                  </div>
+                  <form class="security-form" id="local-password-form">
+                    <label class="form-field"><span>当前密码</span><input name="current_password" type="password" autocomplete="current-password" required /></label>
+                    <label class="form-field"><span>新密码</span><input name="new_password" type="password" autocomplete="new-password" required /></label>
+                    <label class="form-field"><span>再次输入新密码</span><input name="confirm_password" type="password" autocomplete="new-password" required /></label>
+                    <label class="form-field is-hidden" id="local-password-code-field"><span>邮箱验证码</span><input name="email_code" autocomplete="one-time-code" inputmode="numeric" placeholder="请输入验证码" /></label>
+                    <div class="security-actions">
+                      <button class="primary-button compact-button" type="submit">发送验证码并修改</button>
+                    </div>
+                  </form>
+                </section>
+                <section class="security-panel">
+                  <div class="security-panel-head">
+                    <h3>绑定邮箱</h3>
+                    <span>用于登录和改密验证码</span>
+                  </div>
+                  <form class="security-form" id="local-email-form">
+                    <label class="form-field wide-field"><span>邮箱</span><input name="email" type="email" autocomplete="email" placeholder="请输入绑定邮箱" required /></label>
+                    <label class="form-field is-hidden" id="local-email-code-field"><span>邮箱验证码</span><input name="email_code" autocomplete="one-time-code" inputmode="numeric" placeholder="请输入验证码" /></label>
+                    <div class="security-actions">
+                      <button class="primary-button compact-button" type="submit">发送绑定验证码</button>
+                    </div>
+                  </form>
+                </section>
+              </div>
+              <div class="security-note">
+                <strong>邮箱验证码登录</strong>
+                <span>客户端只负责绑定邮箱和填写验证码，SMTP 发信配置由 VPS 服务端统一管理。</span>
+              </div>
+            </section>
+            <section class="settings-section">
+              <div class="section-head sub-head">
+                <div>
+                  <h2>平台底线规则</h2>
+                  <p>这里维护所有账号共用的自动回复安全边界；行业专属规则请放到对应客户的正式知识库。</p>
+                </div>
+                <div class="button-row">
+                  <button class="secondary-button" id="refresh-platform-safety">刷新</button>
+                  <button class="primary-button" id="save-platform-safety">保存规则</button>
+                </div>
+              </div>
+              <div id="platform-safety-summary" class="security-summary">平台底线规则读取中...</div>
+              <label class="form-field platform-safety-editor">
+                <span>规则内容</span>
+                <textarea id="platform-safety-json" spellcheck="false" placeholder="正在加载平台底线规则"></textarea>
+              </label>
+              <div class="security-note">
+                <strong>规则分层</strong>
+                <span>平台底线规则只放所有行业都适用的边界；二手车、贸易、门店、商品等专属规则必须放在客户自己的正式知识库或商品库。</span>
+              </div>
+            </section>
+            <section class="settings-section">
+              <div class="section-head sub-head">
+                <div>
+                  <h2>平台通用理解词典</h2>
+                  <p>这里维护所有账号共用的基础意图词、商品理解词和RAG检索近义词；不写客户专属业务规则。</p>
+                </div>
+                <div class="button-row">
+                  <button class="secondary-button" id="refresh-platform-understanding">刷新</button>
+                  <button class="primary-button" id="save-platform-understanding">保存词典</button>
+                </div>
+              </div>
+              <div id="platform-understanding-summary" class="security-summary">平台通用理解词典读取中...</div>
+              <label class="form-field platform-safety-editor">
+                <span>词典内容</span>
+                <textarea id="platform-understanding-json" spellcheck="false" placeholder="正在加载平台通用理解词典"></textarea>
+              </label>
+              <div class="security-note">
+                <strong>词典分层</strong>
+                <span>这里适合放“价格、库存、发货、售后、发票、推荐、对比”等通用理解词；客户行业规则、商品规则和话术仍应放到正式知识库或商品库。</span>
+              </div>
+            </section>
+            <section class="settings-section muted-section">
+              <h2>后续设置</h2>
+              <p>后续可以在这里加入界面风格、日志清理、端口检查等辅助功能。</p>
+            </section>
+          </article>
+
+          <article class="glass-panel content-card view-panel is-hidden" data-panel="versions">
             <div class="section-head">
               <div>
                 <h2>备份还原</h2>
-                <p>仅保留最近 20 条备份快照，超过数量的旧备份会自动清理。</p>
+                <p>已整合到系统设置。</p>
               </div>
               <div class="button-row">
-                <button class="primary-button" id="create-backup">一键备份</button>
-                <button class="secondary-button" id="refresh-versions">刷新</button>
               </div>
             </div>
-            <div id="version-list" class="compact-list"></div>
           </article>
 
-          <article class="glass-panel content-card view-panel" data-panel="security">
+          <article class="glass-panel content-card view-panel is-hidden" data-panel="security">
             <div class="section-head security-head">
               <div>
                 <h2>账号安全</h2>
-                <p>维护当前账号的登录密码和验证码邮箱。</p>
+                <p>已整合到系统设置。</p>
               </div>
-            </div>
-            <div class="security-summary" id="local-security-summary">账号安全信息读取中...</div>
-            <div class="security-grid">
-              <section class="security-panel">
-                <div class="security-panel-head">
-                  <h3>修改密码</h3>
-                  <span>保存后请用新密码重新登录</span>
-                </div>
-                <form class="security-form" id="local-password-form">
-                  <label class="form-field"><span>当前密码</span><input name="current_password" type="password" autocomplete="current-password" required /></label>
-                  <label class="form-field"><span>新密码</span><input name="new_password" type="password" autocomplete="new-password" required /></label>
-                  <label class="form-field"><span>再次输入新密码</span><input name="confirm_password" type="password" autocomplete="new-password" required /></label>
-                  <label class="form-field is-hidden" id="local-password-code-field"><span>邮箱验证码</span><input name="email_code" autocomplete="one-time-code" inputmode="numeric" placeholder="请输入验证码" /></label>
-                  <div class="security-actions">
-                    <button class="primary-button compact-button" type="submit">发送验证码并修改</button>
-                  </div>
-                </form>
-              </section>
-              <section class="security-panel">
-                <div class="security-panel-head">
-                  <h3>绑定邮箱</h3>
-                  <span>用于登录和改密验证码</span>
-                </div>
-                <form class="security-form" id="local-email-form">
-                  <label class="form-field wide-field"><span>邮箱</span><input name="email" type="email" autocomplete="email" placeholder="请输入绑定邮箱" required /></label>
-                  <label class="form-field is-hidden" id="local-email-code-field"><span>邮箱验证码</span><input name="email_code" autocomplete="one-time-code" inputmode="numeric" placeholder="请输入验证码" /></label>
-                  <div class="security-actions">
-                    <button class="primary-button compact-button" type="submit">发送绑定验证码</button>
-                  </div>
-                </form>
-              </section>
-            </div>
-            <div class="security-note">
-              <strong>邮箱验证码登录</strong>
-              <span>客户端只负责绑定邮箱和填写验证码，SMTP 发信配置由 VPS 服务端统一管理。</span>
             </div>
           </article>
         </section>
       </section>
     </main>
-    <script src="/static/app.js"></script>
+    <aside class="customer-service-float is-stopped" id="customer-service-float" aria-live="polite">
+      <div class="float-status-line">
+        <span class="service-state-dot is-stopped"></span>
+        <div>
+          <strong>已停止</strong>
+          <small>正在读取自动客服状态...</small>
+        </div>
+      </div>
+    </aside>
+    <script src="/static/app.js?v=20260505-promotion-chain-cleanup"></script>
   </body>
 </html>

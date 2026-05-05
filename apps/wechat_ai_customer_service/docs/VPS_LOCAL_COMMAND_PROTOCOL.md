@@ -310,3 +310,4 @@ VPS 不可达：
 - local 使用本地已有知识和会话策略。
 - 若 `WECHAT_AUTH_REQUIRED=1` 且 VPS 不可达，则登录失败。
 - 若非强制认证，可回落到本地开发账号。
+> 2026-05-05 更新：`pull_shared_patch` 的客户端执行语义已调整为“刷新云端正式共享知识快照”。历史 patch payload 继续作为审计和兼容字段保留，但客户端不再把它写入 `data/shared_knowledge`。

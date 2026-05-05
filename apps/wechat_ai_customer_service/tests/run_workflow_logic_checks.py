@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import copy
 import json
+import os
 import sys
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -21,7 +22,7 @@ APP_ROOT = Path(__file__).resolve().parents[1]
 PROJECT_ROOT = APP_ROOT.parents[1]
 WORKFLOWS_ROOT = APP_ROOT / "workflows"
 ADAPTERS_ROOT = APP_ROOT / "adapters"
-for path in (WORKFLOWS_ROOT, ADAPTERS_ROOT):
+for path in (PROJECT_ROOT, WORKFLOWS_ROOT, ADAPTERS_ROOT):
     if str(path) not in sys.path:
         sys.path.insert(0, str(path))
 
@@ -31,6 +32,7 @@ from customer_service_review_queue import build_review_queue  # noqa: E402
 from knowledge_loader import build_evidence_pack  # noqa: E402
 from listen_and_reply import (  # noqa: E402
     ReplyDecision,
+    apply_local_customer_service_settings,
     build_operator_handoff_reply_text,
     configured_reply_prefix,
     is_bot_reply_content,
@@ -43,6 +45,8 @@ from listen_and_reply import (  # noqa: E402
     select_batch,
     should_operator_handoff,
 )
+from apps.wechat_ai_customer_service.admin_backend.services.customer_service_settings import CustomerServiceSettings  # noqa: E402
+from apps.wechat_ai_customer_service.llm_config import DEFAULT_DEEPSEEK_CONTEXT_WINDOW_TOKENS, resolve_deepseek_model, resolve_deepseek_tier_model  # noqa: E402
 from wxauto4_sidecar import is_wechat_main_window  # noqa: E402
 
 
@@ -77,6 +81,8 @@ def run_checks() -> dict[str, Any]:
         check_incomplete_customer_data_is_completed_and_written,
         check_rate_limit_notice_and_backoff,
         check_auto_reply_disabled_blocks_runtime_send,
+        check_customer_service_console_switches_take_effect,
+        check_deepseek_v4_pro_is_default,
         check_llm_reply_application_guards,
         check_llm_boundary_fallback_on_invalid_model_output,
         check_review_queue_reports_pending_and_handoff_items,
@@ -178,7 +184,8 @@ def check_mixed_safety_batch_forces_handoff() -> None:
     assert_equal(event.get("action"), "handoff_sent", "discount/data mixed batch should hand off")
     assert_equal(event.get("message_ids"), ["m-discount", "m-data"], "bot reply should not enter message ids")
     assert_true(connector.sent_texts, "handoff acknowledgement should be sent")
-    assert_true("请示上级" in connector.sent_texts[0], "sent text should be the handoff acknowledgement")
+    assert_true("负责的同事核实" in connector.sent_texts[0], "sent text should be the natural handoff acknowledgement")
+    assert_true("请示上级" not in connector.sent_texts[0], "handoff text should avoid the old formulaic acknowledgement")
     assert_true("客户资料已记录" not in connector.sent_texts[0], "data capture success should not override safety handoff")
     safety = event.get("intent_assist", {}).get("evidence", {}).get("safety", {})
     assert_true(bool(safety.get("must_handoff")), "evidence safety should require handoff")
@@ -205,7 +212,7 @@ def check_incomplete_customer_data_is_completed_and_written() -> None:
             {
                 "id": "lead-1",
                 "type": "text",
-                "content": "客户资料\n电话：13900001111\n地址：杭州市余杭区测试路 8 号\n产品：商用冰箱\n数量：2 台",
+                "content": "客户资料\n电话：13900001111\n地址：杭州市余杭区测试路 8 号\n产品：商用冰箱\n数量：2 台\n[live-regression:test:17:1]",
                 "sender": "self",
             }
         ]
@@ -234,7 +241,7 @@ def check_incomplete_customer_data_is_completed_and_written() -> None:
         {
             "id": "lead-2",
             "type": "text",
-            "content": "联系人：李补全",
+            "content": "联系人：李补全\n[live-regression:test:18:1]",
             "sender": "self",
         }
     ]
@@ -356,6 +363,135 @@ def check_auto_reply_disabled_blocks_runtime_send() -> None:
     assert_true(
         "raw internal policy answer" not in reply,
         "auto-reply disabled FAQ should not send the stored answer before human review",
+    )
+
+
+def check_customer_service_console_switches_take_effect() -> None:
+    tenant_id = "workflow_switch_probe"
+    old_tenant = os.environ.get("WECHAT_KNOWLEDGE_TENANT")
+    os.environ["WECHAT_KNOWLEDGE_TENANT"] = tenant_id
+    settings_store = CustomerServiceSettings(tenant_id=tenant_id)
+    remove_file(settings_store.settings_path)
+    try:
+        settings_store.save(
+            {
+                "enabled": False,
+                "reply_mode": "full_auto",
+                "record_messages": False,
+                "auto_learn": False,
+                "use_llm": False,
+                "rag_enabled": False,
+                "data_capture_enabled": False,
+                "handoff_enabled": False,
+                "operator_alert_enabled": False,
+            }
+        )
+        disabled_config = apply_local_customer_service_settings(load_smoke_config())
+        assert_true(disabled_config["raw_messages"]["enabled"] is False, "record-message switch should disable raw capture")
+        assert_true(disabled_config["raw_messages"]["use_llm"] is False, "LLM switch should disable raw-message LLM learning")
+        assert_true(disabled_config["intent_assist"]["enabled"] is False, "LLM switch should disable LLM-assisted intent analysis")
+        assert_true(disabled_config["rag_response"]["enabled"] is False, "RAG reply switch should disable RAG response")
+        assert_true(disabled_config["data_capture"]["enabled"] is False, "data-capture switch should disable customer data capture")
+        assert_true(disabled_config["handoff"]["enabled"] is False, "handoff switch should disable operator handoff")
+        assert_true(disabled_config["operator_alert"]["enabled"] is False, "operator-alert switch should disable operator alerts")
+
+        disabled_event = process_target(
+            connector=FakeConnector([{"id": "off-1", "type": "text", "content": "商用冰箱多少钱", "sender": "self"}]),  # type: ignore[arg-type]
+            target=parse_targets(disabled_config)[0],
+            config=disabled_config,
+            rules=load_rules(resolve_path(disabled_config.get("rules_path"))),
+            state={"version": 1, "targets": {}},
+            send=True,
+            write_data=False,
+            allow_fallback_send=False,
+            mark_dry_run=False,
+        )
+        assert_equal(disabled_event.get("reason"), "customer_service_disabled", "master switch should stop replies")
+
+        settings_store.save(
+            {
+                "enabled": True,
+                "reply_mode": "record_only",
+                "record_messages": True,
+                "auto_learn": False,
+                "use_llm": True,
+                "rag_enabled": True,
+                "data_capture_enabled": True,
+                "handoff_enabled": True,
+                "operator_alert_enabled": True,
+            }
+        )
+        record_only_config = apply_local_customer_service_settings(load_smoke_config())
+        assert_true(record_only_config["intent_assist"]["llm_advisory"]["enabled"] is True, "LLM switch should enable LLM advisory")
+        assert_equal(record_only_config["intent_assist"]["llm_advisory"]["provider"], "deepseek", "LLM advisory should call configured model provider")
+        assert_true(record_only_config["llm_reply_synthesis"]["enabled"] is True, "LLM switch should enable guarded reply synthesis")
+        assert_equal(record_only_config["llm_reply_synthesis"]["provider"], "deepseek", "guarded reply synthesis should call configured model provider")
+        record_only_event = process_target(
+            connector=FakeConnector([{"id": "record-1", "type": "text", "content": "商用冰箱多少钱", "sender": "self"}]),  # type: ignore[arg-type]
+            target=parse_targets(record_only_config)[0],
+            config=record_only_config,
+            rules=load_rules(resolve_path(record_only_config.get("rules_path"))),
+            state={"version": 1, "targets": {}},
+            send=True,
+            write_data=False,
+            allow_fallback_send=False,
+            mark_dry_run=False,
+        )
+        assert_equal(record_only_event.get("reason"), "record_only_mode", "record-only mode should capture but not reply")
+
+        settings_store.save(
+            {
+                "enabled": True,
+                "reply_mode": "full_auto",
+                "record_messages": True,
+                "auto_learn": False,
+                "use_llm": True,
+                "rag_enabled": True,
+                "data_capture_enabled": True,
+                "handoff_enabled": False,
+                "operator_alert_enabled": False,
+            }
+        )
+        no_handoff_config = apply_local_customer_service_settings(load_smoke_config())
+        no_handoff_event = process_target(
+            connector=FakeConnector([{"id": "risk-1", "type": "text", "content": "买10台冰箱能按20台价格吗？", "sender": "self"}]),  # type: ignore[arg-type]
+            target=parse_targets(no_handoff_config)[0],
+            config=no_handoff_config,
+            rules=load_rules(resolve_path(no_handoff_config.get("rules_path"))),
+            state={"version": 1, "targets": {}},
+            send=True,
+            write_data=False,
+            allow_fallback_send=False,
+            mark_dry_run=False,
+        )
+        assert_equal(no_handoff_event.get("reason"), "operator_handoff_disabled", "handoff-off switch should block risky handoff replies")
+    finally:
+        remove_file(settings_store.settings_path)
+        if old_tenant is None:
+            os.environ.pop("WECHAT_KNOWLEDGE_TENANT", None)
+        else:
+            os.environ["WECHAT_KNOWLEDGE_TENANT"] = old_tenant
+
+
+def check_deepseek_v4_pro_is_default() -> None:
+    assert_equal(
+        resolve_deepseek_model(read_secret_fn=lambda name: ""),
+        "deepseek-v4-pro",
+        "DeepSeek default model should use the 1M-context V4 Pro model",
+    )
+    assert_true(
+        DEFAULT_DEEPSEEK_CONTEXT_WINDOW_TOKENS >= 1_000_000,
+        "DeepSeek V4 Pro context-window metadata should document 1M-token support",
+    )
+    assert_equal(
+        resolve_deepseek_tier_model(tier="flash", read_secret_fn=lambda name: ""),
+        "deepseek-v4-flash",
+        "DeepSeek Flash tier should use the cheaper V4 Flash model",
+    )
+    assert_equal(
+        resolve_deepseek_tier_model(tier="pro", read_secret_fn=lambda name: ""),
+        "deepseek-v4-pro",
+        "DeepSeek Pro tier should keep the 1M-context V4 Pro model",
     )
 
 
@@ -551,6 +687,12 @@ def check_evidence_boundary_cases() -> None:
         {
             "name": "unrelated travel request is no relevant evidence",
             "text": "你能帮我订明天去上海的机票和酒店吗",
+            "expect_handoff": True,
+            "expect_safety_reason_in": "no_relevant_business_evidence",
+        },
+        {
+            "name": "weak policy answer match does not authorize unknown business-adjacent question",
+            "text": "你们老板喜欢什么颜色的包装？\n[live-regression:test:19:1]",
             "expect_handoff": True,
             "expect_safety_reason_in": "no_relevant_business_evidence",
         },

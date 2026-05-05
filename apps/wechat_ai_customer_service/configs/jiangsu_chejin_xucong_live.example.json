@@ -1,0 +1,174 @@
+{
+  "version": 1,
+  "rules_path": "apps/wechat_ai_customer_service/configs/platform_fallback_rules.example.json",
+  "state_path": "runtime/apps/wechat_ai_customer_service/tenants/jiangsu_chejin_usedcar_customer_20260501/state/xucong_live_customer_service_state.json",
+  "audit_log_path": "runtime/apps/wechat_ai_customer_service/tenants/jiangsu_chejin_usedcar_customer_20260501/logs/xucong_live_customer_service_audit.jsonl",
+  "poll": {
+    "interval_seconds": 3,
+    "iterations": 999999
+  },
+  "state_lock": {
+    "timeout_seconds": 120,
+    "stale_seconds": 900
+  },
+  "rate_limits": {
+    "min_seconds_between_replies": 0,
+    "max_replies_per_10_minutes": 80,
+    "max_replies_per_hour": 300,
+    "notice_customer": true,
+    "notice_min_interval_seconds": 300,
+    "notice_reply": "当前自动客服处理频率较高，请稍等约 {retry_after_minutes} 分钟，我会继续处理您的消息。"
+  },
+  "reply": {
+    "prefix": "[车金AI] ",
+    "allow_fallback_send": false
+  },
+  "raw_messages": {
+    "enabled": true,
+    "learning_enabled": true,
+    "auto_learn": true,
+    "use_llm": true,
+    "notify_enabled": false
+  },
+  "rag_response": {
+    "enabled": true,
+    "apply_to_unmatched": true,
+    "apply_to_matched_product": false,
+    "apply_to_small_talk": false,
+    "skip_llm_after_apply": true,
+    "min_hit_score": 0.12,
+    "max_reply_chars": 240,
+    "max_snippet_chars": 140
+  },
+  "llm_reply_synthesis": {
+    "enabled": true,
+    "provider": "deepseek",
+    "mode": "guarded_auto",
+    "shadow_mode": false,
+    "require_evidence": true,
+    "require_structured_for_authority": true,
+    "fallback_to_existing_reply": true,
+    "max_history_messages": 40,
+    "history_char_budget": 14000,
+    "max_rag_hits": 7,
+    "max_rag_text_chars": 900,
+    "max_catalog_candidates": 8,
+    "quality_priority": true,
+    "model_routing": {
+      "enabled": true,
+      "default_tier": "flash",
+      "flash_model": "deepseek-v4-flash",
+      "pro_model": "deepseek-v4-pro",
+      "force_model_tier": "",
+      "pro_intent_tags": [
+        "payment",
+        "invoice",
+        "after_sales",
+        "handoff",
+        "customer_data"
+      ],
+      "pro_safety_reasons": [
+        "matched_faq_requires_handoff",
+        "invoice_amount_entity",
+        "contract_risk",
+        "payment_boundary",
+        "price_approval_required"
+      ],
+      "pro_when_must_handoff": true,
+      "pro_when_rag_only_authority": true,
+      "pro_when_long_context": false,
+      "pro_when_long_message": false,
+      "pro_min_history_count": 80,
+      "pro_min_message_chars": 420
+    },
+    "profiles": {
+      "flash": {
+        "max_history_messages": 12,
+        "history_char_budget": 5000,
+        "max_rag_hits": 3,
+        "max_rag_text_chars": 360,
+        "max_catalog_candidates": 5,
+        "max_tokens": 1800,
+        "temperature": 0.35
+      },
+      "pro": {
+        "max_history_messages": 40,
+        "history_char_budget": 14000,
+        "max_rag_hits": 7,
+        "max_rag_text_chars": 900,
+        "max_catalog_candidates": 8,
+        "max_tokens": 3600,
+        "temperature": 0.38
+      }
+    },
+    "cost_controls": {
+      "enabled": true,
+      "max_llm_calls_per_run": 0,
+      "skip_llm_when_deterministic_reply": false,
+      "safe_deterministic_rule_names": []
+    },
+    "min_confidence": 0.35,
+    "max_reply_chars": 620,
+    "max_tokens": 3600,
+    "temperature": 0.38,
+    "retry_count": 2,
+    "timeout_seconds": 120,
+    "include_evidence_pack_in_audit": false,
+    "candidate_json_path": "",
+    "platform_safety_rules_path": "apps/wechat_ai_customer_service/configs/platform_safety_rules.example.json",
+    "platform_understanding_rules_path": "apps/wechat_ai_customer_service/configs/platform_understanding_rules.example.json"
+  },
+  "data_capture": {
+    "enabled": true,
+    "workbook_path": "runtime/apps/wechat_ai_customer_service/tenants/jiangsu_chejin_usedcar_customer_20260501/test_artifacts/xucong_live_leads.xlsx",
+    "sheet_name": "二手车线索",
+    "required_fields": [
+      "name",
+      "phone"
+    ],
+    "write_on_send_only": false,
+    "success_reply": "客户资料已记录，我会让销售尽快跟进。",
+    "incomplete_reply": "我看到了客户资料，但还缺少：{missing_fields}。请补充后我再记录。"
+  },
+  "product_knowledge": {
+    "enabled": false
+  },
+  "handoff": {
+    "enabled": true,
+    "auto_acknowledge": true,
+    "acknowledgement_reply": "这个问题需要销售人工确认，我先帮您记录并提醒同事跟进。"
+  },
+  "operator_alert": {
+    "enabled": true,
+    "alert_log_path": "runtime/apps/wechat_ai_customer_service/tenants/jiangsu_chejin_usedcar_customer_20260501/logs/xucong_live_operator_alerts.jsonl"
+  },
+  "service_profile": {
+    "role": "谨慎、真实、不过度承诺的微信客服；具体行业身份以当前客户可见知识库为准",
+    "tone": "简短、礼貌、像真人客服",
+    "answer_boundary": "只按当前客户可见的商品库、正式知识、商品专属知识、RAG经验、共享公共知识和当前会话上下文回答；缺少依据或涉及高风险承诺时必须转人工。"
+  },
+  "intent_assist": {
+    "enabled": true,
+    "mode": "heuristic",
+    "advisory_only": true,
+    "llm_advisory": {
+      "enabled": true,
+      "provider": "deepseek",
+      "advisory_only": true,
+      "include_prompt_in_audit": false,
+      "model": "deepseek-v4-flash",
+      "base_url": "https://api.deepseek.com",
+      "timeout_seconds": 120,
+      "candidate_json_path": ""
+    }
+  },
+  "targets": [
+    {
+      "name": "许聪",
+      "enabled": true,
+      "exact": true,
+      "allow_self_for_test": false,
+      "max_batch_messages": 3
+    }
+  ]
+}

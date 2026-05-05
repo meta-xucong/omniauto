@@ -2,7 +2,7 @@
   "schema_version": 1,
   "category_id": "chats",
   "id": "qa-shipping-tomorrow",
-  "status": "active",
+  "status": "archived",
   "source": {
     "type": "deepseek_upload_learning",
     "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\raw_inbox\\products\\upload_c54b9fd38e442a30_05_mixed_company_faq.txt",
@@ -35,7 +35,7 @@
   },
   "metadata": {
     "created_at": "2026-04-27T00:58:51",
-    "updated_at": "2026-04-27T00:58:51",
+    "updated_at": "2026-05-05T20:52:59",
     "created_by": "admin",
     "updated_by": "admin"
   }

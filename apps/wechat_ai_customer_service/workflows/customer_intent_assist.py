@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import re
 import sys
 import urllib.error
@@ -18,12 +17,21 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 
+APP_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = APP_ROOT.parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 from customer_data_capture import extract_customer_data
+from apps.wechat_ai_customer_service.llm_config import read_secret, resolve_deepseek_base_url, resolve_deepseek_max_tokens, resolve_deepseek_tier_model
+from apps.wechat_ai_customer_service.platform_understanding_rules import (
+    intent_keywords,
+    product_keywords,
+    quantity_unit_pattern,
+)
 
 
 SCHEMA_VERSION = 1
-DEFAULT_DEEPSEEK_BASE_URL = "https://api.deepseek.com"
-DEFAULT_DEEPSEEK_MODEL = "deepseek-chat"
 ALLOWED_INTENTS = {
     "greeting",
     "small_talk",
@@ -198,7 +206,7 @@ def analyze_intent(text: str, context: dict[str, Any] | None = None) -> IntentAs
             missing_fields=missing,
         )
 
-    if has_any(normalized, ["投诉", "退款", "退货", "赔偿", "生气", "不满意", "人工"]):
+    if has_any(normalized, intent_keywords().get("handoff", [])):
         return IntentAssistResult(
             enabled=True,
             mode="heuristic",
@@ -276,7 +284,7 @@ def analyze_intent(text: str, context: dict[str, Any] | None = None) -> IntentAs
             missing_fields=missing,
         )
 
-    if has_any(normalized, ["哈哈", "随便看看", "先看看", "客服", "挺快", "谢谢", "辛苦"]):
+    if has_any(normalized, intent_keywords().get("small_talk", [])):
         return IntentAssistResult(
             enabled=True,
             mode="heuristic",
@@ -291,7 +299,7 @@ def analyze_intent(text: str, context: dict[str, Any] | None = None) -> IntentAs
             missing_fields=missing,
         )
 
-    if has_any(normalized, ["你好", "您好", "hello", "在吗"]):
+    if has_any(normalized, intent_keywords().get("greeting", [])):
         return IntentAssistResult(
             enabled=True,
             mode="heuristic",
@@ -326,7 +334,7 @@ def analyze_policy_intent(
     fields: dict[str, str],
     missing: list[str],
 ) -> IntentAssistResult | None:
-    if has_any(normalized, ["你们公司", "公司名称", "公司叫什么", "公司信息", "公司地址", "你们地址", "营业时间", "客服电话"]):
+    if has_any(normalized, intent_keywords().get("company", [])):
         return IntentAssistResult(
             enabled=True,
             mode="heuristic",
@@ -340,7 +348,7 @@ def analyze_policy_intent(
             fields=fields,
             missing_fields=missing,
         )
-    if has_any(normalized, ["发票", "开票", "专票", "普票", "税号", "电子发票", "发票资料"]):
+    if has_any(normalized, intent_keywords().get("invoice", [])):
         return IntentAssistResult(
             enabled=True,
             mode="heuristic",
@@ -354,7 +362,7 @@ def analyze_policy_intent(
             fields=fields,
             missing_fields=missing,
         )
-    if has_any(normalized, ["付款", "支付", "怎么付", "对公", "转账", "收款账户", "银行账号", "账户信息", "打款账户", "定金", "尾款"]):
+    if has_any(normalized, intent_keywords().get("payment", [])):
         return IntentAssistResult(
             enabled=True,
             mode="heuristic",
@@ -368,7 +376,7 @@ def analyze_policy_intent(
             fields=fields,
             missing_fields=missing,
         )
-    if has_any(normalized, ["售后", "保修", "质保", "坏了", "退换", "换货", "破损"]):
+    if has_any(normalized, intent_keywords().get("after_sales", [])):
         return IntentAssistResult(
             enabled=True,
             mode="heuristic",
@@ -382,7 +390,7 @@ def analyze_policy_intent(
             fields=fields,
             missing_fields=missing,
         )
-    if has_any(normalized, ["物流", "快递", "运费", "包邮", "发货", "发到", "发往", "送到", "寄到", "到货", "送货", "上楼", "送货上楼", "几天到", "几天", "多久"]):
+    if has_any(normalized, intent_keywords().get("shipping", [])):
         return IntentAssistResult(
             enabled=True,
             mode="heuristic",
@@ -396,7 +404,7 @@ def analyze_policy_intent(
             fields=fields,
             missing_fields=missing,
         )
-    if has_any(normalized, ["优惠", "便宜", "最低", "折扣", "能少", "少点", "还价", "议价"]):
+    if has_any(normalized, intent_keywords().get("discount", [])):
         return IntentAssistResult(
             enabled=True,
             mode="heuristic",
@@ -562,8 +570,8 @@ def call_deepseek_advisory(
     timeout: int = 60,
 ) -> dict[str, Any]:
     api_key = read_secret("DEEPSEEK_API_KEY")
-    selected_model = model or read_secret("DEEPSEEK_MODEL") or DEFAULT_DEEPSEEK_MODEL
-    selected_base_url = base_url or read_secret("DEEPSEEK_BASE_URL") or DEFAULT_DEEPSEEK_BASE_URL
+    selected_model = resolve_deepseek_tier_model(tier="flash", explicit_model=model, read_secret_fn=read_secret)
+    selected_base_url = resolve_deepseek_base_url(explicit_base_url=base_url, read_secret_fn=read_secret)
     if not api_key:
         return {
             "ok": False,
@@ -673,7 +681,7 @@ def post_deepseek_chat(
             },
         ],
         "temperature": 0.2,
-        "max_tokens": 420,
+        "max_tokens": resolve_deepseek_max_tokens(1200, read_secret_fn=read_secret),
         "stream": False,
         "response_format": {"type": "json_object"},
     }
@@ -746,20 +754,6 @@ def summarize_error_body(body: str) -> Any:
         return body[:500]
 
 
-def read_secret(name: str) -> str:
-    value = os.getenv(name)
-    if value:
-        return value
-    try:
-        import winreg
-
-        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, "Environment") as key:
-            registry_value, _ = winreg.QueryValueEx(key, name)
-            return str(registry_value)
-    except Exception:
-        return ""
-
-
 def normalize_text(text: str) -> str:
     replacements = {
         "：": ":",
@@ -780,45 +774,22 @@ def has_any(text: str, keywords: list[str]) -> bool:
 
 
 def has_quote_intent(text: str) -> bool:
-    return has_any(text, ["价格", "报价", "多少钱", "费用", "单价", "总价"])
+    return has_any(text, product_keywords("quote") or intent_keywords().get("quote", []))
 
 
 def has_product_detail(text: str) -> bool:
     if has_any(
         text,
-        [
-            "产品",
-            "商品",
-            "规格",
-            "型号",
-            "数量",
-            "采购",
-            "冰箱",
-            "净水器",
-            "冷柜",
-            "饮料",
-            "便利店",
-            "小店",
-            "门锁",
-            "智能锁",
-            "指纹锁",
-            "民宿",
-            "客房",
-            "安装前",
-            "供电",
-            "门厚",
-            "开孔",
-        ],
+        [*intent_keywords().get("product", []), *intent_keywords().get("scene_product", []), *product_keywords("spec")],
     ):
         return True
-    return bool(re.search(r"\d+\s*(个|件|台|套|箱|条|kg|千克|斤)", text, re.IGNORECASE))
+    return bool(re.search(rf"\d+\s*({quantity_unit_pattern()})", text, re.IGNORECASE))
 
 
 def needs_approval(text: str) -> bool:
-    approval_keywords = ["特批", "破例", "请示", "申请", "抹零", "赠送", "再便宜", "便宜点", "最低价"]
-    if has_any(text, approval_keywords):
+    if has_any(text, product_keywords("approval")):
         return True
-    return bool(re.search(r"按\s*\d+\s*(个|件|台|套|箱|条|把|瓶)?\s*的?价", text, re.IGNORECASE))
+    return bool(re.search(rf"按\s*\d+\s*(?:{quantity_unit_pattern()})?\s*的?价", text, re.IGNORECASE))
 
 
 def format_missing(fields: list[str]) -> str:

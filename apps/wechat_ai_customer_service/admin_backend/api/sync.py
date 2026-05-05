@@ -8,7 +8,7 @@ from fastapi import APIRouter, HTTPException, Request
 
 from ..auth_context import current_auth_context
 from apps.wechat_ai_customer_service.auth import assert_allowed
-from apps.wechat_ai_customer_service.sync import BackupService, SharedPatchService, VpsLocalSyncService
+from apps.wechat_ai_customer_service.sync import BackupService, VpsLocalSyncService
 
 
 router = APIRouter(prefix="/api/sync", tags=["sync"])
@@ -52,29 +52,34 @@ def backup(request: Request, payload: dict[str, Any] | None = None) -> dict[str,
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
-@router.post("/shared/preview-patch")
-def preview_shared_patch(payload: dict[str, Any]) -> dict[str, Any]:
-    try:
-        return SharedPatchService().preview(payload)
-    except Exception as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
-
-
-@router.post("/shared/apply-patch")
-def apply_shared_patch(payload: dict[str, Any]) -> dict[str, Any]:
-    try:
-        return SharedPatchService().apply(payload)
-    except Exception as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
-
-
-@router.post("/shared/upload-candidates")
-def upload_shared_candidates(request: Request) -> dict[str, Any]:
+@router.post("/shared/formal-candidates")
+def upload_formal_shared_candidates(request: Request, payload: dict[str, Any] | None = None) -> dict[str, Any]:
     context = current_auth_context(request)
     assert_allowed(context, resource="shared_knowledge", action="sync", tenant_id=context.tenant_id)
-    return VpsLocalSyncService().upload_shared_candidates(
+    payload = payload or {}
+    try:
+        limit = int(payload.get("limit") or 30)
+    except (TypeError, ValueError):
+        limit = 30
+    return VpsLocalSyncService().upload_formal_knowledge_candidates(
         token=str(request.headers.get("Authorization") or "").replace("Bearer ", "").strip(),
         tenant_id=context.tenant_id,
+        use_llm=payload.get("use_llm", True) is not False,
+        limit=limit,
+        only_unscanned=payload.get("only_unscanned", True) is not False,
+    )
+
+
+@router.post("/shared/cloud-snapshot")
+def pull_shared_cloud_snapshot(request: Request, payload: dict[str, Any] | None = None) -> dict[str, Any]:
+    context = current_auth_context(request)
+    assert_allowed(context, resource="shared_knowledge", action="sync", tenant_id=context.tenant_id)
+    payload = payload or {}
+    return VpsLocalSyncService().fetch_shared_knowledge_snapshot(
+        token=str(request.headers.get("Authorization") or "").replace("Bearer ", "").strip(),
+        tenant_id=context.tenant_id,
+        since_version=str(payload.get("since_version") or ""),
+        force=bool(payload.get("force", False)),
     )
 
 

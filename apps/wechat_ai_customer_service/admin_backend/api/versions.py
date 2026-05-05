@@ -4,7 +4,8 @@ from __future__ import annotations
 
 from typing import Any
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
+from fastapi.responses import FileResponse
 
 from ..services.version_store import VersionStore
 
@@ -21,6 +22,15 @@ def list_versions() -> dict[str, Any]:
 @router.get("/{version_id}")
 def get_version(version_id: str) -> dict[str, Any]:
     return {"ok": True, "item": store.get_version(version_id)}
+
+
+@router.get("/{version_id}/download")
+def download_version(version_id: str) -> FileResponse:
+    try:
+        package_path = store.download_path(version_id)
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=f"version not found: {version_id}") from exc
+    return FileResponse(package_path, filename=package_path.name, media_type="application/zip")
 
 
 @router.post("")

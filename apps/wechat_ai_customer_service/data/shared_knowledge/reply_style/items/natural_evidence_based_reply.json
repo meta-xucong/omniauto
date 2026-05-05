@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "category_id": "reply_style",
+  "id": "natural_evidence_based_reply",
+  "status": "active",
+  "source": {
+    "type": "admin_shared_seed",
+    "scope": "all_customers"
+  },
+  "data": {
+    "title": "自然且有依据的微信回复",
+    "keywords": [
+      "你好",
+      "在吗",
+      "推荐",
+      "怎么选",
+      "报价",
+      "售后",
+      "发货"
+    ],
+    "guideline_text": "自动回复要先接住客户的具体问题，再基于客户专属正式知识、商品库或 RAG 经验说明依据；没有依据时不要硬答，避免机械开头和空泛套话。",
+    "applies_to": "所有客户账号"
+  },
+  "runtime": {
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "risk_level": "normal"
+  },
+  "metadata": {
+    "created_at": "2026-05-05T00:00:00",
+    "updated_at": "2026-05-05T00:00:00",
+    "created_by": "codex",
+    "updated_by": "codex"
+  }
+}

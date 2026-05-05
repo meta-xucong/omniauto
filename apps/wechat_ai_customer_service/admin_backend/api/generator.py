@@ -55,3 +55,17 @@ def confirm_session(session_id: str) -> dict[str, Any]:
     if not result.get("ok"):
         raise HTTPException(status_code=400, detail=result)
     return result
+
+
+@router.post("/sessions/{session_id}/rag-experience")
+def confirm_session_to_rag_experience(session_id: str, payload: dict[str, Any] | None = None) -> dict[str, Any]:
+    try:
+        result = service.confirm_session_to_rag_experience(
+            session_id,
+            use_llm=(payload or {}).get("use_llm", True) is not False,
+        )
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=f"session not found: {session_id}") from exc
+    if not result.get("ok"):
+        raise HTTPException(status_code=400, detail=result)
+    return result

@@ -511,6 +511,169 @@ class PostgresJsonStore:
     def delete_upload(self, tenant_id: str, upload_id: str) -> None:
         self.execute(f"DELETE FROM {self.schema}.uploads WHERE tenant_id = %s AND upload_id = %s", [tenant_id, upload_id])
 
+    def upsert_raw_conversation(self, tenant_id: str, conversation: dict[str, Any]) -> None:
+        conversation_id = str(conversation.get("conversation_id") or conversation.get("id") or "")
+        if not conversation_id:
+            raise ValueError("conversation_id is required")
+        self.execute(
+            f"""
+            INSERT INTO {self.schema}.raw_conversations
+              (tenant_id, conversation_id, conversation_type, target_name, display_name, status, learning_enabled, payload, updated_at)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, now())
+            ON CONFLICT (conversation_id)
+            DO UPDATE SET
+              conversation_type = EXCLUDED.conversation_type,
+              target_name = EXCLUDED.target_name,
+              display_name = EXCLUDED.display_name,
+              status = EXCLUDED.status,
+              learning_enabled = EXCLUDED.learning_enabled,
+              payload = EXCLUDED.payload,
+              updated_at = now()
+            """,
+            [
+                tenant_id,
+                conversation_id,
+                conversation.get("conversation_type") or "unknown",
+                conversation.get("target_name") or "",
+                conversation.get("display_name") or conversation.get("target_name") or "",
+                conversation.get("status") or "active",
+                conversation.get("learning_enabled", True) is not False,
+                self.jsonb(conversation),
+            ],
+        )
+
+    def list_raw_conversations(self, tenant_id: str, *, conversation_type: str = "", status: str = "all") -> list[dict[str, Any]]:
+        filters = ["tenant_id = %s"]
+        params: list[Any] = [tenant_id]
+        if conversation_type:
+            filters.append("conversation_type = %s")
+            params.append(conversation_type)
+        if status and status != "all":
+            filters.append("status = %s")
+            params.append(status)
+        rows = self.fetchall(
+            f"""
+            SELECT payload
+            FROM {self.schema}.raw_conversations
+            WHERE {" AND ".join(filters)}
+            ORDER BY updated_at DESC, display_name ASC
+            """,
+            params,
+        )
+        return [row["payload"] for row in rows]
+
+    def get_raw_message_by_dedupe(self, tenant_id: str, dedupe_key: str) -> dict[str, Any] | None:
+        row = self.fetchone(
+            f"SELECT payload FROM {self.schema}.raw_messages WHERE tenant_id = %s AND dedupe_key = %s",
+            [tenant_id, dedupe_key],
+        )
+        return row["payload"] if row else None
+
+    def upsert_raw_message(self, tenant_id: str, message: dict[str, Any]) -> None:
+        raw_message_id = str(message.get("raw_message_id") or "")
+        dedupe_key = str(message.get("dedupe_key") or "")
+        if not raw_message_id or not dedupe_key:
+            raise ValueError("raw_message_id and dedupe_key are required")
+        self.execute(
+            f"""
+            INSERT INTO {self.schema}.raw_messages
+              (tenant_id, raw_message_id, conversation_id, dedupe_key, message_id, sender, sender_role,
+               content_type, content, message_time, learning_enabled, payload, observed_at, updated_at)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, COALESCE(%s::timestamptz, now()), now())
+            ON CONFLICT (tenant_id, dedupe_key)
+            DO UPDATE SET
+              payload = EXCLUDED.payload,
+              learning_enabled = EXCLUDED.learning_enabled,
+              updated_at = now()
+            """,
+            [
+                tenant_id,
+                raw_message_id,
+                message.get("conversation_id") or "",
+                dedupe_key,
+                message.get("message_id") or "",
+                message.get("sender") or "",
+                message.get("sender_role") or "unknown",
+                message.get("content_type") or "text",
+                message.get("content") or "",
+                message.get("message_time") or "",
+                message.get("learning_enabled", True) is not False,
+                self.jsonb(message),
+                message.get("observed_at") or None,
+            ],
+        )
+
+    def list_raw_messages(
+        self,
+        tenant_id: str,
+        *,
+        conversation_id: str = "",
+        query: str = "",
+        limit: int = 100,
+    ) -> list[dict[str, Any]]:
+        filters = ["tenant_id = %s"]
+        params: list[Any] = [tenant_id]
+        if conversation_id:
+            filters.append("conversation_id = %s")
+            params.append(conversation_id)
+        if query:
+            filters.append("content ILIKE %s")
+            params.append(f"%{query}%")
+        params.append(max(1, min(int(limit or 100), 500)))
+        rows = self.fetchall(
+            f"""
+            SELECT payload
+            FROM {self.schema}.raw_messages
+            WHERE {" AND ".join(filters)}
+            ORDER BY observed_at DESC, raw_message_id DESC
+            LIMIT %s
+            """,
+            params,
+        )
+        return [row["payload"] for row in rows]
+
+    def upsert_raw_message_batch(self, tenant_id: str, batch: dict[str, Any]) -> None:
+        batch_id = str(batch.get("batch_id") or "")
+        if not batch_id:
+            raise ValueError("batch_id is required")
+        self.execute(
+            f"""
+            INSERT INTO {self.schema}.raw_message_batches
+              (tenant_id, batch_id, conversation_id, reason, message_ids, payload, created_at)
+            VALUES (%s, %s, %s, %s, %s, %s, COALESCE(%s::timestamptz, now()))
+            ON CONFLICT (batch_id)
+            DO UPDATE SET payload = EXCLUDED.payload
+            """,
+            [
+                tenant_id,
+                batch_id,
+                batch.get("conversation_id") or "",
+                batch.get("reason") or "",
+                self.jsonb(batch.get("message_ids", []) or []),
+                self.jsonb(batch),
+                batch.get("created_at") or None,
+            ],
+        )
+
+    def list_raw_message_batches(self, tenant_id: str, *, conversation_id: str = "", limit: int = 100) -> list[dict[str, Any]]:
+        filters = ["tenant_id = %s"]
+        params: list[Any] = [tenant_id]
+        if conversation_id:
+            filters.append("conversation_id = %s")
+            params.append(conversation_id)
+        params.append(max(1, min(int(limit or 100), 500)))
+        rows = self.fetchall(
+            f"""
+            SELECT payload
+            FROM {self.schema}.raw_message_batches
+            WHERE {" AND ".join(filters)}
+            ORDER BY created_at DESC, batch_id DESC
+            LIMIT %s
+            """,
+            params,
+        )
+        return [row["payload"] for row in rows]
+
     def upsert_version(self, tenant_id: str, version: dict[str, Any]) -> None:
         version_id = str(version.get("version_id") or "")
         if not version_id:
@@ -563,6 +726,9 @@ class PostgresJsonStore:
             "knowledge_items": "tenant_id = %s",
             "review_candidates": "tenant_id = %s",
             "uploads": "tenant_id = %s",
+            "raw_conversations": "tenant_id = %s",
+            "raw_messages": "tenant_id = %s",
+            "raw_message_batches": "tenant_id = %s",
             "version_snapshots": "tenant_id = %s",
             "rag_sources": "tenant_id = %s",
             "rag_chunks": "tenant_id = %s",

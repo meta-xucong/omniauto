@@ -19,20 +19,19 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from apps.wechat_ai_customer_service.admin_backend.app import create_app  # noqa: E402
-from apps.wechat_ai_customer_service.knowledge_paths import SHARED_KNOWLEDGE_ROOT  # noqa: E402
+from apps.wechat_ai_customer_service.auth import AuthSession, AuthUser, Role  # noqa: E402
 
 
-TEST_ITEM_ID = "codex_shared_public_test"
 _PASSWORD_OVERRIDES: dict[str, str] = {}
 
 
 def main() -> int:
     old_env = snapshot_env()
     cleanup_test_root()
-    cleanup_test_item()
     try:
         os.environ["WECHAT_AUTH_REQUIRED"] = "1"
         os.environ.pop("WECHAT_VPS_BASE_URL", None)
+        os.environ["WECHAT_VPS_AUTO_DISCOVER"] = "0"
         os.environ["WECHAT_LOCAL_SESSION_PATH"] = str(TEST_ROOT / "sessions.json")
         os.environ["WECHAT_LOCAL_ACCOUNTS_STATE_PATH"] = str(TEST_ROOT / "local_accounts.json")
         os.environ["WECHAT_LOCAL_AUTH_CHALLENGE_PATH"] = str(TEST_ROOT / "local_challenges.json")
@@ -57,7 +56,6 @@ def main() -> int:
                 results.append({"name": check.__name__, "ok": False, "error": repr(exc)})
                 break
     finally:
-        cleanup_test_item()
         restore_env(old_env)
     failures = [item for item in results if not item.get("ok")]
     print(json.dumps({"ok": not failures, "count": len(results), "failures": failures, "results": results}, ensure_ascii=False, indent=2))
@@ -73,16 +71,13 @@ def check_login_shell_present(client: TestClient) -> None:
     assert_true('id="local-login-form"' in html, "login form present")
     assert_true('id="local-logout-button"' in html, "logout button present")
     assert_true("退出登录" in html, "logout label is Chinese")
-    assert_true("共享公共知识库" in html, "shared public admin nav present")
-    assert_true("admin-only-nav" in html, "shared nav is admin-only")
+    assert_true("共享公共知识库" not in html, "local client should not expose shared public knowledge library")
+    assert_true('data-view="shared_public"' not in html, "shared public view is not registered in local navigation")
+    assert_true('id="upload-shared-candidates"' not in html, "manual shared candidate upload is hidden from local client")
+    assert_true("/api/shared-knowledge" not in html, "local shared knowledge management API is not advertised")
     assert_true("填入管理员" not in html, "admin shortcut is hidden from customer login")
     assert_true("管理员登录后" not in html, "admin capability is not advertised on customer login")
     assert_true("placeholder=\"请输入账号\"" in html and "placeholder=\"请输入密码\"" in html, "login placeholders are generic")
-    return
-    assert_true("登录客户端" in html, "login screen present")
-    assert_true("共享公共知识库" in html, "shared public admin nav present")
-    assert_true("admin-only-nav" in html, "shared nav is admin-only")
-    assert_true("test01" in html and "1234.abcd" in html, "customer test01 login hint present")
 
 
 def check_test01_customer_login(client: TestClient) -> None:
@@ -104,40 +99,24 @@ def check_customer_register_node_offline(client: TestClient) -> None:
 
 
 def check_shared_public_admin_only(client: TestClient) -> None:
-    admin = login(client, "admin", "1234.abcd")
+    admin = seed_admin_session()
     listed = client.get("/api/shared-knowledge/items", headers=auth_headers(admin))
-    assert_status(listed, 200, "admin shared list")
+    assert_equal(listed.status_code, 404, "local shared public knowledge management API is not registered")
 
     created = client.post(
         "/api/shared-knowledge/items",
         headers=auth_headers(admin),
-        json={"item_id": TEST_ITEM_ID, "category_id": "global_guidelines", "title": "Codex Shared Test", "content": "Shared body"},
+        json={"item_id": "codex_shared_public_test", "category_id": "global_guidelines", "title": "Codex Shared Test", "content": "Shared body"},
     )
-    assert_status(created, 200, "admin create shared item")
-    fetched = client.get(f"/api/shared-knowledge/items/{TEST_ITEM_ID}", headers=auth_headers(admin))
-    assert_status(fetched, 200, "admin get shared item")
-    assert_equal(fetched.json()["item"]["data"]["title"], "Codex Shared Test", "created title")
-
-    updated = client.put(
-        f"/api/shared-knowledge/items/{TEST_ITEM_ID}",
-        headers=auth_headers(admin),
-        json={"title": "Codex Shared Test Updated", "content": "Updated body", "category_id": "global_guidelines"},
-    )
-    assert_status(updated, 200, "admin update shared item")
-    assert_equal(updated.json()["item"]["data"]["title"], "Codex Shared Test Updated", "updated title")
-
-    deleted = client.delete(f"/api/shared-knowledge/items/{TEST_ITEM_ID}", headers=auth_headers(admin))
-    assert_status(deleted, 200, "admin delete shared item")
-    missing = client.get(f"/api/shared-knowledge/items/{TEST_ITEM_ID}", headers=auth_headers(admin))
-    assert_equal(missing.status_code, 404, "deleted shared item missing")
+    assert_equal(created.status_code, 404, "local admin cannot create official shared item through local API")
 
 
 def check_customer_can_upload_candidates_but_not_edit_shared(client: TestClient) -> None:
     customer = login(client, "test01", "1234.abcd")
     blocked = client.get("/api/shared-knowledge/items", headers=auth_headers(customer))
-    assert_equal(blocked.status_code, 403, "customer cannot view admin shared console API")
-    upload = client.post("/api/sync/shared/upload-candidates", headers=auth_headers(customer), json={})
-    assert_status(upload, 200, "customer can submit shared candidates")
+    assert_equal(blocked.status_code, 404, "customer cannot access local shared console API because it is removed")
+    upload = client.post("/api/sync/shared/formal-candidates", headers=auth_headers(customer), json={"use_llm": False})
+    assert_status(upload, 200, "customer can submit formal shared candidates")
     assert_equal(upload.json()["mode"], "offline_unconfigured", "candidate upload is safely skipped offline")
 
 
@@ -201,21 +180,31 @@ def initialized_password(username: str) -> str:
     }.get(username, f"{username}.5678")
 
 
+def seed_admin_session() -> str:
+    token = "local-shared-admin-session"
+    session = AuthSession(
+        session_id=token,
+        token=token,
+        user=AuthUser(user_id="server-admin", role=Role.ADMIN, tenant_ids=("*",), display_name="Admin", username="admin"),
+        active_tenant_id="default",
+        source="vps",
+    )
+    path = Path(os.environ["WECHAT_LOCAL_SESSION_PATH"])
+    path.parent.mkdir(parents=True, exist_ok=True)
+    existing = []
+    if path.exists():
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+            if isinstance(payload, list):
+                existing = payload
+        except json.JSONDecodeError:
+            existing = []
+    path.write_text(json.dumps([*existing, session.to_dict()], ensure_ascii=False, indent=2), encoding="utf-8")
+    return token
+
+
 def auth_headers(token: str) -> dict[str, str]:
     return {"Authorization": f"Bearer {token}", "X-Tenant-ID": "default"}
-
-
-def cleanup_test_item() -> None:
-    target = SHARED_KNOWLEDGE_ROOT / "global_guidelines" / "items" / f"{TEST_ITEM_ID}.json"
-    if not target.exists():
-        return
-    resolved = target.resolve()
-    root = SHARED_KNOWLEDGE_ROOT.resolve()
-    try:
-        resolved.relative_to(root)
-    except ValueError as exc:
-        raise RuntimeError(f"unsafe cleanup target: {resolved}") from exc
-    resolved.unlink()
 
 
 def cleanup_test_root() -> None:
@@ -231,6 +220,7 @@ def cleanup_test_root() -> None:
 ENV_KEYS = (
     "WECHAT_AUTH_REQUIRED",
     "WECHAT_VPS_BASE_URL",
+    "WECHAT_VPS_AUTO_DISCOVER",
     "WECHAT_LOCAL_SESSION_PATH",
     "WECHAT_LOCAL_ACCOUNTS_STATE_PATH",
     "WECHAT_LOCAL_AUTH_CHALLENGE_PATH",

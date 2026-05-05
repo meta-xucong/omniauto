@@ -43,6 +43,10 @@ def main() -> int:
     parser.add_argument("--send", action="store_true", help="Actually send messages to File Transfer Assistant.")
     parser.add_argument("--reset-state", action="store_true", help="Delete this live-regression state/audit/workbook before running.")
     parser.add_argument("--delay-seconds", type=float, default=0.8)
+    parser.add_argument("--start-index", type=int, default=1, help="Run scenarios from this 1-based index.")
+    parser.add_argument("--end-index", type=int, default=None, help="Run scenarios through this 1-based index.")
+    parser.add_argument("--only", action="append", default=[], help="Run only scenario names matching this value. Can be repeated.")
+    parser.add_argument("--resume", action="store_true", help="Skip scenarios that already passed in the result file.")
     args = parser.parse_args()
 
     result = run_live_regression(args)
@@ -55,8 +59,16 @@ def run_live_regression(args: argparse.Namespace) -> dict[str, Any]:
     scenarios = json.loads(args.scenarios.read_text(encoding="utf-8"))
     if args.reset_state:
         reset_runtime_files(config, args.result_path)
+    previous_payload = load_previous_result(args.result_path) if args.resume and not args.reset_state else {}
+    previous_results = list(previous_payload.get("results") or [])
+    completed_names = {
+        str(item.get("name") or "")
+        for item in previous_results
+        if item.get("ok") is True and item.get("name")
+    }
+    selected_scenarios = select_scenarios(scenarios, args)
     rag_seed = seed_configured_rag_sources(config)
-    live_run_id = time.strftime("%Y%m%d%H%M%S")
+    live_run_id = str(previous_payload.get("live_run_id") or time.strftime("%Y%m%d%H%M%S"))
     setattr(args, "_live_run_id", live_run_id)
     setattr(args, "_append_live_run_nonce", bool(config.get("append_live_run_nonce", bool(args.send))))
 
@@ -75,39 +87,100 @@ def run_live_regression(args: argparse.Namespace) -> dict[str, Any]:
         )
     )
 
-    results = []
-    for index, scenario in enumerate(scenarios, start=1):
+    results = previous_results[:]
+    run_count = 0
+    for index, scenario in selected_scenarios:
+        scenario_name = str(scenario.get("name") or f"scenario_{index}")
+        if args.resume and scenario_name in completed_names:
+            continue
+        run_count += 1
         try:
             output = run_scenario(args, scenario, index=index)
             assert_scenario(scenario, output)
-            results.append({"name": scenario.get("name"), "ok": True, "output": compact_output(output)})
+            results.append({"name": scenario_name, "index": index, "ok": True, "output": compact_output(output)})
         except Exception as exc:
             results.append(
                 {
-                    "name": scenario.get("name", f"scenario_{index}"),
+                    "name": scenario_name,
+                    "index": index,
                     "ok": False,
                     "error": repr(exc),
                     "output": compact_output(locals().get("output", {})),
                 }
             )
+            write_result(args.result_path, build_result_payload(args, config, rag_seed, live_run_id, bootstrap, results, selected_scenarios, run_count))
             if args.send:
                 break
+        write_result(args.result_path, build_result_payload(args, config, rag_seed, live_run_id, bootstrap, results, selected_scenarios, run_count))
 
     failures = [item for item in results if not item.get("ok")]
-    payload = {
-        "ok": not failures,
+    payload = build_result_payload(args, config, rag_seed, live_run_id, bootstrap, results, selected_scenarios, run_count)
+    payload["ok"] = not failures
+    write_result(args.result_path, payload)
+    return payload
+
+
+def select_scenarios(scenarios: list[dict[str, Any]], args: argparse.Namespace) -> list[tuple[int, dict[str, Any]]]:
+    start_index = max(1, int(args.start_index or 1))
+    end_index = int(args.end_index) if args.end_index else len(scenarios)
+    only = {str(item) for item in (args.only or []) if str(item).strip()}
+    selected = []
+    for index, scenario in enumerate(scenarios, start=1):
+        if index < start_index or index > end_index:
+            continue
+        name = str(scenario.get("name") or "")
+        if only and name not in only:
+            continue
+        selected.append((index, scenario))
+    return selected
+
+
+def load_previous_result(path: Path) -> dict[str, Any]:
+    resolved = resolve_path(path)
+    if not resolved.exists() or not resolved.is_file():
+        return {}
+    try:
+        return json.loads(resolved.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+
+
+def build_result_payload(
+    args: argparse.Namespace,
+    config: dict[str, Any],
+    rag_seed: dict[str, Any],
+    live_run_id: str,
+    bootstrap: dict[str, Any],
+    results: list[dict[str, Any]],
+    selected_scenarios: list[tuple[int, dict[str, Any]]],
+    run_count: int,
+) -> dict[str, Any]:
+    failures = [item for item in results if not item.get("ok")]
+    selected_names = [str(scenario.get("name") or f"scenario_{index}") for index, scenario in selected_scenarios]
+    recorded_names = {str(item.get("name") or "") for item in results if item.get("name")}
+    passed_names = {str(item.get("name") or "") for item in results if item.get("ok") is True}
+    pending_names = [name for name in selected_names if name not in recorded_names]
+    return {
+        "ok": not failures and not pending_names,
         "send": bool(args.send),
         "config_path": str(args.config),
         "scenario_path": str(args.scenarios),
+        "start_index": int(args.start_index or 1),
+        "end_index": int(args.end_index) if args.end_index else None,
+        "only": list(args.only or []),
+        "resume": bool(args.resume),
         "rag_seed": rag_seed,
         "live_run_id": live_run_id,
         "bootstrap": bootstrap,
+        "selected_count": len(selected_scenarios),
+        "run_count": run_count,
         "count": len(results),
+        "passed_count": len(passed_names),
+        "pending_count": len(pending_names),
+        "pending": pending_names,
         "failures": failures,
         "results": results,
     }
-    write_result(args.result_path, payload)
-    return payload
 
 
 def seed_configured_rag_sources(config: dict[str, Any]) -> dict[str, Any]:

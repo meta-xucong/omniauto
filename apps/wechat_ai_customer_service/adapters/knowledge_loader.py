@@ -24,96 +24,17 @@ if str(WORKFLOWS_ROOT) not in sys.path:
 from evidence_resolver import EvidenceResolver  # noqa: E402
 from knowledge_runtime import KnowledgeRuntime  # noqa: E402
 from rag_layer import RagService  # noqa: E402
+from apps.wechat_ai_customer_service.platform_understanding_rules import (  # noqa: E402
+    intent_group,
+    intent_keywords,
+    map_of_lists,
+    quantity_unit_pattern,
+    rag_terms,
+    string_map,
+)
 
 PRODUCT_SCOPED_CATEGORY_IDS = {"product_faq", "product_rules", "product_explanations"}
-RAG_SOFT_REFERENCE_TAGS = {"scene_product", "spec", "catalog"}
-RAG_AUTHORITY_BLOCK_TAGS = {
-    "quote",
-    "discount",
-    "stock",
-    "shipping",
-    "invoice",
-    "payment",
-    "after_sales",
-    "handoff",
-    "customer_data",
-}
-RAG_SOFT_REFERENCE_CATEGORIES = {"product_explanations", "product_faq", "product_rules", "products"}
-RAG_SOFT_REFERENCE_SOURCE_TYPES = {"product_doc", "manual"}
 RAG_SOFT_REFERENCE_MIN_SCORE = 0.18
-
-INTENT_KEYWORDS: dict[str, list[str]] = {
-    "greeting": ["你好", "您好", "hello", "在吗"],
-    "catalog": ["有哪些商品", "有什么商品", "商品列表", "产品列表", "产品介绍", "商品介绍", "主营产品", "卖什么"],
-    "quote": ["价格", "报价", "多少钱", "费用", "单价", "总价", "一共", "合计", "共多少钱"],
-    "discount": ["优惠", "便宜", "最低", "折扣", "能少", "少点", "还价", "议价", "按", "算吗"],
-    "stock": ["库存", "现货", "有货"],
-    "shipping": ["物流", "快递", "运费", "包邮", "发货", "发到", "发往", "送到", "寄到", "到货", "送货", "上楼", "几天到", "几天", "多久", "大概多久"],
-    "warranty": ["售后", "保修", "质保", "坏了"],
-    "spec": ["规格", "型号", "参数", "尺寸", "供电", "门厚", "开孔", "安装前", "开门方向"],
-    "invoice": ["发票", "开票", "专票", "普票", "税号", "电子发票"],
-    "payment": ["付款", "支付", "对公", "转账", "收款", "银行账号", "账户"],
-    "company": ["你们公司", "公司名称", "公司叫什么", "公司信息", "公司地址", "你们地址", "在哪里", "营业时间", "客服电话"],
-    "after_sales": ["退换", "退货", "换货", "破损", "退款", "赔偿", "投诉"],
-    "customer_data": ["姓名", "电话", "手机", "地址", "收件", "联系人"],
-    "small_talk": ["哈哈", "随便看看", "先看看", "靠谱吗", "可靠", "辛苦", "谢谢", "忙", "客服", "老板", "小姐姐", "小哥"],
-    "scene_product": [
-        "小店",
-        "便利店",
-        "餐饮店",
-        "饮料",
-        "冷藏",
-        "保鲜",
-        "冷柜",
-        "办公室",
-        "员工",
-        "久坐",
-        "腰疼",
-        "净水",
-        "滤瓶",
-        "耗材",
-        "仓库",
-        "快递",
-        "打包",
-        "包装",
-        "搬家",
-        "门锁",
-        "智能锁",
-        "指纹锁",
-        "民宿",
-        "客房",
-    ],
-    "handoff": [
-        "人工",
-        "转人工",
-        "投诉",
-        "退款",
-        "赔偿",
-        "法务",
-        "律师",
-        "合同",
-        "月结",
-        "账期",
-        "赊账",
-        "安装",
-        "上门",
-        "免单",
-        "白送",
-        "先发货",
-        "月底结",
-        "虚开",
-        "伪造",
-        "假发票",
-    ],
-}
-
-POLICY_TAGS = {
-    "company": "company_profile",
-    "invoice": "invoice_policy",
-    "payment": "payment_policy",
-    "shipping": "logistics_policy",
-    "after_sales": "after_sales_policy",
-}
 
 
 def load_json(path: Path) -> dict[str, Any]:
@@ -131,10 +52,10 @@ def detect_intent_tags(text: str) -> list[str]:
     normalized = normalize_text(text)
     tags = {
         tag
-        for tag, keywords in INTENT_KEYWORDS.items()
+        for tag, keywords in intent_keywords().items()
         if any(keyword.lower() in normalized for keyword in keywords)
     }
-    if re.search(r"\d+\s*(台|个|件|把|箱|套|只|kg|公斤|千克)", normalized, re.IGNORECASE):
+    if re.search(rf"\d+\s*({quantity_unit_pattern()})", normalized, re.IGNORECASE):
         tags.add("quote")
         tags.add("product")
     if tags & {"quote", "discount", "stock", "shipping", "warranty", "spec", "scene_product"}:
@@ -262,6 +183,10 @@ def legacy_evidence_from_category_pack(category_pack: dict[str, Any]) -> dict[st
             evidence["style_examples"].append(legacy_style_example(item, evidence_item))
         elif category_id == "global_guidelines":
             evidence["style_examples"].append(legacy_style_example(item, evidence_item))
+        elif category_id == "reply_style":
+            evidence["style_examples"].append(legacy_style_example(item, evidence_item))
+        elif category_id == "risk_control":
+            evidence["faq"].append(legacy_shared_risk_control_faq(item, evidence_item))
         elif category_id in PRODUCT_SCOPED_CATEGORY_IDS:
             scoped = legacy_product_scoped_item(item, evidence_item)
             evidence["product_scoped"].append(scoped)
@@ -281,7 +206,7 @@ def build_rag_runtime_evidence(
     evidence: dict[str, Any],
     context: dict[str, Any],
 ) -> dict[str, Any]:
-    if not should_use_rag(intent_tags, evidence):
+    if not should_use_rag(intent_tags, evidence, text=text):
         return {"enabled": True, "skipped": True, "reason": "structured_evidence_sufficient", "hits": []}
     try:
         rag = RagService().evidence(text, context=context, limit=5)
@@ -322,10 +247,11 @@ def allow_soft_rag_reference(
 
 def rag_can_support_soft_reference(intent_tags: list[str], rag_evidence: dict[str, Any], *, text: str = "") -> bool:
     tag_set = set(intent_tags)
-    blocked_tags = tag_set & RAG_AUTHORITY_BLOCK_TAGS
-    if blocked_tags and not (blocked_tags == {"handoff"} and is_soft_installation_reference(text)):
+    blocked_tags = tag_set & intent_group("rag_authority_block")
+    soft_installation = is_soft_installation_reference(text)
+    if blocked_tags and not (blocked_tags == {"handoff"} and soft_installation):
         return False
-    if not (tag_set & RAG_SOFT_REFERENCE_TAGS):
+    if not soft_installation and not (tag_set & intent_group("rag_soft_reference")):
         return False
     hits = [item for item in rag_evidence.get("hits", []) or [] if isinstance(item, dict)]
     if not hits:
@@ -344,7 +270,7 @@ def rag_hit_can_support_soft_reference(hit: dict[str, Any]) -> bool:
         return False
     category = str(hit.get("category") or "")
     source_type = str(hit.get("source_type") or "")
-    return category in RAG_SOFT_REFERENCE_CATEGORIES or source_type in RAG_SOFT_REFERENCE_SOURCE_TYPES
+    return category in rag_terms("soft_reference_categories") or source_type in rag_terms("soft_reference_source_types")
 
 
 def is_soft_installation_reference(text: str) -> bool:
@@ -358,8 +284,10 @@ def is_soft_installation_reference(text: str) -> bool:
     return any(term in normalized for term in soft_terms)
 
 
-def should_use_rag(intent_tags: list[str], evidence: dict[str, Any]) -> bool:
+def should_use_rag(intent_tags: list[str], evidence: dict[str, Any], *, text: str = "") -> bool:
     tag_set = set(intent_tags)
+    if is_soft_installation_reference(text):
+        return True
     has_business_evidence = any(evidence.get(key) for key in ("products", "faq", "policies", "product_scoped"))
     if not has_business_evidence:
         return True
@@ -415,6 +343,8 @@ def legacy_policy_faq(item: dict[str, Any], evidence_item: dict[str, Any]) -> di
     needs_handoff = bool(explicit_requires_handoff or evidence_item.get("requires_handoff", False) or not auto_reply_allowed)
     return {
         "intent": str(item.get("id") or data.get("policy_type") or ""),
+        "policy_type": str(data.get("policy_type") or ""),
+        "matched_fields": list(evidence_item.get("matched_fields", []) or []),
         "priority": 100 if needs_handoff else 50,
         "matched_keywords": list(data.get("keywords", []) or []),
         "answer": data.get("answer", ""),
@@ -430,6 +360,8 @@ def legacy_policy_key(data: dict[str, Any], item_id: str) -> str:
         return item_id.removesuffix("_details")
     policy_type = str(data.get("policy_type") or "")
     mapping = {
+        "catalog": "catalog_policy",
+        "product_catalog": "catalog_policy",
         "company": "company_profile",
         "invoice": "invoice_policy",
         "payment": "payment_policy",
@@ -458,6 +390,20 @@ def legacy_style_example(item: dict[str, Any], evidence_item: dict[str, Any]) ->
         "intent_tags": data.get("intent_tags", []) or [],
         "tone_tags": data.get("tone_tags", []) or [],
         "matched_fields": evidence_item.get("matched_fields", []) or [],
+    }
+
+
+def legacy_shared_risk_control_faq(item: dict[str, Any], evidence_item: dict[str, Any]) -> dict[str, Any]:
+    data = item.get("data", {}) or {}
+    return {
+        "intent": str(item.get("id") or data.get("title") or "shared_risk_control"),
+        "priority": 100,
+        "matched_keywords": list(data.get("keywords", []) or []),
+        "answer": data.get("guideline_text") or data.get("answer") or data.get("content") or "",
+        "needs_handoff": True,
+        "auto_reply_allowed": False,
+        "operator_alert": True,
+        "reason": data.get("handoff_reason") or evidence_item.get("handoff_reason") or "shared_risk_control",
     }
 
 
@@ -608,20 +554,13 @@ def select_faq(knowledge: dict[str, Any], normalized_text: str, intent_tags: lis
 def faq_matches_tags(intent: str, tag_set: set[str]) -> bool:
     if intent in tag_set:
         return True
-    mapped = {
-        "company_profile": "company",
-        "company_qualification": "company",
-        "logistics": "shipping",
-        "discount_general": "discount",
-        "manual_required": "handoff",
-        "contract": "handoff",
-    }
+    mapped = string_map("policy_type_to_intent")
     return mapped.get(intent) in tag_set
 
 
 def select_policies(knowledge: dict[str, Any], intent_tags: list[str]) -> dict[str, Any]:
     policies = {}
-    for tag, key in POLICY_TAGS.items():
+    for tag, key in string_map("policy_tags").items():
         if tag in intent_tags and knowledge.get(key):
             policies[key] = knowledge[key]
     return policies
@@ -642,7 +581,7 @@ def build_safety_summary(intent_tags: list[str], evidence: dict[str, Any], text:
     faq_requires_handoff = any(item.get("needs_handoff") for item in evidence.get("faq", []) or [])
     discount_check = evaluate_discount_request(text, evidence)
     must_handoff = bool(tag_set & {"handoff"} or faq_requires_handoff)
-    has_business_evidence = any(evidence.get(key) for key in ("products", "faq", "policies"))
+    has_business_evidence = has_authoritative_business_evidence(intent_tags, evidence)
     reasons = []
     if "handoff" in tag_set:
         reasons.append("handoff_intent_detected")
@@ -665,6 +604,62 @@ def build_safety_summary(intent_tags: list[str], evidence: dict[str, Any], text:
         "allowed_auto_reply": not must_handoff,
         "discount_check": discount_check,
     }
+
+
+def has_authoritative_business_evidence(intent_tags: list[str], evidence: dict[str, Any]) -> bool:
+    tag_set = set(intent_tags)
+    if evidence.get("products") or evidence.get("product_scoped"):
+        return True
+
+    for policy_key in (evidence.get("policies", {}) or {}).keys():
+        if policy_key_matches_intent(str(policy_key), tag_set):
+            return True
+
+    for faq in evidence.get("faq", []) or []:
+        if not isinstance(faq, dict):
+            continue
+        if faq.get("needs_handoff") or faq.get("auto_reply_allowed") is False:
+            return True
+        matched_fields = {str(value).lower() for value in faq.get("matched_fields", []) or []}
+        if matched_fields & {"keywords", "title", "question", "customer_message"}:
+            return True
+        if policy_type_matches_intent(str(faq.get("policy_type") or ""), tag_set):
+            return True
+        if policy_key_matches_intent(str(faq.get("intent") or ""), tag_set):
+            return True
+        if faq_matches_tags(str(faq.get("intent") or ""), tag_set):
+            return True
+    return False
+
+
+def policy_type_matches_intent(policy_type: str, tag_set: set[str]) -> bool:
+    type_tags = {key: set(values) for key, values in map_of_lists("policy_type_tags").items()}
+    tags = type_tags.get(policy_type.strip().lower())
+    return bool(tags and tags & tag_set)
+
+
+def policy_key_matches_intent(policy_key: str, tag_set: set[str]) -> bool:
+    key = policy_key.strip().lower()
+    if not key:
+        return False
+    key_tags = {key: set(values) for key, values in map_of_lists("policy_key_tags").items()}
+    if key in key_tags:
+        return bool(key_tags[key] & tag_set)
+    if any(fragment in key for fragment in ("company", "profile", "address")):
+        return "company" in tag_set
+    if any(fragment in key for fragment in ("invoice", "tax", "fapiao")):
+        return "invoice" in tag_set
+    if any(fragment in key for fragment in ("payment", "bank", "account")):
+        return "payment" in tag_set
+    if any(fragment in key for fragment in ("logistics", "shipping", "delivery", "free_shipping")):
+        return bool({"shipping", "discount"} & tag_set)
+    if any(fragment in key for fragment in ("after_sales", "warranty", "refund")):
+        return bool({"after_sales", "warranty"} & tag_set)
+    if any(fragment in key for fragment in ("discount", "promo", "coupon")):
+        return bool({"discount", "shipping"} & tag_set)
+    if any(fragment in key for fragment in ("contract", "manual", "handoff")):
+        return "handoff" in tag_set
+    return False
 
 
 def sanitize_context(context: dict[str, Any]) -> dict[str, Any]:
@@ -745,7 +740,7 @@ def eligible_unit_price(product: dict[str, Any], quantity: int | None) -> float 
 
 
 def extract_quantity(text: str) -> int | None:
-    match = re.search(r"(\d+)\s*(台|个|件|把|箱|套|只|kg|公斤|千克)", text, re.IGNORECASE)
+    match = re.search(rf"(\d+)\s*({quantity_unit_pattern()})", text, re.IGNORECASE)
     if not match:
         return None
     return int(match.group(1))
@@ -754,8 +749,8 @@ def extract_quantity(text: str) -> int | None:
 def extract_requested_unit_price(text: str) -> float | None:
     patterns = [
         r"按\s*(\d+(?:\.\d+)?)\s*(?:元|块|块钱)?",
-        r"每\s*(?:台|个|件|把|箱|套|只)\s*(\d+(?:\.\d+)?)\s*(?:元|块|块钱)?",
-        r"(\d+(?:\.\d+)?)\s*(?:元|块|块钱)\s*(?:每|/)?\s*(?:台|个|件|把|箱|套|只)",
+        rf"每\s*(?:{quantity_unit_pattern()})\s*(\d+(?:\.\d+)?)\s*(?:元|块|块钱)?",
+        rf"(\d+(?:\.\d+)?)\s*(?:元|块|块钱)\s*(?:每|/)?\s*(?:{quantity_unit_pattern()})",
     ]
     for pattern in patterns:
         match = re.search(pattern, text, re.IGNORECASE)
