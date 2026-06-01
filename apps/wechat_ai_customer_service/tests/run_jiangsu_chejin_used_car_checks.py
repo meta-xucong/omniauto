@@ -713,7 +713,8 @@ def check_customer_service_matrix(token: str) -> dict[str, Any]:
     cases.append(run_service_case(config, rules, target, state, "cs-04", "思域首付三成月供大概多少，贷款能不能包过？", expect_action="handoff_sent", expect_handoff=True))
     cases.append(run_service_case(config, rules, target, state, "cs-05", "我有一台老朗逸想置换", expect_action="sent", expect_contains="估"))
     cases.append(run_service_case(config, rules, target, state, "cs-08", "你保证无事故吗，不对就赔我？", expect_action="handoff_sent", expect_handoff=True))
-    cases.append(run_service_case(config, rules, target, state, "cs-11", "今天天气怎么样，顺便讲个笑话", expect_action="handoff_sent", expect_handoff=True))
+    # 当前策略：对完全无关话题优先友好回应后软转题，不强制直接转人工。
+    cases.append(run_service_case(config, rules, target, state, "cs-11", "今天天气怎么样，顺便讲个笑话", expect_action="sent", expect_handoff=False, expect_contains="看车"))
 
     data_state: dict[str, Any] = {"version": 1, "targets": {}}
     incomplete = run_service_case(
@@ -733,9 +734,10 @@ def check_customer_service_matrix(token: str) -> dict[str, Any]:
         data_state,
         "cs-06",
         "姓名：张先生\n电话：13900001111\n预算：8万\n车型：凯美瑞或思域\n到店时间：明天下午",
-        expect_action="handoff_sent",
+        # 当前策略：资料齐全后允许客服先确认并继续跟进，不强制转人工。
+        expect_action="sent",
         expect_contains="记",
-        expect_handoff=True,
+        expect_handoff=False,
         write_data=True,
     )
     cases.extend([incomplete, complete])

@@ -325,6 +325,79 @@ class RecorderModuleAssignmentService:
         bindings.sort(key=lambda item: str(item.get("updated_at") or ""), reverse=True)
         return bindings
 
+    def local_sync_snapshot(self, *, tenant_id: str, user_id: str = "") -> dict[str, Any]:
+        tenant = active_tenant_id(tenant_id)
+        state = self.store.read()
+        modules = self.list_modules(include_inactive=True)
+        bindings = self.list_bindings()
+
+        resolved_user_ids: set[str] = set()
+        normalized_user = str(user_id or "").strip()
+        if normalized_user:
+            resolved_user_ids.add(normalized_user)
+        tenant_customer = customer_user_by_tenant(state, tenant)
+        if isinstance(tenant_customer, dict):
+            customer_user_id = str(tenant_customer.get("user_id") or "").strip()
+            if customer_user_id:
+                resolved_user_ids.add(customer_user_id)
+
+        filtered: list[dict[str, Any]] = []
+        for item in bindings:
+            scope_type = str(item.get("scope_type") or "").strip().lower()
+            if scope_type == "global":
+                filtered.append(item)
+                continue
+            if scope_type == "tenant":
+                scope_id = str(item.get("scope_id") or "").strip()
+                binding_tenant = str(item.get("tenant_id") or "").strip()
+                if scope_id == tenant or (binding_tenant and binding_tenant == tenant):
+                    filtered.append(item)
+                continue
+            if scope_type == "user":
+                scope_id = str(item.get("scope_id") or "").strip()
+                binding_user_id = str(item.get("user_id") or "").strip()
+                binding_tenant = str(item.get("tenant_id") or "").strip()
+                tenant_matches = not binding_tenant or binding_tenant == tenant
+                user_matches = scope_id in resolved_user_ids or binding_user_id in resolved_user_ids
+                if tenant_matches and user_matches:
+                    filtered.append(item)
+                continue
+
+        if not any(str(item.get("scope_type") or "") == "tenant" and str(item.get("scope_id") or "") == tenant for item in filtered):
+            inferred_module = infer_default_module_for_tenant(state, tenant_id=tenant, modules=modules)
+            if inferred_module:
+                filtered.append(
+                    {
+                        "binding_id": f"auto_tenant_{tenant}",
+                        "scope_type": "tenant",
+                        "scope_id": tenant,
+                        "tenant_id": tenant,
+                        "user_id": "",
+                        "module_key": inferred_module,
+                        "enabled": True,
+                        "created_at": now_iso(),
+                        "updated_at": now_iso(),
+                        "synthetic": True,
+                    }
+                )
+
+        fingerprint_payload = {
+            "tenant_id": tenant,
+            "resolved_user_ids": sorted(resolved_user_ids),
+            "module_keys": [str(item.get("module_key") or "") for item in modules],
+            "binding_ids": [str(item.get("binding_id") or "") for item in filtered],
+        }
+        snapshot_version = "recorder_sync_" + stable_digest(json.dumps(fingerprint_payload, ensure_ascii=False, sort_keys=True), 20)
+        return {
+            "tenant_id": tenant,
+            "request_user_id": normalized_user,
+            "resolved_user_ids": sorted(resolved_user_ids),
+            "snapshot_version": snapshot_version,
+            "modules": modules,
+            "bindings": filtered,
+            "generated_at": now_iso(),
+        }
+
     def upsert_binding(self, payload: dict[str, Any], *, actor: AuthSession) -> dict[str, Any]:
         scope_type = str(payload.get("scope_type") or "").strip().lower()
         if scope_type not in {"user", "tenant", "global"}:
@@ -2167,6 +2240,23 @@ def ensure_tenant_industry_bindings(state: dict[str, Any]) -> None:
         resolved = resolve_tenant_industry_id(str(tenant_id), tenant_record=record, tenant_metadata=metadata)
         record["industry_id"] = resolved
         record["metadata"] = {**metadata, "industry_id": resolved}
+
+
+def infer_default_module_for_tenant(state: dict[str, Any], *, tenant_id: str, modules: list[dict[str, Any]]) -> str:
+    active_module_keys = {
+        str(item.get("module_key") or "")
+        for item in modules
+        if isinstance(item, dict) and str(item.get("status") or "active") == "active"
+    }
+    if not active_module_keys:
+        return ""
+    tenant_record = state.get("tenants", {}).get(tenant_id)
+    tenant_metadata = tenant_record.get("metadata") if isinstance(tenant_record, dict) and isinstance(tenant_record.get("metadata"), dict) else {}
+    industry_id = resolve_tenant_industry_id(tenant_id, tenant_record=tenant_record if isinstance(tenant_record, dict) else None, tenant_metadata=tenant_metadata)
+    preferred = "order_sheet_lab_v1" if industry_id == "lab_instruments" else "raw_message_log_v1"
+    if preferred in active_module_keys:
+        return preferred
+    return sorted(active_module_keys)[0]
 
 
 def customer_username_for_tenant(state: dict[str, Any], tenant_id: str) -> str:

@@ -115,9 +115,9 @@ RPA_HUMANIZED_SEND_DEFAULTS = {
     "fast_send_confirmation_enabled": True,
     "send_trigger_mode": "enter_only",
     "send_input_confirm_attempts": 3,
-    "send_rate_min_interval_seconds": 30,
+    "send_rate_min_interval_seconds": 0,
     "send_rate_burst_window_seconds": 600,
-    "send_rate_burst_limit": 5,
+    "send_rate_burst_limit": 20,
 }
 OPERATOR_GUARD_DEFAULTS = {
     "enabled": False,
@@ -565,23 +565,26 @@ def load_rpa_humanized_send_settings(config_path: Path) -> dict[str, Any]:
         os.getenv("WECHAT_WIN32_OCR_SEND_INPUT_CONFIRM_ATTEMPTS"),
         int(settings.get("send_input_confirm_attempts") or RPA_HUMANIZED_SEND_DEFAULTS["send_input_confirm_attempts"]),
     )
+    configured_min_interval = settings.get("send_rate_min_interval_seconds")
+    if configured_min_interval in (None, ""):
+        configured_min_interval = RPA_HUMANIZED_SEND_DEFAULTS["send_rate_min_interval_seconds"]
     settings["send_rate_min_interval_seconds"] = non_negative_int(
         os.getenv("WECHAT_WIN32_OCR_SEND_MIN_INTERVAL_SECONDS"),
-        int(
-            settings.get("send_rate_min_interval_seconds")
-            or RPA_HUMANIZED_SEND_DEFAULTS["send_rate_min_interval_seconds"]
-        ),
+        int(configured_min_interval),
     )
+    configured_burst_window = settings.get("send_rate_burst_window_seconds")
+    if configured_burst_window in (None, ""):
+        configured_burst_window = RPA_HUMANIZED_SEND_DEFAULTS["send_rate_burst_window_seconds"]
     settings["send_rate_burst_window_seconds"] = positive_int(
         os.getenv("WECHAT_WIN32_OCR_SEND_BURST_WINDOW_SECONDS"),
-        int(
-            settings.get("send_rate_burst_window_seconds")
-            or RPA_HUMANIZED_SEND_DEFAULTS["send_rate_burst_window_seconds"]
-        ),
+        int(configured_burst_window),
     )
+    configured_burst_limit = settings.get("send_rate_burst_limit")
+    if configured_burst_limit in (None, ""):
+        configured_burst_limit = RPA_HUMANIZED_SEND_DEFAULTS["send_rate_burst_limit"]
     settings["send_rate_burst_limit"] = positive_int(
         os.getenv("WECHAT_WIN32_OCR_SEND_BURST_LIMIT"),
-        int(settings.get("send_rate_burst_limit") or RPA_HUMANIZED_SEND_DEFAULTS["send_rate_burst_limit"]),
+        int(configured_burst_limit),
     )
     return settings
 
@@ -725,6 +728,13 @@ def apply_rpa_humanized_send_env(env: dict[str, str], settings: dict[str, Any]) 
         else:
             merged[env_name] = str(value)
     return merged
+
+
+def apply_rpa_humanized_send_runtime_env(settings: dict[str, Any]) -> None:
+    """Keep in-process scheduler sends consistent with listener subprocess env."""
+    runtime_env = apply_rpa_humanized_send_env({}, settings)
+    for env_name, value in runtime_env.items():
+        os.environ[env_name] = str(value)
 
 
 def normalize_operator_guard_settings(settings: dict[str, Any] | None) -> dict[str, Any]:
@@ -1611,6 +1621,9 @@ def run_interactive_rpa_calibration(
     probe_env["WECHAT_WIN32_OCR_PASSIVE_PROBE"] = "0"
     probe_env["WECHAT_WIN32_OCR_WINDOW_NORMALIZE"] = "1"
     probe_env["WECHAT_WIN32_OCR_QUICK_LOGIN_AUTO_ENTER"] = "0"
+    probe_env["WECHAT_WIN32_OCR_AGGRESSIVE_FOCUS"] = "1"
+    probe_env["WECHAT_WIN32_OCR_ATTACH_THREAD_INPUT"] = "1"
+    probe_env["WECHAT_WIN32_OCR_ACTIVATE_DEBOUNCE_SECONDS"] = "0"
     command = [str(python_bin), str(WIN32_OCR_SIDECAR_SCRIPT), "status"]
     process = subprocess.Popen(
         command,
@@ -1634,7 +1647,10 @@ def run_interactive_rpa_calibration(
     payload = parse_last_json(stdout)
     if not isinstance(payload, dict):
         payload = {}
-    ok = bool(payload.get("ok")) and bool(payload.get("online")) and not timed_out
+    focus_guard = payload.get("focus_guard") if isinstance(payload.get("focus_guard"), dict) else {}
+    focus_reason = str(focus_guard.get("reason") or "")
+    focus_ok = bool(focus_guard.get("ok")) and focus_reason in {"foreground_matches_target", "foreground_root_matches_target"}
+    ok = bool(payload.get("ok")) and bool(payload.get("online")) and not timed_out and focus_ok
     return {
         "attempted": True,
         "ok": ok,
@@ -1643,6 +1659,8 @@ def run_interactive_rpa_calibration(
         "command": command,
         "calibration_reason": reason,
         "status_payload": payload,
+        "focus_guard": focus_guard,
+        "focus_ok": focus_ok,
         "stderr_tail": stderr[-600:],
         "stdout_tail": stdout[-600:],
     }
@@ -1927,6 +1945,7 @@ def main() -> int:
     env["PYTHONIOENCODING"] = "utf-8"
     humanized_send_settings = load_rpa_humanized_send_settings(config_path)
     env = apply_rpa_humanized_send_env(env, humanized_send_settings)
+    apply_rpa_humanized_send_runtime_env(humanized_send_settings)
     log_path = runtime_log_path(tenant_id)
     log_path.parent.mkdir(parents=True, exist_ok=True)
     phase_log_path = workflow_phase_log_path(tenant_id)
@@ -2227,6 +2246,7 @@ def main() -> int:
         startup_stop = _interactive_calibration_or_stop("startup")
         if startup_stop is not None:
             return startup_stop
+    fast_followup_ticks_remaining = 0
     while True:
         if operator_guard_enabled:
             hotkey_label = str(operator_settings.get("control_hotkey") or OPERATOR_GUARD_DEFAULTS["control_hotkey"]).upper()
@@ -2461,11 +2481,17 @@ def main() -> int:
             )
         duration = round(time.time() - started, 2)
         summary = summarize_listener_result(result) if isinstance(result, dict) else {}
+        scheduler_tick_activity = summarize_scheduler_tick_activity(result if isinstance(result, dict) else None)
+        if scheduler_tick_activity.get("urgent_followup"):
+            fast_followup_ticks_remaining = max(fast_followup_ticks_remaining, 2)
         if isinstance(result, dict) and result.get("scheduler_enabled"):
             scheduler_summary = result.get("summary") if isinstance(result.get("summary"), dict) else {}
             summary["scheduler_enabled"] = True
             summary["scheduler_summary"] = scheduler_summary
             summary["scheduler_active_session_signals"] = result.get("active_session_signals", [])
+            summary["scheduler_loop_busy"] = bool(scheduler_tick_activity.get("busy"))
+            summary["scheduler_loop_urgent_followup"] = bool(scheduler_tick_activity.get("urgent_followup"))
+            summary["scheduler_fast_followup_ticks_remaining"] = int(fast_followup_ticks_remaining)
         target_guard_verdict = evaluate_runtime_target_guard(
             result if isinstance(result, dict) else {},
             settings=runtime_target_guard_settings,
@@ -2589,10 +2615,28 @@ def main() -> int:
             **summary,
         )
         base_sleep = max(0.5, float(args.interval_seconds))
+        busy_sleep = min(base_sleep, 1.15)
+        quick_followup_sleep = min(busy_sleep, 0.68)
+        sleep_mode = "idle"
+        selected_sleep = base_sleep
+        if scheduler_tick_activity.get("busy"):
+            selected_sleep = busy_sleep
+            sleep_mode = "busy"
+        if scheduler_tick_activity.get("scheduler_enabled") and fast_followup_ticks_remaining > 0:
+            selected_sleep = min(selected_sleep, quick_followup_sleep)
+            sleep_mode = "fast_followup"
+            fast_followup_ticks_remaining = max(0, fast_followup_ticks_remaining - 1)
+        elif not scheduler_tick_activity.get("busy"):
+            fast_followup_ticks_remaining = 0
         cooldown_sleep = max(0.0, float(risk_verdict.get("cooldown_seconds") or 0.0))
         jitter_cap = max(0.0, float(risk_verdict.get("loop_jitter_seconds") or 0.0))
-        jitter = random.uniform(0.0, jitter_cap) if jitter_cap > 0 else 0.0
-        time.sleep(base_sleep + cooldown_sleep + jitter)
+        jitter_multiplier = 1.0
+        if sleep_mode == "busy":
+            jitter_multiplier = 0.7
+        elif sleep_mode == "fast_followup":
+            jitter_multiplier = 0.45
+        jitter = random.uniform(0.0, jitter_cap * jitter_multiplier) if jitter_cap > 0 else 0.0
+        time.sleep(selected_sleep + cooldown_sleep + jitter)
 
 
 def run_once(
@@ -2828,6 +2872,35 @@ def parse_last_json(text: str) -> dict:
             return {}
         return payload if isinstance(payload, dict) else {}
     return {}
+
+
+def summarize_scheduler_tick_activity(result: dict[str, Any] | None) -> dict[str, Any]:
+    if not isinstance(result, dict) or not result.get("scheduler_enabled"):
+        return {
+            "scheduler_enabled": False,
+            "busy": False,
+            "urgent_followup": False,
+        }
+    summary = result.get("summary") if isinstance(result.get("summary"), dict) else {}
+    events = [item for item in result.get("events", []) or [] if isinstance(item, dict)]
+    pending = int(summary.get("pending_sessions") or 0)
+    running = int(summary.get("llm_running") or 0)
+    ready = int(summary.get("reply_ready") or 0)
+    sent = int(summary.get("reply_sent") or 0)
+    llm_completed = any(str(item.get("event") or "") == "llm_task_completed" for item in events)
+    send_completed = any(str(item.get("event") or "") == "send_completed" for item in events)
+    send_failed = any(str(item.get("event") or "") == "send_failed" for item in events)
+    busy = bool(pending or running or ready or sent or events)
+    urgent_followup = bool(ready > 0 or llm_completed or send_completed or send_failed)
+    return {
+        "scheduler_enabled": True,
+        "busy": busy,
+        "urgent_followup": urgent_followup,
+        "pending_sessions": pending,
+        "llm_running": running,
+        "reply_ready": ready,
+        "reply_sent": sent,
+    }
 
 
 def status_message_from_result(result: dict, duration: float) -> str:

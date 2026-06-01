@@ -35,6 +35,7 @@ def main() -> int:
         results.append(check_runtime_start_refreshes_stale_bootstrap_guard())
         results.append(check_bootstrap_refresh_targets_are_explicit_and_verified())
         results.append(check_runtime_target_guard_accepts_ascii_escaped_chinese_target())
+        results.append(check_live_safety_guard_auto_syncs_settings_targets())
     finally:
         if old_cloud_required is None:
             os.environ.pop("WECHAT_CLOUD_REQUIRED", None)
@@ -310,6 +311,85 @@ def check_runtime_target_guard_accepts_ascii_escaped_chinese_target() -> dict[st
     assert_equal(verdict.get("stop"), False, "target guard should not stop for allowed Chinese target")
     assert_equal(verdict.get("ok"), True, "target guard should accept allowed Chinese target")
     return {"name": "check_runtime_target_guard_accepts_ascii_escaped_chinese_target", "ok": True}
+
+
+def check_live_safety_guard_auto_syncs_settings_targets() -> dict[str, Any]:
+    config_payload = {
+        "live_safety_guard": {
+            "enabled": True,
+            "allowed_targets": ["许聪"],
+            "require_exact_targets": True,
+            "disable_respond_all_unread_sessions": True,
+            "require_recent_bootstrap": False,
+        },
+        "targets": [{"name": "许聪", "enabled": True}],
+    }
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        config_path = Path(tmp_dir) / "listener_config.json"
+        config_path.write_text(json.dumps(config_payload, ensure_ascii=False, indent=2), encoding="utf-8")
+        runtime = CustomerServiceRuntime(tenant_id="default")
+        settings_payload: dict[str, Any] = {
+            "enabled": True,
+            "reply_mode": "full_auto",
+            "record_messages": True,
+            "auto_learn": False,
+            "use_llm": True,
+            "rag_enabled": True,
+            "data_capture_enabled": True,
+            "handoff_enabled": True,
+            "operator_alert_enabled": True,
+            "identity_guard_enabled": True,
+            "style_adapter_enabled": True,
+            "final_visible_llm_polish_enabled": True,
+            "respond_all_unread_sessions": True,
+            "session_targets_managed": True,
+            "session_targets": [
+                {
+                    "name": "文件传输助手",
+                    "display_name": "文件传输助手",
+                    "enabled": True,
+                    "exact": True,
+                    "conversation_type": "file_transfer",
+                    "source": "discovered",
+                    "updated_at": "2026-05-31T13:50:16",
+                },
+                {
+                    "name": "许聪",
+                    "display_name": "许聪",
+                    "enabled": False,
+                    "exact": True,
+                    "conversation_type": "private",
+                    "source": "discovered",
+                    "updated_at": "2026-05-24T12:44:27",
+                },
+            ],
+        }
+
+        def fake_get(*_args: Any, **_kwargs: Any) -> dict[str, Any]:
+            return json.loads(json.dumps(settings_payload, ensure_ascii=False))
+
+        def fake_save(*args: Any, **_kwargs: Any) -> dict[str, Any]:
+            patch = args[-1] if args else {}
+            settings_payload.update(patch or {})
+            return json.loads(json.dumps(settings_payload, ensure_ascii=False))
+
+        with patch(
+            "apps.wechat_ai_customer_service.admin_backend.services.customer_service_settings.CustomerServiceSettings.get",
+            side_effect=fake_get,
+        ), patch(
+            "apps.wechat_ai_customer_service.admin_backend.services.customer_service_settings.CustomerServiceSettings.save",
+            side_effect=fake_save,
+        ):
+            summary = runtime._validate_live_safety_guard(config_path)
+
+    assert_equal(summary.get("ok"), True, "guard should pass after auto-sync settings targets")
+    sync = summary.get("settings_sync") if isinstance(summary.get("settings_sync"), dict) else {}
+    assert_true(bool(sync.get("changed")), "auto-sync summary should record changes")
+    guard_sync = summary.get("guard_target_sync") if isinstance(summary.get("guard_target_sync"), dict) else {}
+    assert_true(bool(guard_sync.get("changed")), "guard-target sync should align allowed targets from managed settings")
+    effective = set(summary.get("effective_enabled_targets") or [])
+    assert_equal(effective, {"文件传输助手"}, "effective enabled targets should match managed settings selection")
+    return {"name": "check_live_safety_guard_auto_syncs_settings_targets", "ok": True}
 
 
 def assert_equal(actual: Any, expected: Any, message: str) -> None:

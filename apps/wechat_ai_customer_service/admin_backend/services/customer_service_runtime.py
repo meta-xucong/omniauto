@@ -20,6 +20,7 @@ from apps.wechat_ai_customer_service.customer_service_live_safety import (
     CustomerServiceLiveSafetyError,
     assert_customer_service_recent_bootstrap_guard,
     assert_customer_service_live_safety_guard,
+    evaluate_customer_service_live_safety_guard,
 )
 from apps.wechat_ai_customer_service.admin_backend.services.customer_service_settings import CustomerServiceSettings
 from apps.wechat_ai_customer_service.admin_backend.services.wechat_startup_check import run_wechat_startup_self_check
@@ -40,6 +41,11 @@ VOLATILE_WECHAT_STARTUP_DETAILS = {
     "wechat_send_unavailable",
 }
 VOLATILE_WECHAT_STARTUP_MESSAGE_TTL_SECONDS = 45
+CLOUD_GATE_LOCK_MESSAGE_MARKERS = (
+    "云端授权未通过",
+    "无法向服务端注册本地节点",
+    "无法从服务端刷新共享行业知识库",
+)
 
 
 def now_iso() -> str:
@@ -74,6 +80,16 @@ def atomic_write_json(path: Path, payload: Any, *, attempts: int = 10) -> None:
                 temp.unlink()
             except OSError:
                 pass
+            # Cross-process cleanup can momentarily remove the runtime folder.
+            # Recreate parent and retry instead of failing the whole scheduler tick.
+            if isinstance(exc, FileNotFoundError):
+                try:
+                    path.parent.mkdir(parents=True, exist_ok=True)
+                except OSError:
+                    pass
+                if attempt < attempts - 1:
+                    time.sleep(0.03 * (attempt + 1))
+                    continue
             if not transient_write_error(exc) or attempt >= attempts - 1:
                 raise
             time.sleep(0.05 * (attempt + 1))
@@ -197,6 +213,30 @@ def stale_volatile_wechat_startup_failure(status: dict[str, Any], *, now_ts: flo
     return age >= VOLATILE_WECHAT_STARTUP_MESSAGE_TTL_SECONDS
 
 
+def stale_cloud_gate_lock_message(status: dict[str, Any], gate: dict[str, Any]) -> bool:
+    """Hide stale cloud-lock text once the cloud gate has recovered."""
+    if str(status.get("state") or "") != "stopped":
+        return False
+    if not bool((gate or {}).get("ok")):
+        return False
+    message = str(status.get("message") or "").strip()
+    if not message:
+        return False
+    return any(marker in message for marker in CLOUD_GATE_LOCK_MESSAGE_MARKERS)
+
+
+def stale_live_guard_lock_message(*, status: dict[str, Any], guard_blocking_now: bool) -> bool:
+    """Hide stale live-guard startup failure after settings/config no longer violate the guard."""
+    if guard_blocking_now:
+        return False
+    if str(status.get("state") or "") != "stopped":
+        return False
+    message = str(status.get("message") or "").strip()
+    if not message:
+        return False
+    return "live safety guard failed:" in message
+
+
 def summarize_listener_result(result: dict[str, Any]) -> dict[str, Any]:
     events = [item for item in result.get("events", []) or [] if isinstance(item, dict)]
     last_event = events[-1] if events else {}
@@ -270,8 +310,18 @@ class CustomerServiceRuntime:
         if not running:
             previous_state = str(status.get("state") or "")
             previous_message = str(status.get("message") or "").strip()
+            live_guard_stale = stale_live_guard_lock_message(
+                status=status,
+                guard_blocking_now=self._live_guard_blocking_now(),
+            )
             status["state"] = "stopped"
-            if previous_state == "stopped" and previous_message and not stale_volatile_wechat_startup_failure(status):
+            if (
+                previous_state == "stopped"
+                and previous_message
+                and not stale_volatile_wechat_startup_failure(status)
+                and not stale_cloud_gate_lock_message(status, gate)
+                and not live_guard_stale
+            ):
                 status["message"] = previous_message
             else:
                 if previous_message:
@@ -601,6 +651,232 @@ class CustomerServiceRuntime:
         text = value.decode("utf-8", errors="replace") if isinstance(value, bytes) else str(value)
         return text[-limit:]
 
+    @staticmethod
+    def _truthy_flag(value: Any, *, default: bool = False) -> bool:
+        if value is None:
+            return default
+        if isinstance(value, bool):
+            return value
+        return str(value).strip().lower() not in {"0", "false", "no", "off", ""}
+
+    def _synchronize_settings_with_live_guard(
+        self,
+        config: dict[str, Any],
+        *,
+        settings_service: CustomerServiceSettings,
+        settings: dict[str, Any],
+    ) -> tuple[dict[str, Any], dict[str, Any]]:
+        guard = config.get("live_safety_guard")
+        if not isinstance(guard, dict) or not self._truthy_flag(guard.get("enabled"), default=False):
+            return settings, {"changed": False, "reason": "guard_disabled"}
+        raw_allowed_targets = guard.get("allowed_targets") or guard.get("targets") or []
+        allowed_targets = self._dedupe_names(raw_allowed_targets if isinstance(raw_allowed_targets, list) else [])
+        if not allowed_targets:
+            return settings, {"changed": False, "reason": "allowed_targets_missing"}
+        allowed_set = set(allowed_targets)
+        require_exact = self._truthy_flag(guard.get("require_exact_targets"), default=True)
+        disable_respond_all = self._truthy_flag(guard.get("disable_respond_all_unread_sessions"), default=True)
+
+        raw_targets = settings.get("session_targets") if isinstance(settings.get("session_targets"), list) else []
+        by_name: dict[str, dict[str, Any]] = {}
+        for raw in raw_targets:
+            if not isinstance(raw, dict):
+                continue
+            name = str(raw.get("name") or raw.get("target_name") or raw.get("display_name") or "").strip()
+            if not name:
+                continue
+            item = dict(raw)
+            item["name"] = name
+            item["display_name"] = str(item.get("display_name") or name).strip() or name
+            item["exact"] = bool(item.get("exact", True))
+            item["enabled"] = bool(item.get("enabled", False))
+            item["archived"] = bool(item.get("archived", False))
+            item["source"] = str(item.get("source") or "manual").strip() or "manual"
+            item["conversation_type"] = str(item.get("conversation_type") or "unknown").strip() or "unknown"
+            item["updated_at"] = str(item.get("updated_at") or now_iso()).strip() or now_iso()
+            by_name[name] = item
+
+        changed = False
+        inserted_targets: list[str] = []
+        reenabled_targets: list[str] = []
+        disabled_targets: list[str] = []
+        tick = now_iso()
+
+        for name in allowed_targets:
+            item = by_name.get(name)
+            if item is None:
+                by_name[name] = {
+                    "name": name,
+                    "display_name": name,
+                    "enabled": True,
+                    "exact": True,
+                    "archived": False,
+                    "archived_at": "",
+                    "archived_reason": "",
+                    "conversation_type": "unknown",
+                    "source": "guard_sync",
+                    "updated_at": tick,
+                }
+                inserted_targets.append(name)
+                changed = True
+                continue
+            item_changed = False
+            if not bool(item.get("enabled", False)):
+                item["enabled"] = True
+                reenabled_targets.append(name)
+                item_changed = True
+            if bool(item.get("archived", False)):
+                item["archived"] = False
+                item["archived_at"] = ""
+                item["archived_reason"] = ""
+                item_changed = True
+            if not bool(item.get("exact", True)):
+                item["exact"] = True
+                item_changed = True
+            display_name = str(item.get("display_name") or "").strip()
+            if not display_name:
+                item["display_name"] = name
+                item_changed = True
+            if not str(item.get("source") or "").strip():
+                item["source"] = "guard_sync"
+                item_changed = True
+            if item_changed:
+                item["updated_at"] = tick
+                changed = True
+            by_name[name] = item
+
+        if require_exact:
+            for name, item in by_name.items():
+                if name in allowed_set or not bool(item.get("enabled", False)):
+                    continue
+                item["enabled"] = False
+                item["updated_at"] = tick
+                disabled_targets.append(name)
+                changed = True
+
+        patch: dict[str, Any] = {}
+        if not bool(settings.get("session_targets_managed", False)):
+            patch["session_targets_managed"] = True
+            changed = True
+        if disable_respond_all and bool(settings.get("respond_all_unread_sessions", False)):
+            patch["respond_all_unread_sessions"] = False
+            changed = True
+        if not changed:
+            return settings, {"changed": False, "reason": "already_aligned", "allowed_targets": allowed_targets}
+
+        patch["session_targets"] = list(by_name.values())
+        updated = settings_service.save(patch)
+        summary = {
+            "changed": True,
+            "allowed_targets": allowed_targets,
+            "inserted_targets": inserted_targets,
+            "reenabled_targets": reenabled_targets,
+            "disabled_targets": disabled_targets,
+            "respond_all_unread_sessions": bool(updated.get("respond_all_unread_sessions", False)),
+            "session_targets_managed": bool(updated.get("session_targets_managed", False)),
+        }
+        return updated, summary
+
+    @staticmethod
+    def _enabled_managed_session_target_names(settings: dict[str, Any]) -> list[str]:
+        if not bool((settings or {}).get("session_targets_managed", False)):
+            return []
+        names: list[str] = []
+        for raw in (settings or {}).get("session_targets", []) or []:
+            if (
+                not isinstance(raw, dict)
+                or not bool(raw.get("enabled", False))
+                or bool(raw.get("archived", False))
+            ):
+                continue
+            name = str(raw.get("name") or raw.get("target_name") or raw.get("display_name") or "").strip()
+            if name:
+                names.append(name)
+        deduped: list[str] = []
+        seen: set[str] = set()
+        for name in names:
+            if name in seen:
+                continue
+            seen.add(name)
+            deduped.append(name)
+        return deduped
+
+    def _sync_live_guard_allowed_targets_from_settings(
+        self,
+        *,
+        config_path: Path,
+        payload: dict[str, Any],
+        settings: dict[str, Any],
+    ) -> tuple[dict[str, Any], dict[str, Any]]:
+        guard = payload.get("live_safety_guard") if isinstance(payload.get("live_safety_guard"), dict) else {}
+        if not guard or not self._truthy_flag(guard.get("enabled"), default=False):
+            return payload, {"changed": False, "reason": "guard_disabled"}
+        prefer_settings_targets = self._truthy_flag(
+            guard.get("sync_allowed_targets_from_settings"),
+            default=self._truthy_flag(guard.get("customer_experience_first"), default=True),
+        )
+        if not prefer_settings_targets:
+            return payload, {"changed": False, "reason": "guard_settings_sync_disabled"}
+        enabled_targets = self._enabled_managed_session_target_names(settings)
+        if not enabled_targets:
+            return payload, {"changed": False, "reason": "no_enabled_managed_targets"}
+        current_allowed = self._dedupe_names(
+            (guard.get("allowed_targets") or guard.get("targets") or [])
+            if isinstance(guard.get("allowed_targets") or guard.get("targets") or [], list)
+            else []
+        )
+        if current_allowed == enabled_targets:
+            return payload, {"changed": False, "reason": "already_aligned", "allowed_targets": current_allowed}
+
+        updated_payload = dict(payload)
+        updated_guard = dict(guard)
+        updated_guard["allowed_targets"] = list(enabled_targets)
+        updated_guard["targets"] = list(enabled_targets)
+        updated_payload["live_safety_guard"] = updated_guard
+
+        raw_targets = updated_payload.get("targets") if isinstance(updated_payload.get("targets"), list) else []
+        by_name: dict[str, dict[str, Any]] = {}
+        for raw in raw_targets:
+            if not isinstance(raw, dict):
+                continue
+            name = str(raw.get("name") or raw.get("target_name") or "").strip()
+            if not name:
+                continue
+            item = dict(raw)
+            item["name"] = name
+            by_name[name] = item
+        for name in enabled_targets:
+            item = by_name.get(name) or {"name": name}
+            item["name"] = name
+            item["enabled"] = True
+            item["exact"] = True
+            if name != "文件传输助手":
+                item["allow_self_for_test"] = False
+            by_name[name] = item
+        for name, item in by_name.items():
+            if name not in set(enabled_targets):
+                item["enabled"] = False
+        updated_payload["targets"] = sorted(
+            list(by_name.values()),
+            key=lambda item: (0 if bool(item.get("enabled", False)) else 1, str(item.get("name") or "")),
+        )
+
+        write_error = ""
+        try:
+            atomic_write_json(config_path, updated_payload)
+        except OSError as exc:
+            write_error = repr(exc)
+        summary: dict[str, Any] = {
+            "changed": True,
+            "reason": "aligned_from_settings",
+            "allowed_targets": enabled_targets,
+            "previous_allowed_targets": current_allowed,
+            "config_written": not bool(write_error),
+        }
+        if write_error:
+            summary["write_error"] = write_error
+        return updated_payload, summary
+
     def _auto_update_wxauto4(self) -> dict[str, Any]:
         if not wxauto4_module_update_enabled():
             return WxautoPackageManager().auto_update_on_wechat_module_start()
@@ -650,14 +926,60 @@ class CustomerServiceRuntime:
             payload = json.loads(config_path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError):
             return {"enabled": False, "ok": True, "fail_reasons": ["config_unreadable"]}
-        settings = CustomerServiceSettings(tenant_id=self.tenant_id).get()
+        settings_service = CustomerServiceSettings(tenant_id=self.tenant_id)
+        settings = settings_service.get()
+        payload, guard_target_sync = self._sync_live_guard_allowed_targets_from_settings(
+            config_path=config_path,
+            payload=payload,
+            settings=settings,
+        )
+        if guard_target_sync.get("changed"):
+            settings = settings_service.get()
+        settings, sync_summary = self._synchronize_settings_with_live_guard(
+            payload,
+            settings_service=settings_service,
+            settings=settings,
+        )
         summary = assert_customer_service_live_safety_guard(payload, settings=settings)
+        if sync_summary.get("changed"):
+            summary = dict(summary)
+            summary["settings_sync"] = sync_summary
+        if guard_target_sync.get("changed") or guard_target_sync.get("write_error"):
+            summary = dict(summary)
+            summary["guard_target_sync"] = guard_target_sync
         state = self._load_listener_state(payload)
         bootstrap_summary = assert_customer_service_recent_bootstrap_guard(payload, state=state)
         if bootstrap_summary.get("enabled"):
             summary = dict(summary)
             summary["bootstrap_guard"] = bootstrap_summary
         return summary
+
+    def _live_guard_blocking_now(self) -> bool:
+        try:
+            config_path = self._resolve_config_path()
+            payload = json.loads(config_path.read_text(encoding="utf-8"))
+        except (FileNotFoundError, OSError, json.JSONDecodeError):
+            return False
+        if not isinstance(payload, dict):
+            return False
+        settings = CustomerServiceSettings(tenant_id=self.tenant_id).get()
+        guard = payload.get("live_safety_guard") if isinstance(payload.get("live_safety_guard"), dict) else {}
+        if guard and self._truthy_flag(guard.get("enabled"), default=False):
+            prefer_settings_targets = self._truthy_flag(
+                guard.get("sync_allowed_targets_from_settings"),
+                default=self._truthy_flag(guard.get("customer_experience_first"), default=True),
+            )
+            if prefer_settings_targets:
+                enabled_targets = self._enabled_managed_session_target_names(settings)
+                if enabled_targets:
+                    updated_payload = dict(payload)
+                    updated_guard = dict(guard)
+                    updated_guard["allowed_targets"] = list(enabled_targets)
+                    updated_guard["targets"] = list(enabled_targets)
+                    updated_payload["live_safety_guard"] = updated_guard
+                    payload = updated_payload
+        summary = evaluate_customer_service_live_safety_guard(payload, settings=settings)
+        return bool(summary.get("enabled")) and not bool(summary.get("ok"))
 
     def _load_listener_state(self, config: dict[str, Any]) -> dict[str, Any]:
         raw_path = str((config or {}).get("state_path") or "").strip()

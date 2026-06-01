@@ -183,6 +183,18 @@
     "platform_safety_rules_path": "apps/wechat_ai_customer_service/configs/platform_safety_rules.example.json",
     "platform_understanding_rules_path": "apps/wechat_ai_customer_service/configs/platform_understanding_rules.example.json"
   },
+  "product_entity_resolution": {
+    "enabled": true,
+    "provider": "deepseek",
+    "model_tier": "flash",
+    "model": "",
+    "base_url": "",
+    "timeout_seconds": 3,
+    "max_candidates": 12,
+    "min_confidence": 0.72,
+    "temperature": 0.0,
+    "max_tokens": 240
+  },
   "final_visible_llm_polish": {
     "enabled": false,
     "required_for_send": true,
@@ -200,6 +212,30 @@
     "cache_enabled": true,
     "cache_ttl_seconds": 86400,
     "cache_max_entries": 512
+  },
+  "reply_multi_bubble": {
+    "enabled": true,
+    "min_split_chars": 82,
+    "max_segments": 3,
+    "preferred_segment_chars": 54,
+    "max_segment_chars": 84,
+    "min_segment_chars": 22,
+    "three_segment_threshold_chars": 166,
+    "inter_segment_delay_min_ms": 240,
+    "inter_segment_delay_max_ms": 560,
+    "verify_each_segment": false,
+    "retry_on_transient_send_failures": true,
+    "max_transient_retry_per_segment": 1,
+    "transient_retry_delay_min_ms": 850,
+    "transient_retry_delay_max_ms": 1650
+  },
+  "scheduler_freshness": {
+    "enabled": true,
+    "mode": "preview_first",
+    "strict_check_interval_seconds": 180,
+    "strict_check_after_llm_seconds": 90,
+    "strict_check_on_first_send": false,
+    "preview_from_session_list_require_content_match": false
   },
   "data_capture": {
     "enabled": true,

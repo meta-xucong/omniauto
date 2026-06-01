@@ -49,6 +49,7 @@ from listen_and_reply import (  # noqa: E402
     detect_newer_messages_before_send,
     decide_reply_with_data_capture,
     enforce_rpa_reply_safety,
+    ensure_non_empty_customer_visible_reply,
     ensure_data_capture_success_context,
     is_bot_reply_content,
     load_config,
@@ -56,7 +57,9 @@ from listen_and_reply import (  # noqa: E402
     maybe_enrich_messages_with_history,
     plan_message_batch_semantics,
     maybe_apply_llm_reply,
+    maybe_analyze_intent,
     multi_target_change_warmup_delay_seconds,
+    finalize_customer_visible_reply_with_llm,
     parse_targets,
     polish_customer_visible_reply_text,
     process_target,
@@ -65,9 +68,12 @@ from listen_and_reply import (  # noqa: E402
     sanitize_customer_visible_reply_text,
     select_batch,
     select_batch_details,
+    split_reply_prefix,
     should_operator_handoff,
     should_defer_standalone_greeting,
     rpa_reply_content_char_count,
+    send_reply_with_optional_multi_bubble,
+    split_customer_visible_reply_for_multi_bubble,
     _apply_greeting,
 )
 from apps.wechat_ai_customer_service.admin_backend.services.customer_service_settings import CustomerServiceSettings  # noqa: E402
@@ -186,6 +192,68 @@ class InputNotReadyTransportConnector(FakeConnector):
         }
 
 
+class RetryThenSuccessTransportConnector(FakeConnector):
+    def __init__(self, messages: list[dict[str, Any]]) -> None:
+        super().__init__(messages)
+        self.send_calls = 0
+
+    def send_text_and_verify(self, target: str, text: str, exact: bool = True) -> dict[str, Any]:
+        self.send_calls += 1
+        self.sent_texts.append(text)
+        if self.send_calls == 1:
+            return {
+                "ok": False,
+                "verified": False,
+                "target": target,
+                "exact": exact,
+                "text": text,
+                "send": {
+                    "ok": False,
+                    "adapter": "win32_ocr",
+                    "state": "send_rate_limited",
+                    "guard": {"rate": {"wait_seconds": 0.01}},
+                    "error": "rate guard blocked send",
+                },
+            }
+        return {
+            "ok": True,
+            "verified": True,
+            "target": target,
+            "exact": exact,
+            "text": text,
+            "send": {"ok": True, "adapter": "win32_ocr", "state": "sent"},
+            "adapter": "win32_ocr",
+            "state": "sent",
+        }
+
+
+class FinalSegmentVerifyConnector(FakeConnector):
+    def __init__(self, messages: list[dict[str, Any]]) -> None:
+        super().__init__(messages)
+        self.send_calls = 0
+        self.verify_calls = 0
+
+    def send_text(self, target: str, text: str, exact: bool = True) -> dict[str, Any]:
+        self.send_calls += 1
+        self.sent_texts.append(text)
+        return {"ok": True, "adapter": "win32_ocr", "state": "send_win32_rpa"}
+
+    def send_text_and_verify(self, target: str, text: str, exact: bool = True) -> dict[str, Any]:
+        self.verify_calls += 1
+        self.sent_texts.append(text)
+        return {
+            "ok": True,
+            "verified": True,
+            "target": target,
+            "exact": exact,
+            "text": text,
+            "send": {"ok": True, "adapter": "win32_ocr", "state": "send_win32_rpa"},
+            "adapter": "win32_ocr",
+            "state": "send_win32_rpa",
+            "verification_mode": "send_guard_confirmed_fast",
+        }
+
+
 class FallbackTransportConnector(FakeConnector):
     def status(self) -> dict[str, Any]:
         return {"ok": True, "online": True, "adapter": "win32_ocr"}
@@ -200,6 +268,7 @@ def main() -> int:
 def run_checks() -> dict[str, Any]:
     checks = [
         check_configured_bot_prefix_is_skipped,
+        check_empty_or_prefix_only_reply_is_guarded,
         check_continuous_customer_messages_are_batched_with_overflow_guard,
         check_missing_original_batch_is_treated_as_stale_when_new_messages_visible,
         check_freshness_anchor_mode_does_not_scroll_by_default,
@@ -207,7 +276,9 @@ def run_checks() -> dict[str, Any]:
         check_freshness_matches_visible_ocr_fragment_of_original,
         check_history_backfill_uses_connector_rpa_load_more,
         check_anchor_history_does_not_scroll_when_anchor_visible,
+        check_anchor_history_does_not_scroll_when_anchor_visible_but_sender_drifted,
         check_anchor_history_searches_until_anchor_found,
+        check_anchor_history_uses_low_volume_fast_profile_when_single_visible_message,
         check_anchor_history_fallback_preserves_visible_batch_when_load_drops_current,
         check_anchor_history_blocks_when_anchor_not_found,
         check_semantic_batch_planner_groups_split_need,
@@ -223,11 +294,18 @@ def run_checks() -> dict[str, Any]:
         check_auto_reply_disabled_blocks_runtime_send,
         check_customer_service_console_switches_take_effect,
         check_live_safety_guard_enforces_single_allowed_target,
+        check_live_safety_guard_multi_allowed_targets_do_not_starve_secondary_sessions,
         check_rpa_safety_allows_standalone_greeting_by_default,
         check_rpa_safety_defers_standalone_greeting_when_explicitly_enabled,
         check_rpa_safety_caps_visible_reply,
+        check_reply_multi_bubble_splits_long_reply,
+        check_reply_multi_bubble_retries_transient_send_failures,
+        check_reply_multi_bubble_verifies_only_final_segment_by_default,
+        check_reply_multi_bubble_can_verify_each_segment_when_enabled,
         check_identity_guard_setting_controls_ai_disclosure,
         check_identity_guard_controls_handoff_phrase_concealment,
+        check_force_handoff_style_preserves_social_offtopic_redirect,
+        check_social_offtopic_intent_assist_does_not_force_stale_handoff,
         check_contextual_greeting_avoids_repeated_file_transfer_honorific,
         check_concealed_handoff_acknowledges_contact_appointment,
         check_customer_data_handoff_keeps_trade_in_context,
@@ -248,6 +326,7 @@ def run_checks() -> dict[str, Any]:
         check_final_visible_polish_gate_applies_before_normal_send,
         check_final_visible_polish_blocks_unpolished_send_when_required,
         check_final_visible_polish_transient_failure_can_degrade_when_enabled,
+        check_final_visible_polish_fast_path_skips_short_reply,
         check_customer_data_write_allows_soft_handoff_only,
         check_multi_target_iteration_scans_whitelist_even_without_active_changes,
         check_multi_target_default_rpa_low_risk_prefers_active_only,
@@ -295,6 +374,33 @@ def check_configured_bot_prefix_is_skipped() -> None:
         config=config,
     )
     assert_equal([item["id"] for item in batch], ["m-1"], "batch should exclude configured bot prefix")
+
+
+def check_empty_or_prefix_only_reply_is_guarded() -> None:
+    config = load_smoke_config()
+    config.setdefault("reply", {})["prefix"] = "[车金实盘] "
+
+    degraded = ensure_non_empty_customer_visible_reply(
+        "[车金实盘] [车金实盘]",
+        config,
+        combined="什么车况",
+        need_handoff=False,
+    )
+    assert_true(degraded.get("applied"), "prefix-only degraded reply should trigger guard")
+    _, degraded_body = split_reply_prefix(str(degraded.get("reply_text") or ""), config)
+    assert_true(bool(degraded_body.strip()), "guarded normal reply body should not be empty")
+    assert_true(degraded_body.strip() != "[车金实盘]", "guarded normal reply should not keep prefix echo")
+
+    handoff = ensure_non_empty_customer_visible_reply(
+        "[车金实盘]",
+        config,
+        combined="合同怎么开",
+        need_handoff=True,
+    )
+    assert_true(handoff.get("applied"), "empty handoff reply should trigger guard")
+    _, handoff_body = split_reply_prefix(str(handoff.get("reply_text") or ""), config)
+    assert_true(bool(handoff_body.strip()), "guarded handoff reply body should not be empty")
+    assert_true("核实" in handoff_body or "确认" in handoff_body, "handoff fallback should keep a safe verify tone")
 
 
 def check_continuous_customer_messages_are_batched_with_overflow_guard() -> None:
@@ -487,6 +593,37 @@ def check_anchor_history_does_not_scroll_when_anchor_visible() -> None:
     assert_true(meta.get("gap_risk") is False, "visible anchor should not be a gap risk")
 
 
+def check_anchor_history_does_not_scroll_when_anchor_visible_but_sender_drifted() -> None:
+    config = load_smoke_config()
+    config["history_backfill"] = {
+        "enabled": True,
+        "mode": "anchor_until_found",
+        "max_scroll_steps": 4,
+        "max_messages_after_load": 20,
+    }
+    visible = [
+        {"id": "old-1-ocr", "type": "text", "content": "上一轮已经处理", "sender": "unknown"},
+        {"id": "new-1", "type": "text", "content": "这次新的问题", "sender": "customer"},
+    ]
+    connector = FakeConnector(visible)
+    target = SimpleNamespace(name="客户A", exact=True, allow_self_for_test=False, max_batch_messages=8)
+    enriched = maybe_enrich_messages_with_history(
+        connector=connector,  # type: ignore[arg-type]
+        target=target,  # type: ignore[arg-type]
+        config=config,
+        payload={"ok": True, "messages": visible},
+        target_state={
+            "processed_message_ids": ["old-1"],
+            "processed_content_keys": ["customer\x1ftext\x1f上一轮已经处理"],
+            "handoff_message_ids": [],
+        },
+    )
+    meta = enriched.get("_history_backfill") or {}
+    assert_equal(connector.history_mode_calls, [], "sender drift should not force anchor scroll when content anchor is visible")
+    assert_equal(meta.get("reason"), "visible_anchor_found_no_scroll", "content anchor visible should still stop before scrolling")
+    assert_true(meta.get("gap_risk") is False, "content-anchor match should not create gap risk")
+
+
 def check_anchor_history_searches_until_anchor_found() -> None:
     config = load_smoke_config()
     config["history_backfill"] = {
@@ -529,6 +666,55 @@ def check_anchor_history_searches_until_anchor_found() -> None:
     assert_true(meta.get("anchor_found_after_history_load") is True, "history search should recover the anchor")
     assert_true(meta.get("gap_risk") is False, "recovered anchor should clear gap risk")
     assert_equal([item["id"] for item in enriched.get("messages", [])], ["new-1", "new-2"], "anchor mode should expose only messages after the recovered anchor")
+
+
+def check_anchor_history_uses_low_volume_fast_profile_when_single_visible_message() -> None:
+    config = load_smoke_config()
+    config["history_backfill"] = {
+        "enabled": True,
+        "mode": "anchor_until_found",
+        "max_scroll_steps": 6,
+        "max_duration_seconds": 14,
+        "max_snapshots": 10,
+        "min_delay_ms": 220,
+        "max_delay_ms": 680,
+        "block_on_anchor_not_found": True,
+    }
+    visible = [
+        {"id": "new-1", "type": "text", "content": "就一条新消息，确认一下", "sender": "customer"},
+    ]
+    loaded = [
+        {"id": "old-1", "type": "text", "content": "上一轮已经处理", "sender": "customer"},
+        *visible,
+    ]
+    connector = FakeConnector(
+        visible,
+        history_messages=loaded,
+        history_load={
+            "ok": True,
+            "mode": "anchor_until_found",
+            "anchor_found": True,
+            "scroll_steps": 1,
+            "stopped_reason": "anchor_found",
+        },
+    )
+    target = SimpleNamespace(name="客户A", exact=True, allow_self_for_test=False, max_batch_messages=8)
+    enriched = maybe_enrich_messages_with_history(
+        connector=connector,  # type: ignore[arg-type]
+        target=target,  # type: ignore[arg-type]
+        config=config,
+        payload={"ok": True, "messages": visible},
+        target_state={"processed_message_ids": ["old-1"], "processed_content_keys": [], "handoff_message_ids": []},
+    )
+    assert_equal(len(connector.history_mode_calls), 1, "single visible message should still perform bounded anchor search")
+    call = connector.history_mode_calls[0]
+    assert_equal(int(call.get("max_scroll_steps") or 0), 2, "low-volume fast profile should cap scroll steps to 2")
+    assert_equal(int(call.get("max_duration_seconds") or 0), 6, "low-volume fast profile should cap search duration")
+    assert_equal(int(call.get("max_snapshots") or 0), 4, "low-volume fast profile should cap snapshots")
+    assert_equal(int(call.get("min_delay_ms") or 0), 110, "low-volume fast profile should lower per-step min delay")
+    assert_equal(int(call.get("max_delay_ms") or 0), 320, "low-volume fast profile should lower per-step max delay")
+    meta = enriched.get("_history_backfill") or {}
+    assert_equal(str(meta.get("search_profile") or ""), "low_volume_fast_path", "history metadata should expose fast-path profile")
 
 
 def check_anchor_history_fallback_preserves_visible_batch_when_load_drops_current() -> None:
@@ -1423,7 +1609,11 @@ def check_live_safety_guard_enforces_single_allowed_target() -> None:
         )
         routing = guarded.get("_local_customer_service_session_routing", {})
         assert_true(routing.get("respond_all_unread_sessions") is False, "live guard should force unread-all off")
-        assert_true("新数据测试昨天19:23" in set(routing.get("ignored_names", []) or []), "live guard should ignore disabled/disallowed names")
+        ignored_names = set(routing.get("ignored_names", []) or [])
+        assert_true(
+            "新数据测试昨天19:23" in ignored_names or "新数据测试" in ignored_names,
+            "live guard should ignore disabled/disallowed names",
+        )
 
         try:
             assert_customer_service_recent_bootstrap_guard(base_config, state={"targets": {}}, now_ts=1000.0)
@@ -1438,6 +1628,74 @@ def check_live_safety_guard_enforces_single_allowed_target() -> None:
             now_ts=now.timestamp(),
         )
         assert_true(bootstrap_summary.get("ok") is True, "recent bootstrap should satisfy live startup guard")
+    finally:
+        remove_file(settings_store.settings_path)
+        if old_tenant is None:
+            os.environ.pop("WECHAT_KNOWLEDGE_TENANT", None)
+        else:
+            os.environ["WECHAT_KNOWLEDGE_TENANT"] = old_tenant
+
+
+def check_live_safety_guard_multi_allowed_targets_do_not_starve_secondary_sessions() -> None:
+    tenant_id = "workflow_live_guard_multi_allowed_probe"
+    old_tenant = os.environ.get("WECHAT_KNOWLEDGE_TENANT")
+    os.environ["WECHAT_KNOWLEDGE_TENANT"] = tenant_id
+    settings_store = CustomerServiceSettings(tenant_id=tenant_id)
+    remove_file(settings_store.settings_path)
+    base_config = load_smoke_config()
+    base_config["targets"] = [
+        {"name": "许聪", "enabled": True, "exact": True, "max_batch_messages": 2},
+        {"name": "新数据测试", "enabled": True, "exact": True, "max_batch_messages": 2},
+    ]
+    base_config["live_safety_guard"] = {
+        "enabled": True,
+        "allowed_targets": ["许聪", "新数据测试"],
+        "require_exact_targets": True,
+        "disable_respond_all_unread_sessions": True,
+        "disable_history_backfill": True,
+        "low_risk_single_target_scan": True,
+    }
+    try:
+        settings_store.save(
+            {
+                "enabled": True,
+                "reply_mode": "full_auto",
+                "respond_all_unread_sessions": False,
+                "session_targets_managed": True,
+                "session_targets": [
+                    {"name": "许聪", "enabled": True, "exact": True, "conversation_type": "private"},
+                    {"name": "新数据测试", "enabled": True, "exact": True, "conversation_type": "private"},
+                ],
+            }
+        )
+        guarded = apply_local_customer_service_settings(base_config)
+        multi_target = guarded.get("multi_target", {}) if isinstance(guarded.get("multi_target"), dict) else {}
+        assert_true(bool(multi_target.get("enabled")), "multi-target should stay enabled under live guard")
+        assert_true(
+            multi_target.get("scan_all_whitelist_each_iteration") is False,
+            "multi-session guard should avoid full whitelist scans in unread-driven mode",
+        )
+        assert_equal(
+            int(multi_target.get("max_scan_targets_per_iteration") or 0),
+            1,
+            "multi-session guard should avoid mechanical multi-scan sweeps",
+        )
+        assert_equal(
+            int(multi_target.get("max_targets_per_iteration") or 0),
+            1,
+            "multi-session guard should dispatch one target per capture turn",
+        )
+        assert_true(
+            int(multi_target.get("min_switch_interval_seconds") or 0) <= 2,
+            "multi-session guard should avoid long hard switch intervals",
+        )
+        assert_true(bool(multi_target.get("switch_human_delay_enabled")), "switch delay should be enabled for humanized chat transitions")
+        assert_true(
+            float(multi_target.get("switch_human_delay_min_seconds") or 0.0) >= 1.0
+            and float(multi_target.get("switch_human_delay_max_seconds") or 0.0) <= 3.0,
+            "switch delay should remain inside 1-3 seconds",
+        )
+        assert_true(bool(multi_target.get("capture_one_target_per_round")), "capture should be serialized per dispatch turn")
     finally:
         remove_file(settings_store.settings_path)
         if old_tenant is None:
@@ -1524,6 +1782,151 @@ def check_rpa_safety_caps_visible_reply() -> None:
         assert_true(capped.endswith(("。", "！", "？", ".", "!", "?")), f"visible truncator should end naturally: {capped}")
 
 
+def check_reply_multi_bubble_splits_long_reply() -> None:
+    config = load_smoke_config()
+    config["reply"]["prefix"] = "[车金实盘] "
+    config["reply_multi_bubble"] = {
+        "enabled": True,
+        "min_split_chars": 42,
+        "max_segments": 3,
+        "preferred_segment_chars": 30,
+        "max_segment_chars": 48,
+        "min_segment_chars": 16,
+        "inter_segment_delay_min_ms": 0,
+        "inter_segment_delay_max_ms": 0,
+    }
+    long_reply = (
+        "[车金实盘] 预算在12到15万的话，先看雅阁或凯美瑞会更稳，油耗和保值都比较友好；"
+        "如果你更在意空间，我们再补看一台SUV做对比，今天就能先给你排个看车顺序。"
+    )
+    segments = split_customer_visible_reply_for_multi_bubble(long_reply, config)
+    assert_true(2 <= len(segments) <= 3, f"long reply should split into 2-3 bubbles: {segments}")
+    assert_true(str(segments[0]).startswith("[车金实盘] "), "first bubble should keep configured prefix")
+    for seg in segments:
+        _, body = split_reply_prefix(seg, config)
+        body_text = body or str(seg)
+        assert_true(rpa_reply_content_char_count(body_text) <= 58, f"each bubble should stay concise: {seg}")
+        assert_true(body_text.endswith(("。", "！", "？", ".", "!", "?")), f"bubble should end naturally: {seg}")
+
+
+def check_reply_multi_bubble_retries_transient_send_failures() -> None:
+    config = load_smoke_config()
+    target = parse_targets(config)[0]
+    config["reply"]["prefix"] = "[车金实盘] "
+    config["reply_multi_bubble"] = {
+        "enabled": True,
+        "min_split_chars": 36,
+        "max_segments": 3,
+        "preferred_segment_chars": 24,
+        "max_segment_chars": 42,
+        "min_segment_chars": 14,
+        "inter_segment_delay_min_ms": 0,
+        "inter_segment_delay_max_ms": 0,
+        "retry_on_transient_send_failures": True,
+        "max_transient_retry_per_segment": 1,
+        "transient_retry_delay_min_ms": 0,
+        "transient_retry_delay_max_ms": 0,
+    }
+    connector = RetryThenSuccessTransportConnector(messages=[])
+    reply_text = (
+        "[车金实盘] 预算如果在15万左右，先看车况更透明、后期保值更稳的车型；"
+        "您要是方便，我可以先按通勤和油耗给您排一个优先看车顺序。"
+    )
+    result = send_reply_with_optional_multi_bubble(
+        connector=connector,  # type: ignore[arg-type]
+        target=target,
+        reply_text=reply_text,
+        config=config,
+    )
+    assert_true(bool(result.get("verified")), "transient send-rate failure should recover after retry")
+    assert_true(int(result.get("retry_attempts") or 0) >= 1, "transient failure should record retry attempts")
+    assert_true(
+        int(result.get("segment_count") or 0) >= 2 and int(result.get("sent_segments") or 0) == int(result.get("segment_count") or 0),
+        "all segments should eventually send after transient retry",
+    )
+    assert_true(
+        connector.send_calls >= int(result.get("segment_count") or 0) + 1,
+        "first transient failure should trigger one extra send attempt",
+    )
+
+
+def check_reply_multi_bubble_verifies_only_final_segment_by_default() -> None:
+    config = load_smoke_config()
+    target = parse_targets(config)[0]
+    config["reply"]["prefix"] = "[车金实盘] "
+    config["reply_multi_bubble"] = {
+        "enabled": True,
+        "min_split_chars": 28,
+        "max_segments": 3,
+        "preferred_segment_chars": 22,
+        "max_segment_chars": 40,
+        "min_segment_chars": 14,
+        "three_segment_threshold_chars": 120,
+        "inter_segment_delay_min_ms": 0,
+        "inter_segment_delay_max_ms": 0,
+        "verify_each_segment": False,
+    }
+    connector = FinalSegmentVerifyConnector(messages=[])
+    reply_text = (
+        "[车金实盘] 这两台都在预算内，先看车况更透明、维保记录更完整的那台；"
+        "如果您更看重后期油耗，我再按通勤路况给您排一个优先顺序。"
+    )
+    result = send_reply_with_optional_multi_bubble(
+        connector=connector,  # type: ignore[arg-type]
+        target=target,
+        reply_text=reply_text,
+        config=config,
+    )
+    assert_true(bool(result.get("verified")), "multi bubble send should succeed")
+    assert_true(int(result.get("segment_count") or 0) >= 2, "reply should split into at least two segments for this check")
+    assert_equal(connector.verify_calls, 1, "default strategy should verify only the final segment")
+    assert_true(connector.send_calls >= 1, "intermediate segments should use send-only path")
+    assert_equal(
+        str(result.get("verification_strategy") or ""),
+        "verify_final_segment_only",
+        "result should expose final-segment verification strategy",
+    )
+
+
+def check_reply_multi_bubble_can_verify_each_segment_when_enabled() -> None:
+    config = load_smoke_config()
+    target = parse_targets(config)[0]
+    config["reply"]["prefix"] = "[车金实盘] "
+    config["reply_multi_bubble"] = {
+        "enabled": True,
+        "min_split_chars": 28,
+        "max_segments": 3,
+        "preferred_segment_chars": 22,
+        "max_segment_chars": 40,
+        "min_segment_chars": 14,
+        "three_segment_threshold_chars": 120,
+        "inter_segment_delay_min_ms": 0,
+        "inter_segment_delay_max_ms": 0,
+        "verify_each_segment": True,
+    }
+    connector = FinalSegmentVerifyConnector(messages=[])
+    reply_text = (
+        "[车金实盘] 预算和用途我收到了，先从车况更透明的一台开始看；"
+        "您要是方便，我再把试驾顺序按时间给您排好。"
+    )
+    result = send_reply_with_optional_multi_bubble(
+        connector=connector,  # type: ignore[arg-type]
+        target=target,
+        reply_text=reply_text,
+        config=config,
+    )
+    segment_count = int(result.get("segment_count") or 0)
+    assert_true(bool(result.get("verified")), "verify-each-segment mode should still send successfully")
+    assert_true(segment_count >= 2, "reply should split for verification-mode check")
+    assert_equal(connector.send_calls, 0, "verify-each-segment mode should not use send-only intermediate path")
+    assert_equal(connector.verify_calls, segment_count, "verify-each-segment mode should verify every segment")
+    assert_equal(
+        str(result.get("verification_strategy") or ""),
+        "verify_each_segment",
+        "result should expose per-segment verification strategy",
+    )
+
+
 def check_identity_guard_setting_controls_ai_disclosure() -> None:
     candidate = {
         "can_answer": True,
@@ -1588,6 +1991,42 @@ def check_identity_guard_controls_handoff_phrase_concealment() -> None:
         force_handoff_style=False,
     )
     assert_equal(raw, base, "disabled identity guard should keep original wording")
+
+
+def check_force_handoff_style_preserves_social_offtopic_redirect() -> None:
+    config = load_smoke_config()
+    config.setdefault("llm_reply_synthesis", {})["identity_guard_enabled"] = True
+    combined = "当前客户问题：对了，今天天气怎么样？顺便讲个笑话缓解下焦虑。"
+    redirected = sanitize_customer_visible_reply_text(
+        "[车金实盘] 这个我先跟负责人确认一下，避免说错，稍后回您。",
+        config=config,
+        combined=combined,
+        reason="existing_safety_requires_handoff",
+        force_handoff_style=True,
+        recent_reply_texts=[],
+    )
+    assert_true("天气信息以实时天气为准" in redirected, "social off-topic handoff should keep soft redirect wording")
+    assert_true("预算、用途、是否置换" in redirected, "redirect should guide user back to business context")
+
+
+def check_social_offtopic_intent_assist_does_not_force_stale_handoff() -> None:
+    config = load_smoke_config()
+    config["intent_assist"] = {"enabled": True, "mode": "heuristic", "advisory_only": True}
+    decision = ReplyDecision(reply_text="", rule_name="llm_synthesis_handoff", matched=False, need_handoff=False, reason="")
+    payload = maybe_analyze_intent(
+        config=config,
+        combined=(
+            "近期客户需求：预算10万左右，周末看车，想谈价格。\n"
+            "当前客户问题：先岔开一下，今天天气咋样？再讲个轻松点的笑话。"
+        ),
+        decision=decision,
+        reply_text="",
+        data_capture={},
+        product_knowledge={},
+    )
+    assert_true(payload.get("ok") is True, "intent assist payload should be available")
+    assert_true(payload.get("needs_handoff") is not True, "social off-topic should not inherit stale handoff requirement")
+    assert_true(payload.get("social_offtopic_soft_redirect") is True, "social override marker should be set for traceability")
 
 
 def check_contextual_greeting_avoids_repeated_file_transfer_honorific() -> None:
@@ -2203,6 +2642,41 @@ def check_final_visible_polish_transient_failure_can_degrade_when_enabled() -> N
     assert_true(
         final_visible_polish_blocks_send(polished_guard_reject, config=degrade_cfg) is False,
         "guard rejection of only the polished candidate should degrade to the original safe draft",
+    )
+
+
+def check_final_visible_polish_fast_path_skips_short_reply() -> None:
+    config = load_smoke_config()
+    config["reply"]["prefix"] = ""
+    config["final_visible_llm_polish"] = {
+        "enabled": True,
+        "required_for_send": True,
+        "provider": "manual_json",
+        "candidate": {},
+        "skip_short_reply_fast_path_enabled": True,
+        "skip_short_reply_max_chars": 46,
+        "skip_short_reply_max_sentences": 2,
+    }
+    config["rpa_reply_safety"] = {"enabled": True, "max_auto_reply_chars": 150}
+    result = finalize_customer_visible_reply_with_llm(
+        "好的，我先给您看两台更贴预算的车。",
+        config=config,
+        combined="能不能先给我推荐两台预算内的车？",
+        recent_reply_texts=[],
+        source_channel="normal",
+        needs_handoff=False,
+    )
+    assert_true(result.get("passed") is True, "fast path should still pass final polish gate")
+    assert_equal(
+        result.get("reason"),
+        "final_visible_llm_polish_fast_local_skip",
+        "short conversational reply should use fast skip path",
+    )
+    reply_text = str(result.get("reply_text") or "")
+    assert_true(bool(reply_text.strip()), "fast path should still produce non-empty customer-visible text")
+    assert_true(
+        rpa_reply_content_char_count(reply_text) <= 46,
+        "fast path output should stay concise for short conversational replies",
     )
 
 

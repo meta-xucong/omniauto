@@ -2,43 +2,135 @@
   "schema_version": 1,
   "examples": [
     {
-      "id": "customer_service_style_guidelines",
-      "message": "回复要自然，先接住客户使用场景，再问关键参数。对功率、续航、最低价等不确定内容，不能凭空承诺。适合自动回复的内容：参数收集、常规质保说明、使用场景推荐。需要转人工的内容：最低价、特殊补偿、先发货后付款。",
+      "id": "admin_check_style_example",
+      "message": "测试话术，仅用于管理台回归。",
       "intent_tags": [
-        "greeting",
-        "small_talk",
-        "scene_product",
-        "quote",
+        "small_talk"
+      ]
+    },
+    {
+      "id": "data_missing",
+      "message": "资料我看到了，还差联系人电话，您补一下我就一起登记。",
+      "intent_tags": [
+        "customer_data"
+      ]
+    },
+    {
+      "id": "discount_handoff",
+      "message": "这个价格我这边不能直接拍板，我先帮您记录一下，稍后请示后给您准话。",
+      "intent_tags": [
         "discount",
         "handoff"
-      ],
-      "tone_tags": [
-        "natural",
-        "truthful",
-        "safe"
-      ],
-      "customer_message": "客服通用表达与边界原则",
-      "details": "source: three_layer_migration；migrated_from: tenant.chats.chat_style_guidelines"
+      ]
     },
     {
-      "id": "shared_global_evidence_first",
-      "message": "回复必须优先依据正式知识、共享规则和已确认上下文；无证据时明确说明需核实并转人工。",
-      "customer_message": "证据优先回复"
+      "id": "over_boundary_handoff",
+      "message": "这个已经超出我能直接确认的范围，我先帮您记录下来，稍后请示后给您准话。",
+      "intent_tags": [
+        "handoff"
+      ]
     },
     {
-      "id": "shared_used_car_compliance_disclosure",
-      "message": "涉及事故、水泡、火烧、里程、过户次数、检修记录等问题，必须基于可验证资料；不确定时先说明待核验。",
-      "customer_message": "二手车车况披露规则"
+      "id": "quote_detail_request",
+      "message": "好的，您把具体产品、数量和收货城市发我，我帮您核一下价格和运费。",
+      "intent_tags": [
+        "quote"
+      ]
     },
     {
-      "id": "shared_used_car_test_drive_notice",
-      "message": "试驾沟通需明确有效证件、保险覆盖、试驾路线与责任边界；涉及高风险路况或改装车辆必须人工确认。",
-      "customer_message": "二手车试驾安全提示"
+      "id": "scene_product_association",
+      "message": "您这个场景我大概明白，可以先按库里的相近产品给您对一下，但价格和政策我只按现有资料说。",
+      "intent_tags": [
+        "scene_product",
+        "product"
+      ]
     },
     {
-      "id": "shared_used_car_transfer_docs",
-      "message": "提醒客户交易完成后应交付合法证照与交易凭证，涉及过户办理必须按登记流程执行。",
-      "customer_message": "二手车交易资料完整性"
+      "id": "small_talk_service_pivot",
+      "message": "哈哈没事，您先慢慢看。我这边主要帮您查商品、报价和发货售后，看到合适的产品直接发我名称和数量就行。",
+      "intent_tags": [
+        "small_talk"
+      ]
+    },
+    {
+      "id": "unknown_handoff",
+      "message": "这个问题我当前没有足够依据直接确认，我先帮您记录并转人工处理。",
+      "intent_tags": [
+        "unknown",
+        "handoff"
+      ]
+    },
+    {
+      "id": "wf_tpl_a",
+      "message": "这类预算可以先看20万左右的SUV价格区间，我先按你的通勤场景给你一批车源。",
+      "customer_message": "wfcasea123 预算20万左右，主要市区通勤，想看SUV。",
+      "details": "workflow_import: 这类预算可以先看20万左右的SUV价格区间，我先按你的通勤场景给你一批车源。"
+    },
+    {
+      "id": "wf_tpl_b",
+      "message": "这个属于金融审批边界，不能保证通过，需要人工顾问一对一核实。",
+      "customer_message": "wfcaseb456 你保证我征信不过也能贷款通过吗？",
+      "details": "workflow_import: 这个属于金融审批边界，不能保证通过，需要人工顾问一对一核实。"
+    },
+    {
+      "id": "wf_tpl_c",
+      "message": "我们按质保政策执行，交付后会同步售后服务流程和质保条款。",
+      "customer_message": "wfcasec789 售后质保怎么走？",
+      "details": "workflow_import: 我们按质保政策执行，交付后会同步售后服务流程和质保条款。"
+    },
+    {
+      "id": "wfr_20260524_052227_r1_a",
+      "message": "这档预算可以先看省油家用SUV，我先按通勤和空间给你做三档建议。",
+      "customer_message": "wfrq_20260524_052227_r1_a 预算15万-18万，想找省油家用SUV。",
+      "details": "workflow_import: 这档预算可以先看省油家用SUV，我先按通勤和空间给你做三档建议。"
+    },
+    {
+      "id": "wfr_20260524_052227_r1_b",
+      "message": "金融审批不能保证通过，需要人工顾问一对一核实资质后再给方案。",
+      "customer_message": "wfrq_20260524_052227_r1_b 你能保证我征信一般也一定贷下来吗？",
+      "details": "workflow_import: 金融审批不能保证通过，需要人工顾问一对一核实资质后再给方案。"
+    },
+    {
+      "id": "wfr_20260524_052227_r1_c",
+      "message": "你发下到店时间和意向车型，我帮你安排预约看车排期。",
+      "customer_message": "wfrq_20260524_052227_r1_c 周末看车怎么预约更快？",
+      "details": "workflow_import: 你发下到店时间和意向车型，我帮你安排预约看车排期。"
+    },
+    {
+      "id": "wfr_20260526_002830_r3_a",
+      "message": "这档预算可以先看省油家用SUV，我先按通勤和空间给你做三档建议。",
+      "customer_message": "wfrq_20260526_002830_r3_a 预算15万-18万，想找省油家用SUV。",
+      "details": "workflow_import: 这档预算可以先看省油家用SUV，我先按通勤和空间给你做三档建议。"
+    },
+    {
+      "id": "wfr_20260526_002830_r3_b",
+      "message": "金融审批不能保证通过，需要人工顾问一对一核实资质后再给方案。",
+      "customer_message": "wfrq_20260526_002830_r3_b 你能保证我征信一般也一定贷下来吗？",
+      "details": "workflow_import: 金融审批不能保证通过，需要人工顾问一对一核实资质后再给方案。"
+    },
+    {
+      "id": "wfr_20260526_002830_r3_c",
+      "message": "你发下到店时间和意向车型，我帮你安排预约看车排期。",
+      "customer_message": "wfrq_20260526_002830_r3_c 周末看车怎么预约更快？",
+      "details": "workflow_import: 你发下到店时间和意向车型，我帮你安排预约看车排期。"
+    },
+    {
+      "id": "wfr_20260531_151116_r3_a",
+      "message": "这档预算可以先看省油家用SUV，我先按通勤和空间给你做三档建议。",
+      "customer_message": "wfrq_20260531_151116_r3_a 预算15万-18万，想找省油家用SUV。",
+      "details": "workflow_import: 这档预算可以先看省油家用SUV，我先按通勤和空间给你做三档建议。"
+    },
+    {
+      "id": "wfr_20260531_151116_r3_b",
+      "message": "金融审批不能保证通过，需要人工顾问一对一核实资质后再给方案。",
+      "customer_message": "wfrq_20260531_151116_r3_b 你能保证我征信一般也一定贷下来吗？",
+      "details": "workflow_import: 金融审批不能保证通过，需要人工顾问一对一核实资质后再给方案。"
+    },
+    {
+      "id": "wfr_20260531_151116_r3_c",
+      "message": "你发下到店时间和意向车型，我帮你安排预约看车排期。",
+      "customer_message": "wfrq_20260531_151116_r3_c 周末看车怎么预约更快？",
+      "details": "workflow_import: 你发下到店时间和意向车型，我帮你安排预约看车排期。"
     }
   ]
 }

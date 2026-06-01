@@ -9,8 +9,10 @@ from typing import Any
 
 try:  # pragma: no cover - supports both package and script imports.
     from .knowledge_runtime import KnowledgeRuntime
+    from .product_name_matcher import collect_matched_aliases
 except ImportError:  # pragma: no cover
     from knowledge_runtime import KnowledgeRuntime
+    from product_name_matcher import collect_matched_aliases
 
 from apps.wechat_ai_customer_service.platform_understanding_rules import (
     intent_group,
@@ -311,6 +313,11 @@ def field_matches(
 ) -> tuple[bool, int, int]:
     exact_matches = 0
     intent_matches = 0
+    if field_id in {"name", "aliases", "sku"}:
+        matched_aliases = collect_matched_aliases([str(value) for value in values], normalized_text)
+        if matched_aliases:
+            exact_matches += len(matched_aliases)
+
     for value in values:
         normalized_value = normalize_text(value)
         if not normalized_value:

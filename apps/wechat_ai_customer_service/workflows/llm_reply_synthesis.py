@@ -708,6 +708,34 @@ def build_synthesis_prompt_pack(evidence_pack: dict[str, Any], settings: dict[st
             "若问题涉及贷款必过、无事故保证、合同发票、价格审批等边界，必须收束为核实/人工确认，不做确定承诺。"
             "回复要像微信真人销售：短、直接、可执行；优先1到2句，正文尽量控制在90个中文内容字以内，除非客户一次问了多个点。"
         )
+    elif advisor_mode == "direct_question_resolution":
+        system_parts.append(
+            "\n【质疑直答模式】\n"
+            "当客户明确表达“你没回答到点上/答非所问/请直接回答”时，"
+            "必须先直接回答客户当前问题，再补一条最短理由。"
+            "不要重复前一轮已经说过的两台推荐，不要机械复读。"
+            "如客户问“从你刚推荐的里到底选哪台”，必须明确给出一个首选（必要时加一个备选）。"
+            "避免套话（如“看情况”“都可以”）作为主答案。"
+            "正文尽量控制在80个中文内容字以内。"
+        )
+    elif advisor_mode == "multi_question_compound_answer":
+        system_parts.append(
+            "\n【多问并发整合模式】\n"
+            "当前消息包含客户在短时间内连续提出的多个问题。"
+            "请按出现顺序逐点覆盖，不得漏掉后发问题。"
+            "优先用2到3句短句完成整合：每句一个完整意思，避免长段落。"
+            "若其中某点缺少关键信息，先回答能回答的点，再用一句话提出1个最关键的补充问题。"
+            "保持真人微信客服语气，避免机械编号和模板腔。"
+        )
+    elif advisor_mode == "soft_topic_redirect":
+        system_parts.append(
+            "\n【闲聊转业务模式】\n"
+            "当客户问的是与二手车无关的闲聊话题时，先用一句自然、友好的回应承接情绪，"
+            "再委婉把话题拉回“选车/看车”主线。"
+            "不要生硬拒答，不要说“我不能回答这个”，也不要暴露自己是AI。"
+            "尽量用2句以内完成：第一句共情，第二句给出一个明确的看车推进问题（如预算、用途、车况偏好）。"
+            "回复要像真人微信客服，简短、自然、有温度。"
+        )
     system_parts.append("只输出JSON对象，不要Markdown。")
     return {
         "schema_version": 1,
@@ -887,7 +915,21 @@ def truncate_reply_naturally(text: str, max_chars: int) -> str:
 
 def normalize_advisor_synthesis_reply(reply: str, *, evidence_pack: dict[str, Any], settings: dict[str, Any]) -> str:
     clean = " ".join(str(reply or "").split()).strip()
-    if str(settings.get("advisor_mode") or "") != "clear_common_sense_recommendation" or not clean:
+    advisor_mode = str(settings.get("advisor_mode") or "").strip()
+    if not clean:
+        return clean
+    if advisor_mode == "soft_topic_redirect":
+        normalized = re.sub(r"\s+", "", clean).lower()
+        has_vehicle_redirect = any(
+            term in normalized
+            for term in ("二手车", "看车", "选车", "车型", "预算", "车况", "用途", "油耗", "空间")
+        )
+        if not has_vehicle_redirect:
+            suffix = "我们回到看车上，您说下预算和用途，我马上给您一个贴近建议。"
+            merged = clean.rstrip("。；;，,") + "。" + suffix
+            return truncate_reply(merged, settings)
+        return clean
+    if advisor_mode != "clear_common_sense_recommendation":
         return clean
     current = str(evidence_pack.get("current_message") or "")
     explicit_stock_request = any(
@@ -1171,6 +1213,10 @@ def is_formulaic_existing_reply(text: str) -> bool:
         marker in value
         for marker in (
             "收到，我先记录",
+            "收到，我先看一下",
+            "收到我先看一下",
+            "收到，我先看下",
+            "收到我先看下",
             "稍后继续处理",
             "涉及车况、价格、金融或到店安排会请销售",
             "当前无法直接确认",
@@ -1180,7 +1226,10 @@ def is_formulaic_existing_reply(text: str) -> bool:
 
 def build_natural_timeout_fallback_reply(evidence_pack: dict[str, Any]) -> str:
     message = str(evidence_pack.get("current_message") or "")
-    if not any(term in message for term in ("预算", "推荐", "挑", "省油", "家用", "通勤", "接娃")):
+    if not any(
+        term in message
+        for term in ("预算", "推荐", "挑", "省油", "家用", "通勤", "接娃", "多少钱", "什么价", "报价", "哪台", "哪款")
+    ):
         return ""
     knowledge = evidence_pack.get("knowledge") if isinstance(evidence_pack.get("knowledge"), dict) else {}
     evidence = knowledge.get("evidence") if isinstance(knowledge.get("evidence"), dict) else {}
@@ -1207,8 +1256,8 @@ def build_natural_timeout_fallback_reply(evidence_pack: dict[str, Any]) -> str:
         if len(names) >= 2:
             break
     if names:
-        return "您这个需求我建议先按预算、用途和车况筛，不要只看年份。可以先看" + "、".join(names) + "这类车，家用接娃优先看省心、省油、维修成本低的；具体车况还是以检测报告为准。您大概预算卡在多少，我再帮您缩小到两三台。"
-    return "您这个需求我建议先按预算、用途和车况筛，不要只看年份。家用接娃优先看省心、省油、维修成本低的车，具体车况还是以检测报告为准。您大概预算卡在多少，我再帮您缩小到两三台。"
+        return "先给您短结论：可优先看" + "、".join(names) + "。您再告诉我更重视油耗还是车况，我立刻缩到1-2台。"
+    return "先给您短结论：我按预算、用途、车况三项先筛。您补一个预算区间，我马上缩到1-2台给您。"
 
 
 def extract_budget_wan_from_text(text: str) -> float:

@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "category_id": "global_guidelines",
+  "id": "entity_normalization_first",
+  "status": "active",
+  "source": {
+    "type": "platform_global_principle"
+  },
+  "data": {
+    "title": "实体归一识别优先",
+    "guideline_text": "客户提到商品、车型、型号、品牌等实体时，先做别名、错别字、同音、音译、简称归一；确认是同一实体后再按商品库与正式知识回复，不确定时先澄清。",
+    "intent_tags": [
+      "catalog",
+      "quote",
+      "discount",
+      "stock",
+      "shipping",
+      "spec",
+      "scene_product",
+      "product"
+    ],
+    "tone_tags": [
+      "natural",
+      "precise",
+      "evidence_first"
+    ],
+    "priority": 95,
+    "always_include": true,
+    "additional_details": {
+      "source": "platform_global_principle",
+      "scope": "all_tenants"
+    }
+  },
+  "runtime": {
+    "allow_auto_reply": true,
+    "requires_handoff": false,
+    "risk_level": "normal"
+  },
+  "metadata": {
+    "updated_at": "2026-05-31T00:00:00",
+    "updated_by": "codex"
+  }
+}

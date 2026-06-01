@@ -67,6 +67,28 @@ def check_compiled_product_knowledge_is_legacy_compatible() -> None:
     assert_equal(output.get("product_id"), "commercial_fridge_bx_200", "compiled product id")
 
 
+def check_product_name_homophone_and_typo_are_tolerated() -> None:
+    knowledge = {
+        "products": [
+            {
+                "id": "toyota_sienna_2021",
+                "name": "丰田赛那 2.5L",
+                "aliases": ["赛那", "sienna"],
+                "price": 289800,
+                "unit": "辆",
+            }
+        ],
+        "faq": [],
+    }
+    homophone = decide_product_knowledge_reply("塞纳多少钱？", knowledge)
+    assert_equal(homophone.get("matched"), True, "homophone alias should be matched")
+    assert_equal(homophone.get("product_id"), "toyota_sienna_2021", "homophone query should map to same product")
+
+    typo = decide_product_knowledge_reply("赛哪什么价？", knowledge)
+    assert_equal(typo.get("matched"), True, "small typo alias should be matched")
+    assert_equal(typo.get("product_id"), "toyota_sienna_2021", "typo query should map to same product")
+
+
 def cleanup() -> None:
     if TEST_ROOT.exists():
         shutil.rmtree(TEST_ROOT)
@@ -86,6 +108,7 @@ CHECKS = [
     check_compile_to_disk_writes_expected_files,
     check_compiled_counts_match_category_source,
     check_compiled_product_knowledge_is_legacy_compatible,
+    check_product_name_homophone_and_typo_are_tolerated,
 ]
 
 

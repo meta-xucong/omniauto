@@ -178,9 +178,43 @@ class VpsAdminAuthService:
                 "message": "账号尚未绑定邮箱，请填写邮箱并完成验证码验证。",
             }
 
-        enforce_resend_window(state, user_id=actor_id, purposes={"login", "bind_email_login"}, resend_seconds=email_service.settings.resend_seconds)
         code = email_service.make_code()
-        delivery = email_service.deliver_code(email=email, code=code, username=user.username or user.user_id, purpose="login")
+        challenge = {
+            **base_challenge,
+            "purpose": "login",
+            "email": email,
+            "code_hash": hash_password(code),
+            "last_sent_at": now_iso(),
+        }
+
+        # Reserve the challenge slot first so concurrent duplicate submissions
+        # cannot both pass resend-window checks and send two emails.
+        def reserve_challenge(next_state: dict[str, Any]) -> None:
+            prune_expired_challenges(next_state)
+            enforce_resend_window(
+                next_state,
+                user_id=actor_id,
+                purposes={"login", "bind_email_login"},
+                resend_seconds=email_service.settings.resend_seconds,
+            )
+            remove_prior_challenges(next_state, user_id=actor_id, purposes={"login", "bind_email_login"})
+            next_state["auth_challenges"][challenge_id] = challenge
+
+        self.store.update(reserve_challenge)
+
+        try:
+            delivery = email_service.deliver_code(email=email, code=code, username=user.username or user.user_id, purpose="login")
+        except Exception:
+            # Roll back reserved challenge when delivery fails so user can retry.
+            def rollback_challenge(next_state: dict[str, Any]) -> None:
+                challenges = next_state.setdefault("auth_challenges", {})
+                existing = challenges.get(challenge_id)
+                if isinstance(existing, dict) and str(existing.get("actor_id") or "") == actor_id:
+                    challenges.pop(challenge_id, None)
+
+            self.store.update(rollback_challenge)
+            raise
+
         challenge = {
             **base_challenge,
             "purpose": "login",
@@ -190,9 +224,11 @@ class VpsAdminAuthService:
         }
 
         def mutate(state: dict[str, Any]) -> None:
-            prune_expired_challenges(state)
-            remove_prior_challenges(state, user_id=actor_id, purposes={"login", "bind_email_login"})
-            state["auth_challenges"][challenge_id] = challenge
+            current = state.setdefault("auth_challenges", {}).get(challenge_id)
+            if isinstance(current, dict):
+                current["last_sent_at"] = challenge.get("last_sent_at")
+            else:
+                state["auth_challenges"][challenge_id] = challenge
             append_audit(
                 state,
                 actor_id=actor_id,

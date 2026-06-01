@@ -59,6 +59,7 @@ from rag_experience_store import record_rag_reply_experience
 from realtime_reply_router import (
     build_synthesis_config_for_route,
     choose_reply_variant,
+    current_customer_text,
     de_template_reply_text,
     decide_realtime_reply_route,
     extract_visit_time_label,
@@ -732,8 +733,11 @@ def process_target(
     # 1. Build evidence pack for intent analysis and synthesis
     evidence_pack = build_evidence_pack(
         combined,
-        context=conversation_context_from_product_result(
-            target_state.get("conversation_context", {}) or {}
+        context=build_evidence_context_for_pack(
+            config,
+            conversation_context_from_product_result(
+                target_state.get("conversation_context", {}) or {}
+            ),
         ),
     )
 
@@ -910,6 +914,7 @@ def process_target(
             intent_assist=event["intent_assist"],
             product_knowledge=product_knowledge,
             data_capture=data_capture,
+            combined=combined,
         )
         write_workflow_phase("llm_reply_apply_done", target=target.name, applied=bool(llm_reply.get("applied")), reason=llm_reply.get("reason"))
     event["llm_reply"] = llm_reply
@@ -957,8 +962,14 @@ def process_target(
     )
     event["runtime_route"] = runtime_route
     if runtime_route.get("level") == "L0" and runtime_route.get("reason") == "deterministic_handoff_or_high_risk_boundary":
+        if is_low_information_handoff_reply(reply_text, config):
+            reply_text = format_reply(
+                handoff_acknowledgement_text(config, combined=realtime_combined or combined),
+                configured_reply_prefix(config),
+            )
+        raw_l0_reply = split_reply_prefix(reply_text, config)[1] or decision.reply_text
         decision = ReplyDecision(
-            reply_text=decision.reply_text,
+            reply_text=raw_l0_reply,
             rule_name=decision.rule_name,
             matched=decision.matched,
             need_handoff=True,
@@ -1126,6 +1137,9 @@ def process_target(
     prebuilt_handoff_reason = ""
     prebuilt_handoff_reply_text = ""
     if operator_handoff_required:
+        social_handoff_redirect = ""
+        if decision.rule_name == "llm_synthesis_handoff":
+            social_handoff_redirect = soft_social_redirect_for_handoff(combined)
         prebuilt_handoff_reason = handoff_reason(decision, product_knowledge, intent_assist=event["intent_assist"])
         prebuilt_handoff_reply_text = build_operator_handoff_reply_text(
             config,
@@ -1151,45 +1165,52 @@ def process_target(
             force_handoff_style=True,
             recent_reply_texts=recent_reply_texts,
         )
-        handoff_style_adaptation = adapt_reply_style(
-            config=config,
-            customer_message=combined,
-            reply_text=prebuilt_handoff_reply_text,
-            source_channel="handoff",
-            evidence_pack=evidence_pack,
-            recent_reply_texts=recent_reply_texts,
-            needs_handoff=True,
-        )
-        event["reply_style_adapter_handoff"] = handoff_style_adaptation
-        if handoff_style_adaptation.get("applied"):
-            prebuilt_handoff_reply_text = str(handoff_style_adaptation.get("reply_text") or prebuilt_handoff_reply_text)
-        handoff_naturalness = polish_customer_visible_reply_text(
-            prebuilt_handoff_reply_text,
-            config=config,
-            combined=combined,
-            recent_reply_texts=recent_reply_texts,
-        )
-        event["outbound_naturalness_handoff"] = handoff_naturalness
-        if handoff_naturalness.get("applied"):
-            prebuilt_handoff_reply_text = str(handoff_naturalness.get("reply_text") or prebuilt_handoff_reply_text)
-        if not (send and operator_handoff_required and not handoff_enabled):
-            write_workflow_phase("final_polish_start", target=target.name, source_channel="handoff", reply_chars=len(prebuilt_handoff_reply_text))
-            final_handoff_polish = finalize_customer_visible_reply_with_llm(
+        preserve_social_handoff_redirect = bool(social_handoff_redirect)
+        if preserve_social_handoff_redirect:
+            prebuilt_handoff_reply_text = format_reply(social_handoff_redirect, configured_reply_prefix(config))
+            event["reply_style_adapter_handoff"] = {"applied": False, "reason": "social_offtopic_redirect_preserved"}
+            event["outbound_naturalness_handoff"] = {"applied": False, "reason": "social_offtopic_redirect_preserved"}
+            event["final_visible_llm_polish_handoff"] = {"applied": False, "reason": "social_offtopic_redirect_preserved"}
+        else:
+            handoff_style_adaptation = adapt_reply_style(
+                config=config,
+                customer_message=combined,
+                reply_text=prebuilt_handoff_reply_text,
+                source_channel="handoff",
+                evidence_pack=evidence_pack,
+                recent_reply_texts=recent_reply_texts,
+                needs_handoff=True,
+            )
+            event["reply_style_adapter_handoff"] = handoff_style_adaptation
+            if handoff_style_adaptation.get("applied"):
+                prebuilt_handoff_reply_text = str(handoff_style_adaptation.get("reply_text") or prebuilt_handoff_reply_text)
+            handoff_naturalness = polish_customer_visible_reply_text(
                 prebuilt_handoff_reply_text,
                 config=config,
                 combined=combined,
                 recent_reply_texts=recent_reply_texts,
-                source_channel="handoff",
-                needs_handoff=True,
             )
-            write_workflow_phase("final_polish_done", target=target.name, passed=bool(final_handoff_polish.get("passed")), reason=final_handoff_polish.get("reason"))
-            event["final_visible_llm_polish_handoff"] = final_handoff_polish
-            if final_handoff_polish.get("passed"):
-                prebuilt_handoff_reply_text = str(final_handoff_polish.get("reply_text") or prebuilt_handoff_reply_text)
-            elif final_visible_polish_blocks_send(final_handoff_polish, config=config):
-                return block_for_final_visible_polish_failure(event, target, final_handoff_polish)
-            elif final_visible_polish_degraded(final_handoff_polish, config=config):
-                event["final_visible_llm_polish_handoff_degraded"] = True
+            event["outbound_naturalness_handoff"] = handoff_naturalness
+            if handoff_naturalness.get("applied"):
+                prebuilt_handoff_reply_text = str(handoff_naturalness.get("reply_text") or prebuilt_handoff_reply_text)
+            if not (send and operator_handoff_required and not handoff_enabled):
+                write_workflow_phase("final_polish_start", target=target.name, source_channel="handoff", reply_chars=len(prebuilt_handoff_reply_text))
+                final_handoff_polish = finalize_customer_visible_reply_with_llm(
+                    prebuilt_handoff_reply_text,
+                    config=config,
+                    combined=combined,
+                    recent_reply_texts=recent_reply_texts,
+                    source_channel="handoff",
+                    needs_handoff=True,
+                )
+                write_workflow_phase("final_polish_done", target=target.name, passed=bool(final_handoff_polish.get("passed")), reason=final_handoff_polish.get("reason"))
+                event["final_visible_llm_polish_handoff"] = final_handoff_polish
+                if final_handoff_polish.get("passed"):
+                    prebuilt_handoff_reply_text = str(final_handoff_polish.get("reply_text") or prebuilt_handoff_reply_text)
+                elif final_visible_polish_blocks_send(final_handoff_polish, config=config):
+                    return block_for_final_visible_polish_failure(event, target, final_handoff_polish)
+                elif final_visible_polish_degraded(final_handoff_polish, config=config):
+                    event["final_visible_llm_polish_handoff_degraded"] = True
         if decision.rule_name == "customer_data_capture":
             guarded_handoff_reply = ensure_data_capture_success_context(prebuilt_handoff_reply_text, data_capture)
             if guarded_handoff_reply != prebuilt_handoff_reply_text:
@@ -1203,6 +1224,15 @@ def process_target(
         event["rpa_reply_safety_handoff"] = handoff_reply_safety
         if handoff_reply_safety.get("applied"):
             prebuilt_handoff_reply_text = str(handoff_reply_safety.get("reply_text") or prebuilt_handoff_reply_text)
+        empty_reply_guard_handoff = ensure_non_empty_customer_visible_reply(
+            prebuilt_handoff_reply_text,
+            config,
+            combined=combined,
+            need_handoff=True,
+        )
+        event["empty_reply_guard_handoff"] = empty_reply_guard_handoff
+        if empty_reply_guard_handoff.get("applied"):
+            prebuilt_handoff_reply_text = str(empty_reply_guard_handoff.get("reply_text") or prebuilt_handoff_reply_text)
         decision = ReplyDecision(
             reply_text=split_reply_prefix(prebuilt_handoff_reply_text, config)[1],
             rule_name=decision.rule_name,
@@ -1255,7 +1285,12 @@ def process_target(
         event["decision"]["reply_text"] = handoff_reply_text
         write_runtime_status("thinking", f"正在向「{target.name}」发送回复。", target=target.name, reply_chars=len(handoff_reply_text))
         write_workflow_phase("rpa_send_start", target=target.name, reply_chars=len(handoff_reply_text), handoff=True)
-        verified = connector.send_text_and_verify(target.name, handoff_reply_text, exact=target.exact)
+        verified = send_reply_with_optional_multi_bubble(
+            connector=connector,
+            target=target,
+            reply_text=handoff_reply_text,
+            config=config,
+        )
         write_workflow_phase("rpa_send_done", target=target.name, verified=bool(verified.get("verified")), adapter=verified.get("adapter"), state=verified.get("state"))
         event["send_result"] = verified
         event["verified"] = bool(verified.get("verified"))
@@ -1388,10 +1423,24 @@ def process_target(
         event["rpa_reply_safety"] = reply_safety
         if reply_safety.get("applied"):
             reply_text = str(reply_safety.get("reply_text") or reply_text)
+        empty_reply_guard = ensure_non_empty_customer_visible_reply(
+            reply_text,
+            config,
+            combined=combined,
+            need_handoff=False,
+        )
+        event["empty_reply_guard"] = empty_reply_guard
+        if empty_reply_guard.get("applied"):
+            reply_text = str(empty_reply_guard.get("reply_text") or reply_text)
         event["decision"]["reply_text"] = reply_text
         write_runtime_status("thinking", f"正在向「{target.name}」发送回复。", target=target.name, reply_chars=len(reply_text))
         write_workflow_phase("rpa_send_start", target=target.name, reply_chars=len(reply_text), handoff=False)
-        verified = connector.send_text_and_verify(target.name, reply_text, exact=target.exact)
+        verified = send_reply_with_optional_multi_bubble(
+            connector=connector,
+            target=target,
+            reply_text=reply_text,
+            config=config,
+        )
         write_workflow_phase("rpa_send_done", target=target.name, verified=bool(verified.get("verified")), adapter=verified.get("adapter"), state=verified.get("state"))
         event["send_result"] = verified
         event["verified"] = bool(verified.get("verified"))
@@ -1676,6 +1725,68 @@ def split_reply_prefix(reply_text: str, config: dict[str, Any]) -> tuple[str, st
     return "", clean
 
 
+def strip_bot_reply_prefix_layers(reply_text: str, config: dict[str, Any], *, max_rounds: int = 4) -> str:
+    text = str(reply_text or "").strip()
+    if not text:
+        return ""
+    prefixes = [str(item).strip() for item in bot_reply_prefixes(config) if str(item).strip()]
+    if not prefixes:
+        return text
+    rounds = max(1, int(max_rounds or 1))
+    for _ in range(rounds):
+        changed = False
+        for prefix in prefixes:
+            if text.startswith(prefix):
+                text = text[len(prefix) :].strip()
+                changed = True
+        if not changed:
+            break
+    return text
+
+
+def has_meaningful_reply_body(text: str) -> bool:
+    compact = re.sub(r"[\W_]+", "", str(text or ""), flags=re.UNICODE)
+    return bool(compact)
+
+
+def is_low_information_handoff_reply(reply_text: str, config: dict[str, Any]) -> bool:
+    body = strip_bot_reply_prefix_layers(reply_text, config)
+    return handoff_acknowledgement_is_low_information(body)
+
+
+def empty_customer_visible_reply_fallback(config: dict[str, Any], *, combined: str, need_handoff: bool) -> str:
+    if need_handoff:
+        return handoff_acknowledgement_text(config, combined=combined)
+    return "可以，我把您的问题记下，核实清楚再回复您，这样对您也更稳一点。"
+
+
+def ensure_non_empty_customer_visible_reply(
+    reply_text: str,
+    config: dict[str, Any],
+    *,
+    combined: str = "",
+    need_handoff: bool = False,
+) -> dict[str, Any]:
+    original = str(reply_text or "").strip()
+    body = strip_bot_reply_prefix_layers(original, config)
+    if has_meaningful_reply_body(body):
+        return {"applied": False, "reason": "reply_body_nonempty", "reply_text": original}
+    fallback_body = strip_bot_reply_prefix_layers(
+        empty_customer_visible_reply_fallback(config, combined=combined, need_handoff=need_handoff),
+        config,
+    )
+    if not has_meaningful_reply_body(fallback_body):
+        fallback_body = "我先核实一下，稍后给您回复。"
+    final = format_reply(fallback_body, configured_reply_prefix(config))
+    return {
+        "applied": True,
+        "reason": "reply_body_empty_or_prefix_only",
+        "original_reply_text": original,
+        "reply_text": final,
+        "need_handoff": bool(need_handoff),
+    }
+
+
 def rpa_reply_safety_settings(config: dict[str, Any]) -> dict[str, Any]:
     settings = config.get("rpa_reply_safety") if isinstance(config.get("rpa_reply_safety"), dict) else {}
     guard = config.get("live_safety_guard") if isinstance(config.get("live_safety_guard"), dict) else {}
@@ -1789,6 +1900,389 @@ def enforce_rpa_reply_safety(reply_text: str, config: dict[str, Any]) -> dict[st
         "max_auto_reply_chars": limit,
         "original_chars": rpa_reply_content_char_count(str(reply_text or "").strip()),
     }
+
+
+def reply_multi_bubble_settings(config: dict[str, Any]) -> dict[str, Any]:
+    source = config.get("reply_multi_bubble") if isinstance(config.get("reply_multi_bubble"), dict) else {}
+    enabled = source.get("enabled", True) is not False
+    min_split_chars = positive_int(source.get("min_split_chars"), 82)
+    max_segments = max(2, min(3, positive_int(source.get("max_segments"), 3)))
+    preferred_segment_chars = max(20, positive_int(source.get("preferred_segment_chars"), 54))
+    max_segment_chars = max(preferred_segment_chars, positive_int(source.get("max_segment_chars"), 84))
+    min_segment_chars = max(14, min(preferred_segment_chars, positive_int(source.get("min_segment_chars"), 22)))
+    three_segment_threshold_chars = positive_int(
+        source.get("three_segment_threshold_chars"),
+        166,
+    )
+    inter_delay_min_ms = max(0, int(source.get("inter_segment_delay_min_ms") or 240))
+    inter_delay_max_ms = max(inter_delay_min_ms, int(source.get("inter_segment_delay_max_ms") or 560))
+    retry_enabled = source.get("retry_on_transient_send_failures", True) is not False
+    verify_each_segment = source.get("verify_each_segment", False) is True
+    raw_retry_max = source.get("max_transient_retry_per_segment")
+    try:
+        retry_max = int(raw_retry_max) if raw_retry_max not in (None, "") else 1
+    except (TypeError, ValueError):
+        retry_max = 1
+    retry_max = max(0, min(2, retry_max))
+    raw_retry_min = source.get("transient_retry_delay_min_ms")
+    raw_retry_max_delay = source.get("transient_retry_delay_max_ms")
+    try:
+        retry_delay_min_ms = int(raw_retry_min) if raw_retry_min not in (None, "") else 850
+    except (TypeError, ValueError):
+        retry_delay_min_ms = 850
+    retry_delay_min_ms = max(0, retry_delay_min_ms)
+    try:
+        retry_delay_max_ms = int(raw_retry_max_delay) if raw_retry_max_delay not in (None, "") else 1650
+    except (TypeError, ValueError):
+        retry_delay_max_ms = 1650
+    retry_delay_max_ms = max(retry_delay_min_ms, retry_delay_max_ms)
+    return {
+        "enabled": bool(enabled),
+        "min_split_chars": min_split_chars,
+        "max_segments": max_segments,
+        "preferred_segment_chars": preferred_segment_chars,
+        "max_segment_chars": max_segment_chars,
+        "min_segment_chars": min_segment_chars,
+        "three_segment_threshold_chars": three_segment_threshold_chars,
+        "inter_segment_delay_min_ms": inter_delay_min_ms,
+        "inter_segment_delay_max_ms": inter_delay_max_ms,
+        "verify_each_segment": bool(verify_each_segment),
+        "retry_on_transient_send_failures": bool(retry_enabled),
+        "max_transient_retry_per_segment": retry_max,
+        "transient_retry_delay_min_ms": retry_delay_min_ms,
+        "transient_retry_delay_max_ms": retry_delay_max_ms,
+    }
+
+
+def split_customer_visible_reply_for_multi_bubble(reply_text: str, config: dict[str, Any]) -> list[str]:
+    raw = str(reply_text or "").strip()
+    if not raw:
+        return []
+    settings = reply_multi_bubble_settings(config)
+    if not settings.get("enabled"):
+        return [raw]
+    prefix, body = split_reply_prefix(raw, config)
+    clean_body = " ".join(str(body or raw).split())
+    content_chars = rpa_reply_content_char_count(clean_body)
+    if content_chars < int(settings.get("min_split_chars") or 0):
+        return [raw]
+
+    max_segments = int(settings.get("max_segments") or 3)
+    preferred_segment_chars = int(settings.get("preferred_segment_chars") or 34)
+    desired_segments = 2
+    if max_segments >= 3:
+        three_segment_threshold = max(
+            int(settings.get("three_segment_threshold_chars") or 166),
+            preferred_segment_chars * 2 + int(settings.get("min_segment_chars") or 18),
+        )
+        if content_chars >= three_segment_threshold:
+            desired_segments = 3
+    desired_segments = max(2, min(max_segments, desired_segments))
+    target_chars = max(
+        int(settings.get("min_segment_chars") or 18),
+        min(
+            preferred_segment_chars,
+            (content_chars + desired_segments - 1) // desired_segments,
+        ),
+    )
+    min_segment_chars = int(settings.get("min_segment_chars") or 18)
+    max_segment_chars = int(settings.get("max_segment_chars") or 52)
+
+    units: list[str] = []
+    for match in re.finditer(r"[^。！？!?；;，,、\n]+[。！？!?；;，,、]?", clean_body):
+        unit = str(match.group(0) or "").strip()
+        if unit:
+            units.append(unit)
+    if not units:
+        units = [clean_body]
+
+    packed: list[str] = []
+    current = ""
+    for unit in units:
+        candidate = (current + unit).strip()
+        current_chars = rpa_reply_content_char_count(current)
+        candidate_chars = rpa_reply_content_char_count(candidate)
+        should_break = (
+            bool(current)
+            and (
+                candidate_chars > max_segment_chars
+                or (
+                    current_chars >= min_segment_chars
+                    and current_chars >= target_chars
+                    and len(packed) < desired_segments - 1
+                )
+            )
+        )
+        if should_break:
+            packed.append(current.strip())
+            current = unit
+        else:
+            current = candidate
+    if current.strip():
+        packed.append(current.strip())
+
+    # For punctuation-scarce long replies, force a natural mid split so the
+    # customer sees short conversational bubbles instead of one dense block.
+    while len(packed) < 2 and len(packed) < max_segments and rpa_reply_content_char_count(packed[0]) > max_segment_chars:
+        whole = packed.pop(0).strip()
+        cutoff = rpa_reply_content_cutoff_index(whole, max(min_segment_chars, rpa_reply_content_char_count(whole) // 2))
+        left = whole[:cutoff].rstrip("，,；;、")
+        right = whole[cutoff:].lstrip("，,；;、")
+        if not left or not right:
+            packed = [whole]
+            break
+        packed.extend([left, right])
+
+    if len(packed) > max_segments:
+        head = packed[: max_segments - 1]
+        tail = "".join(packed[max_segments - 1 :]).strip()
+        packed = head + ([tail] if tail else [])
+
+    normalized_segments: list[str] = []
+    for segment in packed:
+        clean = str(segment or "").strip().rstrip("，,；;、")
+        if not clean:
+            continue
+        if not clean.endswith(("。", "！", "？", "!", "?")):
+            clean = clean + "。"
+        normalized_segments.append(clean)
+
+    if len(normalized_segments) < 2:
+        return [raw]
+
+    if len(normalized_segments) > max_segments:
+        normalized_segments = normalized_segments[: max_segments - 1] + ["".join(normalized_segments[max_segments - 1 :]).strip()]
+
+    if prefix:
+        first = format_reply(normalized_segments[0], prefix)
+    else:
+        first = normalized_segments[0]
+    return [first] + normalized_segments[1:]
+
+
+def send_reply_with_optional_multi_bubble(
+    *,
+    connector: WeChatConnector,
+    target: TargetConfig,
+    reply_text: str,
+    config: dict[str, Any],
+) -> dict[str, Any]:
+    segments = split_customer_visible_reply_for_multi_bubble(reply_text, config)
+    settings = reply_multi_bubble_settings(config)
+    if not segments:
+        return {"ok": False, "verified": False, "state": "empty_reply_segment"}
+    if len(segments) == 1:
+        attempts = 0
+        retry_attempts = 0
+        single: dict[str, Any] = {}
+        while True:
+            attempts += 1
+            write_workflow_phase(
+                "rpa_send_segment_start",
+                target=target.name,
+                segment_index=1,
+                segment_count=1,
+                segment_attempt=attempts,
+                reply_chars=len(segments[0]),
+            )
+            attempt_result = connector.send_text_and_verify(target.name, segments[0], exact=target.exact)
+            single = dict(attempt_result) if isinstance(attempt_result, dict) else {"ok": False, "verified": False}
+            verified = bool(single.get("verified"))
+            state = _send_result_state(single)
+            write_workflow_phase(
+                "rpa_send_segment_done",
+                target=target.name,
+                segment_index=1,
+                segment_count=1,
+                segment_attempt=attempts,
+                verified=verified,
+                state=state,
+            )
+            if verified:
+                break
+            delay = transient_send_retry_delay_seconds(single, settings, retry_index=attempts - 1)
+            if delay <= 0:
+                break
+            retry_attempts += 1
+            write_workflow_phase(
+                "rpa_send_segment_retry_wait",
+                target=target.name,
+                segment_index=1,
+                segment_count=1,
+                segment_attempt=attempts,
+                retry_after_seconds=round(delay, 3),
+                state=state,
+            )
+            time.sleep(delay)
+        payload = dict(single) if isinstance(single, dict) else {"ok": False, "verified": False}
+        payload.setdefault("multi_bubble", False)
+        payload.setdefault("segment_count", 1)
+        payload.setdefault("sent_segments", 1 if payload.get("verified") else 0)
+        payload.setdefault("segments", [segments[0]])
+        payload.setdefault("segment_attempt_counts", [attempts])
+        payload.setdefault("retry_attempts", retry_attempts)
+        return payload
+
+    delay_min = float(int(settings.get("inter_segment_delay_min_ms") or 240)) / 1000.0
+    delay_max = float(int(settings.get("inter_segment_delay_max_ms") or 560)) / 1000.0
+    verify_each_segment = bool(settings.get("verify_each_segment"))
+    segment_results: list[dict[str, Any]] = []
+    segment_attempt_counts: list[int] = []
+    sent_segments = 0
+    retry_attempts = 0
+    for index, segment in enumerate(segments, start=1):
+        if index > 1:
+            pause = random.uniform(delay_min, delay_max)
+            time.sleep(max(0.0, pause))
+        attempts = 0
+        result: dict[str, Any] = {}
+        while True:
+            attempts += 1
+            write_workflow_phase(
+                "rpa_send_segment_start",
+                target=target.name,
+                segment_index=index,
+                segment_count=len(segments),
+                segment_attempt=attempts,
+                reply_chars=len(segment),
+            )
+            should_verify_segment = verify_each_segment or index == len(segments)
+            if should_verify_segment or not callable(getattr(connector, "send_text", None)):
+                result = connector.send_text_and_verify(target.name, segment, exact=target.exact)
+            else:
+                send_only = connector.send_text(target.name, segment, exact=target.exact)  # type: ignore[attr-defined]
+                send_only_meta = send_only if isinstance(send_only, dict) else {}
+                result = {
+                    "ok": bool(send_only_meta.get("ok")),
+                    "verified": bool(send_only_meta.get("ok")),
+                    "send": send_only_meta,
+                    "verification_mode": "send_only_intermediate",
+                    "adapter": send_only_meta.get("adapter"),
+                    "state": send_only_meta.get("state"),
+                }
+            verified = bool(result.get("verified"))
+            state = _send_result_state(result)
+            write_workflow_phase(
+                "rpa_send_segment_done",
+                target=target.name,
+                segment_index=index,
+                segment_count=len(segments),
+                segment_attempt=attempts,
+                verified=verified,
+                state=state,
+            )
+            if verified:
+                break
+            delay = transient_send_retry_delay_seconds(result, settings, retry_index=attempts - 1)
+            if delay <= 0:
+                break
+            retry_attempts += 1
+            write_workflow_phase(
+                "rpa_send_segment_retry_wait",
+                target=target.name,
+                segment_index=index,
+                segment_count=len(segments),
+                segment_attempt=attempts,
+                retry_after_seconds=round(delay, 3),
+                state=state,
+            )
+            time.sleep(delay)
+        segment_results.append(result)
+        segment_attempt_counts.append(attempts)
+        if not bool(result.get("verified")):
+            break
+        sent_segments += 1
+
+    last = segment_results[-1] if segment_results else {}
+    send_meta = last.get("send") if isinstance(last.get("send"), dict) else last
+    send_meta = send_meta if isinstance(send_meta, dict) else {}
+    all_verified = sent_segments == len(segments)
+    payload: dict[str, Any] = {
+        "ok": bool(all_verified),
+        "verified": bool(all_verified),
+        "multi_bubble": True,
+        "verification_strategy": "verify_each_segment" if verify_each_segment else "verify_final_segment_only",
+        "segments": segments,
+        "segment_count": len(segments),
+        "sent_segments": sent_segments,
+        "segment_results": segment_results,
+        "segment_attempt_counts": segment_attempt_counts,
+        "retry_attempts": retry_attempts,
+        "send": send_meta,
+        "messages": last.get("messages"),
+    }
+    if not all_verified:
+        failed_index = min(len(segments) - 1, sent_segments)
+        payload["failed_segment_index"] = failed_index + 1
+        payload["failed_segment_text"] = segments[failed_index]
+    for key in ("adapter", "state", "guard", "error"):
+        if key in send_meta:
+            payload[key] = send_meta.get(key)
+    return payload
+
+
+TRANSIENT_SEND_RETRYABLE_STATES = {
+    "send_rate_limited",
+    "send_guard_blocked",
+    "send_geometry_blocked",
+    "target_not_confirmed",
+    "send_uia_unavailable",
+    "send_input_not_ready",
+    "send_lock_timeout",
+}
+
+
+def _send_result_meta(result: dict[str, Any]) -> dict[str, Any]:
+    send_meta = result.get("send") if isinstance(result.get("send"), dict) else result
+    return send_meta if isinstance(send_meta, dict) else {}
+
+
+def _send_result_state(result: dict[str, Any]) -> str:
+    send_meta = _send_result_meta(result)
+    state = str(send_meta.get("state") or "").strip()
+    if state:
+        return state
+    nested = send_meta.get("send_result") if isinstance(send_meta.get("send_result"), dict) else {}
+    nested_state = str(nested.get("state") or "").strip()
+    if nested_state:
+        return nested_state
+    return str(result.get("state") or "").strip()
+
+
+def transient_send_retry_delay_seconds(
+    result: dict[str, Any],
+    settings: dict[str, Any],
+    *,
+    retry_index: int,
+) -> float:
+    if settings.get("retry_on_transient_send_failures") is not True:
+        return 0.0
+    max_retry = int(settings.get("max_transient_retry_per_segment") or 0)
+    if retry_index >= max_retry:
+        return 0.0
+    state = _send_result_state(result)
+    if state not in TRANSIENT_SEND_RETRYABLE_STATES:
+        return 0.0
+    delay_min = float(int(settings.get("transient_retry_delay_min_ms") or 850)) / 1000.0
+    delay_max = float(int(settings.get("transient_retry_delay_max_ms") or 1650)) / 1000.0
+    if state in {"send_lock_timeout", "send_input_not_ready"}:
+        # Foreground/lock contention usually recovers quickly; use shorter
+        # retry jitter to reduce customer-visible tail latency.
+        delay_min = min(delay_min, 0.22)
+        delay_max = min(delay_max, 0.68)
+        if delay_max < delay_min:
+            delay_max = delay_min
+    delay = random.uniform(max(0.0, delay_min), max(max(0.0, delay_min), delay_max))
+    send_meta = _send_result_meta(result)
+    guard = send_meta.get("guard") if isinstance(send_meta.get("guard"), dict) else {}
+    rate = guard.get("rate") if isinstance(guard.get("rate"), dict) else {}
+    try:
+        wait_seconds = float(rate.get("wait_seconds") or 0.0)
+    except (TypeError, ValueError):
+        wait_seconds = 0.0
+    if wait_seconds > 0:
+        delay = max(delay, min(wait_seconds + 0.2, 6.0))
+    return delay
 
 
 def recent_customer_visible_reply_texts(target_state: dict[str, Any], *, limit: int = 5) -> list[str]:
@@ -2241,6 +2735,13 @@ def sanitize_customer_visible_reply_text(
     prefix, body = split_reply_prefix(reply_text, config)
     if not body:
         return str(reply_text or "").strip()
+    # Preserve social off-topic soft redirect text even when the caller requests
+    # handoff-style concealment; otherwise it gets overwritten into a generic
+    # "核实负责人" template and loses conversational quality.
+    if force_handoff_style:
+        social_redirect = soft_social_redirect_for_handoff(combined)
+        if social_redirect:
+            return format_reply(social_redirect, prefix or configured_reply_prefix(config))
     if not force_handoff_style and not has_explicit_handoff_phrase(body):
         return str(reply_text or "").strip()
     safe_body = concealed_handoff_reply(combined=combined, reason=reason, recent_reply_texts=recent_reply_texts)
@@ -2277,6 +2778,65 @@ def polish_customer_visible_reply_text(
     }
 
 
+def final_visible_polish_speed_settings(config: dict[str, Any]) -> dict[str, Any]:
+    polish = config.get("final_visible_llm_polish") if isinstance(config.get("final_visible_llm_polish"), dict) else {}
+    short_skip_enabled = polish.get("skip_short_reply_fast_path_enabled", True) is not False
+    short_skip_max_chars = positive_int(polish.get("skip_short_reply_max_chars"), 46)
+    short_skip_max_sentences = positive_int(polish.get("skip_short_reply_max_sentences"), 2)
+    final_cap = positive_int(polish.get("max_reply_chars"), 620)
+    rpa_cap = int(rpa_reply_safety_settings(config).get("max_auto_reply_chars") or 0)
+    effective_cap = min(final_cap, rpa_cap) if rpa_cap > 0 else final_cap
+    return {
+        "short_skip_enabled": bool(short_skip_enabled),
+        "short_skip_max_chars": short_skip_max_chars,
+        "short_skip_max_sentences": short_skip_max_sentences,
+        "effective_polish_chars_cap": max(1, effective_cap),
+    }
+
+
+def customer_visible_sentence_count(text: str) -> int:
+    fragments = [item for item in re.split(r"[。！？!?；;\n]+", str(text or "")) if re.sub(r"[\s，,、]+", "", item)]
+    return len(fragments)
+
+
+def pre_cap_reply_body_for_final_polish(body: str, config: dict[str, Any]) -> str:
+    clean = str(body or "").strip()
+    if not clean:
+        return clean
+    cap = int(final_visible_polish_speed_settings(config).get("effective_polish_chars_cap") or 0)
+    if cap <= 0:
+        return clean
+    return truncate_reply_body_for_rpa_safety(clean, cap)
+
+
+def should_fast_skip_final_visible_polish(
+    *,
+    reply_body: str,
+    config: dict[str, Any],
+    source_channel: str,
+    needs_handoff: bool,
+) -> bool:
+    if needs_handoff:
+        return False
+    settings = final_visible_polish_speed_settings(config)
+    if not settings.get("short_skip_enabled"):
+        return False
+    body = str(reply_body or "").strip()
+    if not body:
+        return False
+    if rpa_reply_content_char_count(body) > int(settings.get("short_skip_max_chars") or 0):
+        return False
+    if customer_visible_sentence_count(body) > int(settings.get("short_skip_max_sentences") or 2):
+        return False
+    if any(token in body for token in ("最低价", "报价", "底价", "包过", "贷款", "合同", "发票", "置换", "赔偿")):
+        return False
+    # Social / greeting short replies are already conversational after local
+    # naturalness normalization; skipping remote polish reduces latency.
+    if str(source_channel or "").strip().lower() in {"social", "normal", "friendly"}:
+        return True
+    return False
+
+
 def finalize_customer_visible_reply_with_llm(
     reply_text: str,
     *,
@@ -2287,16 +2847,35 @@ def finalize_customer_visible_reply_with_llm(
     needs_handoff: bool = False,
 ) -> dict[str, Any]:
     prefix, body = split_reply_prefix(reply_text, config)
+    draft_body = pre_cap_reply_body_for_final_polish(body or str(reply_text or "").strip(), config)
+    if should_fast_skip_final_visible_polish(
+        reply_body=draft_body,
+        config=config,
+        source_channel=source_channel,
+        needs_handoff=needs_handoff,
+    ):
+        return {
+            "enabled": bool((config.get("final_visible_llm_polish", {}) or {}).get("enabled", False)),
+            "required": bool((config.get("final_visible_llm_polish", {}) or {}).get("required_for_send", False)),
+            "applied": False,
+            "passed": True,
+            "source_channel": source_channel,
+            "reason": "final_visible_llm_polish_fast_local_skip",
+            "raw_reply_text": draft_body,
+            "reply_text": format_reply(draft_body, prefix or configured_reply_prefix(config)),
+            "duration_seconds": 0.0,
+        }
     result = maybe_polish_customer_visible_reply(
         config=config,
         customer_message=combined,
-        reply_text=body or str(reply_text or "").strip(),
+        reply_text=draft_body,
         recent_reply_texts=recent_reply_texts or [],
         source_channel=source_channel,
         needs_handoff=needs_handoff,
     )
     if result.get("passed"):
-        polished_body = str(result.get("reply_text") or body or reply_text).strip()
+        polished_body = str(result.get("reply_text") or draft_body or reply_text).strip()
+        polished_body = pre_cap_reply_body_for_final_polish(polished_body, config)
         result["reply_text"] = format_reply(polished_body, prefix or configured_reply_prefix(config))
     return result
 
@@ -2538,6 +3117,9 @@ def build_operator_handoff_reply_text(
     combined: str = "",
 ) -> str:
     if decision.rule_name == "llm_synthesis_handoff" and str(current_reply_text or "").strip():
+        social_redirect = soft_social_redirect_for_handoff(combined)
+        if social_redirect:
+            return format_reply(social_redirect, configured_reply_prefix(config))
         return current_reply_text
     if decision.rule_name == "llm_synthesis_reply" and llm_reply_already_handoff_style(current_reply_text):
         return current_reply_text
@@ -2550,6 +3132,44 @@ def build_operator_handoff_reply_text(
     return format_reply(handoff_acknowledgement_text(config, combined=combined), configured_reply_prefix(config))
 
 
+def soft_social_redirect_for_handoff(combined: str) -> str:
+    current = re.sub(r"\s+", "", current_customer_text(combined))
+    if not current:
+        return ""
+    social_terms = (
+        "天气",
+        "笑话",
+        "吃饭",
+        "午饭",
+        "晚饭",
+        "电影",
+        "电视剧",
+        "音乐",
+        "宠物",
+        "旅游",
+        "游戏",
+        "八卦",
+    )
+    if not any(term in current for term in social_terms):
+        return ""
+    business_terms = (
+        "预算",
+        "推荐",
+        "车",
+        "看车",
+        "试驾",
+        "价格",
+        "优惠",
+        "贷款",
+        "分期",
+        "置换",
+        "过户",
+    )
+    if any(term in current for term in business_terms):
+        return ""
+    return "哈哈，这个话题我就不乱接梗了，天气信息以实时天气为准。咱们先把看车需求聊明白：预算、用途、是否置换这三点给我，我马上继续帮您筛车。"
+
+
 def handoff_acknowledgement_text(config: dict[str, Any], *, combined: str = "") -> str:
     settings = config.get("handoff", {}) or {}
     conceal_handoff = identity_guard_enabled_for_customer_reply(config)
@@ -2558,6 +3178,8 @@ def handoff_acknowledgement_text(config: dict[str, Any], *, combined: str = "") 
         or "这个问题我当前无法直接确认，我把情况记下，问清楚负责人意见后再回复您。"
     )
     if handoff_acknowledgement_is_formulaic(text):
+        if handoff_acknowledgement_is_low_information(text):
+            return concise_handoff_confirmation_text(combined=combined, conceal_handoff=conceal_handoff)
         if str(combined or "").strip() and conceal_handoff:
             return concealed_handoff_reply(combined=combined, reason="")
         if "直接按" in str(combined or ""):
@@ -2572,6 +3194,11 @@ def handoff_acknowledgement_text(config: dict[str, Any], *, combined: str = "") 
 
 def handoff_acknowledgement_is_formulaic(text: str) -> bool:
     formulaic_terms = (
+        "收到，我先看一下",
+        "收到我先看一下",
+        "收到先看一下",
+        "我先看一下",
+        "我先看下",
         "收到，我先记录",
         "稍后继续处理",
         "请示上级",
@@ -2582,6 +3209,29 @@ def handoff_acknowledgement_is_formulaic(text: str) -> bool:
         "问清楚负责人",
     )
     return any(term in str(text or "") for term in formulaic_terms)
+
+
+def handoff_acknowledgement_is_low_information(text: str) -> bool:
+    value = re.sub(r"[，,。.!！？、\s]+", "", str(text or ""))
+    if not value:
+        return True
+    markers = ("收到我先看一下", "收到我先看下", "收到先看一下", "我先看一下", "我先看下", "先看一下", "先看下")
+    return any(marker in value for marker in markers) and len(value) <= 14
+
+
+def concise_handoff_confirmation_text(*, combined: str = "", conceal_handoff: bool = True) -> str:
+    context = re.sub(r"\s+", "", str(combined or ""))
+    has_any = lambda terms: any(term in context for term in terms)
+    if is_location_contact_context(context):
+        return "收到，我先确认门店地址和到店对接，稍后回您。"
+    has_specific_price_target = bool(re.search(r"\d+(?:\.\d+)?(?:万|整)", context))
+    if (has_specific_price_target and has_any(("最低", "底价", "能不能给", "给到", "谈到", "便宜点", "少点"))) or has_any(PRICE_HARD_BOUNDARY_TERMS):
+        return "收到，这块价格我先核一下，稍后给您准话。"
+    if has_any(CONTACT_DATA_TERMS) and has_any(APPOINTMENT_TERMS):
+        return "收到，您的信息我记下了，我先核排期，稍后回您。"
+    if conceal_handoff:
+        return "收到，我先核一下，稍后给您明确回复。"
+    return "收到，这个我先确认下，稍后给您回复。"
 
 
 def llm_reply_already_handoff_style(text: str) -> bool:
@@ -2884,6 +3534,7 @@ def maybe_match_product_knowledge(
         combined,
         knowledge,
         context=target_state.get("conversation_context", {}) or {},
+        matching_settings=product_entity_resolution_settings(config),
     )
     result["path"] = str(path)
     return result
@@ -3004,6 +3655,18 @@ def apply_local_customer_service_settings(config: dict[str, Any]) -> dict[str, A
     llm_synthesis.setdefault("fallback_to_existing_reply", True)
     merged["llm_reply_synthesis"] = llm_synthesis
 
+    product_entity_resolution = dict(merged.get("product_entity_resolution", {}) or {})
+    product_entity_resolution["enabled"] = use_llm and product_entity_resolution.get("enabled", True) is not False
+    if product_entity_resolution.get("enabled", False) and str(product_entity_resolution.get("provider") or "manual_json") == "manual_json":
+        product_entity_resolution["provider"] = "deepseek"
+    product_entity_resolution.setdefault("model_tier", "flash")
+    product_entity_resolution.setdefault("timeout_seconds", 3)
+    product_entity_resolution.setdefault("max_candidates", 12)
+    product_entity_resolution.setdefault("min_confidence", 0.72)
+    product_entity_resolution.setdefault("temperature", 0.0)
+    product_entity_resolution.setdefault("max_tokens", 240)
+    merged["product_entity_resolution"] = product_entity_resolution
+
     final_polish = dict(merged.get("final_visible_llm_polish", {}) or {})
     final_polish["enabled"] = use_llm and settings.get("final_visible_llm_polish_enabled", True) is not False
     final_polish["identity_guard_enabled"] = settings.get("identity_guard_enabled", True) is not False
@@ -3017,7 +3680,34 @@ def apply_local_customer_service_settings(config: dict[str, Any]) -> dict[str, A
     final_polish.setdefault("temperature", 0.45)
     final_polish.setdefault("max_reply_chars", 620)
     final_polish.setdefault("allow_send_when_unavailable", True)
+    final_polish.setdefault("skip_short_reply_fast_path_enabled", True)
+    final_polish.setdefault("skip_short_reply_max_chars", 46)
+    final_polish.setdefault("skip_short_reply_max_sentences", 2)
     merged["final_visible_llm_polish"] = final_polish
+
+    reply_multi_bubble = dict(merged.get("reply_multi_bubble", {}) or {})
+    reply_multi_bubble.setdefault("enabled", True)
+    reply_multi_bubble.setdefault("min_split_chars", 82)
+    reply_multi_bubble.setdefault("max_segments", 3)
+    reply_multi_bubble.setdefault("preferred_segment_chars", 54)
+    reply_multi_bubble.setdefault("max_segment_chars", 84)
+    reply_multi_bubble.setdefault("min_segment_chars", 22)
+    reply_multi_bubble.setdefault("three_segment_threshold_chars", 166)
+    reply_multi_bubble.setdefault("inter_segment_delay_min_ms", 180)
+    reply_multi_bubble.setdefault("inter_segment_delay_max_ms", 420)
+    reply_multi_bubble.setdefault("verify_each_segment", False)
+    reply_multi_bubble.setdefault("retry_on_transient_send_failures", True)
+    reply_multi_bubble.setdefault("max_transient_retry_per_segment", 1)
+    reply_multi_bubble.setdefault("transient_retry_delay_min_ms", 600)
+    reply_multi_bubble.setdefault("transient_retry_delay_max_ms", 1200)
+    merged["reply_multi_bubble"] = reply_multi_bubble
+
+    scheduler_freshness = dict(merged.get("scheduler_freshness", {}) or {})
+    scheduler_freshness.setdefault("enabled", True)
+    scheduler_freshness.setdefault("mode", "preview_first")
+    scheduler_freshness.setdefault("strict_check_interval_seconds", 75)
+    scheduler_freshness.setdefault("strict_check_after_llm_seconds", 45)
+    merged["scheduler_freshness"] = scheduler_freshness
 
     data_capture = dict(merged.get("data_capture", {}) or {})
     data_capture["enabled"] = settings.get("data_capture_enabled", True) is not False
@@ -3078,7 +3768,10 @@ def maybe_analyze_intent(
 
     evidence_pack = build_evidence_pack(
         combined,
-        context=conversation_context_from_product_result(product_knowledge or {}),
+        context=build_evidence_context_for_pack(
+            config,
+            conversation_context_from_product_result(product_knowledge or {}),
+        ),
     )
     analysis_context = build_intent_context(
         config,
@@ -3102,6 +3795,13 @@ def maybe_analyze_intent(
     }
     safety = payload.get("evidence", {}).get("safety", {}) or {}
     clear_no_relevant_handoff_after_safe_rule_match(safety, decision, combined=combined, settings=config.get("llm_reply_synthesis", {}) or {})
+    social_redirect = soft_social_redirect_for_handoff(combined)
+    if social_redirect and isinstance(safety, dict) and safety.get("must_handoff"):
+        # Off-topic social small-talk should prefer a friendly soft redirect,
+        # instead of inheriting stale business handoff signals from context.
+        safety["must_handoff"] = False
+        safety["reasons"] = []
+        payload["social_offtopic_soft_redirect"] = True
     if isinstance(safety, dict) and safety.get("must_handoff"):
         reasons = [str(item) for item in safety.get("reasons", []) or [] if str(item)]
         payload["needs_handoff"] = True
@@ -3264,6 +3964,21 @@ def conversation_context_from_product_result(product_knowledge: dict[str, Any]) 
     }
 
 
+def product_entity_resolution_settings(config: dict[str, Any]) -> dict[str, Any]:
+    settings = config.get("product_entity_resolution") if isinstance(config.get("product_entity_resolution"), dict) else {}
+    normalized = dict(settings)
+    normalized["enabled"] = bool(normalized.get("enabled", False))
+    return normalized
+
+
+def build_evidence_context_for_pack(config: dict[str, Any], base_context: dict[str, Any]) -> dict[str, Any]:
+    context = dict(base_context or {})
+    settings = product_entity_resolution_settings(config)
+    if settings:
+        context["product_entity_resolution"] = settings
+    return context
+
+
 def summarize_evidence_pack(evidence_pack: dict[str, Any]) -> dict[str, Any]:
     evidence = evidence_pack.get("evidence", {}) or {}
     rag = evidence_pack.get("rag_evidence", {}) or {}
@@ -3390,6 +4105,7 @@ def maybe_apply_llm_reply(
     intent_assist: dict[str, Any],
     product_knowledge: dict[str, Any],
     data_capture: dict[str, Any],
+    combined: str = "",
 ) -> dict[str, Any]:
     settings = (config.get("intent_assist", {}) or {}).get("llm_advisory", {}) or {}
     payload: dict[str, Any] = {
@@ -3425,14 +4141,15 @@ def maybe_apply_llm_reply(
         if not settings.get("allow_llm_handoff", True):
             payload["reason"] = "llm_handoff_not_allowed"
             return payload
+        handoff_text = handoff_acknowledgement_text(config, combined=combined)
         payload.update(
             {
                 "applied": True,
                 "rule_name": "llm_boundary_handoff",
                 "reason": str(candidate.get("reason") or "llm_boundary_handoff"),
                 "needs_handoff": True,
-                "raw_reply_text": handoff_acknowledgement_text(config),
-                "reply_text": format_reply(handoff_acknowledgement_text(config), configured_reply_prefix(config)),
+                "raw_reply_text": handoff_text,
+                "reply_text": format_reply(handoff_text, configured_reply_prefix(config)),
             }
         )
         return payload
@@ -4261,7 +4978,21 @@ def maybe_enrich_messages_with_anchor_history(
         default=positive_int(settings.get("max_load_times"), 5),
         maximum=16,
     )
-    if max_scroll_steps <= 0:
+    low_volume_fast_path = bool(settings.get("low_volume_fast_path_enabled", True))
+    low_volume_eligible_max = bounded_nonnegative_int(settings.get("low_volume_fast_path_max_eligible"), default=2, maximum=8)
+    use_low_volume_profile = (
+        low_volume_fast_path
+        and initial_selection.eligible_count > 0
+        and initial_selection.eligible_count <= max(1, low_volume_eligible_max)
+        and not initial_selection.truncated
+    )
+    effective_scroll_steps = max_scroll_steps
+    if use_low_volume_profile:
+        effective_scroll_steps = min(
+            effective_scroll_steps,
+            max(1, bounded_nonnegative_int(settings.get("low_volume_fast_path_max_scroll_steps"), default=2, maximum=8)),
+        )
+    if effective_scroll_steps <= 0:
         enriched = dict(payload)
         enriched["_history_backfill"] = {
             "enabled": True,
@@ -4272,10 +5003,38 @@ def maybe_enrich_messages_with_anchor_history(
             "anchor_count": anchor_count,
             "anchor_found_initial": False,
             "anchor_index_initial": -1,
+            "search_profile": "low_volume_fast_path" if use_low_volume_profile else "default",
             "gap_risk": bool(settings.get("block_on_anchor_not_found", settings.get("block_on_gap_risk", True))),
             "gap_reason": "anchor_missing_history_search_disabled",
         }
         return enriched
+
+    max_duration_seconds = bounded_nonnegative_int(settings.get("max_duration_seconds"), default=12, maximum=60)
+    max_snapshots = bounded_nonnegative_int(settings.get("max_snapshots"), default=max_scroll_steps + 2, maximum=24)
+    min_delay_ms = bounded_nonnegative_int(settings.get("min_delay_ms"), default=180, maximum=5000)
+    max_delay_ms = bounded_nonnegative_int(settings.get("max_delay_ms"), default=650, maximum=10000)
+    if use_low_volume_profile:
+        max_duration_seconds = min(
+            max_duration_seconds,
+            max(3, bounded_nonnegative_int(settings.get("low_volume_fast_path_max_duration_seconds"), default=6, maximum=30)),
+        )
+        max_snapshots = min(
+            max_snapshots,
+            max(3, bounded_nonnegative_int(settings.get("low_volume_fast_path_max_snapshots"), default=4, maximum=12)),
+        )
+        min_delay_ms = min(
+            min_delay_ms,
+            max(50, bounded_nonnegative_int(settings.get("low_volume_fast_path_min_delay_ms"), default=110, maximum=2000)),
+        )
+        max_delay_ms = min(
+            max_delay_ms,
+            max(
+                min_delay_ms,
+                bounded_nonnegative_int(settings.get("low_volume_fast_path_max_delay_ms"), default=320, maximum=3000),
+            ),
+        )
+    if max_snapshots < effective_scroll_steps + 1:
+        max_snapshots = effective_scroll_steps + 1
 
     try:
         loaded = connector.get_messages(
@@ -4285,11 +5044,11 @@ def maybe_enrich_messages_with_anchor_history(
             anchor_ids=sorted(anchor_ids),
             anchor_content_keys=sorted(anchor_content_keys),
             reply_content_keys=sorted(reply_content_keys),
-            max_scroll_steps=max_scroll_steps,
-            max_duration_seconds=bounded_nonnegative_int(settings.get("max_duration_seconds"), default=12, maximum=60),
-            max_snapshots=bounded_nonnegative_int(settings.get("max_snapshots"), default=max_scroll_steps + 2, maximum=24),
-            min_delay_ms=bounded_nonnegative_int(settings.get("min_delay_ms"), default=180, maximum=5000),
-            max_delay_ms=bounded_nonnegative_int(settings.get("max_delay_ms"), default=650, maximum=10000),
+            max_scroll_steps=effective_scroll_steps,
+            max_duration_seconds=max_duration_seconds,
+            max_snapshots=max_snapshots,
+            min_delay_ms=min_delay_ms,
+            max_delay_ms=max_delay_ms,
             restore_to_latest=bool(settings.get("restore_to_latest", True)),
         )
     except Exception as exc:
@@ -4304,6 +5063,14 @@ def maybe_enrich_messages_with_anchor_history(
             "anchor_count": anchor_count,
             "anchor_found_initial": False,
             "anchor_index_initial": -1,
+            "search_profile": "low_volume_fast_path" if use_low_volume_profile else "default",
+            "search_limits": {
+                "max_scroll_steps": effective_scroll_steps,
+                "max_duration_seconds": max_duration_seconds,
+                "max_snapshots": max_snapshots,
+                "min_delay_ms": min_delay_ms,
+                "max_delay_ms": max_delay_ms,
+            },
             "gap_risk": True,
             "gap_reason": "anchor_missing_history_load_exception",
         }
@@ -4323,6 +5090,14 @@ def maybe_enrich_messages_with_anchor_history(
             "anchor_count": anchor_count,
             "anchor_found_initial": False,
             "anchor_index_initial": -1,
+            "search_profile": "low_volume_fast_path" if use_low_volume_profile else "default",
+            "search_limits": {
+                "max_scroll_steps": effective_scroll_steps,
+                "max_duration_seconds": max_duration_seconds,
+                "max_snapshots": max_snapshots,
+                "min_delay_ms": min_delay_ms,
+                "max_delay_ms": max_delay_ms,
+            },
             "gap_risk": True,
             "gap_reason": "anchor_missing_history_load_failed",
         }
@@ -4359,6 +5134,14 @@ def maybe_enrich_messages_with_anchor_history(
             "anchor_index_initial": -1,
             "anchor_found_after_history_load": loaded_anchor_index >= 0 or bool(sidecar_history_load.get("anchor_found")),
             "anchor_index_after_history_load": loaded_anchor_index,
+            "search_profile": "low_volume_fast_path" if use_low_volume_profile else "default",
+            "search_limits": {
+                "max_scroll_steps": effective_scroll_steps,
+                "max_duration_seconds": max_duration_seconds,
+                "max_snapshots": max_snapshots,
+                "min_delay_ms": min_delay_ms,
+                "max_delay_ms": max_delay_ms,
+            },
             "history_window_contains_initial_batch": False,
             "fallback_to_initial_window": True,
             "gap_risk": False,
@@ -4400,6 +5183,14 @@ def maybe_enrich_messages_with_anchor_history(
             "anchor_index_initial": -1,
             "anchor_found_after_history_load": recovered_anchor_index >= 0 or bool(sidecar_history_load.get("anchor_found")),
             "anchor_index_after_history_load": recovered_anchor_index,
+            "search_profile": "low_volume_fast_path" if use_low_volume_profile else "default",
+            "search_limits": {
+                "max_scroll_steps": effective_scroll_steps,
+                "max_duration_seconds": max_duration_seconds,
+                "max_snapshots": max_snapshots,
+                "min_delay_ms": min_delay_ms,
+                "max_delay_ms": max_delay_ms,
+            },
             "history_window_contains_initial_batch": False,
             "fallback_to_initial_window": True,
             "gap_risk": False,
@@ -4438,6 +5229,14 @@ def maybe_enrich_messages_with_anchor_history(
         "anchor_index_initial": -1,
         "anchor_found_after_history_load": anchor_found,
         "anchor_index_after_history_load": recovered_anchor_index,
+        "search_profile": "low_volume_fast_path" if use_low_volume_profile else "default",
+        "search_limits": {
+            "max_scroll_steps": effective_scroll_steps,
+            "max_duration_seconds": max_duration_seconds,
+            "max_snapshots": max_snapshots,
+            "min_delay_ms": min_delay_ms,
+            "max_delay_ms": max_delay_ms,
+        },
         "history_window_contains_initial_batch": True,
         "gap_risk": gap_risk,
         "gap_reason": "anchor_missing_after_bounded_history_search" if gap_risk else "",
@@ -4474,6 +5273,13 @@ def history_backfill_settings(config: dict[str, Any] | None = None) -> dict[str,
     settings.setdefault("max_snapshots", 8)
     settings.setdefault("min_delay_ms", 180)
     settings.setdefault("max_delay_ms", 650)
+    settings.setdefault("low_volume_fast_path_enabled", True)
+    settings.setdefault("low_volume_fast_path_max_eligible", 2)
+    settings.setdefault("low_volume_fast_path_max_scroll_steps", 2)
+    settings.setdefault("low_volume_fast_path_max_duration_seconds", 6)
+    settings.setdefault("low_volume_fast_path_max_snapshots", 4)
+    settings.setdefault("low_volume_fast_path_min_delay_ms", 110)
+    settings.setdefault("low_volume_fast_path_max_delay_ms", 320)
     settings.setdefault("restore_to_latest", True)
     settings.setdefault("trigger_when_anchor_missing", True)
     settings.setdefault("block_on_anchor_not_found", settings.get("block_on_gap_risk", True))
@@ -5186,6 +5992,9 @@ def customer_service_anchor_payload(target_state: dict[str, Any]) -> dict[str, l
         normalized_key = normalized_processed_content_key(key)
         if normalized_key:
             anchor_content_keys.add(normalized_key)
+        content_only_key = normalized_content_only_processed_key(key)
+        if content_only_key:
+            anchor_content_keys.add(content_only_key)
 
     reply_content_keys: set[str] = set()
     last_anchor = target_state.get("last_successful_reply_anchor")
@@ -5202,6 +6011,9 @@ def customer_service_anchor_payload(target_state: dict[str, Any]) -> dict[str, l
             normalized_value = normalized_processed_content_key(value)
             if normalized_value:
                 anchor_content_keys.add(normalized_value)
+            content_only_value = normalized_content_only_processed_key(value)
+            if content_only_value:
+                anchor_content_keys.add(content_only_value)
         reply_key = normalize_reply_content_key(str(last_anchor.get("reply_text") or last_anchor.get("reply_text_sample") or ""))
         if reply_key:
             reply_content_keys.add(reply_key)
@@ -5220,6 +6032,9 @@ def customer_service_anchor_payload(target_state: dict[str, Any]) -> dict[str, l
             mock_message = {"sender": "customer", "type": "text", "content": str(content or "")}
             for key in message_processed_content_keys(mock_message):
                 anchor_content_keys.add(key)
+                content_only_key = normalized_content_only_processed_key(key)
+                if content_only_key:
+                    anchor_content_keys.add(content_only_key)
         reply_key = normalize_reply_content_key(str(item.get("reply_text") or ""))
         if reply_key:
             reply_content_keys.add(reply_key)
@@ -5246,13 +6061,11 @@ def find_latest_customer_service_anchor_index(
         if not isinstance(message, dict):
             continue
         message_id = str(message.get("id") or "").strip()
-        stable_key = message_stable_content_key(message)
-        content_key = message_content_dedupe_key(message)
+        match_keys = message_anchor_match_keys(message)
         reply_key = normalize_reply_content_key(str(message.get("content") or ""))
         if (
             (message_id and message_id in anchor_ids)
-            or (stable_key and stable_key in anchor_content_keys)
-            or (content_key and content_key in anchor_content_keys)
+            or any(key in anchor_content_keys for key in match_keys)
             or (reply_key and reply_key in reply_keys)
         ):
             latest = index
@@ -5279,6 +6092,15 @@ def message_original_match_keys(message: dict[str, Any]) -> list[str]:
             continue
         content_only = "\x1f".join(["content", parts[2]])
         if content_only not in keys:
+            keys.append(content_only)
+    return keys
+
+
+def message_anchor_match_keys(message: dict[str, Any]) -> list[str]:
+    keys = message_processed_content_keys(message)
+    for key in list(keys):
+        content_only = normalized_content_only_processed_key(key)
+        if content_only and content_only not in keys:
             keys.append(content_only)
     return keys
 
@@ -5315,6 +6137,16 @@ def normalized_processed_content_key(key: str) -> str:
     if not content:
         return ""
     return "\x1f".join([parts[0], parts[1], content])
+
+
+def normalized_content_only_processed_key(key: str, *, min_content_len: int = 6) -> str:
+    parts = str(key or "").split("\x1f")
+    if len(parts) != 3:
+        return ""
+    content = normalize_ocr_content_for_dedupe(parts[2])
+    if len(content) < max(1, int(min_content_len or 1)):
+        return ""
+    return "\x1f".join(["content", content])
 
 
 def append_unique_limited(values: list[str], keys: list[str]) -> None:

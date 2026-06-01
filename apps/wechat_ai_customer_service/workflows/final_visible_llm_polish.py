@@ -37,6 +37,8 @@ DEFAULT_MAX_REPLY_CHARS = 620
 DEFAULT_MAX_TOKENS = 260
 DEFAULT_TIMEOUT_SECONDS = 4
 DEFAULT_OPENAI_TIMEOUT_SECONDS = 8
+SHORT_REPLY_OPENAI_TIMEOUT_SECONDS = 6
+MEDIUM_REPLY_OPENAI_TIMEOUT_SECONDS = 7
 DEFAULT_TEMPERATURE = 0.45
 DEFAULT_CACHE_TTL_SECONDS = 24 * 60 * 60
 DEFAULT_CACHE_MAX_ENTRIES = 512
@@ -250,6 +252,8 @@ def effective_settings(config: dict[str, Any]) -> dict[str, Any]:
     settings.setdefault("max_reply_chars", DEFAULT_MAX_REPLY_CHARS)
     settings.setdefault("min_confidence", 0.25)
     settings.setdefault("fast_prompt_enabled", True)
+    settings.setdefault("short_reply_char_threshold", 88)
+    settings.setdefault("medium_reply_char_threshold", 160)
     settings.setdefault("cache_enabled", True)
     settings.setdefault("cache_ttl_seconds", DEFAULT_CACHE_TTL_SECONDS)
     settings.setdefault("cache_max_entries", DEFAULT_CACHE_MAX_ENTRIES)
@@ -288,6 +292,13 @@ def polish_with_llm(
         source_channel=source_channel,
         needs_handoff=needs_handoff,
     )
+    runtime_budget = resolve_polish_runtime_budget(
+        settings=settings,
+        provider=provider,
+        draft_reply=draft_reply,
+        source_channel=source_channel,
+        needs_handoff=needs_handoff,
+    )
     response = post_polish_request(
         provider=provider,
         api_key=api_key,
@@ -295,12 +306,13 @@ def polish_with_llm(
         model=model,
         tier=tier,
         prompt_pack=prompt_pack,
-        timeout=resolve_final_polish_timeout(settings, provider),
-        max_tokens=positive_int(settings.get("max_tokens"), DEFAULT_MAX_TOKENS),
-        temperature=bounded_float(settings.get("temperature"), DEFAULT_TEMPERATURE, low=0.0, high=0.8),
+        timeout=int(runtime_budget.get("timeout_seconds") or DEFAULT_TIMEOUT_SECONDS),
+        max_tokens=int(runtime_budget.get("max_tokens") or DEFAULT_MAX_TOKENS),
+        temperature=float(runtime_budget.get("temperature") or DEFAULT_TEMPERATURE),
     )
     response["model"] = model
     response["prompt_estimate"] = estimate_prompt_pack(prompt_pack)
+    response["runtime_budget"] = runtime_budget
     if not response.get("ok"):
         return response
     candidate = normalize_candidate(parse_json_object(str(response.get("response_text") or "")))
@@ -817,10 +829,70 @@ def resolve_final_polish_model(*, settings: dict[str, Any], provider: str, tier:
     return resolve_llm_tier_model(provider=provider, tier=tier, explicit_model="", read_secret_fn=read_secret)
 
 
-def resolve_final_polish_timeout(settings: dict[str, Any], provider: str) -> int:
+def visible_char_count(text: str) -> int:
+    return len(re.sub(r"\s+", "", str(text or "")))
+
+
+def resolve_polish_runtime_budget(
+    *,
+    settings: dict[str, Any],
+    provider: str,
+    draft_reply: str,
+    source_channel: str,
+    needs_handoff: bool,
+) -> dict[str, Any]:
+    max_tokens = positive_int(settings.get("max_tokens"), DEFAULT_MAX_TOKENS)
+    temperature = bounded_float(settings.get("temperature"), DEFAULT_TEMPERATURE, low=0.0, high=0.8)
+    short_threshold = max(24, positive_int(settings.get("short_reply_char_threshold"), 88))
+    medium_threshold = max(48, positive_int(settings.get("medium_reply_char_threshold"), 160))
+    if medium_threshold < short_threshold:
+        medium_threshold = short_threshold
+    char_count = visible_char_count(draft_reply)
+    profile = "default"
+    short_reply = False
+    medium_reply = False
+    # Keep handoff and special channels conservative; optimize the common normal path.
+    if not needs_handoff and str(source_channel or "normal").strip().lower() == "normal":
+        if char_count <= short_threshold:
+            profile = "short"
+            short_reply = True
+            max_tokens = min(max_tokens, 120)
+            temperature = min(temperature, 0.38)
+        elif char_count <= medium_threshold:
+            profile = "medium"
+            medium_reply = True
+            max_tokens = min(max_tokens, 180)
+            temperature = min(temperature, 0.42)
+    timeout_seconds = resolve_final_polish_timeout(
+        settings,
+        provider,
+        short_reply=short_reply,
+        medium_reply=medium_reply,
+    )
+    return {
+        "profile": profile,
+        "char_count": char_count,
+        "timeout_seconds": timeout_seconds,
+        "max_tokens": max_tokens,
+        "temperature": temperature,
+    }
+
+
+def resolve_final_polish_timeout(
+    settings: dict[str, Any],
+    provider: str,
+    *,
+    short_reply: bool = False,
+    medium_reply: bool = False,
+) -> int:
     configured = positive_int(settings.get("timeout_seconds"), DEFAULT_TIMEOUT_SECONDS)
-    if str(provider or "").strip().lower() == "openai" and configured < DEFAULT_OPENAI_TIMEOUT_SECONDS:
-        return DEFAULT_OPENAI_TIMEOUT_SECONDS
+    if str(provider or "").strip().lower() == "openai":
+        if short_reply:
+            return max(5, min(configured, SHORT_REPLY_OPENAI_TIMEOUT_SECONDS))
+        if medium_reply:
+            return max(6, min(configured, MEDIUM_REPLY_OPENAI_TIMEOUT_SECONDS))
+        if configured < DEFAULT_OPENAI_TIMEOUT_SECONDS:
+            return DEFAULT_OPENAI_TIMEOUT_SECONDS
     return configured
 
 

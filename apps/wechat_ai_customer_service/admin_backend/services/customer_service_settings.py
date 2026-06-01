@@ -97,7 +97,7 @@ class CustomerServiceSettings:
 
     def summary(self) -> dict[str, Any]:
         settings = self.get()
-        targets = normalize_session_targets(settings.get("session_targets"))
+        targets = self.list_session_targets()
         target_enabled = [item for item in targets if item.get("enabled")]
         return {
             "settings": settings,
@@ -111,8 +111,11 @@ class CustomerServiceSettings:
             },
         }
 
-    def list_session_targets(self) -> list[dict[str, Any]]:
-        return normalize_session_targets(self.get().get("session_targets"))
+    def list_session_targets(self, *, include_archived: bool = False) -> list[dict[str, Any]]:
+        items = normalize_session_targets(self.get().get("session_targets"))
+        if include_archived:
+            return items
+        return [item for item in items if not bool(item.get("archived", False))]
 
     def merge_discovered_sessions(self, sessions: list[dict[str, Any]]) -> dict[str, Any]:
         settings = self.get()
@@ -121,17 +124,22 @@ class CustomerServiceSettings:
         respond_all_unread = bool(settings.get("respond_all_unread_sessions", False))
         discovered_count = 0
         added_count = 0
+        archived_count = 0
+        warnings: list[str] = []
+        discovered_names: set[str] = set()
+        tick = now_iso()
         for raw in sessions or []:
             if not isinstance(raw, dict):
                 continue
             name = normalize_session_name(raw.get("name") or raw.get("title"))
             if not name:
                 continue
+            discovered_names.add(name)
             discovered_count += 1
             current = by_name.get(name)
             if current is None:
                 kind = infer_conversation_type(name, raw)
-                default_enabled = respond_all_unread and kind not in {"file_transfer", "system"}
+                default_enabled = respond_all_unread and kind not in {"file_transfer", "system", "group"}
                 current = {
                     "name": name,
                     "display_name": name,
@@ -139,17 +147,40 @@ class CustomerServiceSettings:
                     "exact": True,
                     "conversation_type": kind,
                     "source": "discovered",
-                    "updated_at": now_iso(),
+                    "updated_at": tick,
+                    "archived": False,
+                    "archived_at": "",
+                    "archived_reason": "",
+                    "last_discovered_at": tick,
                 }
                 by_name[name] = current
                 added_count += 1
                 continue
             current["display_name"] = normalize_session_name(current.get("display_name") or name) or name
             current["conversation_type"] = normalized_conversation_type(
-                current.get("conversation_type") or infer_conversation_type(name, raw)
+                raw.get("conversation_type")
+                or raw.get("type")
+                or current.get("conversation_type")
+                or infer_conversation_type(name, raw)
             )
-            current["updated_at"] = now_iso()
+            current["archived"] = False
+            current["archived_at"] = ""
+            current["archived_reason"] = ""
+            current["last_discovered_at"] = tick
+            current["updated_at"] = tick
             by_name[name] = normalize_session_target(current)
+        for name, current in by_name.items():
+            if not name or name in discovered_names:
+                continue
+            if bool(current.get("archived", False)):
+                continue
+            current["enabled"] = False
+            current["archived"] = True
+            current["archived_at"] = tick
+            current["archived_reason"] = "missing_from_latest_discovery"
+            current["updated_at"] = tick
+            by_name[name] = normalize_session_target(current)
+            archived_count += 1
         merged = sort_session_targets(by_name.values())
         updated = self.save(
             {
@@ -157,11 +188,16 @@ class CustomerServiceSettings:
                 "session_targets": merged,
             }
         )
+        latest_targets = normalize_session_targets(updated.get("session_targets"))
+        active_targets = [item for item in latest_targets if not bool(item.get("archived", False))]
         return {
             "settings": updated,
-            "items": normalize_session_targets(updated.get("session_targets")),
+            "items": active_targets,
+            "all_items": latest_targets,
             "added_count": added_count,
             "discovered_count": discovered_count,
+            "archived_count": archived_count,
+            "warnings": warnings,
         }
 
     def update_session_target(self, session_name: str, patch: dict[str, Any]) -> dict[str, Any]:
@@ -179,7 +215,11 @@ class CustomerServiceSettings:
             "conversation_type": normalized_conversation_type(str((patch or {}).get("conversation_type") or "unknown")),
             "source": "manual",
             "updated_at": now_iso(),
+            "archived": False,
+            "archived_at": "",
+            "archived_reason": "",
         }
+        warnings: list[str] = []
         if "enabled" in (patch or {}):
             current["enabled"] = bool((patch or {}).get("enabled"))
         if "exact" in (patch or {}):
@@ -190,6 +230,10 @@ class CustomerServiceSettings:
             display_name = normalize_session_name((patch or {}).get("display_name"))
             if display_name:
                 current["display_name"] = display_name
+        if bool(current.get("enabled", False)):
+            current["archived"] = False
+            current["archived_at"] = ""
+            current["archived_reason"] = ""
         current["source"] = str((patch or {}).get("source") or current.get("source") or "manual")
         current["updated_at"] = now_iso()
         by_name[name] = normalize_session_target(current)
@@ -200,8 +244,15 @@ class CustomerServiceSettings:
             }
         )
         latest_targets = normalize_session_targets(updated.get("session_targets"))
+        active_targets = [entry for entry in latest_targets if not bool(entry.get("archived", False))]
         item = next((entry for entry in latest_targets if str(entry.get("name") or "") == name), normalize_session_target(current))
-        return {"settings": updated, "item": item, "items": latest_targets}
+        return {
+            "settings": updated,
+            "item": item,
+            "items": active_targets,
+            "all_items": latest_targets,
+            "warnings": warnings,
+        }
 
     @staticmethod
     def status_text(settings: dict[str, Any]) -> str:
@@ -225,7 +276,29 @@ def now_iso() -> str:
 
 def normalize_session_name(value: Any) -> str:
     text = str(value or "").strip()
-    return text
+    return strip_session_time_suffix(text)
+
+
+def strip_session_time_suffix(value: Any) -> str:
+    text = str(value or "").strip()
+    if not text:
+        return ""
+    patterns = (
+        r"(?:今天|昨天|前天)?\d{1,2}:\d{2}$",
+        r"(?:星期|周)[一二三四五六日天]$",
+        r"\d{4}[/-]\d{1,2}[/-]\d{1,2}$",
+        r"\d{1,2}[/-]\d{1,2}$",
+    )
+    stripped = text
+    changed = True
+    while changed:
+        changed = False
+        for pattern in patterns:
+            updated = re.sub(pattern, "", stripped).strip()
+            if updated != stripped:
+                stripped = updated
+                changed = True
+    return stripped or text
 
 
 def normalized_conversation_type(value: Any) -> str:
@@ -256,16 +329,29 @@ def normalize_session_target(raw: dict[str, Any]) -> dict[str, Any]:
     display_name = normalize_session_name(raw.get("display_name") or name) or name
     enabled = bool(raw.get("enabled", False))
     exact = bool(raw.get("exact", True))
+    archived = bool(raw.get("archived", False))
     conversation_type = normalized_conversation_type(
         raw.get("conversation_type") or infer_conversation_type(name, raw if isinstance(raw, dict) else {})
     )
     source = str(raw.get("source") or "manual")
     updated_at = str(raw.get("updated_at") or now_iso())
+    archived_at = str(raw.get("archived_at") or "")
+    archived_reason = str(raw.get("archived_reason") or "")
+    last_discovered_at = str(raw.get("last_discovered_at") or "")
+    if enabled:
+        archived = False
+    if not archived:
+        archived_at = ""
+        archived_reason = ""
     item = {
         "name": name,
         "display_name": display_name,
         "enabled": enabled,
         "exact": exact,
+        "archived": archived,
+        "archived_at": archived_at,
+        "archived_reason": archived_reason,
+        "last_discovered_at": last_discovered_at,
         "conversation_type": conversation_type,
         "source": source,
         "updated_at": updated_at,
@@ -298,6 +384,7 @@ def sort_session_targets(items: Any) -> list[dict[str, Any]]:
     return sorted(
         cleaned,
         key=lambda item: (
+            1 if item.get("archived", False) else 0,
             0 if item.get("enabled") else 1,
             str(item.get("conversation_type") or ""),
             str(item.get("display_name") or item.get("name") or ""),

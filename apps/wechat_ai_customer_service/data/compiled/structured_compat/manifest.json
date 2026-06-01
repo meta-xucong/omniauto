@@ -2,7 +2,7 @@
   "schema_version": 1,
   "scope": "wechat_ai_customer_service",
   "source": "product_master_plus_formal_knowledge",
-  "compiled_at": "2026-05-30T23:54:02",
+  "compiled_at": "2026-05-31T15:11:22",
   "items": [
     {
       "id": "products",
@@ -12,21 +12,9 @@
       "participates_in_reply": true
     },
     {
-      "id": "global_guidelines",
-      "path": "global_guidelines",
-      "summary": "Global Assistant Guidelines",
-      "participates_in_reply": true
-    },
-    {
       "id": "chats",
       "path": "chats",
       "summary": "聊天记录与话术",
-      "participates_in_reply": true
-    },
-    {
-      "id": "risk_control",
-      "path": "risk_control",
-      "summary": "共享风险边界",
       "participates_in_reply": true
     },
     {
@@ -40,12 +28,6 @@
       "path": "erp_exports",
       "summary": "ERP 导出",
       "participates_in_reply": false
-    },
-    {
-      "id": "reply_style",
-      "path": "reply_style",
-      "summary": "共享回复口吻",
-      "participates_in_reply": true
     },
     {
       "id": "product_faq",

@@ -82,11 +82,15 @@ def guard_synthesized_reply(
     if isinstance(safety, dict) and safety.get("must_handoff"):
         reasons = {str(item) for item in safety.get("reasons", []) or [] if str(item)}
         advisor_mode = str(settings.get("advisor_mode") or "")
-        soft_advisor_only = advisor_mode == "clear_common_sense_recommendation" and reasons <= {
+        soft_advisor_only = advisor_mode in {"clear_common_sense_recommendation", "soft_topic_redirect"} and reasons <= {
             "no_relevant_business_evidence",
             "auto_reply_disabled",
         }
         if not soft_advisor_only:
+            if request_is_social_offtopic(evidence_pack):
+                enriched = dict(candidate)
+                enriched["reply"] = social_offtopic_redirect_reply()
+                return handoff_decision("social_offtopic_soft_redirect", enriched)
             return handoff_decision("existing_safety_requires_handoff", candidate)
 
     risk_tags = normalize_risk_tags(candidate.get("risk_tags", []) or [])
@@ -278,6 +282,10 @@ def risk_tag_handoff_reply(risk_tags: set[str]) -> str:
     return "您这个问题问得对，我这边不能随口定，免得给您说错。我先把关键信息记下，请负责人核实后再回您。"
 
 
+def social_offtopic_redirect_reply() -> str:
+    return "哈哈，这个话题我就不乱接梗了，天气信息以实时天气为准。咱们先把看车需求聊明白：预算、用途、是否置换这三点给我，我马上继续帮您筛车。"
+
+
 def has_ai_identity_exposure(text: str) -> bool:
     clean = str(text or "").strip()
     if not clean:
@@ -288,21 +296,57 @@ def has_ai_identity_exposure(text: str) -> bool:
 
 
 def request_has_ai_identity_probe(evidence_pack: dict[str, Any]) -> bool:
-    text = re.sub(r"\s+", "", str(evidence_pack.get("current_message") or ""))
+    text = re.sub(r"\s+", "", extract_current_message_text(evidence_pack))
     if not text:
         return False
     return any(re.search(pattern, text, re.I) for pattern in AI_IDENTITY_PROBE_PATTERNS)
 
 
 def request_has_internal_probe(evidence_pack: dict[str, Any]) -> bool:
-    text = re.sub(r"\s+", "", str(evidence_pack.get("current_message") or ""))
+    text = re.sub(r"\s+", "", extract_current_message_text(evidence_pack))
     if not text:
         return False
     return any(re.search(pattern, text, re.I) for pattern in INTERNAL_PROBE_PATTERNS)
 
 
+def request_is_social_offtopic(evidence_pack: dict[str, Any]) -> bool:
+    text = re.sub(r"\s+", "", extract_current_message_text(evidence_pack))
+    if not text:
+        return False
+    social_terms = (
+        "天气",
+        "笑话",
+        "吃饭",
+        "午饭",
+        "晚饭",
+        "电影",
+        "电视剧",
+        "音乐",
+        "宠物",
+        "旅游",
+        "游戏",
+        "八卦",
+    )
+    if not any(term in text for term in social_terms):
+        return False
+    business_terms = (
+        "预算",
+        "推荐",
+        "车",
+        "看车",
+        "试驾",
+        "价格",
+        "优惠",
+        "贷款",
+        "分期",
+        "置换",
+        "过户",
+    )
+    return not any(term in text for term in business_terms)
+
+
 def identity_probe_handoff_reply(evidence_pack: dict[str, Any] | None = None) -> str:
-    text = re.sub(r"\s+", "", str((evidence_pack or {}).get("current_message") or ""))
+    text = re.sub(r"\s+", "", extract_current_message_text(evidence_pack or {}))
     if any(re.search(pattern, text, re.I) for pattern in INTERNAL_PROBE_PATTERNS):
         return "这类内部信息我这边不能提供，您别介意。咱们回到您的实际需求上；涉及具体承诺，我核实后再回复您。"
     return "不是您说的那种流程哈，我这边按正常客服流程给您处理；涉及具体承诺我不会随口定，会先核实。您把需求说一下，我马上给您看。"
@@ -421,6 +465,55 @@ def customer_context_text(evidence_pack: dict[str, Any]) -> str:
         str(conversation.get("conversation_summary") or ""),
     ]
     return "\n".join(part for part in parts if part)
+
+
+def extract_current_message_text(evidence_pack: dict[str, Any]) -> str:
+    raw = str(evidence_pack.get("current_message") or "")
+    marker = "当前客户问题："
+    if marker in raw:
+        raw = raw.rsplit(marker, 1)[-1]
+    stripped = str(raw or "").strip()
+    if not stripped:
+        return ""
+    lines = [line.strip() for line in stripped.splitlines() if line.strip()]
+    if len(lines) >= 2:
+        transcript_like_count = sum(1 for line in lines if is_transcript_line(line))
+        if transcript_like_count >= 2:
+            for line in reversed(lines):
+                candidate = strip_transcript_line_prefix(line)
+                if candidate:
+                    return candidate
+    return stripped
+
+
+def is_transcript_line(line: str) -> bool:
+    text = str(line or "").strip()
+    if not text:
+        return False
+    return bool(
+        re.match(r"^\[[^\]]{1,72}\]\s*", text)
+        or re.match(r"^\d{1,2}:\d{2}(?::\d{2})?\s*", text)
+        or re.match(
+            r"^(?:self|user|customer|client|assistant|system|agent|客服|客户)\s*[:：]\s*",
+            text,
+            flags=re.IGNORECASE,
+        )
+    )
+
+
+def strip_transcript_line_prefix(line: str) -> str:
+    candidate = str(line or "").strip()
+    if not candidate:
+        return ""
+    candidate = re.sub(r"^\[[^\]]{1,72}\]\s*", "", candidate).strip()
+    candidate = re.sub(r"^\d{1,2}:\d{2}(?::\d{2})?\s*", "", candidate).strip()
+    candidate = re.sub(
+        r"^(?:self|user|customer|client|assistant|system|agent|客服|客户)\s*[:：]\s*",
+        "",
+        candidate,
+        flags=re.IGNORECASE,
+    ).strip()
+    return candidate
 
 
 def collect_product_authorized_price_mentions(product_items: list[dict[str, Any]]) -> set[str]:
@@ -661,7 +754,7 @@ def normalize_risk_tags(raw_tags: list[Any]) -> set[str]:
 
 
 def request_has_hard_boundary_signal(evidence_pack: dict[str, Any]) -> bool:
-    text = re.sub(r"\s+", "", str(evidence_pack.get("current_message") or ""))
+    text = re.sub(r"\s+", "", extract_current_message_text(evidence_pack))
     if not text:
         return False
     intent_tags = {str(item).strip().lower() for item in (evidence_pack.get("intent_tags") or []) if str(item).strip()}

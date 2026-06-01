@@ -13,6 +13,7 @@ from apps.wechat_ai_customer_service.knowledge_paths import runtime_app_root
 
 
 SAFE_ID_RE = re.compile(r"[^A-Za-z0-9_.-]+")
+REMOTE_BINDING_SOURCE = "vps_sync"
 
 
 BUILTIN_MODULES = [
@@ -79,6 +80,13 @@ def safe_id(value: str) -> str:
     if not text:
         return "id_unknown"
     return text[:120]
+
+
+def binding_matches_tenant(binding: dict[str, Any], tenant_id: str) -> bool:
+    bound_tenant = str(binding.get("tenant_id") or "").strip()
+    if not bound_tenant:
+        return True
+    return bound_tenant == str(tenant_id or "")
 
 
 class RecorderModuleRegistryService:
@@ -204,6 +212,32 @@ class RecorderModuleRegistryService:
         self._write_json(self.bindings_path, filtered)
         return True
 
+    def sync_vps_snapshot(
+        self,
+        payload: dict[str, Any],
+        *,
+        tenant_id: str = "",
+        user_id: str = "",
+        source: str = REMOTE_BINDING_SOURCE,
+    ) -> dict[str, Any]:
+        snapshot = payload if isinstance(payload, dict) else {}
+        remote_modules = snapshot.get("modules") if isinstance(snapshot.get("modules"), list) else []
+        remote_bindings = snapshot.get("bindings") if isinstance(snapshot.get("bindings"), list) else []
+
+        modules_written = self._merge_remote_modules(remote_modules)
+        bindings_written = self._merge_remote_bindings(remote_bindings, source=source)
+        resolved = self.resolve_module(tenant_id=str(tenant_id or ""), user_id=str(user_id or ""))
+        return {
+            "ok": True,
+            "source": source,
+            "modules_synced": modules_written,
+            "bindings_synced": bindings_written,
+            "resolved_module_key": str(resolved.get("module_key") or ""),
+            "resolved_module_name": str(resolved.get("module_name") or ""),
+            "tenant_id": str(tenant_id or ""),
+            "user_id": str(user_id or ""),
+        }
+
     def get_module(self, module_key: str) -> dict[str, Any] | None:
         for item in self.list_modules(include_inactive=True):
             if str(item.get("module_key") or "") == module_key:
@@ -222,17 +256,23 @@ class RecorderModuleRegistryService:
         bindings = [item for item in self._read_json(self.bindings_path, default=[]) if isinstance(item, dict)]
         active_bindings = [item for item in bindings if item.get("enabled", True) is not False]
 
+        user_tenant_binding: dict[str, Any] | None = None
+        user_fallback_binding: dict[str, Any] | None = None
         if user_id:
-            user_binding = next(
-                (
-                    item
-                    for item in sorted(active_bindings, key=lambda value: str(value.get("updated_at") or ""), reverse=True)
-                    if str(item.get("scope_type") or "") == "user" and str(item.get("scope_id") or "") == user_id
-                ),
-                None,
-            )
-            if user_binding:
-                module = self.get_module(str(user_binding.get("module_key") or ""))
+            for item in sorted(active_bindings, key=lambda value: str(value.get("updated_at") or ""), reverse=True):
+                if str(item.get("scope_type") or "") != "user":
+                    continue
+                if str(item.get("scope_id") or "") != user_id:
+                    continue
+                if not binding_matches_tenant(item, tenant_id):
+                    continue
+                binding_tenant = str(item.get("tenant_id") or "").strip()
+                if binding_tenant == str(tenant_id or "") and user_tenant_binding is None:
+                    user_tenant_binding = item
+                if not binding_tenant and user_fallback_binding is None:
+                    user_fallback_binding = item
+            if user_tenant_binding:
+                module = self.get_module(str(user_tenant_binding.get("module_key") or ""))
                 if module and str(module.get("status") or "active") == "active":
                     return module
 
@@ -247,6 +287,11 @@ class RecorderModuleRegistryService:
         )
         if tenant_binding:
             module = self.get_module(str(tenant_binding.get("module_key") or ""))
+            if module and str(module.get("status") or "active") == "active":
+                return module
+
+        if user_fallback_binding:
+            module = self.get_module(str(user_fallback_binding.get("module_key") or ""))
             if module and str(module.get("status") or "active") == "active":
                 return module
 
@@ -363,6 +408,83 @@ class RecorderModuleRegistryService:
             self._write_json(self.registry_path, items)
             return items
         return sorted(by_key.values(), key=lambda item: str(item.get("module_key") or ""))
+
+    def _merge_remote_modules(self, modules: list[dict[str, Any]]) -> int:
+        current = {str(item.get("module_key") or ""): item for item in self.list_modules(include_inactive=True)}
+        changed = False
+        written = 0
+        for item in modules:
+            if not isinstance(item, dict):
+                continue
+            module_key = safe_id(str(item.get("module_key") or ""))
+            if not module_key:
+                continue
+            existing = current.get(module_key, {})
+            record = {
+                **existing,
+                "module_key": module_key,
+                "module_name": str(item.get("module_name") or existing.get("module_name") or module_key),
+                "module_type": str(item.get("module_type") or existing.get("module_type") or "chat_extract_export"),
+                "status": str(item.get("status") or existing.get("status") or "active"),
+                "version": str(item.get("version") or existing.get("version") or "1.0.0"),
+                "config": item.get("config") if isinstance(item.get("config"), dict) else dict(existing.get("config") or {}),
+                "builtin": bool(existing.get("builtin", False)),
+                "created_at": str(existing.get("created_at") or now_iso()),
+                "updated_at": now_iso(),
+                "sync_source": REMOTE_BINDING_SOURCE,
+            }
+            current[module_key] = record
+            changed = True
+            written += 1
+        if changed:
+            self._write_json(self.registry_path, sorted(current.values(), key=lambda value: str(value.get("module_key") or "")))
+        return written
+
+    def _merge_remote_bindings(self, bindings: list[dict[str, Any]], *, source: str) -> int:
+        current = [item for item in self._read_json(self.bindings_path, default=[]) if isinstance(item, dict)]
+        kept = [item for item in current if str(item.get("sync_source") or "").strip() != source]
+        remote_items: dict[str, dict[str, Any]] = {}
+        written = 0
+        for item in bindings:
+            if not isinstance(item, dict):
+                continue
+            scope_type = str(item.get("scope_type") or "").strip().lower()
+            if scope_type not in {"user", "tenant", "global"}:
+                continue
+            scope_id = str(item.get("scope_id") or "").strip()
+            if scope_type == "global":
+                scope_id = "*"
+            if not scope_id:
+                continue
+            module_key = str(item.get("module_key") or "").strip()
+            if not module_key:
+                continue
+            binding_id = safe_id(str(item.get("binding_id") or f"{scope_type}_{scope_id}"))
+            existing = next((candidate for candidate in current if str(candidate.get("binding_id") or "") == binding_id), {})
+            tenant_id = str(item.get("tenant_id") or existing.get("tenant_id") or "").strip()
+            if scope_type == "tenant" and not tenant_id:
+                tenant_id = scope_id
+            if scope_type == "global":
+                tenant_id = ""
+            user_id = str(item.get("user_id") or existing.get("user_id") or (scope_id if scope_type == "user" else "")).strip()
+            remote_items[binding_id] = {
+                "binding_id": binding_id,
+                "scope_type": scope_type,
+                "scope_id": scope_id,
+                "tenant_id": tenant_id,
+                "user_id": user_id,
+                "module_key": module_key,
+                "enabled": item.get("enabled", True) is not False,
+                "created_at": str(existing.get("created_at") or item.get("created_at") or now_iso()),
+                "updated_at": str(item.get("updated_at") or now_iso()),
+                "sync_source": source,
+            }
+            written += 1
+        merged = {str(item.get("binding_id") or ""): item for item in kept if str(item.get("binding_id") or "")}
+        merged.update(remote_items)
+        ordered = sorted(merged.values(), key=lambda item: str(item.get("updated_at") or ""), reverse=True)
+        self._write_json(self.bindings_path, ordered)
+        return written
 
     def _read_json(self, path: Path, *, default: Any) -> Any:
         if not path.exists():

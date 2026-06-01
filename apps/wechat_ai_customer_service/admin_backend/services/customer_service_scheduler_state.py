@@ -30,6 +30,16 @@ def utcnow_iso() -> str:
     return datetime.now().isoformat(timespec="seconds")
 
 
+def _iso_to_ts(value: Any) -> float:
+    text = str(value or "").strip()
+    if not text:
+        return 0.0
+    try:
+        return datetime.fromisoformat(text).timestamp()
+    except (TypeError, ValueError, OSError):
+        return 0.0
+
+
 def stable_id(prefix: str, *parts: Any) -> str:
     seed = json.dumps([str(item) for item in parts], ensure_ascii=False, sort_keys=True)
     return f"{prefix}_" + hashlib.sha256(seed.encode("utf-8")).hexdigest()[:20]
@@ -357,6 +367,15 @@ def record_session_signal(
     unread_badge = str(session_payload.get("unread_badge") or session_payload.get("unread") or "").strip()
     conversation_type = str(session_payload.get("conversation_type") or session_payload.get("type") or "unknown")
     session = ensure_session(state, name, conversation_type=conversation_type, now=now)
+    risk_state = session.get("risk_state") if isinstance(session.get("risk_state"), dict) else {}
+    retry_not_before = str((risk_state or {}).get("capture_retry_not_before") or "")
+    if retry_not_before:
+        now_ts = _iso_to_ts(now)
+        retry_ts = _iso_to_ts(retry_not_before)
+        if retry_ts > 0 and now_ts > 0 and now_ts < retry_ts:
+            session["last_detected_at"] = now
+            session["status"] = "capture_cooldown"
+            return session
     previous_digest = str(session.get("last_content_digest") or "")
     previous_time = str(session.get("last_message_time") or "")
     previous_badge = str(session.get("last_unread_badge") or "")
@@ -426,6 +445,9 @@ def mark_capture_started(state: dict[str, Any], target_name: str, *, now: str | 
     session = ensure_session(state, target_name, now=now)
     session["status"] = "capturing"
     session["last_dispatched_at"] = now
+    risk_state = session.get("risk_state") if isinstance(session.get("risk_state"), dict) else {}
+    if risk_state:
+        risk_state.pop("capture_retry_not_before", None)
     append_event(state, "scheduler_capture_started", target_name=session["target_name"])
     return session
 
@@ -444,6 +466,7 @@ def record_capture_result(
 ) -> dict[str, Any]:
     now = now or utcnow_iso()
     session = ensure_session(state, target_name, exact=exact, conversation_type=conversation_type, now=now)
+    risk_state = session.get("risk_state") if isinstance(session.get("risk_state"), dict) else {}
     batch = list(batch if batch is not None else messages)
     overflow_messages = list(overflow_messages or [])
     existing_ids = set(session.get("processed_message_ids", []) or [])
@@ -464,6 +487,10 @@ def record_capture_result(
         session["oldest_unreplied_at"] = str(new_messages[0].get("time") or now)
         session["status"] = "captured"
         session["pending_capture"] = False
+        if risk_state:
+            risk_state.pop("capture_fail_count", None)
+            risk_state.pop("capture_retry_not_before", None)
+            risk_state.pop("last_capture_failed_at", None)
     else:
         session["pending_message_count"] = 0
         session["pending_capture"] = False
@@ -734,10 +761,23 @@ def mark_reply_sent(state: dict[str, Any], reply_id: str, *, send_result: dict[s
     reply["send_result"] = send_result or {}
     target_name = str(reply.get("target_name") or "")
     session = ensure_session(state, target_name, now=now)
-    session["status"] = "sent"
-    session["pending_capture"] = False
-    session["pending_message_count"] = 0
-    session["oldest_unreplied_at"] = ""
+    pending_after_send = bool(session.get("pending_capture"))
+    if pending_after_send:
+        # Preserve queued follow-up signals that arrived while this reply was in flight.
+        session["status"] = "capture_pending"
+        session["pending_capture"] = True
+        session["pending_message_count"] = max(1, int(session.get("pending_message_count") or 0))
+        if not str(session.get("pending_since") or ""):
+            session["pending_since"] = now
+        if not str(session.get("last_detected_at") or ""):
+            session["last_detected_at"] = now
+        if not str(session.get("oldest_unreplied_at") or ""):
+            session["oldest_unreplied_at"] = now
+    else:
+        session["status"] = "sent"
+        session["pending_capture"] = False
+        session["pending_message_count"] = 0
+        session["oldest_unreplied_at"] = ""
     processed = list(session.get("processed_message_ids") or [])
     for message_id in reply.get("input_message_ids") or []:
         if message_id and message_id not in processed:
@@ -748,7 +788,13 @@ def mark_reply_sent(state: dict[str, Any], reply_id: str, *, send_result: dict[s
         if content_key and content_key not in processed_keys:
             processed_keys.append(content_key)
     session["processed_content_keys"] = processed_keys[-500:]
-    append_event(state, "scheduler_send_completed", target_name=target_name, reply_id=reply_id)
+    append_event(
+        state,
+        "scheduler_send_completed",
+        target_name=target_name,
+        reply_id=reply_id,
+        pending_capture_after_send=pending_after_send,
+    )
     return reply
 
 

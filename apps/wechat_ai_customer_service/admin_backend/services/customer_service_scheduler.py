@@ -14,10 +14,14 @@ from __future__ import annotations
 
 import copy
 import os
+import random
+import re
 import time
 import traceback
 from concurrent.futures import Future, ThreadPoolExecutor
 from contextlib import contextmanager
+from dataclasses import replace
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Callable
 
@@ -28,6 +32,7 @@ from apps.wechat_ai_customer_service.admin_backend.services.customer_service_sch
     enqueue_llm_task,
     enqueue_pending_session,
     fail_llm_task,
+    has_active_session_work,
     mark_capture_started,
     mark_llm_started,
     mark_reply_failed,
@@ -281,9 +286,41 @@ def mark_session_capture_failed(state: dict[str, Any], target_name: str, reason:
     from apps.wechat_ai_customer_service.admin_backend.services.customer_service_scheduler_state import append_event, ensure_session
 
     session = ensure_session(state, target_name, now=now)
+    now_text = str(now or datetime.now().isoformat(timespec="seconds"))
+    try:
+        now_dt = datetime.fromisoformat(now_text)
+    except Exception:
+        now_dt = datetime.now()
+    reason_text = str(reason or "")
+    reason_lower = reason_text.lower()
+    risk_state = session.setdefault("risk_state", {})
+    fail_count = int(risk_state.get("capture_fail_count") or 0) + 1
+    risk_state["capture_fail_count"] = fail_count
+    # Exponential backoff avoids tight retry loops that look mechanical in UI.
+    backoff_seconds = min(90, max(3, 3 * (2 ** min(fail_count - 1, 4))))
+    if "lock_timeout" in reason_lower:
+        # Lock contention is usually transient; retry sooner to avoid
+        # customer-visible long-tail waiting while still preventing tight loops.
+        backoff_seconds = min(12, max(2, 2 + fail_count))
+    if "target_not_confirmed_for_messages" in reason_lower:
+        backoff_seconds = max(backoff_seconds, 18)
+    if "blank_render" in reason_lower:
+        backoff_seconds = max(backoff_seconds, 25)
+    retry_not_before = (now_dt + timedelta(seconds=backoff_seconds)).isoformat(timespec="seconds")
     session["status"] = "capture_failed"
-    session.setdefault("risk_state", {})["last_error"] = reason
-    append_event(state, "scheduler_capture_failed", target_name=session["target_name"], reason=reason)
+    session["pending_capture"] = False
+    risk_state["last_error"] = reason_text
+    risk_state["last_capture_failed_at"] = now_text
+    risk_state["capture_retry_not_before"] = retry_not_before
+    append_event(
+        state,
+        "scheduler_capture_failed",
+        target_name=session["target_name"],
+        reason=reason_text,
+        fail_count=fail_count,
+        retry_after_seconds=backoff_seconds,
+        retry_not_before=retry_not_before,
+    )
 
 
 class CapturedMessagesConnector:
@@ -491,6 +528,14 @@ class ManagedListenerSchedulerBridge:
         self.connector: Any = None
         self._workflow: dict[str, Any] = {}
         self._runtime_signature: tuple[Any, ...] | None = None
+        self._freshness_last_strict_at_by_target: dict[str, float] = {}
+        self._freshness_session_list_preview_cache: dict[str, dict[str, Any]] = {}
+        self._switch_human_delay_enabled = False
+        self._switch_human_delay_min_seconds = 0.0
+        self._switch_human_delay_max_seconds = 0.0
+        self._capture_one_target_per_round = False
+        self._last_capture_signal_target = ""
+        self._last_capture_switch_delay_seconds = 0.0
         self._load_workflow_symbols()
         self.reload()
 
@@ -528,6 +573,24 @@ class ManagedListenerSchedulerBridge:
         self.audit_path = wf["resolve_path"](config.get("audit_log_path"))
         multi_target_cfg = config.get("multi_target") if isinstance(config.get("multi_target"), dict) else {}
         self.use_multi_target = bool((multi_target_cfg or {}).get("enabled"))
+        self._switch_human_delay_enabled = bool((multi_target_cfg or {}).get("switch_human_delay_enabled", False))
+        self._switch_human_delay_min_seconds = self._safe_non_negative_float(
+            (multi_target_cfg or {}).get("switch_human_delay_min_seconds"),
+            default=0.0,
+        )
+        self._switch_human_delay_max_seconds = self._safe_non_negative_float(
+            (multi_target_cfg or {}).get("switch_human_delay_max_seconds"),
+            default=self._switch_human_delay_min_seconds,
+        )
+        if self._switch_human_delay_max_seconds < self._switch_human_delay_min_seconds:
+            self._switch_human_delay_max_seconds = self._switch_human_delay_min_seconds
+        self._capture_one_target_per_round = bool((multi_target_cfg or {}).get("capture_one_target_per_round", False))
+        if (
+            self.use_multi_target
+            and self._capture_one_target_per_round
+            and int(self.scheduler_config.capture_max_sessions_per_round) != 1
+        ):
+            self.scheduler_config = replace(self.scheduler_config, capture_max_sessions_per_round=1)
         self._ensure_connector()
         self._ensure_session_monitor(multi_target_cfg or {})
         self._ensure_runtime()
@@ -564,9 +627,18 @@ class ManagedListenerSchedulerBridge:
                 "status": status,
                 "targets": [str(target.name) for target in self.targets],
                 "active_session_signals": [str(item.get("name") or item.get("target_name") or "") for item in session_signals],
+                "switch_human_delay_seconds": float(self._last_capture_switch_delay_seconds),
             }
         )
         return result
+
+    @staticmethod
+    def _safe_non_negative_float(value: Any, *, default: float) -> float:
+        try:
+            parsed = float(value)
+        except (TypeError, ValueError):
+            parsed = float(default)
+        return max(0.0, parsed)
 
     def _load_workflow_symbols(self) -> None:
         import sys
@@ -603,6 +675,7 @@ class ManagedListenerSchedulerBridge:
             resolve_path,
             save_state,
             select_batch_details,
+            send_reply_with_optional_multi_bubble,
             apply_local_customer_service_settings,
         )
 
@@ -630,6 +703,7 @@ class ManagedListenerSchedulerBridge:
             "resolve_path": resolve_path,
             "save_state": save_state,
             "select_batch_details": select_batch_details,
+            "send_reply_with_optional_multi_bubble": send_reply_with_optional_multi_bubble,
             "apply_local_customer_service_settings": apply_local_customer_service_settings,
         }
 
@@ -656,6 +730,10 @@ class ManagedListenerSchedulerBridge:
         whitelist = set() if self.respond_all_unread_sessions else {str(target.name) for target in self.targets}
         max_targets = int(multi_target_cfg.get("max_targets_per_iteration", self.scheduler_config.max_pending_sessions) or self.scheduler_config.max_pending_sessions)
         min_switch = int(multi_target_cfg.get("min_switch_interval_seconds", 2) or 2)
+        dispatch_strategy = str(multi_target_cfg.get("dispatch_strategy") or "event_driven").strip().lower()
+        sticky_hold = int(multi_target_cfg.get("sticky_target_hold_seconds", 35) or 35)
+        sticky_rounds = int(multi_target_cfg.get("sticky_max_dispatch_rounds", 3) or 3)
+        preview_confirmations = int(multi_target_cfg.get("preview_change_confirmations", 2) or 2)
         if self.session_monitor is None:
             self.session_monitor = self._workflow["SessionMonitor"](
                 tenant_id=self.tenant_id,
@@ -663,12 +741,20 @@ class ManagedListenerSchedulerBridge:
                 blacklist=self.ignored_session_names,
                 max_targets_per_iteration=max(1, max_targets),
                 min_switch_interval_seconds=max(1, min_switch),
+                dispatch_strategy=dispatch_strategy,
+                sticky_target_hold_seconds=max(5, sticky_hold),
+                sticky_max_dispatch_rounds=max(1, sticky_rounds),
+                preview_change_confirmations=max(1, preview_confirmations),
             )
             return
         self.session_monitor.whitelist = whitelist
         self.session_monitor.blacklist = set(self.ignored_session_names)
         self.session_monitor.max_targets_per_iteration = max(1, max_targets)
         self.session_monitor.min_switch_interval_seconds = max(1, min_switch)
+        self.session_monitor.dispatch_strategy = dispatch_strategy if dispatch_strategy in {"event_driven", "legacy_pending_scan"} else "event_driven"
+        self.session_monitor.sticky_target_hold_seconds = max(5, sticky_hold)
+        self.session_monitor.sticky_max_dispatch_rounds = max(1, sticky_rounds)
+        self.session_monitor.preview_change_confirmations = max(1, preview_confirmations)
 
     def _ensure_runtime(self) -> None:
         signature = (
@@ -693,9 +779,52 @@ class ManagedListenerSchedulerBridge:
         self._runtime_signature = signature
 
     def _collect_session_signals(self) -> list[dict[str, Any]]:
+        self._last_capture_switch_delay_seconds = 0.0
         if self.use_multi_target and self.session_monitor is not None:
             self.session_monitor.poll(self.connector)
-            pending = self.session_monitor.pending_targets(limit=self.scheduler_config.max_pending_sessions)
+            if hasattr(self.session_monitor, "select_dispatch_targets"):
+                pending = self.session_monitor.select_dispatch_targets(limit=self.scheduler_config.capture_max_sessions_per_round)
+            else:
+                pending = self.session_monitor.pending_targets(limit=self.scheduler_config.max_pending_sessions)
+            # When the sticky target already has active scheduler work, prefer a
+            # different unread session for the next capture tick. This avoids
+            # wasting rounds on a busy session and reduces cross-session lag.
+            if pending:
+                try:
+                    state = self.store.load()
+                except Exception:  # noqa: BLE001 - keep listener resilient
+                    state = {}
+                first = pending[0]
+                first_name = str(getattr(first, "name", "") or "")
+                if first_name and has_active_session_work(state, first_name):
+                    fallback = None
+                    for item in self.session_monitor.pending_targets(limit=self.scheduler_config.max_pending_sessions):
+                        name = str(getattr(item, "name", "") or "")
+                        if not name or name in self.ignored_session_names or name == first_name:
+                            continue
+                        if not has_active_session_work(state, name):
+                            fallback = item
+                            break
+                    if fallback is not None:
+                        pending = [fallback]
+            next_name = ""
+            if pending:
+                next_name = str(getattr(pending[0], "name", "") or "")
+            if (
+                self._switch_human_delay_enabled
+                and next_name
+                and self._last_capture_signal_target
+                and next_name != self._last_capture_signal_target
+            ):
+                delay = random.uniform(
+                    float(self._switch_human_delay_min_seconds),
+                    float(self._switch_human_delay_max_seconds),
+                )
+                if delay > 0:
+                    time.sleep(delay)
+                    self._last_capture_switch_delay_seconds = round(delay, 3)
+            if next_name:
+                self._last_capture_signal_target = next_name
             return [
                 {
                     "name": item.name,
@@ -758,6 +887,23 @@ class ManagedListenerSchedulerBridge:
         )
         payload = self.connector.get_messages(target.name, exact=target.exact)
         if not payload.get("ok"):
+            payload_state = str(payload.get("state") or "").strip().lower()
+            if payload_state in {"messages_lock_timeout", "sessions_lock_timeout", "status_lock_timeout", "rpa_lock_timeout"}:
+                return {
+                    "ok": False,
+                    "blocked": True,
+                    "reason": f"capture_{payload_state}",
+                    "transient": True,
+                    "messages": [],
+                    "batch": [],
+                    "overflow_messages": [],
+                    "history_backfill": {},
+                    "capture_guard": {
+                        "state": payload.get("state"),
+                        "error": payload.get("error"),
+                        "rpa_lock": payload.get("rpa_lock"),
+                    },
+                }
             raise RuntimeError(f"get_messages failed for {target.name}: {payload}")
         workflow_state = self._workflow_state_snapshot()
         target_state = self._target_state(workflow_state, target.name)
@@ -839,11 +985,305 @@ class ManagedListenerSchedulerBridge:
         capture = (state.get("captures", {}) or {}).get(capture_ids[-1])
         return capture if isinstance(capture, dict) else None
 
+    def _scheduler_freshness_settings(self) -> dict[str, Any]:
+        source = self.config.get("scheduler_freshness") if isinstance(self.config.get("scheduler_freshness"), dict) else {}
+        mode = str(source.get("mode") or "preview_first").strip().lower()
+        if mode not in {"preview_first", "strict_only"}:
+            mode = "preview_first"
+        raw_interval = source.get("strict_check_interval_seconds")
+        try:
+            strict_interval = int(raw_interval) if raw_interval not in (None, "") else 180
+        except (TypeError, ValueError):
+            strict_interval = 180
+        raw_long_llm = source.get("strict_check_after_llm_seconds")
+        try:
+            strict_after_llm = int(raw_long_llm) if raw_long_llm not in (None, "") else 90
+        except (TypeError, ValueError):
+            strict_after_llm = 90
+        strict_on_first_send = source.get("strict_check_on_first_send")
+        if strict_on_first_send is None:
+            strict_on_first_send = False
+        preview_from_session_list_enabled = source.get("preview_from_session_list_enabled")
+        if preview_from_session_list_enabled is None:
+            preview_from_session_list_enabled = True
+        raw_preview_cache_seconds = source.get("preview_from_session_list_cache_seconds")
+        try:
+            preview_cache_seconds = float(raw_preview_cache_seconds) if raw_preview_cache_seconds not in (None, "") else 2.5
+        except (TypeError, ValueError):
+            preview_cache_seconds = 2.5
+        preview_cache_seconds = max(0.0, min(20.0, preview_cache_seconds))
+        preview_require_content_match = source.get("preview_from_session_list_require_content_match")
+        if preview_require_content_match is None:
+            # Default to false to avoid expensive strict rescans on harmless
+            # preview-text drift (truncation, timestamp wrappers, etc.).
+            # Strict scan is still enforced by interval/long-LLM guardrails.
+            preview_require_content_match = False
+        return {
+            "enabled": source.get("enabled", True) is not False,
+            "mode": mode,
+            "strict_check_interval_seconds": max(0, strict_interval),
+            "strict_check_after_llm_seconds": max(0, strict_after_llm),
+            "strict_check_on_first_send": bool(strict_on_first_send),
+            "preview_from_session_list_enabled": bool(preview_from_session_list_enabled),
+            "preview_from_session_list_cache_seconds": preview_cache_seconds,
+            "preview_from_session_list_require_content_match": bool(preview_require_content_match),
+        }
+
+    @staticmethod
+    def _iso_to_timestamp(value: str) -> float | None:
+        text = str(value or "").strip()
+        if not text:
+            return None
+        try:
+            return datetime.fromisoformat(text.replace("Z", "+00:00")).timestamp()
+        except Exception:
+            return None
+
+    def _session_monitor_snapshot_for_target(self, target_name: str) -> dict[str, Any] | None:
+        monitor = self.session_monitor
+        if monitor is None or not hasattr(monitor, "all_sessions"):
+            return None
+        try:
+            sessions = monitor.all_sessions()  # type: ignore[call-arg]
+        except Exception:
+            return None
+        if not isinstance(sessions, list):
+            return None
+        for item in sessions:
+            if not isinstance(item, dict):
+                continue
+            if str(item.get("name") or "").strip() != target_name:
+                continue
+            return item
+        return None
+
+    @staticmethod
+    def _compact_preview_text(value: Any) -> str:
+        return re.sub(r"\s+", "", str(value or "")).strip().lower()
+
+    def _target_name_matches_preview(self, target_name: str, preview_name: str) -> bool:
+        left = self._compact_preview_text(target_name)
+        right = self._compact_preview_text(preview_name)
+        if not left or not right:
+            return False
+        return left == right
+
+    def _session_list_preview_for_target(self, target_name: str, *, cache_seconds: float) -> dict[str, Any] | None:
+        now_ts = time.time()
+        cache_key = str(target_name or "").strip()
+        cached = self._freshness_session_list_preview_cache.get(cache_key)
+        if isinstance(cached, dict):
+            cached_at = float(cached.get("cached_at") or 0.0)
+            if cache_seconds > 0 and cached_at > 0 and (now_ts - cached_at) <= cache_seconds:
+                preview = cached.get("preview")
+                if isinstance(preview, dict):
+                    return preview
+        try:
+            payload = self.connector.list_sessions()
+        except Exception:
+            return None
+        if not isinstance(payload, dict) or payload.get("ok") is not True:
+            return None
+        sessions = payload.get("sessions")
+        if not isinstance(sessions, list):
+            return None
+        for item in sessions:
+            if not isinstance(item, dict):
+                continue
+            name = str(item.get("name") or "").strip()
+            if not self._target_name_matches_preview(target_name, name):
+                continue
+            unread = bool(
+                item.get("unread_detected")
+                or item.get("unread_signal")
+                or item.get("unread")
+                or item.get("unread_badge")
+            )
+            preview = {
+                "name": name,
+                "unread_detected": unread,
+                "last_detected_at": "",
+                "pending_since": "",
+                "last_message_time": str(item.get("time") or ""),
+                "preview_content": str(item.get("content") or ""),
+                "_source": "session_list",
+            }
+            self._freshness_session_list_preview_cache[cache_key] = {"cached_at": now_ts, "preview": preview}
+            return preview
+        return None
+
+    def _session_list_preview_matches_capture(self, reply: dict[str, Any], preview: dict[str, Any]) -> bool:
+        preview_content = self._compact_preview_text(preview.get("preview_content"))
+        if not preview_content:
+            return False
+        capture = self._capture_for_reply(reply)
+        if not isinstance(capture, dict):
+            return False
+        batch = [item for item in (capture.get("batch") or []) if isinstance(item, dict)]
+        if not batch:
+            return False
+        latest_content = ""
+        for item in reversed(batch):
+            content = str(item.get("content") or "").strip()
+            if content:
+                latest_content = content
+                break
+        if not latest_content:
+            return False
+        original = self._compact_preview_text(latest_content)
+        if not original:
+            return False
+        if preview_content in original or original in preview_content:
+            return True
+        spans = re.findall(r"[\u4e00-\u9fffA-Za-z0-9]{4,12}", original)
+        for token in spans:
+            if token and token in preview_content:
+                return True
+        return False
+
+    def _reply_llm_elapsed_seconds(self, reply: dict[str, Any]) -> float:
+        cached = reply.get("_llm_elapsed_seconds")
+        if cached not in (None, ""):
+            try:
+                return max(0.0, float(cached))
+            except (TypeError, ValueError):
+                pass
+        task_id = str(reply.get("task_id") or "").strip()
+        if not task_id:
+            return 0.0
+        try:
+            state = self.store.load()
+        except Exception:
+            return 0.0
+        task = (state.get("llm_tasks", {}) or {}).get(task_id)
+        if not isinstance(task, dict):
+            return 0.0
+        return self._task_llm_elapsed_seconds(task)
+
+    def _task_llm_elapsed_seconds(self, task: dict[str, Any]) -> float:
+        started_ts = self._iso_to_timestamp(str(task.get("started_at") or ""))
+        if started_ts is None:
+            return 0.0
+        finished_ts = self._iso_to_timestamp(str(task.get("finished_at") or ""))
+        if finished_ts is not None and finished_ts >= started_ts:
+            return max(0.0, finished_ts - started_ts)
+        return max(0.0, time.time() - started_ts)
+
+    def _preview_freshness_fastpath(
+        self,
+        *,
+        reply: dict[str, Any],
+        target_name: str,
+        settings: dict[str, Any],
+    ) -> dict[str, Any]:
+        if settings.get("enabled") is not True:
+            return {"applied": False, "reason": "scheduler_freshness_disabled"}
+        if str(settings.get("mode") or "preview_first") == "strict_only":
+            return {"applied": False, "reason": "scheduler_freshness_strict_only"}
+
+        # Scheduler-level pending signal is authoritative: if we already know
+        # this session has unread work, never send the old reply.
+        try:
+            scheduler_state = self.store.load()
+        except Exception:
+            scheduler_state = {}
+        session = (scheduler_state.get("sessions", {}) or {}).get(target_name, {})
+        if isinstance(session, dict) and bool(session.get("pending_capture")):
+            return {
+                "applied": True,
+                "ok": True,
+                "stale": True,
+                "has_newer_messages": True,
+                "reason": "scheduler_pending_capture_before_send",
+                "freshness_mode": "session_preview_fastpath",
+            }
+
+        preview = self._session_monitor_snapshot_for_target(target_name)
+        if (
+            not isinstance(preview, dict)
+            and bool(settings.get("preview_from_session_list_enabled", True))
+        ):
+            preview = self._session_list_preview_for_target(
+                target_name,
+                cache_seconds=float(settings.get("preview_from_session_list_cache_seconds") or 0.0),
+            )
+        if not isinstance(preview, dict):
+            return {"applied": False, "reason": "session_preview_unavailable"}
+        if bool(preview.get("unread_detected")):
+            return {
+                "applied": True,
+                "ok": True,
+                "stale": True,
+                "has_newer_messages": True,
+                "reason": "session_monitor_unread_pending_before_send",
+                "freshness_mode": "session_preview_fastpath",
+                "preview_snapshot": {
+                    "last_detected_at": str(preview.get("last_detected_at") or ""),
+                    "pending_since": str(preview.get("pending_since") or ""),
+                    "last_message_time": str(preview.get("last_message_time") or ""),
+                },
+            }
+
+        if (
+            str(preview.get("_source") or "") == "session_list"
+            and bool(settings.get("preview_from_session_list_require_content_match", True))
+            and not self._session_list_preview_matches_capture(reply, preview)
+        ):
+            return {"applied": False, "reason": "session_list_preview_content_mismatch"}
+
+        strict_interval = int(settings.get("strict_check_interval_seconds") or 0)
+        if strict_interval > 0:
+            last_strict = float(self._freshness_last_strict_at_by_target.get(target_name) or 0.0)
+            if last_strict <= 0.0:
+                if bool(settings.get("strict_check_on_first_send")):
+                    return {"applied": False, "reason": "strict_first_send_due"}
+            elif (time.time() - last_strict) >= float(strict_interval):
+                return {"applied": False, "reason": "strict_interval_due"}
+
+        strict_after_llm = int(settings.get("strict_check_after_llm_seconds") or 0)
+        llm_elapsed = self._reply_llm_elapsed_seconds(reply)
+        if strict_after_llm > 0 and llm_elapsed >= float(strict_after_llm):
+            return {"applied": False, "reason": "strict_due_to_long_llm", "llm_elapsed_seconds": round(llm_elapsed, 3)}
+
+        return {
+            "applied": True,
+            "ok": True,
+            "stale": False,
+            "has_newer_messages": False,
+            "reason": (
+                "session_list_preview_no_unread_fast_pass"
+                if str(preview.get("_source") or "") == "session_list"
+                else "session_preview_no_unread_fast_pass"
+            ),
+            "freshness_mode": "session_preview_fastpath",
+            "preview_snapshot": {
+                "last_detected_at": str(preview.get("last_detected_at") or ""),
+                "pending_since": str(preview.get("pending_since") or ""),
+                "last_message_time": str(preview.get("last_message_time") or ""),
+            },
+        }
+
     def _freshness_check(self, reply: dict[str, Any]) -> dict[str, Any]:
         capture = self._capture_for_reply(reply)
         if not capture:
             return {"ok": False, "stale": True, "reason": "capture_missing_before_send"}
         target = self._target_for_name(str(reply.get("target_name") or capture.get("target_name") or ""), exact=bool(capture.get("exact", True)))
+        freshness_settings = self._scheduler_freshness_settings()
+        fastpath = self._preview_freshness_fastpath(
+            reply=reply,
+            target_name=str(target.name),
+            settings=freshness_settings,
+        )
+        if fastpath.get("applied"):
+            return {
+                "ok": True,
+                "stale": bool(fastpath.get("stale") or fastpath.get("has_newer_messages")),
+                "has_newer_messages": bool(fastpath.get("has_newer_messages")),
+                "reason": str(fastpath.get("reason") or "session_preview_fastpath"),
+                "freshness_mode": str(fastpath.get("freshness_mode") or "session_preview_fastpath"),
+                "preview_snapshot": fastpath.get("preview_snapshot"),
+                "llm_elapsed_seconds": fastpath.get("llm_elapsed_seconds"),
+            }
         workflow_state = self._workflow_state_snapshot()
         target_state = self._target_state(workflow_state, target.name)
         freshness = self._workflow["detect_newer_messages_before_send"](
@@ -853,6 +1293,8 @@ class ManagedListenerSchedulerBridge:
             batch=list(capture.get("batch") or []),
             config=self.config,
         )
+        self._freshness_last_strict_at_by_target[str(target.name)] = time.time()
+        freshness["freshness_mode"] = "strict_message_scan"
         freshness["stale"] = bool(freshness.get("has_newer_messages") or freshness.get("gap_risk"))
         return freshness
 
@@ -864,7 +1306,12 @@ class ManagedListenerSchedulerBridge:
         reply_text = str(reply.get("reply_text") or "").strip()
         if not reply_text:
             return {"ok": False, "verified": False, "reason": "empty_reply_text"}
-        verified = self.connector.send_text_and_verify(target.name, reply_text, exact=target.exact)
+        verified = self._workflow["send_reply_with_optional_multi_bubble"](
+            connector=self.connector,
+            target=target,
+            reply_text=reply_text,
+            config=self.config,
+        )
         if not verified.get("verified"):
             return {"ok": False, "verified": False, "reason": "send_not_verified", "send_result": verified}
         batch = list(capture.get("batch") or [])

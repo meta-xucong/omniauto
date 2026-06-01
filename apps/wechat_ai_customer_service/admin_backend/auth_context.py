@@ -40,6 +40,7 @@ CLOUD_GATE_ALLOWED_PATHS = {
     "/api/sync/status",
     "/api/sync/register-node",
     "/api/sync/shared/cloud-snapshot",
+    "/api/sync/recorder/module-bindings",
     "/api/sync/commands/poll",
     "/api/customer-service/runtime/status",
     "/api/customer-service/runtime/stop",

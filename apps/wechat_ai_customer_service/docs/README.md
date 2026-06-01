@@ -7,6 +7,10 @@
 - [`rpa_backend_state_machine_optimization.md`](rpa_backend_state_machine_optimization.md)
 - [`rpa_backend_state_machine_test_plan.md`](rpa_backend_state_machine_test_plan.md)
 - [`rpa_low_disturbance_listener_design.md`](rpa_low_disturbance_listener_design.md)
+- [`rpa_multi_session_dispatch_hardening_architecture_20260601.md`](rpa_multi_session_dispatch_hardening_architecture_20260601.md)
+- [`rpa_multi_session_dispatch_hardening_implementation_checklist_20260601.md`](rpa_multi_session_dispatch_hardening_implementation_checklist_20260601.md)
+- [`rpa_multi_session_dispatch_hardening_test_plan_20260601.md`](rpa_multi_session_dispatch_hardening_test_plan_20260601.md)
+- [`rpa_multi_session_dispatch_hardening_validation_report_20260601.md`](rpa_multi_session_dispatch_hardening_validation_report_20260601.md)
 
 当前知识与 RAG 架构说明：
 

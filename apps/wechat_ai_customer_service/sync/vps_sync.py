@@ -60,7 +60,7 @@ class VpsLocalSyncService:
             "shared_cloud_cache": self.shared_cloud_cache_status(),
             "cloud_gate": cloud_gate_status(),
             "supported_commands": ["backup_all", "backup_tenant", "pull_shared_patch", "check_update", "restore_backup", "push_update"],
-            "supported_sync": ["formal_shared_candidates", "cloud_shared_knowledge", "commands", "updates"],
+            "supported_sync": ["formal_shared_candidates", "cloud_shared_knowledge", "recorder_module_bindings", "commands", "updates"],
         }
 
     def register_node(self, *, token: str = "", tenant_id: str | None = None, display_name: str = "") -> dict[str, Any]:
@@ -193,6 +193,62 @@ class VpsLocalSyncService:
         except VpsClientError as exc:
             return {"ok": False, "error": str(exc), "update": None}
         return {"ok": True, "update": payload.get("update") if isinstance(payload.get("update"), dict) else payload}
+
+    def fetch_recorder_module_bindings(
+        self,
+        *,
+        token: str = "",
+        tenant_id: str | None = None,
+        user_id: str = "",
+    ) -> dict[str, Any]:
+        tenant = active_tenant_id(tenant_id)
+        if not self.vps.configured:
+            return {
+                "ok": True,
+                "mode": "offline_unconfigured",
+                "tenant_id": tenant,
+                "user_id": str(user_id or ""),
+                "updated": False,
+            }
+        query: dict[str, str] = {"tenant_id": tenant}
+        normalized_user_id = str(user_id or "").strip()
+        if normalized_user_id:
+            query["user_id"] = normalized_user_id
+        node_cache = self.read_node_cache()
+        node_id = str(node_cache.get("node_id") or os.getenv("WECHAT_LOCAL_NODE_ID") or "").strip()
+        node_secret = str(node_cache.get("node_token") or os.getenv("WECHAT_LOCAL_NODE_TOKEN") or "").strip()
+        if node_id:
+            query["node_id"] = node_id
+        headers = {"X-Node-Token": node_secret} if node_secret else None
+        try:
+            payload = self.vps.get_json(f"/v1/local/recorder-module-bindings?{urlencode(query)}", token=token, headers=headers)
+        except VpsClientError as exc:
+            return {"ok": False, "tenant_id": tenant, "user_id": normalized_user_id, "error": str(exc)}
+        snapshot = payload.get("snapshot") if isinstance(payload.get("snapshot"), dict) else payload
+        if not isinstance(snapshot, dict):
+            return {"ok": False, "tenant_id": tenant, "user_id": normalized_user_id, "error": "recorder module snapshot must be an object"}
+        try:
+            from apps.wechat_ai_customer_service.admin_backend.services.recorder_module_registry import RecorderModuleRegistryService
+
+            sync_result = RecorderModuleRegistryService().sync_vps_snapshot(
+                snapshot,
+                tenant_id=tenant,
+                user_id=normalized_user_id,
+            )
+        except Exception as exc:  # pragma: no cover - defensive to avoid sync loop crash
+            return {"ok": False, "tenant_id": tenant, "user_id": normalized_user_id, "error": f"apply_recorder_snapshot_failed: {exc}"}
+        return {
+            "ok": True,
+            "mode": "online_configured",
+            "tenant_id": tenant,
+            "user_id": normalized_user_id,
+            "snapshot_version": str(snapshot.get("snapshot_version") or ""),
+            "resolved_user_ids": snapshot.get("resolved_user_ids", []),
+            "pulled_module_count": len(snapshot.get("modules", []) if isinstance(snapshot.get("modules"), list) else []),
+            "pulled_binding_count": len(snapshot.get("bindings", []) if isinstance(snapshot.get("bindings"), list) else []),
+            "apply": sync_result,
+            "updated": True,
+        }
 
     def fetch_shared_knowledge_snapshot(
         self,

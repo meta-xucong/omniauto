@@ -87,7 +87,7 @@ def _enabled_settings_targets(settings: dict[str, Any] | None) -> list[str]:
     names: list[str] = []
     seen: set[str] = set()
     for raw in _settings_targets(settings):
-        if not bool(raw.get("enabled", False)):
+        if not bool(raw.get("enabled", False)) or bool(raw.get("archived", False)):
             continue
         name = _name(raw.get("name") or raw.get("target_name") or raw.get("display_name"))
         if not name or name in seen:
@@ -316,24 +316,56 @@ def apply_customer_service_live_safety_guard(
     merged["_local_customer_service_session_routing"] = routing
 
     if _truthy(guard.get("low_risk_single_target_scan"), default=True):
+        allowed_target_count = len(allowed_targets)
         multi_target = dict(merged.get("multi_target", {}) or {})
-        multi_target.update(
-            {
-                "enabled": True,
-                "rpa_low_risk_mode": True,
-                "scan_all_whitelist_each_iteration": False,
-                "max_scan_targets_per_iteration": 1,
-                "idle_whitelist_sweep_count": 0,
-                "max_targets_per_iteration": 1,
-                "change_warmup_enabled": True,
-                "change_warmup_min_seconds": 0.8,
-                "change_warmup_max_seconds": 2.0,
-            }
-        )
-        multi_target["min_switch_interval_seconds"] = max(
-            25,
-            int(multi_target.get("min_switch_interval_seconds") or 0),
-        )
+        if allowed_target_count <= 1:
+            multi_target.update(
+                {
+                    "enabled": False,
+                    "rpa_low_risk_mode": True,
+                    "scan_all_whitelist_each_iteration": False,
+                    "max_scan_targets_per_iteration": 1,
+                    "idle_whitelist_sweep_count": 0,
+                    "max_targets_per_iteration": 1,
+                    "dispatch_strategy": "event_driven",
+                    "sticky_target_hold_seconds": max(int(multi_target.get("sticky_target_hold_seconds") or 0), 35),
+                    "preview_change_confirmations": max(int(multi_target.get("preview_change_confirmations") or 0), 1),
+                    "change_warmup_enabled": True,
+                    "change_warmup_min_seconds": 0.8,
+                    "change_warmup_max_seconds": 2.0,
+                }
+            )
+            multi_target["min_switch_interval_seconds"] = max(
+                25,
+                int(multi_target.get("min_switch_interval_seconds") or 0),
+            )
+        else:
+            # In multi-session mode, prefer unread-driven dispatch only.
+            # Avoid full-whitelist scans that create visible mechanical
+            # cross-chat hopping under RPA.
+            multi_target.update(
+                {
+                    "enabled": True,
+                    "rpa_low_risk_mode": True,
+                    "scan_all_whitelist_each_iteration": False,
+                    "max_scan_targets_per_iteration": 1,
+                    "idle_whitelist_sweep_count": 0,
+                    "max_targets_per_iteration": 1,
+                    "dispatch_strategy": "event_driven",
+                    "sticky_target_hold_seconds": max(int(multi_target.get("sticky_target_hold_seconds") or 0), 30),
+                    "preview_change_confirmations": max(int(multi_target.get("preview_change_confirmations") or 0), 2),
+                    "change_warmup_enabled": True,
+                    "change_warmup_min_seconds": 0.8,
+                    "change_warmup_max_seconds": 2.0,
+                    "switch_human_delay_enabled": True,
+                    "switch_human_delay_min_seconds": 1.0,
+                    "switch_human_delay_max_seconds": 3.0,
+                    "capture_one_target_per_round": True,
+                }
+            )
+            # No hard long switch interval: unread-driven dispatch plus a short
+            # humanized switch delay is safer and keeps response latency stable.
+            multi_target["min_switch_interval_seconds"] = 1
         merged["multi_target"] = multi_target
 
     scheduler = dict(merged.get("concurrency_scheduler", {}) or {})
@@ -399,8 +431,10 @@ def apply_customer_service_live_safety_guard(
     rpa_send["typing_micro_pause_max_ms"] = max(int(rpa_send.get("typing_micro_pause_max_ms") or 0), 480)
     rpa_send["send_pre_delay_min_ms"] = max(int(rpa_send.get("send_pre_delay_min_ms") or 0), 250)
     rpa_send["send_pre_delay_max_ms"] = max(int(rpa_send.get("send_pre_delay_max_ms") or 0), 900)
-    rpa_send["send_post_input_delay_min_ms"] = max(int(rpa_send.get("send_post_input_delay_min_ms") or 0), 450)
-    rpa_send["send_post_input_delay_max_ms"] = max(int(rpa_send.get("send_post_input_delay_max_ms") or 0), 1200)
+    # Keep a human-like post-input pause, but avoid an overly conservative floor
+    # that drags response latency in normal low-risk scenarios.
+    rpa_send["send_post_input_delay_min_ms"] = max(int(rpa_send.get("send_post_input_delay_min_ms") or 0), 320)
+    rpa_send["send_post_input_delay_max_ms"] = max(int(rpa_send.get("send_post_input_delay_max_ms") or 0), 900)
     rpa_send["send_trigger_mode"] = "enter_only"
     rpa_send["send_input_confirm_attempts"] = 1
     rpa_send["send_rate_min_interval_seconds"] = 0

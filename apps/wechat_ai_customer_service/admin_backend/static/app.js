@@ -79,8 +79,10 @@ const state = {
   activeTenantId: localStorage.getItem("localActiveTenantId") || "",
   syncStatus: null,
   startupSyncTimer: null,
+  cloudGateRetryTimer: null,
   loginChallenge: null,
   cloudLoginLocked: false,
+  localLoginSubmitting: false,
   initChallenge: null,
   passwordChallenge: null,
   emailChallenge: null,
@@ -409,18 +411,80 @@ function initializeLocalLogin() {
 }
 
 async function loginLocal(form) {
-  if (state.loginChallenge) {
-    if (state.loginChallenge.mode === "bind_email") {
-      const response = await fetch("/api/auth/login/bind-email/start", {
+  if (state.localLoginSubmitting) return;
+  state.localLoginSubmitting = true;
+  const submitButton = document.getElementById("local-login-submit");
+  if (submitButton) submitButton.disabled = true;
+  try {
+    if (state.loginChallenge) {
+      if (state.loginChallenge.mode === "bind_email") {
+        const response = await fetch("/api/auth/login/bind-email/start", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({challenge_id: state.loginChallenge.challenge_id, email: form.get("bind_email")}),
+        });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok || payload.ok === false) {
+          throw new Error(formatApiError(payload, "邮箱绑定验证发起失败，请检查邮箱。"));
+        }
+        state.loginChallenge.mode = "verify";
+        document.getElementById("local-login-bind-email-field")?.classList.add("is-hidden");
+        document.getElementById("local-login-code-field")?.classList.remove("is-hidden");
+        document.getElementById("local-login-trust-field")?.classList.remove("is-hidden");
+        document.getElementById("local-login-submit").textContent = "验证并登录";
+        showLoginMessage(
+          payload.debug_code
+            ? `验证码已生成：${payload.debug_code}。生产环境会发送到 ${payload.masked_email || "绑定邮箱"}。`
+            : `验证码已发送到 ${payload.masked_email || "绑定邮箱"}，请输入后登录。`
+        );
+        return;
+      }
+      const response = await fetch("/api/auth/login/verify", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({challenge_id: state.loginChallenge.challenge_id, email: form.get("bind_email")}),
+        body: JSON.stringify({
+          challenge_id: state.loginChallenge.challenge_id,
+          code: form.get("email_code"),
+          trust_device: Boolean(form.get("trust_device")),
+        }),
       });
       const payload = await response.json().catch(() => ({}));
       if (!response.ok || payload.ok === false) {
-        throw new Error(formatApiError(payload, "邮箱绑定验证发起失败，请检查邮箱。"));
+        throw new Error(formatApiError(payload, "验证码错误或已过期，请重新获取。"));
       }
-      state.loginChallenge.mode = "verify";
+      await completeLocalLogin(payload.session);
+      return;
+    }
+    const response = await fetch("/api/auth/login/start", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        username: form.get("username"),
+        password: form.get("password"),
+        device_id: localDeviceId,
+        device_name: browserDeviceName(),
+      }),
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok || payload.ok === false) {
+      throw new Error(formatApiError(payload, "登录失败，请检查账号和密码。"));
+    }
+    if (!payload.requires_verification && payload.session) {
+      await completeLocalLogin(payload.session);
+      return;
+    }
+    if (payload.requires_initialization) {
+      showLocalInitialization(payload);
+      return;
+    }
+    state.loginChallenge = {challenge_id: payload.challenge_id, mode: payload.requires_email_binding ? "bind_email" : "verify"};
+    if (payload.requires_email_binding) {
+      document.getElementById("local-login-bind-email-field")?.classList.remove("is-hidden");
+      document.getElementById("local-login-code-field")?.classList.add("is-hidden");
+      document.getElementById("local-login-trust-field")?.classList.add("is-hidden");
+      document.getElementById("local-login-submit").textContent = "发送邮箱验证码";
+      showLoginMessage(payload.message || "这个账号还没有绑定邮箱，请填写邮箱后获取验证码。");
+    } else {
       document.getElementById("local-login-bind-email-field")?.classList.add("is-hidden");
       document.getElementById("local-login-code-field")?.classList.remove("is-hidden");
       document.getElementById("local-login-trust-field")?.classList.remove("is-hidden");
@@ -430,65 +494,12 @@ async function loginLocal(form) {
           ? `验证码已生成：${payload.debug_code}。生产环境会发送到 ${payload.masked_email || "绑定邮箱"}。`
           : `验证码已发送到 ${payload.masked_email || "绑定邮箱"}，请输入后登录。`
       );
-      return;
     }
-    const response = await fetch("/api/auth/login/verify", {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({
-        challenge_id: state.loginChallenge.challenge_id,
-        code: form.get("email_code"),
-        trust_device: Boolean(form.get("trust_device")),
-      }),
-    });
-    const payload = await response.json().catch(() => ({}));
-    if (!response.ok || payload.ok === false) {
-      throw new Error(formatApiError(payload, "验证码错误或已过期，请重新获取。"));
-    }
-    await completeLocalLogin(payload.session);
-    return;
+    document.getElementById("local-login-reset")?.classList.remove("is-hidden");
+  } finally {
+    state.localLoginSubmitting = false;
+    if (submitButton) submitButton.disabled = false;
   }
-  const response = await fetch("/api/auth/login/start", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({
-      username: form.get("username"),
-      password: form.get("password"),
-      device_id: localDeviceId,
-      device_name: browserDeviceName(),
-    }),
-  });
-  const payload = await response.json().catch(() => ({}));
-  if (!response.ok || payload.ok === false) {
-    throw new Error(formatApiError(payload, "登录失败，请检查账号和密码。"));
-  }
-  if (!payload.requires_verification && payload.session) {
-    await completeLocalLogin(payload.session);
-    return;
-  }
-  if (payload.requires_initialization) {
-    showLocalInitialization(payload);
-    return;
-  }
-  state.loginChallenge = {challenge_id: payload.challenge_id, mode: payload.requires_email_binding ? "bind_email" : "verify"};
-  if (payload.requires_email_binding) {
-    document.getElementById("local-login-bind-email-field")?.classList.remove("is-hidden");
-    document.getElementById("local-login-code-field")?.classList.add("is-hidden");
-    document.getElementById("local-login-trust-field")?.classList.add("is-hidden");
-    document.getElementById("local-login-submit").textContent = "发送邮箱验证码";
-    showLoginMessage(payload.message || "这个账号还没有绑定邮箱，请填写邮箱后获取验证码。");
-  } else {
-    document.getElementById("local-login-bind-email-field")?.classList.add("is-hidden");
-    document.getElementById("local-login-code-field")?.classList.remove("is-hidden");
-    document.getElementById("local-login-trust-field")?.classList.remove("is-hidden");
-    document.getElementById("local-login-submit").textContent = "验证并登录";
-    showLoginMessage(
-      payload.debug_code
-        ? `验证码已生成：${payload.debug_code}。生产环境会发送到 ${payload.masked_email || "绑定邮箱"}。`
-        : `验证码已发送到 ${payload.masked_email || "绑定邮箱"}，请输入后登录。`
-    );
-  }
-  document.getElementById("local-login-reset")?.classList.remove("is-hidden");
 }
 
 function showLocalInitialization(payload) {
@@ -714,16 +725,38 @@ async function prepareCloudGateForLogin({silent = false, force = true} = {}) {
     setLocalLoginEnabled(!state.cloudLoginLocked);
     if (state.cloudLoginLocked) {
       showLoginMessage(payload.message || "当前客户端未通过云端授权校验。请连接服务端并完成共享行业知识库刷新后再使用。");
+      scheduleCloudGatePrepareRetry();
       return false;
     }
+    clearCloudGatePrepareRetry();
     if (!silent && !state.loginChallenge) hideLoginMessage();
     return true;
   } catch (error) {
     state.cloudLoginLocked = true;
     setLocalLoginEnabled(false);
     showLoginMessage(error.message || "当前客户端未通过云端授权校验。请连接服务端并完成共享行业知识库刷新后再使用。");
+    scheduleCloudGatePrepareRetry();
     return false;
   }
+}
+
+function clearCloudGatePrepareRetry() {
+  if (state.cloudGateRetryTimer) {
+    clearTimeout(state.cloudGateRetryTimer);
+    state.cloudGateRetryTimer = null;
+  }
+}
+
+function scheduleCloudGatePrepareRetry() {
+  if (state.authToken) return;
+  if (!state.cloudLoginLocked) return;
+  if (state.cloudGateRetryTimer) return;
+  const retryDelayMs = 5000 + Math.floor(Math.random() * 2000);
+  state.cloudGateRetryTimer = setTimeout(() => {
+    state.cloudGateRetryTimer = null;
+    if (state.authToken || !state.cloudLoginLocked) return;
+    prepareCloudGateForLogin({silent: true, force: true}).catch(() => {});
+  }, retryDelayMs);
 }
 
 function getOrCreateDeviceId(key) {
@@ -840,7 +873,7 @@ async function runStartupSync({startup = false} = {}) {
   if (!state.syncStatus?.vps_configured) return;
   const commandResult = await pollSyncCommands();
   handleSyncCommandOutcome(commandResult, {startup});
-  const results = await Promise.allSettled([syncSharedCloudSnapshot(), checkSyncUpdate(), syncFormalSharedCandidates()]);
+  const results = await Promise.allSettled([syncSharedCloudSnapshot(), checkSyncUpdate(), syncFormalSharedCandidates(), syncRecorderModuleBindings()]);
   if (results[0]?.status === "fulfilled") updateSharedCloudCacheStatus(results[0].value);
   const failed = results.filter((item) => item.status === "rejected");
   if (failed.length) {
@@ -904,6 +937,13 @@ async function syncFormalSharedCandidates() {
   return apiJson("/api/sync/shared/formal-candidates", {
     method: "POST",
     body: JSON.stringify({use_llm: true, only_unscanned: true, limit: 30}),
+  });
+}
+
+async function syncRecorderModuleBindings() {
+  return apiJson("/api/sync/recorder/module-bindings", {
+    method: "POST",
+    body: "{}",
   });
 }
 
@@ -2039,7 +2079,12 @@ async function discoverCustomerServiceSessions() {
     renderCustomerServiceSessionSummary();
     renderCustomerServiceSessionList();
     const added = Number(payload.added_count || 0);
-    alert(added > 0 ? `识别完成，新增 ${added} 个会话。` : "识别完成，会话列表已更新。");
+    const archivedCount = Number(payload.archived_count || 0);
+    const warnings = Array.isArray(payload.warnings) ? payload.warnings.filter(Boolean) : [];
+    const baseMessage = added > 0
+      ? `识别完成，新增 ${added} 个会话，归档旧会话 ${archivedCount} 个。`
+      : `识别完成，会话列表已更新，归档旧会话 ${archivedCount} 个。`;
+    alert(warnings.length ? `${baseMessage}\n${warnings.join("\n")}` : baseMessage);
   } finally {
     if (button) {
       button.disabled = false;
@@ -2063,6 +2108,10 @@ async function updateCustomerServiceSession(name, patch) {
   }
   renderCustomerServiceSessionSummary();
   renderCustomerServiceSessionList();
+  const warnings = Array.isArray(payload.warnings) ? payload.warnings.filter(Boolean) : [];
+  if (warnings.length) {
+    alert(warnings.join("\n"));
+  }
 }
 
 async function applyCustomerServiceSessionSelection(mode = "all") {
@@ -8179,6 +8228,7 @@ document.getElementById("tenant-select")?.addEventListener("change", async (even
     loadOverview().catch(console.error),
     refreshRagExperienceBadge().catch(console.error),
   ]);
+  await syncRecorderModuleBindings().catch((error) => console.warn("tenant switch recorder binding sync failed", error));
   scheduleStartupSync();
   scheduleCustomerServiceRuntimePolling();
   await loadActiveSubsection().catch(console.error);

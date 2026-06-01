@@ -32,6 +32,7 @@ DEFAULT_SETTINGS = {
     "capture_anchor_recent_limit": 80,
 }
 RECORDER_DISCOVERY_SOURCE_TYPE = "wechat_session_discovery"
+RECORDER_TEST_SOURCE_TYPE = "live_recorder_test"
 MIN_CONTENT_ONLY_ANCHOR_LENGTH = 20
 
 
@@ -429,7 +430,7 @@ class RecorderService:
                 continue
             source = item.get("source") if isinstance(item.get("source"), dict) else {}
             source_type = str(source.get("type") or "").strip().lower()
-            if source_type != RECORDER_DISCOVERY_SOURCE_TYPE:
+            if not is_supported_recorder_source_type(source_type):
                 continue
             items.append(item)
         return items
@@ -471,6 +472,17 @@ def preserved_selection(existing: dict[str, Any]) -> dict[str, Any]:
         "learning_enabled": existing.get("learning_enabled", True) is not False,
         "notify_enabled": bool(existing.get("notify_enabled", False)),
     }
+
+
+def is_supported_recorder_source_type(source_type: str) -> bool:
+    source = str(source_type or "").strip().lower()
+    if source == RECORDER_DISCOVERY_SOURCE_TYPE:
+        return True
+    if source == RECORDER_TEST_SOURCE_TYPE:
+        return True
+    if source.startswith("live_recorder_"):
+        return True
+    return False
 
 
 def normalized_patch_conversation_type(value: Any, current: Any) -> str:

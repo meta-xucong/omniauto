@@ -24,6 +24,12 @@ if str(WORKFLOWS_ROOT) not in sys.path:
 from evidence_resolver import EvidenceResolver  # noqa: E402
 from knowledge_runtime import KnowledgeRuntime  # noqa: E402
 from rag_layer import RagService  # noqa: E402
+from apps.wechat_ai_customer_service.workflows.product_name_matcher import (  # noqa: E402
+    collect_matched_aliases,
+)
+from apps.wechat_ai_customer_service.workflows.llm_product_name_matcher import (  # noqa: E402
+    llm_match_product_name,
+)
 from apps.wechat_ai_customer_service.platform_understanding_rules import (  # noqa: E402
     intent_group,
     intent_keywords,
@@ -504,12 +510,21 @@ def select_products(
     matched = []
     for product in products:
         aliases = [str(product.get("name") or ""), *[str(value) for value in product.get("aliases", []) or []]]
-        matched_aliases = [alias for alias in aliases if alias and alias.lower() in normalized_text]
+        matched_aliases = collect_matched_aliases(aliases, normalized_text)
         if matched_aliases:
             matched.append(product_snippet(product, matched_aliases=matched_aliases))
 
     if matched:
         return matched[:3]
+
+    llm_match = maybe_llm_match_product(
+        products=products,
+        normalized_text=normalized_text,
+        intent_tags=intent_tags,
+        context=context,
+    )
+    if llm_match:
+        return llm_match
 
     last_product_id = str(context.get("last_product_id") or "")
     if last_product_id and set(intent_tags) & {"quote", "discount", "shipping", "stock", "warranty", "spec"}:
@@ -538,6 +553,58 @@ def product_snippet(
     if matched_aliases:
         snippet["matched_aliases"] = matched_aliases
     return snippet
+
+
+def maybe_llm_match_product(
+    *,
+    products: list[dict[str, Any]],
+    normalized_text: str,
+    intent_tags: list[str],
+    context: dict[str, Any],
+) -> list[dict[str, Any]]:
+    settings = normalize_product_entity_resolution_settings(context.get("product_entity_resolution"))
+    if not settings.get("enabled", False):
+        return []
+    if not should_try_llm_product_resolution(normalized_text, intent_tags, products):
+        return []
+    result = llm_match_product_name(normalized_text, products, settings=settings)
+    if not result.get("matched"):
+        return []
+    product_id = str(result.get("product_id") or "")
+    if not product_id:
+        return []
+    for product in products:
+        if str(product.get("id") or "") != product_id:
+            continue
+        snippet = product_snippet(product, matched_aliases=["semantic_llm_match"])
+        confidence = result.get("confidence")
+        if confidence is not None:
+            snippet["semantic_match_confidence"] = confidence
+        snippet["semantic_match_reason"] = str(result.get("reason") or "llm_semantic_product_match")
+        return [snippet]
+    return []
+
+
+def should_try_llm_product_resolution(
+    normalized_text: str,
+    intent_tags: list[str],
+    products: list[dict[str, Any]],
+) -> bool:
+    if not products:
+        return False
+    if len(normalize_text(normalized_text)) < 2:
+        return False
+    tag_set = {str(item) for item in intent_tags if str(item)}
+    relevant_tags = {"product", "catalog", "quote", "discount", "stock", "shipping", "warranty", "spec", "scene_product"}
+    return bool(tag_set & relevant_tags)
+
+
+def normalize_product_entity_resolution_settings(raw: Any) -> dict[str, Any]:
+    if not isinstance(raw, dict):
+        return {}
+    normalized: dict[str, Any] = dict(raw)
+    normalized["enabled"] = bool(normalized.get("enabled", False))
+    return normalized
 
 
 def select_faq(knowledge: dict[str, Any], normalized_text: str, intent_tags: list[str]) -> list[dict[str, Any]]:

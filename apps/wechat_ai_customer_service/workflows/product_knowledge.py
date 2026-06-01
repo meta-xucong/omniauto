@@ -11,6 +11,12 @@ from apps.wechat_ai_customer_service.platform_understanding_rules import (
     product_keywords,
     quantity_unit_pattern,
 )
+from apps.wechat_ai_customer_service.workflows.product_name_matcher import (
+    collect_matched_aliases,
+)
+from apps.wechat_ai_customer_service.workflows.llm_product_name_matcher import (
+    llm_match_product_name,
+)
 
 
 def load_product_knowledge(path: Path) -> dict[str, Any]:
@@ -68,8 +74,10 @@ def decide_product_knowledge_reply(
     text: str,
     knowledge: dict[str, Any],
     context: dict[str, Any] | None = None,
+    matching_settings: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     context = context or {}
+    matching_settings = normalize_matching_settings(matching_settings)
     normalized = normalize_text(text)
     faq = match_faq(normalized, knowledge)
     intent = detect_intent(normalized)
@@ -78,6 +86,24 @@ def decide_product_knowledge_reply(
         return build_catalog_result(knowledge)
 
     product = match_product(normalized, knowledge)
+    product_match_reason = "product_alias_matched"
+    product_match_confidence: float | None = None
+    if not product:
+        llm_fallback = try_llm_product_match(
+            normalized_text=normalized,
+            knowledge=knowledge,
+            intent=intent,
+            matching_settings=matching_settings,
+        )
+        if llm_fallback:
+            product = llm_fallback.get("product")
+            product_match_reason = str(llm_fallback.get("reason") or "llm_semantic_product_match")
+            confidence = llm_fallback.get("confidence")
+            if confidence not in (None, ""):
+                try:
+                    product_match_confidence = float(confidence)
+                except (TypeError, ValueError):
+                    product_match_confidence = None
     if faq and int(faq.get("priority", 0) or 0) >= 80 and should_high_priority_faq_preempt_product(faq, product):
         return build_faq_result(faq)
     context_used = False
@@ -90,7 +116,7 @@ def decide_product_knowledge_reply(
 
     if product:
         reply = build_product_reply(product, intent, text, context=context if context_used else None)
-        return {
+        payload = {
             "enabled": True,
             "matched": True,
             "match_type": "product",
@@ -107,8 +133,11 @@ def decide_product_knowledge_reply(
             "needs_handoff": bool(reply.get("needs_handoff")),
             "operator_alert": bool(reply.get("operator_alert")),
             "approval_reason": reply.get("approval_reason"),
-            "reason": str(reply.get("reason") or "product_alias_matched"),
+            "reason": str(reply.get("reason") or product_match_reason),
         }
+        if product_match_confidence is not None:
+            payload["semantic_match_confidence"] = round(product_match_confidence, 3)
+        return payload
 
     if faq:
         return build_faq_result(faq)
@@ -140,13 +169,57 @@ def match_product(normalized_text: str, knowledge: dict[str, Any]) -> dict[str, 
     candidates = []
     for product in knowledge.get("products", []) or []:
         aliases = [str(product.get("name") or ""), *[str(item) for item in product.get("aliases", []) or []]]
-        matched_aliases = [alias for alias in aliases if alias and alias.lower() in normalized_text]
+        matched_aliases = collect_matched_aliases(aliases, normalized_text)
         if not matched_aliases:
             continue
         candidates.append((max(len(alias) for alias in matched_aliases), len(matched_aliases), product))
     if not candidates:
         return None
     return max(candidates, key=lambda item: (item[0], item[1]))[2]
+
+
+def try_llm_product_match(
+    *,
+    normalized_text: str,
+    knowledge: dict[str, Any],
+    intent: str,
+    matching_settings: dict[str, Any],
+) -> dict[str, Any] | None:
+    if not matching_settings.get("enabled", False):
+        return None
+    if not should_try_llm_product_resolution(normalized_text, intent):
+        return None
+    products = knowledge.get("products", []) or []
+    if not products:
+        return None
+    llm_result = llm_match_product_name(normalized_text, products, settings=matching_settings)
+    if not llm_result.get("matched"):
+        return None
+    product_id = str(llm_result.get("product_id") or "")
+    if not product_id:
+        return None
+    product = find_product_by_id(knowledge, product_id)
+    if not product:
+        return None
+    return {
+        "product": product,
+        "reason": str(llm_result.get("reason") or "llm_semantic_product_match"),
+        "confidence": llm_result.get("confidence"),
+    }
+
+
+def should_try_llm_product_resolution(normalized_text: str, intent: str) -> bool:
+    if len(normalize_text(normalized_text)) < 2:
+        return False
+    return intent in {"catalog", "quote", "discount", "shipping", "stock", "warranty", "spec", "product_info"}
+
+
+def normalize_matching_settings(value: dict[str, Any] | None) -> dict[str, Any]:
+    if not isinstance(value, dict):
+        return {}
+    normalized = dict(value)
+    normalized["enabled"] = bool(normalized.get("enabled", False))
+    return normalized
 
 
 def find_product_by_id(knowledge: dict[str, Any], product_id: str) -> dict[str, Any] | None:

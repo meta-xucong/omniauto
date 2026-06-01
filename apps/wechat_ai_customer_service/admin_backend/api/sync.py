@@ -93,6 +93,19 @@ def poll_commands(request: Request) -> dict[str, Any]:
     )
 
 
+@router.post("/recorder/module-bindings")
+def pull_recorder_module_bindings(request: Request, payload: dict[str, Any] | None = None) -> dict[str, Any]:
+    context = current_auth_context(request)
+    payload = payload or {}
+    requested_user_id = str(payload.get("user_id") or "").strip()
+    user_id = requested_user_id or str(context.user.user_id or "")
+    return VpsLocalSyncService().fetch_recorder_module_bindings(
+        token=str(request.headers.get("Authorization") or "").replace("Bearer ", "").strip(),
+        tenant_id=context.tenant_id,
+        user_id=user_id,
+    )
+
+
 @router.get("/update/check")
 def check_update(request: Request) -> dict[str, Any]:
     context = current_auth_context(request)

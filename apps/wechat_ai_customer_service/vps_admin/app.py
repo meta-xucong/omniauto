@@ -532,6 +532,27 @@ def create_app(*, state_path: Path | None = None) -> FastAPI:
         authorize_local_endpoint(request, authorization=authorization, node_id=node_id, node_token=x_node_token)
         return {"ok": True, "commands": app.state.command_service.poll(tenant_id=tenant_id, node_id=node_id)}
 
+    @app.get("/v1/local/recorder-module-bindings")
+    def local_recorder_module_bindings(
+        request: Request,
+        tenant_id: str = Query(default="default"),
+        user_id: str = Query(default=""),
+        node_id: str = Query(default=""),
+        x_node_token: str = Header(default=""),
+        authorization: str = Header(default=""),
+    ) -> dict[str, Any]:
+        authorize_local_endpoint(request, authorization=authorization, node_id=node_id, node_token=x_node_token)
+        effective_user_id = str(user_id or "").strip()
+        if not effective_user_id and authorization:
+            session = get_auth_service(request).resolve_token(bearer_token(authorization))
+            if session is not None:
+                effective_user_id = str(session.user.user_id or "").strip()
+        snapshot = app.state.recorder_module_assignment_service.local_sync_snapshot(
+            tenant_id=tenant_id,
+            user_id=effective_user_id,
+        )
+        return {"ok": True, "snapshot": snapshot}
+
     @app.post("/v1/local/commands/{command_id}/result")
     def command_result(command_id: str, payload: dict[str, Any], request: Request, x_node_token: str = Header(default="")) -> dict[str, Any]:
         node_id = command_node_id(request, command_id)

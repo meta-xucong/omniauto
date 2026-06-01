@@ -10,6 +10,7 @@ const state = {
   initChallenge: null,
   passwordChallenge: null,
   emailChallenge: null,
+  loginSubmitting: false,
 };
 
 const title = document.querySelector("#view-title");
@@ -56,20 +57,85 @@ refresh();
 
 async function login(event) {
   event.preventDefault();
+  if (state.loginSubmitting) return;
+  state.loginSubmitting = true;
+  const submitButton = document.querySelector("#login-submit");
+  if (submitButton) submitButton.disabled = true;
   const form = new FormData(event.currentTarget);
-  if (state.loginChallenge) {
-    if (state.loginChallenge.mode === "bind_email") {
-      const response = await fetch("/v1/auth/login/bind-email/start", {
+  try {
+    if (state.loginChallenge) {
+      if (state.loginChallenge.mode === "bind_email") {
+        const response = await fetch("/v1/auth/login/bind-email/start", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({challenge_id: state.loginChallenge.challenge_id, email: form.get("bind_email")}),
+        });
+        const body = await response.json().catch(() => ({}));
+        if (!response.ok || body.ok === false) {
+          showLoginMessage(body.detail || "邮箱绑定验证发起失败，请检查邮箱。");
+          return;
+        }
+        state.loginChallenge.mode = "verify";
+        document.querySelector("#login-bind-email-field")?.classList.add("is-hidden");
+        document.querySelector("#login-code-field")?.classList.remove("is-hidden");
+        document.querySelector("#login-trust-field")?.classList.remove("is-hidden");
+        document.querySelector("#login-submit").textContent = "验证并登录";
+        showLoginMessage(
+          body.debug_code
+            ? `验证码已生成：${body.debug_code}。生产环境会发送到 ${body.masked_email || "绑定邮箱"}。`
+            : `验证码已发送到 ${body.masked_email || "绑定邮箱"}，请输入后登录。`
+        );
+        return;
+      }
+      const response = await fetch("/v1/auth/login/verify", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({challenge_id: state.loginChallenge.challenge_id, email: form.get("bind_email")}),
+        body: JSON.stringify({
+          challenge_id: state.loginChallenge.challenge_id,
+          code: form.get("email_code"),
+          trust_device: Boolean(form.get("trust_device")),
+        }),
       });
       const body = await response.json().catch(() => ({}));
       if (!response.ok || body.ok === false) {
-        showLoginMessage(body.detail || "邮箱绑定验证发起失败，请检查邮箱。");
+        showLoginMessage(body.detail || "验证码错误或已过期，请重新获取。");
         return;
       }
-      state.loginChallenge.mode = "verify";
+      completeLogin(body.session);
+      return;
+    }
+    const response = await fetch("/v1/auth/login/start", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        username: form.get("username"),
+        password: form.get("password"),
+        tenant_id: "default",
+        device_id: deviceId,
+        device_name: browserDeviceName(),
+      }),
+    });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok || body.ok === false) {
+      showLoginMessage(body.detail || "登录失败，请检查管理员密码。");
+      return;
+    }
+    if (!body.requires_verification && body.session) {
+      completeLogin(body.session);
+      return;
+    }
+    if (body.requires_initialization) {
+      showInitialization(body);
+      return;
+    }
+    state.loginChallenge = {challenge_id: body.challenge_id, mode: body.requires_email_binding ? "bind_email" : "verify"};
+    if (body.requires_email_binding) {
+      document.querySelector("#login-bind-email-field")?.classList.remove("is-hidden");
+      document.querySelector("#login-code-field")?.classList.add("is-hidden");
+      document.querySelector("#login-trust-field")?.classList.add("is-hidden");
+      document.querySelector("#login-submit").textContent = "发送邮箱验证码";
+      showLoginMessage(body.message || "这个账号还没有绑定邮箱，请填写邮箱后获取验证码。");
+    } else {
       document.querySelector("#login-bind-email-field")?.classList.add("is-hidden");
       document.querySelector("#login-code-field")?.classList.remove("is-hidden");
       document.querySelector("#login-trust-field")?.classList.remove("is-hidden");
@@ -79,68 +145,12 @@ async function login(event) {
           ? `验证码已生成：${body.debug_code}。生产环境会发送到 ${body.masked_email || "绑定邮箱"}。`
           : `验证码已发送到 ${body.masked_email || "绑定邮箱"}，请输入后登录。`
       );
-      return;
     }
-    const response = await fetch("/v1/auth/login/verify", {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({
-        challenge_id: state.loginChallenge.challenge_id,
-        code: form.get("email_code"),
-        trust_device: Boolean(form.get("trust_device")),
-      }),
-    });
-    const body = await response.json().catch(() => ({}));
-    if (!response.ok || body.ok === false) {
-      showLoginMessage(body.detail || "验证码错误或已过期，请重新获取。");
-      return;
-    }
-    completeLogin(body.session);
-    return;
+    document.querySelector("#login-reset")?.classList.remove("is-hidden");
+  } finally {
+    state.loginSubmitting = false;
+    if (submitButton) submitButton.disabled = false;
   }
-  const response = await fetch("/v1/auth/login/start", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({
-      username: form.get("username"),
-      password: form.get("password"),
-      tenant_id: "default",
-      device_id: deviceId,
-      device_name: browserDeviceName(),
-    }),
-  });
-  const body = await response.json().catch(() => ({}));
-  if (!response.ok || body.ok === false) {
-    showLoginMessage(body.detail || "登录失败，请检查管理员密码。");
-    return;
-  }
-  if (!body.requires_verification && body.session) {
-    completeLogin(body.session);
-    return;
-  }
-  if (body.requires_initialization) {
-    showInitialization(body);
-    return;
-  }
-  state.loginChallenge = {challenge_id: body.challenge_id, mode: body.requires_email_binding ? "bind_email" : "verify"};
-  if (body.requires_email_binding) {
-    document.querySelector("#login-bind-email-field")?.classList.remove("is-hidden");
-    document.querySelector("#login-code-field")?.classList.add("is-hidden");
-    document.querySelector("#login-trust-field")?.classList.add("is-hidden");
-    document.querySelector("#login-submit").textContent = "发送邮箱验证码";
-    showLoginMessage(body.message || "这个账号还没有绑定邮箱，请填写邮箱后获取验证码。");
-  } else {
-    document.querySelector("#login-bind-email-field")?.classList.add("is-hidden");
-    document.querySelector("#login-code-field")?.classList.remove("is-hidden");
-    document.querySelector("#login-trust-field")?.classList.remove("is-hidden");
-    document.querySelector("#login-submit").textContent = "验证并登录";
-    showLoginMessage(
-      body.debug_code
-        ? `验证码已生成：${body.debug_code}。生产环境会发送到 ${body.masked_email || "绑定邮箱"}。`
-        : `验证码已发送到 ${body.masked_email || "绑定邮箱"}，请输入后登录。`
-    );
-  }
-  document.querySelector("#login-reset")?.classList.remove("is-hidden");
 }
 
 function showInitialization(payload) {

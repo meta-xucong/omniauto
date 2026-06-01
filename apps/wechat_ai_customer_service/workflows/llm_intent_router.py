@@ -13,6 +13,7 @@ Fallback: if LLM fails or times out (5s), falls back to explicit keyword checks.
 from __future__ import annotations
 
 import json
+import re
 import sys
 import time
 import urllib.error
@@ -99,13 +100,11 @@ PRODUCT_INQUIRY_KEYWORDS = [
     "车龄",
 ]
 
-HANDOFF_KEYWORDS = [
-    "人工",
-    "真人",
-    "销售",
-    "顾问",
-    "找客服",
-    "转人工",
+HANDOFF_REQUEST_PATTERNS = [
+    r"转\s*人工",
+    r"(找|要|想要|需要|接|换|叫|请|让|安排|联系).{0,4}(人工|人工客服|真人客服|销售|顾问|专员|客服)",
+    r"(人工|人工客服|真人客服|销售|顾问|专员|客服).{0,6}(联系|跟进|对接|接管|处理|回我|回复我)",
+    r"(有|有没有|能不能|可以).{0,4}(人工|人工客服|真人客服)",
 ]
 
 GREETING_KEYWORDS = [
@@ -388,12 +387,12 @@ def _keyword_fallback_intent(combined: str) -> IntentRouteResult:
                 source="keyword_fallback",
             )
 
-    for keyword in HANDOFF_KEYWORDS:
-        if keyword.lower() in text:
+    for pattern in HANDOFF_REQUEST_PATTERNS:
+        if re.search(pattern, text, flags=re.IGNORECASE):
             return IntentRouteResult(
                 intent="handoff_request",
                 confidence=0.7,
-                reasoning=f"keyword_fallback: handoff keyword '{keyword}'",
+                reasoning=f"keyword_fallback: handoff pattern '{pattern}'",
                 entities={},
                 source="keyword_fallback",
             )

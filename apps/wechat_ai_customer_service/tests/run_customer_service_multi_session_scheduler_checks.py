@@ -8,6 +8,7 @@ import tempfile
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any
 
 
@@ -27,6 +28,7 @@ from apps.wechat_ai_customer_service.admin_backend.services.customer_service_sch
     enqueue_pending_session,
     mark_capture_started,
     mark_llm_started,
+    mark_reply_sending,
     mark_reply_sent,
     record_capture_result,
     record_session_signal,
@@ -38,13 +40,18 @@ from apps.wechat_ai_customer_service.admin_backend.services.customer_service_sch
     CapturedMessagesConnector,
     CustomerServiceSchedulerRuntime,
     ManagedListenerSchedulerBridge,
+    mark_session_capture_failed,
     plan_reply_with_listen_workflow,
 )
+import apps.wechat_ai_customer_service.admin_backend.services.customer_service_scheduler as scheduler_module  # noqa: E402
 from apps.wechat_ai_customer_service.admin_backend.services.customer_profile_store import CustomerProfileStore  # noqa: E402
 from apps.wechat_ai_customer_service.admin_backend.services.session_monitor import SessionMonitor  # noqa: E402
 from apps.wechat_ai_customer_service.customer_service_live_safety import apply_customer_service_live_safety_guard  # noqa: E402
 from apps.wechat_ai_customer_service.workflows.llm_intent_router import route_intent  # noqa: E402
-from apps.wechat_ai_customer_service.scripts.run_customer_service_listener import load_concurrency_scheduler_enabled  # noqa: E402
+from apps.wechat_ai_customer_service.scripts.run_customer_service_listener import (  # noqa: E402
+    load_concurrency_scheduler_enabled,
+    load_rpa_humanized_send_settings,
+)
 from listen_and_reply import TargetConfig, load_config, load_rules, maybe_enrich_messages_with_history  # noqa: E402
 
 
@@ -106,6 +113,14 @@ class FakeBridgeConnector:
     def send_text_and_verify(self, target: str, text: str, exact: bool = True) -> dict[str, Any]:
         self.sent.append({"target": target, "text": text, "exact": exact})
         return {"ok": True, "verified": True, "adapter": "win32_ocr", "state": "sent"}
+
+
+class FakePreviewSessionMonitor:
+    def __init__(self, sessions: list[dict[str, Any]]) -> None:
+        self._sessions = sessions
+
+    def all_sessions(self) -> list[dict[str, Any]]:
+        return list(self._sessions)
 
 
 def message(target: str, index: int, content: str | None = None) -> dict[str, Any]:
@@ -348,6 +363,115 @@ def check_session_monitor_visual_unread_badge_retriggers_after_reset(tmp_dir: Pa
     assert_equal([item.name for item in red_again], ["客户A"], "a new visual badge after reset should retrigger capture")
 
 
+def check_session_monitor_event_driven_dispatch_keeps_sticky_target(tmp_dir: Path | None = None) -> None:
+    state_path = (tmp_dir or (PROJECT_ROOT / "runtime" / "apps" / "wechat_ai_customer_service" / "test_artifacts")) / "session_monitor_dispatch_sticky_unit.json"
+    try:
+        state_path.unlink()
+    except FileNotFoundError:
+        pass
+    monitor = SessionMonitor(
+        state_path=state_path,
+        max_targets_per_iteration=5,
+        min_switch_interval_seconds=30,
+        dispatch_strategy="event_driven",
+        sticky_target_hold_seconds=60,
+        preview_change_confirmations=2,
+    )
+    monitor.poll(
+        FakeSessionConnector(
+            [
+                {"name": "客户A", "content": "A 新消息", "time": "10:00", "conversation_type": "private"},
+                {"name": "客户B", "content": "B 新消息", "time": "10:00", "conversation_type": "private"},
+            ]
+        )
+    )
+    first = monitor.select_dispatch_targets(limit=2)
+    assert_true(bool(first), "event-driven dispatch should choose one pending target")
+    second = monitor.select_dispatch_targets(limit=2)
+    assert_equal(
+        [item.name for item in second],
+        [item.name for item in first],
+        "sticky window should keep dispatching the same target briefly",
+    )
+    monitor.reset_unread(first[0].name)
+    third = monitor.select_dispatch_targets(limit=2)
+    assert_equal(len(third), 1, "after clearing sticky target, remaining pending session should be dispatched")
+    assert_true(
+        third[0].name in {"客户A", "客户B"} and third[0].name != first[0].name,
+        "dispatch should switch only after current sticky target is handled",
+    )
+
+
+def check_session_monitor_event_driven_dispatch_rotates_under_hot_target(tmp_dir: Path | None = None) -> None:
+    state_path = (tmp_dir or (PROJECT_ROOT / "runtime" / "apps" / "wechat_ai_customer_service" / "test_artifacts")) / "session_monitor_dispatch_rotate_unit.json"
+    try:
+        state_path.unlink()
+    except FileNotFoundError:
+        pass
+    monitor = SessionMonitor(
+        state_path=state_path,
+        max_targets_per_iteration=5,
+        min_switch_interval_seconds=30,
+        dispatch_strategy="event_driven",
+        sticky_target_hold_seconds=90,
+        sticky_max_dispatch_rounds=2,
+        preview_change_confirmations=1,
+    )
+    monitor.poll(
+        FakeSessionConnector(
+            [
+                {"name": "客户A", "content": "A 新消息", "time": "10:00", "conversation_type": "private"},
+                {"name": "客户B", "content": "B 新消息", "time": "10:00", "conversation_type": "private"},
+            ]
+        )
+    )
+    first = monitor.select_dispatch_targets(limit=1)
+    second = monitor.select_dispatch_targets(limit=1)
+    third = monitor.select_dispatch_targets(limit=1)
+    first_name = first[0].name if first else ""
+    second_name = second[0].name if second else ""
+    third_name = third[0].name if third else ""
+    assert_true(bool(first_name), "first dispatch should select one pending target")
+    assert_equal(second_name, first_name, "sticky dispatch should keep same target in early rounds")
+    assert_true(
+        third_name and third_name != first_name,
+        "hot sticky target should rotate after max sticky rounds to avoid starving others",
+    )
+
+
+def check_capture_failed_backoff_blocks_immediate_requeue() -> None:
+    state = empty_state()
+    record_session_signal(
+        state,
+        {"name": "客户A", "unread_detected": True, "conversation_type": "private"},
+        now="2026-06-01T10:00:00",
+    )
+    session = state["sessions"]["客户A"]
+    assert_true(bool(session.get("pending_capture")), "initial unread should enqueue capture")
+    mark_session_capture_failed(
+        state,
+        "客户A",
+        "target_not_confirmed_for_messages",
+        now="2026-06-01T10:00:00",
+    )
+    session = state["sessions"]["客户A"]
+    assert_true(not bool(session.get("pending_capture")), "capture failure should clear immediate pending flag")
+    record_session_signal(
+        state,
+        {"name": "客户A", "unread_detected": True, "conversation_type": "private"},
+        now="2026-06-01T10:00:08",
+    )
+    session = state["sessions"]["客户A"]
+    assert_true(not bool(session.get("pending_capture")), "cooldown window should block mechanical immediate requeue")
+    record_session_signal(
+        state,
+        {"name": "客户A", "unread_detected": True, "conversation_type": "private"},
+        now="2026-06-01T10:00:30",
+    )
+    session = state["sessions"]["客户A"]
+    assert_true(bool(session.get("pending_capture")), "after cooldown, capture should be allowed again")
+
+
 def check_runtime_tick_does_not_wait_for_slow_llm() -> None:
     with tempfile.TemporaryDirectory() as temp:
         path = Path(temp) / "scheduler_state.json"
@@ -469,6 +593,50 @@ def check_runtime_send_runner_stales_before_send() -> None:
             )
         finally:
             runtime.shutdown()
+
+
+def check_reply_sent_preserves_followup_pending_signal() -> None:
+    state = empty_state()
+    first = message("A", 1, content="第一条消息")
+    second = message("A", 2, content="第二条追问")
+    record_session_signal(
+        state,
+        {"name": "客户A", "content": first["content"], "time": "10:00", "conversation_type": "private"},
+        now="2026-05-25T10:00:00",
+    )
+    mark_capture_started(state, "客户A", now="2026-05-25T10:00:01")
+    capture = record_capture_result(
+        state,
+        "客户A",
+        messages=[first],
+        batch=[first],
+        now="2026-05-25T10:00:02",
+    )
+    task = enqueue_llm_task(state, capture["capture_id"], now="2026-05-25T10:00:03")
+    mark_llm_started(state, task["task_id"], now="2026-05-25T10:00:04")
+
+    record_session_signal(
+        state,
+        {"name": "客户A", "content": second["content"], "time": "10:01", "conversation_type": "private"},
+        now="2026-05-25T10:00:05",
+    )
+    completion = complete_llm_task(
+        state,
+        task["task_id"],
+        reply_text="先回复第一条",
+        decision={"rule_name": "unit"},
+        now="2026-05-25T10:00:06",
+    )
+    reply = completion.get("reply") if isinstance(completion.get("reply"), dict) else {}
+    reply_id = str(reply.get("reply_id") or "")
+    assert_true(bool(reply_id), "completion should generate one ready reply")
+    mark_reply_sending(state, reply_id, now="2026-05-25T10:00:07")
+    mark_reply_sent(state, reply_id, send_result={"ok": True, "verified": True}, now="2026-05-25T10:00:08")
+
+    session = (state.get("sessions", {}) or {}).get("客户A", {})
+    assert_true(bool(session.get("pending_capture")), "follow-up signal must survive first send completion")
+    next_capture = select_capture_sessions(state, limit=1)
+    assert_equal([item.get("target_name") for item in next_capture], ["客户A"], "follow-up should stay queued for next capture")
 
 
 def check_runtime_same_tick_fast_llm_send_has_capture_snapshot() -> None:
@@ -722,7 +890,16 @@ def check_workflow_planner_uses_captured_messages_without_sending() -> None:
         allow_fallback_send=True,
     )
     assert_true(bool(planned.get("ok")), f"workflow planner should build reply from captured messages: {planned}")
-    assert_true("你好" in str(planned.get("reply_text") or ""), "planned reply should come from existing greeting rule")
+    reply_text = str(planned.get("reply_text") or "")
+    decision = planned.get("decision") if isinstance(planned.get("decision"), dict) else {}
+    assert_true(
+        decision.get("rule_name") == "realtime_friendly_social_greeting",
+        f"planned reply should use friendly greeting rule: {planned}",
+    )
+    assert_true(
+        ("预算" in reply_text) or ("用途" in reply_text),
+        f"planned greeting reply should guide user back to buying context: {planned}",
+    )
     event = planned.get("event") or {}
     assert_equal(event.get("action"), "planned", "planner must not send through captured connector")
 
@@ -828,6 +1005,40 @@ def check_live_safety_applies_backend_scheduler_defaults() -> None:
     assert_true(rollback_scheduler.get("enabled") is False, "explicit scheduler false should survive live safety normalization")
 
 
+def check_listener_rpa_send_rate_zero_is_preserved() -> None:
+    with tempfile.TemporaryDirectory() as temp:
+        path = Path(temp) / "listener_config.json"
+        path.write_text(
+            json.dumps(
+                {
+                    "targets": [{"name": "客户A", "enabled": True, "exact": True}],
+                    "rpa_humanized_send": {
+                        "enabled": True,
+                        "send_rate_min_interval_seconds": 0,
+                        "send_rate_burst_window_seconds": 600,
+                        "send_rate_burst_limit": 20,
+                    },
+                },
+                ensure_ascii=False,
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
+        settings = load_rpa_humanized_send_settings(path)
+        min_interval = settings.get("send_rate_min_interval_seconds")
+        burst_limit = settings.get("send_rate_burst_limit")
+        assert_equal(
+            int(min_interval if min_interval not in (None, "") else -1),
+            0,
+            "explicit 0 min-interval must not fallback to non-zero default",
+        )
+        assert_equal(
+            int(burst_limit if burst_limit not in (None, "") else -1),
+            20,
+            "burst limit should preserve configured value",
+        )
+
+
 def check_managed_bridge_capture_send_marks_workflow_state() -> None:
     with tempfile.TemporaryDirectory() as temp:
         root = Path(temp)
@@ -890,6 +1101,601 @@ def check_managed_bridge_capture_send_marks_workflow_state() -> None:
         assert_true(audit_path.exists(), "send success should append scheduler audit event")
 
 
+def check_managed_bridge_freshness_preview_fast_pass_without_strict_scan() -> None:
+    with tempfile.TemporaryDirectory() as temp:
+        root = Path(temp)
+        config_path = root / "listener_config.json"
+        config = {
+            "state_path": str(root / "workflow_state.json"),
+            "audit_log_path": str(root / "audit.jsonl"),
+            "targets": [{"name": "客户A", "enabled": True, "exact": True}],
+            "history_backfill": {"enabled": False},
+            "scheduler_freshness": {
+                "enabled": True,
+                "mode": "preview_first",
+                "strict_check_interval_seconds": 0,
+                "strict_check_after_llm_seconds": 0,
+            },
+        }
+        config_path.write_text(json.dumps(config, ensure_ascii=False, indent=2), encoding="utf-8")
+        bridge = ManagedListenerSchedulerBridge(
+            tenant_id="unit_preview_fastpass",
+            config_path=config_path,
+            allow_send=False,
+            write_data=False,
+        )
+        bridge.config["scheduler_freshness"] = {
+            "enabled": True,
+            "mode": "preview_first",
+            "strict_check_interval_seconds": 0,
+            "strict_check_after_llm_seconds": 0,
+        }
+        detect_calls = {"count": 0}
+        bridge.session_monitor = FakePreviewSessionMonitor(
+            [{"name": "客户A", "unread_detected": False, "last_detected_at": "", "pending_since": "", "last_message_time": "10:00"}]
+        )
+
+        def detect_stub(**_kwargs: Any) -> dict[str, Any]:
+            detect_calls["count"] += 1
+            return {"ok": True, "has_newer_messages": False}
+
+        bridge._workflow["detect_newer_messages_before_send"] = detect_stub
+        reply = {
+            "reply_id": "reply-preview-fastpass",
+            "target_name": "客户A",
+            "_capture": {
+                "capture_id": "capture-preview-fastpass",
+                "target_name": "客户A",
+                "exact": True,
+                "batch": [{"id": "msg-1", "sender": "customer", "content": "你好"}],
+            },
+        }
+        try:
+            result = bridge._freshness_check(reply)
+        finally:
+            bridge.shutdown()
+        assert_true(result.get("ok") is True, f"preview fast pass should return ok result: {result}")
+        assert_true(result.get("stale") is False, f"preview fast pass should not stale clean session: {result}")
+        assert_equal(
+            str(result.get("freshness_mode") or ""),
+            "session_preview_fastpath",
+            "freshness mode should expose preview fastpath",
+        )
+        assert_equal(detect_calls["count"], 0, "preview fast pass should skip strict detect scanner")
+
+
+def check_managed_bridge_freshness_preview_unread_marks_stale() -> None:
+    with tempfile.TemporaryDirectory() as temp:
+        root = Path(temp)
+        config_path = root / "listener_config.json"
+        config = {
+            "state_path": str(root / "workflow_state.json"),
+            "audit_log_path": str(root / "audit.jsonl"),
+            "targets": [{"name": "客户A", "enabled": True, "exact": True}],
+            "history_backfill": {"enabled": False},
+            "scheduler_freshness": {
+                "enabled": True,
+                "mode": "preview_first",
+                "strict_check_interval_seconds": 0,
+                "strict_check_after_llm_seconds": 0,
+            },
+        }
+        config_path.write_text(json.dumps(config, ensure_ascii=False, indent=2), encoding="utf-8")
+        bridge = ManagedListenerSchedulerBridge(
+            tenant_id="unit_preview_unread",
+            config_path=config_path,
+            allow_send=False,
+            write_data=False,
+        )
+        bridge.config["scheduler_freshness"] = {
+            "enabled": True,
+            "mode": "preview_first",
+            "strict_check_interval_seconds": 0,
+            "strict_check_after_llm_seconds": 0,
+        }
+        detect_calls = {"count": 0}
+        bridge.session_monitor = FakePreviewSessionMonitor(
+            [{"name": "客户A", "unread_detected": True, "last_detected_at": "2026-05-25T10:00:03", "pending_since": "2026-05-25T10:00:03"}]
+        )
+
+        def detect_stub(**_kwargs: Any) -> dict[str, Any]:
+            detect_calls["count"] += 1
+            return {"ok": True, "has_newer_messages": False}
+
+        bridge._workflow["detect_newer_messages_before_send"] = detect_stub
+        reply = {
+            "reply_id": "reply-preview-unread",
+            "target_name": "客户A",
+            "_capture": {
+                "capture_id": "capture-preview-unread",
+                "target_name": "客户A",
+                "exact": True,
+                "batch": [{"id": "msg-1", "sender": "customer", "content": "你好"}],
+            },
+        }
+        try:
+            result = bridge._freshness_check(reply)
+        finally:
+            bridge.shutdown()
+        assert_true(result.get("ok") is True, f"preview unread should still produce ok freshness payload: {result}")
+        assert_true(result.get("stale") is True, f"preview unread must stale the in-flight reply: {result}")
+        assert_true(result.get("has_newer_messages") is True, f"preview unread should mark newer messages: {result}")
+        assert_equal(detect_calls["count"], 0, "preview unread stale should not trigger strict detect scanner")
+
+
+def check_managed_bridge_freshness_strict_interval_fallback() -> None:
+    with tempfile.TemporaryDirectory() as temp:
+        root = Path(temp)
+        config_path = root / "listener_config.json"
+        config = {
+            "state_path": str(root / "workflow_state.json"),
+            "audit_log_path": str(root / "audit.jsonl"),
+            "targets": [{"name": "客户A", "enabled": True, "exact": True}],
+            "history_backfill": {"enabled": False},
+            "scheduler_freshness": {
+                "enabled": True,
+                "mode": "preview_first",
+                "strict_check_interval_seconds": 120,
+                "strict_check_after_llm_seconds": 0,
+                "strict_check_on_first_send": True,
+            },
+        }
+        config_path.write_text(json.dumps(config, ensure_ascii=False, indent=2), encoding="utf-8")
+        bridge = ManagedListenerSchedulerBridge(
+            tenant_id="unit_preview_strict_fallback",
+            config_path=config_path,
+            allow_send=False,
+            write_data=False,
+        )
+        bridge.config["scheduler_freshness"] = {
+            "enabled": True,
+            "mode": "preview_first",
+            "strict_check_interval_seconds": 120,
+            "strict_check_after_llm_seconds": 0,
+            "strict_check_on_first_send": True,
+        }
+        detect_calls = {"count": 0}
+        bridge.session_monitor = FakePreviewSessionMonitor(
+            [{"name": "客户A", "unread_detected": False, "last_detected_at": "", "pending_since": ""}]
+        )
+
+        def detect_stub(**_kwargs: Any) -> dict[str, Any]:
+            detect_calls["count"] += 1
+            return {"ok": True, "has_newer_messages": False, "reason": "unit_strict_scan"}
+
+        bridge._workflow["detect_newer_messages_before_send"] = detect_stub
+        reply = {
+            "reply_id": "reply-preview-strict",
+            "target_name": "客户A",
+            "_capture": {
+                "capture_id": "capture-preview-strict",
+                "target_name": "客户A",
+                "exact": True,
+                "batch": [{"id": "msg-1", "sender": "customer", "content": "你好"}],
+            },
+        }
+        try:
+            result = bridge._freshness_check(reply)
+        finally:
+            bridge.shutdown()
+        assert_true(result.get("ok") is True, f"strict fallback should return freshness payload: {result}")
+        assert_equal(detect_calls["count"], 1, "strict interval should trigger strict detect scan")
+        assert_equal(
+            str(result.get("freshness_mode") or ""),
+            "strict_message_scan",
+            "strict scan fallback should label strict freshness mode",
+        )
+
+
+def check_managed_bridge_freshness_long_llm_uses_task_runtime_not_queue_age() -> None:
+    with tempfile.TemporaryDirectory() as temp:
+        root = Path(temp)
+        config_path = root / "listener_config.json"
+        config = {
+            "state_path": str(root / "workflow_state.json"),
+            "audit_log_path": str(root / "audit.jsonl"),
+            "targets": [{"name": "客户A", "enabled": True, "exact": True}],
+            "history_backfill": {"enabled": False},
+            "scheduler_freshness": {
+                "enabled": True,
+                "mode": "preview_first",
+                "strict_check_interval_seconds": 0,
+                "strict_check_after_llm_seconds": 40,
+            },
+        }
+        config_path.write_text(json.dumps(config, ensure_ascii=False, indent=2), encoding="utf-8")
+        bridge = ManagedListenerSchedulerBridge(
+            tenant_id="unit_preview_llm_elapsed",
+            config_path=config_path,
+            allow_send=False,
+            write_data=False,
+        )
+        bridge.config["scheduler_freshness"] = {
+            "enabled": True,
+            "mode": "preview_first",
+            "strict_check_interval_seconds": 0,
+            "strict_check_after_llm_seconds": 40,
+        }
+        detect_calls = {"count": 0}
+        bridge.session_monitor = FakePreviewSessionMonitor(
+            [{"name": "客户A", "unread_detected": False, "last_detected_at": "", "pending_since": "", "last_message_time": "10:00"}]
+        )
+
+        def detect_stub(**_kwargs: Any) -> dict[str, Any]:
+            detect_calls["count"] += 1
+            return {"ok": True, "has_newer_messages": False, "reason": "unit_strict_scan"}
+
+        bridge._workflow["detect_newer_messages_before_send"] = detect_stub
+        state = bridge.store.load()
+        state.setdefault("llm_tasks", {})["task-llm-duration"] = {
+            "task_id": "task-llm-duration",
+            "target_name": "客户A",
+            "status": "completed",
+            "started_at": "2026-05-25T10:00:00",
+            "finished_at": "2026-05-25T10:00:05",
+        }
+        bridge.store.save(state)
+        reply = {
+            "reply_id": "reply-preview-llm-elapsed",
+            "task_id": "task-llm-duration",
+            "target_name": "客户A",
+            "_capture": {
+                "capture_id": "capture-preview-llm-elapsed",
+                "target_name": "客户A",
+                "exact": True,
+                "batch": [{"id": "msg-1", "sender": "customer", "content": "你好"}],
+            },
+        }
+        try:
+            result = bridge._freshness_check(reply)
+        finally:
+            bridge.shutdown()
+        assert_true(result.get("ok") is True, f"short true LLM runtime should not block fast path: {result}")
+        assert_true(result.get("stale") is False, f"short true LLM runtime should not stale reply: {result}")
+        assert_equal(
+            str(result.get("freshness_mode") or ""),
+            "session_preview_fastpath",
+            "long-queue age should not force strict scan when real LLM runtime is short",
+        )
+        assert_equal(detect_calls["count"], 0, "real short LLM runtime should skip strict scanner")
+
+
+def check_managed_bridge_freshness_session_list_preview_fast_pass_without_monitor() -> None:
+    with tempfile.TemporaryDirectory() as temp:
+        root = Path(temp)
+        config_path = root / "listener_config.json"
+        config = {
+            "state_path": str(root / "workflow_state.json"),
+            "audit_log_path": str(root / "audit.jsonl"),
+            "targets": [{"name": "customer_a", "enabled": True, "exact": True}],
+            "history_backfill": {"enabled": False},
+            "scheduler_freshness": {
+                "enabled": True,
+                "mode": "preview_first",
+                "strict_check_interval_seconds": 0,
+                "strict_check_after_llm_seconds": 0,
+                "preview_from_session_list_enabled": True,
+                "preview_from_session_list_require_content_match": True,
+            },
+        }
+        config_path.write_text(json.dumps(config, ensure_ascii=False, indent=2), encoding="utf-8")
+        bridge = ManagedListenerSchedulerBridge(
+            tenant_id="unit_preview_session_list_fastpass",
+            config_path=config_path,
+            allow_send=False,
+            write_data=False,
+        )
+        bridge.session_monitor = None
+        bridge.connector = FakeBridgeConnector()
+        bridge.config["scheduler_freshness"] = {
+            "enabled": True,
+            "mode": "preview_first",
+            "strict_check_interval_seconds": 0,
+            "strict_check_after_llm_seconds": 0,
+            "preview_from_session_list_enabled": True,
+            "preview_from_session_list_require_content_match": True,
+        }
+        detect_calls = {"count": 0}
+
+        def detect_stub(**_kwargs: Any) -> dict[str, Any]:
+            detect_calls["count"] += 1
+            return {"ok": True, "has_newer_messages": False}
+
+        bridge._workflow["detect_newer_messages_before_send"] = detect_stub
+        reply = {
+            "reply_id": "reply-preview-session-list-fastpass",
+            "target_name": "customer_a",
+            "_capture": {
+                "capture_id": "capture-preview-session-list-fastpass",
+                "target_name": "customer_a",
+                "exact": True,
+                "batch": [{"id": "msg-1", "sender": "customer", "content": "这台车还能优惠吗"}],
+            },
+        }
+        try:
+            result = bridge._freshness_check(reply)
+        finally:
+            bridge.shutdown()
+        assert_true(result.get("ok") is True, f"session list preview fast pass should return ok result: {result}")
+        assert_true(result.get("stale") is False, f"session list preview fast pass should not stale clean session: {result}")
+        assert_equal(
+            str(result.get("freshness_mode") or ""),
+            "session_preview_fastpath",
+            "session list preview should still expose session preview fastpath mode",
+        )
+        assert_equal(detect_calls["count"], 0, "session list preview fast pass should skip strict detect scanner")
+
+
+def check_managed_bridge_freshness_session_list_mismatch_falls_back_to_strict_scan() -> None:
+    with tempfile.TemporaryDirectory() as temp:
+        root = Path(temp)
+        config_path = root / "listener_config.json"
+        config = {
+            "state_path": str(root / "workflow_state.json"),
+            "audit_log_path": str(root / "audit.jsonl"),
+            "targets": [{"name": "customer_a", "enabled": True, "exact": True}],
+            "history_backfill": {"enabled": False},
+            "scheduler_freshness": {
+                "enabled": True,
+                "mode": "preview_first",
+                "strict_check_interval_seconds": 0,
+                "strict_check_after_llm_seconds": 0,
+                "preview_from_session_list_enabled": True,
+                "preview_from_session_list_require_content_match": True,
+            },
+        }
+        config_path.write_text(json.dumps(config, ensure_ascii=False, indent=2), encoding="utf-8")
+        bridge = ManagedListenerSchedulerBridge(
+            tenant_id="unit_preview_session_list_mismatch",
+            config_path=config_path,
+            allow_send=False,
+            write_data=False,
+        )
+        bridge.session_monitor = None
+        bridge.connector = FakeBridgeConnector()
+        bridge.config["scheduler_freshness"] = {
+            "enabled": True,
+            "mode": "preview_first",
+            "strict_check_interval_seconds": 0,
+            "strict_check_after_llm_seconds": 0,
+            "preview_from_session_list_enabled": True,
+            "preview_from_session_list_require_content_match": True,
+        }
+        detect_calls = {"count": 0}
+
+        def detect_stub(**_kwargs: Any) -> dict[str, Any]:
+            detect_calls["count"] += 1
+            return {"ok": True, "has_newer_messages": False, "reason": "unit_strict_scan_after_mismatch"}
+
+        bridge._workflow["detect_newer_messages_before_send"] = detect_stub
+        reply = {
+            "reply_id": "reply-preview-session-list-mismatch",
+            "target_name": "customer_a",
+            "_capture": {
+                "capture_id": "capture-preview-session-list-mismatch",
+                "target_name": "customer_a",
+                "exact": True,
+                "batch": [{"id": "msg-1", "sender": "customer", "content": "完全不同的问题"}],
+            },
+        }
+        try:
+            result = bridge._freshness_check(reply)
+        finally:
+            bridge.shutdown()
+        assert_true(result.get("ok") is True, f"strict fallback should return freshness payload: {result}")
+        assert_equal(detect_calls["count"], 1, "session list content mismatch should trigger strict detect scan")
+        assert_equal(
+            str(result.get("freshness_mode") or ""),
+            "strict_message_scan",
+            "session list mismatch should fall back to strict freshness mode",
+        )
+
+
+def check_managed_bridge_freshness_session_list_mismatch_soft_pass_by_default() -> None:
+    with tempfile.TemporaryDirectory() as temp:
+        root = Path(temp)
+        config_path = root / "listener_config.json"
+        config = {
+            "state_path": str(root / "workflow_state.json"),
+            "audit_log_path": str(root / "audit.jsonl"),
+            "targets": [{"name": "customer_a", "enabled": True, "exact": True}],
+            "history_backfill": {"enabled": False},
+            "scheduler_freshness": {
+                "enabled": True,
+                "mode": "preview_first",
+                "strict_check_interval_seconds": 0,
+                "strict_check_after_llm_seconds": 0,
+                "preview_from_session_list_enabled": True,
+                # Intentionally omit preview_from_session_list_require_content_match
+                # to validate the default soft-pass behavior.
+            },
+        }
+        config_path.write_text(json.dumps(config, ensure_ascii=False, indent=2), encoding="utf-8")
+        bridge = ManagedListenerSchedulerBridge(
+            tenant_id="unit_preview_session_list_softpass_default",
+            config_path=config_path,
+            allow_send=False,
+            write_data=False,
+        )
+        bridge.session_monitor = None
+        bridge.connector = FakeBridgeConnector()
+        bridge.config["scheduler_freshness"] = {
+            "enabled": True,
+            "mode": "preview_first",
+            "strict_check_interval_seconds": 0,
+            "strict_check_after_llm_seconds": 0,
+            "preview_from_session_list_enabled": True,
+        }
+        detect_calls = {"count": 0}
+
+        def detect_stub(**_kwargs: Any) -> dict[str, Any]:
+            detect_calls["count"] += 1
+            return {"ok": True, "has_newer_messages": False}
+
+        bridge._workflow["detect_newer_messages_before_send"] = detect_stub
+        reply = {
+            "reply_id": "reply-preview-session-list-softpass-default",
+            "target_name": "customer_a",
+            "_capture": {
+                "capture_id": "capture-preview-session-list-softpass-default",
+                "target_name": "customer_a",
+                "exact": True,
+                "batch": [{"id": "msg-1", "sender": "customer", "content": "和预览文本明显不一致的问题"}],
+            },
+        }
+        try:
+            result = bridge._freshness_check(reply)
+        finally:
+            bridge.shutdown()
+        assert_true(result.get("ok") is True, f"default session-list mismatch should still return freshness payload: {result}")
+        assert_true(result.get("stale") is False, f"default session-list mismatch should not stale clean session: {result}")
+        assert_equal(
+            str(result.get("freshness_mode") or ""),
+            "session_preview_fastpath",
+            "default session-list mismatch should stay on fastpath for lower tail latency",
+        )
+        assert_equal(detect_calls["count"], 0, "default session-list mismatch should skip strict detect scanner")
+
+
+def check_managed_bridge_collect_signals_skips_busy_sticky_target() -> None:
+    class FakeDispatchMonitor:
+        def poll(self, connector: Any) -> list[Any]:
+            return []
+
+        def select_dispatch_targets(self, *, limit: int | None = None) -> list[Any]:
+            return [SimpleNamespace(name="客户A", exact=True, unread_detected=True, conversation_type="private")]
+
+        def pending_targets(self, *, limit: int | None = None) -> list[Any]:
+            targets = [
+                SimpleNamespace(name="客户A", exact=True, unread_detected=True, conversation_type="private"),
+                SimpleNamespace(name="客户B", exact=True, unread_detected=True, conversation_type="private"),
+            ]
+            if limit is None:
+                return targets
+            return targets[: max(0, int(limit))]
+
+    with tempfile.TemporaryDirectory() as temp:
+        root = Path(temp)
+        config_path = root / "listener_config.json"
+        config = {
+            "state_path": str(root / "workflow_state.json"),
+            "audit_log_path": str(root / "audit.jsonl"),
+            "targets": [
+                {"name": "客户A", "enabled": True, "exact": True},
+                {"name": "客户B", "enabled": True, "exact": True},
+            ],
+            "multi_target": {"enabled": True},
+            "history_backfill": {"enabled": False},
+            "raw_messages": {"enabled": False},
+            "customer_profiles": {"enabled": False},
+            "concurrency_scheduler": {"enabled": True, "capture_max_sessions_per_round": 1},
+        }
+        config_path.write_text(json.dumps(config, ensure_ascii=False, indent=2), encoding="utf-8")
+        bridge = ManagedListenerSchedulerBridge(
+            tenant_id="unit_signal_bias",
+            config_path=config_path,
+            allow_send=False,
+            write_data=False,
+        )
+        try:
+            bridge.session_monitor = FakeDispatchMonitor()
+            bridge.ignored_session_names = set()
+            state = empty_state()
+            record_session_signal(
+                state,
+                {"name": "客户A", "unread_detected": True, "conversation_type": "private"},
+                now="2026-06-01T10:00:00",
+            )
+            capture = record_capture_result(
+                state,
+                "客户A",
+                messages=[message("客户A", 1)],
+                batch=[message("客户A", 1)],
+                overflow_messages=[],
+                history_backfill={},
+                exact=True,
+                conversation_type="private",
+                now="2026-06-01T10:00:00",
+            )
+            task = enqueue_llm_task(state, str(capture.get("capture_id") or ""), now="2026-06-01T10:00:01")
+            mark_llm_started(state, str(task.get("task_id") or ""), now="2026-06-01T10:00:02")
+            bridge.store.save(state)
+            signals = bridge._collect_session_signals()
+            names = [str(item.get("name") or "") for item in signals]
+            assert_true(names[:1] == ["客户B"], f"busy sticky target should yield to other unread target: {names}")
+        finally:
+            bridge.shutdown()
+
+
+def check_managed_bridge_collect_signals_applies_humanized_switch_delay() -> None:
+    class FakeDispatchMonitor:
+        def __init__(self) -> None:
+            self._round = 0
+
+        def poll(self, connector: Any) -> list[Any]:
+            return []
+
+        def select_dispatch_targets(self, *, limit: int | None = None) -> list[Any]:
+            self._round += 1
+            if self._round == 1:
+                return [SimpleNamespace(name="客户A", exact=True, unread_detected=True, conversation_type="private")]
+            return [SimpleNamespace(name="客户B", exact=True, unread_detected=True, conversation_type="private")]
+
+        def pending_targets(self, *, limit: int | None = None) -> list[Any]:
+            return []
+
+    with tempfile.TemporaryDirectory() as temp:
+        root = Path(temp)
+        config_path = root / "listener_config.json"
+        config = {
+            "state_path": str(root / "workflow_state.json"),
+            "audit_log_path": str(root / "audit.jsonl"),
+            "targets": [
+                {"name": "客户A", "enabled": True, "exact": True},
+                {"name": "客户B", "enabled": True, "exact": True},
+            ],
+            "multi_target": {
+                "enabled": True,
+                "switch_human_delay_enabled": True,
+                "switch_human_delay_min_seconds": 1.25,
+                "switch_human_delay_max_seconds": 1.25,
+                "capture_one_target_per_round": True,
+            },
+            "history_backfill": {"enabled": False},
+            "raw_messages": {"enabled": False},
+            "customer_profiles": {"enabled": False},
+            "concurrency_scheduler": {"enabled": True, "capture_max_sessions_per_round": 3},
+        }
+        config_path.write_text(json.dumps(config, ensure_ascii=False, indent=2), encoding="utf-8")
+        bridge = ManagedListenerSchedulerBridge(
+            tenant_id="unit_switch_delay",
+            config_path=config_path,
+            allow_send=False,
+            write_data=False,
+        )
+        original_sleep = scheduler_module.time.sleep
+        original_uniform = scheduler_module.random.uniform
+        sleeps: list[float] = []
+        try:
+            bridge.session_monitor = FakeDispatchMonitor()
+            scheduler_module.random.uniform = lambda _low, _high: 1.25
+            scheduler_module.time.sleep = lambda seconds: sleeps.append(round(float(seconds), 3))
+            first = bridge._collect_session_signals()
+            second = bridge._collect_session_signals()
+            assert_equal([str(item.get("name") or "") for item in first], ["客户A"], "first unread signal should pick first target")
+            assert_equal([str(item.get("name") or "") for item in second], ["客户B"], "second unread signal should switch to next target")
+            assert_true(any(abs(delay - 1.25) < 0.001 for delay in sleeps), f"switch delay should be applied: {sleeps}")
+            assert_equal(
+                int(bridge.scheduler_config.capture_max_sessions_per_round),
+                1,
+                "capture_one_target_per_round should clamp capture round width",
+            )
+        finally:
+            scheduler_module.time.sleep = original_sleep
+            scheduler_module.random.uniform = original_uniform
+            bridge.shutdown()
+
+
 def check_mixed_greeting_budget_intent_prefers_product() -> None:
     config = {"intent_router": {"heuristic_first": True, "cache_seconds": 0}}
     mixed = route_intent(
@@ -900,6 +1706,21 @@ def check_mixed_greeting_budget_intent_prefers_product() -> None:
     assert_equal(mixed.intent, "product_inquiry", "greeting plus concrete used-car need must not be treated as pure greeting")
     pure = route_intent("你好，在吗", config=config, target_state={})
     assert_equal(pure.intent, "greeting", "standalone greeting should still route as greeting")
+
+
+def check_handoff_keyword_requires_explicit_customer_request() -> None:
+    config = {"intent_router": {"heuristic_first": True, "cache_seconds": 0}}
+    style_request = route_intent(
+        "回复不用太长，像真人客服一样先给我一个明确方向，再告诉我到店前要补哪些信息。",
+        config=config,
+        target_state={},
+    )
+    assert_true(
+        style_request.intent != "handoff_request",
+        "style request mentioning 真人客服 must not trigger handoff",
+    )
+    explicit = route_intent("我想转人工，让销售顾问联系我。", config=config, target_state={})
+    assert_equal(explicit.intent, "handoff_request", "explicit manual handoff request should still route to handoff")
 
 
 def run_checks() -> dict[str, Any]:
@@ -914,9 +1735,13 @@ def run_checks() -> dict[str, Any]:
         check_session_monitor_keeps_overflow_pending,
         check_session_monitor_empty_preview_does_not_clear_pending,
         check_session_monitor_visual_unread_badge_retriggers_after_reset,
+        check_session_monitor_event_driven_dispatch_keeps_sticky_target,
+        check_session_monitor_event_driven_dispatch_rotates_under_hot_target,
+        check_capture_failed_backoff_blocks_immediate_requeue,
         check_runtime_tick_does_not_wait_for_slow_llm,
         check_runtime_repeated_unread_signal_does_not_stale_same_batch,
         check_runtime_send_runner_stales_before_send,
+        check_reply_sent_preserves_followup_pending_signal,
         check_runtime_same_tick_fast_llm_send_has_capture_snapshot,
         check_runtime_send_runner_fifo,
         check_runtime_prioritizes_ready_send_before_new_capture,
@@ -927,8 +1752,19 @@ def run_checks() -> dict[str, Any]:
         check_scheduler_planner_applies_final_visible_polish_without_sending,
         check_listener_scheduler_config_gate,
         check_live_safety_applies_backend_scheduler_defaults,
+        check_listener_rpa_send_rate_zero_is_preserved,
         check_managed_bridge_capture_send_marks_workflow_state,
+        check_managed_bridge_freshness_preview_fast_pass_without_strict_scan,
+        check_managed_bridge_freshness_preview_unread_marks_stale,
+        check_managed_bridge_freshness_session_list_preview_fast_pass_without_monitor,
+        check_managed_bridge_freshness_session_list_mismatch_falls_back_to_strict_scan,
+        check_managed_bridge_freshness_session_list_mismatch_soft_pass_by_default,
+        check_managed_bridge_freshness_strict_interval_fallback,
+        check_managed_bridge_freshness_long_llm_uses_task_runtime_not_queue_age,
+        check_managed_bridge_collect_signals_skips_busy_sticky_target,
+        check_managed_bridge_collect_signals_applies_humanized_switch_delay,
         check_mixed_greeting_budget_intent_prefers_product,
+        check_handoff_keyword_requires_explicit_customer_request,
     ]
     results = []
     for check in checks:

@@ -31,17 +31,25 @@ from rag_answer_layer import extract_service_style_snippet  # noqa: E402
 from realtime_reply_router import (  # noqa: E402
     build_need_summary,
     can_override_current_reply,
+    current_customer_text,
     current_reply_has_substantive_body,
     decide_realtime_reply_route,
     extract_budget_range_wan,
     extract_budget_wan,
     initial_token_budget,
     maybe_build_realtime_reply,
+    query_with_recent_requirement_context,
     rank_product_candidates,
     reply_similarity,
 )
-from listen_and_reply import build_realtime_context_combined, recent_customer_visible_reply_texts  # noqa: E402
+from listen_and_reply import (  # noqa: E402
+    build_operator_handoff_reply_text,
+    build_realtime_context_combined,
+    handoff_acknowledgement_text,
+    recent_customer_visible_reply_texts,
+)
 from llm_reply_synthesis import normalize_advisor_synthesis_reply  # noqa: E402
+from llm_reply_guard import guard_synthesized_reply  # noqa: E402
 from recorder_loop import RecorderLoopControl  # noqa: E402
 from apps.wechat_ai_customer_service.admin_backend.services import customer_service_runtime  # noqa: E402
 from run_customer_service_listener import (  # noqa: E402
@@ -126,11 +134,18 @@ def main() -> int:
         check_recommendation_reply_is_concise(),
         check_realtime_context_bridge_uses_prior_need_for_followup_candidates(),
         check_recent_reply_requirement_context_keeps_strict_budget_when_marked_history_is_skipped(),
+        check_recent_requirement_context_not_reused_for_fresh_question(),
+        check_recent_requirement_context_reused_for_explicit_followup(),
+        check_recent_requirement_context_reused_for_inventory_direction_followup(),
+        check_current_customer_text_prefers_last_transcript_line_without_marker(),
         check_context_bridge_current_visit_question_preempts_old_recommendation_need(),
         check_context_bridge_vehicle_availability_visit_confirmation_stays_appointment_style(),
         check_context_bridge_current_compare_question_preempts_candidate_refresh(),
+        check_multi_question_compound_route_prefers_synthesis(),
+        check_customer_challenge_route_prefers_direct_answer_synthesis(),
         check_context_bridge_fresh_need_reset_drops_previous_flow_messages(),
         check_existing_two_vehicle_compare_uses_recent_catalog_options_without_llm(),
+        check_existing_option_single_choice_question_uses_compare_route(),
         check_realtime_context_bridge_skips_unrelated_or_test_marked_history(),
         check_identity_probe_uses_local_denial_without_foreground_llm(),
         check_repeated_identity_probe_uses_reply_variants(),
@@ -139,9 +154,28 @@ def main() -> int:
         check_explicit_two_vehicle_request_preempts_common_sense_compare(),
         check_generic_price_handoff_does_not_block_explicit_vehicle_candidates(),
         check_prefix_only_reply_does_not_block_explicit_vehicle_candidates(),
+        check_low_information_ack_does_not_block_explicit_vehicle_candidates(),
+        check_low_information_handoff_ack_is_humanized_short(),
+        check_handoff_social_offtopic_uses_soft_redirect(),
+        check_guard_social_offtopic_soft_redirect_under_missing_evidence(),
+        check_guard_social_offtopic_with_context_prefix_uses_soft_redirect(),
+        check_uncertain_message_routes_to_business_clarify_reply(),
+        check_vehicle_compare_reply_has_explicit_recommendation_cue(),
         check_recommendation_with_monthly_payment_context_still_uses_candidates(),
+        check_named_model_price_query_routes_to_vehicle_candidates(),
         check_specific_finance_question_does_not_force_vehicle_sources(),
         check_finance_owner_question_does_not_refresh_vehicle_candidates(),
+        check_vehicle_type_guidance_returns_explicit_priority_recommendation(),
+        check_vehicle_type_guidance_not_hijacked_as_named_compare(),
+        check_vehicle_type_guidance_category_question_avoids_catalog_option_leak(),
+        check_named_single_choice_priority_order_replies_with_both_user_options(),
+        check_named_compare_correction_prefix_not_leaked_into_reply(),
+        check_testdrive_material_reply_answers_choice_directly(),
+        check_friendly_social_greeting_reply(),
+        check_friendly_farewell_reply(),
+        check_offtopic_social_message_uses_soft_redirect_advisor(),
+        check_question_like_offtopic_without_keyword_still_routes_soft_redirect(),
+        check_generic_smalltalk_offtopic_routes_soft_redirect(),
         check_safe_no_deposit_report_visit_stays_local(),
         check_greeting_with_business_context_is_not_pure_greeting(),
         check_followup_can_recommend_vehicle_sources(),
@@ -187,6 +221,7 @@ def main() -> int:
         check_listener_passive_recalibration_respects_cooldown(),
         check_runtime_transport_logout_creates_handoff_stub(),
         check_listener_status_atomic_write_retries_transient_lock(),
+        check_listener_status_atomic_write_recovers_missing_runtime_dir(),
         check_listener_rpa_watchdog_timeout_estimate(),
         check_listener_rpa_watchdog_covers_long_humanized_typing(),
         check_listener_watchdog_env_override(),
@@ -1383,6 +1418,60 @@ def check_recent_reply_requirement_context_keeps_strict_budget_when_marked_histo
     }
 
 
+def check_recent_requirement_context_not_reused_for_fresh_question() -> dict[str, Any]:
+    current = "你好，第一次咨询，想先了解下目前都有什么车。"
+    recent = ["按您说的9万以内、自动挡、倒车影像优先，这边先缩两台。"]
+    merged = query_with_recent_requirement_context(current, recent)
+    ok = merged == current
+    return {
+        "name": "recent_requirement_context_not_reused_for_fresh_question",
+        "ok": ok,
+        "current": current,
+        "merged": merged,
+    }
+
+
+def check_recent_requirement_context_reused_for_explicit_followup() -> dict[str, Any]:
+    current = "从刚才那两台里面选一台，别再问预算了。"
+    recent = ["按您说的9万以内、自动挡、倒车影像优先，这边先缩两台。"]
+    merged = query_with_recent_requirement_context(current, recent)
+    ok = ("近期已确认需求" in merged) and ("9万以内" in merged)
+    return {
+        "name": "recent_requirement_context_reused_for_explicit_followup",
+        "ok": ok,
+        "current": current,
+        "merged": merged,
+    }
+
+
+def check_recent_requirement_context_reused_for_inventory_direction_followup() -> dict[str, Any]:
+    current = "方便的话先给我个库存方向，我想先看下你们现在大概有哪些车。"
+    recent = ["按您说的2万以内、自动挡、练手代步方向，我先按车况和库存给您筛一版。"]
+    merged = query_with_recent_requirement_context(current, recent, allow_vehicle_source_context=True)
+    ok = ("近期已确认需求" in merged) and ("2万以内" in merged)
+    return {
+        "name": "recent_requirement_context_reused_for_inventory_direction_followup",
+        "ok": ok,
+        "current": current,
+        "merged": merged,
+    }
+
+
+def check_current_customer_text_prefers_last_transcript_line_without_marker() -> dict[str, Any]:
+    combined = (
+        "[2026-06-01T10:00:00] self: 我想先看两台10万以内省油轿车\n"
+        "[2026-06-01T10:00:12] self: 先别定，车况透明优先\n"
+        "[2026-06-01T10:00:40] self: 对了，今天天气怎么样？"
+    )
+    current = current_customer_text(combined)
+    ok = current == "对了，今天天气怎么样？"
+    return {
+        "name": "current_customer_text_prefers_last_transcript_line_without_marker",
+        "ok": ok,
+        "current": current,
+    }
+
+
 def check_context_bridge_current_visit_question_preempts_old_recommendation_need() -> dict[str, Any]:
     config = {"realtime_reply": {"enabled": True}, "llm_reply_synthesis": {"enabled": True}}
     combined = (
@@ -1503,6 +1592,73 @@ def check_context_bridge_current_compare_question_preempts_candidate_refresh() -
     return {"name": "context_bridge_current_compare_question_preempts_candidate_refresh", "ok": ok, "route": route, "reply": reply}
 
 
+def check_multi_question_compound_route_prefers_synthesis() -> dict[str, Any]:
+    config = {"realtime_reply": {"enabled": True, "allow_foreground_llm": True}, "llm_reply_synthesis": {"enabled": True}}
+    message = "我先问两个问题：\n1. 凯美瑞和雅阁哪个更适合家用通勤？\n2. 如果只选一台，你直接告诉我选哪台。"
+    route = decide_realtime_reply_route(
+        config=config,
+        combined=message,
+        decision=Decision(),
+        intent_result=Intent(),
+        intent_assist={"intent": "product_inquiry", "evidence": {"safety": {"must_handoff": False}}},
+        rag_reply={},
+        llm_reply={},
+        product_knowledge={},
+        data_capture={},
+        evidence_pack={},
+        recent_reply_texts=[],
+    )
+    reply = maybe_build_realtime_reply(
+        config=config,
+        route=route,
+        combined=message,
+        evidence_pack={},
+        current_reply_text="",
+        recent_reply_texts=[],
+    )
+    ok = (
+        route.get("reason") == "multi_question_compound_requires_synthesis"
+        and route.get("foreground_llm_allowed") is True
+        and reply.get("applied") is False
+        and reply.get("reason") == "prefer_foreground_llm_direct_resolution"
+    )
+    return {"name": "multi_question_compound_route_prefers_synthesis", "ok": ok, "route": route, "reply": reply}
+
+
+def check_customer_challenge_route_prefers_direct_answer_synthesis() -> dict[str, Any]:
+    config = {"realtime_reply": {"enabled": True, "allow_foreground_llm": True}, "llm_reply_synthesis": {"enabled": True}}
+    message = "你刚才答非所问，我问的是这两台里到底选哪台，你先直接回答。"
+    recent = ["按您说的预算先看凯美瑞和雅阁两台。"]
+    route = decide_realtime_reply_route(
+        config=config,
+        combined=message,
+        decision=Decision(),
+        intent_result=Intent(),
+        intent_assist={"intent": "product_inquiry", "evidence": {"safety": {"must_handoff": False}}},
+        rag_reply={},
+        llm_reply={},
+        product_knowledge={},
+        data_capture={},
+        evidence_pack={},
+        recent_reply_texts=recent,
+    )
+    reply = maybe_build_realtime_reply(
+        config=config,
+        route=route,
+        combined=message,
+        evidence_pack={},
+        current_reply_text="",
+        recent_reply_texts=recent,
+    )
+    ok = (
+        route.get("reason") == "customer_challenge_needs_direct_answer"
+        and route.get("foreground_llm_allowed") is True
+        and reply.get("applied") is False
+        and reply.get("reason") == "prefer_foreground_llm_direct_resolution"
+    )
+    return {"name": "customer_challenge_route_prefers_direct_answer_synthesis", "ok": ok, "route": route, "reply": reply}
+
+
 def check_context_bridge_fresh_need_reset_drops_previous_flow_messages() -> dict[str, Any]:
     config = {"realtime_reply": {"enabled": True}, "llm_reply_synthesis": {"enabled": True}}
     mixed_visible_batch = (
@@ -1596,6 +1752,46 @@ def check_existing_two_vehicle_compare_uses_recent_catalog_options_without_llm()
         and "高尔夫" not in text
     )
     return {"name": "existing_two_vehicle_compare_uses_recent_catalog_options_without_llm", "ok": ok, "route": route, "reply": reply}
+
+
+def check_existing_option_single_choice_question_uses_compare_route() -> dict[str, Any]:
+    config = {"realtime_reply": {"enabled": True}, "llm_reply_synthesis": {"enabled": True}}
+    combined = "当前客户问题：就是这两个里，你更推荐哪一辆？"
+    recent = [
+        "按您刚才的需求先看两台：2018款丰田皇冠2.0T 运动版（13.8万）和2019款宝马320Li M运动套装（12.8万），先以车况为准。"
+    ]
+    with tenant_context(TENANT_ID):
+        route = decide_realtime_reply_route(
+            config=config,
+            combined=combined,
+            decision=Decision(),
+            intent_result=Intent(),
+            intent_assist={"intent": "product_inquiry", "evidence": {"safety": {"must_handoff": False}}},
+            rag_reply={},
+            llm_reply={},
+            product_knowledge={},
+            data_capture={},
+            evidence_pack={},
+            recent_reply_texts=recent,
+        )
+        reply = maybe_build_realtime_reply(
+            config=config,
+            route=route,
+            combined=combined,
+            evidence_pack={},
+            current_reply_text="",
+            recent_reply_texts=recent,
+        )
+    text = str(reply.get("reply_text") or "")
+    ok = (
+        route.get("reason") == "common_vehicle_compare_can_use_local_style"
+        and route.get("foreground_llm_allowed") is False
+        and reply.get("applied") is True
+        and reply.get("reason") == "local_vehicle_compare_guidance"
+        and any(marker in text for marker in ("只选一台", "更推荐", "先定"))
+        and len(text) <= 120
+    )
+    return {"name": "existing_option_single_choice_question_uses_compare_route", "ok": ok, "route": route, "reply": reply}
 
 
 def check_realtime_context_bridge_skips_unrelated_or_test_marked_history() -> dict[str, Any]:
@@ -1902,6 +2098,269 @@ def check_prefix_only_reply_does_not_block_explicit_vehicle_candidates() -> dict
     return {"name": "prefix_only_reply_does_not_block_explicit_vehicle_candidates", "ok": ok, "route": route, "reply": reply}
 
 
+def check_low_information_ack_does_not_block_explicit_vehicle_candidates() -> dict[str, Any]:
+    config = {"realtime_reply": {"enabled": True}, "llm_reply_synthesis": {"enabled": True}}
+    message = "预算十来万，直接给我挑两台靠谱的，先别绕。"
+    with tenant_context(TENANT_ID):
+        evidence_pack = build_evidence_pack(message, context={})
+        route = decide_realtime_reply_route(
+            config=config,
+            combined=message,
+            decision=Decision(),
+            intent_result=Intent(),
+            intent_assist={"intent": "product_inquiry", "evidence": {"safety": {"must_handoff": False}}},
+            rag_reply={},
+            llm_reply={},
+            product_knowledge={},
+            data_capture={},
+            evidence_pack=evidence_pack,
+            recent_reply_texts=[],
+        )
+        reply = maybe_build_realtime_reply(
+            config=config,
+            route=route,
+            combined=message,
+            evidence_pack=evidence_pack,
+            current_reply_text="收到，我先看一下。",
+            recent_reply_texts=[],
+        )
+    ok = (
+        route.get("reason") == "explicit_vehicle_candidates_requested"
+        and can_override_current_reply("收到，我先看一下。") is True
+        and current_reply_has_substantive_body("收到，我先看一下。", config) is False
+        and reply.get("applied") is True
+        and reply.get("rule_name") == "realtime_local_recommendation"
+        and len(reply.get("used_product_ids") or []) >= 2
+    )
+    return {"name": "low_information_ack_does_not_block_explicit_vehicle_candidates", "ok": ok, "route": route, "reply": reply}
+
+
+def check_low_information_handoff_ack_is_humanized_short() -> dict[str, Any]:
+    config = {
+        "handoff": {"acknowledgement_reply": "收到，我先看一下。"},
+        "llm_reply_synthesis": {"identity_guard_enabled": True},
+    }
+    text = handoff_acknowledgement_text(config, combined="这个价格还能不能再谈一点？")
+    compact = "".join(ch for ch in str(text or "") if ch not in " \t\r\n，,。.!！？、")
+    ok = (
+        "先看一下" not in str(text or "")
+        and any(marker in str(text or "") for marker in ("核", "确认", "准话", "回您"))
+        and len(compact) <= 28
+    )
+    return {"name": "low_information_handoff_ack_is_humanized_short", "ok": ok, "reply_text": text}
+
+
+def check_handoff_social_offtopic_uses_soft_redirect() -> dict[str, Any]:
+    decision = Decision()
+    decision.rule_name = "llm_synthesis_handoff"
+    decision.matched = True
+    config = {"reply": {"prefix": "[车金实盘] "}}
+    combined = "对了，今天天气怎么样？顺便讲个笑话缓解下焦虑。"
+    text = build_operator_handoff_reply_text(
+        config=config,
+        decision=decision,
+        product_knowledge=None,
+        current_reply_text="[车金实盘] 这个我先跟负责人确认一下，避免跟您说错。您稍等，我核实清楚马上回复您。",
+        intent_assist=None,
+        combined=combined,
+    )
+    ok = (
+        "不乱接梗" in text
+        and "预算、用途、是否置换" in text
+        and "负责人确认" not in text
+    )
+    return {"name": "handoff_social_offtopic_uses_soft_redirect", "ok": ok, "reply_text": text}
+
+
+def check_guard_social_offtopic_soft_redirect_under_missing_evidence() -> dict[str, Any]:
+    candidate = {
+        "can_answer": True,
+        "reply": "这个我先去确认。",
+        "confidence": 0.92,
+        "recommended_action": "send_reply",
+        "needs_handoff": False,
+        "used_evidence": [],
+        "risk_tags": [],
+        "reason": "test_candidate",
+    }
+    evidence_pack = {
+        "current_message": "对了，今天天气怎么样？顺便讲个笑话缓解下焦虑。",
+        "safety": {"must_handoff": True, "reasons": ["no_relevant_business_evidence"]},
+        "intent_tags": [],
+    }
+    result = guard_synthesized_reply(
+        candidate=candidate,
+        evidence_pack=evidence_pack,
+        settings={"advisor_mode": "none"},
+    )
+    reply_text = str(result.get("reply") or "")
+    ok = (
+        result.get("allowed") is True
+        and result.get("action") == "handoff"
+        and result.get("reason") == "social_offtopic_soft_redirect"
+        and "不乱接梗" in reply_text
+        and "预算、用途、是否置换" in reply_text
+    )
+    return {
+        "name": "guard_social_offtopic_soft_redirect_under_missing_evidence",
+        "ok": ok,
+        "result": result,
+    }
+
+
+def check_guard_social_offtopic_with_context_prefix_uses_soft_redirect() -> dict[str, Any]:
+    candidate = {
+        "can_answer": True,
+        "reply": "这个我先去确认。",
+        "confidence": 0.92,
+        "recommended_action": "send_reply",
+        "needs_handoff": False,
+        "used_evidence": [],
+        "risk_tags": [],
+        "reason": "test_candidate_context_prefix",
+    }
+    evidence_pack = {
+        "current_message": (
+            "近期客户需求：预算10万左右，周末到店看车并想谈价格。\n"
+            "当前客户问题：先岔开一下，今天天气咋样？再讲个轻松点的笑话。"
+        ),
+        "safety": {
+            "must_handoff": True,
+            "reasons": [
+                "handoff_intent_detected",
+                "matched_faq_requires_handoff",
+                "testdrive_needs_appointment",
+            ],
+        },
+        "intent_tags": ["handoff"],
+    }
+    result = guard_synthesized_reply(
+        candidate=candidate,
+        evidence_pack=evidence_pack,
+        settings={"advisor_mode": "none"},
+    )
+    reply_text = str(result.get("reply") or "")
+    ok = (
+        result.get("allowed") is True
+        and result.get("action") == "handoff"
+        and result.get("reason") == "social_offtopic_soft_redirect"
+        and "不乱接梗" in reply_text
+        and "预算、用途、是否置换" in reply_text
+    )
+    return {
+        "name": "guard_social_offtopic_with_context_prefix_uses_soft_redirect",
+        "ok": ok,
+        "result": result,
+    }
+
+
+def check_uncertain_message_routes_to_business_clarify_reply() -> dict[str, Any]:
+    config = {"realtime_reply": {"enabled": True}, "llm_reply_synthesis": {"enabled": True}}
+    message = "我再把优先级排细一点。"
+    route = decide_realtime_reply_route(
+        config=config,
+        combined=message,
+        decision=Decision(),
+        intent_result=Intent(),
+        intent_assist={"intent": "unknown", "evidence": {"safety": {"must_handoff": False}}},
+        rag_reply={},
+        llm_reply={},
+        product_knowledge={},
+        data_capture={},
+        evidence_pack={},
+        recent_reply_texts=[],
+    )
+    reply = maybe_build_realtime_reply(
+        config=config,
+        route=route,
+        combined=message,
+        evidence_pack={},
+        current_reply_text="收到，我先看一下。",
+        recent_reply_texts=[],
+    )
+    text = str(reply.get("reply_text") or "")
+    ok = (
+        route.get("reason") == "uncertain_message_light_synthesis_allowed"
+        and route.get("level") == "L1"
+        and route.get("foreground_llm_allowed") is False
+        and reply.get("applied") is True
+        and reply.get("reason") == "local_uncertain_business_clarify"
+        and "收到，我先看一下" not in text
+        and any(marker in text for marker in ("预算", "用途", "车源", "二手车"))
+    )
+    return {"name": "uncertain_message_routes_to_business_clarify_reply", "ok": ok, "route": route, "reply": reply}
+
+
+def check_vehicle_compare_reply_has_explicit_recommendation_cue() -> dict[str, Any]:
+    config = {"realtime_reply": {"enabled": True}, "llm_reply_synthesis": {"enabled": True}}
+    message = "途观L和奇骏这两台里，你建议我先看哪台？主要接客户，也要装点物料。"
+    route = decide_realtime_reply_route(
+        config=config,
+        combined=message,
+        decision=Decision(),
+        intent_result=Intent(),
+        intent_assist={"intent": "product_inquiry", "evidence": {"safety": {"must_handoff": False}}},
+        rag_reply={},
+        llm_reply={},
+        product_knowledge={},
+        data_capture={},
+        evidence_pack={},
+        recent_reply_texts=[],
+    )
+    reply = maybe_build_realtime_reply(
+        config=config,
+        route=route,
+        combined=message,
+        evidence_pack={},
+        current_reply_text="",
+        recent_reply_texts=[],
+    )
+    text = str(reply.get("reply_text") or "")
+    ok = (
+        route.get("reason") == "common_vehicle_compare_can_use_local_style"
+        and route.get("level") == "L1"
+        and reply.get("applied") is True
+        and any(marker in text for marker in ("建议", "优先", "先看", "更推荐", "先给结论"))
+    )
+    return {"name": "vehicle_compare_reply_has_explicit_recommendation_cue", "ok": ok, "route": route, "reply": reply}
+
+
+def check_named_model_price_query_routes_to_vehicle_candidates() -> dict[str, Any]:
+    config = {"realtime_reply": {"enabled": True}, "llm_reply_synthesis": {"enabled": True}}
+    message = "塞纳多少钱？"
+    with tenant_context(TENANT_ID):
+        evidence_pack = build_evidence_pack(message, context={})
+        route = decide_realtime_reply_route(
+            config=config,
+            combined=message,
+            decision=Decision(),
+            intent_result=Intent(),
+            intent_assist={"intent": "product_inquiry", "evidence": {"safety": {"must_handoff": False}}},
+            rag_reply={},
+            llm_reply={},
+            product_knowledge={},
+            data_capture={},
+            evidence_pack=evidence_pack,
+            recent_reply_texts=[],
+        )
+        reply = maybe_build_realtime_reply(
+            config=config,
+            route=route,
+            combined=message,
+            evidence_pack=evidence_pack,
+            current_reply_text="",
+            recent_reply_texts=[],
+        )
+    text = str(reply.get("reply_text") or "")
+    ok = (
+        route.get("reason") in {"explicit_vehicle_candidates_requested", "common_price_negotiation_can_use_local_style"}
+        and route.get("level") == "L1"
+        and reply.get("applied") is True
+        and text != "收到，我先看一下。"
+    )
+    return {"name": "named_model_price_query_routes_to_vehicle_candidates", "ok": ok, "route": route, "reply": reply}
+
+
 def check_specific_finance_question_does_not_force_vehicle_sources() -> dict[str, Any]:
     message = "具体贷款流程怎么走？"
     route = decide_realtime_reply_route(
@@ -1919,6 +2378,233 @@ def check_specific_finance_question_does_not_force_vehicle_sources() -> dict[str
     )
     ok = route.get("reason") != "explicit_vehicle_candidates_requested"
     return {"name": "specific_finance_question_does_not_force_vehicle_sources", "ok": ok, "route": route}
+
+
+def check_vehicle_type_guidance_returns_explicit_priority_recommendation() -> dict[str, Any]:
+    config = {"realtime_reply": {"enabled": True}, "llm_reply_synthesis": {"enabled": True}}
+    message = "帕萨特、君威、迈腾这类和SUV比，你更建议我先看哪个方向？"
+    route = decide_realtime_reply_route(
+        config=config,
+        combined=message,
+        decision=Decision(),
+        intent_result=Intent(),
+        intent_assist={"intent": "product_inquiry", "evidence": {"safety": {"must_handoff": False}}},
+        rag_reply={},
+        llm_reply={},
+        product_knowledge={},
+        data_capture={},
+        evidence_pack={},
+        recent_reply_texts=[],
+    )
+    reply = maybe_build_realtime_reply(
+        config=config,
+        route=route,
+        combined=message,
+        evidence_pack={},
+        current_reply_text="",
+        recent_reply_texts=[],
+    )
+    text = str(reply.get("reply_text") or "")
+    ok = (
+        route.get("reason") == "common_vehicle_type_guidance_can_use_local_style"
+        and reply.get("applied") is True
+        and ("建议" in text or "先给明确结论" in text or "先给您明确建议" in text)
+        and ("先看" in text or "优先" in text or "先轿车" in text or "先suv" in text)
+    )
+    return {"name": "vehicle_type_guidance_returns_explicit_priority_recommendation", "ok": ok, "route": route, "reply": reply}
+
+
+def check_vehicle_type_guidance_not_hijacked_as_named_compare() -> dict[str, Any]:
+    config = {"realtime_reply": {"enabled": True}, "llm_reply_synthesis": {"enabled": True}}
+    message = "我平时高速比较多，更看重稳定和后期省心，你会建议我先看轿车还是SUV？"
+    recent = [
+        "如果在奥迪A4L、蔚来ES6之间给个方向：我会先看车况清楚、价格更贴合、后期成本更好控的；成本偏高的先放第二梯队再对比。"
+    ]
+    route = decide_realtime_reply_route(
+        config=config,
+        combined=message,
+        decision=Decision(),
+        intent_result=Intent(),
+        intent_assist={"intent": "product_inquiry", "evidence": {"safety": {"must_handoff": False}}},
+        rag_reply={},
+        llm_reply={},
+        product_knowledge={},
+        data_capture={},
+        evidence_pack={},
+        recent_reply_texts=recent,
+    )
+    reply = maybe_build_realtime_reply(
+        config=config,
+        route=route,
+        combined=message,
+        evidence_pack={},
+        current_reply_text="",
+        recent_reply_texts=recent,
+    )
+    text = str(reply.get("reply_text") or "")
+    ok = (
+        route.get("reason") == "common_vehicle_type_guidance_can_use_local_style"
+        and reply.get("applied") is True
+        and "奥迪A4L" not in text
+        and "蔚来ES6" not in text
+    )
+    return {"name": "vehicle_type_guidance_not_hijacked_as_named_compare", "ok": ok, "route": route, "reply": reply}
+
+
+def check_vehicle_type_guidance_category_question_avoids_catalog_option_leak() -> dict[str, Any]:
+    config = {"realtime_reply": {"enabled": True}, "llm_reply_synthesis": {"enabled": True}}
+    message = "按这个预算先看轿车还是SUV？给我明确建议。"
+    recent = [
+        "如果在奥迪A4L、蔚来ES6里给方向：我会先看车况清楚、价格更贴合、后期成本更好控的；成本偏高的先放第二梯队再对比。"
+    ]
+    route = decide_realtime_reply_route(
+        config=config,
+        combined=message,
+        decision=Decision(),
+        intent_result=Intent(),
+        intent_assist={"intent": "product_inquiry", "evidence": {"safety": {"must_handoff": False}}},
+        rag_reply={},
+        llm_reply={},
+        product_knowledge={},
+        data_capture={},
+        evidence_pack={},
+        recent_reply_texts=recent,
+    )
+    reply = maybe_build_realtime_reply(
+        config=config,
+        route=route,
+        combined=message,
+        evidence_pack={},
+        current_reply_text="",
+        recent_reply_texts=recent,
+    )
+    text = str(reply.get("reply_text") or "")
+    ok = (
+        route.get("reason") == "common_vehicle_type_guidance_can_use_local_style"
+        and reply.get("applied") is True
+        and all(term not in text for term in ("奥迪A4L", "蔚来ES6", "宝马", "奇骏"))
+        and any(marker in text for marker in ("轿车", "SUV", "先看", "优先"))
+    )
+    return {
+        "name": "vehicle_type_guidance_category_question_avoids_catalog_option_leak",
+        "ok": ok,
+        "route": route,
+        "reply": reply,
+    }
+
+
+def check_named_single_choice_priority_order_replies_with_both_user_options() -> dict[str, Any]:
+    config = {"realtime_reply": {"enabled": True}, "llm_reply_synthesis": {"enabled": True}}
+    message = "那你在凯美瑞和雅阁里先帮我定一个优先顺序。"
+    route = decide_realtime_reply_route(
+        config=config,
+        combined=message,
+        decision=Decision(),
+        intent_result=Intent(),
+        intent_assist={"intent": "product_inquiry", "evidence": {"safety": {"must_handoff": False}}},
+        rag_reply={},
+        llm_reply={},
+        product_knowledge={},
+        data_capture={},
+        evidence_pack={},
+        recent_reply_texts=[],
+    )
+    reply = maybe_build_realtime_reply(
+        config=config,
+        route=route,
+        combined=message,
+        evidence_pack={},
+        current_reply_text="",
+        recent_reply_texts=[],
+    )
+    text = str(reply.get("reply_text") or "")
+    ok = (
+        route.get("reason") == "common_vehicle_compare_can_use_local_style"
+        and reply.get("applied") is True
+        and "凯美瑞" in text
+        and "雅阁" in text
+        and any(marker in text for marker in ("优先", "先看", "结论", "二选一"))
+    )
+    return {
+        "name": "named_single_choice_priority_order_replies_with_both_user_options",
+        "ok": ok,
+        "route": route,
+        "reply": reply,
+    }
+
+
+def check_named_compare_correction_prefix_not_leaked_into_reply() -> dict[str, Any]:
+    config = {"realtime_reply": {"enabled": True}, "llm_reply_synthesis": {"enabled": True}}
+    message = "我打错了，是赛那，和奇骏哪个更适合我？"
+    route = decide_realtime_reply_route(
+        config=config,
+        combined=message,
+        decision=Decision(),
+        intent_result=Intent(),
+        intent_assist={"intent": "product_inquiry", "evidence": {"safety": {"must_handoff": False}}},
+        rag_reply={},
+        llm_reply={},
+        product_knowledge={},
+        data_capture={},
+        evidence_pack={},
+        recent_reply_texts=[],
+    )
+    reply = maybe_build_realtime_reply(
+        config=config,
+        route=route,
+        combined=message,
+        evidence_pack={},
+        current_reply_text="",
+        recent_reply_texts=[],
+    )
+    text = str(reply.get("reply_text") or "")
+    ok = (
+        route.get("reason") == "common_vehicle_compare_can_use_local_style"
+        and reply.get("applied") is True
+        and any(marker in text for marker in ("赛那", "奇骏"))
+        and "我打错了" not in text
+        and "是赛那" not in text
+    )
+    return {
+        "name": "named_compare_correction_prefix_not_leaked_into_reply",
+        "ok": ok,
+        "route": route,
+        "reply": reply,
+    }
+
+
+def check_testdrive_material_reply_answers_choice_directly() -> dict[str, Any]:
+    config = {"realtime_reply": {"enabled": True}, "llm_reply_synthesis": {"enabled": True}}
+    message = "去之前我要带身份证、驾驶证还是旧车手续？"
+    route = decide_realtime_reply_route(
+        config=config,
+        combined=message,
+        decision=Decision(),
+        intent_result=Intent(),
+        intent_assist={"intent": "product_inquiry", "evidence": {"safety": {"must_handoff": False}}},
+        rag_reply={},
+        llm_reply={},
+        product_knowledge={},
+        data_capture={},
+        evidence_pack={},
+        recent_reply_texts=[],
+    )
+    reply = maybe_build_realtime_reply(
+        config=config,
+        route=route,
+        combined=message,
+        evidence_pack={},
+        current_reply_text="",
+        recent_reply_texts=[],
+    )
+    text = str(reply.get("reply_text") or "")
+    ok = (
+        route.get("reason") == "common_testdrive_materials_can_use_local_style"
+        and reply.get("applied") is True
+        and "建议先" in text
+        and ("身份证" in text and "驾驶证" in text)
+    )
+    return {"name": "testdrive_material_reply_answers_choice_directly", "ok": ok, "route": route, "reply": reply}
 
 
 def check_finance_owner_question_does_not_refresh_vehicle_candidates() -> dict[str, Any]:
@@ -2046,6 +2732,200 @@ def check_safe_no_deposit_report_visit_stays_local() -> dict[str, Any]:
     return {"name": "safe_no_deposit_report_visit_stays_local", "ok": ok, "route": route, "reply": reply}
 
 
+def check_friendly_social_greeting_reply() -> dict[str, Any]:
+    message = "你好，在吗"
+    config = {"realtime_reply": {"enabled": True}, "llm_reply_synthesis": {"enabled": True}}
+    route = decide_realtime_reply_route(
+        config=config,
+        combined=message,
+        decision=Decision(),
+        intent_result=type("GreetingIntent", (), {"intent": "greeting"})(),
+        intent_assist={"intent": "greeting", "evidence": {"safety": {"must_handoff": False}}},
+        rag_reply={},
+        llm_reply={},
+        product_knowledge={},
+        data_capture={},
+        evidence_pack={},
+        recent_reply_texts=[],
+    )
+    reply = maybe_build_realtime_reply(
+        config=config,
+        route=route,
+        combined=message,
+        evidence_pack={},
+        current_reply_text="",
+        recent_reply_texts=[],
+    )
+    text = str(reply.get("reply_text") or "")
+    ok = (
+        route.get("reason") == "friendly_social_greeting"
+        and route.get("level") == "L1"
+        and route.get("foreground_llm_allowed") is False
+        and reply.get("applied") is True
+        and reply.get("reason") == "local_friendly_social_greeting"
+        and any(marker in text for marker in ("您好", "在", "预算", "用途", "看车"))
+        and len(text) <= 120
+    )
+    return {"name": "friendly_social_greeting_reply", "ok": ok, "route": route, "reply": reply}
+
+
+def check_friendly_farewell_reply() -> dict[str, Any]:
+    message = "好的谢谢，先这样，回头聊"
+    config = {"realtime_reply": {"enabled": True}, "llm_reply_synthesis": {"enabled": True}}
+    route = decide_realtime_reply_route(
+        config=config,
+        combined=message,
+        decision=Decision(),
+        intent_result=Intent(),
+        intent_assist={"intent": "general", "evidence": {"safety": {"must_handoff": False}}},
+        rag_reply={},
+        llm_reply={},
+        product_knowledge={},
+        data_capture={},
+        evidence_pack={},
+        recent_reply_texts=[],
+    )
+    reply = maybe_build_realtime_reply(
+        config=config,
+        route=route,
+        combined=message,
+        evidence_pack={},
+        current_reply_text="",
+        recent_reply_texts=[],
+    )
+    text = str(reply.get("reply_text") or "")
+    ok = (
+        route.get("reason") == "friendly_farewell"
+        and route.get("level") == "L1"
+        and reply.get("applied") is True
+        and reply.get("reason") == "local_friendly_farewell"
+        and any(marker in text for marker in ("感谢", "辛苦", "随时", "预算", "看车"))
+        and len(text) <= 120
+    )
+    return {"name": "friendly_farewell_reply", "ok": ok, "route": route, "reply": reply}
+
+
+def check_offtopic_social_message_uses_soft_redirect_advisor() -> dict[str, Any]:
+    message = "最近有什么好看的电影吗？"
+    config = {"realtime_reply": {"enabled": True}, "llm_reply_synthesis": {"enabled": True}}
+    route = decide_realtime_reply_route(
+        config=config,
+        combined=message,
+        decision=Decision(),
+        intent_result=Intent(),
+        intent_assist={"intent": "general", "evidence": {"safety": {"must_handoff": False}}},
+        rag_reply={},
+        llm_reply={},
+        product_knowledge={},
+        data_capture={},
+        evidence_pack={},
+        recent_reply_texts=[],
+    )
+    reply = maybe_build_realtime_reply(
+        config=config,
+        route=route,
+        combined=message,
+        evidence_pack={},
+        current_reply_text="",
+        recent_reply_texts=[],
+    )
+    text = str(reply.get("reply_text") or "")
+    ok = (
+        route.get("reason") == "offtopic_soft_redirect_needs_light_synthesis"
+        and route.get("level") == "L1"
+        and route.get("foreground_llm_allowed") is True
+        and route.get("advisor_mode") == "soft_topic_redirect"
+        and reply.get("applied") is True
+        and reply.get("reason") == "local_offtopic_soft_redirect_fallback"
+        and any(marker in text for marker in ("电影", "片单", "追剧"))
+        and any(marker in text for marker in ("看车", "选车", "预算", "用途", "二手车"))
+        and len(text) <= 150
+    )
+    return {"name": "offtopic_social_message_uses_soft_redirect_advisor", "ok": ok, "route": route, "reply": reply}
+
+
+def check_question_like_offtopic_without_keyword_still_routes_soft_redirect() -> dict[str, Any]:
+    message = "昨晚那场比赛你怎么看？"
+    config = {"realtime_reply": {"enabled": True}, "llm_reply_synthesis": {"enabled": True}}
+    route = decide_realtime_reply_route(
+        config=config,
+        combined=message,
+        decision=Decision(),
+        intent_result=Intent(),
+        intent_assist={"intent": "general", "evidence": {"safety": {"must_handoff": False}}},
+        rag_reply={},
+        llm_reply={},
+        product_knowledge={},
+        data_capture={},
+        evidence_pack={},
+        recent_reply_texts=[],
+    )
+    reply = maybe_build_realtime_reply(
+        config=config,
+        route=route,
+        combined=message,
+        evidence_pack={},
+        current_reply_text="",
+        recent_reply_texts=[],
+    )
+    text = str(reply.get("reply_text") or "")
+    ok = (
+        route.get("reason") == "offtopic_soft_redirect_needs_light_synthesis"
+        and route.get("level") == "L1"
+        and reply.get("applied") is True
+        and reply.get("reason") == "local_offtopic_soft_redirect_fallback"
+        and any(marker in text for marker in ("看车", "选车", "预算", "用途", "二手车"))
+        and len(text) <= 150
+    )
+    return {
+        "name": "question_like_offtopic_without_keyword_still_routes_soft_redirect",
+        "ok": ok,
+        "route": route,
+        "reply": reply,
+    }
+
+
+def check_generic_smalltalk_offtopic_routes_soft_redirect() -> dict[str, Any]:
+    message = "你觉得人生意义是什么？"
+    config = {"realtime_reply": {"enabled": True}, "llm_reply_synthesis": {"enabled": True}}
+    route = decide_realtime_reply_route(
+        config=config,
+        combined=message,
+        decision=Decision(),
+        intent_result=Intent(),
+        intent_assist={"intent": "general", "evidence": {"safety": {"must_handoff": False}}},
+        rag_reply={},
+        llm_reply={},
+        product_knowledge={},
+        data_capture={},
+        evidence_pack={},
+        recent_reply_texts=[],
+    )
+    reply = maybe_build_realtime_reply(
+        config=config,
+        route=route,
+        combined=message,
+        evidence_pack={},
+        current_reply_text="",
+        recent_reply_texts=[],
+    )
+    text = str(reply.get("reply_text") or "")
+    ok = (
+        route.get("reason") == "offtopic_soft_redirect_needs_light_synthesis"
+        and route.get("level") == "L1"
+        and reply.get("applied") is True
+        and reply.get("reason") == "local_offtopic_soft_redirect_fallback"
+        and any(marker in text for marker in ("看车", "选车", "预算", "用途", "二手车"))
+        and len(text) <= 150
+    )
+    return {
+        "name": "generic_smalltalk_offtopic_routes_soft_redirect",
+        "ok": ok,
+        "route": route,
+        "reply": reply,
+    }
+
+
 def check_greeting_with_business_context_is_not_pure_greeting() -> dict[str, Any]:
     message = "你好，我从抖音直播间来的，家里接娃通勤用，预算十万左右，想先了解下。"
     route = decide_realtime_reply_route(
@@ -2095,7 +2975,7 @@ def check_followup_can_recommend_vehicle_sources() -> dict[str, Any]:
     text = str(reply.get("reply_text") or "")
     ok = (
         route.get("level") == "L1"
-        and route.get("reason") == "followup_ready_for_vehicle_candidates"
+        and route.get("reason") in {"followup_ready_for_vehicle_candidates", "explicit_vehicle_candidates_requested"}
         and reply.get("applied") is True
         and bool(reply.get("used_product_ids"))
         and "检测报告" in text
@@ -3535,6 +4415,33 @@ def check_listener_status_atomic_write_retries_transient_lock() -> dict[str, Any
     ok = attempts["count"] == 2 and payload.get("mode") == "running"
     return {
         "name": "listener_status_atomic_write_retries_transient_lock",
+        "ok": ok,
+        "attempts": attempts["count"],
+    }
+
+
+def check_listener_status_atomic_write_recovers_missing_runtime_dir() -> dict[str, Any]:
+    from unittest.mock import patch
+
+    with tempfile.TemporaryDirectory() as tmp:
+        path = Path(tmp) / "tenant_runtime" / "customer_service" / "runtime_status.json"
+        attempts = {"count": 0}
+        real_replace = customer_service_runtime.os.replace
+
+        def flaky_replace(source: str | Path, destination: str | Path) -> None:
+            attempts["count"] += 1
+            if attempts["count"] == 1:
+                shutil.rmtree(Path(destination).parent, ignore_errors=True)
+                raise FileNotFoundError(2, "No such file or directory")
+            real_replace(source, destination)
+
+        with patch.object(customer_service_runtime.os, "replace", side_effect=flaky_replace):
+            customer_service_runtime.atomic_write_json(path, {"state": "thinking", "message": "unit"})
+        payload = json.loads(path.read_text(encoding="utf-8"))
+
+    ok = attempts["count"] == 2 and payload.get("state") == "thinking"
+    return {
+        "name": "listener_status_atomic_write_recovers_missing_runtime_dir",
         "ok": ok,
         "attempts": attempts["count"],
     }

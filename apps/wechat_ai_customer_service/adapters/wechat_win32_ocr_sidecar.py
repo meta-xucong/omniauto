@@ -128,8 +128,12 @@ DEFAULT_HUMANIZED_SHORT_TEXT_CHARS = 90
 DEFAULT_HUMANIZED_LONG_TEXT_CHARS = 240
 DEFAULT_INPUT_COPYBACK_STRONG_CONFIRM = False
 DEFAULT_SEND_INPUT_CONFIRM_ATTEMPTS = 3
+DEFAULT_INPUT_FAST_VISUAL_CONFIRM = True
+DEFAULT_POST_SEND_STRICT_CONFIRM = False
 DEFAULT_SEND_TRIGGER_MODE = "enter_only"
 DEFAULT_STRICT_SEND_FOCUS_GUARD = True
+DEFAULT_FOCUS_CLICK_FALLBACK = True
+DEFAULT_ALLOW_UNKNOWN_FOREGROUND_GUARD = True
 INPUT_TEXT_DARK_RATIO_MIN = 0.0025
 HUMANIZED_TYPO_CANDIDATES = "asdfjkl;,.?/[]"
 SENDINPUT_INPUT_KEYBOARD = 1
@@ -317,24 +321,24 @@ def run_action(args: argparse.Namespace) -> dict[str, Any]:
         if args.target:
             opened = open_chat(hwnd, args.target, exact=bool(args.exact), artifact_dir=args.artifact_dir)
             humanized_action_sleep(380, 620)
-            if not opened:
-                validation = validate_active_send_target(
-                    hwnd,
-                    args.target,
-                    exact=bool(args.exact),
-                    artifact_dir=args.artifact_dir,
-                )
-                if not validation.get("ok"):
-                    return {
-                        "ok": False,
-                        "online": bool(validation.get("online", True)),
-                        "adapter": "win32_ocr",
-                        "state": "target_not_confirmed_for_messages",
-                        "window_probe": probe,
-                        "target": args.target,
-                        "guard": validation,
-                        "error": "The target chat was not confirmed before reading messages.",
-                    }
+            validation = validate_active_send_target(
+                hwnd,
+                args.target,
+                exact=bool(args.exact),
+                artifact_dir=args.artifact_dir,
+            )
+            if not validation.get("ok"):
+                return {
+                    "ok": False,
+                    "online": bool(validation.get("online", True)),
+                    "adapter": "win32_ocr",
+                    "state": "target_not_confirmed_for_messages",
+                    "window_probe": probe,
+                    "target": args.target,
+                    "opened": bool(opened),
+                    "guard": validation,
+                    "error": "The target chat was not confirmed before reading messages.",
+                }
             if scroll_to_latest_before_read_enabled():
                 scroll_chat_to_latest(hwnd)
         load_times = bounded_int(args.history_load_times, default=0, minimum=0, maximum=16)
@@ -392,6 +396,7 @@ def run_action(args: argparse.Namespace) -> dict[str, Any]:
             exact=bool(args.exact),
             skip_send_rate_guard=bool(args.skip_send_rate_guard),
             artifact_dir=args.artifact_dir,
+            validated_guard=target_ready.get("validation") if isinstance(target_ready.get("validation"), dict) else None,
         )
     return {"ok": False, "online": False, "adapter": "win32_ocr", "state": "unsupported_action"}
 
@@ -665,6 +670,7 @@ def trigger_wechat_tray_redraw(hwnd: int, probe: dict[str, Any]) -> dict[str, An
 def status_payload(hwnd: int, probe: dict[str, Any], *, artifact_dir: str | None = None) -> dict[str, Any]:
     geometry = get_window_geometry(hwnd)
     geometry_check = validate_capture_geometry(geometry)
+    focus_guard = foreground_window_matches_target(hwnd)
     if not geometry_check.get("ok"):
         return {
             "ok": False,
@@ -674,6 +680,7 @@ def status_payload(hwnd: int, probe: dict[str, Any], *, artifact_dir: str | None
             "reason": str(geometry_check.get("reason") or ""),
             "window_probe": probe,
             "geometry": geometry,
+            "focus_guard": focus_guard,
             "screenshot_path": "",
             "ocr_count": 0,
             "compat_reason": "rpa_primary",
@@ -690,6 +697,7 @@ def status_payload(hwnd: int, probe: dict[str, Any], *, artifact_dir: str | None
             "state": "login_window_detected",
             "window_probe": probe,
             "geometry": geometry,
+            "focus_guard": focus_guard,
             "screenshot_path": path,
             "ocr_count": len(ocr_items),
             "compat_reason": "rpa_primary",
@@ -705,6 +713,7 @@ def status_payload(hwnd: int, probe: dict[str, Any], *, artifact_dir: str | None
             "reason": "blank_render",
             "window_probe": probe,
             "geometry": geometry,
+            "focus_guard": focus_guard,
             "screenshot_path": path,
             "ocr_count": len(ocr_items),
             "render_probe": blank_render,
@@ -721,6 +730,7 @@ def status_payload(hwnd: int, probe: dict[str, Any], *, artifact_dir: str | None
             "reason": "auxiliary_shell_window",
             "window_probe": probe,
             "geometry": geometry,
+            "focus_guard": focus_guard,
             "screenshot_path": path,
             "ocr_count": len(ocr_items),
             "shell_probe": auxiliary_shell,
@@ -734,6 +744,7 @@ def status_payload(hwnd: int, probe: dict[str, Any], *, artifact_dir: str | None
         "state": "main_window_compat",
         "window_probe": probe,
         "geometry": geometry,
+        "focus_guard": focus_guard,
         "screenshot_path": path,
         "ocr_count": len(ocr_items),
         "compat_reason": "rpa_primary",
@@ -741,6 +752,7 @@ def status_payload(hwnd: int, probe: dict[str, Any], *, artifact_dir: str | None
 def capabilities_payload(hwnd: int, probe: dict[str, Any], *, artifact_dir: str | None = None) -> dict[str, Any]:
     geometry = get_window_geometry(hwnd)
     geometry_check = validate_capture_geometry(geometry)
+    focus_guard = foreground_window_matches_target(hwnd)
     if not geometry_check.get("ok"):
         return {
             "ok": False,
@@ -753,6 +765,7 @@ def capabilities_payload(hwnd: int, probe: dict[str, Any], *, artifact_dir: str 
             "screenshot_path": "",
             "ocr_count": 0,
             "geometry": geometry,
+            "focus_guard": focus_guard,
             "receive": {"ok": False},
             "send": {"ok": False},
             "compat_reason": "rpa_primary",
@@ -771,6 +784,7 @@ def capabilities_payload(hwnd: int, probe: dict[str, Any], *, artifact_dir: str 
             "screenshot_path": path,
             "ocr_count": len(ocr_items),
             "geometry": geometry,
+            "focus_guard": focus_guard,
             "receive": {"ok": False},
             "send": {"ok": False},
             "compat_reason": "rpa_primary",
@@ -789,6 +803,7 @@ def capabilities_payload(hwnd: int, probe: dict[str, Any], *, artifact_dir: str 
             "screenshot_path": path,
             "ocr_count": len(ocr_items),
             "geometry": geometry,
+            "focus_guard": focus_guard,
             "render_probe": blank_render,
             "receive": {"ok": False, "blocked_by": "blank_render"},
             "send": {"ok": False},
@@ -808,6 +823,7 @@ def capabilities_payload(hwnd: int, probe: dict[str, Any], *, artifact_dir: str 
             "screenshot_path": path,
             "ocr_count": len(ocr_items),
             "geometry": geometry,
+            "focus_guard": focus_guard,
             "shell_probe": auxiliary_shell,
             "receive": {"ok": False, "blocked_by": "auxiliary_shell_window"},
             "send": {"ok": False},
@@ -864,6 +880,7 @@ def capabilities_payload(hwnd: int, probe: dict[str, Any], *, artifact_dir: str 
         "screenshot_path": path,
         "ocr_count": len(ocr_items),
         "geometry": geometry,
+        "focus_guard": focus_guard,
         "blocking_reason": blocking_reason,
         "receive": receive,
         "send": {
@@ -1281,21 +1298,60 @@ def send_payload(
     exact: bool,
     skip_send_rate_guard: bool = False,
     artifact_dir: str | None = None,
+    validated_guard: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    validation = validate_active_send_target(hwnd, target, exact=exact, artifact_dir=artifact_dir)
-    if not validation.get("ok"):
-        return {
-            "ok": False,
-            "online": validation.get("online", True),
-            "adapter": "win32_ocr",
-            "state": "send_guard_blocked",
-            "window_probe": probe,
-            "target": target,
-            "guard": validation,
-            "error": str(validation.get("error") or validation.get("reason") or "send guard blocked"),
-        }
-
-    geometry = validation["geometry"]
+    reused_prevalidated_guard = bool(isinstance(validated_guard, dict) and validated_guard.get("ok"))
+    if reused_prevalidated_guard:
+        validation = dict(validated_guard or {})
+        # Re-check foreground/visibility quickly before using the cached target
+        # confirmation to avoid repeating OCR-heavy guard validation.
+        focus_guard = recover_send_window_guard(hwnd, max_attempts=1)
+        if not focus_guard.get("ok"):
+            # Fallback to full active target validation to keep behavior robust
+            # when foreground recovery is temporarily blocked.
+            validation = validate_active_send_target(hwnd, target, exact=exact, artifact_dir=artifact_dir)
+            reused_prevalidated_guard = False
+            if not validation.get("ok"):
+                return {
+                    "ok": False,
+                    "online": bool(validation.get("online", True)),
+                    "adapter": "win32_ocr",
+                    "state": "send_guard_blocked",
+                    "window_probe": probe,
+                    "target": target,
+                    "guard": {**validation, "window_guard": focus_guard},
+                    "error": str(validation.get("error") or validation.get("reason") or "send guard blocked"),
+                }
+            geometry = validation["geometry"]
+        else:
+            geometry = get_window_geometry(hwnd)
+            geometry_check = validate_send_geometry(geometry)
+            if not geometry_check.get("ok"):
+                return {
+                    "ok": False,
+                    "online": True,
+                    "adapter": "win32_ocr",
+                    "state": "send_geometry_blocked",
+                    "window_probe": probe,
+                    "target": target,
+                    "guard": {**validation, "geometry": geometry, "geometry_check": geometry_check},
+                    "error": str(geometry_check.get("error") or "send geometry guard blocked"),
+                }
+            validation["geometry"] = geometry
+    else:
+        validation = validate_active_send_target(hwnd, target, exact=exact, artifact_dir=artifact_dir)
+        if not validation.get("ok"):
+            return {
+                "ok": False,
+                "online": validation.get("online", True),
+                "adapter": "win32_ocr",
+                "state": "send_guard_blocked",
+                "window_probe": probe,
+                "target": target,
+                "guard": validation,
+                "error": str(validation.get("error") or validation.get("reason") or "send guard blocked"),
+            }
+        geometry = validation["geometry"]
     points = calculate_send_points(geometry)
     if not points.get("ok"):
         return {
@@ -1380,8 +1436,8 @@ def send_payload(
             },
             "error": str(click_result.get("error") or uia_result.get("error") or "send input could not be confirmed"),
         }
-    humanized_action_sleep(350, 650)
-    post_validation = validate_active_send_target(hwnd, target, exact=exact, artifact_dir=artifact_dir)
+    humanized_action_sleep(200, 420)
+    post_validation = validate_post_send_target(hwnd, target, exact=exact, artifact_dir=artifact_dir)
     if str(post_validation.get("reason") or "") == "blank_render":
         return {
             "ok": False,
@@ -1414,6 +1470,7 @@ def send_payload(
             "mode": send_mode,
             "requested_mode": requested_send_mode,
             "humanized_method": settings.get("method"),
+            "validation_source": "prevalidated_guard" if reused_prevalidated_guard else "active_send_guard",
             "geometry": geometry,
             "input_point": points["input_point"],
             "send_point": points["send_point"],
@@ -1569,53 +1626,53 @@ def adapt_humanized_input_settings(settings: dict[str, Any], text: str) -> dict[
     if text_len <= DEFAULT_HUMANIZED_SHORT_TEXT_CHARS:
         profile = {
             "speed_profile": "short_natural",
-            "chunk_min_chars": 3,
-            "chunk_max_chars": 8,
+            "chunk_min_chars": 4,
+            "chunk_max_chars": 10,
             "char_delay_min_ms": 45,
-            "char_delay_max_ms": 110,
-            "micro_pause_every_chars": 28,
-            "micro_pause_min_ms": 130,
-            "micro_pause_max_ms": 340,
+            "char_delay_max_ms": 95,
+            "micro_pause_every_chars": 34,
+            "micro_pause_min_ms": 90,
+            "micro_pause_max_ms": 260,
             "typo_probability": 0.10,
             "typo_max": 1,
-            "send_pre_delay_min_ms": 180,
-            "send_pre_delay_max_ms": 620,
-            "send_post_input_delay_min_ms": 260,
-            "send_post_input_delay_max_ms": 720,
+            "send_pre_delay_min_ms": 120,
+            "send_pre_delay_max_ms": 360,
+            "send_post_input_delay_min_ms": 180,
+            "send_post_input_delay_max_ms": 360,
         }
     elif text_len <= DEFAULT_HUMANIZED_LONG_TEXT_CHARS:
         profile = {
             "speed_profile": "medium_natural",
             "chunk_min_chars": 4,
-            "chunk_max_chars": 9,
-            "char_delay_min_ms": 38,
-            "char_delay_max_ms": 96,
-            "micro_pause_every_chars": 34,
-            "micro_pause_min_ms": 115,
-            "micro_pause_max_ms": 300,
+            "chunk_max_chars": 10,
+            "char_delay_min_ms": 42,
+            "char_delay_max_ms": 88,
+            "micro_pause_every_chars": 38,
+            "micro_pause_min_ms": 85,
+            "micro_pause_max_ms": 240,
             "typo_probability": 0.08,
             "typo_max": 1,
-            "send_pre_delay_min_ms": 160,
-            "send_pre_delay_max_ms": 540,
-            "send_post_input_delay_min_ms": 240,
-            "send_post_input_delay_max_ms": 640,
+            "send_pre_delay_min_ms": 110,
+            "send_pre_delay_max_ms": 320,
+            "send_post_input_delay_min_ms": 160,
+            "send_post_input_delay_max_ms": 340,
         }
     else:
         profile = {
             "speed_profile": "long_natural_capped",
             "chunk_min_chars": 5,
-            "chunk_max_chars": 10,
+            "chunk_max_chars": 11,
             "char_delay_min_ms": 32,
-            "char_delay_max_ms": 84,
-            "micro_pause_every_chars": 42,
-            "micro_pause_min_ms": 95,
-            "micro_pause_max_ms": 260,
+            "char_delay_max_ms": 78,
+            "micro_pause_every_chars": 44,
+            "micro_pause_min_ms": 70,
+            "micro_pause_max_ms": 220,
             "typo_probability": 0.06,
             "typo_max": 1,
-            "send_pre_delay_min_ms": 140,
-            "send_pre_delay_max_ms": 480,
-            "send_post_input_delay_min_ms": 210,
-            "send_post_input_delay_max_ms": 560,
+            "send_pre_delay_min_ms": 100,
+            "send_pre_delay_max_ms": 280,
+            "send_post_input_delay_min_ms": 150,
+            "send_post_input_delay_max_ms": 320,
         }
     active["speed_profile"] = profile["speed_profile"]
     for key in (
@@ -1717,12 +1774,43 @@ def message_probe_tokens(text: str) -> list[str]:
     if not compact:
         return []
     tokens: list[str] = []
-    for candidate in (compact[:10], compact[:6], compact[-6:]):
+
+    def add_token(candidate: str) -> None:
         token = str(candidate or "").strip()
         if len(token) < 2:
-            continue
+            return
         if token not in tokens:
             tokens.append(token)
+
+    semantic = compact
+    # Live acceptance/customer-service messages often carry a bracketed marker
+    # before the real customer text. OCR may split or drop that marker, so use
+    # semantic body fragments first and keep the old prefix/suffix fallback.
+    for _ in range(3):
+        stripped = re.sub(r"^(?:【[^】]{1,80}】|\[[^\]]{1,80}\]|（[^）]{1,80}）|\([^)]{1,80}\))", "", semantic)
+        if stripped == semantic:
+            break
+        semantic = stripped
+    semantic = semantic.lstrip("：:，,。；;、 ")
+
+    semantic_spans = re.findall(r"[\u4e00-\u9fffA-Za-z0-9]{3,18}", semantic)
+    for span in semantic_spans:
+        if not re.search(r"[\u4e00-\u9fff]", span):
+            continue
+        variants = [span]
+        if len(span) >= 4 and span[0] in {"我", "想", "要", "请"}:
+            variants.append(span[1:])
+        for variant in variants:
+            add_token(variant[:10])
+            add_token(variant[:6])
+            add_token(variant[-6:])
+            if len(tokens) >= 8:
+                break
+        if len(tokens) >= 8:
+            break
+
+    for candidate in (compact[:10], compact[:6], compact[-6:]):
+        add_token(candidate)
     return tokens
 
 
@@ -1905,13 +1993,35 @@ def clear_existing_input_draft(
     """Clear a stale WeChat draft only when the input area is already non-empty."""
     if not before_state.get("has_visible_text"):
         return {"ok": True, "cleared": False, "reason": "input_region_already_blank", "before": before_state}
-    input_x = int(points["input_point"][0])
-    input_y = int(points["input_point"][1])
+    input_x, input_y = jitter_input_click_point(
+        int(points["input_point"][0]),
+        int(points["input_point"][1]),
+        geometry,
+    )
     human_client_click(hwnd, input_x, input_y)
     time.sleep(random.uniform(0.08, 0.16))
-    hotkey(win32con.VK_CONTROL, ord("A"))
-    time.sleep(random.uniform(0.05, 0.11))
-    key_press(win32con.VK_BACK)
+    # Avoid Ctrl+A here: select-all artifacts can leak to chat history when
+    # focus drifts. Use bounded backspace/delete bursts instead.
+    backspaces = bounded_int(
+        os.getenv("WECHAT_WIN32_OCR_INPUT_DRAFT_CLEAR_BACKSPACES"),
+        default=20,
+        minimum=6,
+        maximum=64,
+    )
+    deletes = bounded_int(
+        os.getenv("WECHAT_WIN32_OCR_INPUT_DRAFT_CLEAR_DELETES"),
+        default=4,
+        minimum=0,
+        maximum=18,
+    )
+    for idx in range(backspaces):
+        key_press(win32con.VK_BACK)
+        humanized_action_sleep(8, 26)
+        if idx > 0 and idx % 7 == 0:
+            humanized_action_sleep(22, 66)
+    for _ in range(deletes):
+        key_press(win32con.VK_DELETE)
+        humanized_action_sleep(10, 30)
     time.sleep(random.uniform(0.16, 0.32))
     screenshot, _path = capture_wechat(hwnd, artifact_dir=artifact_dir, label=f"send_input_clear_{attempt}")
     ocr_items = run_ocr(screenshot)
@@ -2146,13 +2256,84 @@ def strict_send_focus_guard_enabled() -> bool:
     return env_flag("WECHAT_WIN32_OCR_STRICT_SEND_FOCUS_GUARD", default=DEFAULT_STRICT_SEND_FOCUS_GUARD)
 
 
+def focus_click_fallback_enabled() -> bool:
+    return env_flag("WECHAT_WIN32_OCR_FOCUS_CLICK_FALLBACK", default=DEFAULT_FOCUS_CLICK_FALLBACK)
+
+
+def allow_unknown_foreground_guard() -> bool:
+    return env_flag("WECHAT_WIN32_OCR_ALLOW_UNKNOWN_FOREGROUND", default=DEFAULT_ALLOW_UNKNOWN_FOREGROUND_GUARD)
+
+
+def process_executable_path(pid: int) -> str:
+    if pid <= 0:
+        return ""
+    try:
+        kernel32 = ctypes.windll.kernel32
+        process_query_limited_information = 0x1000
+        handle = kernel32.OpenProcess(process_query_limited_information, False, int(pid))
+        if not handle:
+            return ""
+        try:
+            size = wintypes.DWORD(32768)
+            buffer = ctypes.create_unicode_buffer(size.value)
+            if kernel32.QueryFullProcessImageNameW(handle, 0, buffer, ctypes.byref(size)):
+                return str(buffer.value or "")
+            return ""
+        finally:
+            kernel32.CloseHandle(handle)
+    except Exception:
+        return ""
+
+
 def foreground_window_matches_target(hwnd: int) -> dict[str, Any]:
+    def _window_brief(candidate_hwnd: int) -> dict[str, Any]:
+        brief: dict[str, Any] = {"hwnd": int(candidate_hwnd or 0)}
+        if not candidate_hwnd:
+            return brief
+        try:
+            brief["title"] = str(win32gui.GetWindowText(candidate_hwnd) or "")
+        except Exception:
+            brief["title"] = ""
+        try:
+            brief["class_name"] = str(win32gui.GetClassName(candidate_hwnd) or "")
+        except Exception:
+            brief["class_name"] = ""
+        try:
+            pid = int(win32process.GetWindowThreadProcessId(candidate_hwnd)[1] or 0)
+        except Exception:
+            pid = 0
+        brief["pid"] = pid
+        if pid > 0:
+            try:
+                path = process_executable_path(pid)
+            except Exception:
+                path = ""
+            if path:
+                brief["path"] = path
+        return brief
+
     if not hwnd or win32gui is None:
         return {"ok": True, "reason": "foreground_guard_unavailable"}
     try:
         foreground = int(win32gui.GetForegroundWindow() or 0)
     except Exception as exc:
         return {"ok": False, "reason": "foreground_probe_failed", "error": repr(exc), "hwnd": int(hwnd or 0)}
+    if foreground == 0:
+        if allow_unknown_foreground_guard():
+            return {
+                "ok": True,
+                "reason": "foreground_unknown_guard_degraded",
+                "hwnd": int(hwnd),
+                "foreground_hwnd": 0,
+                "foreground_root_hwnd": 0,
+            }
+        return {
+            "ok": False,
+            "reason": "foreground_not_wechat_target",
+            "hwnd": int(hwnd),
+            "foreground_hwnd": 0,
+            "foreground_root_hwnd": 0,
+        }
     if foreground == int(hwnd):
         return {"ok": True, "reason": "foreground_matches_target", "hwnd": int(hwnd), "foreground_hwnd": foreground}
     root = 0
@@ -2174,6 +2355,8 @@ def foreground_window_matches_target(hwnd: int) -> dict[str, Any]:
         "hwnd": int(hwnd),
         "foreground_hwnd": foreground,
         "foreground_root_hwnd": root,
+        "foreground_window": _window_brief(foreground),
+        "foreground_root_window": _window_brief(root),
     }
 
 
@@ -2205,6 +2388,37 @@ def basic_send_window_guard(hwnd: int) -> dict[str, Any]:
     except Exception as exc:
         return {"ok": False, "reason": "window_guard_failed", "error": repr(exc)}
     return {"ok": True, "reason": "window_valid"}
+
+
+def recover_send_window_guard(hwnd: int, *, max_attempts: int = 1) -> dict[str, Any]:
+    guard = basic_send_window_guard(hwnd)
+    if guard.get("ok"):
+        return guard
+    reason = str(guard.get("reason") or "")
+    if reason not in {"foreground_not_wechat_target", "foreground_probe_failed"}:
+        return guard
+    attempts = max(0, int(max_attempts))
+    if attempts <= 0:
+        return guard
+    last_guard = guard
+    for attempt in range(1, attempts + 1):
+        activate_window(hwnd)
+        time.sleep(random.uniform(0.06, 0.14))
+        retry_guard = basic_send_window_guard(hwnd)
+        if retry_guard.get("ok"):
+            return {
+                **retry_guard,
+                "focus_recovered": True,
+                "focus_recovery_attempts": attempt,
+                "focus_recovery_from": reason,
+            }
+        last_guard = retry_guard
+    return {
+        **last_guard,
+        "focus_recovered": False,
+        "focus_recovery_attempts": attempts,
+        "focus_recovery_from": reason,
+    }
 
 
 def paste_text_in_chunks_with_humanized_pacing(text: str, settings: dict[str, Any]) -> dict[str, Any]:
@@ -2269,6 +2483,10 @@ def paste_text_with_confirmation(
     ]
     confirm_attempts = send_input_confirm_attempt_count(len(attempts))
     allow_copyback = env_flag("WECHAT_WIN32_OCR_INPUT_COPYBACK_CONFIRM", default=False)
+    fast_visual_confirm = env_flag(
+        "WECHAT_WIN32_OCR_INPUT_FAST_VISUAL_CONFIRM",
+        default=DEFAULT_INPUT_FAST_VISUAL_CONFIRM,
+    )
     attempts = attempts[:confirm_attempts]
     input_method = "clipboard_chunks"
     last_input_result: dict[str, Any] | None = None
@@ -2283,7 +2501,7 @@ def paste_text_with_confirmation(
     for attempt, (x, y, mode) in enumerate(attempts, start=1):
         activate_window(hwnd)
         time.sleep(random.uniform(0.08, 0.18))
-        focus_guard = basic_send_window_guard(hwnd)
+        focus_guard = recover_send_window_guard(hwnd, max_attempts=1)
         if not focus_guard.get("ok"):
             return {
                 "ok": False,
@@ -2303,7 +2521,7 @@ def paste_text_with_confirmation(
                 artifact_dir=artifact_dir,
                 label=f"send_input_before_{attempt}",
             )
-            before_ocr_items = run_ocr(before_screenshot)
+            before_ocr_items = [] if fast_visual_confirm else run_ocr(before_screenshot)
             before_input_region = input_text_region_state(before_screenshot, before_ocr_items, geometry=geometry)
         except Exception as exc:
             before_input_region = {
@@ -2333,12 +2551,13 @@ def paste_text_with_confirmation(
                 "input_result": last_input_result,
             }
         before_input_region = clear_result.get("after") or before_input_region
+        click_x, click_y = jitter_input_click_point(int(x), int(y), geometry)
         if mode == "human":
-            human_client_click(hwnd, x, y)
+            human_client_click(hwnd, click_x, click_y)
         else:
-            client_click(hwnd, x, y)
+            client_click(hwnd, click_x, click_y)
         time.sleep(random.uniform(0.12, 0.28))
-        focus_guard = basic_send_window_guard(hwnd)
+        focus_guard = recover_send_window_guard(hwnd, max_attempts=1)
         if not focus_guard.get("ok"):
             return {
                 "ok": False,
@@ -2360,7 +2579,7 @@ def paste_text_with_confirmation(
                 window_guard_func=lambda hwnd=hwnd: basic_send_window_guard(hwnd),
             )
         elif settings.get("enabled") and input_method == "clipboard_chunks":
-            focus_guard = basic_send_window_guard(hwnd)
+            focus_guard = recover_send_window_guard(hwnd, max_attempts=1)
             if not focus_guard.get("ok"):
                 return {
                     "ok": False,
@@ -2376,7 +2595,7 @@ def paste_text_with_confirmation(
                 }
             input_result = paste_text_in_chunks_with_humanized_pacing(text, settings)
         else:
-            focus_guard = basic_send_window_guard(hwnd)
+            focus_guard = recover_send_window_guard(hwnd, max_attempts=1)
             if not focus_guard.get("ok"):
                 return {
                     "ok": False,
@@ -2422,13 +2641,29 @@ def paste_text_with_confirmation(
                 "input_mode": input_method,
                 "input_result": last_input_result,
             }
+        fast_after_region = input_text_region_state(screenshot, [], geometry=geometry)
+        visual_confirm_fast = input_region_visual_delta_confirms(before_input_region, fast_after_region, input_result)
+        if fast_visual_confirm and visual_confirm_fast.get("ok"):
+            return {
+                "ok": True,
+                "attempt": attempt,
+                "click_mode": mode,
+                "point": [click_x, click_y],
+                "probe_token": probe_token,
+                "probe_tokens": probe_tokens,
+                "confirmed_by": "input_area_visual_delta_fast",
+                "input_visual_confirm": visual_confirm_fast,
+                "input_clear": clear_result,
+                "input_mode": input_method,
+                "input_result": input_result,
+            }
         ocr_items = run_ocr(screenshot)
         if input_area_contains_any_token(ocr_items, geometry=geometry, tokens=probe_tokens):
             return {
                 "ok": True,
                 "attempt": attempt,
                 "click_mode": mode,
-                "point": [x, y],
+                "point": [click_x, click_y],
                 "probe_token": probe_token,
                 "probe_tokens": probe_tokens,
                 "confirmed_by": "ocr_input_area",
@@ -2443,7 +2678,7 @@ def paste_text_with_confirmation(
                 "ok": True,
                 "attempt": attempt,
                 "click_mode": mode,
-                "point": [x, y],
+                "point": [click_x, click_y],
                 "probe_token": probe_token,
                 "probe_tokens": probe_tokens,
                 "confirmed_by": "input_area_visual_delta",
@@ -2459,7 +2694,7 @@ def paste_text_with_confirmation(
                     "ok": True,
                     "attempt": attempt,
                     "click_mode": mode,
-                    "point": [x, y],
+                    "point": [click_x, click_y],
                     "probe_token": probe_token,
                     "probe_tokens": probe_tokens,
                     "confirmed_by": "clipboard_copyback",
@@ -2587,6 +2822,7 @@ def send_with_guarded_clicks(
     # and confirm OCR can see the token in the input area before sending.
     send_x = int(points["send_point"][0])
     send_y = int(points["send_point"][1])
+    send_click_x, send_click_y = jitter_send_click_point(send_x, send_y, geometry)
     settings = settings or adapt_humanized_input_settings(humanized_input_settings(), text)
     if settings.get("enabled"):
         humanized_sleep_ms(
@@ -2621,7 +2857,7 @@ def send_with_guarded_clicks(
             int(settings.get("send_post_input_delay_min_ms") or DEFAULT_HUMANIZED_SEND_POST_INPUT_DELAY_MIN_MS),
             int(settings.get("send_post_input_delay_max_ms") or DEFAULT_HUMANIZED_SEND_POST_INPUT_DELAY_MAX_MS),
         )
-    focus_guard = basic_send_window_guard(hwnd)
+    focus_guard = recover_send_window_guard(hwnd, max_attempts=1)
     if not focus_guard.get("ok"):
         return {
             "ok": False,
@@ -2635,7 +2871,7 @@ def send_with_guarded_clicks(
         key_press(win32con.VK_RETURN)
         time.sleep(random.uniform(0.08, 0.16))
     if trigger_mode in {"click_only", "enter_then_click"}:
-        focus_guard = basic_send_window_guard(hwnd)
+        focus_guard = recover_send_window_guard(hwnd, max_attempts=1)
         if not focus_guard.get("ok"):
             return {
                 "ok": False,
@@ -2644,13 +2880,13 @@ def send_with_guarded_clicks(
                 "paste": paste_result,
                 "window_guard": focus_guard,
             }
-        human_client_click(hwnd, send_x, send_y)
+        human_client_click(hwnd, send_click_x, send_click_y)
     paste_method = str(paste_result.get("input_mode") or paste_result.get("method") or "clipboard_once")
     return {
         "ok": True,
         "method": f"win32.human_click_input+{paste_method}+send_trigger:{trigger_mode}",
         "input_point": [int(points["input_point"][0]), int(points["input_point"][1])],
-        "send_point": [send_x, send_y],
+        "send_point": [send_click_x, send_click_y],
         "paste": paste_result,
         "send_trigger_mode": trigger_mode,
         "degraded": bool(paste_result.get("degraded")),
@@ -3352,11 +3588,20 @@ def ensure_target_ready_for_send(
     attempts = target_ready_attempt_count(max_attempts)
     last_validation: dict[str, Any] = {}
     for attempt in range(1, attempts + 1):
+        # Fast path: when we are already on the correct chat, avoid the extra
+        # open-chat traversal and send immediately after guard confirmation.
+        pre_validation = validate_active_send_target(hwnd, target, exact=exact, artifact_dir=artifact_dir)
+        if pre_validation.get("ok"):
+            return {"ok": True, "attempts": attempt, "validation": pre_validation, "opened": False}
+        last_validation = pre_validation
+        if target_switch_validation_is_hard_stop(pre_validation):
+            return {"ok": False, "attempts": attempt, "validation": pre_validation, "hard_stop": True}
+
         opened = open_chat(hwnd, target, exact=exact, artifact_dir=artifact_dir)
         humanized_action_sleep(280 + attempt * 90, 440 + attempt * 150)
         validation = validate_active_send_target(hwnd, target, exact=exact, artifact_dir=artifact_dir)
-        if opened or validation.get("ok"):
-            return {"ok": True, "attempts": attempt, "validation": validation}
+        if validation.get("ok"):
+            return {"ok": True, "attempts": attempt, "validation": validation, "opened": bool(opened)}
         last_validation = validation
         if target_switch_validation_is_hard_stop(validation):
             return {"ok": False, "attempts": attempt, "validation": validation, "hard_stop": True}
@@ -3469,6 +3714,62 @@ def validate_active_send_target(
     }
 
 
+def validate_post_send_target(
+    hwnd: int,
+    target: str,
+    *,
+    exact: bool,
+    artifact_dir: str | None = None,
+) -> dict[str, Any]:
+    """Lightweight post-send guard.
+
+    Pre-send already enforces strict target confirmation. Post-send primarily
+    needs to detect hard failures (blank render / lost window). We therefore
+    use a fast path first and only fall back to strict OCR confirmation when
+    the fast probe is inconclusive.
+    """
+    if env_flag(
+        "WECHAT_WIN32_OCR_POST_SEND_STRICT_CONFIRM",
+        default=DEFAULT_POST_SEND_STRICT_CONFIRM,
+    ):
+        return validate_active_send_target(hwnd, target, exact=exact, artifact_dir=artifact_dir)
+
+    geometry = get_window_geometry(hwnd)
+    geometry_check = validate_send_geometry(geometry)
+    if not geometry_check.get("ok"):
+        return {**geometry_check, "online": True, "geometry": geometry}
+
+    focus_guard = basic_send_window_guard(hwnd)
+    if not focus_guard.get("ok"):
+        return validate_active_send_target(hwnd, target, exact=exact, artifact_dir=artifact_dir)
+
+    try:
+        screenshot, path = capture_wechat(hwnd, artifact_dir=artifact_dir, label="send_post_guard_fast")
+    except Exception:
+        return validate_active_send_target(hwnd, target, exact=exact, artifact_dir=artifact_dir)
+
+    blank_render = detect_blank_render(screenshot, [], geometry=geometry)
+    if blank_render.get("detected"):
+        return {
+            "ok": False,
+            "online": False,
+            "reason": "blank_render",
+            "state": "blank_render_detected",
+            "geometry": geometry,
+            "screenshot_path": path,
+            "render_probe": blank_render,
+            "error": "WeChat render is blank after send.",
+        }
+    return {
+        "ok": True,
+        "online": True,
+        "reason": "target_confirmed",
+        "geometry": geometry,
+        "screenshot_path": path,
+        "post_send_fast_guard": True,
+    }
+
+
 def get_window_geometry(hwnd: int) -> dict[str, int]:
     left, top, right, bottom = win32gui.GetWindowRect(hwnd)
     return {
@@ -3541,6 +3842,80 @@ def calculate_send_points(geometry: dict[str, Any]) -> dict[str, Any]:
             "error": "Calculated send points overlap the session list.",
         }
     return {"ok": True, "input_point": [input_x, input_y], "send_point": [send_x, send_y], "geometry": geometry}
+
+
+def jitter_input_click_point(x: int, y: int, geometry: dict[str, Any]) -> tuple[int, int]:
+    width = int(geometry.get("width") or 0)
+    height = int(geometry.get("height") or 0)
+    if width <= 0 or height <= 0:
+        return int(x), int(y)
+    jitter_x = bounded_int(
+        os.getenv("WECHAT_WIN32_OCR_INPUT_POINT_JITTER_X"),
+        default=7,
+        minimum=0,
+        maximum=20,
+    )
+    jitter_y = bounded_int(
+        os.getenv("WECHAT_WIN32_OCR_INPUT_POINT_JITTER_Y"),
+        default=6,
+        minimum=0,
+        maximum=18,
+    )
+    split_x = session_split_x(width)
+    safe_min_x = max(split_x + 30, int(width * 0.52))
+    safe_max_x = max(safe_min_x, width - 88)
+    safe_min_y = max(int(height * 0.74), height - 220)
+    safe_max_y = max(safe_min_y, height - 82)
+    jittered_x = bounded_int(
+        int(x) + random.randint(-jitter_x, jitter_x),
+        default=int(x),
+        minimum=safe_min_x,
+        maximum=safe_max_x,
+    )
+    jittered_y = bounded_int(
+        int(y) + random.randint(-jitter_y, jitter_y),
+        default=int(y),
+        minimum=safe_min_y,
+        maximum=safe_max_y,
+    )
+    return jittered_x, jittered_y
+
+
+def jitter_send_click_point(x: int, y: int, geometry: dict[str, Any]) -> tuple[int, int]:
+    width = int(geometry.get("width") or 0)
+    height = int(geometry.get("height") or 0)
+    if width <= 0 or height <= 0:
+        return int(x), int(y)
+    jitter_x = bounded_int(
+        os.getenv("WECHAT_WIN32_OCR_SEND_POINT_JITTER_X"),
+        default=4,
+        minimum=0,
+        maximum=12,
+    )
+    jitter_y = bounded_int(
+        os.getenv("WECHAT_WIN32_OCR_SEND_POINT_JITTER_Y"),
+        default=3,
+        minimum=0,
+        maximum=10,
+    )
+    split_x = session_split_x(width)
+    safe_min_x = max(split_x + 80, width - 132)
+    safe_max_x = max(safe_min_x, width - 20)
+    safe_min_y = max(int(height * 0.80), height - 92)
+    safe_max_y = max(safe_min_y, height - 16)
+    jittered_x = bounded_int(
+        int(x) + random.randint(-jitter_x, jitter_x),
+        default=int(x),
+        minimum=safe_min_x,
+        maximum=safe_max_x,
+    )
+    jittered_y = bounded_int(
+        int(y) + random.randint(-jitter_y, jitter_y),
+        default=int(y),
+        minimum=safe_min_y,
+        maximum=safe_max_y,
+    )
+    return jittered_x, jittered_y
 
 
 def blocking_screen_reason(ocr_items: list[dict[str, Any]]) -> str:
@@ -4092,6 +4467,9 @@ def parse_sessions_from_ocr(
         if center_y - last_y < min_session_row_gap:
             continue
         name = normalize_session_name(str(item.get("text") or ""))
+        # OCR occasionally glues sidebar timestamps into the session title
+        # (e.g. "新数据测试昨天19:23"), which breaks session-target matching.
+        name = strip_session_time_suffix(name)
         if is_file_transfer_session_alias(name):
             name = "文件传输助手"
         if not name or any(existing["name"] == name for existing in sessions):
@@ -4498,7 +4876,15 @@ def focus_wechat_window(probe: dict[str, Any]) -> dict[str, Any] | None:
     hwnd = int(item.get("hwnd") or 0)
     if hwnd:
         activate_window(hwnd)
-        return dict(item)
+        try:
+            focus_match = foreground_window_matches_target(hwnd)
+            if (
+                focus_match.get("ok")
+                and str(focus_match.get("reason") or "") in {"foreground_matches_target", "foreground_root_matches_target"}
+            ):
+                return dict(item)
+        except Exception:
+            pass
     return None
 
 
@@ -4531,7 +4917,14 @@ def activate_window(hwnd: int) -> None:
         if now_monotonic - last_monotonic <= debounce_seconds:
             try:
                 if bool(user32.IsWindow(hwnd)) and bool(user32.IsWindowVisible(hwnd)) and not bool(user32.IsIconic(hwnd)):
-                    return
+                    # Only short-circuit when the target is already foreground.
+                    # Otherwise we still need to execute a real foreground raise.
+                    focus_match = foreground_window_matches_target(hwnd)
+                    if (
+                        focus_match.get("ok")
+                        and str(focus_match.get("reason") or "") in {"foreground_matches_target", "foreground_root_matches_target"}
+                    ):
+                        return
             except Exception:
                 pass
     require_active_ui_action_budget("activate_window", metadata={"hwnd": int(hwnd or 0)})
@@ -4590,6 +4983,48 @@ def activate_window(hwnd: int) -> None:
                 win32process.AttachThreadInput(current_tid, target_tid, False)
             except Exception:
                 pass
+    if aggressive_focus:
+        try:
+            final_match = foreground_window_matches_target(hwnd)
+        except Exception:
+            final_match = {}
+        if not (
+            final_match.get("ok")
+            and str(final_match.get("reason") or "") in {"foreground_matches_target", "foreground_root_matches_target"}
+        ):
+            # Foreground lock fallback: synthesize a tiny ALT keystroke before
+            # SetForegroundWindow to satisfy Windows focus-stealing constraints.
+            try:
+                win32api.keybd_event(win32con.VK_MENU, 0, 0, 0)
+                humanized_action_sleep(25, 55)
+                user32.SetForegroundWindow(hwnd)
+                win32gui.SetForegroundWindow(hwnd)
+                win32gui.SetActiveWindow(hwnd)
+            except Exception:
+                pass
+            finally:
+                try:
+                    win32api.keybd_event(win32con.VK_MENU, 0, win32con.KEYEVENTF_KEYUP, 0)
+                except Exception:
+                    pass
+            humanized_action_sleep(60, 120)
+            try:
+                final_match = foreground_window_matches_target(hwnd)
+            except Exception:
+                final_match = {}
+            if not (
+                final_match.get("ok")
+                and str(final_match.get("reason") or "") in {"foreground_matches_target", "foreground_root_matches_target"}
+            ) and focus_click_fallback_enabled():
+                try:
+                    left, top, right, _bottom = win32gui.GetWindowRect(hwnd)
+                    width = max(120, int(right - left))
+                    title_x = int(left + min(max(88, width // 3), max(88, width - 88)))
+                    title_y = int(top + 18)
+                    click(title_x, title_y)
+                    humanized_action_sleep(65, 130)
+                except Exception:
+                    pass
 
 
 def configure_dpi_awareness() -> None:
