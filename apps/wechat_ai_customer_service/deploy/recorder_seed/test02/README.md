@@ -9,20 +9,20 @@ This folder provides a stable, downloadable package in the repository.
 
 ## Files
 
-- `test02_recorder_only_20260522_145033.zip`
+- `test02_recorder_only_20260602_040502.zip` (latest)
 - `install_seed.ps1`
 - `操作指南.md` (human-friendly Chinese guide)
 - `import_guide.json` (machine-readable guide for AI agents)
 
 Package SHA256:
 
-`42E1757E5D0ECC8E195CA1DD690DDE4416B5AE246E20C9DC2D469A0DEC980B93`
+`E30BF60FB04E87D5098C9A8B3700E31CB302B3DF6C4D94AE4D5EC5FFFDD47618`
 
 ## Quick install on another machine
 
 1. Clone/download repository.
 2. Stop local admin backend and related worker processes.
-3. Run:
+3. Run (installer auto-picks the latest `test02_recorder_only_*.zip`):
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\apps\wechat_ai_customer_service\deploy\recorder_seed\test02\install_seed.ps1 -WorkspaceRoot "D:\AI\omniauto"
@@ -34,5 +34,6 @@ powershell -ExecutionPolicy Bypass -File .\apps\wechat_ai_customer_service\deplo
 ## Safety scope
 
 - Imports only `payload/runtime/tenants/test02/*`.
-- Does **not** auto-overwrite global module bindings.
-- Includes optional reference material inside the zip under `optional_reference/`, not auto-applied.
+- By default, also merges only `test02` tenant binding and key recorder module configs into global files (with backups).
+- If you do not want global merge, run installer with `-ApplyGlobalRecorderModules:$false`.
+- Includes optional reference material inside the zip under `optional_reference/`.
