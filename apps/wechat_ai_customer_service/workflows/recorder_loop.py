@@ -164,6 +164,44 @@ def write_recorder_runtime_status(path: Path | None, *, tenant_id: str, state: s
     atomic_write_json(path, payload)
 
 
+def write_recorder_runtime_heartbeat(
+    path: Path | None,
+    *,
+    tenant_id: str,
+    state: str = "idle",
+    message: str = "AI智能记录员正在运行。",
+    iteration: int = 0,
+    capture_interval_seconds: int = 30,
+    runtime_max_runtime_seconds: int = 0,
+    result: dict[str, Any] | None = None,
+) -> None:
+    if path is None:
+        return
+    payload = read_json(path)
+    now_text = datetime.now().isoformat(timespec="seconds")
+    payload.update(
+        {
+            "ok": True,
+            "state": state if state in {"idle", "thinking", "paused", "stopped"} else "idle",
+            "message": message,
+            "updated_at": now_text,
+            "tenant_id": tenant_id,
+            "heartbeat_at": now_text,
+            "last_capture_heartbeat_at": now_text,
+            "loop_iteration": max(0, int(iteration or 0)),
+            "capture_interval_seconds": max(1, int(capture_interval_seconds or 30)),
+            "runtime_max_runtime_seconds": max(0, int(runtime_max_runtime_seconds or 0)),
+        }
+    )
+    if isinstance(result, dict):
+        payload["last_capture_summary"] = {
+            "ok": bool(result.get("ok")),
+            "conversation_count": int(result.get("conversation_count", 0) or 0),
+            "inserted_count": int(result.get("inserted_count", 0) or 0),
+        }
+    atomic_write_json(path, payload)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--once", action="store_true", help="Run one capture iteration.")
@@ -180,7 +218,9 @@ def main() -> int:
     tenant_id = active_tenant_id(args.tenant_id or None)
     os.environ["WECHAT_KNOWLEDGE_TENANT"] = tenant_id
     service = RecorderService(tenant_id=tenant_id)
+    settings = service.settings()
     interval = max(1, int(args.interval_seconds or 30))
+    runtime_max_runtime_seconds = max(0, int(settings.get("runtime_max_runtime_seconds") or 0))
     operator_control = RecorderLoopControl(
         args.operator_control.resolve() if isinstance(args.operator_control, Path) else None,
         tenant_id=tenant_id,
@@ -193,14 +233,31 @@ def main() -> int:
             discover_payload = service.discover_sessions()
             print(json.dumps({"kind": "discover", "tenant_id": tenant_id, "result": discover_payload}, ensure_ascii=True), flush=True)
         index = 0
+        runtime_started = time.monotonic()
         while True:
             if operator_control.poll() == "stop":
                 return 0
             if not operator_control.wait_if_paused():
                 return 0
+            if runtime_max_runtime_seconds > 0 and time.monotonic() - runtime_started >= runtime_max_runtime_seconds:
+                write_recorder_runtime_status(
+                    operator_control.status_path,
+                    tenant_id=tenant_id,
+                    state="stopped",
+                    message="AI智能记录员达到运行时长上限，已自动停止。",
+                )
+                return 0
             index += 1
             loop_started = time.monotonic()
             result = service.capture_selected_once(send_notifications=bool(args.notify))
+            write_recorder_runtime_heartbeat(
+                operator_control.status_path,
+                tenant_id=tenant_id,
+                iteration=index,
+                capture_interval_seconds=interval,
+                runtime_max_runtime_seconds=runtime_max_runtime_seconds,
+                result=result,
+            )
             print(
                 json.dumps(
                     {

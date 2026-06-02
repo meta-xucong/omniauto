@@ -129,6 +129,7 @@ def main() -> int:
         check_explicit_mpv_need_filters_non_mpv_catalog_candidates(),
         check_pre_purchase_maintenance_guidance_is_not_after_sales_handoff(),
         check_common_sense_advisor_trims_unasked_inventory_details(),
+        check_common_sense_advisor_normalizes_awkward_punctuation(),
         check_advisor_postprocess_covers_all_listed_options(),
         check_advisor_postprocess_demotes_over_budget_first_choice(),
         check_recommendation_reply_is_concise(),
@@ -210,6 +211,7 @@ def main() -> int:
         check_runtime_worker_cmdline_tenant_exact_match(),
         check_recorder_runtime_status_accepts_paused(),
         check_recorder_operator_guard_launch_flow(),
+        check_recorder_runtime_liveness_status(),
         check_recorder_loop_operator_control_commands(),
         check_frontend_recorder_runtime_uses_actual_state(),
         check_sidecar_open_chat_avoids_ctrl_a_selection(),
@@ -1223,6 +1225,18 @@ def check_common_sense_advisor_trims_unasked_inventory_details() -> dict[str, An
         and len(cleaned) < len(draft)
     )
     return {"name": "common_sense_advisor_trims_unasked_inventory_details", "ok": ok, "cleaned": cleaned}
+
+
+def check_common_sense_advisor_normalizes_awkward_punctuation() -> dict[str, Any]:
+    message = "凯美瑞和雅阁家用怎么选更省心？"
+    draft = "按您家用省心诉求；？我建议先看雅阁；其次凯美瑞。"
+    cleaned = normalize_advisor_synthesis_reply(
+        draft,
+        evidence_pack={"current_message": message},
+        settings={"advisor_mode": "clear_common_sense_recommendation"},
+    )
+    ok = "；？" not in cleaned and "？；" not in cleaned and "；!" not in cleaned and "!；" not in cleaned and "建议先看" in cleaned
+    return {"name": "common_sense_advisor_normalizes_awkward_punctuation", "ok": ok, "cleaned": cleaned}
 
 
 def check_advisor_postprocess_covers_all_listed_options() -> dict[str, Any]:
@@ -3652,6 +3666,7 @@ def check_listener_operator_guard_settings_normalization() -> dict[str, Any]:
             "floating_indicator_enabled": False,
             "esc_double_press_window_ms": 10,
             "pause_poll_interval_ms": 99999,
+            "bootstrap_timeout_seconds": 1,
         }
     )
     ok = (
@@ -3660,6 +3675,7 @@ def check_listener_operator_guard_settings_normalization() -> dict[str, Any]:
         and normalized.get("floating_indicator_enabled") is False
         and normalized.get("esc_double_press_window_ms") == 180
         and normalized.get("pause_poll_interval_ms") == 3000
+        and normalized.get("bootstrap_timeout_seconds") == 3.0
     )
     return {"name": "listener_operator_guard_settings_normalization", "ok": ok, "normalized": normalized}
 
@@ -3994,10 +4010,14 @@ def check_recorder_operator_guard_launch_flow() -> dict[str, Any]:
                 "state_parent_pid": parent_pid,
                 "state": {"phase": "running", "pid": parent_pid + 11, "parent_pid": parent_pid, "hooks_installed": True},
             },
-        ):
-            result = runtime._launch_operator_guard_for_loop(parent_pid=parent_pid, settings={})
+        ) as verify_mock:
+            result = runtime._launch_operator_guard_for_loop(
+                parent_pid=parent_pid,
+                settings={"rpa_operator_guard": {"bootstrap_timeout_seconds": 17}},
+            )
         pid_record_path = recorder_runtime.recorder_operator_guard_pid_path(tenant_id)
         pid_record = json.loads(pid_record_path.read_text(encoding="utf-8"))
+        verify_timeout = float(verify_mock.call_args.kwargs.get("timeout_seconds") or 0.0)
     finally:
         if runtime_root.exists():
             shutil.rmtree(runtime_root)
@@ -4007,12 +4027,14 @@ def check_recorder_operator_guard_launch_flow() -> dict[str, Any]:
         and (result.get("settings") or {}).get("enabled") is True
         and pid_record.get("pid") == parent_pid + 11
         and pid_record.get("launcher_pid") == parent_pid + 10
+        and verify_timeout == 17.0
     )
     return {
         "name": "recorder_operator_guard_launch_flow",
         "ok": ok,
         "result": result,
         "pid_record": pid_record,
+        "verify_timeout": verify_timeout,
     }
 
 
@@ -4042,6 +4064,78 @@ def check_recorder_runtime_status_accepts_paused() -> dict[str, Any]:
         "ok": ok,
         "state": payload.get("state"),
         "message": payload.get("message"),
+    }
+
+
+def check_recorder_runtime_liveness_status() -> dict[str, Any]:
+    tenant_id = "recorder_runtime_liveness_status_test"
+    runtime_root = tenant_runtime_root(tenant_id) / "recorder"
+    settings_path = runtime_root / "settings.json"
+    try:
+        if runtime_root.exists():
+            shutil.rmtree(runtime_root)
+        runtime_root.mkdir(parents=True, exist_ok=True)
+        recorder_runtime.atomic_write_json(
+            recorder_runtime.recorder_runtime_pid_path(tenant_id),
+            {"pid": os.getpid(), "tenant_id": tenant_id},
+        )
+        recorder_runtime.atomic_write_json(
+            settings_path,
+            {
+                "enabled": True,
+                "runtime_liveness_interval_seconds": 30,
+                "runtime_liveness_stale_seconds": 120,
+                "runtime_max_runtime_seconds": 0,
+            },
+        )
+        fresh_at = datetime.now().isoformat(timespec="seconds")
+        recorder_runtime.atomic_write_json(
+            recorder_runtime.recorder_runtime_status_path(tenant_id),
+            {
+                "ok": True,
+                "state": "idle",
+                "message": "AI智能记录员正在运行。",
+                "tenant_id": tenant_id,
+                "heartbeat_at": fresh_at,
+                "updated_at": fresh_at,
+            },
+        )
+        fresh = recorder_runtime.RecorderRuntime(tenant_id=tenant_id).status()
+        stale_at = datetime.fromtimestamp(time.time() - 500).isoformat(timespec="seconds")
+        recorder_runtime.atomic_write_json(
+            recorder_runtime.recorder_runtime_status_path(tenant_id),
+            {
+                "ok": True,
+                "state": "idle",
+                "message": "AI智能记录员正在运行。",
+                "tenant_id": tenant_id,
+                "heartbeat_at": stale_at,
+                "updated_at": stale_at,
+            },
+        )
+        stale = recorder_runtime.RecorderRuntime(tenant_id=tenant_id).status()
+    finally:
+        if runtime_root.exists():
+            shutil.rmtree(runtime_root)
+    ok = (
+        fresh.get("running") is True
+        and fresh.get("liveness_ok") is True
+        and stale.get("running") is True
+        and stale.get("liveness_ok") is False
+        and stale.get("runtime_max_runtime_seconds") == 0
+    )
+    return {
+        "name": "recorder_runtime_liveness_status",
+        "ok": ok,
+        "fresh": {
+            "liveness_ok": fresh.get("liveness_ok"),
+            "liveness_reason": fresh.get("liveness_reason"),
+        },
+        "stale": {
+            "liveness_ok": stale.get("liveness_ok"),
+            "liveness_reason": stale.get("liveness_reason"),
+            "runtime_max_runtime_seconds": stale.get("runtime_max_runtime_seconds"),
+        },
     }
 
 

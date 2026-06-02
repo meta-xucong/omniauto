@@ -511,6 +511,18 @@ def check_runtime_tick_does_not_wait_for_slow_llm() -> None:
             duration = time.time() - started
             assert_true(duration < 0.15, f"tick should submit LLM tasks without waiting for slow worker, got {duration:.3f}s")
             assert_equal(result["summary"]["llm_running"], 2, "both LLM tasks should be running after first tick")
+            phase = result.get("phase_durations")
+            assert_true(isinstance(phase, dict), f"tick should expose phase_durations: {result}")
+            for key in (
+                "send_pre_seconds",
+                "capture_seconds",
+                "llm_submit_seconds",
+                "llm_collect_seconds",
+                "send_post_seconds",
+                "state_save_seconds",
+                "total_seconds",
+            ):
+                assert_true(key in phase, f"phase duration key missing: {key} -> {phase}")
             time.sleep(0.06)
             second = runtime.tick(allow_send=False, now="2026-05-25T10:00:01")
             assert_true(second["summary"]["reply_ready"] >= 1, "fast LLM task should become ready while slow task may still run")
@@ -715,6 +727,59 @@ def check_runtime_send_runner_fifo() -> None:
             runtime.tick(allow_send=False, now="2026-05-25T10:00:01")
             runtime.tick(allow_send=True, now="2026-05-25T10:00:02")
             assert_equal(sent, ["客户A", "客户B"], "send runner should consume ready replies in FIFO order")
+        finally:
+            runtime.shutdown()
+
+
+def check_runtime_send_event_includes_observability() -> None:
+    with tempfile.TemporaryDirectory() as temp:
+        path = Path(temp) / "scheduler_state.json"
+        store = SchedulerStateStore(tenant_id="unit", path=path)
+
+        def capture_fn(session: dict[str, Any]) -> dict[str, Any]:
+            return {"messages": [message("A", 1)], "batch": [message("A", 1)]}
+
+        def planner(capture: dict[str, Any], task: dict[str, Any]) -> dict[str, Any]:
+            return {"ok": True, "reply_text": "可观测回复", "decision": {"rule_name": "unit"}}
+
+        def sender(reply: dict[str, Any]) -> dict[str, Any]:
+            return {
+                "ok": True,
+                "verified": True,
+                "send_result": {
+                    "ok": True,
+                    "verified": True,
+                    "state": "sent",
+                    "retry_attempts": 1,
+                    "verification_mode": "verify_each_segment",
+                    "segment_attempt_counts": [1, 2],
+                    "send": {"state": "sent", "rpa_lock": {"action": "send", "waited_seconds": 0.44, "attempts": 3}},
+                },
+            }
+
+        runtime = CustomerServiceSchedulerRuntime(
+            store=store,
+            config=SchedulerConfig(enabled=True, capture_max_sessions_per_round=1, llm_max_concurrency=1, send_max_replies_per_round=1),
+            capture_fn=capture_fn,
+            plan_reply_fn=planner,
+            send_fn=sender,
+        )
+        try:
+            runtime.tick(
+                session_signals=[{"name": "客户A", "content": "A新消息", "time": "10:00"}],
+                allow_send=False,
+                now="2026-05-25T10:00:00",
+            )
+            time.sleep(0.03)
+            result = runtime.tick(allow_send=True, now="2026-05-25T10:00:01")
+            events = [item for item in result.get("events") or [] if item.get("event") == "send_completed"]
+            assert_true(events, f"send_completed event should exist: {result}")
+            observability = events[0].get("send_observability")
+            assert_true(isinstance(observability, dict), f"send event should include observability payload: {events[0]}")
+            assert_equal(observability.get("retry_attempts"), 1, "retry attempts should surface in send event")
+            assert_equal(observability.get("verification_mode"), "verify_each_segment", "verification mode should surface in send event")
+            lock_meta = observability.get("rpa_lock") if isinstance(observability.get("rpa_lock"), dict) else {}
+            assert_true(float(lock_meta.get("waited_seconds") or 0.0) > 0.0, f"lock wait should surface in send event: {observability}")
         finally:
             runtime.shutdown()
 
@@ -1744,6 +1809,7 @@ def run_checks() -> dict[str, Any]:
         check_reply_sent_preserves_followup_pending_signal,
         check_runtime_same_tick_fast_llm_send_has_capture_snapshot,
         check_runtime_send_runner_fifo,
+        check_runtime_send_event_includes_observability,
         check_runtime_prioritizes_ready_send_before_new_capture,
         check_runtime_recovers_orphaned_running_llm_task_after_restart,
         check_captured_messages_connector_accepts_history_kwargs,

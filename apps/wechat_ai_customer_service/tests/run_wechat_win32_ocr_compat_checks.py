@@ -16,6 +16,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from apps.wechat_ai_customer_service.adapters.wechat_connector import (  # noqa: E402
+    RPALockTimeoutError,
     WeChatConnector,
     blind_send_without_ocr,
     compat_args,
@@ -384,9 +385,13 @@ def test_wechat_rpa_lock_recovers_stale_lock_and_times_out_on_live_lock() -> Non
                 json.dumps({"pid": 99999999, "action": "dead", "created_at": time.time()}),
                 encoding="utf-8",
             )
-            with wechat_rpa_lock("fresh_after_stale", timeout_seconds=1.0, stale_seconds=60.0):
+            with wechat_rpa_lock("fresh_after_stale", timeout_seconds=1.0, stale_seconds=60.0) as lock_meta:
                 payload = json.loads(lock_path.read_text(encoding="utf-8"))
                 assert_true(payload.get("action") == "fresh_after_stale", f"stale lock should be replaced: {payload}")
+                assert_true(
+                    isinstance(lock_meta, dict) and "waited_seconds" in lock_meta and "attempts" in lock_meta,
+                    f"lock metadata should expose wait/attempt observability: {lock_meta}",
+                )
             assert_true(not lock_path.exists(), "lock should be released after context exit")
 
             lock_path.write_text(
@@ -394,12 +399,18 @@ def test_wechat_rpa_lock_recovers_stale_lock_and_times_out_on_live_lock() -> Non
                 encoding="utf-8",
             )
             timed_out = False
+            timeout_meta: dict[str, object] = {}
             try:
                 with wechat_rpa_lock("blocked_by_live", timeout_seconds=0.35, stale_seconds=60.0):
                     pass
-            except TimeoutError:
+            except RPALockTimeoutError as exc:
                 timed_out = True
+                timeout_meta = dict(exc.meta or {})
             assert_true(timed_out, "live lock should timeout instead of breaking a healthy owner")
+            assert_true(
+                timeout_meta.get("action") == "blocked_by_live" and float(timeout_meta.get("waited_seconds") or 0.0) > 0.0,
+                f"timeout should include lock wait metadata: {timeout_meta}",
+            )
             payload = json.loads(lock_path.read_text(encoding="utf-8"))
             assert_true(payload.get("action") == "live", f"live lock should be preserved: {payload}")
         finally:

@@ -927,10 +927,10 @@ def normalize_advisor_synthesis_reply(reply: str, *, evidence_pack: dict[str, An
         if not has_vehicle_redirect:
             suffix = "我们回到看车上，您说下预算和用途，我马上给您一个贴近建议。"
             merged = clean.rstrip("。；;，,") + "。" + suffix
-            return truncate_reply(merged, settings)
-        return clean
+            return normalize_reply_punctuation(truncate_reply(merged, settings))
+        return normalize_reply_punctuation(clean)
     if advisor_mode != "clear_common_sense_recommendation":
-        return clean
+        return normalize_reply_punctuation(clean)
     current = str(evidence_pack.get("current_message") or "")
     explicit_stock_request = any(
         term in current
@@ -974,7 +974,8 @@ def normalize_advisor_synthesis_reply(reply: str, *, evidence_pack: dict[str, An
             break
     result = "".join(trimmed).strip() or clean
     result = ensure_listed_options_covered(result, evidence_pack=evidence_pack)
-    return adjust_budget_conflicted_priority(result, evidence_pack=evidence_pack)
+    result = adjust_budget_conflicted_priority(result, evidence_pack=evidence_pack)
+    return normalize_reply_punctuation(result)
 
 
 def ensure_listed_options_covered(reply: str, *, evidence_pack: dict[str, Any]) -> str:
@@ -1101,6 +1102,19 @@ def normalize_option_key(value: str) -> str:
 def split_chinese_sentences(text: str) -> list[str]:
     parts = re.findall(r"[^。！？!?；;]+[。！？!?；;]?", str(text or ""))
     return [part.strip() for part in parts if part.strip()]
+
+
+def normalize_reply_punctuation(text: str) -> str:
+    clean = str(text or "").strip()
+    if not clean:
+        return ""
+    clean = re.sub(r"[；;]\s*([？?！!])", r"\1", clean)
+    clean = re.sub(r"([？?！!])\s*[；;]", r"\1", clean)
+    clean = re.sub(r"[，,]\s*([。！？!?])", r"\1", clean)
+    clean = re.sub(r"([。！？!?])\s*[，,]", r"\1", clean)
+    clean = re.sub(r"([。！？!?；;，,])(?:\s*\1)+", r"\1", clean)
+    clean = re.sub(r"\s{2,}", " ", clean)
+    return clean.strip()
 
 
 def advisor_content_char_count(text: str) -> int:

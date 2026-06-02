@@ -319,14 +319,22 @@ def run_action(args: argparse.Namespace) -> dict[str, Any]:
         return sessions_payload(hwnd, probe, artifact_dir=args.artifact_dir)
     if action == "messages":
         if args.target:
-            opened = open_chat(hwnd, args.target, exact=bool(args.exact), artifact_dir=args.artifact_dir)
-            humanized_action_sleep(380, 620)
             validation = validate_active_send_target(
                 hwnd,
                 args.target,
                 exact=bool(args.exact),
                 artifact_dir=args.artifact_dir,
             )
+            opened = False
+            if not validation.get("ok"):
+                opened = open_chat(hwnd, args.target, exact=bool(args.exact), artifact_dir=args.artifact_dir)
+                humanized_action_sleep(380, 620)
+                validation = validate_active_send_target(
+                    hwnd,
+                    args.target,
+                    exact=bool(args.exact),
+                    artifact_dir=args.artifact_dir,
+                )
             if not validation.get("ok"):
                 return {
                     "ok": False,
@@ -1594,6 +1602,13 @@ def humanized_input_settings() -> dict[str, Any]:
         minimum=post_delay_min_ms,
         maximum=6000,
     )
+    inter_chunk_delay_scale = max(
+        0.35,
+        min(
+            1.2,
+            env_float("WECHAT_WIN32_OCR_HUMANIZED_INTER_CHUNK_DELAY_SCALE", default=1.0),
+        ),
+    )
     return {
         "enabled": enabled,
         "method": method,
@@ -1610,6 +1625,7 @@ def humanized_input_settings() -> dict[str, Any]:
         "send_pre_delay_max_ms": pre_delay_max_ms,
         "send_post_input_delay_min_ms": post_delay_min_ms,
         "send_post_input_delay_max_ms": post_delay_max_ms,
+        "inter_chunk_delay_scale": inter_chunk_delay_scale,
         "adaptive_speed_enabled": env_flag(
             "WECHAT_WIN32_OCR_HUMANIZED_ADAPTIVE_SPEED_ENABLED",
             default=DEFAULT_HUMANIZED_ADAPTIVE_SPEED_ENABLED,
@@ -1639,6 +1655,7 @@ def adapt_humanized_input_settings(settings: dict[str, Any], text: str) -> dict[
             "send_pre_delay_max_ms": 360,
             "send_post_input_delay_min_ms": 180,
             "send_post_input_delay_max_ms": 360,
+            "inter_chunk_delay_scale": 0.58,
         }
     elif text_len <= DEFAULT_HUMANIZED_LONG_TEXT_CHARS:
         profile = {
@@ -1656,6 +1673,7 @@ def adapt_humanized_input_settings(settings: dict[str, Any], text: str) -> dict[
             "send_pre_delay_max_ms": 320,
             "send_post_input_delay_min_ms": 160,
             "send_post_input_delay_max_ms": 340,
+            "inter_chunk_delay_scale": 0.62,
         }
     else:
         profile = {
@@ -1673,6 +1691,7 @@ def adapt_humanized_input_settings(settings: dict[str, Any], text: str) -> dict[
             "send_pre_delay_max_ms": 280,
             "send_post_input_delay_min_ms": 150,
             "send_post_input_delay_max_ms": 320,
+            "inter_chunk_delay_scale": 0.68,
         }
     active["speed_profile"] = profile["speed_profile"]
     for key in (
@@ -1702,6 +1721,17 @@ def adapt_humanized_input_settings(settings: dict[str, Any], text: str) -> dict[
         active["micro_pause_max_ms"] = active["micro_pause_min_ms"]
     active["typo_probability"] = min(float(active.get("typo_probability") or 0.0), float(profile["typo_probability"]))
     active["typo_max"] = min(int(active.get("typo_max") or 0), int(profile["typo_max"]))
+    try:
+        current_scale = float(active.get("inter_chunk_delay_scale") or 1.0)
+    except (TypeError, ValueError):
+        current_scale = 1.0
+    active["inter_chunk_delay_scale"] = max(
+        0.35,
+        min(
+            1.2,
+            min(current_scale, float(profile["inter_chunk_delay_scale"])),
+        ),
+    )
     active["adaptive_text_chars"] = text_len
     return active
 
@@ -1754,6 +1784,14 @@ def typed_text_delay_ms(segment: str, settings: dict[str, Any]) -> tuple[int, in
     per_char_high = int(settings.get("char_delay_max_ms") or DEFAULT_HUMANIZED_TYPING_CHAR_DELAY_MAX_MS)
     low = max(0, per_char_low * char_count)
     high = max(low, per_char_high * char_count)
+    try:
+        delay_scale = float(settings.get("inter_chunk_delay_scale") or 1.0)
+    except (TypeError, ValueError):
+        delay_scale = 1.0
+    delay_scale = max(0.35, min(1.2, delay_scale))
+    if abs(delay_scale - 1.0) > 1e-6:
+        low = max(0, int(round(low * delay_scale)))
+        high = max(low, int(round(high * delay_scale)))
     return low, high
 
 
@@ -5557,5 +5595,144 @@ def bounded_int(value: Any, *, default: int, minimum: int, maximum: int) -> int:
     return max(minimum, min(maximum, parsed))
 
 
+def args_for_daemon_request(request: dict[str, Any]) -> list[str]:
+    action = str(request.get("action") or "").strip().lower()
+    if action not in {"status", "capabilities", "sessions", "messages", "send", "recover-render"}:
+        action = "status"
+    argv: list[str] = [action]
+    if bool(request.get("exact")):
+        argv.append("--exact")
+    target = str(request.get("target") or "").strip()
+    if target:
+        argv.extend(["--target", target])
+    text = str(request.get("text") or "")
+    if action == "send" and text:
+        argv.extend(["--text", text])
+    if bool(request.get("skip_send_rate_guard")):
+        argv.append("--skip-send-rate-guard")
+    if action == "messages":
+        numeric_flags = (
+            ("history_load_times", "--history-load-times"),
+            ("max_scroll_steps", "--max-scroll-steps"),
+            ("max_duration_seconds", "--max-duration-seconds"),
+            ("max_snapshots", "--max-snapshots"),
+            ("min_delay_ms", "--min-delay-ms"),
+            ("max_delay_ms", "--max-delay-ms"),
+        )
+        for key, flag in numeric_flags:
+            if key in request:
+                try:
+                    value = int(request.get(key) or 0)
+                except (TypeError, ValueError):
+                    value = 0
+                argv.extend([flag, str(max(0, value))])
+        history_mode = str(request.get("history_mode") or "").strip()
+        if history_mode:
+            argv.extend(["--history-mode", history_mode])
+        for key, flag in (
+            ("anchor_ids", "--anchor-id"),
+            ("anchor_content_keys", "--anchor-content-key"),
+            ("reply_content_keys", "--reply-content-key"),
+        ):
+            values = request.get(key)
+            if isinstance(values, list):
+                for item in values:
+                    clean = str(item or "").strip()
+                    if clean:
+                        argv.extend([flag, clean])
+        if request.get("restore_to_latest") is True:
+            argv.append("--restore-to-latest")
+        elif request.get("restore_to_latest") is False:
+            argv.append("--no-restore-to-latest")
+    artifact_dir = str(request.get("artifact_dir") or "").strip()
+    if artifact_dir:
+        argv.extend(["--artifact-dir", artifact_dir])
+    return argv
+
+
+def run_daemon_loop() -> int:
+    while True:
+        line = sys.stdin.readline()
+        if not line:
+            break
+        clean = str(line).strip()
+        if not clean:
+            continue
+        try:
+            request = json.loads(clean)
+        except json.JSONDecodeError:
+            print(json.dumps({"ok": False, "state": "daemon_invalid_json", "error": "invalid_json"}, ensure_ascii=True), flush=True)
+            continue
+        if not isinstance(request, dict):
+            print(json.dumps({"ok": False, "state": "daemon_invalid_request", "error": "request_must_be_object"}, ensure_ascii=True), flush=True)
+            continue
+        if str(request.get("action") or "").strip().lower() in {"exit", "quit", "stop"}:
+            print(json.dumps({"ok": True, "state": "daemon_exit"}, ensure_ascii=True), flush=True)
+            return 0
+        argv = args_for_daemon_request(request)
+        env_overrides = request.get("_env_overrides") if isinstance(request.get("_env_overrides"), dict) else {}
+        original_env: dict[str, str | None] = {}
+        if env_overrides:
+            for key, value in env_overrides.items():
+                clean_key = str(key or "").strip()
+                if not clean_key:
+                    continue
+                original_env[clean_key] = os.getenv(clean_key)
+                os.environ[clean_key] = str(value)
+        try:
+            payload = run_sidecar_cli(argv)
+        except Exception as exc:  # noqa: BLE001
+            payload = {"ok": False, "state": "daemon_dispatch_failed", "error": repr(exc), "request": request}
+        finally:
+            if env_overrides:
+                for key, old_value in original_env.items():
+                    if old_value is None:
+                        os.environ.pop(key, None)
+                    else:
+                        os.environ[key] = old_value
+        print(json.dumps(payload, ensure_ascii=True), flush=True)
+    return 0
+
+
+def run_sidecar_cli(argv: list[str] | None = None) -> dict[str, Any]:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("action", choices=["status", "capabilities", "sessions", "messages", "send", "recover-render"], nargs="?")
+    parser.add_argument("--target", help="Chat name for messages/send.")
+    parser.add_argument("--text", help="Message text for send.")
+    parser.add_argument("--exact", action="store_true", help="Use exact chat name matching.")
+    parser.add_argument(
+        "--skip-send-rate-guard",
+        action="store_true",
+        help="Skip rate guard reservation for controlled loopback simulation only.",
+    )
+    parser.add_argument("--history-load-times", type=int, default=0, help="Scroll upward this many times before reading messages.")
+    parser.add_argument("--history-mode", default="", help="History loading strategy, e.g. anchor_until_found.")
+    parser.add_argument("--anchor-id", action="append", default=[], help="Message id anchor to stop bounded history search.")
+    parser.add_argument("--anchor-content-key", action="append", default=[], help="Normalized customer message content key anchor.")
+    parser.add_argument("--reply-content-key", action="append", default=[], help="Normalized self reply content key anchor.")
+    parser.add_argument("--max-scroll-steps", type=int, default=6, help="Maximum bounded upward scroll steps for anchor history search.")
+    parser.add_argument("--max-duration-seconds", type=int, default=12, help="Maximum bounded anchor history search duration.")
+    parser.add_argument("--max-snapshots", type=int, default=8, help="Maximum screenshots during anchor history search.")
+    parser.add_argument("--min-delay-ms", type=int, default=180, help="Minimum pause between bounded anchor search scrolls.")
+    parser.add_argument("--max-delay-ms", type=int, default=650, help="Maximum pause between bounded anchor search scrolls.")
+    parser.add_argument("--restore-to-latest", dest="restore_to_latest", action="store_true", default=None)
+    parser.add_argument("--no-restore-to-latest", dest="restore_to_latest", action="store_false")
+    parser.add_argument(
+        "--artifact-dir",
+        default="",
+        help="Optional directory for OCR screenshots and diagnostics.",
+    )
+    parser.add_argument("--daemon", action="store_true", help="Run as stdin/stdout JSON daemon.")
+    args = parser.parse_args(argv)
+    if args.daemon:
+        return {"ok": False, "state": "daemon_reentry_not_supported"}
+    configure_dpi_awareness()
+    return run_action(args)
+
+
 if __name__ == "__main__":
-    raise SystemExit(main())
+    if "--daemon" in sys.argv:
+        raise SystemExit(run_daemon_loop())
+    payload = run_sidecar_cli()
+    print(json.dumps(payload, ensure_ascii=True))
+    raise SystemExit(0 if bool(payload.get("ok")) else 1)

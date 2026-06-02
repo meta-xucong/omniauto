@@ -42,6 +42,16 @@ def now_iso() -> str:
     return datetime.now().isoformat(timespec="seconds")
 
 
+def parse_iso_timestamp(value: Any) -> float | None:
+    text = str(value or "").strip()
+    if not text:
+        return None
+    try:
+        return datetime.fromisoformat(text).timestamp()
+    except ValueError:
+        return None
+
+
 def recorder_runtime_dir(tenant_id: str | None = None) -> Path:
     return tenant_runtime_root(tenant_id) / "recorder"
 
@@ -81,6 +91,7 @@ class RecorderRuntime:
         self.tenant_id = active_tenant_id(tenant_id)
 
     def status(self) -> dict[str, Any]:
+        settings = RecorderService(tenant_id=self.tenant_id).settings()
         pid_record = self._read_pid_record()
         pid = int(pid_record.get("pid") or 0)
         running = self._pid_alive(pid)
@@ -119,6 +130,9 @@ class RecorderRuntime:
                 status_payload["message"] = previous_message
             else:
                 status_payload["message"] = "AI智能记录员监听已停止。"
+        liveness = self._evaluate_runtime_liveness(status_payload=status_payload, settings=settings, running=running)
+        if running and not liveness["ok"]:
+            status_payload["message"] = "AI智能记录员正在运行，但活性心跳异常，请检查微信窗口或重启监听。"
         status_payload.update(
             {
                 "running": running,
@@ -133,6 +147,13 @@ class RecorderRuntime:
                 "queue_summary": queue_summary,
                 "log_path": str(recorder_runtime_log_path(self.tenant_id)),
                 "tenant_id": self.tenant_id,
+                "liveness_ok": liveness["ok"],
+                "liveness_reason": liveness["reason"],
+                "liveness_age_seconds": liveness["age_seconds"],
+                "liveness_interval_seconds": liveness["interval_seconds"],
+                "liveness_stale_seconds": liveness["stale_seconds"],
+                "heartbeat_at": liveness["heartbeat_at"],
+                "runtime_max_runtime_seconds": liveness["runtime_max_runtime_seconds"],
             }
         )
         return status_payload
@@ -391,6 +412,7 @@ class RecorderRuntime:
         verify = verify_operator_guard_bootstrap(
             int(launch.get("pid") or 0),
             state_path,
+            timeout_seconds=float(guard_settings.get("bootstrap_timeout_seconds") or 15.0),
             expected_parent_pid=parent_pid,
         )
         result = {"ok": verify.get("ok") is True, "enabled": True, "settings": guard_settings, "launch": launch, "verify": verify}
@@ -706,6 +728,67 @@ class RecorderRuntime:
     def _write_status_payload(self, payload: dict[str, Any]) -> None:
         path = recorder_runtime_status_path(self.tenant_id)
         atomic_write_json(path, payload)
+
+    def _evaluate_runtime_liveness(
+        self,
+        *,
+        status_payload: dict[str, Any],
+        settings: dict[str, Any],
+        running: bool,
+    ) -> dict[str, Any]:
+        interval_seconds = max(15, min(3600, int(settings.get("runtime_liveness_interval_seconds") or 60)))
+        stale_seconds = max(
+            interval_seconds * 3,
+            min(86400, int(settings.get("runtime_liveness_stale_seconds") or 240)),
+        )
+        runtime_max_runtime_seconds = max(0, int(settings.get("runtime_max_runtime_seconds") or 0))
+        heartbeat_at = str(
+            status_payload.get("heartbeat_at")
+            or status_payload.get("last_capture_heartbeat_at")
+            or status_payload.get("updated_at")
+            or ""
+        ).strip()
+        if str(status_payload.get("state") or "").strip().lower() == "paused":
+            return {
+                "ok": True,
+                "reason": "paused",
+                "age_seconds": 0,
+                "interval_seconds": interval_seconds,
+                "stale_seconds": stale_seconds,
+                "heartbeat_at": heartbeat_at,
+                "runtime_max_runtime_seconds": runtime_max_runtime_seconds,
+            }
+        if not running:
+            return {
+                "ok": False,
+                "reason": "not_running",
+                "age_seconds": None,
+                "interval_seconds": interval_seconds,
+                "stale_seconds": stale_seconds,
+                "heartbeat_at": heartbeat_at,
+                "runtime_max_runtime_seconds": runtime_max_runtime_seconds,
+            }
+        heartbeat_ts = parse_iso_timestamp(heartbeat_at)
+        if heartbeat_ts is None:
+            return {
+                "ok": False,
+                "reason": "heartbeat_missing",
+                "age_seconds": None,
+                "interval_seconds": interval_seconds,
+                "stale_seconds": stale_seconds,
+                "heartbeat_at": heartbeat_at,
+                "runtime_max_runtime_seconds": runtime_max_runtime_seconds,
+            }
+        age_seconds = max(0, int(time.time() - heartbeat_ts))
+        return {
+            "ok": age_seconds <= stale_seconds,
+            "reason": "ok" if age_seconds <= stale_seconds else "heartbeat_stale",
+            "age_seconds": age_seconds,
+            "interval_seconds": interval_seconds,
+            "stale_seconds": stale_seconds,
+            "heartbeat_at": heartbeat_at,
+            "runtime_max_runtime_seconds": runtime_max_runtime_seconds,
+        }
 
     @staticmethod
     def _pid_alive(pid: int) -> bool:

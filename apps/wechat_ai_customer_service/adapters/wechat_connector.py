@@ -44,12 +44,22 @@ WECHAT_RPA_LOCK_PATH = ROOT / "runtime" / "wechat_rpa.lock"
 # Global daemon process cache to avoid repeated subprocess spawn overhead.
 _daemon_proc: subprocess.Popen | None = None
 _daemon_lock = threading.Lock()
+_compat_daemon_proc: subprocess.Popen | None = None
+_compat_daemon_lock = threading.Lock()
 _simulated_inbound_lock = threading.Lock()
 _simulated_inbound_cache: dict[str, list[dict[str, Any]]] = {}
 
 
 class WeChatConnectorError(RuntimeError):
     """Raised when the connector cannot complete a guarded operation."""
+
+
+class RPALockTimeoutError(TimeoutError):
+    """RPA lock acquisition timed out with observability metadata."""
+
+    def __init__(self, message: str, *, meta: dict[str, Any]) -> None:
+        super().__init__(message)
+        self.meta = dict(meta)
 
 
 @dataclass(frozen=True)
@@ -67,7 +77,7 @@ class WeChatConnector:
     def status(self, *, interactive: bool = False) -> dict[str, Any]:
         lock_timeout = rpa_lock_timeout_seconds("status", default=12.0)
         try:
-            with wechat_rpa_lock("status", timeout_seconds=lock_timeout):
+            with wechat_rpa_lock("status", timeout_seconds=lock_timeout) as lock_meta:
                 env_overrides = interactive_rpa_probe_env() if interactive else None
                 primary = self.call_compat_sidecar(["status"], allow_failure=True, env_overrides=env_overrides)
                 primary = self._retry_recoverable_rpa_probe(
@@ -79,15 +89,18 @@ class WeChatConnector:
                 if primary.get("ok") and primary.get("online"):
                     primary.setdefault("adapter", "win32_ocr")
                     primary.setdefault("transport_priority", "rpa_first")
+                    attach_rpa_lock_meta(primary, lock_meta)
                     return primary
                 reserve = self.call_reserve_sidecar(["status"], allow_failure=True, primary_payload=snapshot_payload(primary))
                 if reserve.get("ok") and reserve.get("online"):
                     reserve.setdefault("adapter", "wxauto4")
                     reserve.setdefault("transport_priority", "rpa_first")
                     reserve.setdefault("reserve_reason", "rpa_primary_unavailable")
+                    attach_rpa_lock_meta(reserve, lock_meta)
                     return reserve
                 primary.setdefault("wxauto4_reserve_status", reserve)
                 primary.setdefault("transport_priority", "rpa_first")
+                attach_rpa_lock_meta(primary, lock_meta)
                 return primary
         except TimeoutError as exc:
             return {
@@ -97,14 +110,14 @@ class WeChatConnector:
                 "state": "status_lock_timeout",
                 "error": repr(exc),
                 "transport_priority": "rpa_first",
-                "rpa_lock": {"action": "status", "timeout_seconds": lock_timeout},
+                "rpa_lock": rpa_lock_timeout_payload(exc, action="status", timeout_seconds=lock_timeout),
             }
 
     def capabilities(self, *, interactive: bool = False) -> dict[str, Any]:
         """Detect the active WeChat transport before starting a long-running loop."""
         lock_timeout = rpa_lock_timeout_seconds("capabilities", default=14.0)
         try:
-            with wechat_rpa_lock("capabilities", timeout_seconds=lock_timeout):
+            with wechat_rpa_lock("capabilities", timeout_seconds=lock_timeout) as lock_meta:
                 env_overrides = interactive_rpa_probe_env() if interactive else None
                 try:
                     primary = self.call_compat_sidecar(
@@ -131,6 +144,7 @@ class WeChatConnector:
                     primary.setdefault("scheme", str(primary.get("scheme") or "win32_ocr_unavailable"))
                     primary.setdefault("state", str(primary.get("state") or "rpa_primary_ready"))
                     primary.setdefault("transport_priority", "rpa_first")
+                    attach_rpa_lock_meta(primary, lock_meta)
                     return primary
 
                 try:
@@ -144,7 +158,7 @@ class WeChatConnector:
                         "error": repr(exc),
                     }
                 if reserve.get("online"):
-                    return {
+                    payload = {
                         "ok": True,
                         "online": True,
                         "adapter": "wxauto4",
@@ -157,6 +171,8 @@ class WeChatConnector:
                         "transport_priority": "rpa_first",
                         "message": "RPA primary is unavailable; using wxauto4 reserve adapter.",
                     }
+                    attach_rpa_lock_meta(payload, lock_meta)
+                    return payload
 
                 if rpa_payload_needs_interactive_confirmation(primary):
                     primary.setdefault("ok", False)
@@ -167,9 +183,10 @@ class WeChatConnector:
                     primary.setdefault("reserve_status", reserve)
                     primary.setdefault("wxauto4_reserve_enabled", self.wxauto4_reserve_enabled())
                     primary.setdefault("transport_priority", "rpa_first")
+                    attach_rpa_lock_meta(primary, lock_meta)
                     return primary
 
-                return {
+                payload = {
                     "ok": False,
                     "online": False,
                     "adapter": "none",
@@ -184,6 +201,8 @@ class WeChatConnector:
                     "weixin_process_running": any_weixin_process(),
                     "message": "No logged-in WeChat main window is available.",
                 }
+                attach_rpa_lock_meta(payload, lock_meta)
+                return payload
         except TimeoutError as exc:
             return {
                 "ok": False,
@@ -195,7 +214,7 @@ class WeChatConnector:
                 "send": {"ok": False},
                 "error": repr(exc),
                 "transport_priority": "rpa_first",
-                "rpa_lock": {"action": "capabilities", "timeout_seconds": lock_timeout},
+                "rpa_lock": rpa_lock_timeout_payload(exc, action="capabilities", timeout_seconds=lock_timeout),
             }
 
     def wait_online(self, seconds: int = 60) -> dict[str, Any]:
@@ -214,20 +233,23 @@ class WeChatConnector:
             args.append("--fresh")
         lock_timeout = rpa_lock_timeout_seconds("sessions", default=14.0)
         try:
-            with wechat_rpa_lock("sessions", timeout_seconds=lock_timeout):
+            with wechat_rpa_lock("sessions", timeout_seconds=lock_timeout) as lock_meta:
                 primary = self.call_compat_sidecar(args, allow_failure=True)
                 if primary.get("ok"):
                     primary.setdefault("adapter", "win32_ocr")
                     primary.setdefault("transport_priority", "rpa_first")
+                    attach_rpa_lock_meta(primary, lock_meta)
                     return primary
                 reserve = self.call_reserve_sidecar(args, allow_failure=True, primary_payload=snapshot_payload(primary))
                 if reserve.get("ok"):
                     reserve.setdefault("adapter", "wxauto4")
                     reserve.setdefault("transport_priority", "rpa_first")
                     reserve.setdefault("reserve_reason", "rpa_primary_unavailable")
+                    attach_rpa_lock_meta(reserve, lock_meta)
                     return reserve
                 primary.setdefault("wxauto4_reserve_status", reserve)
                 primary.setdefault("transport_priority", "rpa_first")
+                attach_rpa_lock_meta(primary, lock_meta)
                 return primary
         except TimeoutError as exc:
             return {
@@ -237,7 +259,7 @@ class WeChatConnector:
                 "state": "sessions_lock_timeout",
                 "error": repr(exc),
                 "transport_priority": "rpa_first",
-                "rpa_lock": {"action": "sessions", "timeout_seconds": lock_timeout},
+                "rpa_lock": rpa_lock_timeout_payload(exc, action="sessions", timeout_seconds=lock_timeout),
             }
 
     def get_messages(
@@ -300,24 +322,28 @@ class WeChatConnector:
                 args.extend(["--history-load-times", str(load_times)])
         lock_timeout = rpa_lock_timeout_seconds("messages", default=14.0)
         try:
-            with wechat_rpa_lock("messages", timeout_seconds=lock_timeout):
+            with wechat_rpa_lock("messages", timeout_seconds=lock_timeout) as lock_meta:
                 primary = self.call_compat_sidecar(args, allow_failure=True)
                 if primary.get("ok"):
                     primary.setdefault("adapter", "win32_ocr")
                     primary.setdefault("transport_priority", "rpa_first")
+                    attach_rpa_lock_meta(primary, lock_meta)
                     return inject_simulated_inbound_messages(primary, target=target)
                 if mode:
                     primary.setdefault("wxauto4_reserve_status", {"ok": False, "skipped": True, "reason": "history_mode_requires_win32_ocr"})
                     primary.setdefault("transport_priority", "rpa_first")
+                    attach_rpa_lock_meta(primary, lock_meta)
                     return primary
                 reserve = self.call_reserve_sidecar(args, allow_failure=True, primary_payload=snapshot_payload(primary))
                 if reserve.get("ok"):
                     reserve.setdefault("adapter", "wxauto4")
                     reserve.setdefault("transport_priority", "rpa_first")
                     reserve.setdefault("reserve_reason", "rpa_primary_unavailable")
+                    attach_rpa_lock_meta(reserve, lock_meta)
                     return inject_simulated_inbound_messages(reserve, target=target)
                 primary.setdefault("wxauto4_reserve_status", reserve)
                 primary.setdefault("transport_priority", "rpa_first")
+                attach_rpa_lock_meta(primary, lock_meta)
                 return primary
         except TimeoutError as exc:
             return {
@@ -330,7 +356,7 @@ class WeChatConnector:
                 "history_mode": mode,
                 "error": repr(exc),
                 "transport_priority": "rpa_first",
-                "rpa_lock": {"action": "messages", "timeout_seconds": lock_timeout},
+                "rpa_lock": rpa_lock_timeout_payload(exc, action="messages", timeout_seconds=lock_timeout),
             }
 
     def send_text(
@@ -352,11 +378,12 @@ class WeChatConnector:
             args.append("--skip-send-rate-guard")
         lock_timeout = rpa_lock_timeout_seconds("send", default=18.0)
         try:
-            with wechat_rpa_lock("send", timeout_seconds=lock_timeout):
+            with wechat_rpa_lock("send", timeout_seconds=lock_timeout) as lock_meta:
                 primary = self.call_compat_sidecar(args, allow_failure=True, env_overrides=send_rpa_env())
                 if primary.get("ok"):
                     primary.setdefault("adapter", "win32_ocr")
                     primary.setdefault("transport_priority", "rpa_first")
+                    attach_rpa_lock_meta(primary, lock_meta)
                     return primary
                 if rpa_payload_has_invalid_window_handle(primary):
                     primary["risk_stop_recommended"] = True
@@ -372,15 +399,18 @@ class WeChatConnector:
                         },
                     )
                     primary.setdefault("transport_priority", "rpa_first")
+                    attach_rpa_lock_meta(primary, lock_meta)
                     return primary
                 reserve = self.call_reserve_sidecar(args, allow_failure=True, primary_payload=snapshot_payload(primary))
                 if reserve.get("ok"):
                     reserve.setdefault("adapter", "wxauto4")
                     reserve.setdefault("transport_priority", "rpa_first")
                     reserve.setdefault("reserve_reason", "rpa_primary_unavailable")
+                    attach_rpa_lock_meta(reserve, lock_meta)
                     return reserve
                 primary.setdefault("wxauto4_reserve_status", reserve)
                 primary.setdefault("transport_priority", "rpa_first")
+                attach_rpa_lock_meta(primary, lock_meta)
                 return primary
         except TimeoutError as exc:
             return {
@@ -392,7 +422,7 @@ class WeChatConnector:
                 "exact": exact,
                 "error": repr(exc),
                 "transport_priority": "rpa_first",
-                "rpa_lock": {"action": "send", "timeout_seconds": lock_timeout},
+                "rpa_lock": rpa_lock_timeout_payload(exc, action="send", timeout_seconds=lock_timeout),
             }
 
     def send_text_and_verify(
@@ -539,6 +569,32 @@ class WeChatConnector:
                 payload.setdefault("error", "compat_sidecar_missing")
             return payload
 
+        use_daemon = os.getenv("WECHAT_WIN32_OCR_DAEMON_ENABLED", "").strip().lower() not in {"0", "false", "no", "off"}
+        if use_daemon:
+            payload = self._call_compat_daemon(args, allow_failure=allow_failure, env_overrides=env_overrides)
+            if payload.get("ok") or payload.get("state") not in {"compat_daemon_call_failed", "compat_daemon_invalid_response"}:
+                if primary_payload is not None:
+                    payload["primary_status"] = snapshot_payload(primary_payload)
+                    payload.setdefault("compat_reason", "primary_adapter_failed")
+                if not payload.get("ok") and not allow_failure:
+                    payload.setdefault("error", "compat_command_failed")
+                return payload
+
+        payload = self._call_compat_oneshot(args, allow_failure=allow_failure, env_overrides=env_overrides)
+        if primary_payload is not None:
+            payload["primary_status"] = snapshot_payload(primary_payload)
+            payload.setdefault("compat_reason", "primary_adapter_failed")
+        if not payload.get("ok") and not allow_failure:
+            payload.setdefault("error", "compat_command_failed")
+        return payload
+
+    def _call_compat_oneshot(
+        self,
+        args: list[str],
+        *,
+        allow_failure: bool,
+        env_overrides: dict[str, str] | None,
+    ) -> dict[str, Any]:
         python = self.compat_sidecar_python if self.compat_sidecar_python.exists() else Path(sys.executable)
         cmd = [str(python), str(self.compat_sidecar_script), *compat_args(args)]
         env = os.environ.copy()
@@ -559,10 +615,7 @@ class WeChatConnector:
                 timeout=min(max(10, self.timeout_seconds), 120),
             )
         except Exception as exc:
-            payload = {"ok": False, "online": False, "adapter": "win32_ocr", "state": "compat_call_failed", "error": repr(exc)}
-            if primary_payload is not None:
-                payload["primary_status"] = snapshot_payload(primary_payload)
-            return payload
+            return {"ok": False, "online": False, "adapter": "win32_ocr", "state": "compat_call_failed", "error": repr(exc)}
 
         payload = parse_json_object(proc.stdout)
         if not isinstance(payload, dict):
@@ -577,15 +630,43 @@ class WeChatConnector:
                 "returncode": proc.returncode,
             }
         payload.setdefault("adapter", "win32_ocr")
-        if primary_payload is not None:
-            payload["primary_status"] = snapshot_payload(primary_payload)
-            payload.setdefault("compat_reason", "primary_adapter_failed")
         if proc.returncode != 0 and payload.get("ok"):
             payload["returncode_warning"] = proc.returncode
         elif proc.returncode != 0:
             payload.setdefault("returncode", proc.returncode)
             if proc.stderr:
                 payload.setdefault("stderr", proc.stderr[-2000:])
+        if not payload.get("ok") and not allow_failure:
+            payload.setdefault("error", "compat_command_failed")
+        return payload
+
+    def _call_compat_daemon(
+        self,
+        args: list[str],
+        *,
+        allow_failure: bool,
+        env_overrides: dict[str, str] | None,
+    ) -> dict[str, Any]:
+        request = _args_to_request(args)
+        if env_overrides:
+            request["_env_overrides"] = {str(key): str(value) for key, value in env_overrides.items()}
+        try:
+            payload = _compat_daemon_request(
+                compat_sidecar_python=self.compat_sidecar_python,
+                compat_sidecar_script=self.compat_sidecar_script,
+                root=self.root,
+                request=request,
+                timeout=min(max(10, self.timeout_seconds), 120),
+            )
+        except Exception as exc:
+            payload = {
+                "ok": False,
+                "online": False,
+                "adapter": "win32_ocr",
+                "state": "compat_daemon_call_failed",
+                "error": repr(exc),
+            }
+        payload.setdefault("adapter", "win32_ocr")
         if not payload.get("ok") and not allow_failure:
             payload.setdefault("error", "compat_command_failed")
         return payload
@@ -701,14 +782,25 @@ def wechat_rpa_lock(action: str, *, timeout_seconds: float = 90.0, stale_seconds
     with automated sends and produce missed or partial captures.
     """
     if os.getenv("WECHAT_RPA_LOCK_DISABLED", "").strip().lower() in {"1", "true", "yes", "on"}:
-        yield
+        yield {
+            "action": action,
+            "disabled": True,
+            "timeout_seconds": round(max(1.0, float(timeout_seconds)), 3),
+            "waited_seconds": 0.0,
+            "attempts": 1,
+            "stale_breaks": 0,
+        }
         return
     lock_path = WECHAT_RPA_LOCK_PATH
     lock_path.parent.mkdir(parents=True, exist_ok=True)
     deadline = time.time() + max(1.0, float(timeout_seconds))
     payload = {"pid": os.getpid(), "action": action, "created_at": time.time()}
+    acquire_started = time.perf_counter()
     acquired = False
+    attempts = 0
+    stale_breaks = 0
     while time.time() <= deadline:
+        attempts += 1
         try:
             fd = os.open(str(lock_path), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
             try:
@@ -719,6 +811,7 @@ def wechat_rpa_lock(action: str, *, timeout_seconds: float = 90.0, stale_seconds
             break
         except FileExistsError:
             if should_break_wechat_rpa_lock(lock_path, stale_seconds=stale_seconds):
+                stale_breaks += 1
                 try:
                     lock_path.unlink()
                 except FileNotFoundError:
@@ -729,9 +822,26 @@ def wechat_rpa_lock(action: str, *, timeout_seconds: float = 90.0, stale_seconds
             else:
                 time.sleep(0.2)
     if not acquired:
-        raise TimeoutError(f"WeChat RPA lock timeout for action={action}")
+        waited_seconds = max(0.0, time.perf_counter() - acquire_started)
+        raise RPALockTimeoutError(
+            f"WeChat RPA lock timeout for action={action}",
+            meta={
+                "action": str(action or ""),
+                "timeout_seconds": round(max(1.0, float(timeout_seconds)), 3),
+                "waited_seconds": round(waited_seconds, 3),
+                "attempts": max(1, int(attempts)),
+                "stale_breaks": max(0, int(stale_breaks)),
+            },
+        )
+    lock_meta = {
+        "action": str(action or ""),
+        "timeout_seconds": round(max(1.0, float(timeout_seconds)), 3),
+        "waited_seconds": round(max(0.0, time.perf_counter() - acquire_started), 3),
+        "attempts": max(1, int(attempts)),
+        "stale_breaks": max(0, int(stale_breaks)),
+    }
     try:
-        yield
+        yield lock_meta
     finally:
         try:
             current = json.loads(lock_path.read_text(encoding="utf-8"))
@@ -756,6 +866,32 @@ def should_break_wechat_rpa_lock(path: Path, *, stale_seconds: float) -> bool:
     if created_at and time.time() - created_at > stale_seconds:
         return True
     return False
+
+
+def attach_rpa_lock_meta(payload: dict[str, Any], lock_meta: dict[str, Any] | None) -> dict[str, Any]:
+    if not isinstance(payload, dict):
+        return payload
+    clean = dict(lock_meta or {})
+    if not clean:
+        return payload
+    existing = payload.get("rpa_lock")
+    if isinstance(existing, dict):
+        merged = dict(clean)
+        merged.update({key: value for key, value in existing.items() if key not in merged})
+    else:
+        merged = clean
+    payload["rpa_lock"] = merged
+    return payload
+
+
+def rpa_lock_timeout_payload(exc: TimeoutError, *, action: str, timeout_seconds: float) -> dict[str, Any]:
+    payload = {
+        "action": str(action or ""),
+        "timeout_seconds": round(max(1.0, float(timeout_seconds)), 3),
+    }
+    if isinstance(exc, RPALockTimeoutError):
+        payload.update({key: value for key, value in (exc.meta or {}).items() if value is not None})
+    return payload
 
 
 def _read_json_response(proc: subprocess.Popen, timeout: int = 25) -> dict[str, Any]:
@@ -833,9 +969,89 @@ def _kill_daemon() -> None:
         _daemon_proc = None
 
 
+def _compat_daemon_env(
+    *,
+    root: Path,
+) -> dict[str, str]:
+    env = os.environ.copy()
+    env["PYTHONUTF8"] = "1"
+    env["PYTHONIOENCODING"] = "utf-8"
+    env["PYTHONPATH"] = str(root)
+    return env
+
+
+def _ensure_compat_daemon(
+    compat_sidecar_python: Path,
+    compat_sidecar_script: Path,
+    root: Path,
+) -> subprocess.Popen:
+    global _compat_daemon_proc
+    if _compat_daemon_proc is not None:
+        if _compat_daemon_proc.poll() is None:
+            return _compat_daemon_proc
+        _kill_compat_daemon()
+
+    python = compat_sidecar_python if compat_sidecar_python.exists() else Path(sys.executable)
+    env = _compat_daemon_env(root=root)
+    _compat_daemon_proc = subprocess.Popen(
+        [str(python), str(compat_sidecar_script), "--daemon"],
+        cwd=str(root),
+        env=env,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    return _compat_daemon_proc
+
+
+def _kill_compat_daemon() -> None:
+    global _compat_daemon_proc
+    if _compat_daemon_proc is not None:
+        try:
+            _compat_daemon_proc.stdin.write(b'{"action": "exit"}\n')
+            _compat_daemon_proc.stdin.flush()
+            _compat_daemon_proc.wait(timeout=2)
+        except Exception:
+            _compat_daemon_proc.kill()
+        _compat_daemon_proc = None
+
+
+def _compat_daemon_request(
+    *,
+    compat_sidecar_python: Path,
+    compat_sidecar_script: Path,
+    root: Path,
+    request: dict[str, Any],
+    timeout: int,
+) -> dict[str, Any]:
+    with _compat_daemon_lock:
+        proc = _ensure_compat_daemon(compat_sidecar_python, compat_sidecar_script, root)
+        request_line = json.dumps(request, ensure_ascii=True) + "\n"
+        try:
+            proc.stdin.write(request_line.encode("utf-8"))
+            proc.stdin.flush()
+            payload = _read_json_response(proc, timeout=max(1, int(timeout)))
+        except Exception:
+            _kill_compat_daemon()
+            proc = _ensure_compat_daemon(compat_sidecar_python, compat_sidecar_script, root)
+            proc.stdin.write(request_line.encode("utf-8"))
+            proc.stdin.flush()
+            payload = _read_json_response(proc, timeout=max(1, int(timeout)))
+        if not isinstance(payload, dict):
+            return {
+                "ok": False,
+                "online": False,
+                "adapter": "win32_ocr",
+                "state": "compat_daemon_invalid_response",
+                "error": "compat daemon did not return JSON",
+            }
+        return payload
+
+
 def reset_wxauto_sidecar_daemon() -> None:
     """Force the cached wxauto4 sidecar to restart on the next connector call."""
     _kill_daemon()
+    _kill_compat_daemon()
 
 
 def interactive_rpa_probe_env() -> dict[str, str]:
@@ -908,6 +1124,8 @@ def _args_to_request(args: list[str]) -> dict[str, Any]:
                 request["restore_to_latest"] = True
             elif arg == "--no-restore-to-latest":
                 request["restore_to_latest"] = False
+            elif arg == "--artifact-dir" and i + 1 < len(args):
+                request["artifact_dir"] = args[i + 1]
     elif args[0] == "send":
         request["action"] = "send"
         for i, arg in enumerate(args):
@@ -917,6 +1135,15 @@ def _args_to_request(args: list[str]) -> dict[str, Any]:
                 request["text"] = args[i + 1]
             elif arg == "--exact":
                 request["exact"] = True
+            elif arg == "--skip-send-rate-guard":
+                request["skip_send_rate_guard"] = True
+            elif arg == "--artifact-dir" and i + 1 < len(args):
+                request["artifact_dir"] = args[i + 1]
+    elif args[0] in {"status", "capabilities", "sessions", "recover-render"}:
+        request["action"] = args[0]
+        for i, arg in enumerate(args):
+            if arg == "--artifact-dir" and i + 1 < len(args):
+                request["artifact_dir"] = args[i + 1]
     return request
 
 

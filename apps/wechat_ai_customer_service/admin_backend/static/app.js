@@ -6788,6 +6788,9 @@ function recorderRuntimeStatusText(runtime = {}, settings = {}) {
   if (runtime.state === "paused") return runtime.message || "已暂停，等待继续";
   if (runtime.running) {
     const interval = Number(settings.capture_interval_seconds || 30);
+    if (runtime.liveness_ok === false) {
+      return `监听中（活性异常，最近心跳 ${Number.isFinite(Number(runtime.liveness_age_seconds)) ? `${Number(runtime.liveness_age_seconds)}s前` : "缺失"}）`;
+    }
     return `监听中（轮询间隔 ${Number.isFinite(interval) && interval > 0 ? interval : 30}s）`;
   }
   if (settings.enabled === false) return "已停止";

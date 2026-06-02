@@ -30,6 +30,9 @@ DEFAULT_SETTINGS = {
     "history_backfill_load_times": 3,
     "history_backfill_max_load_times": 5,
     "capture_anchor_recent_limit": 80,
+    "runtime_max_runtime_seconds": 0,
+    "runtime_liveness_interval_seconds": 60,
+    "runtime_liveness_stale_seconds": 240,
 }
 RECORDER_DISCOVERY_SOURCE_TYPE = "wechat_session_discovery"
 RECORDER_TEST_SOURCE_TYPE = "live_recorder_test"

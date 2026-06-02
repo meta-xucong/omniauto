@@ -126,6 +126,9 @@ def build_live_test_config(token: str) -> dict[str, Any]:
     config["raw_messages"]["notify_enabled"] = False
     config.setdefault("reply", {})
     config["reply"]["allow_fallback_send"] = False
+    config.setdefault("customer_service", {})
+    config["customer_service"]["enabled"] = True
+    config["_local_customer_service_settings"] = {"enabled": True, "reply_mode": "auto"}
     config.setdefault("rate_limits", {})
     config["rate_limits"]["min_seconds_between_replies"] = 0
     config["rate_limits"]["notice_customer"] = False
@@ -158,7 +161,7 @@ def build_flows(token: str) -> list[dict[str, Any]]:
                 {
                     "message": f"你好，我从抖音直播间来的，家里接娃通勤用，预算十万左右，想先了解下。({token}-A1)",
                     "expect": "sent",
-                    "must_include_any": ["预算", "用途", "车型", "车源", "筛"],
+                    "must_include_any": ["预算", "10万", "通勤", "车况", "范围", "筛"],
                 },
                 {
                     "message": f"那你直接给我挑两台靠谱的，别太费油，南京能看最好。({token}-A2)",
@@ -253,7 +256,12 @@ def run_one_flow(
             if dry_run:
                 send = {"ok": True, "dry_run": True}
             else:
-                send = connector.send_text_and_verify(target.name, message, exact=target.exact)
+                send = connector.send_text_and_verify(
+                    target.name,
+                    message,
+                    exact=target.exact,
+                    simulate_inbound_file_transfer=True,
+                )
             assert_true(send.get("ok"), f"{flow['id']} turn {index} live send failed: {send}")
             time.sleep(delay_seconds)
             event = process_target(

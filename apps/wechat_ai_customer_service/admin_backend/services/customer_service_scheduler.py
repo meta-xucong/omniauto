@@ -94,7 +94,9 @@ class CustomerServiceSchedulerRuntime:
         now: str | None = None,
     ) -> dict[str, Any]:
         """Run one non-blocking scheduling tick."""
-        started = time.time()
+        started = time.perf_counter()
+        phase_durations: dict[str, float] = {}
+        phase_started = started
         state = self.store.load()
         events: list[dict[str, Any]] = []
 
@@ -108,25 +110,39 @@ class CustomerServiceSchedulerRuntime:
             events.append({"event": "llm_task_orphan_requeued", "task_id": task.get("task_id"), "target_name": task.get("target_name")})
 
         pre_sent = self._consume_send_queue(state, allow_send=allow_send, now=now)
+        phase_durations["send_pre_seconds"] = round(max(0.0, time.perf_counter() - phase_started), 4)
+        phase_started = time.perf_counter()
         events.extend(pre_sent)
 
         captured = self._capture_pending(state, now=now)
+        phase_durations["capture_seconds"] = round(max(0.0, time.perf_counter() - phase_started), 4)
+        phase_started = time.perf_counter()
         events.extend(captured)
 
         submitted = self._submit_llm_tasks(state, now=now)
+        phase_durations["llm_submit_seconds"] = round(max(0.0, time.perf_counter() - phase_started), 4)
+        phase_started = time.perf_counter()
         events.extend(submitted)
 
         completed = self._collect_llm_results(state, now=now)
+        phase_durations["llm_collect_seconds"] = round(max(0.0, time.perf_counter() - phase_started), 4)
+        phase_started = time.perf_counter()
         events.extend(completed)
 
         sent = self._consume_send_queue(state, allow_send=allow_send, now=now)
+        phase_durations["send_post_seconds"] = round(max(0.0, time.perf_counter() - phase_started), 4)
+        phase_started = time.perf_counter()
         events.extend(sent)
 
         self.store.save(state)
+        phase_durations["state_save_seconds"] = round(max(0.0, time.perf_counter() - phase_started), 4)
         summary = state_summary(state)
+        total_seconds = round(max(0.0, time.perf_counter() - started), 4)
+        phase_durations["total_seconds"] = total_seconds
         return {
             "ok": True,
-            "duration_seconds": round(time.time() - started, 4),
+            "duration_seconds": total_seconds,
+            "phase_durations": phase_durations,
             "events": events,
             "summary": summary,
         }
@@ -264,12 +280,23 @@ class CustomerServiceSchedulerRuntime:
                 mark_reply_failed(state, reply_id, reason=repr(exc), now=now)
                 events.append({"event": "send_failed", "reply_id": reply_id, "error": repr(exc)})
                 continue
+            send_observability = self._extract_send_observability(send_result)
             if send_result.get("ok") is False or send_result.get("verified") is False:
                 mark_reply_failed(state, reply_id, reason=str(send_result.get("reason") or send_result.get("error") or "send_failed"), send_result=send_result, now=now)
-                events.append({"event": "send_failed", "reply_id": reply_id, "send_result": send_result})
+                failed_event = {"event": "send_failed", "reply_id": reply_id, "send_result": send_result}
+                if send_observability:
+                    failed_event["send_observability"] = send_observability
+                events.append(failed_event)
                 continue
             mark_reply_sent(state, reply_id, send_result=send_result, now=now)
-            events.append({"event": "send_completed", "reply_id": reply_id, "target_name": reply.get("target_name")})
+            completed_event = {
+                "event": "send_completed",
+                "reply_id": reply_id,
+                "target_name": reply.get("target_name"),
+            }
+            if send_observability:
+                completed_event["send_observability"] = send_observability
+            events.append(completed_event)
         return events
 
     def _reply_for_callbacks(self, state: dict[str, Any], reply: dict[str, Any]) -> dict[str, Any]:
@@ -280,6 +307,36 @@ class CustomerServiceSchedulerRuntime:
             if isinstance(capture, dict):
                 enriched["_capture"] = copy.deepcopy(capture)
         return enriched
+
+    @staticmethod
+    def _extract_send_observability(send_result: dict[str, Any]) -> dict[str, Any]:
+        if not isinstance(send_result, dict):
+            return {}
+        send_payload = send_result.get("send_result")
+        if not isinstance(send_payload, dict):
+            send_payload = send_result
+        send_meta = send_payload.get("send")
+        if not isinstance(send_meta, dict):
+            send_meta = send_payload if isinstance(send_payload, dict) else {}
+        observability: dict[str, Any] = {}
+        state = str(send_meta.get("state") or send_payload.get("state") or "").strip()
+        if state:
+            observability["state"] = state
+        verification_mode = str(send_payload.get("verification_mode") or send_result.get("verification_mode") or "").strip()
+        if verification_mode:
+            observability["verification_mode"] = verification_mode
+        try:
+            retry_attempts = int(send_payload.get("retry_attempts") or send_result.get("retry_attempts") or 0)
+        except (TypeError, ValueError):
+            retry_attempts = 0
+        observability["retry_attempts"] = max(0, retry_attempts)
+        segment_attempt_counts = send_payload.get("segment_attempt_counts")
+        if isinstance(segment_attempt_counts, list) and segment_attempt_counts:
+            observability["segment_attempt_counts"] = [int(item) for item in segment_attempt_counts if isinstance(item, (int, float))]
+        rpa_lock = send_meta.get("rpa_lock")
+        if isinstance(rpa_lock, dict):
+            observability["rpa_lock"] = copy.deepcopy(rpa_lock)
+        return observability
 
 
 def mark_session_capture_failed(state: dict[str, Any], target_name: str, reason: str, *, now: str | None = None) -> None:

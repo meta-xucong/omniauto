@@ -1,14 +1,26 @@
 [
   {
-    "binding_id": "order_sheet_local_admin_binding",
-    "scope_type": "user",
-    "scope_id": "local-admin",
-    "tenant_id": "",
-    "user_id": "local-admin",
+    "binding_id": "auto_tenant_chejin",
+    "scope_type": "tenant",
+    "scope_id": "chejin",
+    "tenant_id": "chejin",
+    "user_id": "",
+    "module_key": "raw_message_log_v1",
+    "enabled": true,
+    "created_at": "2026-05-31T07:38:20+00:00",
+    "updated_at": "2026-06-01T14:02:27+00:00",
+    "sync_source": "vps_sync"
+  },
+  {
+    "binding_id": "live_test_tenant_test02",
+    "scope_type": "tenant",
+    "scope_id": "test02",
+    "tenant_id": "test02",
+    "user_id": "",
     "module_key": "order_sheet_lab_v1",
     "enabled": true,
-    "created_at": "2026-05-11T01:55:32",
-    "updated_at": "2026-05-16T21:29:10"
+    "created_at": "2026-05-31T11:19:40",
+    "updated_at": "2026-05-31T15:17:56"
   },
   {
     "binding_id": "phase_a_local_admin_binding",
@@ -19,18 +31,29 @@
     "module_key": "raw_message_log_v1",
     "enabled": true,
     "created_at": "2026-05-11T01:55:33",
-    "updated_at": "2026-05-16T21:33:46"
+    "updated_at": "2026-06-02T10:26:30"
   },
   {
-    "binding_id": "user_user_YTE2rdUWFGqX",
+    "binding_id": "order_sheet_local_admin_binding",
     "scope_type": "user",
-    "scope_id": "user_YTE2rdUWFGqX",
+    "scope_id": "local-admin",
     "tenant_id": "",
-    "user_id": "user_YTE2rdUWFGqX",
+    "user_id": "local-admin",
     "module_key": "order_sheet_lab_v1",
     "enabled": true,
-    "created_at": "2026-05-11T02:44:29",
-    "updated_at": "2026-05-11T02:47:40"
+    "created_at": "2026-05-11T01:55:32",
+    "updated_at": "2026-05-31T10:09:28"
+  },
+  {
+    "binding_id": "backtest_local_admin_binding",
+    "scope_type": "user",
+    "scope_id": "local-admin",
+    "tenant_id": "",
+    "user_id": "local-admin",
+    "module_key": "order_sheet_lab_v1",
+    "enabled": true,
+    "created_at": "2026-05-12T10:50:09",
+    "updated_at": "2026-05-15T15:36:02"
   },
   {
     "binding_id": "eval_local_admin_binding",
@@ -44,14 +67,26 @@
     "updated_at": "2026-05-11T23:43:09"
   },
   {
-    "binding_id": "backtest_local_admin_binding",
+    "binding_id": "user_user_YTE2rdUWFGqX",
     "scope_type": "user",
-    "scope_id": "local-admin",
+    "scope_id": "user_YTE2rdUWFGqX",
     "tenant_id": "",
-    "user_id": "local-admin",
+    "user_id": "user_YTE2rdUWFGqX",
     "module_key": "order_sheet_lab_v1",
     "enabled": true,
-    "created_at": "2026-05-12T10:50:09",
-    "updated_at": "2026-05-15T15:36:02"
+    "created_at": "2026-05-11T02:44:29",
+    "updated_at": "2026-05-11T02:47:40"
+  },
+  {
+    "binding_id": "global_default",
+    "scope_type": "global",
+    "scope_id": "*",
+    "tenant_id": "",
+    "user_id": "",
+    "module_key": "raw_message_log_v1",
+    "enabled": true,
+    "created_at": "2026-05-10T17:42:21+00:00",
+    "updated_at": "2026-05-10T18:17:15+00:00",
+    "sync_source": "vps_sync"
   }
 ]

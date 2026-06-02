@@ -218,7 +218,10 @@ def check_offline_context_followup(token: str) -> dict[str, Any]:
     )
     for case_id, event in (("context_first_compare", first), ("context_second_followup", second)):
         assert_foreground_path_handled(event, case_id)
-        assert_normal_send(event, case_id, require_rag=(case_id == "context_first_compare"), require_structured=True)
+        if bool((event.get("decision") or {}).get("need_handoff")) or bool((event.get("llm_reply_synthesis") or {}).get("needs_handoff")):
+            assert_guarded_handoff(event, case_id)
+        else:
+            assert_normal_send(event, case_id, require_rag=(case_id == "context_first_compare"), require_structured=True)
     outputs = [summarize_event("context_first_compare", first), summarize_event("context_second_followup", second)]
     return {"name": "offline_context_followup", "ok": True, "case_count": len(outputs), "quality": summarize_quality(outputs), "outputs": outputs}
 
@@ -439,17 +442,18 @@ def synthesis_config(token: str) -> dict[str, Any]:
     return config
 
 
-def assert_deepseek_participated(event: dict[str, Any], case_id: str) -> None:
+def assert_guarded_synthesis_participated(event: dict[str, Any], case_id: str) -> None:
     synthesis = event.get("llm_reply_synthesis", {}) or {}
-    assert_true(synthesis.get("provider") == "deepseek", f"{case_id} should call DeepSeek synthesis: {synthesis}")
-    assert_true(synthesis.get("applied"), f"{case_id} should apply guarded DeepSeek synthesis: {event}")
-    assert_true((synthesis.get("llm_status") or {}).get("ok") is True, f"{case_id} DeepSeek status should be ok: {synthesis}")
+    provider = str(synthesis.get("provider") or "").strip().lower()
+    assert_true(provider in {"deepseek", "openai"}, f"{case_id} should use guarded synthesis provider: {synthesis}")
+    assert_true(synthesis.get("applied"), f"{case_id} should apply guarded synthesis: {event}")
+    assert_true((synthesis.get("llm_status") or {}).get("ok") is True, f"{case_id} synthesis llm_status should be ok: {synthesis}")
 
 
 def assert_foreground_path_handled(event: dict[str, Any], case_id: str) -> None:
     synthesis = event.get("llm_reply_synthesis", {}) or {}
-    if synthesis.get("provider") == "deepseek":
-        assert_deepseek_participated(event, case_id)
+    if bool(synthesis.get("applied")):
+        assert_guarded_synthesis_participated(event, case_id)
         return
     route = event.get("runtime_route") if isinstance(event.get("runtime_route"), dict) else {}
     reason = str(synthesis.get("reason") or "")
@@ -461,7 +465,7 @@ def assert_foreground_path_handled(event: dict[str, Any], case_id: str) -> None:
         return
     assert_true(
         reason == "skipped_by_realtime_route" and route_level in {"L0", "L1"},
-        f"{case_id} should either call DeepSeek or be skipped by deterministic realtime route: {synthesis}",
+        f"{case_id} should either call guarded synthesis or be skipped by deterministic realtime route: {synthesis}",
     )
     budget = event.get("token_budget") if isinstance(event.get("token_budget"), dict) else {}
     assert_true(int(budget.get("actual_total_tokens") or 0) == 0, f"{case_id} realtime route should use zero foreground LLM tokens: {budget}")

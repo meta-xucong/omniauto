@@ -91,6 +91,9 @@ USED_CAR_TERMS = (
 HANDOFF_HINTS = ("转人工", "人工", "负责人", "确认后回复", "请负责人")
 DIRECT_CHOICE_TERMS = ("哪个", "哪台", "哪款", "还是", "怎么选", "选一辆", "更推荐")
 DIRECT_ANSWER_HINTS = ("建议", "优先", "更推荐", "先看", "我会先", "可以先")
+VEHICLE_MODEL_TERMS = ("赛纳", "塞纳", "赛那", "凯美瑞", "雅阁", "奇骏", "途观", "gl8", "思域", "秦plus", "dm-i")
+VEHICLE_CHOICE_CONTEXT_TERMS = USED_CAR_TERMS + ("suv", "mpv", "轿车", "越野", "纯电", "混动", "油车")
+IDENTITY_OR_SYSTEM_TERMS = ("真人", "系统", "自动回", "机器人", "自动回复", "是不是ai", "是ai", "客服")
 
 
 @dataclass(frozen=True)
@@ -209,12 +212,18 @@ def extract_from_runtime_messages(runtime_messages_path: Path) -> list[AuditSamp
             continue
         if is_obvious_bot_or_control_message(text):
             continue
+        if is_likely_agent_reply_fragment(text):
+            continue
+        if not looks_like_customer_query(text):
+            continue
         samples.append(AuditSample(source="runtime_messages", text=text))
     return samples
 
 
 def sanitize_question(text: str) -> str:
     normalized = re.sub(r"\s+", " ", str(text or "")).strip()
+    normalized = re.sub(r"^\[[A-Za-z0-9_:\- ]{6,80}\]\s*", "", normalized)
+    normalized = re.sub(r"^\([A-Za-z0-9_:\- ]{6,80}\)\s*", "", normalized)
     normalized = normalized.strip("`'\"")
     if len(normalized) < 2:
         return ""
@@ -250,6 +259,59 @@ def is_obvious_bot_or_control_message(text: str) -> bool:
     if any(token in lower for token in blocked):
         return True
     return bool(re.match(r"^\s*(商品资料|政策规则|聊天记录)\s*[：:]", text))
+
+
+def looks_like_customer_query(text: str) -> bool:
+    clean = str(text or "").strip()
+    if not clean:
+        return False
+    if re.search(r"[？?]", clean):
+        return True
+    return contains_any(
+        clean,
+        (
+            "你好",
+            "在吗",
+            "想买",
+            "想看",
+            "预算",
+            "推荐",
+            "帮我",
+            "麻烦",
+            "请问",
+            "咨询",
+            "有没有",
+            "多少",
+            "怎么",
+            "哪个",
+            "哪台",
+            "哪款",
+            "可以",
+            "能不能",
+            "安排",
+            "到店",
+            "试驾",
+            "置换",
+            "贷款",
+        ),
+    )
+
+
+def is_likely_agent_reply_fragment(text: str) -> bool:
+    clean = str(text or "").strip()
+    if not clean:
+        return False
+    stock_terms = ("上牌", "表显", "自动挡", "万公里", "检测报告", "看车城市", "到店时间", "贷款/置换")
+    stock_hits = sum(1 for term in stock_terms if term in clean)
+    if stock_hits >= 3 and len(clean) >= 56 and not re.search(r"[？?]", clean):
+        return True
+    if contains_any(clean, ("我再把优先级排细一点", "您把贷款/置换情况", "具体还是以检测报告为准")):
+        return True
+    if re.match(r"^[0-9一二三四五六七八九十]*\s*万[，,、；;）)]", clean) and len(clean) >= 24:
+        return True
+    if re.match(r"^(哥，按您|老板，按您|按您说的|如果先缩到两台)", clean):
+        return True
+    return False
 
 
 def dedupe_samples(samples: list[AuditSample]) -> list[AuditSample]:
@@ -469,7 +531,7 @@ def detect_issues(question: str, result: dict[str, Any]) -> list[dict[str, Any]]
         return issues
     if len(reply) > 180:
         issues.append(issue("reply_too_long", f"回复偏长({len(reply)}字)", owner_from_result(route, realtime, llm_probe)))
-    if contains_any(question, DIRECT_CHOICE_TERMS) and not contains_any(reply, DIRECT_ANSWER_HINTS) and not expected_l0:
+    if is_vehicle_choice_question(question) and not contains_any(reply, DIRECT_ANSWER_HINTS) and not expected_l0:
         issues.append(issue("no_clear_recommendation", "明确选择题未给出清晰建议", "realtime_reply_router"))
     budget_issue = detect_budget_deviation(question, reply)
     if budget_issue:
@@ -504,6 +566,8 @@ def owner_from_result(route: dict[str, Any], realtime: dict[str, Any], llm_probe
 
 
 def detect_budget_deviation(question: str, reply: str) -> str:
+    if is_likely_agent_reply_fragment(question):
+        return ""
     budget = extract_budget(question)
     if not budget:
         return ""
@@ -519,6 +583,19 @@ def detect_budget_deviation(question: str, reply: str) -> str:
     if not outlier:
         return ""
     return f"预算[{lower:.2f},{upper:.2f}]万，回复价格存在偏离值: {', '.join(f'{item:.2f}' for item in outlier)}万"
+
+
+def is_vehicle_choice_question(question: str) -> bool:
+    clean = str(question or "")
+    if contains_any(clean, ("哪个", "哪台", "哪款", "怎么选", "选一辆", "更推荐")):
+        return True
+    if "还是" not in clean:
+        return False
+    if contains_any(clean, IDENTITY_OR_SYSTEM_TERMS):
+        return False
+    if contains_any(clean, VEHICLE_CHOICE_CONTEXT_TERMS):
+        return True
+    return contains_any(clean, VEHICLE_MODEL_TERMS)
 
 
 def extract_budget(text: str) -> tuple[float, float] | None:

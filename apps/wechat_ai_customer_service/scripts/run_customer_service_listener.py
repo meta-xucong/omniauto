@@ -126,6 +126,7 @@ OPERATOR_GUARD_DEFAULTS = {
     "control_hotkey": "f8",
     "esc_double_press_window_ms": 420,
     "pause_poll_interval_ms": 550,
+    "bootstrap_timeout_seconds": 15.0,
 }
 OPERATOR_COMMAND_ACTIONS = {"pause", "resume", "stop"}
 OPERATOR_CONTROL_MODES = {"running", "paused", "stopped"}
@@ -761,6 +762,18 @@ def normalize_operator_guard_settings(settings: dict[str, Any] | None) -> dict[s
             minimum=120,
             maximum=3000,
         ),
+        "bootstrap_timeout_seconds": min(
+            60.0,
+            max(
+                3.0,
+                float(
+                    non_negative_float(
+                        source.get("bootstrap_timeout_seconds"),
+                        float(OPERATOR_GUARD_DEFAULTS["bootstrap_timeout_seconds"]),
+                    )
+                ),
+            ),
+        ),
     }
     return normalized
 
@@ -809,6 +822,21 @@ def load_operator_guard_settings(config_path: Path) -> dict[str, Any]:
         default=int(settings.get("pause_poll_interval_ms") or OPERATOR_GUARD_DEFAULTS["pause_poll_interval_ms"]),
         minimum=120,
         maximum=3000,
+    )
+    settings["bootstrap_timeout_seconds"] = min(
+        60.0,
+        max(
+            3.0,
+            float(
+                non_negative_float(
+                    os.getenv("WECHAT_RPA_OPERATOR_GUARD_BOOTSTRAP_TIMEOUT_SECONDS"),
+                    float(
+                        settings.get("bootstrap_timeout_seconds")
+                        or OPERATOR_GUARD_DEFAULTS["bootstrap_timeout_seconds"]
+                    ),
+                )
+            ),
+        ),
     )
     return settings
 
@@ -1078,7 +1106,7 @@ def verify_operator_guard_bootstrap(
     pid: int,
     state_path: Path,
     *,
-    timeout_seconds: float = 5.0,
+    timeout_seconds: float = float(OPERATOR_GUARD_DEFAULTS["bootstrap_timeout_seconds"]),
     expected_parent_pid: int | None = None,
 ) -> dict[str, Any]:
     def _state_matches_current_launch(snapshot: dict[str, Any]) -> tuple[bool, int, int]:
@@ -2066,6 +2094,10 @@ def main() -> int:
         guard_verify = verify_operator_guard_bootstrap(
             int(guard_launch.get("pid") or 0),
             operator_guard_state_file,
+            timeout_seconds=float(
+                operator_settings.get("bootstrap_timeout_seconds")
+                or OPERATOR_GUARD_DEFAULTS["bootstrap_timeout_seconds"]
+            ),
             expected_parent_pid=os.getpid(),
         )
         append_log(
