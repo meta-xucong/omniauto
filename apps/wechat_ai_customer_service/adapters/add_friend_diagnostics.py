@@ -225,13 +225,21 @@ def render_step_event_html(*, title: str, description: str, report: dict[str, An
         artifacts = event.get("artifacts") if isinstance(event.get("artifacts"), dict) else {}
         annotated = local_artifact_name(artifacts.get("annotated"))
         raw = local_artifact_name(artifacts.get("raw"))
+        fallback_warning = event_has_fallback_warning(event)
+        section_class = ' class="fallback-warning"' if fallback_warning else ""
+        warning_html = (
+            '<p class="warning"><b>注意：</b>本步骤触发固定兜底定位，请优先检查 OCR/视觉定位为什么没有命中。</p>'
+            if fallback_warning
+            else ""
+        )
         image_html = f'<img src="{annotated}" alt="{html.escape(str(event.get("title") or ""))} annotated">' if annotated else "<p>无标注图</p>"
         raw_link = f'<a href="{raw}">原始截图</a>' if raw else "无原始截图"
         event_html.append(
             "\n".join(
                 [
-                    "<section>",
+                    f"<section{section_class}>",
                     f"<h2>{html.escape(str(event.get('step_id') or ''))} · {html.escape(str(event.get('title') or ''))}</h2>",
+                    warning_html,
                     f"<p><b>状态：</b>{html.escape(str(event.get('status') or 'unknown'))}</p>",
                     f"<p><b>状态变化：</b>{html.escape(str(event.get('state_before') or ''))} → {html.escape(str(event.get('state_after') or ''))}</p>",
                     f"<p><b>耗时：</b>{html.escape(str(event.get('timing_ms') or 0))} ms</p>",
@@ -261,6 +269,8 @@ def render_step_event_html(*, title: str, description: str, report: dict[str, An
             "body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;margin:24px;background:#f6f7f9;color:#111827}",
             "h1{font-size:24px;margin:0 0 12px}",
             "section{background:#fff;border:1px solid #d8dee8;border-radius:8px;padding:16px;margin:16px 0}",
+            "section.fallback-warning{border-color:#dc2626;background:#fff7f7}",
+            ".warning{color:#b91c1c;background:#fee2e2;border:1px solid #fecaca;border-radius:6px;padding:8px 10px}",
             "img{display:block;max-width:100%;height:auto;border:1px solid #d8dee8;background:#fff}",
             "pre{white-space:pre-wrap;background:#f3f4f6;border-radius:6px;padding:10px}",
             "a{color:#2563eb}",
@@ -276,6 +286,17 @@ def render_step_event_html(*, title: str, description: str, report: dict[str, An
             "</body></html>",
         ]
     )
+
+
+def event_has_fallback_warning(event: dict[str, Any]) -> bool:
+    selected = event.get("selected_target") if isinstance(event.get("selected_target"), dict) else {}
+    if selected.get("fallback_used"):
+        return True
+    targets = event.get("targets") if isinstance(event.get("targets"), list) else []
+    for target in targets:
+        if isinstance(target, dict) and target.get("fallback_used"):
+            return True
+    return False
 
 
 def local_artifact_name(path_value: Any) -> str:

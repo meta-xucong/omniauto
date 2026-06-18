@@ -6,10 +6,13 @@ import os
 from typing import Any
 
 
+DEFAULT_ADD_FRIEND_PACING_PROFILE = "balanced"
+
+
 DEFAULT_ADD_FRIEND_PACING_TIERS: dict[str, tuple[int, int]] = {
     "critical_click": (1000, 2000),
-    "input": (420, 1500),
-    "verify": (700, 1600),
+    "input": (180, 520),
+    "verify": (350, 900),
     "report": (0, 0),
     "default": (1000, 2000),
 }
@@ -40,7 +43,7 @@ def pacing_metadata(tier: str, *, reason: str = "") -> dict[str, Any]:
         "reason": str(reason or ""),
         "min_ms": low,
         "max_ms": high,
-        "profile": "safe",
+        "profile": str(os.getenv("WECHAT_WIN32_OCR_ADD_FRIEND_PACE_PROFILE") or DEFAULT_ADD_FRIEND_PACING_PROFILE),
     }
 
 

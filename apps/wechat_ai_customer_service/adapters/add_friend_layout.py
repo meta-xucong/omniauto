@@ -111,9 +111,33 @@ def plus_entry_safe_bounds(
     split_x = split_x_fn(width)
     top = max(36, min(56, int(height * 0.06)))
     bottom = max(top + 36, min(118, int(height * 0.15)))
-    left = max(238, min(split_x - 90, int(width * 0.24)))
-    right = min(split_x - 18, max(left + 42, int(width * 0.34)))
+    left = max(96, split_x - 92)
+    right = min(width - 4, max(left + 44, split_x - 2))
     return normalize_bounds([left, top, right, bottom])
+
+
+def plus_entry_layout_regions(
+    image_size: tuple[int, int],
+    *,
+    split_x_fn: Callable[[int], int] = default_session_split_x,
+) -> dict[str, Any]:
+    width, height = int(image_size[0]), int(image_size[1])
+    split_x = split_x_fn(width)
+    nav_right = max(64, min(92, int(width * 0.075)))
+    search_bottom = max(112, min(148, int(height * 0.16)))
+    plus_bounds = plus_entry_safe_bounds(image_size, split_x_fn=split_x_fn)
+    return {
+        "image_size": [width, height],
+        "split_x": split_x,
+        "regions": {
+            "left_nav": [0, 0, nav_right, height],
+            "sidebar_search": [nav_right, 0, split_x, search_bottom],
+            "session_list": [nav_right, search_bottom, split_x, height],
+            "main_header": [split_x, 0, width, max(96, int(height * 0.12))],
+            "main_content": [split_x, max(96, int(height * 0.12)), width, height],
+            "plus_search_region": plus_bounds,
+        },
+    }
 
 
 def find_sidebar_search_anchor_item(
@@ -168,11 +192,91 @@ def windows_plus_point(
     return plus_x, plus_y
 
 
+def _pixel_is_plus_dark(pixel: Any) -> bool:
+    if isinstance(pixel, int):
+        return pixel < 120
+    try:
+        red, green, blue = int(pixel[0]), int(pixel[1]), int(pixel[2])
+    except Exception:
+        return False
+    return red < 120 and green < 120 and blue < 120 and max(red, green, blue) - min(red, green, blue) < 70
+
+
+def vision_plus_icon_candidates(
+    image: Any,
+    image_size: tuple[int, int],
+    *,
+    split_x_fn: Callable[[int], int] = default_session_split_x,
+) -> list[dict[str, Any]]:
+    if image is None or not hasattr(image, "crop"):
+        return []
+    search_bounds = plus_entry_safe_bounds(image_size, split_x_fn=split_x_fn)
+    left, top, right, bottom = search_bounds
+    try:
+        crop = image.crop((left, top, right, bottom)).convert("RGB")
+    except Exception:
+        return []
+    crop_width, crop_height = crop.size
+    if crop_width < 18 or crop_height < 18:
+        return []
+
+    pixels = crop.load()
+    candidates: list[dict[str, Any]] = []
+    half = 7
+    for cy in range(half + 2, crop_height - half - 2):
+        for cx in range(half + 2, crop_width - half - 2):
+            horizontal = 0
+            for dx in range(-half, half + 1):
+                if any(_pixel_is_plus_dark(pixels[cx + dx, max(0, min(crop_height - 1, cy + dy))]) for dy in (-1, 0, 1)):
+                    horizontal += 1
+            vertical = 0
+            for dy in range(-half, half + 1):
+                if any(_pixel_is_plus_dark(pixels[max(0, min(crop_width - 1, cx + dx)), cy + dy]) for dx in (-1, 0, 1)):
+                    vertical += 1
+            if horizontal < 9 or vertical < 9:
+                continue
+            center_dark = sum(
+                1
+                for dy in range(-2, 3)
+                for dx in range(-2, 3)
+                if _pixel_is_plus_dark(pixels[cx + dx, cy + dy])
+            )
+            # A text glyph or circle edge often scores on one axis only.  Require a
+            # compact crossing in the center and similar horizontal/vertical arms.
+            balance = 1.0 - min(1.0, abs(horizontal - vertical) / 12.0)
+            confidence = min(0.96, 0.48 + (horizontal + vertical) / 48.0 + center_dark / 80.0 + balance * 0.10)
+            if confidence < 0.78:
+                continue
+            point = [left + cx, top + cy]
+            bounds = normalize_bounds([point[0] - 14, point[1] - 14, point[0] + 14, point[1] + 14])
+            candidates.append(
+                {
+                    "source": "vision_plus_icon",
+                    "bounds": bounds,
+                    "point": point,
+                    "confidence": round(confidence, 3),
+                    "horizontal_score": horizontal,
+                    "vertical_score": vertical,
+                    "center_dark_pixels": center_dark,
+                }
+            )
+    deduped: list[dict[str, Any]] = []
+    for candidate in sorted(candidates, key=lambda item: float(item.get("confidence") or 0.0), reverse=True):
+        point = normalize_point(candidate.get("point"))
+        if any(abs(point[0] - normalize_point(existing.get("point"))[0]) <= 5 and abs(point[1] - normalize_point(existing.get("point"))[1]) <= 5 for existing in deduped):
+            continue
+        deduped.append(candidate)
+        if len(deduped) >= 5:
+            break
+    return deduped
+
+
 def plus_entry_target(
     geometry: dict[str, Any],
     image_size: tuple[int, int],
     ocr_items: list[dict[str, Any]] | None = None,
     *,
+    screenshot: Any | None = None,
     route_kind: str = "windows",
     split_x_fn: Callable[[int], int] = default_session_split_x,
     search_box_point_fn: Callable[[dict[str, Any]], tuple[int, int]] = default_search_box_point,
@@ -180,7 +284,9 @@ def plus_entry_target(
 ) -> dict[str, Any]:
     width, height = int(image_size[0]), int(image_size[1])
     safe_bounds = plus_entry_safe_bounds(image_size, split_x_fn=split_x_fn)
+    layout = plus_entry_layout_regions(image_size, split_x_fn=split_x_fn)
     candidates: list[dict[str, Any]] = []
+    diagnostic_references: list[dict[str, Any]] = []
 
     anchor_item = find_sidebar_search_anchor_item(ocr_items or [], image_size, split_x_fn=split_x_fn)
     if anchor_item is not None:
@@ -189,25 +295,27 @@ def plus_entry_target(
         raw_x = max(anchor_bounds[2] + 118, anchor_center_x + 148)
         raw_y = anchor_center_y
         point = clamp_point_to_bounds(int(raw_x), int(raw_y), safe_bounds)
-        candidates.append(
+        diagnostic_references.append(
             {
-                "source": "sidebar_search_ocr_anchor",
+                "source": "diagnostic_sidebar_search_ocr_anchor_offset",
                 "text": str(anchor_item.get("text") or ""),
                 "anchor_bounds": anchor_bounds,
                 "point": list(point),
                 "bounds": list(safe_bounds),
                 "confidence": min(0.92, max(0.72, float(anchor_item.get("confidence") or 0.0) * 0.88)),
+                "executable": False,
             }
         )
 
     current_x, current_y = windows_plus_point(geometry, split_x_fn=split_x_fn, search_box_point_fn=search_box_point_fn)
     current_point = clamp_point_to_bounds(current_x, current_y, safe_bounds)
-    candidates.append(
+    diagnostic_references.append(
         {
-            "source": "windows_current_geometry",
+            "source": "diagnostic_windows_current_geometry",
             "point": list(current_point),
             "bounds": list(safe_bounds),
             "confidence": 0.74,
+            "executable": False,
         }
     )
     reference_x, reference_y = windows_1080p_reference_plus_point(
@@ -216,34 +324,35 @@ def plus_entry_target(
         search_box_point_fn=search_box_point_fn,
     )
     reference_point = clamp_point_to_bounds(reference_x, reference_y, safe_bounds)
-    candidates.append(
+    diagnostic_references.append(
         {
-            "source": "windows_1080p_reference_geometry",
+            "source": "diagnostic_windows_1080p_reference_geometry",
             "point": list(reference_point),
             "bounds": list(safe_bounds),
             "confidence": 0.42,
             "reference_only": True,
+            "executable": False,
         }
     )
 
-    allowed_sources = {"sidebar_search_ocr_anchor", "windows_current_geometry"}
-    if str(route_kind or "").lower() == "windows_1080p_reference":
-        allowed_sources.add("windows_1080p_reference_geometry")
-    eligible = [item for item in candidates if str(item.get("source") or "") in allowed_sources]
-    selected = max(eligible, key=lambda item: float(item.get("confidence") or 0.0)) if eligible else candidates[0]
+    candidates.extend(vision_plus_icon_candidates(screenshot, image_size, split_x_fn=split_x_fn))
+    selected = max(candidates, key=lambda item: float(item.get("confidence") or 0.0)) if candidates else None
+    executable = selected is not None and str(selected.get("source") or "") == "vision_plus_icon"
+    if selected is None:
+        selected = {
+            "source": "plus_icon_not_found",
+            "point": list(center_of_bounds(safe_bounds)),
+            "bounds": list(safe_bounds),
+            "confidence": 0.0,
+            "executable": False,
+        }
     selected_point = normalize_point(selected.get("point"))
     selected_source = str(selected.get("source") or "")
-    selected_reason = "plus entry located from sidebar search OCR anchor"
-    fallback_used = False
-    fallback_reason = ""
-    if selected_source == "windows_current_geometry":
-        selected_reason = "plus entry fallback from current Windows sidebar geometry"
-        fallback_used = True
-        fallback_reason = "sidebar_search_ocr_anchor_not_available"
-    elif selected_source == "windows_1080p_reference_geometry":
-        selected_reason = "plus entry reference route fallback from Windows 1920x1080 geometry"
-        fallback_used = True
-        fallback_reason = "reference_route_or_no_current_locator"
+    selected_reason = (
+        "plus icon shape matched inside calibrated sidebar header"
+        if executable
+        else "no executable plus icon candidate found inside calibrated sidebar header"
+    )
 
     region = (
         region_for_point_fn(selected_point[0], selected_point[1], image_size)
@@ -252,16 +361,16 @@ def plus_entry_target(
     )
     target = make_locator_result(
         name="plus_entry",
-        label=f"Step1 click target: plus entry beside search box ({route_kind or 'windows'})",
-        strategy="multi_candidate_sidebar_plus_locator",
+        label=f"Step1 click target: visually detected plus entry ({route_kind or 'windows'})",
+        strategy="sidebar_header_plus_icon_vision_locator",
         region=region,
-        bounds=safe_bounds,
+        bounds=list(selected.get("bounds") or safe_bounds),
         point=selected_point,
         candidates=candidates,
         selected_reason=selected_reason,
         confidence=float(selected.get("confidence") or 0.0),
-        fallback_used=fallback_used,
-        fallback_reason=fallback_reason,
+        fallback_used=False,
+        fallback_reason="",
         source=selected_source,
         risk="single_click_plus_only_after_surface_preflight",
         metadata={
@@ -269,11 +378,16 @@ def plus_entry_target(
             "geometry": dict(geometry or {}),
             "route_kind": str(route_kind or "windows"),
             "verify_after_action": "plus_entry_popup_menu_detected",
-            "layout_model": "add_friend_windows_adaptive_v1",
+            "layout_model": "add_friend_windows_sidebar_plus_vision_v2",
+            "layout_calibration": layout,
+            "diagnostic_references": diagnostic_references,
+            "executable": executable,
         },
     )
     target["platform_adapter"] = str(route_kind or "windows")
     target["item"] = item_snapshot(anchor_item, image_size) if anchor_item is not None else None
+    target["executable"] = executable
+    target["diagnostic_references"] = diagnostic_references
     return target
 
 

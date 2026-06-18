@@ -95,6 +95,7 @@ from apps.wechat_ai_customer_service.adapters.add_friend_layout import (
     windows_plus_point,
 )
 from apps.wechat_ai_customer_service.adapters.add_friend_locator import (
+    LOCATOR_RESULT_FIELDS,
     fixed_geometry_locator,
     geometry_fallback_locator,
     make_locator_result,
@@ -1825,12 +1826,14 @@ def add_friend_plus_entry_target(
     image_size: tuple[int, int],
     ocr_items: list[dict[str, Any]] | None = None,
     *,
+    screenshot: Any | None = None,
     route_kind: str = "windows",
 ) -> dict[str, Any]:
     return layout_plus_entry_target(
         geometry,
         image_size,
         ocr_items or [],
+        screenshot=screenshot,
         route_kind=route_kind,
         split_x_fn=session_split_x,
         search_box_point_fn=search_box_point_for_geometry,
@@ -2129,6 +2132,62 @@ def draw_add_friend_screen_annotation(
         text_y = min(max(0, y + 12), max(0, height - 18))
         draw.rectangle([text_x, text_y, min(width - 1, text_x + max(110, len(label) * 7)), text_y + 16], fill="#ef4444")
         draw.text((text_x + 3, text_y + 3), label, fill="white", font=font)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    image.save(output_path)
+    return str(output_path)
+
+
+def draw_add_friend_layout_calibration_annotation(
+    screenshot: Image.Image,
+    *,
+    layout_calibration: dict[str, Any] | None,
+    output_path: Path,
+) -> str:
+    image = screenshot.convert("RGB").copy()
+    draw = ImageDraw.Draw(image)
+    font = ImageFont.load_default()
+    width, height = image.size
+    regions = {}
+    if isinstance(layout_calibration, dict) and isinstance(layout_calibration.get("regions"), dict):
+        regions = layout_calibration.get("regions") or {}
+    color_by_name = {
+        "left_nav": "#2563eb",
+        "sidebar_search": "#16a34a",
+        "session_list": "#f97316",
+        "main_header": "#7c3aed",
+        "main_content": "#0891b2",
+        "plus_search_region": "#dc2626",
+    }
+    if not regions:
+        draw.rectangle([0, 0, width - 1, height - 1], outline="#dc2626", width=3)
+        draw.rectangle([8, 8, min(width - 1, 248), 30], fill="#dc2626")
+        draw.text((14, 14), "layout_calibration_missing", fill="white", font=font)
+    for index, (name, bounds) in enumerate(regions.items(), start=1):
+        if not isinstance(bounds, list) or len(bounds) < 4:
+            continue
+        left, top, right, bottom = [int(float(value or 0)) for value in bounds[:4]]
+        left = max(0, min(width - 1, left))
+        top = max(0, min(height - 1, top))
+        right = max(left, min(width - 1, right))
+        bottom = max(top, min(height - 1, bottom))
+        color = color_by_name.get(str(name), "#64748b")
+        line_width = 4 if str(name) == "plus_search_region" else 2
+        draw.rectangle([left, top, right, bottom], outline=color, width=line_width)
+        label = f"{index}:{name}"
+        label_width = min(width - 1, left + max(86, len(label) * 7 + 8))
+        label_y = top if top + 18 < height else max(0, top - 18)
+        draw.rectangle([left, label_y, label_width, min(height - 1, label_y + 16)], fill=color)
+        draw.text((left + 3, label_y + 3), label, fill="white", font=font)
+    split_x = None
+    if isinstance(layout_calibration, dict):
+        try:
+            split_x = int(layout_calibration.get("split_x"))
+        except Exception:
+            split_x = None
+    if split_x is not None and 0 <= split_x < width:
+        draw.line([split_x, 0, split_x, height - 1], fill="#0f172a", width=2)
+        draw.rectangle([max(0, split_x - 42), 4, min(width - 1, split_x + 42), 20], fill="#0f172a")
+        draw.text((max(0, split_x - 36), 8), f"split_x={split_x}", fill="white", font=font)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     image.save(output_path)
     return str(output_path)
@@ -2891,12 +2950,24 @@ def fill_add_friend_invite_form_and_confirm(
     pause_seconds = add_friend_paced_pause("verify", reason="after_invite_confirm_click_before_capture")
     timings.append({"name": "after_invite_confirm_click_before_capture_pause", "seconds": round(pause_seconds, 3)})
     after_shot, after_path = capture_wechat_window_visible_screen(hwnd, artifact_dir=str(output_dir), label="add_friend_invite_form_after_confirm_window")
-    after_items = run_ocr_on_screen_region(after_shot, [0, 0, after_shot.size[0], after_shot.size[1]])
-    final_status = classify_add_friend_after_confirm_surface(
-        after_items,
-        after_shot.size,
-        confirm_ok=bool(confirm_result.get("ok")),
-    )
+    strict_after_confirm_ocr = os.getenv("WECHAT_WIN32_OCR_ADD_FRIEND_STRICT_AFTER_CONFIRM_OCR", "").strip().lower() in {"1", "true", "yes", "on"}
+    after_items: list[dict[str, Any]] = []
+    if strict_after_confirm_ocr:
+        after_ocr_started_at = time.perf_counter()
+        after_items = run_ocr_on_screen_region(after_shot, [0, 0, after_shot.size[0], after_shot.size[1]])
+        timings.append({"name": "after_invite_confirm_ocr", "seconds": round(time.perf_counter() - after_ocr_started_at, 3), "ocr_count": len(after_items)})
+        final_status = classify_add_friend_after_confirm_surface(
+            after_items,
+            after_shot.size,
+            confirm_ok=bool(confirm_result.get("ok")),
+        )
+    else:
+        final_status = add_friend_completed_result(
+            state=RESULT_INVITE_SENT,
+            result_code=RESULT_INVITE_SENT,
+            current_step="invite_confirm_after_click",
+            observation="confirm_clicked_skip_strict_after_confirm_ocr",
+        )
     after_annotated_path = output_dir / "add_friend_invite_form_after_confirm_window_annotated.png"
     after_annotated = draw_add_friend_screen_annotation(
         after_shot,
@@ -2937,6 +3008,7 @@ def fill_add_friend_invite_form_and_confirm(
             "annotated_path": after_annotated,
             "ocr_items": add_friend_ocr_snapshots(after_items, after_shot.size),
             "final_status": final_status,
+            "strict_after_confirm_ocr": strict_after_confirm_ocr,
         },
         "greeting": greeting_result,
         "remark_fill": remark_result,
@@ -2950,77 +3022,36 @@ def fill_add_friend_invite_form_and_confirm(
 def find_add_friend_page_search_targets(
     ocr_items: list[dict[str, Any]],
     image_size: tuple[int, int],
+    screenshot: Image.Image | None = None,
 ) -> dict[str, Any]:
     search_region = add_friend_page_search_region(image_size)
-    small_add_friend_window = image_size[0] <= 560
-    if small_add_friend_window:
-        width, height = image_size
-        y = bounded_int(96, default=96, minimum=70, maximum=max(72, min(height - 24, 126)))
-        input_bounds = [32, 72, max(120, min(width - 126, 292)), 122]
-        button_bounds = [max(input_bounds[2] + 4, width - 118), 72, max(input_bounds[2] + 44, width - 30), 122]
-        input_x, input_y = clamp_point_to_bounds(
-            bounded_int(int(width * 0.38), default=158, minimum=input_bounds[0] + 20, maximum=input_bounds[2] - 20),
-            y,
-            input_bounds,
-        )
-        button_x, button_y = clamp_point_to_bounds(
-            int((button_bounds[0] + button_bounds[2]) / 2),
-            y,
-            button_bounds,
-        )
-        return {
-            "search_region": search_region,
-            "input": geometry_fallback_locator(
-                name="add_friend_search_input",
-                label="Add friend dialog search input fixed safe area",
-                region=add_friend_region_for_point(input_x, input_y, image_size),
-                bounds=input_bounds,
-                point=[input_x, input_y],
-                selected_reason="small add-friend dialog fixed search input safe area",
-                fallback_reason="small_dialog_geometry_is_more_stable_than_ocr_placeholder",
-                risk="type_query_here_fixed_dialog_input",
-                source="fixed_small_add_friend_dialog_geometry",
-                metadata={"image_size": [width, height]},
-            ),
-            "button": geometry_fallback_locator(
-                name="add_friend_search_button",
-                label="Add friend dialog search button fixed safe area",
-                region=add_friend_region_for_point(button_x, button_y, image_size),
-                bounds=button_bounds,
-                point=[button_x, button_y],
-                selected_reason="small add-friend dialog fixed search button safe area",
-                fallback_reason="small_dialog_geometry_is_more_stable_than_ocr_button",
-                risk="click_search_after_query_verified_fixed_dialog_button",
-                source="fixed_small_add_friend_dialog_geometry",
-                metadata={"image_size": [width, height]},
-            ),
-        }
-    input_item = find_add_friend_menu_item(
-        ocr_items,
-        ("微信号/手机号", "微信号", "手机号", "QQ号", "搜索"),
-        image_size,
-        popup_bounds=search_region,
-    )
-    search_button = find_add_friend_menu_item(
-        ocr_items,
-        ("搜索",),
-        image_size,
-        popup_bounds=search_region,
-    )
+    input_item = find_add_friend_search_placeholder_item(ocr_items, image_size, search_region=search_region)
+    search_button = find_add_friend_search_button_item(ocr_items, image_size, search_region=search_region)
+    visual_button = find_add_friend_search_button_by_visual(screenshot, image_size, search_region=search_region)
     split_x = session_split_x(image_size[0])
-    fallback_input_x = max(split_x + 150, int(image_size[0] * 0.53))
-    fallback_input_y = max(118, int(image_size[1] * 0.16))
+    small_add_friend_window = image_size[0] <= 560
+    fallback_input_x = int(image_size[0] * 0.38) if small_add_friend_window else max(split_x + 150, int(image_size[0] * 0.53))
+    fallback_input_y = 96 if small_add_friend_window else max(118, int(image_size[1] * 0.16))
+    visual_button_bounds = visual_button.get("bounds") if isinstance(visual_button, dict) else None
+    visual_button_left = int(visual_button_bounds[0]) if isinstance(visual_button_bounds, list) and len(visual_button_bounds) >= 4 else None
     if input_item is not None:
         input_x, input_y = add_friend_item_center(input_item)
-        input_x = max(split_x + 80, input_x)
+        if not small_add_friend_window:
+            input_x = max(split_x + 80, input_x)
         input_left = int(float(input_item.get("left") or input_x))
         input_top = int(float(input_item.get("top") or input_y))
         input_right = int(float(input_item.get("right") or input_x))
         input_bottom = int(float(input_item.get("bottom") or input_y))
+        button_left = None
+        if search_button is not None:
+            button_left = int(float(search_button.get("left") or 0)) or None
+        if button_left is None:
+            button_left = visual_button_left
+        right_limit = (button_left - 8) if button_left else max(input_right + 160, input_x + 80)
         input_bounds = [
-            max(split_x + 12, input_left - 48),
+            max(search_region[0] + 8, input_left - 28),
             max(search_region[1], input_top - 18),
-            min(image_size[0] - 12, max(input_right + 160, input_x + 80)),
+            min(search_region[2] - 8, max(input_right + 28, right_limit)),
             min(search_region[3], input_bottom + 18),
         ]
         input_target = ocr_item_locator(
@@ -3036,23 +3067,64 @@ def find_add_friend_page_search_targets(
             metadata={"image_size": [image_size[0], image_size[1]], "search_region": search_region},
         )
         input_target["item"] = add_friend_item_snapshot(input_item, image_size)
+    elif visual_button_left is not None:
+        button_top = int(visual_button_bounds[1])
+        button_bottom = int(visual_button_bounds[3])
+        input_bounds = [
+            search_region[0] + 12,
+            max(search_region[1], button_top),
+            max(search_region[0] + 90, visual_button_left - 8),
+            min(search_region[3], button_bottom),
+        ]
+        input_x, input_y = clamp_point_to_bounds(
+            int((input_bounds[0] + input_bounds[2]) / 2),
+            int((input_bounds[1] + input_bounds[3]) / 2),
+            input_bounds,
+        )
+        input_target = geometry_fallback_locator(
+            name="add_friend_search_input",
+            label="Add friend page search input from visual search button anchor",
+            region=add_friend_region_for_point(input_x, input_y, image_size),
+            bounds=input_bounds,
+            point=[input_x, input_y],
+            selected_reason="visual search button detected; input is the adjacent left field",
+            fallback_reason="ocr_placeholder_not_detected_visual_button_anchor_used",
+            risk="type_query_here_visual_button_anchor",
+            source="visual_search_button_anchor",
+            confidence=0.78,
+            metadata={"image_size": [image_size[0], image_size[1]], "search_region": search_region},
+        )
+        input_target["strategy"] = "visual_button_anchor_locator"
+        input_target["fallback_used"] = False
+        input_target["fallback_reason"] = ""
+        input_target["source"] = "visual_search_button_anchor"
+        input_target["locator"] = {field: input_target.get(field) for field in LOCATOR_RESULT_FIELDS}
+        input_target["item"] = None
     else:
         input_x, input_y = fallback_input_x, fallback_input_y
-        input_bounds = [
-            max(split_x + 48, input_x - 140),
-            max(search_region[1], input_y - 24),
-            min(image_size[0] - 80, input_x + 170),
-            min(search_region[3], input_y + 24),
-        ]
+        if small_add_friend_window:
+            input_bounds = [32, 72, max(120, min(image_size[0] - 126, 292)), 122]
+            input_x, input_y = clamp_point_to_bounds(
+                bounded_int(input_x, default=158, minimum=input_bounds[0] + 20, maximum=input_bounds[2] - 20),
+                bounded_int(input_y, default=96, minimum=input_bounds[1] + 8, maximum=input_bounds[3] - 8),
+                input_bounds,
+            )
+        else:
+            input_bounds = [
+                max(split_x + 48, input_x - 140),
+                max(search_region[1], input_y - 24),
+                min(image_size[0] - 80, input_x + 170),
+                min(search_region[3], input_y + 24),
+            ]
         input_target = geometry_fallback_locator(
             name="add_friend_search_input",
             label="Add friend page search input",
             region=add_friend_region_for_point(input_x, input_y, image_size),
             bounds=input_bounds,
             point=[input_x, input_y],
-            selected_reason="fallback search input point from window split geometry",
+            selected_reason="last-resort fixed search input point from window geometry",
             fallback_reason="search_input_ocr_not_detected",
-            risk="type_query_here",
+            risk="HIGH_RISK_FIXED_FALLBACK: type query only after exact OCR verification",
             source="fallback_search_input_geometry",
             metadata={"image_size": [image_size[0], image_size[1]], "search_region": search_region},
         )
@@ -3084,23 +3156,57 @@ def find_add_friend_page_search_targets(
             metadata={"image_size": [image_size[0], image_size[1]], "search_region": search_region},
         )
         button_target["item"] = add_friend_item_snapshot(search_button, image_size)
+    elif visual_button is not None:
+        button_bounds = [int(value) for value in visual_button["bounds"]]
+        button_x, button_y = clamp_point_to_bounds(
+            int((button_bounds[0] + button_bounds[2]) / 2),
+            int((button_bounds[1] + button_bounds[3]) / 2),
+            button_bounds,
+        )
+        button_target = geometry_fallback_locator(
+            name="add_friend_search_button",
+            label="Add friend page search button visual target",
+            region=add_friend_region_for_point(button_x, button_y, image_size),
+            bounds=button_bounds,
+            point=[button_x, button_y],
+            selected_reason="visual green search button detected",
+            fallback_reason="",
+            risk="click_search_after_exact_query_verified_visual_button",
+            source="visual_search_button",
+            confidence=float(visual_button.get("confidence") or 0.78),
+            metadata={"image_size": [image_size[0], image_size[1]], "search_region": search_region},
+        )
+        button_target["strategy"] = "visual_button_locator"
+        button_target["fallback_used"] = False
+        button_target["fallback_reason"] = ""
+        button_target["source"] = "visual_search_button"
+        button_target["locator"] = {field: button_target.get(field) for field in LOCATOR_RESULT_FIELDS}
+        button_target["item"] = None
     else:
-        button_x, button_y = min(image_size[0] - 38, input_x + 230), input_y
-        button_bounds = [
-            max(search_region[0], button_x - 42),
-            max(search_region[1], button_y - 24),
-            min(image_size[0] - 12, button_x + 42),
-            min(search_region[3], button_y + 24),
-        ]
+        if small_add_friend_window:
+            button_bounds = [max(input_target["click_bounds"][2] + 4, image_size[0] - 118), 72, max(input_target["click_bounds"][2] + 44, image_size[0] - 30), 122]
+            button_x, button_y = clamp_point_to_bounds(
+                int((button_bounds[0] + button_bounds[2]) / 2),
+                input_y,
+                button_bounds,
+            )
+        else:
+            button_x, button_y = min(image_size[0] - 38, input_x + 230), input_y
+            button_bounds = [
+                max(search_region[0], button_x - 42),
+                max(search_region[1], button_y - 24),
+                min(image_size[0] - 12, button_x + 42),
+                min(search_region[3], button_y + 24),
+            ]
         button_target = geometry_fallback_locator(
             name="add_friend_search_button",
             label="Add friend page search button",
             region=add_friend_region_for_point(button_x, button_y, image_size),
             bounds=button_bounds,
             point=[button_x, button_y],
-            selected_reason="fallback search button point to the right of search input",
+            selected_reason="last-resort fixed search button point to the right of search input",
             fallback_reason="search_button_ocr_not_detected",
-            risk="click_search_after_query_verified",
+            risk="HIGH_RISK_FIXED_FALLBACK: click only after exact query verification",
             source="fallback_search_button_geometry",
             metadata={"image_size": [image_size[0], image_size[1]], "search_region": search_region},
         )
@@ -3112,17 +3218,125 @@ def find_add_friend_page_search_targets(
     }
 
 
+def find_add_friend_search_placeholder_item(
+    ocr_items: list[dict[str, Any]],
+    image_size: tuple[int, int],
+    *,
+    search_region: list[int],
+) -> dict[str, Any] | None:
+    candidates: list[dict[str, Any]] = []
+    for item in ocr_items:
+        center_x, center_y = add_friend_item_center(item)
+        if not point_in_bounds(center_x, center_y, search_region):
+            continue
+        compact = add_friend_ocr_compact(add_friend_item_text(item))
+        has_contact_hint = any(token in compact for token in ("微信号", "手机号", "QQ号", "微信"))
+        if not has_contact_hint:
+            continue
+        if compact == "搜索":
+            continue
+        candidates.append(item)
+    if not candidates:
+        return None
+    return max(candidates, key=lambda item: (float(item.get("confidence") or 0.0), float(item.get("right") or 0.0) - float(item.get("left") or 0.0)))
+
+
+def find_add_friend_search_button_item(
+    ocr_items: list[dict[str, Any]],
+    image_size: tuple[int, int],
+    *,
+    search_region: list[int],
+) -> dict[str, Any] | None:
+    candidates: list[dict[str, Any]] = []
+    for item in ocr_items:
+        center_x, center_y = add_friend_item_center(item)
+        if not point_in_bounds(center_x, center_y, search_region):
+            continue
+        compact = add_friend_ocr_compact(add_friend_item_text(item))
+        if compact != "搜索":
+            continue
+        candidates.append(item)
+    if not candidates:
+        return None
+    return max(candidates, key=lambda item: (float(item.get("confidence") or 0.0), float(item.get("left") or 0.0)))
+
+
+def find_add_friend_search_button_by_visual(
+    screenshot: Image.Image | None,
+    image_size: tuple[int, int],
+    *,
+    search_region: list[int],
+) -> dict[str, Any] | None:
+    if screenshot is None:
+        return None
+    left, top, right, bottom = [int(value) for value in search_region[:4]]
+    try:
+        image = screenshot.convert("RGB")
+    except Exception:
+        return None
+    points: list[tuple[int, int]] = []
+    sample_step = 2
+    for y in range(max(0, top), min(image_size[1], bottom), sample_step):
+        for x in range(max(0, left), min(image_size[0], right), sample_step):
+            r, g, b = image.getpixel((x, y))
+            if g >= 145 and r <= 90 and b <= 140 and (g - max(r, b)) >= 50:
+                points.append((x, y))
+    if len(points) < 48:
+        return None
+    min_x = min(x for x, _ in points)
+    max_x = max(x for x, _ in points)
+    min_y = min(y for _, y in points)
+    max_y = max(y for _, y in points)
+    if max_x - min_x < 38 or max_y - min_y < 28:
+        return None
+    bounds = [
+        max(left, min_x - 4),
+        max(top, min_y - 4),
+        min(right, max_x + 4),
+        min(bottom, max_y + 4),
+    ]
+    return {
+        "source": "visual_search_button",
+        "bounds": bounds,
+        "point": [int((bounds[0] + bounds[2]) / 2), int((bounds[1] + bounds[3]) / 2)],
+        "confidence": 0.78,
+        "green_pixels": len(points),
+    }
+
+
 def add_friend_query_visible_in_items(query: str, ocr_items: list[dict[str, Any]]) -> dict[str, Any]:
     clean_query = add_friend_ocr_compact(query)
     text = add_friend_surface_text(ocr_items)
     digits_query = re.sub(r"\D+", "", str(query or ""))
     digits_text = re.sub(r"\D+", "", text)
-    visible = bool(clean_query and clean_query in text) or bool(digits_query and digits_query in digits_text)
+    if digits_query:
+        visible = digits_text == digits_query
+        reason = "digits_exact_match" if visible else "digits_not_exact_match"
+    else:
+        compact_items = [add_friend_ocr_compact(add_friend_item_text(item)) for item in ocr_items]
+        compact_items = [item for item in compact_items if item and item != "搜索"]
+        visible = bool(clean_query and compact_items.count(clean_query) == 1)
+        reason = "text_exact_item_match" if visible else "text_not_exact_match"
     return {
         "ok": visible,
         "query": str(query or ""),
         "ocr_text": text,
         "digits_text": digits_text,
+        "expected_digits": digits_query,
+        "reason": reason,
+    }
+
+
+def add_friend_search_input_empty_in_items(ocr_items: list[dict[str, Any]], image_size: tuple[int, int]) -> dict[str, Any]:
+    search_region = add_friend_page_search_region(image_size)
+    placeholder = find_add_friend_search_placeholder_item(ocr_items, image_size, search_region=search_region)
+    surface = add_friend_surface_text(ocr_items)
+    digit_sequences = re.findall(r"\d{5,20}", surface)
+    return {
+        "ok": placeholder is not None and not digit_sequences,
+        "placeholder_visible": placeholder is not None,
+        "digits": digit_sequences,
+        "ocr_text": surface,
     }
 
 
@@ -3565,7 +3779,7 @@ def input_add_friend_query_and_search(
     ocr_started_at = time.perf_counter()
     page_items = run_ocr_on_screen_region(page_shot, search_region)
     timings.append({"name": "add_friend_page_search_region_ocr", "seconds": round(time.perf_counter() - ocr_started_at, 3), "bounds": search_region, "ocr_count": len(page_items)})
-    search_targets = find_add_friend_page_search_targets(page_items, page_shot.size)
+    search_targets = find_add_friend_page_search_targets(page_items, page_shot.size, screenshot=page_shot)
     targets = [search_targets["input"], search_targets["button"]]
     page_annotated_path = output_dir / "add_friend_page_before_input_window_annotated.png"
     page_annotated = draw_add_friend_screen_annotation(
@@ -3591,13 +3805,86 @@ def input_add_friend_query_and_search(
         human_window_image_click(hwnd, int(input_target.get("x") or 0), int(input_target.get("y") or 0))
         input_click_result = {"ok": True, "x": int(input_target.get("x") or 0), "y": int(input_target.get("y") or 0), "bounds": None}
     timings.append({"name": "add_friend_search_input_click", "seconds": round(time.perf_counter() - input_click_started_at, 3), "result": input_click_result})
-    pause_seconds = add_friend_paced_pause("input", reason="after_add_friend_search_input_click_before_typing")
+    pause_seconds = add_friend_human_pause(140, 360, reason="input:after_add_friend_search_input_click_before_typing")
     timings.append({"name": "after_add_friend_search_input_click_before_typing_pause", "seconds": round(pause_seconds, 3)})
     clear_started_at = time.perf_counter()
     search_x = int(input_target.get("x") or 0)
     search_y = int(input_target.get("y") or 0)
-    clear_result = clear_add_friend_sidebar_search_box(hwnd, search_x, search_y, target_hint=query)
+    initial_empty = add_friend_search_input_empty_in_items(page_items, page_shot.size)
+    clear_verify_payload: dict[str, Any] | None = None
+    if initial_empty.get("ok"):
+        clear_result = {"ok": True, "method": "skip_clear_placeholder_visible", "empty_check": initial_empty}
+    else:
+        clear_result = clear_add_friend_sidebar_search_box(hwnd, search_x, search_y, target_hint=query)
     timings.append({"name": "clear_add_friend_search_box", "seconds": round(time.perf_counter() - clear_started_at, 3), "result": clear_result})
+    if not clear_result.get("ok"):
+        return {
+            "ok": False,
+            "state": "search_input_clear_failed",
+            "query": query,
+            "error_code": "ADD_FRIEND_SEARCH_INPUT_CLEAR_FAILED",
+            "page": {
+                "screenshot_path": page_path,
+                "annotated_path": page_annotated,
+                "ocr_items": add_friend_ocr_snapshots(page_items, page_shot.size),
+                "targets": targets,
+                "input_empty_before_clear": initial_empty,
+            },
+            "clear_result": clear_result,
+            "timings": timings,
+        }
+    if not initial_empty.get("ok"):
+        clear_verify_started_at = time.perf_counter()
+        clear_verify_shot, clear_verify_path = capture_wechat_window_visible_screen(hwnd, artifact_dir=str(output_dir), label="add_friend_search_input_after_clear_window")
+        clear_verify_region = add_friend_page_search_region(clear_verify_shot.size)
+        clear_verify_items = run_ocr_on_screen_region(clear_verify_shot, clear_verify_region)
+        clear_verify = add_friend_search_input_empty_in_items(clear_verify_items, clear_verify_shot.size)
+        clear_verify_annotated_path = output_dir / "add_friend_search_input_after_clear_window_annotated.png"
+        clear_verify_annotated = draw_add_friend_screen_annotation(
+            clear_verify_shot,
+            ocr_items=clear_verify_items,
+            targets=targets,
+            output_path=clear_verify_annotated_path,
+            window_rect=None,
+        )
+        clear_verify_payload = {
+            "screenshot_path": clear_verify_path,
+            "annotated_path": clear_verify_annotated,
+            "ocr_items": add_friend_ocr_snapshots(clear_verify_items, clear_verify_shot.size),
+            "verify": clear_verify,
+        }
+        timings.append(
+            {
+                "name": "clear_add_friend_search_box_verify",
+                "seconds": round(time.perf_counter() - clear_verify_started_at, 3),
+                "bounds": clear_verify_region,
+                "ocr_count": len(clear_verify_items),
+                "result": clear_verify,
+            }
+        )
+        if not clear_verify.get("ok"):
+            return {
+                "ok": False,
+                "state": "search_input_clear_unconfirmed",
+                "query": query,
+                "error_code": "ADD_FRIEND_SEARCH_INPUT_CLEAR_FAILED",
+                "page": {
+                    "screenshot_path": page_path,
+                    "annotated_path": page_annotated,
+                    "ocr_items": add_friend_ocr_snapshots(page_items, page_shot.size),
+                    "targets": targets,
+                    "input_empty_before_clear": initial_empty,
+                },
+                "latest_verify": {
+                    "screenshot_path": clear_verify_path,
+                    "annotated_path": clear_verify_annotated,
+                    "ocr_items": add_friend_ocr_snapshots(clear_verify_items, clear_verify_shot.size),
+                    "verify": clear_verify,
+                },
+                "clear_verify": clear_verify_payload,
+                "clear_result": clear_result,
+                "timings": timings,
+            }
 
     input_attempts: list[dict[str, Any]] = []
     verified = False
@@ -3690,10 +3977,13 @@ def input_add_friend_query_and_search(
             verified = True
             break
         if attempt < 2:
-            delete_result = backspace_add_friend_query_chars(len(str(query)))
-            timings.append({"name": f"backspace_query_attempt_{attempt}", "result": delete_result})
-            pause_seconds = add_friend_paced_pause("input", reason=f"after_query_backspace_attempt_{attempt}")
-            timings.append({"name": f"after_query_backspace_attempt_{attempt}_pause", "seconds": round(pause_seconds, 3)})
+            retry_clear_started_at = time.perf_counter()
+            retry_clear_result = clear_add_friend_sidebar_search_box(hwnd, search_x, search_y, target_hint=query)
+            timings.append({"name": f"clear_query_attempt_{attempt}", "seconds": round(time.perf_counter() - retry_clear_started_at, 3), "result": retry_clear_result})
+            if not retry_clear_result.get("ok"):
+                break
+            pause_seconds = add_friend_human_pause(140, 360, reason=f"input:after_query_clear_attempt_{attempt}")
+            timings.append({"name": f"after_query_clear_attempt_{attempt}_pause", "seconds": round(pause_seconds, 3)})
 
     if not verified:
         return {
@@ -3707,6 +3997,9 @@ def input_add_friend_query_and_search(
                 "targets": targets,
             },
             "input_attempts": input_attempts,
+            "input_empty_before_clear": initial_empty,
+            "clear_result": clear_result,
+            "clear_verify": clear_verify_payload,
             "latest_verify": {
                 "screenshot_path": latest_verify_path,
                 "annotated_path": latest_verify_annotated,
@@ -3776,7 +4069,10 @@ def input_add_friend_query_and_search(
             "annotated_path": page_annotated,
             "ocr_items": add_friend_ocr_snapshots(page_items, page_shot.size),
             "targets": targets,
+            "input_empty_before_clear": initial_empty,
         },
+        "clear_result": clear_result,
+        "clear_verify": clear_verify_payload,
         "input_attempts": input_attempts,
         "result": {
             "screenshot_path": result_path,
@@ -3815,11 +4111,39 @@ def write_add_friend_entry_click_review(output_dir: Path, payload: dict[str, Any
         )
     before = payload.get("before") if isinstance(payload.get("before"), dict) else {}
     if before:
+        plus_target = {}
+        planned_targets = before.get("planned_targets") or []
+        if isinstance(planned_targets, list):
+            for target in planned_targets:
+                if isinstance(target, dict) and str(target.get("name") or "") == "plus_entry":
+                    plus_target = target
+                    break
+        target_meta = plus_target.get("metadata") if isinstance(plus_target.get("metadata"), dict) else {}
+        if plus_target:
+            rows.append(
+                {
+                    "title": "01 微信窗口布局校准",
+                    "purpose": "先划分微信窗口区域，再在左侧栏顶部右侧区域用图标形状识别 + 入口；旧坐标推算只保留为诊断参考。",
+                    "expected": "source=vision_plus_icon 且 executable=true；diagnostic_references 只能用于排查，不能作为点击点。",
+                    "raw": before.get("screenshot_path"),
+                    "annotated": before.get("annotated_path"),
+                    "targets": [plus_target],
+                    "detection": {
+                        "source": plus_target.get("source"),
+                        "strategy": plus_target.get("strategy"),
+                        "confidence": plus_target.get("confidence"),
+                        "executable": plus_target.get("executable"),
+                        "selected_reason": plus_target.get("selected_reason"),
+                        "layout_calibration": target_meta.get("layout_calibration"),
+                        "diagnostic_references": plus_target.get("diagnostic_references") or target_meta.get("diagnostic_references") or [],
+                    },
+                }
+            )
         rows.append(
             {
-                "title": "01 运行前屏幕标注",
-                "purpose": "检查 + 入口目标是否落在微信左上搜索框右侧；如果菜单本来已经打开，也会标注菜单项。",
-                "expected": "红色 T1 应落在 + 上；不能点到搜索框、聊天区或 PowerShell。",
+                "title": "02 运行前屏幕标注",
+                "purpose": "检查 + 入口目标是否落在微信左侧栏顶部右侧区域；如果菜单本来已经打开，也会标注菜单项。",
+                "expected": "红色 T1 应落在视觉识别出的 + 上；不能点到搜索框、聊天区或 PowerShell。",
                 "raw": before.get("screenshot_path"),
                 "annotated": before.get("annotated_path"),
                 "targets": before.get("planned_targets") or [],
@@ -3832,7 +4156,7 @@ def write_add_friend_entry_click_review(output_dir: Path, payload: dict[str, Any
         attempt_no = attempt.get("attempt")
         rows.append(
             {
-                "title": f"02 点击 + 后屏幕标注 attempt {attempt_no}",
+                "title": f"03 点击 + 后屏幕标注 attempt {attempt_no}",
                 "purpose": "检查点击 + 后是否出现快捷操作弹出菜单 plus_entry_popup_menu，并检查菜单里的下一步目标。",
                 "expected": "应能看到 发起群聊 / 添加朋友 / 新建笔记；红色 add_friend_menu_entry 应落在“添加朋友”这一行。",
                 "raw": attempt.get("screenshot_path"),
@@ -3845,7 +4169,7 @@ def write_add_friend_entry_click_review(output_dir: Path, payload: dict[str, Any
     if menu_click:
         rows.append(
             {
-                "title": "03 点击添加朋友后屏幕标注",
+                "title": "04 点击添加朋友后屏幕标注",
                 "purpose": "检查鼠标是否已经通过轨迹移动到“添加朋友”，停顿后点击，并进入下一层添加朋友界面。",
                 "expected": "应不再停留在快捷操作弹出菜单；如果微信进入添加朋友/搜索页，说明这一格通过。",
                 "raw": menu_click.get("screenshot_path"),
@@ -3864,13 +4188,31 @@ def write_add_friend_entry_click_review(output_dir: Path, payload: dict[str, Any
     if page:
         rows.append(
             {
-                "title": "04 添加朋友页搜索框标注",
+                "title": "05 添加朋友页搜索框标注",
                 "purpose": "检查进入添加朋友页后，搜索输入框和搜索按钮定位是否合理。",
                 "expected": "红色 add_friend_search_input 应落在输入框，add_friend_search_button 应落在搜索按钮。",
                 "raw": page.get("screenshot_path"),
                 "annotated": page.get("annotated_path"),
                 "targets": page.get("targets") or [],
-                "detection": {"state": query_search.get("state"), "query": query_search.get("query")},
+                "detection": {
+                    "state": query_search.get("state"),
+                    "query": query_search.get("query"),
+                    "input_empty_before_clear": page.get("input_empty_before_clear"),
+                    "clear_result": query_search.get("clear_result"),
+                },
+            }
+        )
+    clear_verify = query_search.get("clear_verify") if isinstance(query_search.get("clear_verify"), dict) else {}
+    if clear_verify:
+        rows.append(
+            {
+                "title": "06 清空搜索框后复核",
+                "purpose": "检查旧手机号/微信号是否已经清空；如果输入框为空，OCR 应看到占位文案且不应再看到手机号数字。",
+                "expected": "verify.ok=true；否则直接失败，不继续输入新手机号，避免旧手机号残留 + 新手机号拼接。",
+                "raw": clear_verify.get("screenshot_path"),
+                "annotated": clear_verify.get("annotated_path"),
+                "targets": page.get("targets") or [],
+                "detection": clear_verify.get("verify"),
             }
         )
     for attempt in query_search.get("input_attempts") or []:
@@ -3878,9 +4220,9 @@ def write_add_friend_entry_click_review(output_dir: Path, payload: dict[str, Any
             continue
         rows.append(
             {
-                "title": f"05 输入核对 attempt {attempt.get('attempt')}",
+                "title": f"07 输入核对 attempt {attempt.get('attempt')}",
                 "purpose": "检查手机号/微信号是否完整输入，OCR 是否确认输入内容正确。",
-                "expected": "verify.ok=true；如果 false，脚本会逐个 Backspace 删除后重输一次。",
+                "expected": "verify.ok=true；如果 false，脚本会重新 Ctrl+A 清空后只重输一次；仍不通过则失败。",
                 "raw": attempt.get("screenshot_path"),
                 "annotated": attempt.get("annotated_path"),
                 "targets": page.get("targets") or [],
@@ -3891,7 +4233,7 @@ def write_add_friend_entry_click_review(output_dir: Path, payload: dict[str, Any
     if result:
         rows.append(
             {
-                "title": "06 点击搜索后结果区标注",
+                "title": "08 点击搜索后结果区标注",
                 "purpose": "检查点击搜索后，结果区域是否出现内容。",
                 "expected": "截图中应能看到搜索后的页面内容；橙色框只标和搜索结果区域有关的 OCR。",
                 "raw": result.get("screenshot_path"),
@@ -3907,7 +4249,7 @@ def write_add_friend_entry_click_review(output_dir: Path, payload: dict[str, Any
         if add_contact_before:
             rows.append(
                 {
-                    "title": "07 点击添加到通讯录前标注",
+                    "title": "09 点击添加到通讯录前标注",
                     "purpose": "检查搜索结果里是否识别到“添加到通讯录”按钮；搜不到用户时这里会展示失败状态。",
                     "expected": "搜到用户时红色 add_contact_entry_button 应落在“添加到通讯录”；搜不到时 detection.error_code=PHONE_NOT_FOUND。",
                     "raw": add_contact_before.get("screenshot_path"),
@@ -3925,7 +4267,7 @@ def write_add_friend_entry_click_review(output_dir: Path, payload: dict[str, Any
         elif add_contact_result.get("annotated_path") or add_contact_result.get("screenshot_path"):
             rows.append(
                 {
-                    "title": "07 搜索结果失败判定",
+                    "title": "09 搜索结果失败判定",
                     "purpose": "检查搜索结果是否为找不到用户，并输出任务失败上报字段。",
                     "expected": "找不到用户时 task_status=failed、error_code=PHONE_NOT_FOUND、current_step=searching_phone。",
                     "raw": add_contact_result.get("screenshot_path"),
@@ -3944,7 +4286,7 @@ def write_add_friend_entry_click_review(output_dir: Path, payload: dict[str, Any
         if add_contact_after:
             rows.append(
                 {
-                    "title": "08 点击添加到通讯录后截图",
+                    "title": "10 点击添加到通讯录后截图",
                     "purpose": "检查脚本是否只点击了一次“添加到通讯录”，然后进入申请添加朋友表单。",
                     "expected": "应出现“申请添加朋友”表单；下一步会清空默认申请文案并填写固定话术。",
                     "raw": add_contact_after.get("screenshot_path"),
@@ -3968,7 +4310,7 @@ def write_add_friend_entry_click_review(output_dir: Path, payload: dict[str, Any
             if invite_before:
                 rows.append(
                     {
-                        "title": "09 申请表单填写前标注",
+                        "title": "11 申请表单填写前标注",
                         "purpose": "检查申请文案框、备注框、确定按钮三个操作区域是否落在正确位置。",
                         "expected": "invite_greeting_textarea 应落在“发送添加朋友申请”文本框；invite_remark_input 应落在备注框；invite_confirm_button 应落在绿色确定按钮。",
                         "raw": invite_before.get("screenshot_path"),
@@ -3988,7 +4330,7 @@ def write_add_friend_entry_click_review(output_dir: Path, payload: dict[str, Any
             if invite_filled:
                 rows.append(
                     {
-                        "title": "10 申请表单填写后/确定前截图",
+                        "title": "12 申请表单填写后/确定前截图",
                         "purpose": "检查申请语是否写入 verify_message，微信备注框是否写入 remark_name。",
                         "expected": "申请语应等于传入的 verify_message；备注名应等于传入的 remark_name，且 remark_name 包含 remark_code。",
                         "raw": invite_filled.get("screenshot_path"),
@@ -4010,7 +4352,7 @@ def write_add_friend_entry_click_review(output_dir: Path, payload: dict[str, Any
             if invite_after:
                 rows.append(
                     {
-                        "title": "11 点击确定后截图",
+                        "title": "13 点击确定后截图",
                         "purpose": "检查脚本是否点击了“确定”，并用点击后的 OCR 结果复核最终任务状态。",
                         "expected": "confirm.ok=true；只要没有明确失败/风控提示，就按 completed + invite_sent 上报；already_friend 只允许在发送邀请前的搜索结果/资料页阶段判定。",
                         "raw": invite_after.get("screenshot_path"),
@@ -4349,7 +4691,7 @@ def add_friend_pre_click_main_window_readiness(
     ocr_items = run_ocr_on_screen_region(screenshot, [0, 0, screenshot.size[0], screenshot.size[1]])
     ocr_seconds = round(time.perf_counter() - ocr_started_at, 3)
     route_kind = "windows_1080p_reference" if str(route or "") == ADD_FRIEND_WINDOWS_1080P_REFERENCE_ROUTE else "windows"
-    plus_target = add_friend_plus_entry_target(geometry, screenshot.size, ocr_items, route_kind=route_kind)
+    plus_target = add_friend_plus_entry_target(geometry, screenshot.size, ocr_items, screenshot=screenshot, route_kind=route_kind)
     surface_readiness = add_friend_surface_readiness(
         screenshot,
         ocr_items,
@@ -4428,7 +4770,7 @@ def add_friend_calibration_payload(
     ocr_started_at = time.perf_counter()
     ocr_items = run_ocr_on_screen_region(screenshot, [0, 0, screenshot.size[0], screenshot.size[1]])
     route_kind = "windows_1080p_reference" if str(route or "") == ADD_FRIEND_WINDOWS_1080P_REFERENCE_ROUTE else "windows"
-    plus_target = add_friend_plus_entry_target(geometry, screenshot.size, ocr_items, route_kind=route_kind)
+    plus_target = add_friend_plus_entry_target(geometry, screenshot.size, ocr_items, screenshot=screenshot, route_kind=route_kind)
     readiness = add_friend_surface_readiness(screenshot, ocr_items, geometry, stage="calibration")
     annotated_path = output_dir / "add_friend_calibration_main_window_annotated.png"
     annotated = draw_add_friend_screen_annotation(
@@ -4711,8 +5053,8 @@ def click_add_friend_ocr_item(hwnd: int, item: dict[str, Any]) -> None:
     add_friend_human_pause(900, 1900, reason="after_mouse_click")
 
 
-def add_friend_wait_before_ocr(reason: str) -> None:
-    add_friend_human_pause(1200, 2600, reason=reason)
+def add_friend_wait_before_ocr(reason: str) -> float:
+    return add_friend_paced_pause("verify", reason=reason)
 
 
 def clear_add_friend_sidebar_search_box(
@@ -4721,35 +5063,18 @@ def clear_add_friend_sidebar_search_box(
     search_y: int,
     *,
     target_hint: str = "",
-) -> None:
-    """Clear the WeChat sidebar search box with slow serialized key actions."""
-    add_friend_human_pause(700, 1600, reason="before_search_clear_escape")
-    key_press(win32con.VK_ESCAPE)
-    add_friend_human_pause(900, 1800, reason="after_escape_before_search_click")
-    human_window_image_click(hwnd, search_x, search_y)
-    add_friend_human_pause(900, 1900, reason="after_search_click_before_clear_keys")
-    # Default to a minimal clear. In clean main-list state ESC + focus click is
-    # enough; long Backspace/Delete bursts are a known anti-automation risk.
-    default_backspaces = random.randint(1, 3)
-    backspaces = bounded_int(
-        os.getenv("WECHAT_WIN32_OCR_ADD_FRIEND_CLEAR_BACKSPACES"),
-        default=default_backspaces,
-        minimum=0,
-        maximum=12,
-    )
-    deletes = bounded_int(
-        os.getenv("WECHAT_WIN32_OCR_ADD_FRIEND_CLEAR_DELETES"),
-        default=0,
-        minimum=0,
-        maximum=4,
-    )
-    for idx in range(backspaces):
+) -> dict[str, Any]:
+    """Clear the add-friend search box before typing a new query."""
+    try:
+        human_window_image_click(hwnd, search_x, search_y)
+        add_friend_human_pause(140, 320, reason="after_search_click_before_ctrl_a")
+        hotkey(win32con.VK_CONTROL, ord("A"))
+        add_friend_human_pause(90, 220, reason="after_ctrl_a_before_clear")
         key_press(win32con.VK_BACK)
-        add_friend_human_pause(120, 420, reason=f"clear_backspace_{idx + 1}")
-    for idx in range(deletes):
-        key_press(win32con.VK_DELETE)
-        add_friend_human_pause(150, 460, reason=f"clear_delete_{idx + 1}")
-    add_friend_human_pause(700, 1500, reason="after_search_clear_keys")
+        add_friend_human_pause(140, 320, reason="after_search_clear")
+        return {"ok": True, "method": "click_ctrl_a_backspace", "target_hint": str(target_hint or "")}
+    except Exception as exc:
+        return {"ok": False, "method": "click_ctrl_a_backspace", "target_hint": str(target_hint or ""), "error": repr(exc)}
 
 
 def add_friend_virtual_key_for_digit(char: str) -> int:

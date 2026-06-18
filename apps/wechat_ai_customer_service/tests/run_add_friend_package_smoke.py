@@ -898,8 +898,25 @@ def test_sidecar_uses_flow_context_for_entry_click() -> None:
     )
     assert_true("def _build_entry_click_payload(" in flow_source, "entry-click flow should centralize payload assembly")
     assert_true(
-        flow_source.count("_build_entry_click_payload(") == 4,
-        "entry-click flow should have one helper definition and three branch calls",
+        flow_source.count("_build_entry_click_payload(") == 5,
+        "entry-click flow should have one helper definition and four branch calls",
+    )
+    assert_true('"window_layout_calibration"' in flow_source, "entry-click flow should expose layout calibration as a first-class step")
+    assert_true("ERROR_PLUS_ENTRY_NOT_FOUND" in flow_source, "missing visual plus icon should be a first-class failure")
+    assert_true("ERROR_PLUS_ENTRY_POPUP_NOT_DETECTED" in flow_source, "missing popup after plus click should be a first-class failure")
+    assert_true("ERROR_ADD_FRIEND_MENU_CLICK_FAILED" in flow_source, "menu click failure should not be reported as plus popup failure")
+    assert_true("human_window_image_click_in_bounds(" in flow_source, "plus click must clamp to selected target bounds")
+    assert_true(
+        "add_friend_window_layout_calibration_annotated.png" in flow_source,
+        "layout calibration should have its own region annotation artifact",
+    )
+    assert_true(
+        '"entry_before_capture"' in flow_source and '"annotated": before_annotated' in flow_source,
+        "entry-before capture should keep the plus-entry target annotation artifact",
+    )
+    assert_true(
+        "WECHAT_WIN32_OCR_PLUS_ENTRY_CLICK_MAX_ATTEMPTS" not in flow_source,
+        "plus entry click should not retry the same candidate point",
     )
 
 
@@ -928,6 +945,8 @@ def test_add_friend_uses_shared_operator_guard_module() -> None:
         encoding="utf-8"
     )
     assert_true("run_rpa_operator_guard.py" in guard_source, "add_friend must reuse the shared floating-ball operator guard script")
+    assert_true("--block-manual-input" in guard_source, "operator guard should default to locking/blocking manual keyboard and mouse input")
+    assert_true("block_manual_input" in guard_source, "operator guard settings should expose the manual-input lock flag")
     assert_true("SetWindowsHookExW" not in guard_source, "add_friend adapter must not duplicate keyboard/mouse hook logic")
     assert_true("start_add_friend_operator_guard(" in sidecar, "sidecar should start operator guard before add_friend click flow")
     assert_true("stop_add_friend_operator_guard(" in sidecar, "sidecar should stop operator guard after add_friend click flow")
@@ -1281,9 +1300,12 @@ def test_query_verify_invalid_dialog_handle_returns_structured_failure() -> None
 
 
 def test_add_friend_primary_locator_contract() -> None:
+    from PIL import Image, ImageDraw
+
     from apps.wechat_ai_customer_service.adapters.wechat_win32_ocr_sidecar import (
         add_friend_menu_candidate_targets,
         add_friend_plus_entry_target,
+        add_friend_query_visible_in_items,
         add_friend_search_result_add_contact_target,
         find_add_friend_page_search_targets,
     )
@@ -1299,6 +1321,21 @@ def test_add_friend_primary_locator_contract() -> None:
             "center_y": int((top + bottom) / 2),
             "confidence": 0.91,
         }
+
+    def plus_icon_image() -> Image.Image:
+        image = Image.new("RGB", (981, 860), (246, 248, 250))
+        draw = ImageDraw.Draw(image)
+        center_x, center_y = 350, 70
+        draw.line((center_x - 9, center_y, center_x + 9, center_y), fill=(45, 52, 64), width=3)
+        draw.line((center_x, center_y - 9, center_x, center_y + 9), fill=(45, 52, 64), width=3)
+        return image
+
+    def small_add_friend_image() -> Image.Image:
+        image = Image.new("RGB", (468, 520), (245, 246, 248))
+        draw = ImageDraw.Draw(image)
+        draw.rounded_rectangle((32, 72, 292, 122), radius=8, fill=(235, 238, 242), outline=(214, 220, 228), width=1)
+        draw.rounded_rectangle((310, 72, 398, 122), radius=8, fill=(8, 189, 116), outline=(8, 189, 116), width=1)
+        return image
 
     def assert_locator(target: dict[str, object], name: str) -> None:
         for field in [
@@ -1321,17 +1358,22 @@ def test_add_friend_primary_locator_contract() -> None:
         {"width": 981, "height": 860, "left": 0, "top": 0, "right": 981, "bottom": 860},
         (981, 860),
         [ocr_item("搜索", 112, 60, 154, 82)],
+        screenshot=plus_icon_image(),
         route_kind="windows",
     )
     assert_locator(plus_target, "plus_entry")
-    assert_true(plus_target.get("strategy") == "multi_candidate_sidebar_plus_locator", f"plus locator strategy mismatch: {plus_target}")
-    assert_true(plus_target.get("source") == "sidebar_search_ocr_anchor", f"plus locator should prefer OCR anchor: {plus_target}")
-    assert_true(plus_target.get("fallback_used") is False, f"OCR anchored plus locator should not mark fallback: {plus_target}")
-    assert_true(len(plus_target.get("candidates") or []) >= 3, f"plus locator should expose OCR/current/reference candidates: {plus_target}")
-    assert_true(250 <= int(plus_target.get("x") or 0) <= 334, f"plus locator x outside sidebar toolbar: {plus_target}")
+    assert_true(plus_target.get("strategy") == "sidebar_header_plus_icon_vision_locator", f"plus locator strategy mismatch: {plus_target}")
+    assert_true(plus_target.get("source") == "vision_plus_icon", f"plus locator must use visual icon detection: {plus_target}")
+    assert_true(plus_target.get("executable") is True, f"visual plus locator should be executable: {plus_target}")
+    assert_true(plus_target.get("fallback_used") is False, f"plus locator must not execute fallback clicks: {plus_target}")
+    assert_true(len(plus_target.get("candidates") or []) >= 1, f"plus locator should expose visual candidates: {plus_target}")
+    assert_true(320 <= int(plus_target.get("x") or 0) <= 370, f"plus locator x outside sidebar toolbar: {plus_target}")
     assert_true(48 <= int(plus_target.get("y") or 0) <= 118, f"plus locator y outside sidebar toolbar: {plus_target}")
     sources = {str(item.get("source") or "") for item in plus_target.get("candidates") or [] if isinstance(item, dict)}
-    assert_true("windows_1080p_reference_geometry" in sources, f"plus locator must keep reference candidate for diagnostics: {plus_target}")
+    assert_true("vision_plus_icon" in sources, f"plus locator must expose visual candidate: {plus_target}")
+    diagnostic_sources = {str(item.get("source") or "") for item in plus_target.get("diagnostic_references") or [] if isinstance(item, dict)}
+    assert_true("diagnostic_windows_current_geometry" in diagnostic_sources, f"plus locator must keep current geometry only as diagnostics: {plus_target}")
+    assert_true("diagnostic_windows_1080p_reference_geometry" in diagnostic_sources, f"plus locator must keep reference geometry only as diagnostics: {plus_target}")
 
     fallback_plus_target = add_friend_plus_entry_target(
         {"width": 981, "height": 860, "left": 0, "top": 0, "right": 981, "bottom": 860},
@@ -1340,8 +1382,9 @@ def test_add_friend_primary_locator_contract() -> None:
         route_kind="windows",
     )
     assert_locator(fallback_plus_target, "plus_entry_fallback")
-    assert_true(fallback_plus_target.get("source") == "windows_current_geometry", f"main route should fallback to current Windows geometry: {fallback_plus_target}")
-    assert_true(fallback_plus_target.get("fallback_used") is True, f"geometry fallback should be explicit: {fallback_plus_target}")
+    assert_true(fallback_plus_target.get("source") == "plus_icon_not_found", f"main route must not execute geometry fallback: {fallback_plus_target}")
+    assert_true(fallback_plus_target.get("executable") is False, f"missing visual plus must be non-executable: {fallback_plus_target}")
+    assert_true(fallback_plus_target.get("fallback_used") is False, f"geometry fallback must not be executable: {fallback_plus_target}")
 
     menu_targets = add_friend_menu_candidate_targets(
         [ocr_item("添加朋友", 270, 148, 336, 172)],
@@ -1367,11 +1410,38 @@ def test_add_friend_primary_locator_contract() -> None:
     assert_true(search_targets["input"].get("strategy") == "window_region_ocr_target", f"search input should use OCR when available: {search_targets}")
     assert_true(search_targets["button"].get("strategy") == "window_region_ocr_target", f"search button should use OCR when available: {search_targets}")
 
+    small_ocr_search_targets = find_add_friend_page_search_targets(
+        [
+            ocr_item("Q搜索微信号或者手机号", 50, 85, 258, 106),
+            ocr_item("搜索", 327, 86, 364, 107),
+        ],
+        (468, 520),
+        screenshot=small_add_friend_image(),
+    )
+    assert_locator(small_ocr_search_targets["input"], "small_add_friend_ocr_search_input")
+    assert_locator(small_ocr_search_targets["button"], "small_add_friend_ocr_search_button")
+    assert_true(small_ocr_search_targets["input"].get("strategy") == "window_region_ocr_target", f"small dialog input should prefer OCR placeholder: {small_ocr_search_targets}")
+    assert_true(small_ocr_search_targets["input"].get("fallback_used") is False, f"small dialog OCR input must not be fallback: {small_ocr_search_targets}")
+    assert_true(small_ocr_search_targets["button"].get("strategy") == "window_region_ocr_target", f"small dialog button should prefer OCR button: {small_ocr_search_targets}")
+
+    small_visual_search_targets = find_add_friend_page_search_targets([], (468, 520), screenshot=small_add_friend_image())
+    assert_locator(small_visual_search_targets["input"], "small_add_friend_visual_search_input")
+    assert_locator(small_visual_search_targets["button"], "small_add_friend_visual_search_button")
+    assert_true(small_visual_search_targets["input"].get("strategy") == "visual_button_anchor_locator", f"small dialog should use visual button before fixed fallback: {small_visual_search_targets}")
+    assert_true(small_visual_search_targets["button"].get("strategy") == "visual_button_locator", f"small dialog button should use visual locator: {small_visual_search_targets}")
+    assert_true(small_visual_search_targets["input"].get("fallback_used") is False, f"visual input anchor must not be fixed fallback: {small_visual_search_targets}")
+
     small_search_targets = find_add_friend_page_search_targets([], (468, 520))
     assert_locator(small_search_targets["input"], "small_add_friend_search_input")
     assert_locator(small_search_targets["button"], "small_add_friend_search_button")
-    assert_true(small_search_targets["input"].get("fallback_used") is True, f"small dialog input should expose fallback: {small_search_targets}")
-    assert_true(small_search_targets["button"].get("fallback_used") is True, f"small dialog button should expose fallback: {small_search_targets}")
+    assert_true(small_search_targets["input"].get("fallback_used") is True, f"small dialog input fixed fallback should be last resort: {small_search_targets}")
+    assert_true("HIGH_RISK_FIXED_FALLBACK" in str(small_search_targets["input"].get("risk") or ""), f"fixed fallback should be visibly high risk: {small_search_targets}")
+    assert_true(small_search_targets["button"].get("fallback_used") is True, f"small dialog button fixed fallback should be last resort: {small_search_targets}")
+
+    exact_query = add_friend_query_visible_in_items("17368746889", [ocr_item("17368746889", 84, 85, 188, 106), ocr_item("搜索", 327, 86, 364, 107)])
+    assert_true(exact_query.get("ok") is True, f"exact phone should verify: {exact_query}")
+    residue_query = add_friend_query_visible_in_items("17368746889", [ocr_item("1736874688913866677777", 84, 85, 260, 106), ocr_item("搜索", 327, 86, 364, 107)])
+    assert_true(residue_query.get("ok") is False, f"old+new phone residue must fail exact verification: {residue_query}")
 
     add_contact = add_friend_search_result_add_contact_target(
         [ocr_item("添加到通讯录", 600, 310, 720, 340)],
@@ -1415,7 +1485,7 @@ def test_add_friend_pacing_tier_contract() -> None:
         assert_true(0 <= low <= high, f"invalid pacing range for {tier}: {(low, high)}")
         meta = pacing_metadata(tier, reason="smoke")
         assert_true(meta.get("tier") == tier, f"pacing metadata tier mismatch: {meta}")
-        assert_true(meta.get("profile") == "safe", f"pacing should default to safe profile: {meta}")
+        assert_true(meta.get("profile") == "balanced", f"pacing should default to balanced profile: {meta}")
     assert_true(pacing_range("report") == (0, 0), f"report tier should not wait: {pacing_range('report')}")
     assert_true(normalize_pacing_tier("missing") == "default", "unknown pacing tier should fallback to default")
 

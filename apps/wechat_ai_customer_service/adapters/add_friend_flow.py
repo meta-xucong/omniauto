@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import os
 import time
 from typing import Any, Protocol
 
@@ -12,7 +11,12 @@ from apps.wechat_ai_customer_service.adapters.add_friend_contract import (
 )
 from apps.wechat_ai_customer_service.adapters.add_friend_flow_context import AddFriendFlowContext
 from apps.wechat_ai_customer_service.adapters.add_friend_flow_events import add_friend_query_search_events_from_result
-from apps.wechat_ai_customer_service.adapters.add_friend_result_mapping import add_friend_server_report_payload
+from apps.wechat_ai_customer_service.adapters.add_friend_result_mapping import (
+    ERROR_ADD_FRIEND_MENU_CLICK_FAILED,
+    ERROR_PLUS_ENTRY_NOT_FOUND,
+    ERROR_PLUS_ENTRY_POPUP_NOT_DETECTED,
+    add_friend_server_report_payload,
+)
 from apps.wechat_ai_customer_service.adapters.add_friend_routes import (
     ADD_FRIEND_WINDOWS_1080P_REFERENCE_ROUTE,
     ADD_FRIEND_MAIN_ROUTE,
@@ -38,6 +42,7 @@ class AddFriendOpsProtocol(Protocol):
     def add_friend_menu_candidate_targets(self, items: list[dict[str, Any]], image_size: Any, **kwargs: Any) -> list[dict[str, Any]]: ...
     def plus_entry_popup_menu_detected(self, items: list[dict[str, Any]], targets: list[dict[str, Any]]) -> dict[str, Any]: ...
     def draw_add_friend_screen_annotation(self, image: Any, **kwargs: Any) -> str: ...
+    def draw_add_friend_layout_calibration_annotation(self, image: Any, **kwargs: Any) -> str: ...
     def add_click_screen_origin_to_targets(self, targets: list[dict[str, Any]], *, origin_x: int, origin_y: int) -> list[dict[str, Any]]: ...
     def click_add_friend_menu_entry_and_capture(self, hwnd: int, output_dir: Any, *, menu_targets: list[dict[str, Any]]) -> dict[str, Any]: ...
     def input_add_friend_query_and_search(self, hwnd: int, output_dir: Any, **kwargs: Any) -> dict[str, Any]: ...
@@ -45,7 +50,7 @@ class AddFriendOpsProtocol(Protocol):
     def add_friend_paced_pause(self, tier: str, **kwargs: Any) -> float: ...
     def add_friend_operator_guard_checkpoint(self, **kwargs: Any) -> dict[str, Any]: ...
     def human_window_image_hover(self, hwnd: int, x: int, y: int) -> dict[str, Any]: ...
-    def human_window_image_click(self, hwnd: int, x: int, y: int) -> Any: ...
+    def human_window_image_click_in_bounds(self, hwnd: int, x: int, y: int, *, bounds: list[int], action_name: str = "human_window_image_click_in_bounds") -> dict[str, Any]: ...
     def bounded_int(self, value: Any, *, default: int, minimum: int, maximum: int) -> int: ...
 
 
@@ -172,6 +177,7 @@ def run_add_friend_entry_click_plan_flow(
         geometry,
         before_shot.size,
         before_full_items,
+        screenshot=before_shot,
         route_kind=platform_adapter,
     )
     plus_x = int(plus_target.get("x") or plus_target.get("point", [0, 0])[0])
@@ -220,6 +226,37 @@ def run_add_friend_entry_click_plan_flow(
         targets=[plus_target, *before_menu_targets],
         output_path=before_annotated_path,
         window_rect=None,
+    )
+    layout_meta = plus_target.get("metadata") if isinstance(plus_target.get("metadata"), dict) else {}
+    layout_calibration = layout_meta.get("layout_calibration")
+    layout_annotated_path = output_dir / "add_friend_window_layout_calibration_annotated.png"
+    layout_annotated = ops.draw_add_friend_layout_calibration_annotation(
+        before_shot,
+        layout_calibration=layout_calibration,
+        output_path=layout_annotated_path,
+    )
+    flow.add_event(
+        step_id="window_layout_calibration",
+        title="微信窗口布局校准",
+        status="completed" if plus_target.get("executable") else "failed",
+        state_before="payload_valid",
+        state_after="plus_entry_located" if plus_target.get("executable") else "plus_entry_not_found",
+        ocr_items=ops.add_friend_ocr_snapshots(before_full_items or before_items, before_shot.size),
+        targets=[plus_target],
+        selected_target=plus_target,
+        artifacts={"raw": before_screenshot_path, "annotated": layout_annotated},
+        result={
+            "ok": bool(plus_target.get("executable")),
+            "geometry": geometry,
+            "window_rect": window_rect,
+            "image_size": list(before_shot.size),
+            "layout_calibration": layout_calibration,
+            "diagnostic_references": plus_target.get("diagnostic_references") or layout_meta.get("diagnostic_references") or [],
+            "source": plus_target.get("source"),
+            "confidence": plus_target.get("confidence"),
+            "executable": plus_target.get("executable"),
+            "selected_reason": plus_target.get("selected_reason"),
+        },
     )
     flow.add_event(
         step_id="entry_before_capture",
@@ -291,6 +328,63 @@ def run_add_friend_entry_click_plan_flow(
             query_search=query_search,
             plan_path=str(flow.plan_path),
             note="add_friend_preflight_stopped_before_click_due_to_window_or_account_state",
+        )
+        _append_flow_timings(payload, timings, payload["menu_click"], query_search, flow.started_at)
+        return flow.finalize_payload(payload, report_writer=ops.write_add_friend_entry_click_review)
+
+    if not plus_target.get("executable"):
+        query_search = {
+            "ok": False,
+            "state": "plus_entry_not_found",
+            "task_status": "failed",
+            "result_code": "",
+            "error_code": ERROR_PLUS_ENTRY_NOT_FOUND,
+            "current_step": "window_layout_calibration",
+            "server_report_payload": add_friend_server_report_payload(
+                task_status="failed",
+                error_code=ERROR_PLUS_ENTRY_NOT_FOUND,
+                current_step="window_layout_calibration",
+            ),
+            "reason": "plus_icon_not_found_inside_calibrated_sidebar_header",
+            "selected_target": plus_target,
+        }
+        task_outcome = add_friend_entry_click_task_outcome(query_search)
+        payload = _build_entry_click_payload(
+            task_outcome=task_outcome,
+            query=query,
+            phone=phone,
+            wechat=wechat,
+            verify_message=clean_verify_message,
+            remark_name=clean_remark_name,
+            remark_code=clean_remark_code,
+            remark_code_valid=remark_code_valid,
+            probe=probe,
+            geometry_before=geometry,
+            geometry_after=geometry,
+            before={
+                "screenshot_path": before_screenshot_path,
+                "annotated_path": before_annotated,
+                "capture_mode": "screen_visible",
+                "readiness": before_readiness,
+                "ocr_items": ops.add_friend_ocr_snapshots(before_full_items or before_items, before_shot.size),
+                "planned_targets": [plus_target],
+                "popup_detection": before_popup_detection,
+                "hover": {"skipped": True, "reason": "plus_entry_not_executable"},
+            },
+            after={
+                "screenshot_path": before_screenshot_path,
+                "annotated_path": before_annotated,
+                "capture_mode": "screen_visible",
+                "readiness": before_readiness,
+                "ocr_items": ops.add_friend_ocr_snapshots(before_full_items or before_items, before_shot.size),
+                "planned_targets": before_menu_targets,
+                "popup_detection": before_popup_detection,
+            },
+            click_attempts=[],
+            menu_click={"clicked": False, "reason": "plus_entry_not_executable", "target": None},
+            query_search=query_search,
+            plan_path=str(flow.plan_path),
+            note="add_friend_stopped_before_click_because_plus_icon_was_not_visually_located",
         )
         _append_flow_timings(payload, timings, payload["menu_click"], query_search, flow.started_at)
         return flow.finalize_payload(payload, report_writer=ops.write_add_friend_entry_click_review)
@@ -375,12 +469,7 @@ def run_add_friend_entry_click_plan_flow(
     pause_seconds = ops.add_friend_paced_pause("critical_click", reason="after_plus_entry_hover_before_click")
     timings.append({"name": "after_plus_entry_hover_before_click_pause", "seconds": round(pause_seconds, 3)})
 
-    max_attempts = ops.bounded_int(
-        os.getenv("WECHAT_WIN32_OCR_PLUS_ENTRY_CLICK_MAX_ATTEMPTS"),
-        default=1,
-        minimum=1,
-        maximum=2,
-    )
+    max_attempts = 1
     click_attempts: list[dict[str, Any]] = []
     after_geometry = geometry
     after_shot = before_shot
@@ -396,9 +485,46 @@ def run_add_friend_entry_click_plan_flow(
             timings.append({"name": f"before_plus_entry_retry_{attempt}_pause", "seconds": round(pause_seconds, 3)})
         guard_checkpoint = ops.add_friend_operator_guard_checkpoint(reason=f"before_plus_entry_click_{attempt}")
         timings.append({"name": f"operator_guard_before_plus_entry_click_{attempt}", "seconds": 0.0, "result": guard_checkpoint})
+        click_bounds = list(plus_target.get("click_bounds") or plus_target.get("bounds") or [])
         click_started_at = time.perf_counter()
-        ops.human_window_image_click(hwnd, plus_x, plus_y)
-        timings.append({"name": f"plus_entry_click_{attempt}", "seconds": round(time.perf_counter() - click_started_at, 3)})
+        click_result = ops.human_window_image_click_in_bounds(
+            hwnd,
+            plus_x,
+            plus_y,
+            bounds=click_bounds,
+            action_name=f"plus_entry_click_{attempt}",
+        )
+        timings.append(
+            {
+                "name": f"plus_entry_click_{attempt}",
+                "seconds": round(time.perf_counter() - click_started_at, 3),
+                "result": click_result,
+            }
+        )
+        if not click_result.get("ok"):
+            popup_detection = {"detected": False, "reason": "plus_entry_click_failed", "click": click_result}
+            click_attempts.append(
+                {
+                    "attempt": attempt,
+                    "screenshot_path": "",
+                    "annotated_path": "",
+                    "readiness": {},
+                    "popup_detection": popup_detection,
+                    "planned_targets": [],
+                    "click": click_result,
+                }
+            )
+            flow.add_event(
+                step_id=f"plus_entry_click_attempt_{attempt}",
+                title=f"点击 + 入口 attempt {attempt}",
+                status="failed",
+                state_before="main_window",
+                state_after="plus_entry_click_failed",
+                targets=[plus_target],
+                selected_target=plus_target,
+                result={"attempt": attempt, "click": click_result, "popup_detection": popup_detection},
+            )
+            break
         pause_seconds = ops.add_friend_paced_pause("verify", reason=f"after_plus_entry_click_{attempt}_before_screen_capture")
         timings.append({"name": f"after_plus_entry_click_{attempt}_before_screen_capture_pause", "seconds": round(pause_seconds, 3)})
 
@@ -461,6 +587,7 @@ def run_add_friend_entry_click_plan_flow(
                 "readiness": after_readiness,
                 "popup_detection": popup_detection,
                 "planned_targets": menu_targets,
+                "click": click_result,
             }
         )
         flow.add_event(
@@ -475,6 +602,7 @@ def run_add_friend_entry_click_plan_flow(
             artifacts={"raw": after_screenshot_path, "annotated": attempt_annotated},
             result={
                 "attempt": attempt,
+                "click": click_result,
                 "readiness": after_readiness,
                 "popup_detection": popup_detection,
             },
@@ -504,6 +632,7 @@ def run_add_friend_entry_click_plan_flow(
         else {"clicked": False, "reason": popup_detection.get("reason") or "plus_entry_popup_menu_not_detected", "target": None}
     )
     query_hwnd = int(menu_click.get("next_hwnd") or 0) if isinstance(menu_click, dict) else 0
+    menu_failed_after_popup = bool(popup_detection.get("detected")) and not bool(menu_click.get("clicked"))
     query_search = (
         ops.input_add_friend_query_and_search(
             query_hwnd,
@@ -516,10 +645,22 @@ def run_add_friend_entry_click_plan_flow(
         if menu_click.get("clicked") and query and query_hwnd
         else {
             "ok": False,
-            "state": after_readiness.get("state") if after_readiness and not after_readiness.get("ok") else "query_not_run",
-            "task_status": "failed" if after_readiness and not after_readiness.get("ok") else None,
-            "error_code": after_readiness.get("error_code") if after_readiness and not after_readiness.get("ok") else None,
-            "current_step": "preflight_window_ready" if after_readiness and not after_readiness.get("ok") else None,
+            "state": (
+                after_readiness.get("state")
+                if after_readiness and not after_readiness.get("ok")
+                else ("add_friend_menu_click_failed" if menu_failed_after_popup else "plus_entry_popup_menu_not_detected")
+            ),
+            "task_status": "failed",
+            "error_code": (
+                after_readiness.get("error_code")
+                if after_readiness and not after_readiness.get("ok")
+                else (ERROR_ADD_FRIEND_MENU_CLICK_FAILED if menu_failed_after_popup else ERROR_PLUS_ENTRY_POPUP_NOT_DETECTED)
+            ),
+            "current_step": (
+                "preflight_window_ready"
+                if after_readiness and not after_readiness.get("ok")
+                else ("add_friend_menu_click" if menu_failed_after_popup else "plus_entry_click")
+            ),
             "server_report_payload": (
                 add_friend_server_report_payload(
                     task_status="failed",
@@ -527,12 +668,20 @@ def run_add_friend_entry_click_plan_flow(
                     current_step="preflight_window_ready",
                 )
                 if after_readiness and not after_readiness.get("ok") and after_readiness.get("error_code")
-                else None
+                else add_friend_server_report_payload(
+                    task_status="failed",
+                    error_code=ERROR_ADD_FRIEND_MENU_CLICK_FAILED if menu_failed_after_popup else ERROR_PLUS_ENTRY_POPUP_NOT_DETECTED,
+                    current_step="add_friend_menu_click" if menu_failed_after_popup else "plus_entry_click",
+                )
             ),
             "reason": (
                 after_readiness.get("reason")
                 if after_readiness and not after_readiness.get("ok")
-                else "empty_query_or_menu_click_failed_or_dialog_hwnd_missing"
+                else (
+                    menu_click.get("reason")
+                    if menu_failed_after_popup
+                    else (popup_detection.get("reason") or "plus_entry_popup_menu_not_detected")
+                )
             ),
             "query": query,
             "dialog_hwnd": query_hwnd,
