@@ -404,6 +404,7 @@ def test_add_friend_payload_builder_contract() -> None:
         ERROR_ACCOUNT_RESTRICTED,
         ERROR_ADD_CONTACT_ENTRY_NOT_FOUND,
         ERROR_INVITE_CONFIRM_CLICK_FAILED,
+        ERROR_INVITE_FIELD_VERIFICATION_FAILED,
         ERROR_INVITE_FORM_WINDOW_NOT_FOUND,
         ERROR_PHONE_NOT_FOUND,
         ERROR_TASK_PAYLOAD_INVALID,
@@ -499,6 +500,7 @@ def test_add_friend_payload_builder_contract() -> None:
     confirm_failed = add_friend_after_confirm_payload(confirm_ok=False, surface_text="", phone="17368746889")
     assert_true(confirm_failed.get("ok") is False, f"confirm failure payload should fail: {confirm_failed}")
     assert_true(confirm_failed.get("error_code") == ERROR_INVITE_CONFIRM_CLICK_FAILED, f"confirm failure error mismatch: {confirm_failed}")
+    assert_true(ERROR_INVITE_FIELD_VERIFICATION_FAILED == "INVITE_FIELD_VERIFICATION_FAILED", "field verification error code mismatch")
 
     entry_missing = add_friend_add_contact_entry_not_found_payload(phone="17368746889")
     assert_true(entry_missing.get("error_code") == ERROR_ADD_CONTACT_ENTRY_NOT_FOUND, f"entry missing error mismatch: {entry_missing}")
@@ -1221,6 +1223,63 @@ def test_invite_form_locator_contract() -> None:
     assert_true(field_check.get("ok") is True, f"field verification should pass visible OCR text: {field_check}")
 
 
+def test_invite_form_input_click_failure_blocks_keyboard_actions() -> None:
+    import apps.wechat_ai_customer_service.adapters.wechat_win32_ocr_sidecar as sidecar
+
+    calls: list[object] = []
+    original_click = sidecar.human_window_image_click_in_bounds
+    original_pause = sidecar.add_friend_paced_pause
+    original_hotkey = sidecar.hotkey
+    original_key_press = sidecar.key_press
+    original_clipboard_copy = sidecar.clipboard_copy
+    try:
+        sidecar.human_window_image_click_in_bounds = lambda *_args, **_kwargs: {
+            "ok": False,
+            "reason": "simulated_focus_click_failed",
+        }
+        sidecar.add_friend_paced_pause = lambda *_args, **_kwargs: 0.0
+        sidecar.hotkey = lambda *args, **_kwargs: calls.append(("hotkey", args))
+        sidecar.key_press = lambda *args, **_kwargs: calls.append(("key_press", args))
+        sidecar.clipboard_copy = lambda text: calls.append(("clipboard_copy", text))
+        target = {
+            "name": "invite_remark_input",
+            "x": 128,
+            "y": 300,
+            "click_bounds": [40, 265, 428, 335],
+        }
+        result = sidecar.paste_invite_form_text(1001, target, "客户-CJ8K2P", action_name="invite_remark")
+    finally:
+        sidecar.human_window_image_click_in_bounds = original_click
+        sidecar.add_friend_paced_pause = original_pause
+        sidecar.hotkey = original_hotkey
+        sidecar.key_press = original_key_press
+        sidecar.clipboard_copy = original_clipboard_copy
+    assert_true(result.get("ok") is False, f"focus click failure should fail: {result}")
+    assert_true(result.get("reason") == "field_click_failed", f"failure should be explicit: {result}")
+    assert_true(calls == [], f"keyboard/clipboard actions must not run after failed field click: {calls}")
+
+
+def test_invite_form_field_verification_blocks_confirm_click() -> None:
+    source = (PROJECT_ROOT / "apps/wechat_ai_customer_service/adapters/wechat_win32_ocr_sidecar.py").read_text(encoding="utf-8")
+    section = source.split("def fill_add_friend_invite_form_and_confirm", 1)[1].split("def find_add_friend_page_search_targets", 1)[0]
+    field_check_index = section.find('if not field_verification.get("ok")')
+    confirm_click_index = section.find('action_name="invite_confirm_button_click"')
+    assert_true(field_check_index >= 0, "invite form fill must hard-gate on field_verification.ok")
+    assert_true(confirm_click_index >= 0, "invite confirm click section missing")
+    assert_true(field_check_index < confirm_click_index, "field verification gate must run before confirm click")
+    assert_true("INVITE_FIELD_VERIFICATION_FAILED" in section, "field verification failure must use explicit error code")
+    assert_true('"confirm": {"ok": False, "skipped": True' in section, "failed field verification must skip confirm click")
+
+
+def test_query_verify_invalid_dialog_handle_returns_structured_failure() -> None:
+    source = (PROJECT_ROOT / "apps/wechat_ai_customer_service/adapters/wechat_win32_ocr_sidecar.py").read_text(encoding="utf-8")
+    section = source.split("def input_add_friend_query_and_search", 1)[1].split("def write_add_friend_entry_click_review", 1)[0]
+    assert_true("dialog_handle_invalid_during_query_verify" in section, "query verify invalid hwnd must not traceback")
+    assert_true('"state": "dialog_handle_invalid"' in section, "invalid dialog hwnd should become a structured failed state")
+    assert_true('"current_step": "query_input_verify"' in section, "invalid dialog hwnd should report the query verify step")
+    assert_true("add_friend_server_report_payload(" in section, "invalid dialog hwnd should keep server report payload")
+
+
 def test_add_friend_primary_locator_contract() -> None:
     from apps.wechat_ai_customer_service.adapters.wechat_win32_ocr_sidecar import (
         add_friend_menu_candidate_targets,
@@ -1561,6 +1620,9 @@ def main() -> int:
         test_entry_click_task_outcome_contract,
         test_add_friend_actions_contract,
         test_invite_form_locator_contract,
+        test_invite_form_input_click_failure_blocks_keyboard_actions,
+        test_invite_form_field_verification_blocks_confirm_click,
+        test_query_verify_invalid_dialog_handle_returns_structured_failure,
         test_add_friend_primary_locator_contract,
         test_add_friend_ocr_contract,
         test_add_friend_pacing_tier_contract,

@@ -121,6 +121,7 @@ from apps.wechat_ai_customer_service.adapters.add_friend_payloads import (
 )
 from apps.wechat_ai_customer_service.adapters.add_friend_result_mapping import (
     ERROR_ACCOUNT_RESTRICTED,
+    ERROR_INVITE_FIELD_VERIFICATION_FAILED,
     ERROR_OPERATOR_GUARD_NOT_READY,
     ERROR_PHONE_NOT_FOUND,
     ERROR_TASK_PAYLOAD_INVALID,
@@ -2703,6 +2704,25 @@ def paste_invite_form_text(
         bounds=bounds,
         action_name=f"{action_name}_click",
     )
+    if not click_result.get("ok"):
+        return {
+            "ok": False,
+            "reason": "field_click_failed",
+            "method": "click_ctrl_a_backspace_clipboard_paste",
+            "text_length": len(clean),
+            "click": click_result,
+            "target": target,
+            "action": make_action_result(
+                action_id=action_name,
+                action_type=ACTION_COMPOSITE_INPUT,
+                status="failed",
+                method="click_ctrl_a_backspace_clipboard_paste",
+                target=target,
+                text=clean,
+                error=str(click_result.get("reason") or click_result.get("error") or "field_click_failed"),
+                result={"click": click_result, "aborted_before_keyboard_input": True},
+            ),
+        }
     add_friend_paced_pause("input", reason=f"after_{action_name}_click_before_select_all")
     hotkey(win32con.VK_CONTROL, ord("A"))
     add_friend_paced_pause("input", reason=f"after_{action_name}_select_all_before_backspace")
@@ -2800,6 +2820,61 @@ def fill_add_friend_invite_form_and_confirm(
         output_path=filled_annotated_path,
         window_rect=None,
     )
+
+    if not field_verification.get("ok"):
+        final_status = mapped_add_friend_failed_result(
+            state="invite_field_verification_failed",
+            error_code=ERROR_INVITE_FIELD_VERIFICATION_FAILED,
+            current_step="invite_fields_review",
+            field_verification=field_verification,
+        )
+        timings.append({"name": "invite_field_verification_gate", "seconds": 0.0, "result": field_verification})
+        return {
+            "ok": False,
+            "state": str(final_status.get("state") or "invite_field_verification_failed"),
+            "task_status": str(final_status.get("task_status") or "failed"),
+            "result_code": str(final_status.get("result_code") or ""),
+            "error_code": str(final_status.get("error_code") or ERROR_INVITE_FIELD_VERIFICATION_FAILED),
+            "current_step": str(final_status.get("current_step") or "invite_fields_review"),
+            "verify_message": clean_verify_message,
+            "remark_name": clean_remark_name,
+            "remark_code": clean_remark_code,
+            "remark_code_valid": remark_code_valid,
+            "legacy_remark_fallback": False,
+            "validation_errors": [],
+            "before": {
+                "screenshot_path": before_path,
+                "annotated_path": before_annotated,
+                "targets": before_targets,
+                "ocr_items": add_friend_ocr_snapshots(before_items, before_shot.size),
+            },
+            "filled": {
+                "screenshot_path": filled_path,
+                "annotated_path": filled_annotated,
+                "targets": filled_targets,
+                "ocr_items": add_friend_ocr_snapshots(filled_items, filled_shot.size),
+                "field_verification": field_verification,
+            },
+            "after": {
+                "screenshot_path": "",
+                "annotated_path": "",
+                "ocr_items": [],
+                "final_status": final_status,
+                "skipped": True,
+                "reason": "field_verification_failed_before_confirm",
+            },
+            "greeting": greeting_result,
+            "remark_fill": remark_result,
+            "field_verification": field_verification,
+            "confirm": {"ok": False, "skipped": True, "reason": "field_verification_failed_before_confirm"},
+            "server_report_payload": final_status.get("server_report_payload")
+            or {
+                "task.status": "failed",
+                "task.error_code": ERROR_INVITE_FIELD_VERIFICATION_FAILED,
+                "task.current_step": "invite_fields_review",
+            },
+            "timings": timings,
+        }
 
     pause_seconds = add_friend_paced_pause("critical_click", reason="before_invite_confirm_click")
     timings.append({"name": "before_invite_confirm_click_pause", "seconds": round(pause_seconds, 3)})
@@ -3538,7 +3613,57 @@ def input_add_friend_query_and_search(
         wait_started_at = time.perf_counter()
         add_friend_wait_before_ocr("after_search_input_before_ocr")
         timings.append({"name": f"after_query_type_attempt_{attempt}_before_verify_pause", "seconds": round(time.perf_counter() - wait_started_at, 3)})
-        latest_verify_shot, latest_verify_path = capture_wechat_window_visible_screen(hwnd, artifact_dir=str(output_dir), label=f"add_friend_query_verify_attempt_{attempt}_window")
+        try:
+            latest_verify_shot, latest_verify_path = capture_wechat_window_visible_screen(
+                hwnd,
+                artifact_dir=str(output_dir),
+                label=f"add_friend_query_verify_attempt_{attempt}_window",
+            )
+        except Exception as exc:
+            latest_verify_result = {
+                "ok": False,
+                "reason": "dialog_handle_invalid_during_query_verify",
+                "error": repr(exc),
+                "attempt": attempt,
+                "hwnd": int(hwnd or 0),
+            }
+            input_attempts.append(
+                {
+                    "attempt": attempt,
+                    "type_result": type_result,
+                    "verify": latest_verify_result,
+                    "screenshot_path": latest_verify_path,
+                    "annotated_path": latest_verify_annotated,
+                }
+            )
+            return {
+                "ok": False,
+                "state": "dialog_handle_invalid",
+                "task_status": "failed",
+                "error_code": ERROR_WECHAT_WINDOW_NOT_READY,
+                "current_step": "query_input_verify",
+                "server_report_payload": add_friend_server_report_payload(
+                    task_status="failed",
+                    error_code=ERROR_WECHAT_WINDOW_NOT_READY,
+                    current_step="query_input_verify",
+                ),
+                "query": query,
+                "geometry": geometry,
+                "page": {
+                    "screenshot_path": page_path,
+                    "annotated_path": page_annotated,
+                    "ocr_items": add_friend_ocr_snapshots(page_items, page_shot.size),
+                    "targets": targets,
+                },
+                "input_attempts": input_attempts,
+                "latest_verify": {
+                    "screenshot_path": latest_verify_path,
+                    "annotated_path": latest_verify_annotated,
+                    "ocr_items": add_friend_ocr_snapshots(latest_verify_items, latest_verify_shot.size),
+                    "verify": latest_verify_result,
+                },
+                "timings": timings,
+            }
         verify_region = add_friend_page_search_region(latest_verify_shot.size)
         verify_ocr_started_at = time.perf_counter()
         latest_verify_items = run_ocr_on_screen_region(latest_verify_shot, verify_region)

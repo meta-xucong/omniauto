@@ -14,7 +14,7 @@
 
 现状：
 
-- `add_friend_routes.py` 已声明 `ADD_FRIEND_MAIN_ROUTE = ADD_FRIEND_WINDOWS_ROUTE`。
+- `add_friend_routes.py` 已声明 `ADD_FRIEND_MAIN_ROUTE = ADD_FRIEND_ENTRY_CLICK_ROUTE`，即对外稳定入口仍是 `add-friend-entry-click-plan`；`ADD_FRIEND_WINDOWS_ROUTE` 是显式 Windows 别名。
 - `ADD_FRIEND_WINDOWS_1080P_REFERENCE_ROUTE` 保留原入口，用于对照 Windows 1920x1080 布局假设。
 - `README.md` 与加好友验收文档已经标记：当前微信操控栈是 Windows 适配，不同分辨率/DPI/窗口尺寸需要布局校准，不能复用固定坐标。
 
