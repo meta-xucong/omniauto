@@ -7976,6 +7976,7 @@ def session_click_x_for_geometry(geometry: dict[str, Any]) -> int:
 def normalize_wechat_window(hwnd: int) -> dict[str, Any]:
     enabled = env_flag("WECHAT_WIN32_OCR_WINDOW_NORMALIZE", default=True)
     before = get_window_geometry(hwnd)
+    dpi_scale = window_dpi_scale(hwnd)
     if not enabled:
         return {"ok": True, "enabled": False, "applied": False, "before": before}
 
@@ -7994,6 +7995,7 @@ def normalize_wechat_window(hwnd: int) -> dict[str, Any]:
     plan = win32_ocr_window_actions.plan_normalize_wechat_window(
         before,
         enabled=True,
+        dpi_scale=dpi_scale,
         requested_width=os.getenv("WECHAT_WIN32_OCR_WINDOW_WIDTH"),
         requested_height=os.getenv("WECHAT_WIN32_OCR_WINDOW_HEIGHT"),
         requested_left=os.getenv("WECHAT_WIN32_OCR_WINDOW_LEFT"),
@@ -8026,6 +8028,7 @@ def normalize_wechat_window(hwnd: int) -> dict[str, Any]:
             "after": before,
             "target": effective_target,
             "requested_target": requested_target,
+            "dpi_scale": dpi_scale,
             "enforce_recommended": enforce_recommended,
             "recommended_floor_applied": recommended_floor_applied,
             "fixed_origin": fixed_origin,
@@ -8051,6 +8054,7 @@ def normalize_wechat_window(hwnd: int) -> dict[str, Any]:
             "after": after,
             "target": effective_target,
             "requested_target": requested_target,
+            "dpi_scale": dpi_scale,
             "enforce_recommended": enforce_recommended,
             "recommended_floor_applied": recommended_floor_applied,
             "fixed_origin": fixed_origin,
@@ -8065,6 +8069,7 @@ def normalize_wechat_window(hwnd: int) -> dict[str, Any]:
             "before": before,
             "target": effective_target,
             "requested_target": requested_target,
+            "dpi_scale": dpi_scale,
             "enforce_recommended": enforce_recommended,
             "recommended_floor_applied": recommended_floor_applied,
             "fixed_origin": fixed_origin,

@@ -25,6 +25,7 @@ def plan_normalize_wechat_window(
     before: dict[str, Any],
     *,
     enabled: bool,
+    dpi_scale: float,
     requested_width: Any,
     requested_height: Any,
     requested_left: Any,
@@ -45,16 +46,24 @@ def plan_normalize_wechat_window(
     if not enabled:
         return {"ok": True, "enabled": False, "applied": False, "before": before_geometry}
 
-    target_width = bounded_int(requested_width, default=default_width, minimum=min_width, maximum=max_width)
-    target_height = bounded_int(requested_height, default=default_height, minimum=min_height, maximum=max_height)
+    try:
+        normalized_scale = max(1.0, float(dpi_scale or 1.0))
+    except (TypeError, ValueError):
+        normalized_scale = 1.0
+    scaled_default_width = int(round(default_width * normalized_scale))
+    scaled_default_height = int(round(default_height * normalized_scale))
+    scaled_min_width = int(round(min_width * normalized_scale))
+    scaled_min_height = int(round(min_height * normalized_scale))
+    target_width = bounded_int(requested_width, default=scaled_default_width, minimum=scaled_min_width, maximum=max_width)
+    target_height = bounded_int(requested_height, default=scaled_default_height, minimum=scaled_min_height, maximum=max_height)
     requested_target = {"width": target_width, "height": target_height}
     recommended_floor_applied = False
     if enforce_recommended:
-        if target_width < default_width:
-            target_width = default_width
+        if target_width < scaled_default_width:
+            target_width = scaled_default_width
             recommended_floor_applied = True
-        if target_height < default_height:
-            target_height = default_height
+        if target_height < scaled_default_height:
+            target_height = scaled_default_height
             recommended_floor_applied = True
     effective_target = {"width": target_width, "height": target_height}
 

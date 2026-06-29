@@ -25,6 +25,7 @@ def plan(
     before: dict[str, int],
     *,
     enabled: bool = True,
+    dpi_scale: float = 1.0,
     requested_width: object = None,
     requested_height: object = None,
     requested_left: object = None,
@@ -38,6 +39,7 @@ def plan(
     return window_action_planning.plan_normalize_wechat_window(
         before,
         enabled=enabled,
+        dpi_scale=dpi_scale,
         requested_width=requested_width,
         requested_height=requested_height,
         requested_left=requested_left,
@@ -81,6 +83,16 @@ def test_plan_1920x1080_keeps_default_safe_window_when_it_fits() -> None:
     before = {"left": 10, "top": 12, "width": 900, "height": 800}
     result = plan(before, screen_width=1920, screen_height=1080)
     assert_true((result.get("left"), result.get("top"), result.get("width"), result.get("height")) == (0, 0, 980, 860), f"1080p target mismatch: {result}")
+
+
+def test_plan_high_dpi_scales_recommended_window_when_screen_allows() -> None:
+    before = {"left": 20, "top": 24, "width": 980, "height": 860}
+    result = plan(before, dpi_scale=1.5, screen_width=3840, screen_height=2160)
+    assert_true(
+        (result.get("left"), result.get("top"), result.get("width"), result.get("height")) == (0, 0, 1470, 1290),
+        f"high DPI target should scale recommended geometry: {result}",
+    )
+    assert_true(result.get("target") == {"width": 1470, "height": 1290}, f"high DPI target metadata mismatch: {result}")
 
 
 def test_plan_small_screen_clamps_size_to_visible_screen() -> None:
@@ -203,6 +215,7 @@ def main() -> int:
         test_plan_disabled_matches_sidecar_disabled_shape,
         test_plan_1920x1200_fixed_origin_matches_default_safe_window,
         test_plan_1920x1080_keeps_default_safe_window_when_it_fits,
+        test_plan_high_dpi_scales_recommended_window_when_screen_allows,
         test_plan_small_screen_clamps_size_to_visible_screen,
         test_plan_non_fixed_origin_clamps_existing_origin,
         test_plan_recommended_floor_and_custom_origin,
