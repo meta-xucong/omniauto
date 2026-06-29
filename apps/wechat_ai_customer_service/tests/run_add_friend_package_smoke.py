@@ -1339,6 +1339,7 @@ def test_add_friend_primary_locator_contract() -> None:
     from apps.wechat_ai_customer_service.adapters.wechat_win32_ocr_sidecar import (
         add_friend_menu_candidate_targets,
         add_friend_plus_entry_target,
+        add_friend_plus_entry_safe_bounds,
         add_friend_query_visible_in_items,
         add_friend_search_result_add_contact_target,
         find_add_friend_page_search_targets,
@@ -1363,6 +1364,17 @@ def test_add_friend_primary_locator_contract() -> None:
         draw.line((center_x - 9, center_y, center_x + 9, center_y), fill=(45, 52, 64), width=3)
         draw.line((center_x, center_y - 9, center_x, center_y + 9), fill=(45, 52, 64), width=3)
         return image
+
+    def plus_icon_image_for_size(width: int, height: int) -> tuple[Image.Image, tuple[int, int], list[int]]:
+        image = Image.new("RGB", (width, height), (246, 248, 250))
+        bounds = add_friend_plus_entry_safe_bounds((width, height))
+        left, top, right, bottom = bounds
+        center_x = min(right - 10, max(left + 18, right - 22))
+        center_y = int((top + bottom) / 2)
+        draw = ImageDraw.Draw(image)
+        draw.line((center_x - 9, center_y, center_x + 9, center_y), fill=(45, 52, 64), width=3)
+        draw.line((center_x, center_y - 9, center_x, center_y + 9), fill=(45, 52, 64), width=3)
+        return image, (center_x, center_y), bounds
 
     def small_add_friend_image() -> Image.Image:
         image = Image.new("RGB", (468, 520), (245, 246, 248))
@@ -1409,6 +1421,36 @@ def test_add_friend_primary_locator_contract() -> None:
     assert_true("diagnostic_windows_current_geometry" in diagnostic_sources, f"plus locator must keep current geometry only as diagnostics: {plus_target}")
     assert_true("diagnostic_windows_1080p_reference_geometry" in diagnostic_sources, f"plus locator must keep reference geometry only as diagnostics: {plus_target}")
 
+    for width, height in [(980, 720), (980, 860), (1225, 816), (1225, 1032), (1470, 1032), (1470, 1290), (2560, 1440)]:
+        matrix_image, expected_point, safe_bounds = plus_icon_image_for_size(width, height)
+        matrix_target = add_friend_plus_entry_target(
+            {"width": width, "height": height, "left": 0, "top": 0, "right": width, "bottom": height},
+            (width, height),
+            [],
+            screenshot=matrix_image,
+            route_kind="windows",
+        )
+        assert_locator(matrix_target, f"plus_entry_{width}x{height}")
+        assert_true(matrix_target.get("source") == "vision_plus_icon", f"matrix plus locator must use vision: {matrix_target}")
+        assert_true(matrix_target.get("executable") is True, f"matrix plus locator should be executable: {matrix_target}")
+        assert_true(matrix_target.get("fallback_used") is False, f"matrix plus locator must not execute fallback: {matrix_target}")
+        actual_point = [int(matrix_target.get("x") or 0), int(matrix_target.get("y") or 0)]
+        assert_true(
+            safe_bounds[0] <= actual_point[0] <= safe_bounds[2] and safe_bounds[1] <= actual_point[1] <= safe_bounds[3],
+            f"matrix plus locator outside calibrated safe bounds: {(width, height, actual_point, safe_bounds, matrix_target)}",
+        )
+        assert_true(
+            abs(actual_point[0] - expected_point[0]) <= 8 and abs(actual_point[1] - expected_point[1]) <= 8,
+            f"matrix plus locator should match visual anchor: {(width, height, actual_point, expected_point, matrix_target)}",
+        )
+        matrix_diagnostic_sources = {
+            str(item.get("source") or "")
+            for item in matrix_target.get("diagnostic_references") or []
+            if isinstance(item, dict)
+        }
+        assert_true("diagnostic_windows_current_geometry" in matrix_diagnostic_sources, f"matrix current geometry diagnostics missing: {matrix_target}")
+        assert_true("diagnostic_windows_1080p_reference_geometry" in matrix_diagnostic_sources, f"matrix reference diagnostics missing: {matrix_target}")
+
     fallback_plus_target = add_friend_plus_entry_target(
         {"width": 981, "height": 860, "left": 0, "top": 0, "right": 981, "bottom": 860},
         (981, 860),
@@ -1419,6 +1461,19 @@ def test_add_friend_primary_locator_contract() -> None:
     assert_true(fallback_plus_target.get("source") == "plus_icon_not_found", f"main route must not execute geometry fallback: {fallback_plus_target}")
     assert_true(fallback_plus_target.get("executable") is False, f"missing visual plus must be non-executable: {fallback_plus_target}")
     assert_true(fallback_plus_target.get("fallback_used") is False, f"geometry fallback must not be executable: {fallback_plus_target}")
+
+    for width, height in [(980, 720), (1225, 816), (1470, 1032), (2560, 1440)]:
+        blank_target = add_friend_plus_entry_target(
+            {"width": width, "height": height, "left": 0, "top": 0, "right": width, "bottom": height},
+            (width, height),
+            [],
+            screenshot=Image.new("RGB", (width, height), (246, 248, 250)),
+            route_kind="windows",
+        )
+        assert_locator(blank_target, f"plus_entry_blank_{width}x{height}")
+        assert_true(blank_target.get("source") == "plus_icon_not_found", f"blank matrix must not use geometry fallback: {blank_target}")
+        assert_true(blank_target.get("executable") is False, f"blank matrix must fail closed: {blank_target}")
+        assert_true(blank_target.get("fallback_used") is False, f"blank matrix fallback must stay non-executable: {blank_target}")
 
     menu_targets = add_friend_menu_candidate_targets(
         [ocr_item("添加朋友", 270, 148, 336, 172)],

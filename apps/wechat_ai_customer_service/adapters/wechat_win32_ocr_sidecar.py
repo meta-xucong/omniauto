@@ -7111,7 +7111,8 @@ def parse_messages_from_ocr(ocr_items: list[dict[str, Any]], image_size: tuple[i
             continue
         if is_message_noise(text):
             continue
-        side = classify_message_side(item, width=width)
+        side_details = classify_message_side_details(item, width=width)
+        side = str(side_details.get("side") or "unknown")
         rect = {
             "left": int(float(item.get("left") or 0)),
             "top": int(float(item.get("top") or 0)),
@@ -7123,7 +7124,15 @@ def parse_messages_from_ocr(ocr_items: list[dict[str, Any]], image_size: tuple[i
         # partial drafts cannot be fed back to the LLM as customer messages.
         if side != "self" and rect_in_input_area(rect, geometry):
             continue
-        rows.append({**item, "side": side})
+        rows.append(
+            {
+                **item,
+                "side": side,
+                "sender_role_algorithm": side_details.get("algorithm"),
+                "sender_role_confidence": side_details.get("confidence"),
+                "sender_role_evidence": side_details.get("evidence") or [],
+            }
+        )
 
     grouped: list[list[dict[str, Any]]] = []
     for item in sorted(rows, key=lambda row: (float(row["center_y"]), float(row["left"]))):
@@ -7134,6 +7143,11 @@ def parse_messages_from_ocr(ocr_items: list[dict[str, Any]], image_size: tuple[i
         previous = grouped[-1][-1]
         previous_side = str(previous.get("side") or "unknown")
         vertical_gap = float(item["top"]) - float(previous["bottom"])
+        if side == "unknown" and previous_side == "self" and message_line_continues_previous_self_bubble(item, previous, vertical_gap):
+            evidence = list(item.get("sender_role_evidence") or [])
+            evidence.append("self_continuation_from_previous_line")
+            grouped[-1].append({**item, "side": "self", "sender_role_evidence": evidence})
+            continue
         if previous_side == side and vertical_gap <= merge_vertical_gap:
             grouped[-1].append({**item, "side": side})
         else:
@@ -7169,6 +7183,9 @@ def parse_messages_from_ocr(ocr_items: list[dict[str, Any]], image_size: tuple[i
             "type": "text",
             "sender": "self" if side == "self" else "unknown",
             "sender_role": "self" if side == "self" else "unknown",
+            "sender_role_algorithm": str(group[0].get("sender_role_algorithm") or "wechat_win32_bubble_role_v2"),
+            "sender_role_confidence": float(group[0].get("sender_role_confidence") or 0.0),
+            "sender_role_evidence": list(group[0].get("sender_role_evidence") or []),
             "content": content,
             "content_raw_ocr": raw_content,
             "time": "",
@@ -7192,18 +7209,69 @@ def parse_messages_from_ocr(ocr_items: list[dict[str, Any]], image_size: tuple[i
 
 
 def classify_message_side(item: dict[str, Any], *, width: int) -> str:
+    return str(classify_message_side_details(item, width=width).get("side") or "unknown")
+
+
+def message_line_continues_previous_self_bubble(item: dict[str, Any], previous: dict[str, Any], vertical_gap: float) -> bool:
+    if vertical_gap < 0:
+        return False
+    previous_height = max(1.0, float(previous.get("bottom") or 0) - float(previous.get("top") or 0))
+    current_height = max(1.0, float(item.get("bottom") or 0) - float(item.get("top") or 0))
+    gap_limit = max(8.0, min(14.0, max(previous_height, current_height) * 0.65))
+    if vertical_gap > gap_limit:
+        return False
+    previous_left = float(previous.get("left") or 0)
+    current_left = float(item.get("left") or 0)
+    return abs(current_left - previous_left) <= 32.0
+
+
+def classify_message_side_details(item: dict[str, Any], *, width: int) -> dict[str, Any]:
     split_x = session_split_x(width)
     left = float(item.get("left") or 0)
+    right = float(item.get("right") or 0)
     center_x = float(item.get("center_x") or 0)
-    # Long right-side bubbles can have a center slightly left of the old 68%
-    # cutoff. Their left edge is still safely to the right of normal inbound
-    # bubbles, so prefer the left-edge cue to avoid replying to ourselves.
-    self_left_min = max(float(split_x + 75), float(width) * 0.43)
-    if left >= self_left_min:
-        return "self"
-    if center_x > float(width) * 0.68:
-        return "self"
-    return "unknown"
+    if center_x <= 0 and left and right:
+        center_x = (left + right) / 2.0
+    chat_width = max(1.0, float(width - split_x))
+    rel_left = (left - float(split_x)) / chat_width
+    rel_right = (right - float(split_x)) / chat_width
+    rel_center = (center_x - float(split_x)) / chat_width
+    legacy_left_hint_min = max(float(split_x + 75), float(width) * 0.43)
+    left_in_self_lane = left >= legacy_left_hint_min
+    reaches_right_self_lane = right >= max(float(split_x + 260), float(width) * 0.72)
+    center_in_self_lane = center_x >= max(float(split_x + 180), float(width) * 0.58)
+    compact_right_aligned = right >= float(width) * 0.84 and center_x >= float(width) * 0.62
+    evidence: list[str] = [
+        "wechat_win32_bubble_role_v2",
+        f"rel_left={rel_left:.3f}",
+        f"rel_center={rel_center:.3f}",
+        f"rel_right={rel_right:.3f}",
+    ]
+    if left_in_self_lane:
+        evidence.append("legacy_text_left_hint")
+    if reaches_right_self_lane:
+        evidence.append("right_self_lane_reached")
+    if center_in_self_lane:
+        evidence.append("center_in_self_lane")
+    if compact_right_aligned:
+        evidence.append("compact_right_aligned")
+    if left_in_self_lane and ((reaches_right_self_lane and center_in_self_lane) or compact_right_aligned):
+        return {
+            "side": "self",
+            "confidence": 0.92 if reaches_right_self_lane and center_in_self_lane else 0.86,
+            "algorithm": "wechat_win32_bubble_role_v2",
+            "evidence": evidence,
+        }
+    if left_in_self_lane:
+        evidence.append("legacy_left_hint_downgraded_without_right_structure")
+    elif reaches_right_self_lane and center_in_self_lane:
+        evidence.append("right_structure_downgraded_without_left_alignment")
+    return {
+        "side": "unknown",
+        "confidence": 0.76 if not left_in_self_lane else 0.64,
+        "algorithm": "wechat_win32_bubble_role_v2",
+        "evidence": evidence,
+    }
 
 
 def probe_wechat_windows() -> dict[str, Any]:

@@ -753,6 +753,146 @@ def test_parse_messages_classifies_wide_right_bubbles_as_self() -> None:
     )
 
 
+def test_parse_messages_classifies_light_and_dark_left_bubbles_as_non_self() -> None:
+    light_peer = {
+        "text": "light-peer-short",
+        "confidence": 0.99,
+        "left": 485,
+        "right": 548,
+        "top": 234,
+        "bottom": 277,
+        "center_x": 516.5,
+        "center_y": 255.5,
+    }
+    assert_true(
+        classify_message_side(light_peer, width=980) != "self",
+        "light left-side peer text must not become self only because its left crosses the old threshold",
+    )
+    light_messages = parse_messages_from_ocr([light_peer], (980, 860), target="CJWIN01")
+    assert_true(light_messages, f"light peer bubble should be captured: {light_messages}")
+    assert_true(light_messages[0]["sender"] != "self", f"light peer bubble should not be self: {light_messages}")
+    assert_true(
+        "legacy_left_hint_downgraded_without_right_structure" in set(light_messages[0].get("sender_role_evidence") or []),
+        f"light peer evidence should record the downgraded legacy left hint: {light_messages}",
+    )
+
+    dark_peer_items = [
+        {
+            "text": "dark-peer-line-1",
+            "confidence": 0.99,
+            "left": 455,
+            "right": 550,
+            "top": 566,
+            "bottom": 590,
+            "center_x": 502.5,
+            "center_y": 578,
+        },
+        {
+            "text": "dark-peer-line-2",
+            "confidence": 0.99,
+            "left": 455,
+            "right": 688,
+            "top": 591,
+            "bottom": 618,
+            "center_x": 571.5,
+            "center_y": 604.5,
+        },
+    ]
+    assert_true(
+        classify_message_side(dark_peer_items[0], width=964) != "self",
+        "dark left-side peer text must not become self only because its left crosses the old threshold",
+    )
+    dark_messages = parse_messages_from_ocr(dark_peer_items, (964, 852), target="dark-mode-peer")
+    assert_true(len(dark_messages) == 1, f"dark peer lines should merge as one message: {dark_messages}")
+    assert_true(dark_messages[0]["sender"] != "self", f"dark peer bubble should not be self: {dark_messages}")
+    assert_true("dark-peer-line-1" in dark_messages[0]["content"], f"dark peer content should be retained: {dark_messages}")
+    assert_true("dark-peer-line-2" in dark_messages[0]["content"], f"dark peer content should be retained: {dark_messages}")
+
+
+def test_parse_messages_classifies_light_and_dark_right_bubbles_as_self() -> None:
+    light_self = {
+        "text": "light-self-message",
+        "confidence": 0.99,
+        "left": 716,
+        "right": 870,
+        "top": 164,
+        "bottom": 208,
+        "center_x": 793,
+        "center_y": 186,
+    }
+    assert_true(classify_message_side(light_self, width=980) == "self", "light right-side self bubble should stay self")
+    light_messages = parse_messages_from_ocr([light_self], (980, 860), target="CJWIN01")
+    assert_true(light_messages and light_messages[0]["sender"] == "self", f"light self bubble should be self: {light_messages}")
+    assert_true(
+        "right_self_lane_reached" in set(light_messages[0].get("sender_role_evidence") or []),
+        f"light self evidence should include right lane reach: {light_messages}",
+    )
+
+    dark_self = {
+        "text": "https://example.invalid/zh",
+        "confidence": 0.99,
+        "left": 608,
+        "right": 868,
+        "top": 443,
+        "bottom": 489,
+        "center_x": 738,
+        "center_y": 466,
+    }
+    assert_true(classify_message_side(dark_self, width=964) == "self", "dark right-side self bubble should stay self")
+    dark_messages = parse_messages_from_ocr([dark_self], (964, 852), target="dark-mode-peer")
+    assert_true(dark_messages and dark_messages[0]["sender"] == "self", f"dark self bubble should be self: {dark_messages}")
+    assert_true(
+        dark_messages[0].get("sender_role_algorithm") == "wechat_win32_bubble_role_v2",
+        f"sender-role algorithm version should be recorded: {dark_messages}",
+    )
+
+
+def test_parse_messages_does_not_let_role_v2_leak_input_or_cross_bubble_state() -> None:
+    draft_like = {
+        "text": "draft-like-wide-text",
+        "confidence": 0.99,
+        "left": 394,
+        "right": 770,
+        "top": 690,
+        "bottom": 718,
+        "center_x": 582,
+        "center_y": 704,
+    }
+    assert_true(
+        classify_message_side(draft_like, width=980) != "self",
+        "wide input draft text must not be self without right-side text start alignment",
+    )
+    draft_messages = parse_messages_from_ocr([draft_like], (980, 860), target="draft-guard")
+    assert_true(not draft_messages, f"input draft residue should be excluded from message capture: {draft_messages}")
+
+    items = [
+        {
+            "text": "self-first-line",
+            "confidence": 0.99,
+            "left": 716,
+            "right": 870,
+            "top": 164,
+            "bottom": 208,
+            "center_x": 793,
+            "center_y": 186,
+        },
+        {
+            "text": "peer-after-gap",
+            "confidence": 0.99,
+            "left": 485,
+            "right": 548,
+            "top": 234,
+            "bottom": 277,
+            "center_x": 516.5,
+            "center_y": 255.5,
+        },
+    ]
+    messages = parse_messages_from_ocr(items, (980, 860), target="cross-bubble-guard")
+    assert_true(len(messages) == 2, f"separate bubbles should not merge across a visible gap: {messages}")
+    assert_true(messages[0]["sender"] == "self", f"first right-side bubble should be self: {messages}")
+    assert_true(messages[1]["sender"] != "self", f"second left/peer bubble must not inherit self: {messages}")
+
+
 def test_parse_messages_outputs_message_envelope_fields() -> None:
     items = [
         {"text": "许聪", "confidence": 0.99, "left": 390, "right": 443, "top": 210, "bottom": 232, "center_x": 416, "center_y": 221},
@@ -6164,6 +6304,9 @@ def main() -> int:
         test_parse_messages_keeps_low_visible_bubble_lines,
         test_parse_messages_excludes_left_input_draft_residue,
         test_parse_messages_classifies_wide_right_bubbles_as_self,
+        test_parse_messages_classifies_light_and_dark_left_bubbles_as_non_self,
+        test_parse_messages_classifies_light_and_dark_right_bubbles_as_self,
+        test_parse_messages_does_not_let_role_v2_leak_input_or_cross_bubble_state,
         test_parse_messages_outputs_message_envelope_fields,
         test_history_snapshot_merge_orders_and_dedupes,
         test_anchor_match_supports_content_and_reply_keys,
