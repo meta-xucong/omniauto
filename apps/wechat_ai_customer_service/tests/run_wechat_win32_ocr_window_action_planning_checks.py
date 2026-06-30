@@ -63,6 +63,10 @@ def test_window_action_planning_module_exports_expected_helpers() -> None:
         callable(getattr(window_action_planning, "plan_normalize_wechat_window", None)),
         "window action planner missing: plan_normalize_wechat_window",
     )
+    assert_true(
+        callable(getattr(window_action_planning, "recommended_window_scale_for_screen", None)),
+        "window action planner missing: recommended_window_scale_for_screen",
+    )
 
 
 def test_plan_disabled_matches_sidecar_disabled_shape() -> None:
@@ -85,25 +89,49 @@ def test_plan_1920x1080_keeps_default_safe_window_when_it_fits() -> None:
     assert_true((result.get("left"), result.get("top"), result.get("width"), result.get("height")) == (0, 0, 980, 860), f"1080p target mismatch: {result}")
 
 
-def test_plan_high_dpi_scales_recommended_window_when_screen_allows() -> None:
+def test_plan_high_resolution_scales_recommended_window_when_screen_allows() -> None:
     before = {"left": 20, "top": 24, "width": 980, "height": 860}
     result = plan(before, dpi_scale=1.5, screen_width=3840, screen_height=2160)
     assert_true(
         (result.get("left"), result.get("top"), result.get("width"), result.get("height")) == (0, 0, 1470, 1290),
-        f"high DPI target should scale recommended geometry: {result}",
+        f"high resolution target should scale recommended geometry: {result}",
     )
-    assert_true(result.get("target") == {"width": 1470, "height": 1290}, f"high DPI target metadata mismatch: {result}")
+    assert_true(result.get("target") == {"width": 1470, "height": 1290}, f"high resolution target metadata mismatch: {result}")
+    assert_true(result.get("resolution_scale") == 1.5, f"resolution scale metadata mismatch: {result}")
+
+
+def test_plan_1920_class_displays_ignore_dpi_scale_for_default_window() -> None:
+    cases = [
+        ("1920x1080@100", 1920, 1080, 1.0, (0, 0, 980, 860)),
+        ("1920x1080@125-logical", 1536, 864, 1.25, (0, 0, 980, 816)),
+        ("local-1920x1200@125-logical", 1536, 960, 1.25, (0, 0, 980, 860)),
+        ("1920x1080@150-logical", 1280, 720, 1.5, (0, 0, 980, 672)),
+    ]
+    for label, screen_width, screen_height, dpi_scale, expected_rect in cases:
+        result = plan(
+            {"left": 20, "top": 24, "width": 900, "height": 800},
+            dpi_scale=dpi_scale,
+            screen_width=screen_width,
+            screen_height=screen_height,
+        )
+        assert_true(
+            (result.get("left"), result.get("top"), result.get("width"), result.get("height")) == expected_rect,
+            f"{label} should keep the 980x860 default class and only clamp to visible bounds: {result}",
+        )
+        assert_true(result.get("target") == {"width": 980, "height": 860}, f"{label} target metadata mismatch: {result}")
+        assert_true(result.get("resolution_scale") == 1.0, f"{label} should not scale by DPI: {result}")
+        assert_true(result.get("dpi_scale") == dpi_scale, f"{label} should still report DPI for diagnostics: {result}")
 
 
 def test_plan_resolution_dpi_matrix_stays_visible_and_safe() -> None:
     cases = [
         ("1366x768@100", 1366, 768, 1.0, (0, 0, 980, 720), {"width": 980, "height": 860}),
         ("1440x900@100", 1440, 900, 1.0, (0, 0, 980, 852), {"width": 980, "height": 860}),
-        ("1536x864@125", 1536, 864, 1.25, (0, 0, 1225, 816), {"width": 1225, "height": 1075}),
+        ("1536x864@125", 1536, 864, 1.25, (0, 0, 980, 816), {"width": 980, "height": 860}),
         ("1920x1080@100", 1920, 1080, 1.0, (0, 0, 980, 860), {"width": 980, "height": 860}),
-        ("1920x1080@125", 1920, 1080, 1.25, (0, 0, 1225, 1032), {"width": 1225, "height": 1075}),
-        ("1920x1080@150", 1920, 1080, 1.5, (0, 0, 1470, 1032), {"width": 1470, "height": 1290}),
-        ("2560x1440@100", 2560, 1440, 1.0, (0, 0, 980, 860), {"width": 980, "height": 860}),
+        ("1920x1080@125", 1920, 1080, 1.25, (0, 0, 980, 860), {"width": 980, "height": 860}),
+        ("1920x1080@150", 1920, 1080, 1.5, (0, 0, 980, 860), {"width": 980, "height": 860}),
+        ("2560x1440@100", 2560, 1440, 1.0, (0, 0, 1225, 1075), {"width": 1225, "height": 1075}),
         ("3840x2160@150", 3840, 2160, 1.5, (0, 0, 1470, 1290), {"width": 1470, "height": 1290}),
     ]
     for label, screen_width, screen_height, dpi_scale, expected_rect, expected_target in cases:
@@ -122,20 +150,22 @@ def test_plan_resolution_dpi_matrix_stays_visible_and_safe() -> None:
         assert_true(int(result.get("target", {}).get("height") or 0) <= sidecar.MAX_SAFE_WINDOW_HEIGHT, f"{label} target height exceeds max: {result}")
 
 
-def test_plan_extreme_dpi_clamps_recommended_target_to_safe_maximum() -> None:
+def test_plan_huge_requested_window_clamps_to_safe_maximum() -> None:
     result = plan(
         {"left": 100, "top": 100, "width": 980, "height": 860},
         dpi_scale=4.0,
+        requested_width="9999",
+        requested_height="9999",
         screen_width=7680,
         screen_height=4320,
     )
     assert_true(
         result.get("target") == {"width": sidecar.MAX_SAFE_WINDOW_WIDTH, "height": sidecar.MAX_SAFE_WINDOW_HEIGHT},
-        f"extreme DPI target should be clamped to max safe bounds: {result}",
+        f"explicit huge requested target should be clamped to max safe bounds: {result}",
     )
     assert_true(
         (result.get("width"), result.get("height")) == (sidecar.MAX_SAFE_WINDOW_WIDTH, sidecar.MAX_SAFE_WINDOW_HEIGHT),
-        f"extreme DPI effective size should stay within max safe bounds: {result}",
+        f"explicit huge requested effective size should stay within max safe bounds: {result}",
     )
 
 
@@ -250,6 +280,7 @@ def test_sidecar_normalize_wechat_window_uses_same_planned_move_shape() -> None:
         assert_true(calls == [expected_move], f"sidecar should execute planner move: calls={calls}, planned={planned}")
         assert_true(result.get("target") == planned.get("target"), f"target metadata mismatch: {result} vs {planned}")
         assert_true(result.get("screen") == planned.get("screen"), f"screen metadata mismatch: {result} vs {planned}")
+        assert_true(result.get("resolution_scale") == planned.get("resolution_scale"), f"resolution scale metadata mismatch: {result} vs {planned}")
     finally:
         for name, value in previous_env.items():
             if value is None:
@@ -268,9 +299,10 @@ def main() -> int:
         test_plan_disabled_matches_sidecar_disabled_shape,
         test_plan_1920x1200_fixed_origin_matches_default_safe_window,
         test_plan_1920x1080_keeps_default_safe_window_when_it_fits,
-        test_plan_high_dpi_scales_recommended_window_when_screen_allows,
+        test_plan_high_resolution_scales_recommended_window_when_screen_allows,
+        test_plan_1920_class_displays_ignore_dpi_scale_for_default_window,
         test_plan_resolution_dpi_matrix_stays_visible_and_safe,
-        test_plan_extreme_dpi_clamps_recommended_target_to_safe_maximum,
+        test_plan_huge_requested_window_clamps_to_safe_maximum,
         test_plan_tiny_screen_never_exceeds_visible_screen_bounds,
         test_plan_small_screen_clamps_size_to_visible_screen,
         test_plan_non_fixed_origin_clamps_existing_origin,

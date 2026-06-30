@@ -14,6 +14,18 @@ ENSURE_VISIBLE_ACTION_MANUAL_TRAY = "manual_open_tray"
 WINDOW_SELECTION_EMPTY_SCORE = (-1, -1, -1, -1, -1)
 
 
+def recommended_window_scale_for_screen(screen_width: int, screen_height: int, *, screen_metrics_available: bool) -> float:
+    if not screen_metrics_available:
+        return 1.0
+    width = max(0, int(screen_width or 0))
+    height = max(0, int(screen_height or 0))
+    if width >= 3200 and height >= 1800:
+        return 1.5
+    if width >= 2400 and height >= 1350:
+        return 1.25
+    return 1.0
+
+
 def _geometry_int(geometry: dict[str, Any], key: str) -> int:
     try:
         return int(geometry.get(key) or 0)
@@ -46,18 +58,23 @@ def plan_normalize_wechat_window(
     if not enabled:
         return {"ok": True, "enabled": False, "applied": False, "before": before_geometry}
 
-    try:
-        normalized_scale = max(1.0, float(dpi_scale or 1.0))
-    except (TypeError, ValueError):
-        normalized_scale = 1.0
     safe_max_width = max(1, int(max_width or 1))
     safe_max_height = max(1, int(max_height or 1))
-    scaled_default_width = min(safe_max_width, max(1, int(round(default_width * normalized_scale))))
-    scaled_default_height = min(safe_max_height, max(1, int(round(default_height * normalized_scale))))
-    scaled_min_width = min(safe_max_width, max(1, int(round(min_width * normalized_scale))))
-    scaled_min_height = min(safe_max_height, max(1, int(round(min_height * normalized_scale))))
-    target_width = bounded_int(requested_width, default=scaled_default_width, minimum=scaled_min_width, maximum=safe_max_width)
-    target_height = bounded_int(requested_height, default=scaled_default_height, minimum=scaled_min_height, maximum=safe_max_height)
+    try:
+        normalized_dpi_scale = max(1.0, float(dpi_scale or 1.0))
+    except (TypeError, ValueError):
+        normalized_dpi_scale = 1.0
+    resolution_scale = recommended_window_scale_for_screen(
+        screen_width,
+        screen_height,
+        screen_metrics_available=screen_metrics_available,
+    )
+    scaled_default_width = min(safe_max_width, max(1, int(round(default_width * resolution_scale))))
+    scaled_default_height = min(safe_max_height, max(1, int(round(default_height * resolution_scale))))
+    base_min_width = min(safe_max_width, max(1, int(min_width or 1)))
+    base_min_height = min(safe_max_height, max(1, int(min_height or 1)))
+    target_width = bounded_int(requested_width, default=scaled_default_width, minimum=base_min_width, maximum=safe_max_width)
+    target_height = bounded_int(requested_height, default=scaled_default_height, minimum=base_min_height, maximum=safe_max_height)
     requested_target = {"width": target_width, "height": target_height}
     recommended_floor_applied = False
     if enforce_recommended:
@@ -123,6 +140,8 @@ def plan_normalize_wechat_window(
         "recommended_floor_applied": bool(recommended_floor_applied),
         "fixed_origin": bool(fixed_origin),
         "screen": {"width": safe_screen_width, "height": safe_screen_height},
+        "dpi_scale": normalized_dpi_scale,
+        "resolution_scale": resolution_scale,
         "left": int(left),
         "top": int(top),
         "width": int(safe_width),

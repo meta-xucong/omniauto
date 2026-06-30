@@ -8087,6 +8087,7 @@ def normalize_wechat_window(hwnd: int) -> dict[str, Any]:
     effective_target = dict(plan.get("target") or {})
     requested_target = dict(plan.get("requested_target") or {})
     recommended_floor_applied = bool(plan.get("recommended_floor_applied"))
+    resolution_scale = float(plan.get("resolution_scale") or 1.0)
     if not bool(plan.get("move")):
         return {
             "ok": True,
@@ -8097,6 +8098,7 @@ def normalize_wechat_window(hwnd: int) -> dict[str, Any]:
             "target": effective_target,
             "requested_target": requested_target,
             "dpi_scale": dpi_scale,
+            "resolution_scale": resolution_scale,
             "enforce_recommended": enforce_recommended,
             "recommended_floor_applied": recommended_floor_applied,
             "fixed_origin": fixed_origin,
@@ -8123,6 +8125,7 @@ def normalize_wechat_window(hwnd: int) -> dict[str, Any]:
             "target": effective_target,
             "requested_target": requested_target,
             "dpi_scale": dpi_scale,
+            "resolution_scale": resolution_scale,
             "enforce_recommended": enforce_recommended,
             "recommended_floor_applied": recommended_floor_applied,
             "fixed_origin": fixed_origin,
@@ -8138,6 +8141,7 @@ def normalize_wechat_window(hwnd: int) -> dict[str, Any]:
             "target": effective_target,
             "requested_target": requested_target,
             "dpi_scale": dpi_scale,
+            "resolution_scale": resolution_scale,
             "enforce_recommended": enforce_recommended,
             "recommended_floor_applied": recommended_floor_applied,
             "fixed_origin": fixed_origin,
