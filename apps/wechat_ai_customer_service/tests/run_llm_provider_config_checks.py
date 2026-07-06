@@ -85,6 +85,20 @@ def run_checks() -> dict[str, Any]:
                     )
                 return FakeResponse({"data": [{"id": "gpt-4o-mini"}, {"id": "gpt-4.1"}]})
             if request_url.endswith("/messages"):
+                body = json.loads(request.data.decode("utf-8")) if request.data else {}
+                if body.get("tool_choice"):
+                    return FakeResponse(
+                        {
+                            "content": [
+                                {
+                                    "type": "tool_use",
+                                    "id": "tool_unit_emit_json",
+                                    "name": "emit_json_object",
+                                    "input": {"ok": True, "reply_segments": ["OK"]},
+                                }
+                            ]
+                        }
+                    )
                 return FakeResponse({"content": [{"type": "text", "text": "OK"}]})
             return FakeResponse()
 
@@ -94,6 +108,7 @@ def run_checks() -> dict[str, Any]:
             check_openai_compatible_roundtrip_and_probe(calls)
             check_deepseek_gateway_roundtrip_and_probe(calls)
             check_fallback_roundtrip_and_anthropic_probe(calls)
+            check_anthropic_json_mode_uses_tool_output(calls)
             check_kimi_primary_deepseek_flash_fallback_payload_and_failover(calls)
             check_model_unavailable_primary_is_failoverable()
             check_stage_can_disallow_fallback(calls)
@@ -103,7 +118,7 @@ def run_checks() -> dict[str, Any]:
         finally:
             llm_config_module.urllib.request.urlopen = old_urlopen
             llm_config_module._LLM_CONFIG_PATH = old_path
-    return {"ok": True, "checks": 10}
+    return {"ok": True, "checks": 11}
 
 
 def check_legacy_deepseek_defaults() -> None:
@@ -269,6 +284,37 @@ def check_fallback_roundtrip_and_anthropic_probe(calls: list[dict[str, Any]]) ->
     assert_equal(calls[-1]["body"]["model"], "kimi-for-coding", "fallback probe should use fallback flash model")
     assert_equal(calls[-1]["headers"].get("x-api-key"), "sk-fallback-kimi", "fallback probe should send anthropic API key header")
     assert_equal(calls[-1]["headers"].get("anthropic-version"), "2023-06-01", "fallback probe should send anthropic version header")
+
+
+def check_anthropic_json_mode_uses_tool_output(calls: list[dict[str, Any]]) -> None:
+    before = len(calls)
+    result = llm_config_module.call_llm_request_once(
+        provider="anthropic",
+        api_key="sk-anthropic-json",
+        base_url="https://aiself.vip/v1",
+        model="kimi-for-coding",
+        messages=[
+            {"role": "system", "content": "只输出 JSON 对象。"},
+            {"role": "user", "content": "返回最小 JSON"},
+        ],
+        timeout=30,
+        max_tokens=128,
+        temperature=0.0,
+        tier="flash",
+        json_mode=True,
+    )
+    assert_true(result.get("ok"), f"anthropic json-mode call should succeed: {result}")
+    assert_equal(result.get("provider"), "anthropic", "provider should stay anthropic")
+    assert_true(result.get("tool_json_mode") is True, f"anthropic json-mode should use tool output: {result}")
+    assert_equal(result.get("tool_json_payload"), {"ok": True, "reply_segments": ["OK"]}, "tool payload should be preserved")
+    assert_equal(result.get("response_text"), json.dumps({"ok": True, "reply_segments": ["OK"]}, ensure_ascii=False), "response text should serialize tool payload")
+    assert_true(len(calls) == before + 1, "anthropic json-mode should perform one request")
+    request = calls[-1]
+    assert_equal(request["url"], "https://aiself.vip/v1/messages", "anthropic json-mode should still call messages endpoint")
+    assert_equal(request["body"].get("thinking"), {"type": "disabled"}, "anthropic json-mode should disable thinking")
+    assert_equal(request["body"].get("tool_choice"), {"type": "tool", "name": "emit_json_object"}, "anthropic json-mode should force tool output")
+    tools = request["body"].get("tools")
+    assert_true(isinstance(tools, list) and len(tools) == 1, "anthropic json-mode should include one output tool")
 
 
 def check_kimi_primary_deepseek_flash_fallback_payload_and_failover(calls: list[dict[str, Any]]) -> None:

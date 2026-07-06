@@ -10,6 +10,7 @@ import subprocess
 import sys
 import tempfile
 import types
+from contextlib import contextmanager
 
 from PIL import Image, ImageDraw
 
@@ -36,6 +37,9 @@ from apps.wechat_ai_customer_service.adapters.wechat_connector import (  # noqa:
     rpa_payload_needs_interactive_confirmation,
     rpa_payload_needs_render_recovery,
     send_rpa_env,
+    send_rpa_batch_lock_active,
+    send_rpa_batch_lock_context,
+    send_rpa_batch_lock_meta,
     same_target_continuation_send_active,
     same_target_continuation_send_context,
     same_target_continuation_send_env,
@@ -1132,6 +1136,33 @@ def test_connector_helpers() -> None:
         "--skip-send-rate-guard" in skip_guard,
         f"compat args should preserve loopback guard flag: {skip_guard}",
     )
+    image_save_args = compat_args(
+        [
+            "image-save",
+            "--target",
+            "新数据测试",
+            "--exact",
+            "--session-key",
+            "wx:1",
+            "--source-preview",
+            "许聪:[图片]",
+            "--speaker-name",
+            "许聪",
+            "--tenant-id",
+            "chejin",
+            "--max-images",
+            "1",
+        ]
+    )
+    assert_true(image_save_args[0] == "image-save", f"image-save action should be preserved: {image_save_args}")
+    assert_true("--source-preview" in image_save_args and "许聪:[图片]" in image_save_args, f"image preview should be preserved: {image_save_args}")
+    request = wechat_connector_module._args_to_request(image_save_args)
+    assert_true(request.get("action") == "image-save", f"image-save request action should be parsed: {request}")
+    assert_true(request.get("target") == "新数据测试", f"image-save target should be parsed: {request}")
+    assert_true(request.get("source_preview") == "许聪:[图片]", f"image-save source preview should be parsed: {request}")
+    assert_true(request.get("speaker_name") == "许聪", f"image-save speaker should be parsed: {request}")
+    assert_true(request.get("tenant_id") == "chejin", f"image-save tenant should be parsed: {request}")
+    assert_true(request.get("max_images") == 1, f"image-save max_images should be parsed: {request}")
 
 
 def test_send_geometry_guard() -> None:
@@ -1662,6 +1693,16 @@ def test_input_region_soft_blank_noise_allows_post_clear_progress() -> None:
         input_region_soft_blank_noise(noise_after_clear) is True,
         "low-dark high-mean zero-OCR residue after draft clearing should be treated as soft blank noise",
     )
+    live_weak_ocr_noise = {
+        "has_visible_text": True,
+        "ocr_hits": 1,
+        "dark_ratio": 0.001619,
+        "mean": 249.707,
+    }
+    assert_true(
+        input_region_soft_blank_noise(live_weak_ocr_noise) is True,
+        "single weak OCR drift in an almost-white input region should be treated as soft blank noise",
+    )
     ocr_residue = {
         "has_visible_text": True,
         "ocr_hits": 1,
@@ -1670,7 +1711,7 @@ def test_input_region_soft_blank_noise_allows_post_clear_progress() -> None:
     }
     assert_true(
         input_region_soft_blank_noise(ocr_residue) is False,
-        "any OCR-visible residue must not be treated as blank because it can be an unsent draft fragment",
+        "non-weak OCR-visible residue must not be treated as blank because it can be an unsent draft fragment",
     )
     likely_draft = {
         "has_visible_text": True,
@@ -1703,6 +1744,24 @@ def test_clear_existing_input_draft_noops_when_blank() -> None:
         before_state={"has_visible_text": False, "reason": "input_region_blank"},
     )
     assert_true(result["ok"] is True and result["cleared"] is False, f"blank input should not trigger select-all: {result}")
+
+
+def test_clear_existing_input_draft_normalizes_weak_ocr_noise() -> None:
+    weak_noise = {
+        "has_visible_text": True,
+        "reason": "ocr_or_dark_pixels",
+        "ocr_hits": 1,
+        "dark_ratio": 0.001619,
+        "mean": 249.707,
+    }
+    result = clear_existing_input_draft(
+        0,
+        points={"input_point": [600, 720], "send_point": [920, 810]},
+        geometry={"width": 980, "height": 860},
+        before_state=weak_noise,
+    )
+    assert_true(result["ok"] is True and result["cleared"] is False, f"weak OCR noise should not trigger draft clearing: {result}")
+    assert_true((result.get("after") or {}).get("has_visible_text") is False, f"normalized after-state should be blank: {result}")
 
 
 def test_send_rate_guard() -> None:
@@ -4201,6 +4260,38 @@ def test_same_target_continuation_context_survives_dual_import_paths() -> None:
     )
 
 
+def test_send_rpa_batch_lock_context_reuses_single_lock_for_send_and_messages() -> None:
+    original_lock = wechat_connector_module.wechat_rpa_lock
+    calls: list[str] = []
+
+    @contextmanager
+    def fake_lock(action: str, *, timeout_seconds: float = 90.0, stale_seconds: float = 180.0):
+        calls.append(str(action))
+        yield {
+            "action": str(action),
+            "timeout_seconds": round(float(timeout_seconds), 3),
+            "waited_seconds": 0.0,
+            "attempts": 1,
+            "stale_breaks": 0,
+        }
+
+    try:
+        wechat_connector_module.wechat_rpa_lock = fake_lock
+        assert_true(not send_rpa_batch_lock_active(), "batch lock should start inactive")
+        with send_rpa_batch_lock_context(True):
+            assert_true(send_rpa_batch_lock_active(), "batch lock context should become active")
+            send_meta = send_rpa_batch_lock_meta("send")
+            messages_meta = send_rpa_batch_lock_meta("messages")
+            assert_true(isinstance(send_meta, dict), f"send should see active batch lock: {send_meta}")
+            assert_true(isinstance(messages_meta, dict), f"messages should see active batch lock: {messages_meta}")
+            assert_true(send_meta.get("reused_for_action") == "send", f"unexpected send meta: {send_meta}")
+            assert_true(messages_meta.get("reused_for_action") == "messages", f"unexpected messages meta: {messages_meta}")
+        assert_true(not send_rpa_batch_lock_active(), "batch lock context should reset")
+        assert_true(calls == ["send"], f"batch context should acquire the real lock only once: {calls}")
+    finally:
+        wechat_connector_module.wechat_rpa_lock = original_lock
+
+
 def test_activate_window_debounces_aggressive_refocus() -> None:
     source_path = PROJECT_ROOT / "apps" / "wechat_ai_customer_service" / "adapters" / "wechat_win32_ocr_sidecar.py"
     activation_path = PROJECT_ROOT / "apps" / "wechat_ai_customer_service" / "adapters" / "wechat_win32_ocr" / "window_activation.py"
@@ -5548,6 +5639,201 @@ def test_send_payload_rechecks_prevalidated_guard_before_typing() -> None:
             setattr(sidecar_mod, name, value)
 
 
+def test_send_payload_reuses_continuation_prevalidated_guard_without_second_ocr() -> None:
+    sidecar_mod = sys.modules["apps.wechat_ai_customer_service.adapters.wechat_win32_ocr_sidecar"]
+    geometry = {"left": 0, "top": 0, "right": 980, "bottom": 860, "width": 980, "height": 860}
+    originals = {
+        "validate_active_send_target": sidecar_mod.validate_active_send_target,
+        "recover_send_window_guard": sidecar_mod.recover_send_window_guard,
+        "get_window_geometry": sidecar_mod.get_window_geometry,
+        "validate_send_geometry": sidecar_mod.validate_send_geometry,
+        "calculate_send_points": sidecar_mod.calculate_send_points,
+        "reserve_send_rate": sidecar_mod.reserve_send_rate,
+        "send_with_guarded_clicks": sidecar_mod.send_with_guarded_clicks,
+        "validate_post_send_target": sidecar_mod.validate_post_send_target,
+        "humanized_action_sleep": sidecar_mod.humanized_action_sleep,
+        "capture_wechat": sidecar_mod.capture_wechat,
+    }
+    calls = {"validate_active": 0}
+    try:
+        fingerprint_image = Image.new("RGB", (980, 860), "white")
+        draw = ImageDraw.Draw(fingerprint_image)
+        draw.rectangle((390, 52, 720, 118), fill=(245, 245, 245))
+        draw.text((430, 72), "新数据测试", fill=(20, 20, 20))
+        title_fingerprint = sidecar_mod.active_title_region_fingerprint(fingerprint_image, geometry)
+
+        def fail_validate(*_args, **_kwargs):
+            calls["validate_active"] += 1
+            return {
+                "ok": False,
+                "online": True,
+                "reason": "unexpected_ocr_call",
+                "geometry": dict(geometry),
+            }
+
+        sidecar_mod.validate_active_send_target = fail_validate
+        sidecar_mod.recover_send_window_guard = lambda _hwnd, max_attempts=1: {"ok": True, "reason": "window_valid"}
+        sidecar_mod.get_window_geometry = lambda _hwnd: dict(geometry)
+        sidecar_mod.validate_send_geometry = lambda _g: {"ok": True}
+        sidecar_mod.capture_wechat = lambda *_args, **_kwargs: (fingerprint_image, "continuation_title.png")
+        sidecar_mod.calculate_send_points = lambda _g: {
+            "ok": True,
+            "input_point": [640, 715],
+            "send_point": [915, 816],
+        }
+        sidecar_mod.reserve_send_rate = lambda **_kwargs: {"ok": True, "reason": "rate_ok"}
+        sidecar_mod.send_with_guarded_clicks = lambda *_args, **_kwargs: {
+            "ok": True,
+            "method": "win32.human_click_input+sendinput_unicode+send_trigger:enter_only",
+            "paste": {"ok": True, "input_mode": "sendinput_unicode"},
+        }
+        sidecar_mod.validate_post_send_target = lambda *_args, **_kwargs: {
+            "ok": True,
+            "online": True,
+            "reason": "target_confirmed",
+            "geometry": dict(geometry),
+            "post_send_fast_guard": True,
+            "screenshot_path": "",
+        }
+        sidecar_mod.humanized_action_sleep = lambda *_args, **_kwargs: 0.0
+        payload = sidecar_mod.send_payload(
+            1001,
+            {"windows": [], "visible_main_windows": []},
+            target="新数据测试",
+            text="第二条",
+            exact=True,
+            validated_guard={
+                "ok": True,
+                "online": True,
+                "reason": "target_confirmed",
+                "requested_target": "新数据测试",
+                "confirmed_target": "新数据测试",
+                "confirmation_confidence": "active_title_strict",
+                "geometry": dict(geometry),
+                "continuation_prevalidated_guard": True,
+                "active_title_region_fingerprint": title_fingerprint,
+            },
+            allow_cached_prevalidated_guard_without_ocr=True,
+        )
+        assert_true(payload.get("ok") is True, f"continuation cached guard should send: {payload}")
+        assert_true(calls["validate_active"] == 0, f"continuation cache should skip duplicate active OCR: {calls}")
+        timing = payload.get("timing") if isinstance(payload.get("timing"), dict) else {}
+        assert_true(timing.get("pre_send_guard_cached_continuation_ocr_skipped") is True, f"timing should expose OCR skip: {timing}")
+        send_result = payload.get("send_result") if isinstance(payload.get("send_result"), dict) else {}
+        assert_true(
+            str(send_result.get("validation_source") or "") == "prevalidated_guard_continuation_cache",
+            f"validation source should mark continuation cache: {send_result}",
+        )
+        pre_guard = send_result.get("pre_send_guard") if isinstance(send_result.get("pre_send_guard"), dict) else {}
+        assert_true(pre_guard.get("continuation_prevalidated_guard_reused") is True, f"pre guard should be auditable: {pre_guard}")
+    finally:
+        for name, value in originals.items():
+            setattr(sidecar_mod, name, value)
+
+
+def test_send_payload_rechecks_when_continuation_title_fingerprint_mismatches() -> None:
+    sidecar_mod = sys.modules["apps.wechat_ai_customer_service.adapters.wechat_win32_ocr_sidecar"]
+    geometry = {"left": 0, "top": 0, "right": 980, "bottom": 860, "width": 980, "height": 860}
+    originals = {
+        "validate_active_send_target": sidecar_mod.validate_active_send_target,
+        "recover_send_window_guard": sidecar_mod.recover_send_window_guard,
+        "get_window_geometry": sidecar_mod.get_window_geometry,
+        "validate_send_geometry": sidecar_mod.validate_send_geometry,
+        "calculate_send_points": sidecar_mod.calculate_send_points,
+        "reserve_send_rate": sidecar_mod.reserve_send_rate,
+        "send_with_guarded_clicks": sidecar_mod.send_with_guarded_clicks,
+        "validate_post_send_target": sidecar_mod.validate_post_send_target,
+        "humanized_action_sleep": sidecar_mod.humanized_action_sleep,
+        "capture_wechat": sidecar_mod.capture_wechat,
+    }
+    calls = {"validate_active": 0}
+    try:
+        current_image = Image.new("RGB", (980, 860), "white")
+        current_draw = ImageDraw.Draw(current_image)
+        current_draw.rectangle((390, 52, 720, 118), fill=(250, 250, 250))
+        current_draw.text((430, 72), "另一个会话", fill=(20, 20, 20))
+        current_fingerprint = sidecar_mod.active_title_region_fingerprint(current_image, geometry)
+        cached_fingerprint = f"{(int(current_fingerprint, 16) ^ ((1 << 64) - 1)):016x}"
+        assert_true(
+            sidecar_mod.hamming_distance_hex(cached_fingerprint, current_fingerprint) > 8,
+            "test setup should force a title fingerprint mismatch",
+        )
+
+        def pass_validate(*_args, **_kwargs):
+            calls["validate_active"] += 1
+            return {
+                "ok": True,
+                "online": True,
+                "reason": "target_confirmed",
+                "requested_target": "新数据测试",
+                "confirmed_target": "新数据测试",
+                "confirmation_confidence": "active_title_strict",
+                "geometry": dict(geometry),
+                "screenshot_path": "send_guard.png",
+            }
+
+        sidecar_mod.validate_active_send_target = pass_validate
+        sidecar_mod.recover_send_window_guard = lambda _hwnd, max_attempts=1: {"ok": True, "reason": "window_valid"}
+        sidecar_mod.get_window_geometry = lambda _hwnd: dict(geometry)
+        sidecar_mod.validate_send_geometry = lambda _g: {"ok": True}
+        sidecar_mod.capture_wechat = lambda *_args, **_kwargs: (current_image, "continuation_title_mismatch.png")
+        sidecar_mod.calculate_send_points = lambda _g: {
+            "ok": True,
+            "input_point": [640, 715],
+            "send_point": [915, 816],
+        }
+        sidecar_mod.reserve_send_rate = lambda **_kwargs: {"ok": True, "reason": "rate_ok"}
+        sidecar_mod.send_with_guarded_clicks = lambda *_args, **_kwargs: {
+            "ok": True,
+            "method": "win32.human_click_input+sendinput_unicode+send_trigger:enter_only",
+            "paste": {"ok": True, "input_mode": "sendinput_unicode"},
+        }
+        sidecar_mod.validate_post_send_target = lambda *_args, **_kwargs: {
+            "ok": True,
+            "online": True,
+            "reason": "target_confirmed",
+            "geometry": dict(geometry),
+            "post_send_fast_guard": True,
+            "screenshot_path": "",
+        }
+        sidecar_mod.humanized_action_sleep = lambda *_args, **_kwargs: 0.0
+        payload = sidecar_mod.send_payload(
+            1001,
+            {"windows": [], "visible_main_windows": []},
+            target="新数据测试",
+            text="第二条",
+            exact=True,
+            validated_guard={
+                "ok": True,
+                "online": True,
+                "reason": "target_confirmed",
+                "requested_target": "新数据测试",
+                "confirmed_target": "新数据测试",
+                "confirmation_confidence": "active_title_strict",
+                "geometry": dict(geometry),
+                "continuation_prevalidated_guard": True,
+                "active_title_region_fingerprint": cached_fingerprint,
+            },
+            allow_cached_prevalidated_guard_without_ocr=True,
+        )
+        assert_true(payload.get("ok") is True, f"mismatch should recover via strict OCR: {payload}")
+        assert_true(calls["validate_active"] == 1, f"fingerprint mismatch must force OCR recheck: {calls}")
+        timing = payload.get("timing") if isinstance(payload.get("timing"), dict) else {}
+        assert_true(timing.get("pre_send_guard_cached_continuation_reuse_rejected") is True, f"reuse rejection should be timed: {timing}")
+        assert_true(
+            timing.get("pre_send_guard_cached_continuation_title_fingerprint_ok") is False,
+            f"title fingerprint mismatch should be auditable: {timing}",
+        )
+        send_result = payload.get("send_result") if isinstance(payload.get("send_result"), dict) else {}
+        assert_true(
+            str(send_result.get("validation_source") or "") == "prevalidated_guard_strict_recheck",
+            f"mismatch should fall back to strict recheck source: {send_result}",
+        )
+    finally:
+        for name, value in originals.items():
+            setattr(sidecar_mod, name, value)
+
+
 def test_send_payload_exposes_optional_timing_without_contract_changes() -> None:
     sidecar_mod = sys.modules["apps.wechat_ai_customer_service.adapters.wechat_win32_ocr_sidecar"]
     geometry = {"left": 0, "top": 0, "right": 980, "bottom": 860, "width": 980, "height": 860}
@@ -6642,9 +6928,11 @@ def main() -> int:
         test_input_region_soft_blank_noise_allows_post_clear_progress,
         test_input_area_token_confirmation_excludes_recent_chat_bubble,
         test_clear_existing_input_draft_noops_when_blank,
+        test_clear_existing_input_draft_normalizes_weak_ocr_noise,
         test_send_rpa_env_enables_strict_focus_single_confirm_and_blank_retry,
         test_same_target_continuation_send_env_is_context_scoped,
         test_same_target_continuation_context_survives_dual_import_paths,
+        test_send_rpa_batch_lock_context_reuses_single_lock_for_send_and_messages,
         test_activate_window_debounces_aggressive_refocus,
         test_non_retryable_input_failure_detects_focus_loss,
         test_foreground_guard_zero_hwnd_can_degrade_when_enabled,
@@ -6672,6 +6960,8 @@ def main() -> int:
         test_target_ready_switch_validation_cache_respects_target_and_geometry,
         test_target_ready_reopens_when_prevalidation_is_weak,
         test_send_payload_rechecks_prevalidated_guard_before_typing,
+        test_send_payload_reuses_continuation_prevalidated_guard_without_second_ocr,
+        test_send_payload_rechecks_when_continuation_title_fingerprint_mismatches,
         test_send_payload_exposes_optional_timing_without_contract_changes,
         test_send_payload_reuses_strict_guard_input_region_seed_for_before_check,
         test_send_payload_blocks_stale_prevalidated_guard_when_active_target_changed,

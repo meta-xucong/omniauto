@@ -756,6 +756,21 @@ def extract_llm_response_text(*, provider: Any, data: Any) -> str:
     return str(((data.get("choices", [{}])[0] if isinstance(data, dict) else {}).get("message", {}) or {}).get("content", "") or "").strip()
 
 
+def extract_anthropic_tool_json_object(data: Any) -> dict[str, Any] | None:
+    items = data.get("content") if isinstance(data, dict) else []
+    if not isinstance(items, list):
+        return None
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        if str(item.get("type") or "").strip().lower() != "tool_use":
+            continue
+        payload = item.get("input")
+        if isinstance(payload, dict):
+            return payload
+    return None
+
+
 def call_llm_request_once(
     *,
     provider: Any,
@@ -791,6 +806,19 @@ def call_llm_request_once(
             "max_tokens": max(1, int(max_tokens)),
             "stream": False,
         }
+        if json_mode:
+            payload["thinking"] = {"type": "disabled"}
+            payload["tools"] = [
+                {
+                    "name": "emit_json_object",
+                    "description": "Return the requested structured JSON object only through tool input.",
+                    "input_schema": {
+                        "type": "object",
+                        "additionalProperties": True,
+                    },
+                }
+            ]
+            payload["tool_choice"] = {"type": "tool", "name": "emit_json_object"}
         if system_parts:
             payload["system"] = "\n\n".join(system_parts)
         if temperature is not None:
@@ -848,9 +876,11 @@ def call_llm_request_once(
                 "model": model,
                 "base_url": normalize_llm_base_url(base_url),
                 "status": int(getattr(response, "status", 200) or 200),
-                "response_text": extract_llm_response_text(provider=provider_id, data=data),
+                "response_text": json.dumps(tool_payload, ensure_ascii=False) if (json_mode and isinstance(tool_payload := extract_anthropic_tool_json_object(data), dict)) else extract_llm_response_text(provider=provider_id, data=data),
                 "usage": data.get("usage", {}) if isinstance(data, dict) else {},
                 "request_style": request_style,
+                "tool_json_mode": bool(json_mode and isinstance(tool_payload, dict)),
+                "tool_json_payload": tool_payload if json_mode and isinstance(tool_payload, dict) else None,
             }
     except urllib.error.HTTPError as exc:
         body = exc.read().decode("utf-8", errors="replace")

@@ -75,6 +75,17 @@ def message_content_key(message: dict[str, Any]) -> str:
     msg_type = str(message.get("type") or "")
     if not content:
         return ""
+    if message.get("is_customer_image_proxy") or str(message.get("visual_turn_kind") or "") == "customer_image":
+        visual_identity = ""
+        for key in ("visual_occurrence_id", "source_message_id", "message_id", "id", "saved_image_path", "asset_id"):
+            visual_identity = str(message.get(key) or "").strip()
+            if visual_identity:
+                break
+        image_assets = [str(item).strip() for item in (message.get("image_assets") or []) if str(item).strip()]
+        if not visual_identity and image_assets:
+            visual_identity = image_assets[0]
+        if visual_identity:
+            return hashlib.sha256(f"{sender}|{msg_type}|customer_image|{visual_identity}".encode("utf-8")).hexdigest()[:24]
     return hashlib.sha256(f"{sender}|{msg_type}|{content}".encode("utf-8")).hexdigest()[:24]
 
 

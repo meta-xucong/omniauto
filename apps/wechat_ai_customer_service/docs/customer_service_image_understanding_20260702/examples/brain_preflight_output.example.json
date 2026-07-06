@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "customer_goal": "客户想确认图片里的车是否有现车",
+  "business_intent": "product_availability",
+  "requires_product_master": true,
+  "requires_formal_knowledge": false,
+  "requires_current_context": true,
+  "low_authority_fast_allowed": false,
+  "normalized_product_queries": [
+    "比亚迪秦PLUS DM-i"
+  ],
+  "evidence_lookup_mode": "product_master_exact_then_similar",
+  "context_resolution": {
+    "uses_visual_bridge": true,
+    "uses_recent_visual_context": false,
+    "ambiguous_reference": false
+  },
+  "brain_guidance": "先按商品库核对同款；无同款再让 Brain 基于商品库候选做相似推荐。",
+  "confidence": 0.86,
+  "reason": "图片识别为车型且客户问是否有这款"
+}

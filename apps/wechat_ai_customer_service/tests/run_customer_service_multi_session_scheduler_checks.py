@@ -39,6 +39,7 @@ from apps.wechat_ai_customer_service.admin_backend.services.customer_service_sch
     mark_polish_started,
     mark_reply_sending,
     mark_reply_sent,
+    message_content_key,
     message_identity,
     record_capture_result,
     record_session_signal,
@@ -783,6 +784,90 @@ def check_capture_failed_backoff_blocks_immediate_requeue() -> None:
         bool(select_capture_sessions(state, limit=1)),
         "expired target confirmation cooldown should allow capture retry",
     )
+
+
+def check_image_capture_failure_uses_long_ui_backoff() -> None:
+    state = empty_state()
+    now_text = datetime.now().isoformat(timespec="seconds")
+    record_session_signal(
+        state,
+        {"name": "客户A", "unread_detected": True, "conversation_type": "private"},
+        now=now_text,
+    )
+    mark_session_capture_failed(
+        state,
+        "客户A",
+        "image_context_menu_save_item_missing",
+        now=now_text,
+    )
+    session = session_by_name(state, "客户A")
+    retry_not_before = str((session.get("risk_state") or {}).get("capture_retry_not_before") or "")
+    assert_true(bool(retry_not_before), "image capture UI failure should write retry cooldown")
+    retry_at = datetime.fromisoformat(retry_not_before)
+    started_at = datetime.fromisoformat(now_text)
+    assert_true(
+        (retry_at - started_at).total_seconds() >= 45,
+        f"image capture UI failure should avoid rapid repeated right-clicks: {retry_not_before}",
+    )
+
+
+def check_distinct_customer_image_assets_are_not_deduped_by_proxy_text() -> None:
+    state = empty_state()
+    first = {
+        "id": "visual_proxy:first",
+        "message_id": "visual_proxy:first",
+        "type": "text",
+        "sender": "customer",
+        "sender_role": "customer",
+        "content": "客户发来了一张图片",
+        "is_customer_image_proxy": True,
+        "visual_turn_kind": "customer_image",
+        "asset_id": "visual_asset_wx_first",
+        "image_assets": ["visual_asset_wx_first"],
+        "saved_image_path": "D:/tmp/first.png",
+    }
+    second = {
+        "id": "visual_proxy:second",
+        "message_id": "visual_proxy:second",
+        "type": "text",
+        "sender": "customer",
+        "sender_role": "customer",
+        "content": "客户发来了一张图片",
+        "is_customer_image_proxy": True,
+        "visual_turn_kind": "customer_image",
+        "asset_id": "visual_asset_wx_second",
+        "image_assets": ["visual_asset_wx_second"],
+        "saved_image_path": "D:/tmp/second.png",
+    }
+    first_key = message_content_key(first)
+    second_key = message_content_key(second)
+    assert_true(first_key and second_key and first_key != second_key, "distinct image assets need distinct content keys")
+
+    first_capture = record_capture_result(
+        state,
+        "新数据测试",
+        messages=[first],
+        batch=[first],
+        conversation_type="group",
+        session_key="wx:images",
+        now="2026-07-06T15:43:45",
+    )
+    session = session_by_name(state, "新数据测试")
+    session["processed_message_ids"] = [message_identity(first)]
+    session["processed_content_keys"] = [first_key]
+    second_capture = record_capture_result(
+        state,
+        "新数据测试",
+        messages=[second],
+        batch=[second],
+        conversation_type="group",
+        session_key="wx:images",
+        now="2026-07-06T15:45:29",
+    )
+    assert_equal(first_capture.get("status"), "captured", "first image should be captured")
+    assert_equal(second_capture.get("status"), "captured", "second image with different asset should not be swallowed")
+    assert_equal(second_capture.get("content_keys"), [second_key], "second capture should keep its image-specific key")
+    assert_equal(second_capture.get("context_version"), 2, "second image should advance scheduler context")
 
 
 def check_runtime_tick_does_not_wait_for_slow_llm() -> None:
@@ -5829,6 +5914,240 @@ def check_short_pending_signal_does_not_synthesize_media_preview() -> None:
     assert_true(not recovered, "media-only monitor preview should not synthesize a reply-eligible short message")
 
 
+def check_managed_bridge_blocks_capture_when_image_save_fails() -> None:
+    class FakeImageFailureConnector:
+        def get_messages(self, target: str, exact: bool = True, history_load_times: int = 0, **kwargs: Any) -> dict[str, Any]:
+            return {
+                "ok": True,
+                "adapter": "win32_ocr",
+                "state": "messages_ocr",
+                "target": target,
+                "exact": exact,
+                "messages": [],
+            }
+
+        def save_customer_image(self, target: str, **kwargs: Any) -> dict[str, Any]:
+            return {
+                "ok": False,
+                "state": "image_save_failed",
+                "reason": "image_bubble_not_found",
+                "target": target,
+                "assets": [],
+                "messages": [],
+            }
+
+    with tempfile.TemporaryDirectory() as temp:
+        root = Path(temp)
+        config_path = root / "listener_config.json"
+        config_path.write_text(
+            json.dumps(
+                {
+                    "state_path": str(root / "workflow_state.json"),
+                    "audit_log_path": str(root / "audit.jsonl"),
+                    "targets": [{"name": "新数据测试", "enabled": True, "exact": True}],
+                    "history_backfill": {"enabled": False},
+                    "raw_messages": {"enabled": False},
+                    "customer_profiles": {"enabled": False},
+                    "concurrency_scheduler": {"enabled": True},
+                },
+                ensure_ascii=False,
+            ),
+            encoding="utf-8",
+        )
+        bridge = ManagedListenerSchedulerBridge(
+            tenant_id="unit_image_save_failure_blocks_capture",
+            config_path=config_path,
+            allow_send=False,
+            write_data=False,
+        )
+        try:
+            bridge.connector = FakeImageFailureConnector()
+            bridge.session_monitor = SimpleNamespace(
+                all_sessions=lambda: [
+                    {
+                        "name": "新数据测试",
+                        "session_key": "wx:img-fail",
+                        "pending_signal_id": "sig-img-fail-1",
+                        "pending_signal_text": "许聪:[图片]",
+                        "preview_content": "许聪:[图片]",
+                        "group_member_name": "许聪",
+                    }
+                ]
+            )
+            result = bridge._capture_session(
+                {
+                    "target_name": "新数据测试",
+                    "name": "新数据测试",
+                    "exact": True,
+                    "conversation_type": "private",
+                    "session_key": "wx:img-fail",
+                }
+            )
+        finally:
+            bridge.shutdown()
+    assert_true(result.get("ok") is False and result.get("blocked") is True, f"image save failure should block capture: {result}")
+    assert_equal(result.get("reason"), "image_bubble_not_found", "image save failure reason should be preserved")
+    assert_equal((result.get("customer_image_assets") or {}).get("state"), "image_save_failed", "image save payload should be attached")
+
+
+def check_managed_bridge_visual_scan_records_both_sides_without_preview() -> None:
+    customer_image = {
+        "id": "visual_msg_wx_customer_audi",
+        "message_id": "visual_msg_wx_customer_audi",
+        "type": "image",
+        "message_type": "image",
+        "sender": "customer",
+        "sender_role": "customer",
+        "content": "[图片]",
+        "asset_id": "visual_asset_wx_customer_audi",
+        "image_assets": ["visual_asset_wx_customer_audi"],
+        "saved_image_path": "D:/tmp/customer_audi.png",
+        "visual_side": "customer",
+        "visual_occurrence_id": "visual_occurrence_wx_customer_audi_1",
+        "bubble_bounds": [372, 260, 612, 450],
+        "captured_at": "2026-07-06T16:30:00",
+    }
+    self_image = {
+        "id": "visual_msg_wx_self_model3",
+        "message_id": "visual_msg_wx_self_model3",
+        "type": "image",
+        "message_type": "image",
+        "sender": "self",
+        "sender_role": "self",
+        "content": "[图片]",
+        "asset_id": "visual_asset_wx_self_model3",
+        "image_assets": ["visual_asset_wx_self_model3"],
+        "saved_image_path": "D:/tmp/self_model3.png",
+        "visual_side": "self",
+        "visual_occurrence_id": "visual_occurrence_wx_self_model3_1",
+        "bubble_bounds": [746, 500, 940, 680],
+        "captured_at": "2026-07-06T16:30:00",
+    }
+
+    class FakeVisualConnector:
+        def __init__(self) -> None:
+            self.capture_calls: list[dict[str, Any]] = []
+            self.save_calls = 0
+
+        def get_messages(self, target: str, exact: bool = True, history_load_times: int = 0, **kwargs: Any) -> dict[str, Any]:
+            return {
+                "ok": True,
+                "adapter": "win32_ocr",
+                "state": "messages_ocr",
+                "target": target,
+                "exact": exact,
+                "messages": [],
+            }
+
+        def capture_visual_images(self, target: str, **kwargs: Any) -> dict[str, Any]:
+            self.capture_calls.append({"target": target, "kwargs": dict(kwargs)})
+            return {
+                "ok": True,
+                "state": "visual_bubbles_archived",
+                "target": target,
+                "assets": [
+                    {**customer_image, "message_type": "image"},
+                    {**self_image, "message_type": "image"},
+                ],
+                "messages": [dict(customer_image), dict(self_image)],
+            }
+
+        def save_customer_image(self, target: str, **kwargs: Any) -> dict[str, Any]:
+            self.save_calls += 1
+            return {"ok": False, "state": "unexpected_legacy_image_save", "assets": [], "messages": []}
+
+    with tempfile.TemporaryDirectory() as temp:
+        root = Path(temp)
+        config_path = root / "listener_config.json"
+        config_path.write_text(
+            json.dumps(
+                {
+                    "state_path": str(root / "workflow_state.json"),
+                    "audit_log_path": str(root / "audit.jsonl"),
+                    "targets": [{"name": "新数据测试", "enabled": True, "exact": True}],
+                    "history_backfill": {"enabled": False},
+                    "raw_messages": {"enabled": False},
+                    "customer_profiles": {"enabled": False},
+                    "concurrency_scheduler": {"enabled": True},
+                },
+                ensure_ascii=False,
+            ),
+            encoding="utf-8",
+        )
+        bridge = ManagedListenerSchedulerBridge(
+            tenant_id="unit_visual_scan_records_both_sides",
+            config_path=config_path,
+            allow_send=False,
+            write_data=False,
+        )
+        connector = FakeVisualConnector()
+        try:
+            bridge.connector = connector
+            bridge.session_monitor = SimpleNamespace(
+                all_sessions=lambda: [
+                    {
+                        "name": "新数据测试",
+                        "session_key": "wx:visual-scan",
+                        "pending_signal_text": "",
+                        "preview_content": "",
+                    }
+                ]
+            )
+            result = bridge._capture_session(
+                {
+                    "target_name": "新数据测试",
+                    "name": "新数据测试",
+                    "exact": True,
+                    "conversation_type": "private",
+                    "session_key": "wx:visual-scan",
+                }
+            )
+        finally:
+            bridge.shutdown()
+        ledger = SessionLedgerStore(tenant_id="unit_visual_scan_records_both_sides", root=root / "ledger")
+        ledger.record_capture(
+            session_key="wx:visual-scan",
+            target_name="新数据测试",
+            conversation_type="private",
+            capture_id="capture_visual_scan",
+            messages=list(result.get("messages") or []),
+            batch=list(result.get("batch") or []),
+            history_backfill={},
+            context_version=1,
+        )
+        summary = ledger.load_summary("wx:visual-scan")
+        events = [
+            json.loads(line)
+            for line in ledger.events_path("wx:visual-scan").read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        ]
+    assert_true(bool(connector.capture_calls), "visual scan should be called even without [图片] preview")
+    assert_equal(connector.save_calls, 0, "legacy context-menu image save should not run after visual scan succeeds")
+    assert_true(result.get("ok") is True, f"visual scan capture should succeed: {result}")
+    messages = [item for item in (result.get("messages") or []) if isinstance(item, dict)]
+    raw_images = [item for item in messages if str(item.get("type") or "") == "image"]
+    proxies = [item for item in messages if item.get("is_customer_image_proxy")]
+    assert_equal(len(raw_images), 2, f"both raw image messages should be recorded: {messages}")
+    assert_equal({item.get("visual_side") for item in raw_images}, {"customer", "self"}, "raw image messages should keep both sides")
+    assert_equal(len(proxies), 1, f"only customer image should become a Brain proxy: {messages}")
+    assert_equal(proxies[0].get("source_message_id"), "visual_msg_wx_customer_audi", "Brain proxy should point to customer raw image")
+    batch = [item for item in (result.get("batch") or []) if isinstance(item, dict)]
+    assert_equal([item.get("message_id") for item in batch], [proxies[0].get("message_id")], "batch should contain only customer image proxy")
+    assert_true(result.get("batch_authoritative") is True, "capture should prevent raw-image fallback into Brain batch")
+    recent = summary.get("recent_messages") or []
+    recent_paths = {item.get("saved_image_path") for item in recent}
+    assert_true("D:/tmp/customer_audi.png" in recent_paths, f"customer image should be kept in ledger: {recent}")
+    assert_true("D:/tmp/self_model3.png" in recent_paths, f"self image should be kept in ledger: {recent}")
+    visual_assets = []
+    for event in events:
+        visual_assets.extend(event.get("visual_assets") or [])
+    assert_equal(
+        {item.get("visual_side") for item in visual_assets},
+        {"customer", "self"},
+        f"capture_recorded event should expose both visual sides: {visual_assets}",
+    )
+
+
 def check_mixed_greeting_budget_intent_prefers_product() -> None:
     config = {"intent_router": {"heuristic_first": True, "cache_seconds": 0}}
     mixed = route_intent(
@@ -6357,6 +6676,8 @@ def run_checks() -> dict[str, Any]:
         check_session_monitor_event_driven_dispatch_keeps_sticky_target,
         check_session_monitor_event_driven_dispatch_rotates_under_hot_target,
         check_capture_failed_backoff_blocks_immediate_requeue,
+        check_image_capture_failure_uses_long_ui_backoff,
+        check_distinct_customer_image_assets_are_not_deduped_by_proxy_text,
         check_runtime_tick_does_not_wait_for_slow_llm,
         check_runtime_submits_planner_after_each_capture,
         check_runtime_retries_same_capture_for_monitor_only_short_pending_after_brain_no_visible_reply,
@@ -6454,6 +6775,8 @@ def run_checks() -> dict[str, Any]:
         check_normal_pending_signal_synthesizes_monitor_only_group_preview,
         check_stale_short_pending_signal_does_not_recover,
         check_short_pending_signal_does_not_synthesize_media_preview,
+        check_managed_bridge_blocks_capture_when_image_save_fails,
+        check_managed_bridge_visual_scan_records_both_sides_without_preview,
         check_mixed_greeting_budget_intent_prefers_product,
         check_handoff_keyword_requires_explicit_customer_request,
         check_scheduler_conversation_context_update_does_not_advance_context_version,

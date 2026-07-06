@@ -68,9 +68,26 @@ def _shared_context_var(name: str, *, default: bool = False) -> ContextVar[bool]
     return created
 
 
+def _shared_context_var_any(name: str, *, default: Any = None) -> ContextVar[Any]:
+    store = getattr(builtins, "_omniauto_wechat_connector_contextvars", None)
+    if not isinstance(store, dict):
+        store = {}
+        setattr(builtins, "_omniauto_wechat_connector_contextvars", store)
+    existing = store.get(name)
+    if isinstance(existing, ContextVar):
+        return existing
+    created: ContextVar[Any] = ContextVar(name, default=default)
+    store[name] = created
+    return created
+
+
 _same_target_continuation_send_fast_path = _shared_context_var(
     "same_target_continuation_send_fast_path",
     default=False,
+)
+_send_rpa_batch_lock_meta = _shared_context_var_any(
+    "send_rpa_batch_lock_meta",
+    default=None,
 )
 
 
@@ -99,10 +116,69 @@ def same_target_continuation_send_context(enabled: bool = True):
         _same_target_continuation_send_fast_path.reset(token)
 
 
-def same_target_continuation_send_env() -> dict[str, str]:
+def same_target_continuation_send_env(prevalidated_guard: dict[str, Any] | None = None) -> dict[str, str]:
     if not same_target_continuation_send_active():
         return {}
-    return {"WECHAT_WIN32_OCR_CONTINUATION_SEND_FAST_PATH": "1"}
+    env = {"WECHAT_WIN32_OCR_CONTINUATION_SEND_FAST_PATH": "1"}
+    if isinstance(prevalidated_guard, dict) and prevalidated_guard:
+        try:
+            env["WECHAT_WIN32_OCR_CONTINUATION_PREVALIDATED_GUARD_JSON"] = json.dumps(
+                prevalidated_guard,
+                ensure_ascii=False,
+            )
+        except (TypeError, ValueError):
+            pass
+    return env
+
+
+def send_rpa_batch_lock_active() -> bool:
+    meta = _send_rpa_batch_lock_meta.get(None)
+    return isinstance(meta, dict) and bool(meta.get("batch_lock"))
+
+
+def send_rpa_batch_lock_meta(action: str) -> dict[str, Any] | None:
+    meta = _send_rpa_batch_lock_meta.get(None)
+    if not isinstance(meta, dict) or not meta.get("batch_lock"):
+        return None
+    clean = dict(meta)
+    clean["active_batch_lock"] = True
+    clean["reused_for_action"] = str(action or "")
+    return clean
+
+
+@contextmanager
+def send_rpa_batch_lock_context(enabled: bool = True):
+    if not enabled:
+        yield None
+        return
+    existing = _send_rpa_batch_lock_meta.get(None)
+    if isinstance(existing, dict) and existing.get("batch_lock"):
+        yield existing
+        return
+    lock_timeout = rpa_lock_timeout_seconds("send_batch", default=1.0)
+    lock_cm = wechat_rpa_lock("send", timeout_seconds=lock_timeout)
+    try:
+        lock_meta = lock_cm.__enter__()
+    except TimeoutError:
+        # Fail open to preserve the pre-existing per-send lock behavior.
+        yield None
+        return
+    batch_meta = {
+        **dict(lock_meta or {}),
+        "action": "send_batch",
+        "batch_lock": True,
+        "batch_lock_timeout_seconds": round(float(lock_timeout), 3),
+    }
+    token = _send_rpa_batch_lock_meta.set(batch_meta)
+    exc_info = (None, None, None)
+    try:
+        yield batch_meta
+    except BaseException:
+        exc_info = sys.exc_info()
+        raise
+    finally:
+        _send_rpa_batch_lock_meta.reset(token)
+        lock_cm.__exit__(*exc_info)
 
 
 @dataclass(frozen=True)
@@ -407,43 +483,50 @@ class WeChatConnector:
                 args.extend(["--history-load-times", str(load_times)])
         lock_timeout = rpa_lock_timeout_seconds("messages", default=14.0)
         env_overrides = visible_only_message_env() if visible_only_target else None
-        try:
-            with wechat_rpa_lock("messages", timeout_seconds=lock_timeout) as lock_meta:
-                primary = self.call_compat_sidecar(args, allow_failure=True, env_overrides=env_overrides)
-                if primary.get("ok"):
-                    primary.setdefault("adapter", "win32_ocr")
-                    primary.setdefault("transport_priority", "rpa_first")
-                    attach_rpa_lock_meta(primary, lock_meta)
-                    return inject_simulated_inbound_messages(primary, target=target)
-                if rpa_render_fault_should_stop(primary):
-                    primary.setdefault("adapter", "win32_ocr")
-                    primary.setdefault("transport_priority", "rpa_first")
-                    attach_rpa_lock_meta(primary, lock_meta)
-                    return primary
-                if visible_only_target and message_target_pending_visible(primary):
-                    primary.setdefault("adapter", "win32_ocr")
-                    primary.setdefault("transport_priority", "rpa_first")
-                    primary["target_pending_visible"] = True
-                    primary.setdefault("reason", "target_not_visible_waiting_for_unread")
-                    primary.setdefault("safe_user_message", "当前不在可见会话列表里，待收到新消息时会自动识别")
-                    attach_rpa_lock_meta(primary, lock_meta)
-                    return primary
-                if mode:
-                    primary.setdefault("wxauto4_reserve_status", {"ok": False, "skipped": True, "reason": "history_mode_requires_win32_ocr"})
-                    primary.setdefault("transport_priority", "rpa_first")
-                    attach_rpa_lock_meta(primary, lock_meta)
-                    return primary
-                reserve = self.call_reserve_sidecar(args, allow_failure=True, primary_payload=snapshot_payload(primary))
-                if reserve.get("ok"):
-                    reserve.setdefault("adapter", "wxauto4")
-                    reserve.setdefault("transport_priority", "rpa_first")
-                    reserve.setdefault("reserve_reason", "rpa_primary_unavailable")
-                    attach_rpa_lock_meta(reserve, lock_meta)
-                    return inject_simulated_inbound_messages(reserve, target=target)
-                primary.setdefault("wxauto4_reserve_status", reserve)
+
+        def _call_messages_with_lock(lock_meta: dict[str, Any]) -> dict[str, Any]:
+            primary = self.call_compat_sidecar(args, allow_failure=True, env_overrides=env_overrides)
+            if primary.get("ok"):
+                primary.setdefault("adapter", "win32_ocr")
+                primary.setdefault("transport_priority", "rpa_first")
+                attach_rpa_lock_meta(primary, lock_meta)
+                return inject_simulated_inbound_messages(primary, target=target)
+            if rpa_render_fault_should_stop(primary):
+                primary.setdefault("adapter", "win32_ocr")
                 primary.setdefault("transport_priority", "rpa_first")
                 attach_rpa_lock_meta(primary, lock_meta)
                 return primary
+            if visible_only_target and message_target_pending_visible(primary):
+                primary.setdefault("adapter", "win32_ocr")
+                primary.setdefault("transport_priority", "rpa_first")
+                primary["target_pending_visible"] = True
+                primary.setdefault("reason", "target_not_visible_waiting_for_unread")
+                primary.setdefault("safe_user_message", "当前不在可见会话列表里，待收到新消息时会自动识别")
+                attach_rpa_lock_meta(primary, lock_meta)
+                return primary
+            if mode:
+                primary.setdefault("wxauto4_reserve_status", {"ok": False, "skipped": True, "reason": "history_mode_requires_win32_ocr"})
+                primary.setdefault("transport_priority", "rpa_first")
+                attach_rpa_lock_meta(primary, lock_meta)
+                return primary
+            reserve = self.call_reserve_sidecar(args, allow_failure=True, primary_payload=snapshot_payload(primary))
+            if reserve.get("ok"):
+                reserve.setdefault("adapter", "wxauto4")
+                reserve.setdefault("transport_priority", "rpa_first")
+                reserve.setdefault("reserve_reason", "rpa_primary_unavailable")
+                attach_rpa_lock_meta(reserve, lock_meta)
+                return inject_simulated_inbound_messages(reserve, target=target)
+            primary.setdefault("wxauto4_reserve_status", reserve)
+            primary.setdefault("transport_priority", "rpa_first")
+            attach_rpa_lock_meta(primary, lock_meta)
+            return primary
+
+        try:
+            active_lock_meta = send_rpa_batch_lock_meta("messages")
+            if active_lock_meta:
+                return _call_messages_with_lock(active_lock_meta)
+            with wechat_rpa_lock("messages", timeout_seconds=lock_timeout) as lock_meta:
+                return _call_messages_with_lock(lock_meta)
         except TimeoutError as exc:
             return {
                 "ok": False,
@@ -566,6 +649,99 @@ class WeChatConnector:
                 "rpa_lock": rpa_lock_timeout_payload(exc, action="voice_transcribe", timeout_seconds=lock_timeout),
             }
 
+    def save_customer_image(
+        self,
+        target: str,
+        exact: bool = True,
+        *,
+        session_key: str = "",
+        artifact_dir: str | None = None,
+        source_preview: str = "",
+        speaker_name: str = "",
+        tenant_id: str = "",
+        max_images: int = 1,
+        side_filter: str = "customer",
+        capture_mode: str = "context_menu",
+    ) -> dict[str, Any]:
+        """Save the latest visible customer image and return image asset metadata."""
+        if not target:
+            return {"ok": False, "adapter": "win32_ocr", "state": "image_save_target_missing", "assets": [], "messages": []}
+        args = ["image-save", "--target", target]
+        clean_session_key = str(session_key or "").strip()
+        if clean_session_key:
+            args.extend(["--session-key", clean_session_key])
+        if exact:
+            args.append("--exact")
+        for value, flag in (
+            (artifact_dir, "--artifact-dir"),
+            (source_preview, "--source-preview"),
+            (speaker_name, "--speaker-name"),
+            (tenant_id, "--tenant-id"),
+        ):
+            clean = str(value or "").strip()
+            if clean:
+                args.extend([flag, clean])
+        clean_side_filter = str(side_filter or "").strip().lower()
+        if clean_side_filter in {"customer", "self", "all"}:
+            args.extend(["--side-filter", clean_side_filter])
+        clean_capture_mode = str(capture_mode or "").strip().lower()
+        if clean_capture_mode in {"context_menu", "crop"}:
+            args.extend(["--capture-mode", clean_capture_mode])
+        max_allowed_images = 8 if clean_capture_mode == "crop" else 3
+        try:
+            bounded_max = max(1, min(int(max_images or 1), max_allowed_images))
+        except (TypeError, ValueError):
+            bounded_max = 1
+        args.extend(["--max-images", str(bounded_max)])
+        lock_timeout = rpa_lock_timeout_seconds("image_save", default=45.0)
+        try:
+            with wechat_rpa_lock("image_save", timeout_seconds=lock_timeout) as lock_meta:
+                primary = self.call_compat_sidecar(args, allow_failure=True)
+                primary.setdefault("adapter", "win32_ocr")
+                primary.setdefault("transport_priority", "rpa_first")
+                attach_rpa_lock_meta(primary, lock_meta)
+                return primary
+        except TimeoutError as exc:
+            return {
+                "ok": False,
+                "online": bool(any_weixin_process()),
+                "adapter": "win32_ocr",
+                "state": "image_save_lock_timeout",
+                "target": target,
+                "exact": exact,
+                "assets": [],
+                "messages": [],
+                "error": repr(exc),
+                "transport_priority": "rpa_first",
+                "rpa_lock": rpa_lock_timeout_payload(exc, action="image_save", timeout_seconds=lock_timeout),
+            }
+
+    def capture_visual_images(
+        self,
+        target: str,
+        exact: bool = True,
+        *,
+        session_key: str = "",
+        artifact_dir: str | None = None,
+        source_preview: str = "",
+        speaker_name: str = "",
+        tenant_id: str = "",
+        max_images: int = 6,
+    ) -> dict[str, Any]:
+        """Archive all visible image bubbles without opening context menus."""
+        return self.save_customer_image(
+            target,
+            exact=exact,
+            session_key=session_key,
+            artifact_dir=artifact_dir,
+            source_preview=source_preview,
+            speaker_name=speaker_name,
+            tenant_id=tenant_id,
+            max_images=max_images,
+            side_filter="all",
+            capture_mode="crop",
+        )
+
     def send_text(
         self,
         target: str,
@@ -575,6 +751,7 @@ class WeChatConnector:
         skip_send_rate_guard: bool = False,
         artifact_dir: str | None = None,
         session_key: str = "",
+        continuation_prevalidated_guard: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         if not target:
             raise WeChatConnectorError("target is required")
@@ -608,48 +785,55 @@ class WeChatConnector:
         if artifact_dir:
             compat_args_list.extend(["--artifact-dir", str(artifact_dir)])
         lock_timeout = rpa_lock_timeout_seconds("send", default=18.0)
-        try:
-            with wechat_rpa_lock("send", timeout_seconds=lock_timeout) as lock_meta:
-                env_overrides = send_rpa_env()
-                env_overrides.update(same_target_continuation_send_env())
-                primary = self.call_compat_sidecar(compat_args_list, allow_failure=True, env_overrides=env_overrides)
-                if primary.get("ok"):
-                    primary.setdefault("adapter", "win32_ocr")
-                    primary.setdefault("transport_priority", "rpa_first")
-                    attach_rpa_lock_meta(primary, lock_meta)
-                    return _finish_send(primary, adapter_stage="win32_ocr_primary")
-                if rpa_payload_has_invalid_window_handle(primary):
-                    primary["risk_stop_recommended"] = True
-                    primary["risk_stop_reason"] = "win32_invalid_window_handle"
-                    primary["risk_stop_message"] = "微信窗口句柄失效，已停止本次发送。请人工确认微信未掉线/未白屏后再恢复。"
-                    primary.setdefault(
-                        "wxauto4_reserve_status",
-                        {
-                            "ok": False,
-                            "online": False,
-                            "adapter": "wxauto4",
-                            "state": "wxauto4_reserve_skipped_due_to_rpa_hard_stop",
-                        },
-                    )
-                    primary.setdefault("transport_priority", "rpa_first")
-                    attach_rpa_lock_meta(primary, lock_meta)
-                    return _finish_send(primary, adapter_stage="win32_invalid_window_handle")
-                if rpa_render_fault_should_stop(primary):
-                    primary.setdefault("adapter", "win32_ocr")
-                    primary.setdefault("transport_priority", "rpa_first")
-                    attach_rpa_lock_meta(primary, lock_meta)
-                    return _finish_send(primary, adapter_stage="win32_render_fault_stop")
-                reserve = self.call_reserve_sidecar(args, allow_failure=True, primary_payload=snapshot_payload(primary))
-                if reserve.get("ok"):
-                    reserve.setdefault("adapter", "wxauto4")
-                    reserve.setdefault("transport_priority", "rpa_first")
-                    reserve.setdefault("reserve_reason", "rpa_primary_unavailable")
-                    attach_rpa_lock_meta(reserve, lock_meta)
-                    return _finish_send(reserve, adapter_stage="wxauto4_reserve")
-                primary.setdefault("wxauto4_reserve_status", reserve)
+
+        def _call_send_with_lock(lock_meta: dict[str, Any]) -> dict[str, Any]:
+            env_overrides = send_rpa_env()
+            env_overrides.update(same_target_continuation_send_env(continuation_prevalidated_guard))
+            primary = self.call_compat_sidecar(compat_args_list, allow_failure=True, env_overrides=env_overrides)
+            if primary.get("ok"):
+                primary.setdefault("adapter", "win32_ocr")
                 primary.setdefault("transport_priority", "rpa_first")
                 attach_rpa_lock_meta(primary, lock_meta)
-                return _finish_send(primary, adapter_stage="win32_ocr_primary_failed")
+                return _finish_send(primary, adapter_stage="win32_ocr_primary")
+            if rpa_payload_has_invalid_window_handle(primary):
+                primary["risk_stop_recommended"] = True
+                primary["risk_stop_reason"] = "win32_invalid_window_handle"
+                primary["risk_stop_message"] = "微信窗口句柄失效，已停止本次发送。请人工确认微信未掉线/未白屏后再恢复。"
+                primary.setdefault(
+                    "wxauto4_reserve_status",
+                    {
+                        "ok": False,
+                        "online": False,
+                        "adapter": "wxauto4",
+                        "state": "wxauto4_reserve_skipped_due_to_rpa_hard_stop",
+                    },
+                )
+                primary.setdefault("transport_priority", "rpa_first")
+                attach_rpa_lock_meta(primary, lock_meta)
+                return _finish_send(primary, adapter_stage="win32_invalid_window_handle")
+            if rpa_render_fault_should_stop(primary):
+                primary.setdefault("adapter", "win32_ocr")
+                primary.setdefault("transport_priority", "rpa_first")
+                attach_rpa_lock_meta(primary, lock_meta)
+                return _finish_send(primary, adapter_stage="win32_render_fault_stop")
+            reserve = self.call_reserve_sidecar(args, allow_failure=True, primary_payload=snapshot_payload(primary))
+            if reserve.get("ok"):
+                reserve.setdefault("adapter", "wxauto4")
+                reserve.setdefault("transport_priority", "rpa_first")
+                reserve.setdefault("reserve_reason", "rpa_primary_unavailable")
+                attach_rpa_lock_meta(reserve, lock_meta)
+                return _finish_send(reserve, adapter_stage="wxauto4_reserve")
+            primary.setdefault("wxauto4_reserve_status", reserve)
+            primary.setdefault("transport_priority", "rpa_first")
+            attach_rpa_lock_meta(primary, lock_meta)
+            return _finish_send(primary, adapter_stage="win32_ocr_primary_failed")
+
+        try:
+            active_lock_meta = send_rpa_batch_lock_meta("send")
+            if active_lock_meta:
+                return _call_send_with_lock(active_lock_meta)
+            with wechat_rpa_lock("send", timeout_seconds=lock_timeout) as lock_meta:
+                return _call_send_with_lock(lock_meta)
         except TimeoutError as exc:
             return _finish_send({
                 "ok": False,
@@ -673,6 +857,7 @@ class WeChatConnector:
         skip_send_rate_guard: bool = False,
         artifact_dir: str | None = None,
         session_key: str = "",
+        continuation_prevalidated_guard: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         verify_started_at = time.time()
         verify_started_iso = time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(verify_started_at))
@@ -700,6 +885,8 @@ class WeChatConnector:
         clean_session_key = str(session_key or "").strip()
         if clean_session_key:
             send_kwargs["session_key"] = clean_session_key
+        if isinstance(continuation_prevalidated_guard, dict) and continuation_prevalidated_guard:
+            send_kwargs["continuation_prevalidated_guard"] = continuation_prevalidated_guard
         send_result = self.send_text(
             target,
             text,
@@ -1573,6 +1760,32 @@ def _args_to_request(args: list[str]) -> dict[str, Any]:
                 request["exact"] = True
             elif arg == "--artifact-dir" and i + 1 < len(args):
                 request["artifact_dir"] = args[i + 1]
+    elif args[0] == "image-save":
+        request["action"] = "image-save"
+        for i, arg in enumerate(args):
+            if arg == "--target" and i + 1 < len(args):
+                request["target"] = args[i + 1]
+            elif arg == "--session-key" and i + 1 < len(args):
+                request["session_key"] = args[i + 1]
+            elif arg == "--exact":
+                request["exact"] = True
+            elif arg == "--artifact-dir" and i + 1 < len(args):
+                request["artifact_dir"] = args[i + 1]
+            elif arg == "--source-preview" and i + 1 < len(args):
+                request["source_preview"] = args[i + 1]
+            elif arg == "--speaker-name" and i + 1 < len(args):
+                request["speaker_name"] = args[i + 1]
+            elif arg == "--tenant-id" and i + 1 < len(args):
+                request["tenant_id"] = args[i + 1]
+            elif arg == "--side-filter" and i + 1 < len(args):
+                request["side_filter"] = args[i + 1]
+            elif arg == "--capture-mode" and i + 1 < len(args):
+                request["capture_mode"] = args[i + 1]
+            elif arg == "--max-images" and i + 1 < len(args):
+                try:
+                    request["max_images"] = max(1, min(int(args[i + 1]), 8))
+                except ValueError:
+                    request["max_images"] = 1
     elif args[0] == "send":
         request["action"] = "send"
         for i, arg in enumerate(args):
@@ -1642,6 +1855,12 @@ def compat_args(args: list[str]) -> list[str]:
             "--max-snapshots",
             "--min-delay-ms",
             "--max-delay-ms",
+            "--source-preview",
+            "--speaker-name",
+            "--tenant-id",
+            "--side-filter",
+            "--capture-mode",
+            "--max-images",
         } and index + 1 < len(args):
             converted.append(args[index + 1])
             skip_next = True

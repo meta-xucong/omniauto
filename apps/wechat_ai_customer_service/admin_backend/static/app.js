@@ -1707,10 +1707,50 @@ function renderCustomerService(counts = {}) {
     <div class="metric-card"><span>${enabledSessions.length}</span><label>监听会话</label></div>
     <div class="metric-card"><span>${counts.raw_messages ?? 0}</span><label>已记录消息</label></div>
   `;
+  renderCustomerImageUnderstandingSettings(item);
   renderCustomerServiceNewSessionPolicyButtons();
   renderCustomerServiceSessionSummary();
   renderCustomerServiceSessionList();
   renderCustomerServiceRuntime();
+}
+
+function renderCustomerImageUnderstandingSettings(item = {}) {
+  const settings = item.settings || {};
+  const imageSettings = settings.customer_image_understanding || {};
+  const providers = Array.isArray(item.customer_image_understanding_providers) ? item.customer_image_understanding_providers : [];
+  const requestStyles = Array.isArray(item.customer_image_understanding_request_styles) ? item.customer_image_understanding_request_styles : [];
+  const status = item.customer_image_understanding_status || {};
+  setChecked("customer-image-understanding-enabled", imageSettings.enabled !== false);
+  const providerSelect = document.getElementById("customer-image-understanding-provider");
+  if (providerSelect) {
+    providerSelect.innerHTML = providers.map((option) => `<option value="${escapeHtml(option.id || "")}">${escapeHtml(option.label || option.id || "")}</option>`).join("");
+    providerSelect.value = imageSettings.provider || "anthropic";
+  }
+  const requestStyleSelect = document.getElementById("customer-image-understanding-request-style");
+  if (requestStyleSelect) {
+    requestStyleSelect.innerHTML = requestStyles.map((option) => `<option value="${escapeHtml(option.id || "")}">${escapeHtml(option.label || option.id || "")}</option>`).join("");
+    requestStyleSelect.value = imageSettings.request_style || "anthropic_messages_vision";
+  }
+  const baseUrlInput = document.getElementById("customer-image-understanding-base-url");
+  if (baseUrlInput) baseUrlInput.value = imageSettings.base_url || "https://aiself.vip/v1";
+  const modelInput = document.getElementById("customer-image-understanding-model");
+  if (modelInput) modelInput.value = imageSettings.model || "doubao-seed-2-0-lite-260428";
+  const apiKeyEnvInput = document.getElementById("customer-image-understanding-api-key-env");
+  if (apiKeyEnvInput) apiKeyEnvInput.value = imageSettings.api_key_env || "ANTHROPIC_AUTH_TOKEN";
+  const apiKeyInput = document.getElementById("customer-image-understanding-api-key");
+  if (apiKeyInput) apiKeyInput.value = imageSettings.api_key || "";
+  const timeoutInput = document.getElementById("customer-image-understanding-timeout-seconds");
+  if (timeoutInput) timeoutInput.value = Number(imageSettings.timeout_seconds || 30);
+  const maxTokensInput = document.getElementById("customer-image-understanding-max-tokens");
+  if (maxTokensInput) maxTokensInput.value = Number(imageSettings.max_tokens || 1800);
+  const summary = document.getElementById("customer-image-understanding-summary");
+  if (summary) {
+    const enabledText = imageSettings.enabled !== false ? "已开启" : "已关闭";
+    const providerText = imageSettings.provider || "anthropic";
+    const modelText = imageSettings.model || "doubao-seed-2-0-lite-260428";
+    const keyText = status.api_key_configured ? "API Key 已就绪" : "API Key 未配置";
+    summary.textContent = `${enabledText} · ${providerText} · ${modelText} · ${keyText}`;
+  }
 }
 
 function renderCustomerServiceNewSessionPolicyButtons() {
@@ -2118,6 +2158,17 @@ async function saveCustomerServiceSettings() {
       final_visible_llm_polish_enabled: document.getElementById("customer-final-polish")?.checked,
       customer_service_brain_mode: "brain_first",
       respond_all_unread_sessions: document.getElementById("customer-respond-all-unread")?.checked,
+      customer_image_understanding: {
+        enabled: document.getElementById("customer-image-understanding-enabled")?.checked,
+        provider: document.getElementById("customer-image-understanding-provider")?.value || "anthropic",
+        request_style: document.getElementById("customer-image-understanding-request-style")?.value || "anthropic_messages_vision",
+        base_url: document.getElementById("customer-image-understanding-base-url")?.value?.trim() || "https://aiself.vip/v1",
+        model: document.getElementById("customer-image-understanding-model")?.value?.trim() || "doubao-seed-2-0-lite-260428",
+        api_key_env: document.getElementById("customer-image-understanding-api-key-env")?.value?.trim() || "ANTHROPIC_AUTH_TOKEN",
+        api_key: document.getElementById("customer-image-understanding-api-key")?.value?.trim() || "",
+        timeout_seconds: Number(document.getElementById("customer-image-understanding-timeout-seconds")?.value || 30),
+        max_tokens: Number(document.getElementById("customer-image-understanding-max-tokens")?.value || 1800),
+      },
     }),
   });
   state.customerService = payload.item || {};

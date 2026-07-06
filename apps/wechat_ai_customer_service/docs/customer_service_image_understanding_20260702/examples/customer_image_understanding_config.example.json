@@ -1,0 +1,21 @@
+{
+  "customer_image_understanding": {
+    "enabled": true,
+    "provider": "openai_compatible",
+    "request_style": "anthropic_messages_vision",
+    "model": "doubao-seed-2-0-lite-260428",
+    "base_url": "https://aiself.vip/v1",
+    "api_key_env": "CUSTOMER_IMAGE_UNDERSTANDING_API_KEY",
+    "timeout_seconds": 10,
+    "fallback_enabled": false,
+    "max_images_per_turn": 3,
+    "max_image_edge_px": 1568,
+    "jpeg_quality": 88,
+    "same_turn_text_window_seconds": 90,
+    "vehicle_confidence_threshold": 0.68,
+    "catalog_match_min_confidence": 0.62,
+    "local_preanalysis_enabled": true,
+    "artifact_retention_days": 7,
+    "include_raw_vision_result_in_audit": true
+  }
+}

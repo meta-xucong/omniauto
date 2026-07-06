@@ -120,6 +120,7 @@ def main() -> int:
         check_social_brain_plan_clears_soft_no_evidence_guard(),
         check_brain_first_failure_blocks_visible_reply_without_legacy(),
         check_kimi_fenced_json_is_parsed_without_structure_repair(),
+        check_kimi_tool_json_is_adopted_without_structure_repair(),
         check_brain_json_structure_repair_recovers_plan(),
         check_brain_same_capture_retry_recovers_empty_response(),
         check_brain_same_capture_retry_recovers_unavailable_response(),
@@ -2167,6 +2168,51 @@ def check_kimi_fenced_json_is_parsed_without_structure_repair() -> CaseResult:
     assert_true(not status.get("json_structure_repaired"), f"fenced JSON should not need LLM structure repair: {status}")
     assert_true(len(calls) == 1, f"fenced JSON should only call primary Brain LLM once: {len(calls)}")
     return CaseResult("kimi_fenced_json_is_parsed_without_structure_repair", True, {"calls": len(calls)})
+
+
+def check_kimi_tool_json_is_adopted_without_structure_repair() -> CaseResult:
+    config = base_config(base_plan())
+    config["customer_service_brain"].update({"provider": "anthropic", "mode": "shadow", "model": "kimi-for-coding"})
+    original_call = brain_module.call_llm_request_with_failover
+    calls: list[dict[str, Any]] = []
+
+    def fake_call(**kwargs: Any) -> dict[str, Any]:
+        calls.append(copy.deepcopy(kwargs))
+        return {
+            "ok": True,
+            "provider": "anthropic",
+            "model": "kimi-for-coding",
+            "response_text": json.dumps(base_plan(), ensure_ascii=False),
+            "tool_json_mode": True,
+            "tool_json_payload": copy.deepcopy(base_plan()),
+        }
+
+    try:
+        brain_module.call_llm_request_with_failover = fake_call
+        with patched_evidence_pack(fake_evidence_pack(include_product=True)):
+            event = brain_module.maybe_run_customer_service_brain(
+                config=config,
+                target_name="许聪",
+                target_state={"conversation_context": {}},
+                batch=[{"id": "msg-kimi-tool-json", "sender": "许聪", "content": "秦plus多少钱"}],
+                combined="秦plus多少钱",
+                decision=ReplyDecision("", "", False, False, ""),
+                reply_text="",
+                intent_assist={},
+                rag_reply={},
+                llm_reply={},
+                product_knowledge={},
+                data_capture={},
+                raw_capture={"conversation": {"conversation_id": "c1", "chat_type": "private"}},
+                customer_profile=None,
+            )
+    finally:
+        brain_module.call_llm_request_with_failover = original_call
+    status = event.get("llm_status") if isinstance(event.get("llm_status"), dict) else {}
+    assert_true(event.get("applied"), f"Kimi tool JSON should parse as BrainPlan: {event}")
+    assert_true(not status.get("json_structure_repaired"), f"tool JSON should not need structure repair: {status}")
+    assert_true(len(calls) == 1, f"tool JSON should only call primary Brain LLM once: {len(calls)}")
+    return CaseResult("kimi_tool_json_is_adopted_without_structure_repair", True, {"calls": len(calls)})
 
 
 def check_brain_same_capture_retry_recovers_empty_response() -> CaseResult:
