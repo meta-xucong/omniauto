@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "target": {
+    "conversation_id": "wx_conv_abc",
+    "target_name": "客户A",
+    "chat_type": "private"
+  },
+  "current_turn": {
+    "text": "这款有吗",
+    "message_ids": [
+      "wx_msg_text_001",
+      "wx_msg_image_001"
+    ]
+  },
+  "images": [
+    {
+      "asset_id": "visual_asset_wx_20260702_001",
+      "message_id": "wx_msg_image_001",
+      "thumbnail_path": "runtime/apps/wechat_ai_customer_service/visual_assets/wx_conv_abc/visual_asset_wx_20260702_001/thumb.jpg",
+      "bubble_crop_path": "runtime/apps/wechat_ai_customer_service/visual_assets/wx_conv_abc/visual_asset_wx_20260702_001/bubble_crop.jpg",
+      "width": 1080,
+      "height": 1440
+    }
+  ],
+  "runtime": {
+    "source_reason": "image_plus_text_turn",
+    "max_images_per_turn": 3,
+    "request_style": "anthropic_messages_vision"
+  }
+}

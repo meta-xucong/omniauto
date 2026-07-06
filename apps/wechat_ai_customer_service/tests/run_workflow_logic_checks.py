@@ -113,7 +113,7 @@ from llm_reply_guard import guard_synthesized_reply  # noqa: E402
 from realtime_reply_router import reply_similarity  # noqa: E402
 from reply_style_adapter import adapt_reply_style  # noqa: E402
 from customer_service_conversation_strategy import update_conversation_interaction_state_on_capture  # noqa: E402
-from wechat_connector import same_target_continuation_send_active  # noqa: E402
+from wechat_connector import same_target_continuation_send_active, send_rpa_batch_lock_active  # noqa: E402
 from wxauto4_sidecar import is_wechat_main_window  # noqa: E402
 from apps.wechat_ai_customer_service.customer_service_live_safety import (  # noqa: E402
     CustomerServiceLiveSafetyError,
@@ -295,6 +295,20 @@ class FinalSegmentVerifyConnector(FakeConnector):
         self.verify_calls = 0
         self.send_rate_guard_skips: list[bool] = []
         self.continuation_fast_path_contexts: list[bool] = []
+        self.batch_lock_contexts: list[bool] = []
+        self.continuation_guard_contexts: list[bool] = []
+
+    def _send_guard(self, target: str) -> dict[str, Any]:
+        return {
+            "ok": True,
+            "online": True,
+            "reason": "target_confirmed",
+            "requested_target": target,
+            "confirmed_target": target,
+            "confirmation_confidence": "active_title_strict",
+            "geometry": {"left": 0, "top": 0, "right": 980, "bottom": 860, "width": 980, "height": 860},
+            "screenshot_path": "send_guard.png",
+        }
 
     def send_text(self, target: str, text: str, exact: bool = True, *, skip_send_rate_guard: bool = False, **kwargs: Any) -> dict[str, Any]:
         self.send_calls += 1
@@ -302,11 +316,14 @@ class FinalSegmentVerifyConnector(FakeConnector):
         self.sent_session_keys.append(str(kwargs.get("session_key") or ""))
         self.send_rate_guard_skips.append(bool(skip_send_rate_guard))
         self.continuation_fast_path_contexts.append(same_target_continuation_send_active())
+        self.batch_lock_contexts.append(send_rpa_batch_lock_active())
+        self.continuation_guard_contexts.append(isinstance(kwargs.get("continuation_prevalidated_guard"), dict))
         return {
             "ok": True,
             "adapter": "win32_ocr",
             "state": "send_win32_rpa",
             "skip_send_rate_guard": bool(skip_send_rate_guard),
+            "send_result": {"pre_send_guard": self._send_guard(target)},
         }
 
     def send_text_and_verify(self, target: str, text: str, exact: bool = True, *, skip_send_rate_guard: bool = False, **kwargs: Any) -> dict[str, Any]:
@@ -315,13 +332,20 @@ class FinalSegmentVerifyConnector(FakeConnector):
         self.sent_session_keys.append(str(kwargs.get("session_key") or ""))
         self.send_rate_guard_skips.append(bool(skip_send_rate_guard))
         self.continuation_fast_path_contexts.append(same_target_continuation_send_active())
+        self.batch_lock_contexts.append(send_rpa_batch_lock_active())
+        self.continuation_guard_contexts.append(isinstance(kwargs.get("continuation_prevalidated_guard"), dict))
         return {
             "ok": True,
             "verified": True,
             "target": target,
             "exact": exact,
             "text": text,
-            "send": {"ok": True, "adapter": "win32_ocr", "state": "send_win32_rpa"},
+            "send": {
+                "ok": True,
+                "adapter": "win32_ocr",
+                "state": "send_win32_rpa",
+                "send_result": {"pre_send_guard": self._send_guard(target)},
+            },
             "adapter": "win32_ocr",
             "state": "send_win32_rpa",
             "verification_mode": "send_guard_confirmed_fast",
@@ -341,6 +365,8 @@ class ContinuationFallbackConnector(FinalSegmentVerifyConnector):
         self.send_rate_guard_skips.append(bool(skip_send_rate_guard))
         fast_path_active = same_target_continuation_send_active()
         self.continuation_fast_path_contexts.append(fast_path_active)
+        self.batch_lock_contexts.append(send_rpa_batch_lock_active())
+        self.continuation_guard_contexts.append(isinstance(kwargs.get("continuation_prevalidated_guard"), dict))
         if fast_path_active and not self.failed_fast_path_once:
             self.failed_fast_path_once = True
             return {
@@ -364,7 +390,12 @@ class ContinuationFallbackConnector(FinalSegmentVerifyConnector):
             "target": target,
             "exact": exact,
             "text": text,
-            "send": {"ok": True, "adapter": "win32_ocr", "state": "send_win32_rpa"},
+            "send": {
+                "ok": True,
+                "adapter": "win32_ocr",
+                "state": "send_win32_rpa",
+                "send_result": {"pre_send_guard": self._send_guard(target)},
+            },
             "adapter": "win32_ocr",
             "state": "send_win32_rpa",
             "verification_mode": "send_guard_confirmed_fast",
@@ -2836,6 +2867,15 @@ def check_reply_multi_bubble_uses_same_target_continuation_fast_path() -> None:
     assert_true(
         all(connector.continuation_fast_path_contexts[1:]),
         f"follow-up bubbles should enter continuation context: {connector.continuation_fast_path_contexts}",
+    )
+    assert_true(
+        all(connector.batch_lock_contexts),
+        f"multi-bubble send should hold one RPA batch lock across segments: {connector.batch_lock_contexts}",
+    )
+    assert_equal(connector.continuation_guard_contexts[0], False, "first bubble should not have a cached continuation guard")
+    assert_true(
+        all(connector.continuation_guard_contexts[1:]),
+        f"follow-up bubbles should receive cached continuation guards: {connector.continuation_guard_contexts}",
     )
     segment_results = result.get("segment_results") if isinstance(result.get("segment_results"), list) else []
     assert_true(

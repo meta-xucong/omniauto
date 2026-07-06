@@ -67,6 +67,10 @@ from apps.wechat_ai_customer_service.message_identity import (
     apply_canonical_identity_fields,
     canonical_input_message_id,
 )
+from apps.wechat_ai_customer_service.adapters.wechat_image_save_capture import (
+    image_preview_text,
+)
+from apps.wechat_ai_customer_service.workflows.customer_image_asset_store import build_brain_safe_image_proxy_messages
 from apps.wechat_ai_customer_service.workflows.listen_and_reply import TargetConfig as WorkflowTargetConfig
 from apps.wechat_ai_customer_service.wechat_message_normalizer import split_wechat_ocr_speaker_prefix
 
@@ -113,6 +117,20 @@ _RPA_HUMANIZED_SEND_ENV_MAPPING = {
 _SELF_MESSAGE_SENDERS = {"self", "assistant", "agent", "me", "outbound"}
 _SHORT_PENDING_SIGNAL_KIND = "high_sensitivity_short"
 _SHORT_PENDING_SIGNAL_MAX_AGE_SECONDS = 120.0
+
+
+def _visual_image_side(message: dict[str, Any]) -> str:
+    side = str(message.get("visual_side") or "").strip().lower()
+    if side in {"customer", "self"}:
+        return side
+    sender = str(message.get("sender") or message.get("sender_role") or "").strip().lower()
+    if sender in {"customer", "self"}:
+        return sender
+    return ""
+
+
+def _customer_visual_image_sources(sources: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [item for item in sources if isinstance(item, dict) and _visual_image_side(item) == "customer"]
 
 
 def safe_json_roundtrip(value: Any) -> Any:
@@ -962,7 +980,7 @@ class CustomerServiceSchedulerRuntime:
                 events.append({"event": "capture_blocked", "target_name": target_name, "reason": result.get("reason")})
                 continue
             messages = list(result.get("messages") or [])
-            batch = list(result.get("batch") or messages)
+            batch = list(result.get("batch") or ([] if result.get("batch_authoritative") else messages))
             overflow = list(result.get("overflow_messages") or [])
             capture = record_capture_result(
                 state,
@@ -1778,6 +1796,16 @@ def mark_session_capture_failed(
         backoff_seconds = min(7, max(3, 2 + fail_count) + random.uniform(0.4, 1.8))
     if "blank_render" in reason_lower:
         backoff_seconds = max(backoff_seconds, 25)
+    if (
+        "image_context_menu" in reason_lower
+        or "clipboard_image" in reason_lower
+        or "image_save_dialog" in reason_lower
+        or "image_file_unstable" in reason_lower
+    ):
+        # Image acquisition failures operate on the live WeChat UI. Use a
+        # longer floor so a single bad menu/clipboard state does not look like
+        # mechanical repeated right-clicking in the chat window.
+        backoff_seconds = max(backoff_seconds, 45)
     retry_not_before = (now_dt + timedelta(seconds=backoff_seconds)).isoformat(timespec="seconds")
     session["status"] = "capture_cooldown" if soft_target_unconfirmed else "capture_failed"
     session["pending_capture"] = bool(soft_target_unconfirmed)
@@ -1871,6 +1899,9 @@ class CapturedMessagesConnector:
             "target": target,
             "exact": exact,
             "messages": copy.deepcopy(messages),
+            "pending_signal": copy.deepcopy(self.capture.get("pending_signal") if isinstance(self.capture.get("pending_signal"), dict) else {}),
+            "customer_image_assets": copy.deepcopy(self.capture.get("customer_image_assets") if isinstance(self.capture.get("customer_image_assets"), dict) else {}),
+            "visual_image_assets": copy.deepcopy(self.capture.get("visual_image_assets") if isinstance(self.capture.get("visual_image_assets"), dict) else {}),
             "_scheduler_authoritative_batch": copy.deepcopy(authoritative_batch),
             "_scheduler_authoritative_batch_ids": authoritative_batch_ids,
             "_scheduler_capture_is_authoritative": bool(authoritative_batch_ids or authoritative_batch),
@@ -2868,7 +2899,110 @@ class ManagedListenerSchedulerBridge:
             max_messages=min(2, max(1, int(target.max_batch_messages or 1))),
         )
         payload["messages"] = messages
+        if isinstance(pending_signal, dict):
+            payload["pending_signal"] = pending_signal
         history_meta = payload.get("_history_backfill", {}) if isinstance(payload.get("_history_backfill"), dict) else {}
+        customer_image_assets: dict[str, Any] = {}
+        visual_image_assets: dict[str, Any] = {}
+        pending_text = ""
+        pending_speaker_name = ""
+        if isinstance(pending_signal, dict):
+            pending_text = str(pending_signal.get("pending_signal_text") or pending_signal.get("preview_content") or "").strip()
+            pending_speaker_name = str(pending_signal.get("speaker_name") or pending_signal.get("group_member_name") or "")
+        capture_visual_images = getattr(self.connector, "capture_visual_images", None)
+        if callable(capture_visual_images):
+            visual_image_assets = capture_visual_images(
+                target.name,
+                exact=target.exact,
+                session_key=str(getattr(target, "session_key", "") or session.get("session_key") or ""),
+                source_preview=pending_text,
+                speaker_name=pending_speaker_name,
+                tenant_id=self.tenant_id,
+                max_images=8,
+            )
+            payload["visual_image_assets"] = visual_image_assets
+            if visual_image_assets.get("ok") and visual_image_assets.get("assets"):
+                visual_sources = [item for item in (visual_image_assets.get("messages") or []) if isinstance(item, dict)]
+                if not visual_sources:
+                    visual_sources = [
+                        item
+                        for item in (visual_image_assets.get("assets") or [])
+                        if isinstance(item, dict)
+                    ]
+                if isinstance(pending_signal, dict) and pending_signal.get("pending_signal_id"):
+                    for visual_source in visual_sources:
+                        visual_source.setdefault("pending_signal_id", str(pending_signal.get("pending_signal_id") or ""))
+                        visual_source.setdefault("pending_signal_text", pending_text)
+                raw_visual_messages = [
+                    item
+                    for item in visual_sources
+                    if isinstance(item, dict) and str(item.get("type") or item.get("message_type") or "").strip().lower() == "image"
+                ]
+                if raw_visual_messages:
+                    messages = [*messages, *raw_visual_messages]
+                customer_sources = _customer_visual_image_sources(visual_sources)
+                if customer_sources:
+                    customer_image_assets = visual_image_assets
+                    image_messages = build_brain_safe_image_proxy_messages(
+                        customer_sources,
+                        target_name=target.name,
+                        session_key=str(getattr(target, "session_key", "") or session.get("session_key") or ""),
+                    )
+                    messages = [*messages, *image_messages]
+                payload["messages"] = messages
+        if not customer_image_assets and image_preview_text(pending_text):
+            save_image = getattr(self.connector, "save_customer_image", None)
+            if callable(save_image):
+                customer_image_assets = save_image(
+                    target.name,
+                    exact=target.exact,
+                    session_key=str(getattr(target, "session_key", "") or session.get("session_key") or ""),
+                    source_preview=pending_text,
+                    speaker_name=pending_speaker_name,
+                    tenant_id=self.tenant_id,
+                    max_images=1,
+                )
+            else:
+                customer_image_assets = {"ok": False, "state": "image_save_unsupported", "assets": [], "messages": []}
+            payload["customer_image_assets"] = customer_image_assets
+            if not customer_image_assets.get("ok") or not customer_image_assets.get("assets"):
+                return {
+                    "ok": False,
+                    "blocked": True,
+                    "reason": str(
+                        customer_image_assets.get("reason")
+                        or customer_image_assets.get("state")
+                        or "customer_image_save_failed"
+                    ),
+                    "messages": messages,
+                    "batch": [],
+                    "overflow_messages": [],
+                    "pending_signal": pending_signal if isinstance(pending_signal, dict) else {},
+                    "customer_image_assets": customer_image_assets,
+                    "visual_image_assets": visual_image_assets,
+                    "history_backfill": history_meta,
+                    "batch_selection": {"message_ids": [], "eligible_count": 0, "overflow_count": 0},
+                    "batch_authoritative": True,
+                }
+            if customer_image_assets.get("ok") and customer_image_assets.get("assets"):
+                image_sources = [item for item in (customer_image_assets.get("messages") or []) if isinstance(item, dict)]
+                if not image_sources:
+                    image_sources = [
+                        item
+                        for item in (customer_image_assets.get("assets") or [])
+                        if isinstance(item, dict)
+                    ]
+                if pending_signal.get("pending_signal_id"):
+                    for image_source in image_sources:
+                        image_source.setdefault("pending_signal_id", str(pending_signal.get("pending_signal_id") or ""))
+                        image_source.setdefault("pending_signal_text", pending_text)
+                image_messages = build_brain_safe_image_proxy_messages(
+                    image_sources,
+                    target_name=target.name,
+                    session_key=str(getattr(target, "session_key", "") or session.get("session_key") or ""),
+                )
+                messages = [*messages, *image_messages]
+                payload["messages"] = messages
         selection = self._workflow["select_batch_details"](
             messages,
             target_state=target_state,
@@ -2916,8 +3050,12 @@ class ManagedListenerSchedulerBridge:
             "messages": messages,
             "batch": selection.batch,
             "overflow_messages": selection.overflow_messages,
+            "pending_signal": pending_signal if isinstance(pending_signal, dict) else {},
+            "customer_image_assets": customer_image_assets,
+            "visual_image_assets": visual_image_assets,
             "history_backfill": history_meta,
             "batch_selection": self._workflow["batch_selection_payload"](selection),
+            "batch_authoritative": True,
         }
 
     def _capture_done(self, session: dict[str, Any], result: dict[str, Any], capture: dict[str, Any]) -> None:

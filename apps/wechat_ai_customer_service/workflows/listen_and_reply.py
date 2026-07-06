@@ -80,6 +80,7 @@ from customer_service_conversation_strategy import (
     update_conversation_interaction_state_on_capture,
     update_conversation_strategy_state,
 )
+from customer_image_turn_router import maybe_route_customer_image_turn
 from product_knowledge import decide_product_knowledge_reply, load_product_knowledge
 from rag_answer_layer import maybe_build_rag_reply
 from rag_experience_store import record_rag_reply_experience
@@ -105,7 +106,13 @@ from realtime_reply_router import (
     update_token_budget_from_synthesis,
 )
 from reply_style_adapter import adapt_reply_style, infer_source_channel
-from wechat_connector import FILE_TRANSFER_ASSISTANT, ROOT, WeChatConnector, same_target_continuation_send_context
+from wechat_connector import (
+    FILE_TRANSFER_ASSISTANT,
+    ROOT,
+    WeChatConnector,
+    same_target_continuation_send_context,
+    send_rpa_batch_lock_context,
+)
 from apps.wechat_ai_customer_service.customer_service_live_safety import apply_customer_service_live_safety_guard
 from apps.wechat_ai_customer_service.admin_backend.services.customer_service_runtime import (
     summarize_listener_result,
@@ -859,7 +866,31 @@ def process_target(
                 "dry_run": not send,
             },
         )
+    preview_batch = selection.batch
+    preview_combined = "\n".join(
+        str(item.get("content") or "")
+        for item in preview_batch
+        if isinstance(item, dict) and str(item.get("content") or "")
+    ).strip()
+    customer_image_turn = maybe_route_customer_image_turn(
+        connector=connector,
+        target=target,
+        config=config,
+        payload=payload,
+        target_state=target_state,
+        batch=preview_batch,
+        combined=preview_combined,
+    )
+    if customer_image_turn.get("applied"):
+        context_patch = customer_image_turn.get("conversation_context_patch") if isinstance(customer_image_turn.get("conversation_context_patch"), dict) else {}
+        if context_patch:
+            target_state.setdefault("conversation_context", {}).update(context_patch)
+        visual_context_patch = customer_image_turn.get("visual_context_state_patch") if isinstance(customer_image_turn.get("visual_context_state_patch"), dict) else {}
+        if visual_context_patch:
+            target_state.setdefault("visual_context_state", {}).update(visual_context_patch)
     batch = selection.batch
+    if not batch and customer_image_turn.get("adoptable"):
+        batch = [item for item in (customer_image_turn.get("proxy_batch") or []) if isinstance(item, dict)]
     if not batch:
         return base_event(
             target,
@@ -868,8 +899,19 @@ def process_target(
                 "reason": "no eligible unprocessed text messages",
                 "raw_capture": raw_capture,
                 "batch_selection": batch_selection_payload(selection),
+                "customer_image_turn": customer_image_turn,
             },
         )
+    brain_target_state = (
+        customer_image_turn.get("target_state_for_brain")
+        if isinstance(customer_image_turn.get("target_state_for_brain"), dict)
+        else target_state
+    )
+    visual_bridge_input = (
+        customer_image_turn.get("visual_bridge_input")
+        if isinstance(customer_image_turn.get("visual_bridge_input"), dict)
+        else None
+    )
 
     # LLM-only planning runs in parallel, so keep it side-effect-free. The real
     # send/write path still updates customer profile stats below.
@@ -890,6 +932,8 @@ def process_target(
     routing_batch = normalize_batch_content_for_reply_routing(batch)
     semantic_batch_plan = plan_message_batch_semantics(routing_batch, config)
     combined = str(semantic_batch_plan.get("combined_text") or "\n".join(str(item.get("content") or "") for item in batch))
+    if not str(combined or "").strip() and customer_image_turn.get("adoptable"):
+        combined = str(customer_image_turn.get("combined_text_override") or "").strip()
     preference_context_update = update_conversation_preference_context(target_state, combined)
     strategy_state = update_conversation_strategy_state(target_state, combined)
     message_ids = [reply_input_message_identity(item) for item in batch if reply_input_message_identity(item)]
@@ -996,6 +1040,8 @@ def process_target(
                 "intent_assist": intent_assist,
                 "dry_run": not send,
                 "brain_first_low_authority_fast_precheck": low_authority_fast_precheck,
+                "customer_image_turn": customer_image_turn,
+                "brain_visual_context_used": bool(visual_bridge_input),
             },
         )
         write_workflow_phase("customer_service_brain_start", target=target.name)
@@ -1003,7 +1049,7 @@ def process_target(
             event["customer_service_brain"] = maybe_run_customer_service_brain(
                 config=config,
                 target_name=target.name,
-                target_state=target_state,
+                target_state=brain_target_state,
                 batch=batch,
                 combined=combined,
                 decision=decision,
@@ -1015,6 +1061,7 @@ def process_target(
                 data_capture=data_capture,
                 raw_capture=raw_capture,
                 customer_profile=profile,
+                visual_bridge_input=visual_bridge_input,
             )
         except Exception as exc:
             brain_settings = effective_brain_settings(config)
@@ -1230,6 +1277,8 @@ def process_target(
             "intent_result": intent_result.to_dict(),
             "intent_assist": skipped_intent_assist(config, "not_evaluated_yet"),
             "dry_run": not send,
+            "customer_image_turn": customer_image_turn,
+            "brain_visual_context_used": bool(visual_bridge_input),
         },
     )
 
@@ -1267,7 +1316,7 @@ def process_target(
         event["customer_service_brain"] = maybe_run_customer_service_brain(
             config=config,
             target_name=target.name,
-            target_state=target_state,
+            target_state=brain_target_state,
             batch=batch,
             combined=combined,
             decision=decision,
@@ -1279,6 +1328,7 @@ def process_target(
             data_capture=data_capture,
             raw_capture=raw_capture,
             customer_profile=profile,
+            visual_bridge_input=visual_bridge_input,
         )
     except Exception as exc:
         brain_settings = effective_brain_settings(config)
@@ -2828,6 +2878,50 @@ def split_reply_body_into_sendable_units(text: str) -> list[str]:
     return [item for item in comma_units if item]
 
 
+def continuation_prevalidated_guard_from_send_result(
+    result: dict[str, Any],
+    *,
+    target: TargetConfig,
+) -> dict[str, Any] | None:
+    if not isinstance(result, dict):
+        return None
+    send_meta = result.get("send") if isinstance(result.get("send"), dict) else result
+    if not isinstance(send_meta, dict):
+        return None
+    send_result = send_meta.get("send_result") if isinstance(send_meta.get("send_result"), dict) else {}
+    guard = send_result.get("pre_send_guard") if isinstance(send_result.get("pre_send_guard"), dict) else {}
+    if not guard:
+        guard = send_meta.get("guard") if isinstance(send_meta.get("guard"), dict) else {}
+    if guard.get("ok") is not True:
+        return None
+    if str(guard.get("reason") or "") != "target_confirmed":
+        return None
+    if str(guard.get("confirmation_confidence") or "") != "active_title_strict":
+        return None
+    geometry = guard.get("geometry") if isinstance(guard.get("geometry"), dict) else {}
+    if not geometry:
+        return None
+    clean_target = str(getattr(target, "name", "") or "").strip()
+    clean_session_key = str(getattr(target, "session_key", "") or "").strip()
+    return {
+        "target": clean_target,
+        "exact": bool(getattr(target, "exact", True)),
+        "session_key": clean_session_key,
+        "created_at": time.time(),
+        "guard": {
+            "ok": True,
+            "online": bool(guard.get("online", True)),
+            "reason": "target_confirmed",
+            "requested_target": str(guard.get("requested_target") or clean_target),
+            "confirmed_target": str(guard.get("confirmed_target") or clean_target),
+            "confirmation_confidence": "active_title_strict",
+            "geometry": dict(geometry),
+            "screenshot_path": str(guard.get("screenshot_path") or ""),
+            "active_title_region_fingerprint": str(guard.get("active_title_region_fingerprint") or ""),
+        },
+    }
+
+
 def send_reply_with_optional_multi_bubble(
     *,
     connector: WeChatConnector,
@@ -2903,94 +2997,102 @@ def send_reply_with_optional_multi_bubble(
     segment_attempt_counts: list[int] = []
     sent_segments = 0
     retry_attempts = 0
-    for index, segment in enumerate(segments, start=1):
-        if index > 1:
-            pause = random.uniform(delay_min, delay_max)
-            time.sleep(max(0.0, pause))
-        attempts = 0
-        result: dict[str, Any] = {}
-        while True:
-            attempts += 1
-            write_workflow_phase(
-                "rpa_send_segment_start",
-                target=target.name,
-                segment_index=index,
-                segment_count=len(segments),
-                segment_attempt=attempts,
-                reply_chars=len(segment),
-            )
-            should_verify_segment = verify_each_segment or index == len(segments)
-            skip_segment_rate_guard = index > 1
-            continuation_fast_path = bool(settings.get("same_target_continuation_fast_path_enabled")) and index > 1 and attempts == 1
-            write_workflow_phase(
-                "rpa_send_segment_continuation_context",
-                target=target.name,
-                segment_index=index,
-                segment_count=len(segments),
-                segment_attempt=attempts,
-                same_target_continuation_fast_path=continuation_fast_path,
-            )
-            with same_target_continuation_send_context(continuation_fast_path):
-                if should_verify_segment or not callable(getattr(connector, "send_text", None)):
-                    result = connector.send_text_and_verify(
-                        target.name,
-                        segment,
-                        exact=target.exact,
-                        skip_send_rate_guard=skip_segment_rate_guard,
-                        session_key=str(getattr(target, "session_key", "") or ""),
-                    )
-                else:
-                    send_only = connector.send_text(
-                        target.name,
-                        segment,
-                        exact=target.exact,
-                        skip_send_rate_guard=skip_segment_rate_guard,
-                        session_key=str(getattr(target, "session_key", "") or ""),
-                    )  # type: ignore[attr-defined]
-                    send_only_meta = send_only if isinstance(send_only, dict) else {}
-                    result = {
-                        "ok": bool(send_only_meta.get("ok")),
-                        "verified": bool(send_only_meta.get("ok")),
-                        "send": send_only_meta,
-                        "verification_mode": "send_only_intermediate",
-                        "adapter": send_only_meta.get("adapter"),
-                        "state": send_only_meta.get("state"),
-                        "skip_send_rate_guard": skip_segment_rate_guard,
-                    }
-            if isinstance(result, dict):
-                result.setdefault("same_target_continuation_fast_path", bool(continuation_fast_path))
-            verified = bool(result.get("verified"))
-            state = _send_result_state(result)
-            write_workflow_phase(
-                "rpa_send_segment_done",
-                target=target.name,
-                segment_index=index,
-                segment_count=len(segments),
-                segment_attempt=attempts,
-                verified=verified,
-                state=state,
-            )
-            if verified:
+    continuation_prevalidated_guard: dict[str, Any] | None = None
+    batch_lock_enabled = bool(settings.get("same_target_continuation_fast_path_enabled"))
+    with send_rpa_batch_lock_context(batch_lock_enabled):
+        for index, segment in enumerate(segments, start=1):
+            if index > 1:
+                pause = random.uniform(delay_min, delay_max)
+                time.sleep(max(0.0, pause))
+            attempts = 0
+            result: dict[str, Any] = {}
+            while True:
+                attempts += 1
+                write_workflow_phase(
+                    "rpa_send_segment_start",
+                    target=target.name,
+                    segment_index=index,
+                    segment_count=len(segments),
+                    segment_attempt=attempts,
+                    reply_chars=len(segment),
+                )
+                should_verify_segment = verify_each_segment or index == len(segments)
+                skip_segment_rate_guard = index > 1
+                continuation_fast_path = bool(settings.get("same_target_continuation_fast_path_enabled")) and index > 1 and attempts == 1
+                continuation_send_kwargs: dict[str, Any] = {
+                    "exact": target.exact,
+                    "skip_send_rate_guard": skip_segment_rate_guard,
+                    "session_key": str(getattr(target, "session_key", "") or ""),
+                }
+                if continuation_fast_path and isinstance(continuation_prevalidated_guard, dict):
+                    continuation_send_kwargs["continuation_prevalidated_guard"] = continuation_prevalidated_guard
+                write_workflow_phase(
+                    "rpa_send_segment_continuation_context",
+                    target=target.name,
+                    segment_index=index,
+                    segment_count=len(segments),
+                    segment_attempt=attempts,
+                    same_target_continuation_fast_path=continuation_fast_path,
+                    continuation_guard_available=bool(continuation_send_kwargs.get("continuation_prevalidated_guard")),
+                )
+                with same_target_continuation_send_context(continuation_fast_path):
+                    if should_verify_segment or not callable(getattr(connector, "send_text", None)):
+                        result = connector.send_text_and_verify(
+                            target.name,
+                            segment,
+                            **continuation_send_kwargs,
+                        )
+                    else:
+                        send_only = connector.send_text(
+                            target.name,
+                            segment,
+                            **continuation_send_kwargs,
+                        )  # type: ignore[attr-defined]
+                        send_only_meta = send_only if isinstance(send_only, dict) else {}
+                        result = {
+                            "ok": bool(send_only_meta.get("ok")),
+                            "verified": bool(send_only_meta.get("ok")),
+                            "send": send_only_meta,
+                            "verification_mode": "send_only_intermediate",
+                            "adapter": send_only_meta.get("adapter"),
+                            "state": send_only_meta.get("state"),
+                            "skip_send_rate_guard": skip_segment_rate_guard,
+                        }
+                if isinstance(result, dict):
+                    result.setdefault("same_target_continuation_fast_path", bool(continuation_fast_path))
+                verified = bool(result.get("verified"))
+                state = _send_result_state(result)
+                write_workflow_phase(
+                    "rpa_send_segment_done",
+                    target=target.name,
+                    segment_index=index,
+                    segment_count=len(segments),
+                    segment_attempt=attempts,
+                    verified=verified,
+                    state=state,
+                )
+                if verified:
+                    break
+                delay = transient_send_retry_delay_seconds(result, settings, retry_index=attempts - 1)
+                if delay <= 0:
+                    break
+                retry_attempts += 1
+                write_workflow_phase(
+                    "rpa_send_segment_retry_wait",
+                    target=target.name,
+                    segment_index=index,
+                    segment_count=len(segments),
+                    segment_attempt=attempts,
+                    retry_after_seconds=round(delay, 3),
+                    state=state,
+                )
+                time.sleep(delay)
+            segment_results.append(result)
+            segment_attempt_counts.append(attempts)
+            if not bool(result.get("verified")):
                 break
-            delay = transient_send_retry_delay_seconds(result, settings, retry_index=attempts - 1)
-            if delay <= 0:
-                break
-            retry_attempts += 1
-            write_workflow_phase(
-                "rpa_send_segment_retry_wait",
-                target=target.name,
-                segment_index=index,
-                segment_count=len(segments),
-                segment_attempt=attempts,
-                retry_after_seconds=round(delay, 3),
-                state=state,
-            )
-            time.sleep(delay)
-        segment_results.append(result)
-        segment_attempt_counts.append(attempts)
-        if not bool(result.get("verified")):
-            break
-        sent_segments += 1
+            sent_segments += 1
+            continuation_prevalidated_guard = continuation_prevalidated_guard_from_send_result(result, target=target)
 
     last = segment_results[-1] if segment_results else {}
     send_meta = last.get("send") if isinstance(last.get("send"), dict) else last
@@ -5096,6 +5198,15 @@ def apply_local_customer_service_settings(config: dict[str, Any]) -> dict[str, A
     operator_alert = dict(merged.get("operator_alert", {}) or {})
     operator_alert["enabled"] = settings.get("operator_alert_enabled", True) is not False
     merged["operator_alert"] = operator_alert
+    customer_image_understanding = dict(merged.get("customer_image_understanding", {}) or {})
+    local_image_understanding = (
+        settings.get("customer_image_understanding")
+        if isinstance(settings.get("customer_image_understanding"), dict)
+        else {}
+    )
+    customer_image_understanding.update(local_image_understanding or {})
+    customer_image_understanding["enabled"] = use_llm and customer_image_understanding.get("enabled", True) is not False
+    merged["customer_image_understanding"] = customer_image_understanding
     merged = apply_customer_service_brain_startup_guard(merged, settings=settings)
     return apply_customer_service_live_safety_guard(merged, settings=settings)
 

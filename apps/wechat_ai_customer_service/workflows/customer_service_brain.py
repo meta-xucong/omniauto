@@ -52,6 +52,19 @@ from customer_service_conversation_strategy import (
     build_conversation_interaction_brain_hint,
     build_conversation_strategy_brain_hint,
 )
+from customer_image_brain_bridge import (
+    augment_text_with_visual_query,
+    compact_customer_image_brain_bridge,
+    resolve_visual_brain_turn_text,
+)
+from customer_service_brain_preflight import (
+    augment_evidence_text_with_brain_preflight_queries,
+    brain_preflight_requires_authoritative_evidence,
+    compact_brain_preflight_for_prompt,
+    effective_customer_service_brain_preflight_settings,
+    maybe_run_customer_service_brain_preflight,
+)
+from customer_service_prompt_archive import archive_prompt_event, should_archive_brain_prompt
 from llm_reply_guard import guard_synthesized_reply
 from evidence_authority import PRODUCT_MASTER_CATEGORY_ID, annotate_authority
 from reply_evidence_builder import build_reply_evidence_pack, catalog_product_payload
@@ -513,6 +526,108 @@ def prompt_product_master_item_count(evidence_pack: dict[str, Any]) -> int:
     return len([item for item in items if isinstance(item, dict)])
 
 
+TEXT_EVIDENCE_GAP_SURFACE_TERMS = (
+    "车",
+    "车型",
+    "车源",
+    "现车",
+    "库存",
+    "配置",
+    "型号",
+    "车况",
+    "公里",
+    "里程",
+    "报价",
+    "价格",
+    "多少钱",
+    "预算",
+    "推荐",
+    "对比",
+    "类似",
+    "有吗",
+    "有没",
+    "发我",
+)
+
+
+def text_evidence_gap_surface_signal(text: str) -> bool:
+    clean = normalize_fast_profile_text(text)
+    if not clean:
+        return False
+    if text_contains_any(clean, TEXT_EVIDENCE_GAP_SURFACE_TERMS):
+        return True
+    # Catch compact model-code mentions such as A4L/GL8/ES6 without enumerating car names.
+    return bool(re.search(r"(?i)(?:^|[^a-z0-9])([a-z]{1,5}\d[a-z0-9-]{0,5})(?:$|[^a-z0-9])", str(text or "")))
+
+
+def text_evidence_gap_social_only_turn(text: str) -> bool:
+    """Return True for short social pings that should not spend preflight time."""
+    clean = re.sub(r"[\s?？!！。.,，~～…:：;；、]+", "", normalize_fast_profile_text(text)).lower()
+    if not clean:
+        return False
+    if social_message_requires_visible_brain_reply(text):
+        return True
+    if len(clean) > 6:
+        return False
+    return clean in {
+        "在",
+        "在不",
+        "在吗",
+        "在嘛",
+        "还在吗",
+        "有人吗",
+        "人呢",
+        "你好",
+        "您好",
+        "hi",
+        "hello",
+        "哈喽",
+    }
+
+
+def text_evidence_gap_preflight_probe_decision(
+    *,
+    config: dict[str, Any],
+    settings: dict[str, Any],
+    combined: str,
+    batch: list[dict[str, Any]],
+    target_state: dict[str, Any],
+    evidence_pack: dict[str, Any] | None = None,
+    fast_profile: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    preflight_settings = effective_customer_service_brain_preflight_settings(config=config, settings=settings)
+    if not preflight_settings.get("enabled") or not preflight_settings.get("text_evidence_gap_enabled"):
+        return {"enabled": False, "reason": "text_evidence_gap_preflight_disabled"}
+    clean = normalize_fast_profile_text(combined)
+    if not clean:
+        return {"enabled": False, "reason": "empty_message"}
+    max_chars = int(preflight_settings.get("text_evidence_gap_max_chars") or 80)
+    if len(clean) > max_chars:
+        return {"enabled": False, "reason": "message_too_long_for_text_evidence_gap", "char_count": len(clean)}
+    if text_evidence_gap_social_only_turn(combined):
+        return {"enabled": False, "reason": "social_turn_not_text_evidence_gap"}
+    customer_messages = [
+        item
+        for item in batch
+        if isinstance(item, dict)
+        and str(item.get("sender") or item.get("speaker") or "").strip().lower() not in {"self", "assistant", "agent", "me", "outbound", "客服"}
+    ]
+    if len(customer_messages or batch) > 2:
+        return {"enabled": False, "reason": "multi_message_batch_not_text_gap", "message_count": len(customer_messages or batch)}
+    if evidence_pack is not None and prompt_product_master_item_count(evidence_pack) > 0:
+        return {"enabled": False, "reason": "product_master_already_present"}
+    fast_profile = fast_profile if isinstance(fast_profile, dict) else {}
+    if fast_profile.get("enabled"):
+        if not preflight_settings.get("text_evidence_gap_probe_short_low_authority"):
+            return {"enabled": False, "reason": "short_low_authority_text_gap_probe_disabled"}
+        if str(fast_profile.get("reason") or "") != "short_low_authority_turn":
+            return {"enabled": False, "reason": "fast_profile_not_text_gap_candidate"}
+        return {"enabled": True, "reason": "short_low_authority_text_evidence_gap_probe"}
+    if evidence_pack is not None and text_evidence_gap_surface_signal(combined):
+        return {"enabled": True, "reason": "empty_product_master_text_evidence_gap_probe"}
+    return {"enabled": False, "reason": "text_evidence_gap_surface_signal_missing"}
+
+
 def apply_routine_product_fast_brain_settings(settings: dict[str, Any], decision: dict[str, Any]) -> dict[str, Any]:
     fast = dict(settings)
     fast["prompt_profile"] = "routine_product_fast"
@@ -706,6 +821,7 @@ def maybe_run_customer_service_brain(
     data_capture: dict[str, Any],
     raw_capture: dict[str, Any],
     customer_profile: dict[str, Any] | None = None,
+    visual_bridge_input: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     started_at = time.time()
     stage_timings: dict[str, float] = {}
@@ -718,6 +834,11 @@ def maybe_run_customer_service_brain(
         "adoptable": False,
     }
     visible_reply_owner = "brain"
+    visual_bridge_input = visual_bridge_input if isinstance(visual_bridge_input, dict) else {}
+    if visual_bridge_input:
+        payload["visual_bridge_input"] = compact_customer_image_brain_bridge(visual_bridge_input)
+    combined = resolve_visual_brain_turn_text(combined, visual_bridge_input)
+    evidence_combined = augment_text_with_visual_query(combined, visual_bridge_input)
 
     def record_stage(name: str, stage_started_at: float) -> None:
         duration = round(time.time() - stage_started_at, 4)
@@ -757,12 +878,68 @@ def maybe_run_customer_service_brain(
         )
         return finish(payload)
 
+    stage_started = time.time()
+    brain_preflight = maybe_run_customer_service_brain_preflight(
+        config=config,
+        settings=settings,
+        target_name=target_name,
+        target_state=target_state,
+        batch=batch,
+        combined=combined,
+        visual_bridge_input=visual_bridge_input,
+    )
+    payload["brain_preflight"] = brain_preflight
+    evidence_combined = augment_evidence_text_with_brain_preflight_queries(evidence_combined, brain_preflight)
+    record_stage("brain_preflight", stage_started)
+
     fast_profile = low_authority_fast_profile_decision(
         settings=settings,
         combined=combined,
         batch=batch,
         target_state=target_state,
     )
+    if brain_preflight_requires_authoritative_evidence(brain_preflight):
+        fast_profile = {
+            "enabled": False,
+            "reason": "brain_preflight_requires_evidence",
+            "blocked_profile": fast_profile if isinstance(fast_profile, dict) else {},
+        }
+    text_gap_preflight_attempted = False
+    if fast_profile.get("enabled"):
+        text_gap_probe = text_evidence_gap_preflight_probe_decision(
+            config=config,
+            settings=settings,
+            combined=combined,
+            batch=batch,
+            target_state=target_state,
+            fast_profile=fast_profile,
+        )
+        payload["text_evidence_gap_preflight_probe"] = text_gap_probe
+        if text_gap_probe.get("enabled"):
+            text_gap_preflight_attempted = True
+            stage_started_text_gap = time.time()
+            text_gap_preflight = maybe_run_customer_service_brain_preflight(
+                config=config,
+                settings=settings,
+                target_name=target_name,
+                target_state=target_state,
+                batch=batch,
+                combined=combined,
+                visual_bridge_input=visual_bridge_input,
+                force_reason=str(text_gap_probe.get("reason") or "short_low_authority_text_evidence_gap_probe"),
+            )
+            record_stage("brain_preflight_text_gap_before_fast", stage_started_text_gap)
+            payload["brain_preflight_text_gap"] = text_gap_preflight
+            if text_gap_preflight.get("applied"):
+                brain_preflight = text_gap_preflight
+                payload["brain_preflight"] = brain_preflight
+                evidence_combined = augment_evidence_text_with_brain_preflight_queries(evidence_combined, brain_preflight)
+                if brain_preflight_requires_authoritative_evidence(brain_preflight):
+                    fast_profile = {
+                        "enabled": False,
+                        "reason": "brain_preflight_requires_evidence",
+                        "blocked_profile": fast_profile if isinstance(fast_profile, dict) else {},
+                    }
     payload["low_authority_fast_profile"] = fast_profile
     if fast_profile.get("enabled"):
         settings = apply_low_authority_fast_brain_settings(settings, fast_profile)
@@ -783,7 +960,7 @@ def maybe_run_customer_service_brain(
             target_name=target_name,
             target_state=target_state,
             batch=batch,
-            combined=combined,
+            combined=evidence_combined,
             decision=decision,
             reply_text=reply_text,
             intent_assist=intent_assist,
@@ -794,6 +971,53 @@ def maybe_run_customer_service_brain(
             raw_capture=raw_capture,
             customer_profile=customer_profile,
         )
+        if not brain_preflight_requires_authoritative_evidence(brain_preflight):
+            text_gap_probe = text_evidence_gap_preflight_probe_decision(
+                config=config,
+                settings=settings,
+                combined=combined,
+                batch=batch,
+                target_state=target_state,
+                evidence_pack=evidence_pack,
+            )
+            payload["text_evidence_gap_preflight_probe_after_evidence"] = text_gap_probe
+            if text_gap_probe.get("enabled") and not text_gap_preflight_attempted:
+                stage_started_text_gap = time.time()
+                text_gap_preflight = maybe_run_customer_service_brain_preflight(
+                    config=config,
+                    settings=settings,
+                    target_name=target_name,
+                    target_state=target_state,
+                    batch=batch,
+                    combined=combined,
+                    visual_bridge_input=visual_bridge_input,
+                    force_reason=str(text_gap_probe.get("reason") or "empty_product_master_text_evidence_gap_probe"),
+                )
+                record_stage("brain_preflight_text_gap_after_evidence", stage_started_text_gap)
+                payload["brain_preflight_text_gap"] = text_gap_preflight
+                if text_gap_preflight.get("applied"):
+                    enriched_evidence_combined = augment_evidence_text_with_brain_preflight_queries(evidence_combined, text_gap_preflight)
+                    if enriched_evidence_combined != evidence_combined:
+                        brain_preflight = text_gap_preflight
+                        payload["brain_preflight"] = brain_preflight
+                        evidence_combined = enriched_evidence_combined
+                        evidence_pack = build_reply_evidence_pack(
+                            config=config_with_brain_synthesis_settings(config, settings),
+                            target_name=target_name,
+                            target_state=target_state,
+                            batch=batch,
+                            combined=evidence_combined,
+                            decision=decision,
+                            reply_text=reply_text,
+                            intent_assist=intent_assist,
+                            rag_reply=rag_reply,
+                            llm_reply=llm_reply,
+                            product_knowledge=product_knowledge or {},
+                            data_capture=data_capture,
+                            raw_capture=raw_capture,
+                            customer_profile=customer_profile,
+                        )
+                        payload["text_evidence_gap_evidence_rebuilt"] = True
     attach_conversation_runtime_hints_to_evidence_pack(evidence_pack, target_state)
     routine_fast_profile = {"enabled": False, "reason": "low_authority_fast_already_selected" if fast_profile.get("enabled") else "not_evaluated"}
     if not fast_profile.get("enabled"):
@@ -817,6 +1041,8 @@ def maybe_run_customer_service_brain(
         combined=combined,
         raw_capture=raw_capture,
         evidence_pack=evidence_pack,
+        visual_bridge_input=visual_bridge_input,
+        brain_preflight=brain_preflight,
     )
     record_stage("brain_input", stage_started)
     payload["audit_summary"] = evidence_pack.get("audit_summary", {})
@@ -1622,6 +1848,11 @@ def effective_brain_settings(config: dict[str, Any]) -> dict[str, Any]:
     settings = dict(config.get("customer_service_brain", {}) or {})
     llm_synthesis = config.get("llm_reply_synthesis") if isinstance(config.get("llm_reply_synthesis"), dict) else {}
     final_polish = config.get("final_visible_llm_polish") if isinstance(config.get("final_visible_llm_polish"), dict) else {}
+    local_settings = config.get("_local_customer_service_settings") if isinstance(config.get("_local_customer_service_settings"), dict) else {}
+    prompt_archive = config.get("prompt_archive") if isinstance(config.get("prompt_archive"), dict) else {}
+    local_prompt_archive = local_settings.get("prompt_archive") if isinstance(local_settings.get("prompt_archive"), dict) else {}
+    if prompt_archive or local_prompt_archive:
+        settings["prompt_archive"] = {**dict(prompt_archive), **dict(local_prompt_archive)}
     if "enabled" not in settings:
         settings["enabled"] = False
     settings.setdefault("mode", "off")
@@ -1805,6 +2036,8 @@ def build_brain_input(
     combined: str,
     raw_capture: dict[str, Any],
     evidence_pack: dict[str, Any],
+    visual_bridge_input: dict[str, Any] | None = None,
+    brain_preflight: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     conversation = evidence_pack.get("conversation") if isinstance(evidence_pack.get("conversation"), dict) else {}
     message_text_payload = semantic_message_text_payload(
@@ -1842,6 +2075,12 @@ def build_brain_input(
             }
         ),
     }
+    visual_bridge_input = visual_bridge_input if isinstance(visual_bridge_input, dict) else {}
+    if visual_bridge_input:
+        current_message["visual_bridge_input"] = compact_customer_image_brain_bridge(visual_bridge_input)
+    brain_preflight = brain_preflight if isinstance(brain_preflight, dict) else {}
+    if brain_preflight.get("applied"):
+        current_message["brain_preflight"] = compact_brain_preflight_for_prompt(brain_preflight)
     if retry_instruction:
         current_message["retry_instruction"] = retry_instruction[:700]
     return {
@@ -2068,6 +2307,26 @@ def run_brain_llm(*, settings: dict[str, Any], brain_input: dict[str, Any]) -> d
         {"role": "user", "content": user_content},
     ]
     max_tokens = max(256, int(settings.get("max_tokens") or DEFAULT_MAX_TOKENS))
+    if should_archive_brain_prompt(settings=settings, brain_input=brain_input):
+        try:
+            archive_prompt_event(
+                "customer_service_brain_prompt",
+                {
+                    "provider": provider,
+                    "model": model,
+                    "base_url": base_url,
+                    "model_tier": str(settings.get("model_tier") or "flash"),
+                    "max_tokens": max_tokens,
+                    "temperature": float(settings.get("temperature") or DEFAULT_TEMPERATURE),
+                    "prompt_estimate": prompt_estimate,
+                    "brain_input": brain_input,
+                    "prompt_pack": prompt_pack,
+                    "messages": messages,
+                },
+                settings=settings,
+            )
+        except Exception:
+            pass
     response = call_llm_request_with_failover(
         provider=provider,
         api_key=api_key,
@@ -3138,6 +3397,21 @@ def compact_current_message_for_prompt(current: dict[str, Any]) -> dict[str, Any
     retry_instruction = str(current.get("retry_instruction") or "").strip()
     if retry_instruction:
         payload["retry_instruction"] = clip(retry_instruction, 360)
+    visual_bridge_input = current.get("visual_bridge_input") if isinstance(current.get("visual_bridge_input"), dict) else {}
+    if visual_bridge_input:
+        payload["visual_bridge_input"] = compact_prompt_value(
+            visual_bridge_input,
+            max_text_chars=120,
+            max_list_items=4,
+        )
+        payload["visual_bridge_policy"] = "视觉桥接输入只辅助识别图片/指代，不直接授权商品事实。"
+    brain_preflight = current.get("brain_preflight") if isinstance(current.get("brain_preflight"), dict) else {}
+    if brain_preflight:
+        payload["brain_preflight"] = compact_prompt_value(
+            brain_preflight,
+            max_text_chars=160,
+            max_list_items=4,
+        )
     return payload
 
 

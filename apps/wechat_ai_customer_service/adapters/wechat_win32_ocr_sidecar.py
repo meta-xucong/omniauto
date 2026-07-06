@@ -165,6 +165,7 @@ from apps.wechat_ai_customer_service.adapters.wechat_win32_ocr import window_vis
 from apps.wechat_ai_customer_service.adapters.wechat_win32_ocr import window_metrics as win32_ocr_window_metrics
 from apps.wechat_ai_customer_service.adapters.wechat_win32_ocr import windowing as win32_ocr_windowing
 from apps.wechat_ai_customer_service.adapters.wechat_win32_ocr import add_friend_windows as win32_ocr_add_friend_windows
+from apps.wechat_ai_customer_service.adapters.wechat_image_save_capture import execute_wechat_image_save
 
 try:
     from rapidocr_onnxruntime import RapidOCR
@@ -180,7 +181,7 @@ CHAT_HEADER_MAX_Y = 90
 CHAT_INPUT_BOTTOM_OFFSET = 52
 DEFAULT_MESSAGE_BOTTOM_EXCLUDE_PX = 95
 OCR_MIN_CONFIDENCE = 0.45
-SIDECAR_BASE_ACTIONS = ("status", "capabilities", "sessions", "messages", "send", "recover-render", "voice-transcribe")
+SIDECAR_BASE_ACTIONS = ("status", "capabilities", "sessions", "messages", "send", "recover-render", "voice-transcribe", "image-save")
 SIDECAR_ACTION_CHOICES = (*SIDECAR_BASE_ACTIONS, *ADD_FRIEND_ROUTES)
 SEND_GUARD_PATH = PROJECT_ROOT / "runtime" / "wechat_win32_ocr_send_guard.json"
 UI_ACTION_GUARD_PATH = PROJECT_ROOT / "runtime" / "wechat_win32_ocr_ui_action_guard.json"
@@ -223,6 +224,7 @@ DEFAULT_QUICK_LOGIN_AUTO_ENTER = False
 DEFAULT_TARGET_READY_MAX_ATTEMPTS = 1
 DEFAULT_TARGET_READY_SWITCH_VALIDATION_CACHE_SECONDS = 4.0
 DEFAULT_TARGET_READY_PREVALIDATION_OCR_SEED_SECONDS = 1.5
+DEFAULT_CONTINUATION_PREVALIDATED_GUARD_SECONDS = 4.0
 DEFAULT_ACTIVE_SEND_TARGET_ROI_OCR = False
 DEFAULT_INPUT_REGION_PRECHECK_OCR_SEED_SECONDS = 3.0
 BLANK_RENDER_BRIGHT_MIN = 238.0
@@ -267,6 +269,8 @@ DEFAULT_ALLOW_UNKNOWN_FOREGROUND_GUARD = True
 INPUT_TEXT_DARK_RATIO_MIN = 0.0025
 INPUT_TEXT_SOFT_BLANK_DARK_RATIO_MAX = 0.035
 INPUT_TEXT_SOFT_BLANK_MEAN_MIN = 242.0
+INPUT_TEXT_SOFT_BLANK_WEAK_OCR_DARK_RATIO_MAX = 0.002
+INPUT_TEXT_SOFT_BLANK_WEAK_OCR_MEAN_MIN = 248.0
 HUMANIZED_TYPO_CANDIDATES = "asdfjkl;,.?/[]"
 SENDINPUT_INPUT_KEYBOARD = 1
 SENDINPUT_KEYEVENTF_KEYUP = 0x0002
@@ -487,6 +491,12 @@ def main() -> int:
     parser.add_argument("--restore-to-latest", dest="restore_to_latest", action="store_true", default=None)
     parser.add_argument("--no-restore-to-latest", dest="restore_to_latest", action="store_false")
     parser.add_argument("--artifact-dir", help="Optional directory for debug screenshots.")
+    parser.add_argument("--source-preview", default="", help="Session-list image preview text for image-save.")
+    parser.add_argument("--speaker-name", default="", help="Group speaker name from image preview.")
+    parser.add_argument("--max-images", type=int, default=1, help="Maximum images to save for image-save.")
+    parser.add_argument("--side-filter", default="customer", choices=("customer", "self", "all"), help="Which visual image bubble side to save.")
+    parser.add_argument("--capture-mode", default="context_menu", choices=("context_menu", "crop"), help="How image-save archives image bubbles.")
+    parser.add_argument("--tenant-id", default="", help="Tenant id for image-save asset isolation.")
     args = parser.parse_args()
 
     captured = io.StringIO()
@@ -785,6 +795,74 @@ def run_action(args: argparse.Namespace) -> dict[str, Any]:
             target=args.target or "",
             artifact_dir=args.artifact_dir,
         )
+    if action == "image-save":
+        if not args.target:
+            raise ValueError("--target is required for image-save")
+        clean_sidecar_run_id = str(getattr(args, "sidecar_run_id", "") or "").strip()
+        clean_session_key = str(args.session_key or "").strip()
+        validation = (
+            {"ok": False, "reason": "session_key_requires_row_activation"}
+            if clean_session_key
+            else validate_active_send_target(
+                hwnd,
+                args.target,
+                exact=bool(args.exact),
+                artifact_dir=args.artifact_dir,
+            )
+        )
+        opened = False
+        if not validation.get("ok"):
+            opened = open_chat(
+                hwnd,
+                args.target,
+                exact=bool(args.exact),
+                artifact_dir=args.artifact_dir,
+                session_key=clean_session_key,
+            )
+            humanized_action_sleep(380, 620)
+            validation = validate_active_send_target(
+                hwnd,
+                args.target,
+                exact=bool(args.exact),
+                artifact_dir=args.artifact_dir,
+            )
+        if not validation.get("ok"):
+            return {
+                "ok": False,
+                "online": bool(validation.get("online", True)),
+                "adapter": "win32_ocr",
+                "state": "target_not_confirmed_for_image_save",
+                "sidecar_run_id": clean_sidecar_run_id,
+                "window_probe": probe,
+                "target": args.target,
+                "opened": bool(opened),
+                "guard": validation,
+                "open_chat_timing": dict(_LAST_OPEN_CHAT_TIMING),
+                "assets": [],
+                "messages": [],
+                "error": "The target chat was not confirmed before saving image.",
+            }
+        if scroll_to_latest_before_read_enabled():
+            scroll_chat_to_latest(hwnd)
+        payload = execute_wechat_image_save(
+            hwnd=hwnd,
+            probe=probe,
+            target_name=args.target,
+            session_key=clean_session_key,
+            exact=bool(args.exact),
+            artifact_dir=args.artifact_dir,
+            tenant_id=str(getattr(args, "tenant_id", "") or os.getenv("WECHAT_KNOWLEDGE_TENANT") or ""),
+            source_preview=str(getattr(args, "source_preview", "") or ""),
+            speaker_name=str(getattr(args, "speaker_name", "") or ""),
+            max_images=bounded_int(getattr(args, "max_images", 1), default=1, minimum=1, maximum=8),
+            side_filter=str(getattr(args, "side_filter", "") or "customer"),
+            capture_mode=str(getattr(args, "capture_mode", "") or "context_menu"),
+            sidecar_ops=sys.modules[__name__],
+        )
+        payload["sidecar_run_id"] = clean_sidecar_run_id
+        payload.setdefault("target", args.target)
+        payload.setdefault("session_key", clean_session_key)
+        return payload
     if action == "send":
         if not args.target:
             raise ValueError("--target is required for send")
@@ -793,14 +871,20 @@ def run_action(args: argparse.Namespace) -> dict[str, Any]:
         target_ready_timing: dict[str, Any] = {}
         target_ready_started = _sidecar_timing_start(target_ready_timing, "target_ready")
         continuation_fast_path = same_target_continuation_fast_path_enabled()
+        continuation_prevalidated_guard = continuation_prevalidated_guard_from_env(
+            args.target,
+            exact=bool(args.exact),
+            session_key=str(args.session_key or ""),
+        )
         if continuation_fast_path:
             target_ready = {
                 "ok": True,
                 "attempts": 0,
-                "validation": None,
+                "validation": continuation_prevalidated_guard,
                 "timing": {
                     "target_ready_continuation_fast_path": True,
                     "target_ready_skipped_for_continuation": True,
+                    "target_ready_continuation_guard_available": bool(continuation_prevalidated_guard),
                 },
             }
         else:
@@ -842,11 +926,10 @@ def run_action(args: argparse.Namespace) -> dict[str, Any]:
             exact=bool(args.exact),
             skip_send_rate_guard=bool(args.skip_send_rate_guard),
             artifact_dir=args.artifact_dir,
-            validated_guard=None
-            if continuation_fast_path
-            else target_ready.get("validation")
-            if isinstance(target_ready.get("validation"), dict)
-            else None,
+            validated_guard=target_ready.get("validation") if isinstance(target_ready.get("validation"), dict) else None,
+            allow_cached_prevalidated_guard_without_ocr=bool(
+                continuation_fast_path and isinstance(continuation_prevalidated_guard, dict)
+            ),
         )
         if isinstance(send_result_payload, dict):
             if continuation_fast_path:
@@ -887,6 +970,54 @@ def scroll_to_latest_before_read_enabled() -> bool:
 
 def same_target_continuation_fast_path_enabled() -> bool:
     return env_flag("WECHAT_WIN32_OCR_CONTINUATION_SEND_FAST_PATH", default=False)
+
+
+def continuation_prevalidated_guard_ttl_seconds() -> float:
+    return env_float(
+        "WECHAT_WIN32_OCR_CONTINUATION_PREVALIDATED_GUARD_SECONDS",
+        DEFAULT_CONTINUATION_PREVALIDATED_GUARD_SECONDS,
+    )
+
+
+def continuation_prevalidated_guard_from_env(
+    target: str,
+    *,
+    exact: bool,
+    session_key: str,
+) -> dict[str, Any] | None:
+    raw = str(os.getenv("WECHAT_WIN32_OCR_CONTINUATION_PREVALIDATED_GUARD_JSON") or "").strip()
+    if not raw:
+        return None
+    try:
+        payload = json.loads(raw)
+    except json.JSONDecodeError:
+        return None
+    if not isinstance(payload, dict):
+        return None
+    clean_target = str(target or "").strip()
+    if str(payload.get("target") or "").strip() != clean_target:
+        return None
+    if bool(payload.get("exact", True)) != bool(exact):
+        return None
+    if str(payload.get("session_key") or "").strip() != str(session_key or "").strip():
+        return None
+    try:
+        created_at = float(payload.get("created_at") or 0.0)
+    except (TypeError, ValueError):
+        created_at = 0.0
+    age = max(0.0, time.time() - created_at) if created_at > 0 else 999999.0
+    if age > max(0.1, continuation_prevalidated_guard_ttl_seconds()):
+        return None
+    guard = payload.get("guard") if isinstance(payload.get("guard"), dict) else {}
+    if not active_send_guard_is_strong(guard):
+        return None
+    geometry = guard.get("geometry") if isinstance(guard.get("geometry"), dict) else {}
+    if not geometry:
+        return None
+    reused = dict(guard)
+    reused["continuation_prevalidated_guard"] = True
+    reused["continuation_prevalidated_guard_age_seconds"] = round(age, 4)
+    return reused
 
 
 def detect_blank_render(
@@ -3252,6 +3383,86 @@ def message_anchor_match_type(
     return ""
 
 
+def continuation_guard_geometry_matches(
+    cached_geometry: dict[str, Any] | None,
+    current_geometry: dict[str, Any] | None,
+    *,
+    tolerance_px: int = 2,
+) -> bool:
+    if not isinstance(cached_geometry, dict) or not isinstance(current_geometry, dict):
+        return False
+    for key in ("left", "top", "right", "bottom", "width", "height"):
+        try:
+            cached = int(round(float(cached_geometry.get(key))))
+            current = int(round(float(current_geometry.get(key))))
+        except (TypeError, ValueError):
+            return False
+        if abs(cached - current) > max(0, int(tolerance_px)):
+            return False
+    return True
+
+
+def active_title_fingerprint_bounds(geometry: dict[str, Any]) -> tuple[int, int, int, int]:
+    width = int(geometry.get("width") or 0)
+    height = int(geometry.get("height") or 0)
+    left = max(0, min(width - 1, session_split_x(width) + 20))
+    right = max(left + 1, min(width, active_chat_title_right_x(width)))
+    top = max(0, min(height - 1, active_chat_title_top_y(height) - 8))
+    bottom = max(top + 1, min(height, active_chat_title_bottom_y(height) + 8))
+    return left, top, right, bottom
+
+
+def active_title_region_fingerprint(image: Any, geometry: dict[str, Any]) -> str:
+    if image is None:
+        return ""
+    try:
+        bounds = active_title_fingerprint_bounds(geometry)
+        crop = image.crop(bounds).convert("L").resize((8, 8))
+        pixels = list(crop.getdata())
+    except Exception:
+        return ""
+    if not pixels:
+        return ""
+    mean = sum(int(value) for value in pixels) / float(len(pixels))
+    bits = ["1" if int(value) >= mean else "0" for value in pixels]
+    value = int("".join(bits), 2)
+    return f"{value:016x}"
+
+
+def hamming_distance_hex(left: str, right: str) -> int:
+    clean_left = str(left or "").strip().lower()
+    clean_right = str(right or "").strip().lower()
+    if not clean_left or len(clean_left) != len(clean_right):
+        return 9999
+    try:
+        return (int(clean_left, 16) ^ int(clean_right, 16)).bit_count()
+    except ValueError:
+        return 9999
+
+
+def continuation_guard_title_fingerprint_matches(
+    hwnd: int,
+    cached_validation: dict[str, Any],
+    geometry: dict[str, Any],
+    *,
+    artifact_dir: str | None,
+) -> dict[str, Any]:
+    expected = str(cached_validation.get("active_title_region_fingerprint") or "").strip()
+    if not expected:
+        return {"ok": False, "reason": "cached_title_fingerprint_missing"}
+    screenshot, path = capture_wechat(hwnd, artifact_dir=artifact_dir, label="send_guard_continuation_title")
+    observed = active_title_region_fingerprint(screenshot, geometry)
+    distance = hamming_distance_hex(expected, observed)
+    return {
+        "ok": bool(observed and distance <= 8),
+        "reason": "title_fingerprint_match" if observed and distance <= 8 else "title_fingerprint_mismatch",
+        "expected": expected,
+        "observed": observed,
+        "hamming_distance": distance,
+        "screenshot_path": path,
+    }
+
+
 def send_payload(
     hwnd: int,
     probe: dict[str, Any],
@@ -3262,6 +3473,7 @@ def send_payload(
     skip_send_rate_guard: bool = False,
     artifact_dir: str | None = None,
     validated_guard: dict[str, Any] | None = None,
+    allow_cached_prevalidated_guard_without_ocr: bool = False,
 ) -> dict[str, Any]:
     timing: dict[str, Any] = {}
     ocr_trace_token = _ocr_trace_start()
@@ -3285,10 +3497,8 @@ def send_payload(
     if reused_prevalidated_guard:
         validation = dict(validated_guard or {})
         # Re-check foreground/visibility quickly before using the cached target
-        # confirmation, then re-run strict OCR target validation immediately
-        # before typing.  Cached confirmation can become stale when the
-        # scheduler switches between multiple chats; never let it authorize
-        # customer-visible text by itself.
+        # confirmation.  The default path still re-runs strict OCR below; only
+        # an explicit same-target continuation may reuse the cached guard.
         focus_guard = recover_send_window_guard(hwnd, max_attempts=1)
         if not focus_guard.get("ok"):
             # Fallback to full active target validation to keep behavior robust
@@ -3309,6 +3519,80 @@ def send_payload(
                     "error": str(validation.get("error") or validation.get("reason") or "send guard blocked"),
                 })
             geometry = validation["geometry"]
+        elif allow_cached_prevalidated_guard_without_ocr and active_send_guard_is_strong(validation):
+            geometry = get_window_geometry(hwnd)
+            geometry_check = validate_send_geometry(geometry)
+            cached_geometry = validation.get("geometry") if isinstance(validation.get("geometry"), dict) else {}
+            title_fingerprint = (
+                continuation_guard_title_fingerprint_matches(
+                    hwnd,
+                    validation,
+                    geometry,
+                    artifact_dir=artifact_dir,
+                )
+                if geometry_check.get("ok") and continuation_guard_geometry_matches(cached_geometry, geometry)
+                else {"ok": False, "reason": "geometry_mismatch"}
+            )
+            if geometry_check.get("ok") and continuation_guard_geometry_matches(cached_geometry, geometry) and title_fingerprint.get("ok"):
+                timing["pre_send_guard_cached_continuation_reused"] = True
+                timing["pre_send_guard_cached_continuation_ocr_skipped"] = True
+                timing["pre_send_guard_cached_continuation_title_fingerprint_ok"] = True
+                timing["pre_send_guard_cached_continuation_title_fingerprint_distance"] = title_fingerprint.get("hamming_distance")
+                validation = {
+                    **validation,
+                    "window_guard": focus_guard,
+                    "strict_recheck": False,
+                    "continuation_prevalidated_guard_reused": True,
+                    "continuation_prevalidated_guard_ocr_skipped": True,
+                    "continuation_title_fingerprint": title_fingerprint,
+                    "geometry": geometry,
+                }
+            else:
+                timing["pre_send_guard_cached_continuation_reused"] = False
+                timing["pre_send_guard_cached_continuation_reuse_rejected"] = True
+                timing["pre_send_guard_cached_continuation_geometry_ok"] = bool(geometry_check.get("ok"))
+                timing["pre_send_guard_cached_continuation_title_fingerprint_ok"] = bool(title_fingerprint.get("ok"))
+                timing["pre_send_guard_cached_continuation_title_fingerprint_reason"] = str(title_fingerprint.get("reason") or "")
+                strict_validation = validate_active_send_target(hwnd, target, exact=exact, artifact_dir=artifact_dir)
+                _sidecar_timing_merge_validation(timing, "pre_send_guard_strict_validation", strict_validation)
+                if not strict_validation.get("ok") or not active_send_guard_is_strong(strict_validation):
+                    _sidecar_timing_finish(timing, "pre_send_guard", pre_send_guard_started)
+                    return finish({
+                        "ok": False,
+                        "online": bool(strict_validation.get("online", True)),
+                        "adapter": "win32_ocr",
+                        "state": "send_guard_blocked",
+                        "window_probe": probe,
+                        "target": target,
+                        "guard": {
+                            **strict_validation,
+                            "cached_prevalidated_guard": validation,
+                            "window_guard": focus_guard,
+                            "strict_recheck": True,
+                        },
+                        "error": str(strict_validation.get("error") or strict_validation.get("reason") or "send guard blocked"),
+                    })
+                validation = {
+                    **strict_validation,
+                    "cached_prevalidated_guard": validation,
+                    "window_guard": focus_guard,
+                    "strict_recheck": True,
+                }
+                geometry = get_window_geometry(hwnd)
+                geometry_check = validate_send_geometry(geometry)
+                if not geometry_check.get("ok"):
+                    _sidecar_timing_finish(timing, "pre_send_guard", pre_send_guard_started)
+                    return finish({
+                        "ok": False,
+                        "online": True,
+                        "adapter": "win32_ocr",
+                        "state": "send_geometry_blocked",
+                        "window_probe": probe,
+                        "target": target,
+                        "guard": {**validation, "geometry": geometry, "geometry_check": geometry_check},
+                        "error": str(geometry_check.get("error") or "send geometry guard blocked"),
+                    })
+                validation["geometry"] = geometry
         else:
             strict_validation = validate_active_send_target(hwnd, target, exact=exact, artifact_dir=artifact_dir)
             _sidecar_timing_merge_validation(timing, "pre_send_guard_strict_validation", strict_validation)
@@ -3508,7 +3792,13 @@ def send_payload(
             "mode": send_mode,
             "requested_mode": requested_send_mode,
             "humanized_method": settings.get("method"),
-            "validation_source": "prevalidated_guard_strict_recheck" if reused_prevalidated_guard else "active_send_guard",
+            "validation_source": (
+                "prevalidated_guard_continuation_cache"
+                if validation.get("continuation_prevalidated_guard_reused")
+                else "prevalidated_guard_strict_recheck"
+                if reused_prevalidated_guard
+                else "active_send_guard"
+            ),
             "pre_send_guard": validation,
             "geometry": geometry,
             "input_point": points["input_point"],
@@ -3808,10 +4098,19 @@ def input_region_soft_blank_noise(state: dict[str, Any]) -> bool:
         ocr_hits = int(state.get("ocr_hits") or 0)
     except Exception:
         ocr_hits = 0
-    return bool(
+    if (
         ocr_hits == 0
         and dark_ratio <= INPUT_TEXT_SOFT_BLANK_DARK_RATIO_MAX
         and mean >= INPUT_TEXT_SOFT_BLANK_MEAN_MIN
+    ):
+        return True
+    # Some WeChat builds let one OCR box drift into a visually blank input
+    # panel.  Only treat that as blank when the crop is almost pure white;
+    # real one-character drafts produce a noticeably higher dark-pixel ratio.
+    return bool(
+        ocr_hits <= 1
+        and dark_ratio <= INPUT_TEXT_SOFT_BLANK_WEAK_OCR_DARK_RATIO_MAX
+        and mean >= INPUT_TEXT_SOFT_BLANK_WEAK_OCR_MEAN_MIN
     )
 
 
@@ -3837,7 +4136,7 @@ def clear_existing_input_draft(
         return {"ok": True, "cleared": False, "reason": "input_region_already_blank", "before": before_state}
     if input_region_soft_blank_noise(before_state):
         blank = normalize_soft_blank_input_state(before_state, reason="input_region_soft_blank_noise")
-        return {"ok": True, "cleared": False, "reason": "input_region_soft_blank_noise", "before": blank}
+        return {"ok": True, "cleared": False, "reason": "input_region_soft_blank_noise", "before": blank, "after": blank}
     input_x, input_y = jitter_input_click_point(
         int(points["input_point"][0]),
         int(points["input_point"][1]),
@@ -7578,6 +7877,7 @@ def validate_active_send_target(
         "confirmation_confidence": "active_title_strict",
         "geometry": geometry,
         "screenshot_path": path,
+        "active_title_region_fingerprint": active_title_region_fingerprint(screenshot, geometry),
     })
 
 
@@ -10045,6 +10345,22 @@ def args_for_daemon_request(request: dict[str, Any]) -> list[str]:
             argv.append("--restore-to-latest")
         elif request.get("restore_to_latest") is False:
             argv.append("--no-restore-to-latest")
+    if action == "image-save":
+        for key, flag in (
+            ("source_preview", "--source-preview"),
+            ("speaker_name", "--speaker-name"),
+            ("tenant_id", "--tenant-id"),
+            ("side_filter", "--side-filter"),
+            ("capture_mode", "--capture-mode"),
+        ):
+            value = str(request.get(key) or "").strip()
+            if value:
+                argv.extend([flag, value])
+        if "max_images" in request:
+            try:
+                argv.extend(["--max-images", str(max(1, min(int(request.get("max_images") or 1), 8)))])
+            except (TypeError, ValueError):
+                argv.extend(["--max-images", "1"])
     artifact_dir = str(request.get("artifact_dir") or "").strip()
     if artifact_dir:
         argv.extend(["--artifact-dir", artifact_dir])
@@ -10133,6 +10449,12 @@ def run_sidecar_cli(argv: list[str] | None = None) -> dict[str, Any]:
         default="",
         help="Optional directory for OCR screenshots and diagnostics.",
     )
+    parser.add_argument("--source-preview", default="", help="Session-list image preview text for image-save.")
+    parser.add_argument("--speaker-name", default="", help="Group speaker name from image preview.")
+    parser.add_argument("--max-images", type=int, default=1, help="Maximum images to save for image-save.")
+    parser.add_argument("--side-filter", default="customer", choices=("customer", "self", "all"), help="Which visual image bubble side to save.")
+    parser.add_argument("--capture-mode", default="context_menu", choices=("context_menu", "crop"), help="How image-save archives image bubbles.")
+    parser.add_argument("--tenant-id", default="", help="Tenant id for image-save asset isolation.")
     parser.add_argument("--daemon", action="store_true", help="Run as stdin/stdout JSON daemon.")
     args = parser.parse_args(argv)
     if args.daemon:

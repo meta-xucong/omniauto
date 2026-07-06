@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "present": true,
+  "source_message_ids": [
+    "wx_msg_image_001"
+  ],
+  "vision_summary": "图片主体是一辆白色三厢轿车，外观接近比亚迪秦PLUS DM-i。",
+  "classification": {
+    "is_vehicle": true,
+    "vehicle_confidence": 0.93
+  },
+  "catalog_assist": {
+    "normalized_vehicle_query": "比亚迪 秦PLUS DM-i 白色 轿车",
+    "catalog_lookup_mode": "vehicle_exact_then_similar",
+    "similar_recommendation_allowed": true,
+    "preferred_candidate_ids": []
+  },
+  "conversation_visual_context": {
+    "last_vehicle_query": "比亚迪 秦PLUS DM-i 白色 轿车",
+    "updated_at": "2026-07-02T14:11:02+08:00"
+  },
+  "policy": "visual bridge input is advisory only; product facts must still be grounded in product_master and formal_knowledge",
+  "audit": {
+    "source_reason": "image_plus_text_turn",
+    "used_catalog_assist": true
+  }
+}

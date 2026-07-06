@@ -29,6 +29,17 @@ DEFAULT_SETTINGS = {
     "respond_all_unread_sessions": False,
     "session_targets_managed": False,
     "session_targets": [],
+    "customer_image_understanding": {
+        "enabled": True,
+        "provider": "anthropic",
+        "request_style": "anthropic_messages_vision",
+        "model": "doubao-seed-2-0-lite-260428",
+        "base_url": "https://aiself.vip/v1",
+        "api_key_env": "ANTHROPIC_AUTH_TOKEN",
+        "api_key": "",
+        "timeout_seconds": 30,
+        "max_tokens": 1800,
+    },
 }
 
 REPLY_MODES = {
@@ -43,12 +54,58 @@ CUSTOMER_SERVICE_BRAIN_MODES = {
     CUSTOMER_SERVICE_BRAIN_FIRST_MODE: "客服大脑优先：由大模型先思考再回复",
 }
 LEGACY_CUSTOMER_SERVICE_BRAIN_MODES = {"off", "shadow", "hybrid_shadow"}
+CUSTOMER_IMAGE_UNDERSTANDING_PROVIDER_OPTIONS = (
+    {"id": "anthropic", "label": "Anthropic 风格 / Kimi / 豆包兼容"},
+    {"id": "openai_compatible", "label": "OpenAI Compatible / 第三方网关"},
+)
+CUSTOMER_IMAGE_UNDERSTANDING_REQUEST_STYLE_OPTIONS = (
+    {"id": "anthropic_messages_vision", "label": "Anthropic Messages Vision"},
+    {"id": "openai_chat_vision", "label": "OpenAI Chat Vision"},
+)
 
 
 def normalize_customer_service_brain_mode(value: Any) -> str:
     """Collapse hidden legacy modes to the only customer-service runtime mode."""
     _ = value
     return CUSTOMER_SERVICE_BRAIN_FIRST_MODE
+
+
+def normalize_customer_image_understanding_settings(value: Any) -> dict[str, Any]:
+    base = dict(DEFAULT_SETTINGS.get("customer_image_understanding", {}) or {})
+    incoming = value if isinstance(value, dict) else {}
+    merged = {**base, **incoming}
+    merged["enabled"] = bool(merged.get("enabled", True))
+    merged["provider"] = str(merged.get("provider") or base.get("provider") or "anthropic").strip() or "anthropic"
+    merged["request_style"] = str(
+        merged.get("request_style") or base.get("request_style") or "anthropic_messages_vision"
+    ).strip() or "anthropic_messages_vision"
+    merged["model"] = str(merged.get("model") or base.get("model") or "").strip()
+    merged["base_url"] = str(merged.get("base_url") or base.get("base_url") or "").strip()
+    merged["api_key_env"] = str(merged.get("api_key_env") or base.get("api_key_env") or "ANTHROPIC_AUTH_TOKEN").strip()
+    merged["api_key"] = str(merged.get("api_key") or "").strip()
+    try:
+        timeout_seconds = int(merged.get("timeout_seconds") or base.get("timeout_seconds") or 30)
+    except (TypeError, ValueError):
+        timeout_seconds = 30
+    merged["timeout_seconds"] = max(3, min(timeout_seconds, 120))
+    try:
+        max_tokens = int(merged.get("max_tokens") or base.get("max_tokens") or 1800)
+    except (TypeError, ValueError):
+        max_tokens = 1800
+    merged["max_tokens"] = max(800, min(max_tokens, 6000))
+    return merged
+
+
+def customer_image_understanding_api_key_present(settings: dict[str, Any]) -> bool:
+    nested = normalize_customer_image_understanding_settings(settings.get("customer_image_understanding"))
+    if str(nested.get("api_key") or "").strip():
+        return True
+    env_name = str(nested.get("api_key_env") or "").strip()
+    if env_name:
+        value = os.getenv(env_name)
+        if value:
+            return True
+    return False
 
 
 class CustomerServiceSettings:
@@ -80,6 +137,9 @@ class CustomerServiceSettings:
         settings["respond_all_unread_sessions"] = bool(settings.get("respond_all_unread_sessions", False))
         settings["session_targets_managed"] = bool(settings.get("session_targets_managed", False))
         settings["session_targets"] = normalize_session_targets(settings.get("session_targets"))
+        settings["customer_image_understanding"] = normalize_customer_image_understanding_settings(
+            settings.get("customer_image_understanding")
+        )
         return settings
 
     def save(self, patch: dict[str, Any]) -> dict[str, Any]:
@@ -100,6 +160,10 @@ class CustomerServiceSettings:
             allowed["session_targets_managed"] = bool(allowed.get("session_targets_managed", False))
         if "session_targets" in allowed:
             allowed["session_targets"] = normalize_session_targets(allowed.get("session_targets"))
+        if "customer_image_understanding" in allowed:
+            allowed["customer_image_understanding"] = normalize_customer_image_understanding_settings(
+                allowed.get("customer_image_understanding")
+            )
         settings = {**self.get(), **allowed}
         if settings["reply_mode"] not in REPLY_MODES:
             settings["reply_mode"] = DEFAULT_SETTINGS["reply_mode"]
@@ -112,6 +176,9 @@ class CustomerServiceSettings:
         settings["respond_all_unread_sessions"] = bool(settings.get("respond_all_unread_sessions", False))
         settings["session_targets_managed"] = bool(settings.get("session_targets_managed", False))
         settings["session_targets"] = normalize_session_targets(settings.get("session_targets"))
+        settings["customer_image_understanding"] = normalize_customer_image_understanding_settings(
+            settings.get("customer_image_understanding")
+        )
         self.settings_path.parent.mkdir(parents=True, exist_ok=True)
         temp = self.settings_path.with_suffix(".json.tmp")
         temp.write_text(json.dumps(settings, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -128,6 +195,12 @@ class CustomerServiceSettings:
             "customer_service_brain_modes": [
                 {"id": key, "label": label} for key, label in CUSTOMER_SERVICE_BRAIN_MODES.items()
             ],
+            "customer_image_understanding_providers": list(CUSTOMER_IMAGE_UNDERSTANDING_PROVIDER_OPTIONS),
+            "customer_image_understanding_request_styles": list(CUSTOMER_IMAGE_UNDERSTANDING_REQUEST_STYLE_OPTIONS),
+            "customer_image_understanding_status": {
+                "enabled": bool((settings.get("customer_image_understanding") or {}).get("enabled", True)),
+                "api_key_configured": customer_image_understanding_api_key_present(settings),
+            },
             "legacy_customer_service_brain_modes_hidden": True,
             "status": self.status_text(settings),
             "session_targets": targets,

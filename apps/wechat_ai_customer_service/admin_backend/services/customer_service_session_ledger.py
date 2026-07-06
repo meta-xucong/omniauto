@@ -115,6 +115,11 @@ def ledger_message_content_key(message: dict[str, Any]) -> str:
     sender = str(message.get("sender") or "")
     content = " ".join(str(message.get("content") or "").split())
     msg_type = str(message.get("type") or "")
+    if msg_type in {"image", "picture", "photo"} or message.get("is_customer_image_proxy"):
+        for key in ("visual_occurrence_id", "source_message_id", "message_id", "id", "saved_image_path", "asset_id"):
+            value = str(message.get(key) or "").strip()
+            if value:
+                return stable_hash(sender, msg_type, "visual_image", value, length=24)
     if not content:
         return ""
     return stable_hash(sender, msg_type, content, length=24)
@@ -136,8 +141,8 @@ def sanitize_ledger_message(message: dict[str, Any] | None) -> dict[str, Any] | 
     message_id = canonical_id or legacy_message_id
     time_value = str(message.get("time") or message.get("created_at") or "").strip()
     identity = canonical_id or message_id or stable_hash(sender, msg_type, content, time_value, length=24)
-    content_key = ledger_message_content_key({"sender": sender, "type": msg_type, "content": content})
-    return {
+    content_key = ledger_message_content_key({**message, "sender": sender, "type": msg_type, "content": content})
+    result = {
         "id": message_id,
         "legacy_message_id": legacy_message_id,
         "canonical_input_id": canonical_id,
@@ -149,6 +154,35 @@ def sanitize_ledger_message(message: dict[str, Any] | None) -> dict[str, Any] | 
         "time": time_value,
         "content_key": content_key,
     }
+    for key in (
+        "asset_id",
+        "saved_image_path",
+        "visual_side",
+        "visual_occurrence_id",
+        "source_message_id",
+        "source_message_type",
+        "is_customer_image_proxy",
+        "visual_turn_kind",
+    ):
+        value = message.get(key)
+        if isinstance(value, bool):
+            result[key] = value
+        else:
+            text = str(value or "").strip()
+            if text:
+                result[key] = text
+    image_assets = [str(item).strip() for item in (message.get("image_assets") or []) if str(item).strip()]
+    if image_assets:
+        result["image_assets"] = image_assets[:8]
+    bounds = []
+    for value in message.get("bubble_bounds") or []:
+        try:
+            bounds.append(int(value))
+        except (TypeError, ValueError):
+            continue
+    if bounds:
+        result["bubble_bounds"] = bounds[:4]
+    return result
 
 
 def merge_recent_messages(
@@ -260,6 +294,18 @@ class SessionLedgerStore:
             return
         sanitized_messages = [item for item in (sanitize_ledger_message(raw) for raw in messages) if item]
         sanitized_batch = [item for item in (sanitize_ledger_message(raw) for raw in batch) if item]
+        visual_assets = [
+            {
+                "id": str(item.get("identity") or item.get("id") or ""),
+                "sender": str(item.get("sender") or ""),
+                "asset_id": str(item.get("asset_id") or ""),
+                "saved_image_path": str(item.get("saved_image_path") or ""),
+                "visual_side": str(item.get("visual_side") or ""),
+                "visual_occurrence_id": str(item.get("visual_occurrence_id") or ""),
+            }
+            for item in sanitized_messages
+            if str(item.get("saved_image_path") or item.get("asset_id") or "").strip()
+        ][-MAX_LEDGER_EVENT_MESSAGES:]
         message_ids = [
             str(item.get("identity") or item.get("canonical_input_id") or item.get("id") or "")
             for item in sanitized_batch
@@ -277,6 +323,7 @@ class SessionLedgerStore:
                 "message_count": len(messages),
                 "batch_count": len(batch),
                 "batch_messages": sanitized_batch[-MAX_LEDGER_EVENT_MESSAGES:],
+                "visual_assets": visual_assets,
                 "history_continuity": str(history_backfill.get("history_continuity") or ""),
                 "history_backfill": history_backfill,
             },

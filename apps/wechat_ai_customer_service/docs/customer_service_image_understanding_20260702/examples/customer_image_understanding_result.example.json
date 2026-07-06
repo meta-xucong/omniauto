@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "enabled": true,
+  "applied": true,
+  "adoptable": true,
+  "reason": "vision_ready",
+  "provider": "openai_compatible",
+  "request_style": "anthropic_messages_vision",
+  "model": "doubao-seed-2-0-lite-260428",
+  "source_messages": [
+    {
+      "message_id": "wx_msg_image_001",
+      "asset_id": "visual_asset_wx_20260702_001",
+      "message_type": "image"
+    }
+  ],
+  "local_visual_profile": {
+    "width": 1080,
+    "height": 1440,
+    "orientation": "portrait",
+    "dominant_colors": [
+      "#f0f0f0",
+      "#222222"
+    ]
+  },
+  "vision_summary": "图片主体是一辆白色三厢轿车，外观接近比亚迪秦PLUS DM-i。",
+  "image_ocr_text": [
+    "秦PLUS",
+    "DM-i"
+  ],
+  "classification": {
+    "is_vehicle": true,
+    "vehicle_confidence": 0.93,
+    "non_vehicle_reason": ""
+  },
+  "entities": {
+    "brand_candidates": [
+      "比亚迪"
+    ],
+    "series_candidates": [
+      "秦PLUS"
+    ],
+    "model_clues": [
+      "DM-i",
+      "白色",
+      "轿车"
+    ],
+    "body_type": "sedan",
+    "color": "white",
+    "year_clues": [
+      "2021+"
+    ]
+  },
+  "intent_hints": {
+    "wants_catalog_match": true,
+    "wants_similar_recommendation": true,
+    "wants_general_chat": false,
+    "needs_clarification": false
+  },
+  "bridge": {
+    "normalized_vehicle_query": "比亚迪 秦PLUS DM-i 白色 轿车",
+    "brain_mode": "vehicle_catalog_assist",
+    "catalog_lookup_mode": "vehicle_exact_then_similar"
+  },
+  "audit": {
+    "latency_ms": 1840,
+    "used_fallback": false
+  }
+}
