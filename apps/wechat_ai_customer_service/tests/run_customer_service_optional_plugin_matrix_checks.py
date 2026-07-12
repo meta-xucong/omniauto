@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import ast
 import json
+import subprocess
 import sys
 from pathlib import Path
 from typing import Any
@@ -167,6 +168,53 @@ def check_voice_win32_action_uses_injected_sidecar_primitives() -> None:
     assert_true(result.get("messages") == [], f"voice result shape changed: {result}")
 
 
+def check_core_imports_without_concrete_voice_or_vision_modules() -> None:
+    code = f"""
+import importlib.abc
+import sys
+from pathlib import Path
+
+root = Path({str(PROJECT_ROOT)!r})
+app = root / 'apps' / 'wechat_ai_customer_service'
+for path in (root, app, app / 'workflows', app / 'adapters'):
+    sys.path.insert(0, str(path))
+
+blocked = (
+    'apps.wechat_ai_customer_service.optional_plugins.voice.plugin',
+    'apps.wechat_ai_customer_service.optional_plugins.voice.win32_action',
+    'apps.wechat_ai_customer_service.optional_plugins.vision.plugin',
+    'apps.wechat_ai_customer_service.workflows.customer_image_',
+    'apps.wechat_ai_customer_service.adapters.wechat_image_save_capture',
+    'customer_image_',
+)
+
+class Blocker(importlib.abc.MetaPathFinder):
+    def find_spec(self, fullname, path=None, target=None):
+        if any(fullname.startswith(prefix) for prefix in blocked):
+            raise ModuleNotFoundError('blocked optional implementation: ' + fullname)
+        return None
+
+sys.meta_path.insert(0, Blocker())
+import listen_and_reply
+from apps.wechat_ai_customer_service.admin_backend.services import customer_service_scheduler
+import customer_service_brain
+import wechat_win32_ocr_sidecar
+print('CORE_IMPORT_OK')
+"""
+    completed = subprocess.run(
+        [sys.executable, "-c", code],
+        text=True,
+        capture_output=True,
+        encoding="utf-8",
+        timeout=60,
+        check=False,
+    )
+    assert_true(
+        completed.returncode == 0 and "CORE_IMPORT_OK" in completed.stdout,
+        f"core import loaded a concrete optional module: stdout={completed.stdout!r}, stderr={completed.stderr!r}",
+    )
+
+
 def main() -> int:
     checks = [
         check_registry_import_is_lazy,
@@ -175,6 +223,7 @@ def main() -> int:
         check_custom_plugins_can_replace_builtins_independently,
         check_missing_plugin_fails_closed_without_exception,
         check_voice_win32_action_uses_injected_sidecar_primitives,
+        check_core_imports_without_concrete_voice_or_vision_modules,
     ]
     results: list[dict[str, Any]] = []
     for check in checks:
