@@ -129,6 +129,8 @@ def main() -> int:
         check_brain_same_capture_retry_recovers_unavailable_response(),
         check_brain_unavailable_retry_recovers_after_non_json_retry_response(),
         check_brain_invalid_plan_retry_recovers_empty_reply_segments(),
+        check_brain_repair_retries_parseable_empty_reply_segments(),
+        check_brain_repair_empty_retry_exhaustion_is_explicit(),
         check_brain_json_structure_repair_failure_classified(),
         check_rejects_product_scoped_master_fact(),
         check_rejects_formal_policy_fact_without_source_id(),
@@ -197,6 +199,8 @@ def main() -> int:
         check_shadow_non_blocking_defers_without_llm(),
         check_shadow_brain_runner_passes_guard(),
         check_brain_runner_records_stage_timings(),
+        check_brain_first_intent_assist_skips_duplicate_llm_advisory(),
+        check_non_brain_first_intent_assist_keeps_llm_advisory(),
         check_brain_runner_rejects_quality_failed_plan(),
         check_original_brain_quality_soft_pass_after_failed_repair_allows_soft_doubts(),
         check_repaired_deterministic_quality_soft_pass_requires_missing_context_anchor(),
@@ -2135,6 +2139,7 @@ def check_routine_product_fast_profile_compacts_grounded_product_turn() -> CaseR
     prompt_text = json.dumps(prompt_pack, ensure_ascii=False)
     assert_equal(estimate.get("profile"), "routine_product_fast", f"routine profile should be explicit: {estimate}")
     assert_true("常规商品问价/推荐" in prompt_pack["system"], "routine profile should use short product system prompt")
+    assert_true("不能说替客户直接定车、下单、留车或锁车" in prompt_pack["system"], "routine profile should prevent avoidable sales-pressure repair")
     assert_true("chejin_qinplus_2022_dmi55" in prompt_text, "routine profile must still carry product-master id")
     assert_true("8.68" in prompt_text, "routine profile must still carry product-master price")
     assert_true(int(estimate.get("prompt_chars") or 99999) < 6200, f"routine prompt should be smaller than default lean prompt: {estimate}")
@@ -2611,6 +2616,110 @@ def check_brain_invalid_plan_retry_recovers_empty_reply_segments() -> CaseResult
     assert_true(retry.get("same_capture_invalid_plan_retry") is True, f"retry audit should be visible: {event}")
     assert_true(len(calls) == 2, f"expected one invalid-plan retry call, got {len(calls)}")
     return CaseResult("brain_invalid_plan_retry_recovers_empty_reply_segments", True, {"calls": len(calls), "reason": event.get("reason")})
+
+
+def check_brain_repair_retries_parseable_empty_reply_segments() -> CaseResult:
+    settings = {
+        "provider": "openai",
+        "model": "gpt-unit",
+        "model_tier": "flash",
+        "quality_repair_enabled": True,
+        "quality_repair_timeout_seconds": 8,
+        "quality_repair_max_tokens": 520,
+    }
+    empty_plan = {**base_plan(), "reply_segments": []}
+    calls: list[dict[str, Any]] = []
+    original_call = brain_module.call_llm_request_with_failover
+    original_resolve_key = brain_module.resolve_llm_api_key
+
+    def fake_call(**kwargs: Any) -> dict[str, Any]:
+        calls.append(copy.deepcopy(kwargs))
+        if len(calls) == 1:
+            return {
+                "ok": True,
+                "provider": "deepseek",
+                "model": "deepseek-v4-flash",
+                "status": 200,
+                "response_text": json.dumps(empty_plan, ensure_ascii=False),
+                "failover": {
+                    "attempted": True,
+                    "activated": True,
+                    "reason": "fallback_success",
+                    "primary_provider": "openai",
+                },
+            }
+        user_content = str((kwargs.get("messages") or [{}])[-1].get("content") or "")
+        assert_true("reply_segments为空" in user_content, f"empty-repair retry instruction should be explicit: {user_content[:500]}")
+        return {
+            "ok": True,
+            "provider": "openai",
+            "model": "gpt-unit",
+            "status": 200,
+            "response_text": json.dumps(base_plan(), ensure_ascii=False),
+            "failover": {"attempted": False, "activated": False, "reason": "primary_ok"},
+        }
+
+    try:
+        brain_module.call_llm_request_with_failover = fake_call
+        brain_module.resolve_llm_api_key = lambda **_kwargs: "unit-key"
+        result = brain_module.run_brain_repair_llm(
+            settings=settings,
+            brain_input={"current_message": {"clean_text": "秦PLUS多少钱"}},
+            plan=base_plan(),
+            quality={"ok": False, "errors": ["missing_direct_price_response"], "repair_instruction": "直接回答价格。"},
+        )
+    finally:
+        brain_module.call_llm_request_with_failover = original_call
+        brain_module.resolve_llm_api_key = original_resolve_key
+    assert_true(result.get("ok"), f"same-capture empty repair retry should recover: {result}")
+    assert_true(result.get("same_capture_repair_retry") is True, f"retry audit should be retained: {result}")
+    assert_true(result.get("retry_reason") == "brain_repair_empty_reply_segments", f"retry reason mismatch: {result}")
+    assert_true(bool((result.get("brain_plan") or {}).get("reply_segments")), f"retry must return visible Brain segments: {result}")
+    previous = result.get("previous_repair_status") if isinstance(result.get("previous_repair_status"), dict) else {}
+    assert_true((previous.get("failover") or {}).get("activated") is True, f"previous failover must remain auditable: {result}")
+    assert_true(len(calls) == 2, f"expected exactly one empty repair retry, got {len(calls)}")
+    return CaseResult("brain_repair_retries_parseable_empty_reply_segments", True, {"calls": len(calls), "retry_reason": result.get("retry_reason")})
+
+
+def check_brain_repair_empty_retry_exhaustion_is_explicit() -> CaseResult:
+    settings = {
+        "provider": "openai",
+        "model": "gpt-unit",
+        "model_tier": "flash",
+        "quality_repair_timeout_seconds": 8,
+    }
+    empty_plan = {**base_plan(), "reply_segments": []}
+    calls: list[dict[str, Any]] = []
+    original_call = brain_module.call_llm_request_with_failover
+    original_resolve_key = brain_module.resolve_llm_api_key
+
+    def fake_call(**kwargs: Any) -> dict[str, Any]:
+        calls.append(copy.deepcopy(kwargs))
+        return {
+            "ok": True,
+            "provider": "openai",
+            "model": "gpt-unit",
+            "status": 200,
+            "response_text": json.dumps(empty_plan, ensure_ascii=False),
+        }
+
+    try:
+        brain_module.call_llm_request_with_failover = fake_call
+        brain_module.resolve_llm_api_key = lambda **_kwargs: "unit-key"
+        result = brain_module.run_brain_repair_llm(
+            settings=settings,
+            brain_input={"current_message": {"clean_text": "秦PLUS多少钱"}},
+            plan=base_plan(),
+            quality={"ok": False, "errors": ["empty_visible_reply"]},
+        )
+    finally:
+        brain_module.call_llm_request_with_failover = original_call
+        brain_module.resolve_llm_api_key = original_resolve_key
+    assert_true(not result.get("ok"), f"exhausted empty repair must be explicit failure: {result}")
+    assert_true(result.get("error") == "brain_repair_retry_empty_reply_segments", f"empty retry error mismatch: {result}")
+    assert_true(result.get("same_capture_repair_retry") is True, f"exhausted retry should remain auditable: {result}")
+    assert_true(len(calls) == 2, f"empty repair retry must stop after one retry, got {len(calls)} calls")
+    return CaseResult("brain_repair_empty_retry_exhaustion_is_explicit", True, {"calls": len(calls), "error": result.get("error")})
 
 
 def check_brain_json_structure_repair_failure_classified() -> CaseResult:
@@ -8053,6 +8162,78 @@ def check_brain_runner_ignores_guard_visible_reply_source() -> CaseResult:
     assert_true("不能随口定" not in str(event.get("reply_text") or ""), f"guard visible reply must not leak: {event}")
     assert_true(calls["count"] >= 2, f"legacy guard handoff should force a repair pass: {event}")
     return CaseResult("brain_runner_ignores_guard_visible_reply_source", True, {"visible_reply_owner": event.get("visible_reply_owner"), "reason": event.get("reason")})
+
+
+def check_brain_first_intent_assist_skips_duplicate_llm_advisory() -> CaseResult:
+    config = base_config(base_plan())
+    config["customer_service_brain"]["mode"] = "brain_first"
+    config["intent_assist"] = {
+        "enabled": True,
+        "mode": "heuristic",
+        "advisory_only": True,
+        "llm_advisory": {
+            "enabled": True,
+            "provider": "openai",
+            "advisory_only": True,
+            "apply_to_reply": False,
+        },
+    }
+    original_builder = workflow_module.build_llm_advisory
+
+    def unexpected_llm_advisory(**_kwargs: Any) -> dict[str, Any]:
+        raise AssertionError("Brain First must not synchronously call the duplicate intent advisory LLM")
+
+    try:
+        workflow_module.build_llm_advisory = unexpected_llm_advisory
+        result = workflow_module.maybe_analyze_intent(
+            config=config,
+            combined="预算6万以内，直接推荐一台省油耐用的车",
+            decision=ReplyDecision("", "", False, False, ""),
+            reply_text="",
+            data_capture={"enabled": False},
+            product_knowledge={},
+        )
+    finally:
+        workflow_module.build_llm_advisory = original_builder
+    advisory = result.get("llm_advisory") if isinstance(result.get("llm_advisory"), dict) else {}
+    assert_true(result.get("ok"), f"heuristic intent evidence should remain available: {result}")
+    assert_true(advisory.get("skipped") is True, f"duplicate LLM advisory should be skipped: {result}")
+    assert_true(advisory.get("reason") == "skipped_for_brain_first_single_reasoner", f"skip reason mismatch: {result}")
+    assert_true(bool(result.get("evidence")), f"Brain still needs the intent evidence summary: {result}")
+    return CaseResult("brain_first_intent_assist_skips_duplicate_llm_advisory", True, {"advisory": advisory})
+
+
+def check_non_brain_first_intent_assist_keeps_llm_advisory() -> CaseResult:
+    config = base_config(base_plan())
+    config["customer_service_brain"]["mode"] = "shadow"
+    config["intent_assist"] = {
+        "enabled": True,
+        "mode": "heuristic",
+        "llm_advisory": {"enabled": True, "provider": "openai", "advisory_only": True},
+    }
+    original_builder = workflow_module.build_llm_advisory
+    calls = {"count": 0}
+
+    def fake_llm_advisory(**_kwargs: Any) -> dict[str, Any]:
+        calls["count"] += 1
+        return {"enabled": True, "provider": "openai", "status": "unit_called"}
+
+    try:
+        workflow_module.build_llm_advisory = fake_llm_advisory
+        result = workflow_module.maybe_analyze_intent(
+            config=config,
+            combined="预算6万以内，推荐一台省油耐用的车",
+            decision=ReplyDecision("", "", False, False, ""),
+            reply_text="",
+            data_capture={"enabled": False},
+            product_knowledge={},
+        )
+    finally:
+        workflow_module.build_llm_advisory = original_builder
+    advisory = result.get("llm_advisory") if isinstance(result.get("llm_advisory"), dict) else {}
+    assert_true(calls["count"] == 1, f"non-Brain-First intent advisory behavior must stay compatible: {result}")
+    assert_true(advisory.get("status") == "unit_called", f"non-Brain-First advisory result should be preserved: {result}")
+    return CaseResult("non_brain_first_intent_assist_keeps_llm_advisory", True, {"calls": calls["count"], "advisory": advisory})
 
 
 def check_brain_repair_retry_recovers_guard_repair_non_json() -> CaseResult:

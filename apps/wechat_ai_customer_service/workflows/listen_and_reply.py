@@ -5893,9 +5893,18 @@ def maybe_analyze_intent(
     suggested_reply = str(payload.get("suggested_reply") or "")
     payload["would_change_reply"] = bool(suggested_reply and suggested_reply not in reply_text)
 
-    # Run LLM advisory in background so it never blocks the customer reply path.
+    # Brain First already performs the authoritative intent/reply reasoning. Keep
+    # the heuristic evidence summary, but avoid a second synchronous LLM pass.
     llm_settings = settings.get("llm_advisory", {}) or {}
-    if llm_settings.get("enabled") and str(llm_settings.get("provider") or "") == "deepseek":
+    if llm_settings.get("enabled") and brain_first_requires_brain_owned_visible_reply(config):
+        payload["llm_advisory"] = {
+            "enabled": True,
+            "skipped": True,
+            "advisory_only": True,
+            "reason": "skipped_for_brain_first_single_reasoner",
+            "provider": resolve_effective_llm_provider(llm_settings.get("provider") or "manual_json"),
+        }
+    elif llm_settings.get("enabled") and str(llm_settings.get("provider") or "") == "deepseek":
         def _background_advisory(
             settings_param: dict[str, Any],
             combined_param: str,
