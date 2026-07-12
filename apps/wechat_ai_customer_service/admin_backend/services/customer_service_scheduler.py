@@ -72,11 +72,11 @@ from apps.wechat_ai_customer_service.message_identity import (
     apply_canonical_identity_fields,
     canonical_input_message_id,
 )
-from apps.wechat_ai_customer_service.adapters.wechat_image_save_capture import (
-    image_preview_text,
+from apps.wechat_ai_customer_service.optional_plugins.vision.compatibility import (
+    legacy_build_brain_safe_image_proxy_messages as build_brain_safe_image_proxy_messages,
+    legacy_customer_image_capture_trigger as customer_image_capture_trigger,
+    legacy_image_preview_text as image_preview_text,
 )
-from apps.wechat_ai_customer_service.workflows.customer_image_asset_store import build_brain_safe_image_proxy_messages
-from apps.wechat_ai_customer_service.workflows.customer_image_turn_router import customer_image_capture_trigger
 from apps.wechat_ai_customer_service.workflows.listen_and_reply import TargetConfig as WorkflowTargetConfig
 from apps.wechat_ai_customer_service.wechat_message_normalizer import split_wechat_ocr_speaker_prefix
 

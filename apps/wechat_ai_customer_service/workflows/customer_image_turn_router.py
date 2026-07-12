@@ -73,76 +73,17 @@ def customer_image_capture_trigger(
     image signals and recent image bubbles to enter the existing image router.
     """
 
-    source = payload if isinstance(payload, dict) else {}
-    signal = pending_signal if isinstance(pending_signal, dict) else {}
-    signal_kind = str(pending_signal_kind or signal.get("pending_signal_kind") or "").strip().lower()
-    signal_id = str(signal.get("pending_signal_id") or "").strip()
-    if signal_id and _pending_image_signal_was_processed(target_state, signal_id):
-        return {
-            "should_run": False,
-            "reason": "pending_image_signal_already_processed",
-            "pending_signal_kind": signal_kind,
-            "pending_signal_id": signal_id,
-            "evidence_count": 0,
-        }
-    if signal_kind in IMAGE_CAPTURE_SIGNAL_KINDS:
-        return {
-            "should_run": True,
-            "reason": "pending_signal_is_image",
-            "pending_signal_kind": signal_kind,
-            "pending_signal_id": signal_id,
-            "evidence_count": 1,
-        }
+    from apps.wechat_ai_customer_service.optional_plugins.vision.trigger import (
+        customer_image_capture_trigger as trigger,
+    )
 
-    signal_text = str(signal.get("pending_signal_text") or signal.get("preview_content") or "").strip()
-    if image_preview_text(signal_text):
-        return {
-            "should_run": True,
-            "reason": "pending_signal_preview_is_image",
-            "pending_signal_kind": signal_kind,
-            "pending_signal_id": signal_id,
-            "evidence_count": 1,
-        }
-
-    messages = [item for item in (source.get("messages") or []) if isinstance(item, dict)]
-    try:
-        limit = max(1, min(int(recent_message_limit or 1), 12))
-    except (TypeError, ValueError):
-        limit = 6
-    recent_messages = messages[-limit:]
-    evidence: list[str] = []
-    for item in recent_messages:
-        message_type = str(item.get("type") or item.get("message_type") or "").strip().lower()
-        if message_type in IMAGE_MESSAGE_TYPES:
-            evidence.append("recent_image_message_type")
-            continue
-        if item.get("is_customer_image_proxy"):
-            # An existing proxy is already routed; do not recapture it merely
-            # because it remains visible in the OCR history window.
-            continue
-        if str(item.get("saved_image_path") or "").strip():
-            evidence.append("recent_saved_image_asset")
-            continue
-        content = str(item.get("content") or item.get("text") or "").strip()
-        if image_preview_text(content):
-            evidence.append("recent_image_preview")
-
-    if evidence:
-        return {
-            "should_run": True,
-            "reason": evidence[0],
-            "pending_signal_kind": signal_kind,
-            "pending_signal_id": signal_id,
-            "evidence_count": len(evidence),
-            "evidence": evidence[:8],
-        }
-    return {
-        "should_run": False,
-        "reason": "no_recent_image_evidence",
-        "pending_signal_kind": signal_kind,
-        "pending_signal_id": signal_id,
-        "evidence_count": 0,
-    }
+    return trigger(
+        payload=payload,
+        pending_signal=pending_signal,
+        pending_signal_kind=pending_signal_kind,
+        target_state=target_state,
+        recent_message_limit=recent_message_limit,
+    )
 
 
 def _has_direct_image_message(messages: list[dict[str, Any]]) -> bool:

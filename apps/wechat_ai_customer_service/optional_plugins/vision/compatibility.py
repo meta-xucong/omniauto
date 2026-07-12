@@ -1,0 +1,120 @@
+from __future__ import annotations
+
+from typing import Any
+
+from apps.wechat_ai_customer_service.optional_plugins.registry import resolve_optional_capability
+
+
+def legacy_image_preview_text(value: Any) -> bool:
+    from .trigger import image_preview_text
+
+    return image_preview_text(value)
+
+
+def legacy_customer_image_capture_trigger(
+    *,
+    payload: dict[str, Any] | None,
+    pending_signal: dict[str, Any] | None = None,
+    pending_signal_kind: str = "",
+    target_state: dict[str, Any] | None = None,
+    recent_message_limit: int = 6,
+) -> dict[str, Any]:
+    plugin = resolve_optional_capability("vision")
+    if plugin is None:
+        return {
+            "should_run": False,
+            "reason": "vision_capability_unavailable",
+            "pending_signal_kind": str(
+                pending_signal_kind
+                or (pending_signal or {}).get("pending_signal_kind")
+                or ""
+            ).strip().lower(),
+            "pending_signal_id": str((pending_signal or {}).get("pending_signal_id") or ""),
+            "evidence_count": 0,
+        }
+    return plugin.should_run(
+        {
+            "payload": payload,
+            "pending_signal": pending_signal,
+            "pending_signal_kind": pending_signal_kind,
+            "target_state": target_state,
+            "recent_message_limit": recent_message_limit,
+        }
+    )
+
+
+def legacy_maybe_route_customer_image_turn(
+    *,
+    connector: Any,
+    target: Any,
+    config: dict[str, Any],
+    payload: dict[str, Any],
+    target_state: dict[str, Any],
+    batch: list[dict[str, Any]],
+    combined: str,
+) -> dict[str, Any]:
+    plugin = resolve_optional_capability("vision")
+    if plugin is None:
+        return {
+            "enabled": False,
+            "applied": False,
+            "adoptable": False,
+            "reason": "vision_capability_unavailable",
+        }
+    return plugin.run(
+        {
+            "connector": connector,
+            "target": target,
+            "config": config,
+            "payload": payload,
+            "target_state": target_state,
+            "batch": batch,
+            "combined": combined,
+        }
+    )
+
+
+def legacy_build_brain_safe_image_proxy_messages(*args: Any, **kwargs: Any) -> list[dict[str, Any]]:
+    from apps.wechat_ai_customer_service.workflows.customer_image_asset_store import (
+        build_brain_safe_image_proxy_messages,
+    )
+
+    return build_brain_safe_image_proxy_messages(*args, **kwargs)
+
+
+def legacy_augment_text_with_visual_query(
+    combined: str,
+    visual_bridge_input: dict[str, Any] | None,
+) -> str:
+    try:
+        from apps.wechat_ai_customer_service.workflows.customer_image_brain_bridge import (
+            augment_text_with_visual_query,
+        )
+    except ImportError:
+        return str(combined or "")
+    return augment_text_with_visual_query(combined, visual_bridge_input)
+
+
+def legacy_compact_customer_image_brain_bridge(
+    value: dict[str, Any] | None,
+) -> dict[str, Any]:
+    try:
+        from apps.wechat_ai_customer_service.workflows.customer_image_brain_bridge import (
+            compact_customer_image_brain_bridge,
+        )
+    except ImportError:
+        return {}
+    return compact_customer_image_brain_bridge(value)
+
+
+def legacy_resolve_visual_brain_turn_text(
+    combined: str,
+    visual_bridge_input: dict[str, Any] | None,
+) -> str:
+    try:
+        from apps.wechat_ai_customer_service.workflows.customer_image_brain_bridge import (
+            resolve_visual_brain_turn_text,
+        )
+    except ImportError:
+        return str(combined or "")
+    return resolve_visual_brain_turn_text(combined, visual_bridge_input)

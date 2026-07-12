@@ -52,10 +52,10 @@ from customer_service_conversation_strategy import (
     build_conversation_interaction_brain_hint,
     build_conversation_strategy_brain_hint,
 )
-from customer_image_brain_bridge import (
-    augment_text_with_visual_query,
-    compact_customer_image_brain_bridge,
-    resolve_visual_brain_turn_text,
+from apps.wechat_ai_customer_service.optional_plugins.vision.compatibility import (
+    legacy_augment_text_with_visual_query as augment_text_with_visual_query,
+    legacy_compact_customer_image_brain_bridge as compact_customer_image_brain_bridge,
+    legacy_resolve_visual_brain_turn_text as resolve_visual_brain_turn_text,
 )
 from customer_service_brain_preflight import (
     augment_evidence_text_with_brain_preflight_queries,

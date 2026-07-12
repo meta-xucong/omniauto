@@ -428,7 +428,11 @@ class SchedulerStateStore:
         return state
 
     def save(self, state: dict[str, Any]) -> None:
-        payload = copy.deepcopy(state)
+        # The scheduler owns this state for the duration of a tick and the JSON
+        # encoder is read-only. A top-level copy preserves the historical rule
+        # that save() must not alter the caller's updated_at field without
+        # duplicating an entire multi-megabyte task history in memory.
+        payload = dict(state)
         payload["updated_at"] = utcnow_iso()
         self.path.parent.mkdir(parents=True, exist_ok=True)
         fd, temp_name = tempfile.mkstemp(
@@ -440,7 +444,10 @@ class SchedulerStateStore:
         temp = Path(temp_name)
         try:
             with os.fdopen(fd, "w", encoding="utf-8", newline="") as handle:
-                handle.write(json.dumps(payload, ensure_ascii=False, indent=2))
+                # This state can grow to tens of megabytes. Whitespace is not
+                # part of the JSON contract, while compact serialization cuts
+                # both write latency and disk churn without changing fields.
+                handle.write(json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
             last_error: OSError | None = None
             for attempt in range(6):
                 try:

@@ -80,7 +80,15 @@ from customer_service_conversation_strategy import (
     update_conversation_interaction_state_on_capture,
     update_conversation_strategy_state,
 )
-from customer_image_turn_router import maybe_route_customer_image_turn
+from apps.wechat_ai_customer_service.optional_plugins.voice.compatibility import (
+    legacy_attach_voice_transcription_audit,
+    legacy_auto_voice_transcription_settings,
+    legacy_maybe_auto_transcribe_voice_messages,
+    legacy_voice_transcription_trigger,
+)
+from apps.wechat_ai_customer_service.optional_plugins.vision.compatibility import (
+    legacy_maybe_route_customer_image_turn,
+)
 from product_knowledge import decide_product_knowledge_reply, load_product_knowledge
 from rag_answer_layer import maybe_build_rag_reply
 from rag_experience_store import record_rag_reply_experience
@@ -689,21 +697,7 @@ def _enqueue_post_reply_work(
 
 
 def auto_voice_transcription_settings(config: dict[str, Any]) -> dict[str, Any]:
-    raw = config.get("voice_transcription") if isinstance(config.get("voice_transcription"), dict) else {}
-    env_value = os.getenv("WECHAT_AUTO_VOICE_TRANSCRIBE")
-    enabled = raw.get("enabled", True)
-    if env_value is not None and env_value.strip():
-        enabled = env_value.strip().lower() in {"1", "true", "yes", "on"}
-    try:
-        max_attempts = int(os.getenv("WECHAT_AUTO_VOICE_TRANSCRIBE_MAX_ATTEMPTS") or raw.get("max_attempts") or 4)
-    except (TypeError, ValueError):
-        max_attempts = 4
-    artifact_dir = str(raw.get("artifact_dir") or os.getenv("WECHAT_AUTO_VOICE_TRANSCRIBE_ARTIFACT_DIR") or "").strip()
-    return {
-        "enabled": bool(enabled),
-        "max_attempts": max(1, min(max_attempts, 8)),
-        "artifact_dir": artifact_dir,
-    }
+    return legacy_auto_voice_transcription_settings(config)
 
 
 def voice_transcription_trigger(
@@ -711,53 +705,10 @@ def voice_transcription_trigger(
     *,
     pending_signal_kind: str = "",
 ) -> dict[str, Any]:
-    """Decide whether a capture contains enough voice evidence for RPA.
-
-    Voice RPA is physically destructive (right-click and menu click), so a
-    normal text capture must not enter it merely because voice transcription is
-    enabled. The sidecar's visual candidate and explicit voice message types
-    are the only normal-capture triggers; an unread voice signal remains an
-    explicit trigger so both customer and self voice bubbles are supported.
-    """
-
-    signal_kind = str(pending_signal_kind or "").strip().lower()
-    if signal_kind in {"image_capture", "media_capture"}:
-        return {
-            "should_run": False,
-            "reason": "pending_signal_is_non_voice_media",
-            "pending_signal_kind": signal_kind,
-        }
-    if signal_kind == "voice_capture":
-        return {
-            "should_run": True,
-            "reason": "pending_signal_is_voice",
-            "pending_signal_kind": signal_kind,
-        }
-
-    source = payload if isinstance(payload, dict) else {}
-    if bool(source.get("voice_transcription_candidate")):
-        return {
-            "should_run": True,
-            "reason": "sidecar_visual_voice_candidate",
-            "pending_signal_kind": signal_kind,
-            "candidate": source.get("voice_transcription_candidate_evidence") or {},
-        }
-    for message in source.get("messages") or []:
-        if not isinstance(message, dict):
-            continue
-        message_type = str(message.get("type") or message.get("message_type") or "").strip().lower()
-        content = str(message.get("content") or "").strip().lower()
-        if message_type in {"voice", "audio"} or content.startswith(("[语音]", "语音", "[voice]", "[audio]")):
-            return {
-                "should_run": True,
-                "reason": "captured_voice_message_evidence",
-                "pending_signal_kind": signal_kind,
-            }
-    return {
-        "should_run": False,
-        "reason": "no_voice_evidence_in_capture",
-        "pending_signal_kind": signal_kind,
-    }
+    return legacy_voice_transcription_trigger(
+        payload,
+        pending_signal_kind=pending_signal_kind,
+    )
 
 
 def maybe_auto_transcribe_voice_messages(
@@ -769,58 +720,39 @@ def maybe_auto_transcribe_voice_messages(
     conversation_type: str = "",
     pending_signal_kind: str = "",
 ) -> dict[str, Any]:
-    settings = auto_voice_transcription_settings(config)
-    if not settings.get("enabled"):
-        return {"attempted": False, "enabled": False, "reason": "voice_transcription_disabled"}
-    if console_settings.get("enabled") is False:
-        return {"attempted": False, "enabled": True, "reason": "customer_service_disabled"}
-    signal_kind = str(pending_signal_kind or "").strip().lower()
-    if signal_kind in {"image_capture", "media_capture"}:
-        # Image/file/video capture has its own RPA path.  Running the voice
-        # scanner first would inspect stale OCR on the visible chat surface
-        # and can right-click a number inside an image as if it were a voice
-        # duration bubble. A later voice signal still runs the normal
-        # both-sides transcription flow.
-        return {
-            "attempted": False,
-            "enabled": True,
-            "ok": True,
-            "state": "voice_transcription_skipped_non_voice_signal",
-            "reason": "pending_signal_is_non_voice_media",
-            "pending_signal_kind": signal_kind,
-        }
-    transcribe = getattr(connector, "transcribe_voice_messages", None)
-    if not callable(transcribe):
-        return {"attempted": False, "enabled": True, "reason": "connector_voice_transcription_not_supported"}
-    try:
-        result = transcribe(
-            target.name,
-            exact=target.exact,
-            session_key=str(getattr(target, "session_key", "") or ""),
-            conversation_type=str(conversation_type or ""),
-            max_attempts=int(settings.get("max_attempts") or 4),
-            artifact_dir=str(settings.get("artifact_dir") or "") or None,
-        )
-    except Exception as exc:
-        return {
-            "attempted": True,
-            "enabled": True,
-            "ok": False,
-            "state": "voice_transcription_exception",
-            "error": repr(exc),
-        }
-    if isinstance(result, dict):
-        result = dict(result)
-        result["attempted"] = True
-        result["enabled"] = True
-        return result
-    return {"attempted": True, "enabled": True, "ok": False, "state": "voice_transcription_invalid_result"}
+    return legacy_maybe_auto_transcribe_voice_messages(
+        connector=connector,
+        target=target,
+        config=config,
+        console_settings=console_settings,
+        conversation_type=conversation_type,
+        pending_signal_kind=pending_signal_kind,
+    )
 
 
 def attach_voice_transcription_audit(payload: dict[str, Any], voice_transcription: dict[str, Any]) -> dict[str, Any]:
-    if isinstance(payload, dict) and voice_transcription and voice_transcription.get("attempted"):
-        payload["voice_transcription"] = voice_transcription
-    return payload
+    return legacy_attach_voice_transcription_audit(payload, voice_transcription)
+
+
+def maybe_route_customer_image_turn(
+    *,
+    connector: Any,
+    target: Any,
+    config: dict[str, Any],
+    payload: dict[str, Any],
+    target_state: dict[str, Any],
+    batch: list[dict[str, Any]],
+    combined: str,
+) -> dict[str, Any]:
+    return legacy_maybe_route_customer_image_turn(
+        connector=connector,
+        target=target,
+        config=config,
+        payload=payload,
+        target_state=target_state,
+        batch=batch,
+        combined=combined,
+    )
 
 
 def process_target(

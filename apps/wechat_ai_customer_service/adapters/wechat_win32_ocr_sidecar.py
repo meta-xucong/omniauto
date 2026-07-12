@@ -165,7 +165,45 @@ from apps.wechat_ai_customer_service.adapters.wechat_win32_ocr import window_vis
 from apps.wechat_ai_customer_service.adapters.wechat_win32_ocr import window_metrics as win32_ocr_window_metrics
 from apps.wechat_ai_customer_service.adapters.wechat_win32_ocr import windowing as win32_ocr_windowing
 from apps.wechat_ai_customer_service.adapters.wechat_win32_ocr import add_friend_windows as win32_ocr_add_friend_windows
-from apps.wechat_ai_customer_service.adapters.wechat_image_save_capture import execute_wechat_image_save
+
+
+def execute_wechat_image_save(
+    *,
+    hwnd: int,
+    probe: dict[str, Any],
+    target_name: str,
+    session_key: str = "",
+    exact: bool = True,
+    artifact_dir: str | Path | None = None,
+    tenant_id: str = "",
+    source_preview: str = "",
+    speaker_name: str = "",
+    max_images: int = 1,
+    side_filter: str = "customer",
+    capture_mode: str = "context_menu",
+    pending_signal_id: str = "",
+    sidecar_ops: Any,
+) -> dict[str, Any]:
+    from apps.wechat_ai_customer_service.adapters.wechat_image_save_capture import (
+        execute_wechat_image_save as execute_image_save,
+    )
+
+    return execute_image_save(
+        hwnd=hwnd,
+        probe=probe,
+        target_name=target_name,
+        session_key=session_key,
+        exact=exact,
+        artifact_dir=artifact_dir,
+        tenant_id=tenant_id,
+        source_preview=source_preview,
+        speaker_name=speaker_name,
+        max_images=max_images,
+        side_filter=side_filter,
+        capture_mode=capture_mode,
+        pending_signal_id=pending_signal_id,
+        sidecar_ops=sidecar_ops,
+    )
 
 try:
     from rapidocr_onnxruntime import RapidOCR
