@@ -1160,7 +1160,13 @@ def should_invoke_semantic_reviewer(
     cfg = settings if isinstance(settings, dict) else {}
     if cfg.get("semantic_reviewer_force"):
         return True
-    if deterministic_quality.get("errors") or deterministic_quality.get("warnings"):
+    review_warnings = {
+        str(item).strip()
+        for item in (deterministic_quality.get("warnings") or [])
+        if str(item).strip()
+    }
+    non_blocking_warnings = {"delay_followup_short_social_reply_review"}
+    if deterministic_quality.get("errors") or review_warnings - non_blocking_warnings:
         return True
     question = normalize_space(current_message)
     reply = normalize_space(join_reply_segments(plan.get("reply_segments", []) or []))

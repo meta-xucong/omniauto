@@ -9,7 +9,18 @@ that product master, formal knowledge and current conversation facts actually pa
 from __future__ import annotations
 
 import re
+import sys
+from pathlib import Path
 from typing import Any
+
+
+# The admin API imports scheduler/customer-image modules before the listener
+# bootstrap runs. Keep the existing direct workflow imports compatible in
+# that startup path without changing their public module names.
+APP_ROOT = Path(__file__).resolve().parents[1]
+for _path in (APP_ROOT / "workflows", APP_ROOT / "adapters"):
+    if str(_path) not in sys.path:
+        sys.path.insert(0, str(_path))
 
 from apps.wechat_ai_customer_service.platform_understanding_rules import intent_group
 from admin_backend.services.raw_message_store import RawMessageStore

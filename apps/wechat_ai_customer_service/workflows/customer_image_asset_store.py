@@ -138,6 +138,9 @@ def build_brain_safe_image_proxy_message(
         "conversation_id",
         "visual_side",
         "visual_occurrence_id",
+        "wechat_message_time",
+        "visual_index",
+        "visual_observation_id",
     ):
         value = str(item.get(key) or "").strip()
         if value:
@@ -201,6 +204,9 @@ def assets_from_payload_messages(payload: dict[str, Any] | None) -> list[dict[st
                 "sender_role": str(message.get("sender_role") or message.get("sender") or ""),
                 "visual_side": str(message.get("visual_side") or ""),
                 "visual_occurrence_id": str(message.get("visual_occurrence_id") or ""),
+                "wechat_message_time": str(message.get("wechat_message_time") or ""),
+                "visual_index": int(message.get("visual_index") or 0),
+                "visual_observation_id": str(message.get("visual_observation_id") or ""),
                 "bubble_bounds": [int(value) for value in (message.get("bubble_bounds") or [])[:4]],
                 "saved_image_path": saved_path,
                 "source_preview": str(message.get("pending_signal_text") or message.get("source_preview") or ""),
@@ -209,6 +215,14 @@ def assets_from_payload_messages(payload: dict[str, Any] | None) -> list[dict[st
             }
         )
     return result
+
+
+def customer_scoped_image_asset(asset: dict[str, Any]) -> bool:
+    side = str(asset.get("visual_side") or "").strip().lower()
+    sender = str(asset.get("sender") or asset.get("sender_role") or "").strip().lower()
+    if side == "self" or sender in {"self", "assistant", "agent", "me", "outbound"}:
+        return False
+    return True
 
 
 def call_image_save_sidecar(
@@ -222,6 +236,7 @@ def call_image_save_sidecar(
 ) -> dict[str, Any]:
     source_preview = str(pending_signal.get("pending_signal_text") or pending_signal.get("preview_content") or "").strip()
     speaker_name = parse_preview_speaker(source_preview, pending_signal.get("speaker_name") or pending_signal.get("group_member_name") or "")
+    pending_signal_id = str(pending_signal.get("pending_signal_id") or "").strip()
     tenant_id = str(os.getenv("WECHAT_KNOWLEDGE_TENANT") or "").strip()
     save_method = getattr(connector, "save_customer_image", None)
     if callable(save_method):
@@ -232,6 +247,7 @@ def call_image_save_sidecar(
             artifact_dir=str(artifact_dir),
             source_preview=source_preview,
             speaker_name=speaker_name,
+            pending_signal_id=pending_signal_id,
             tenant_id=tenant_id,
             max_images=1,
         )
@@ -249,6 +265,8 @@ def call_image_save_sidecar(
         args.extend(["--source-preview", source_preview])
     if speaker_name:
         args.extend(["--speaker-name", speaker_name])
+    if pending_signal_id:
+        args.extend(["--pending-signal-id", pending_signal_id])
     if tenant_id:
         args.extend(["--tenant-id", tenant_id])
     return compat_call(args, allow_failure=True)
@@ -396,7 +414,47 @@ def maybe_collect_customer_image_assets(
 ) -> dict[str, Any]:
     artifact_dir = visual_artifact_dir(target_name=target_name, session_key=session_key)
     source_payload = copy.deepcopy(payload) if isinstance(payload, dict) else {}
-    payload_assets = assets_from_payload_messages(source_payload)
+    explicit_customer_assets = (
+        source_payload.get("customer_image_assets")
+        if isinstance(source_payload.get("customer_image_assets"), dict)
+        else {}
+    )
+    if explicit_customer_assets.get("ok") and explicit_customer_assets.get("assets"):
+        assets = [
+            item
+            for item in (explicit_customer_assets.get("assets") or [])
+            if isinstance(item, dict)
+        ]
+        messages = [
+            item
+            for item in (explicit_customer_assets.get("messages") or [])
+            if isinstance(item, dict)
+        ]
+        if not messages:
+            messages = [build_image_message_from_asset(item) for item in assets]
+        for asset in assets:
+            asset.setdefault("target_name", target_name)
+            asset.setdefault("session_key", session_key)
+        return {
+            "applied": True,
+            "reason": "scheduler_customer_image_assets_ready",
+            "artifact_dir": str(artifact_dir),
+            "source_payload": {
+                "state": str(source_payload.get("state") or ""),
+                "adapter": str(source_payload.get("adapter") or ""),
+            },
+            "assets": assets,
+            "messages": build_brain_safe_image_proxy_messages(
+                messages,
+                target_name=target_name,
+                session_key=session_key,
+            ),
+        }
+    payload_assets = [
+        item
+        for item in assets_from_payload_messages(source_payload)
+        if customer_scoped_image_asset(item)
+    ]
     if payload_assets:
         for asset in payload_assets:
             asset.setdefault("target_name", target_name)
@@ -414,7 +472,9 @@ def maybe_collect_customer_image_assets(
                 [
                     item
                     for item in (source_payload.get("messages") or [])
-                    if isinstance(item, dict) and str(item.get("saved_image_path") or "").strip()
+                    if isinstance(item, dict)
+                    and str(item.get("saved_image_path") or "").strip()
+                    and customer_scoped_image_asset(item)
                 ],
                 target_name=target_name,
                 session_key=session_key,

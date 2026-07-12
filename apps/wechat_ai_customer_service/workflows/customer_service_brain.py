@@ -1818,6 +1818,7 @@ def maybe_run_customer_service_brain(
                 "guard_verdict": str(guard.get("guard_verdict") or guard.get("severity") or "pass"),
                 "guard_hard_boundary": bool(guard.get("hard_boundary", False)),
                 "guard_reply_ignored": guard_reply_ignored,
+                "brain_quality_review": build_brain_quality_review_metadata(quality),
             }
         )
     elif action == "handoff":
@@ -1835,6 +1836,7 @@ def maybe_run_customer_service_brain(
                 "guard_verdict": str(guard.get("guard_verdict") or guard.get("severity") or "handoff"),
                 "guard_hard_boundary": bool(guard.get("hard_boundary", False)),
                 "guard_reply_ignored": guard_reply_ignored,
+                "brain_quality_review": build_brain_quality_review_metadata(quality),
             }
         )
     else:
@@ -2027,6 +2029,94 @@ def resolve_brain_fallback_timeout(settings: dict[str, Any], primary_timeout_sec
     return max(1, fallback_timeout)
 
 
+def compact_context_recovery_for_brain(value: Any) -> dict[str, Any]:
+    if not isinstance(value, dict) or not value:
+        return {}
+    payload = {
+        "schema_version": int(value.get("schema_version") or 1),
+        "applied": bool(value.get("applied")),
+        "mode": str(value.get("mode") or "normal"),
+        "reason": str(value.get("reason") or ""),
+        "confidence": value.get("confidence"),
+        "score": value.get("score"),
+        "signals": [str(item) for item in (value.get("signals") or []) if str(item)][:10],
+        "latest_message_ids": [str(item) for item in (value.get("latest_message_ids") or []) if str(item)][:6],
+        "latest_customer_text": clip(str(value.get("latest_customer_text") or ""), 260),
+        "latest_message_type": str(value.get("latest_message_type") or ""),
+        "policy": str(value.get("policy") or ""),
+    }
+    hard_guards = [str(item) for item in (value.get("hard_guards_preserved") or []) if str(item)]
+    if hard_guards:
+        payload["hard_guards_preserved"] = hard_guards[:8]
+    return payload
+
+
+def context_recovery_latest_turn_only(context_recovery: dict[str, Any]) -> bool:
+    return bool(
+        isinstance(context_recovery, dict)
+        and context_recovery.get("applied")
+        and str(context_recovery.get("mode") or "") == "latest_turn_only_candidate"
+    )
+
+
+def _context_recovery_message_id(message: dict[str, Any]) -> str:
+    if not isinstance(message, dict):
+        return ""
+    for key in ("id", "message_id", "source_message_id", "visual_occurrence_id", "asset_id"):
+        value = str(message.get(key) or "").strip()
+        if value:
+            return value
+    return ""
+
+
+def batch_for_context_recovery_current_turn(batch: list[dict[str, Any]], context_recovery: dict[str, Any]) -> list[dict[str, Any]]:
+    if not context_recovery_latest_turn_only(context_recovery):
+        return list(batch or [])
+    ids = {str(item).strip() for item in (context_recovery.get("latest_message_ids") or []) if str(item).strip()}
+    if ids:
+        selected = [item for item in (batch or []) if isinstance(item, dict) and _context_recovery_message_id(item) in ids]
+        if selected:
+            return selected
+    latest_text = " ".join(str(context_recovery.get("latest_customer_text") or "").split()).strip()
+    if latest_text:
+        for item in reversed(batch or []):
+            if not isinstance(item, dict):
+                continue
+            item_text = " ".join(str(item.get("content") or item.get("text") or item.get("transcript") or "").split()).strip()
+            if item_text and (item_text == latest_text or latest_text in item_text or item_text in latest_text):
+                return [item]
+    return [item for item in (batch or []) if isinstance(item, dict)][-1:]
+
+
+def pruned_conversation_context_for_context_recovery(context: dict[str, Any], context_recovery: dict[str, Any]) -> dict[str, Any]:
+    if not context_recovery_latest_turn_only(context_recovery):
+        return dict(context or {})
+    return {
+        "context_recovery_policy": (
+            "suspected_manual_intervention_or_context_rupture: older ledger/history context is prompt-pruned and may only be "
+            "treated as low-confidence background if the current turn explicitly refers to it."
+        ),
+        "old_context_pruned": True,
+        "latest_message_ids": list(context_recovery.get("latest_message_ids") or [])[:6],
+    }
+
+
+def pruned_interaction_hint_for_context_recovery(interaction_hint: dict[str, Any], context_recovery: dict[str, Any]) -> dict[str, Any]:
+    if not context_recovery_latest_turn_only(context_recovery):
+        return dict(interaction_hint or {})
+    return {
+        "authority": "non_authoritative_interaction_hint",
+        "context_recovery": "latest_turn_only_candidate",
+        "unanswered_exists": False,
+        "suggested_reply_posture": "normal",
+        "policy_note": (
+            "旧的未回复/等待上下文疑似来自人工介入或历史噪声；Brain先判断本轮最新消息是否可独立回复，"
+            "可独立时不要被旧等待话题牵引。"
+        ),
+        "visibility_rule": "不得把本状态字段名、内部原因或机制说明写进客户可见回复。",
+    }
+
+
 def build_brain_input(
     *,
     settings: dict[str, Any],
@@ -2040,14 +2130,22 @@ def build_brain_input(
     brain_preflight: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     conversation = evidence_pack.get("conversation") if isinstance(evidence_pack.get("conversation"), dict) else {}
+    raw_context_recovery = (
+        raw_capture.get("context_recovery")
+        if isinstance(raw_capture.get("context_recovery"), dict)
+        else target_state.get("context_recovery_state")
+    )
+    context_recovery = compact_context_recovery_for_brain(raw_context_recovery)
+    recovery_latest_turn_only = context_recovery_latest_turn_only(context_recovery)
+    effective_batch = batch_for_context_recovery_current_turn(batch, context_recovery)
     message_text_payload = semantic_message_text_payload(
-        batch,
+        effective_batch,
         combined=combined,
         target_name=target_name,
         raw_capture=raw_capture,
     )
     clean_text = strip_nonsemantic_runtime_markers(str(message_text_payload.get("clean_text") or combined or ""))
-    raw_text = str(message_text_payload.get("raw_text") or "\n".join(str(item.get("content") or "") for item in batch))
+    raw_text = str(message_text_payload.get("raw_text") or "\n".join(str(item.get("content") or "") for item in effective_batch))
     reply_obligation = classify_social_reply_obligation(clean_text)
     strategy_hint = build_conversation_strategy_brain_hint(
         target_state.get("conversation_strategy_state") if isinstance(target_state.get("conversation_strategy_state"), dict) else {}
@@ -2055,26 +2153,38 @@ def build_brain_input(
     interaction_hint = build_conversation_interaction_brain_hint(
         target_state.get("conversation_interaction_state") if isinstance(target_state.get("conversation_interaction_state"), dict) else {}
     )
+    if recovery_latest_turn_only:
+        interaction_hint = pruned_interaction_hint_for_context_recovery(interaction_hint, context_recovery)
     retry_instruction = str(target_state.get("brain_retry_instruction") or "").strip()
+    context_priority_policy = current_message_context_priority_policy(reply_obligation)
+    if recovery_latest_turn_only:
+        context_priority_policy = (
+            "context_rupture_latest_turn_first: 当前捕获疑似发生人工介入/上下文断裂。"
+            "Brain先判断旧上下文是否与最新消息连续；若不连续，只回答最新可行动消息。"
+            "商品事实仍只能用product_master，政策流程仍只能用formal_knowledge。"
+        )
     current_message = {
         "clean_text": clean_text,
         "raw_text": raw_text,
-        "message_ids": [str(item.get("id") or item.get("message_id") or "") for item in batch],
+        "message_ids": [str(item.get("id") or item.get("message_id") or "") for item in effective_batch],
+        "original_batch_message_ids": [str(item.get("id") or item.get("message_id") or "") for item in batch],
         "reply_obligation": reply_obligation,
-        "context_priority_policy": current_message_context_priority_policy(reply_obligation),
+        "context_priority_policy": context_priority_policy,
         "ocr_metadata_policy": "speaker/chat title/group member names are metadata only and must not be treated as message body",
         "ocr_metadata": message_text_payload.get("metadata", []),
-        "referenced_context": collect_referenced_context(batch),
+        "referenced_context": collect_referenced_context(effective_batch),
         "quality_flags": sorted(
             {
                 str(flag)
-                for item in batch
+                for item in effective_batch
                 if isinstance(item, dict)
                 for flag in (item.get("quality_flags") or [])
                 if str(flag)
             }
         ),
     }
+    if context_recovery.get("applied"):
+        current_message["context_recovery"] = context_recovery
     visual_bridge_input = visual_bridge_input if isinstance(visual_bridge_input, dict) else {}
     if visual_bridge_input:
         current_message["visual_bridge_input"] = compact_customer_image_brain_bridge(visual_bridge_input)
@@ -2083,6 +2193,13 @@ def build_brain_input(
         current_message["brain_preflight"] = compact_brain_preflight_for_prompt(brain_preflight)
     if retry_instruction:
         current_message["retry_instruction"] = retry_instruction[:700]
+    conversation_context = pruned_conversation_context_for_context_recovery(
+        dict(target_state.get("conversation_context", {}) or {}),
+        context_recovery,
+    )
+    conversation_history_text = "" if recovery_latest_turn_only else str(conversation.get("history_text") or "")
+    conversation_summary = "" if recovery_latest_turn_only else str(conversation.get("conversation_summary") or "")
+    conversation_current_batch_text = clean_text if recovery_latest_turn_only else str(conversation.get("current_batch_text") or "")
     return {
         "schema_version": 1,
         "target": {
@@ -2093,10 +2210,10 @@ def build_brain_input(
         },
         "current_message": current_message,
         "conversation": {
-            "context": dict(target_state.get("conversation_context", {}) or {}),
-            "history_text": str(conversation.get("history_text") or ""),
-            "summary": str(conversation.get("conversation_summary") or ""),
-            "current_batch_text": str(conversation.get("current_batch_text") or ""),
+            "context": conversation_context,
+            "history_text": conversation_history_text,
+            "summary": conversation_summary,
+            "current_batch_text": conversation_current_batch_text,
             "conversation_strategy_state": strategy_hint,
             "conversation_interaction_state": interaction_hint,
         },
@@ -2109,6 +2226,7 @@ def build_brain_input(
             "runtime_principles": build_brain_runtime_principles(settings=settings),
             "conversation_strategy_state": strategy_hint,
             "conversation_interaction_state": interaction_hint,
+            "context_recovery": context_recovery,
         },
     }
 
@@ -2235,6 +2353,7 @@ def compact_brain_input(brain_input: dict[str, Any]) -> dict[str, Any]:
             if isinstance(brain_input.get("runtime"), dict)
             else {}
         ),
+        "context_recovery": current.get("context_recovery", {}),
         "audit_summary": evidence.get("audit_summary", {}),
     }
 
@@ -3412,6 +3531,14 @@ def compact_current_message_for_prompt(current: dict[str, Any]) -> dict[str, Any
             max_text_chars=160,
             max_list_items=4,
         )
+    context_recovery = current.get("context_recovery") if isinstance(current.get("context_recovery"), dict) else {}
+    if context_recovery:
+        payload["context_recovery"] = compact_prompt_value(
+            context_recovery,
+            max_text_chars=180,
+            max_list_items=5,
+        )
+        payload["context_recovery_policy"] = "只用于判断旧上下文是否断裂；不得作为商品/政策事实来源。"
     return payload
 
 
@@ -3852,6 +3979,9 @@ POST_REPAIR_HARD_DETERMINISTIC_QUALITY_ERRORS = {
 }
 POST_REPAIR_SOFT_DETERMINISTIC_QUALITY_ERRORS = {
     "reply_too_long",
+    # A short Brain-authored social acknowledgement is valid even when the
+    # runtime suspects the customer is following up after a delay.
+    "delay_followup_reply_looks_like_fresh_greeting",
     "missing_direct_price_response",
     "missing_referenced_product_in_reply",
     "asks_new_need_instead_of_answering_price",
@@ -3965,7 +4095,7 @@ def repaired_deterministic_quality_soft_pass_decision(
 
     evidence = plan.get("evidence_used") if isinstance(plan.get("evidence_used"), dict) else {}
     has_context_or_product_anchor = bool(evidence.get("product_ids") or evidence.get("conversation_fact_ids"))
-    if not has_context_or_product_anchor and not repaired_reply_has_actionable_anchor(
+    if not has_context_or_product_anchor and not is_safe_brain_social_reply(plan) and not repaired_reply_has_actionable_anchor(
         plan=plan,
         evidence_pack=evidence_pack,
         reply=join_reply_segments(plan.get("reply_segments", []) or []),
@@ -4046,7 +4176,7 @@ def original_brain_quality_soft_pass_after_failed_repair(
 
     evidence = plan.get("evidence_used") if isinstance(plan.get("evidence_used"), dict) else {}
     has_context_or_product_anchor = bool(evidence.get("product_ids") or evidence.get("conversation_fact_ids"))
-    if not has_context_or_product_anchor and not repaired_reply_has_actionable_anchor(
+    if not has_context_or_product_anchor and not is_safe_brain_social_reply(plan) and not repaired_reply_has_actionable_anchor(
         plan=plan,
         evidence_pack=evidence_pack,
         reply=reply,
@@ -4058,6 +4188,71 @@ def original_brain_quality_soft_pass_after_failed_repair(
         "reason": "original_brain_soft_quality_deferred_after_repair_failure",
         "warnings": [f"original_brain_soft_quality_pass:{item}" for item in errors],
         "errors": errors,
+    }
+
+
+def is_safe_brain_social_reply(plan: dict[str, Any]) -> bool:
+    """Recognize a Brain-owned social reply that needs no business anchor.
+
+    Social acknowledgements such as "在呢，您说" are intentionally allowed to
+    stand on their own. They still require a valid Brain plan and low risk, but
+    they must not be rejected merely because they do not cite a product or
+    conversation fact.
+    """
+
+    if str(plan.get("answer_mode") or "").strip() not in {
+        "soft_social_reply",
+        "soft_redirect_to_business",
+    }:
+        return False
+    if str(plan.get("recommended_action") or "send_reply").strip().lower() != "send_reply":
+        return False
+    if not bool(plan.get("can_answer", True)):
+        return False
+    if not normalize_reply_segments(plan.get("reply_segments"), max_segments=3):
+        return False
+    if plan.get("facts_claimed"):
+        return False
+    evidence = plan.get("evidence_used") if isinstance(plan.get("evidence_used"), dict) else {}
+    if evidence.get("product_ids") or evidence.get("formal_knowledge_ids"):
+        return False
+    risk = plan.get("risk") if isinstance(plan.get("risk"), dict) else {}
+    if bool(risk.get("needs_handoff")):
+        return False
+    if str(risk.get("risk_level") or "low").strip().lower() in {"high", "高"}:
+        return False
+    hard_tags = {
+        "illegal_request",
+        "prompt_injection",
+        "policy_violation",
+        "finance_commitment",
+        "price_commitment",
+        "contract_commitment",
+        "invoice_commitment",
+    }
+    risk_tags = {str(item).strip().lower() for item in risk.get("risk_tags", []) or [] if str(item).strip()}
+    return not bool(risk_tags & hard_tags)
+
+
+def build_brain_quality_review_metadata(quality: dict[str, Any]) -> dict[str, Any]:
+    """Expose residual soft review notes without changing Brain's reply."""
+
+    warnings = [str(item).strip() for item in quality.get("warnings", []) or [] if str(item).strip()]
+    continuity_warnings = [
+        item for item in warnings if item == "delay_followup_short_social_reply_review"
+    ]
+    return {
+        "required": bool(warnings),
+        "severity": "advisory" if warnings else "none",
+        "warnings": warnings[:8],
+        "operator_attention_required": bool(continuity_warnings),
+        "operator_attention_reason": (
+            "brain_short_social_reply_after_delayed_turn"
+            if continuity_warnings
+            else ""
+        ),
+        "visible_reply_preserved": True,
+        "reply_owner": "brain",
     }
 
 

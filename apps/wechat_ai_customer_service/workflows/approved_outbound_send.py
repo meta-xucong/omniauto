@@ -121,6 +121,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             args.text,
             exact=target.exact,
             session_key=str(args.session_key or getattr(target, "session_key", "") or ""),
+            conversation_type=str(getattr(target, "conversation_type", "") or ""),
         )
         event["send_result"] = send_result
         event["verified"] = bool(send_result.get("verified"))

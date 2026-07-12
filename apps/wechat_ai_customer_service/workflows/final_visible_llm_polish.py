@@ -244,6 +244,51 @@ def maybe_polish_customer_visible_reply(
         return finish(payload)
 
     recent_replies = recent_reply_texts or []
+    if should_use_brain_local_verify_fast_path(
+        settings=settings,
+        source_channel=source_channel,
+        needs_handoff=needs_handoff,
+    ):
+        draft_guard = guard_final_visible_polish_candidate(
+            base_reply=draft,
+            polished_reply=draft,
+            customer_message=customer_message,
+            recent_reply_texts=recent_replies,
+            settings=settings,
+            source_channel=source_channel,
+        )
+        payload["local_verify"] = {
+            "enabled": True,
+            "provider": "local_final_visible_guard",
+            "guard": draft_guard,
+        }
+        if draft_guard.get("allowed"):
+            channel = normalized_source_channel(source_channel)
+            payload["llm_status"] = {
+                "ok": True,
+                "provider": "local_final_visible_guard",
+                "status": "local_draft_verified",
+            }
+            payload["runtime_budget"] = {
+                "profile": f"{channel}_local_verify",
+                "timeout_seconds": 0,
+                "max_tokens": 0,
+            }
+            payload["guard"] = {
+                "allowed": True,
+                "reason": f"{channel}_local_draft_verified_no_delta",
+                "draft_guard": draft_guard,
+            }
+            payload.update(
+                {
+                    "passed": True,
+                    "applied": False,
+                    "reason": f"final_visible_llm_polish_{channel}_local_draft_verified_no_delta",
+                    "raw_reply_text": draft,
+                    "reply_text": draft,
+                }
+            )
+            return finish(payload)
     result = get_cached_polish_result(
         settings=settings,
         customer_message=customer_message,
@@ -423,6 +468,8 @@ def effective_settings(config: dict[str, Any]) -> dict[str, Any]:
     settings.setdefault("brain_micro_max_tokens", DEFAULT_BRAIN_MICRO_MAX_TOKENS)
     settings.setdefault("brain_micro_temperature", DEFAULT_BRAIN_MICRO_TEMPERATURE)
     settings.setdefault("brain_micro_min_similarity", 0.72)
+    settings.setdefault("brain_local_verify_fast_path_enabled", True)
+    settings.setdefault("brain_local_verify_handoff_enabled", False)
     settings.setdefault("micro_verify_source_channels", sorted(MICRO_VERIFY_SOURCE_CHANNELS))
     return settings
 
@@ -1127,6 +1174,22 @@ def should_use_draft_after_micro_reject(*, settings: dict[str, Any], source_chan
     if channel not in {"brain", "handoff"}:
         return False
     if settings.get("brain_micro_guard_fallback_to_draft", True) is False:
+        return False
+    return source_micro_verify_enabled(settings, source_channel=source_channel)
+
+
+def should_use_brain_local_verify_fast_path(
+    *,
+    settings: dict[str, Any],
+    source_channel: str,
+    needs_handoff: bool,
+) -> bool:
+    if settings.get("brain_local_verify_fast_path_enabled", True) is False:
+        return False
+    channel = normalized_source_channel(source_channel)
+    if channel != "brain":
+        return False
+    if needs_handoff and settings.get("brain_local_verify_handoff_enabled", False) is not True:
         return False
     return source_micro_verify_enabled(settings, source_channel=source_channel)
 

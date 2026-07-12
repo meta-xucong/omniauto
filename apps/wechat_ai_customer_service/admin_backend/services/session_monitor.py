@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import Any
 
 from apps.wechat_ai_customer_service.admin_backend.services.customer_service_session_ledger import (
+    SessionLedgerStore,
     row_fingerprint_from_payload,
     session_key_from_payload,
 )
@@ -44,6 +45,7 @@ class SessionState:
     signal_ready_after: str = ""
     retry_not_before: str = ""
     empty_capture_retries: int = 0
+    startup_visual_baseline_at: str = ""
 
 
 @dataclass
@@ -56,6 +58,12 @@ class ActiveTarget:
     session_age_seconds: int = 0
     conversation_type: str = "unknown"
     pending_signal_kind: str = ""
+    pending_signal_text: str = ""
+    last_message_time: str = ""
+    unread_badge: str = ""
+
+
+MEDIA_CAPTURE_SIGNAL_KINDS = {"voice_capture", "image_capture", "media_capture"}
 
 
 class SessionMonitor:
@@ -118,6 +126,8 @@ class SessionMonitor:
         self._sticky_until_ts: float = 0.0
         self._sticky_dispatch_rounds: int = 0
         self._sessions: dict[str, SessionState] = {}
+        self._startup_visual_baseline_active = True
+        self._ledger = SessionLedgerStore(tenant_id=self.tenant_id)
         self._load_state()
 
     def _load_state(self) -> None:
@@ -166,6 +176,7 @@ class SessionMonitor:
                 signal_ready_after=str(data.get("signal_ready_after") or ""),
                 retry_not_before=str(data.get("retry_not_before") or ""),
                 empty_capture_retries=int(data.get("empty_capture_retries", 0) or 0),
+                startup_visual_baseline_at=str(data.get("startup_visual_baseline_at") or ""),
             )
         self._sessions = restored
 
@@ -196,6 +207,7 @@ class SessionMonitor:
                     "signal_ready_after": s.signal_ready_after,
                     "retry_not_before": s.retry_not_before,
                     "empty_capture_retries": int(s.empty_capture_retries or 0),
+                    "startup_visual_baseline_at": s.startup_visual_baseline_at,
                 }
                 for name, s in self._sessions.items()
             },
@@ -212,6 +224,7 @@ class SessionMonitor:
 
         sessions_data = result.get("sessions", []) or []
         now_iso = datetime.now().isoformat(timespec="seconds")
+        startup_visual_baseline_active = bool(self._startup_visual_baseline_active)
         active: list[ActiveTarget] = []
         unsafe_duplicate_display_names = self._unsafe_duplicate_display_names(sessions_data)
 
@@ -242,12 +255,17 @@ class SessionMonitor:
                 },
                 fallback_name=name,
             )
+            if name in unsafe_duplicate_display_names:
+                self._block_ambiguous_display_name(name, now_iso=now_iso, session_key=session_key)
+                continue
+            if not explicit_session_key:
+                session_key = self._reuse_unique_display_name_session_key(
+                    name,
+                    candidate_session_key=session_key,
+                )
             # All runtime session state is keyed by session_key.  The display
             # name is retained only for UI/whitelist/legacy migration.
             state_key = session_key
-            if name in unsafe_duplicate_display_names:
-                self._block_ambiguous_display_name(name, now_iso=now_iso, session_key=state_key)
-                continue
             has_preview_signal = bool(digest or msg_time)
             has_signal = bool(has_preview_signal or unread_badge)
             has_dispatch_badge = bool(unread_badge)
@@ -263,7 +281,14 @@ class SessionMonitor:
                     self._sessions.pop(name, None)
             if existing is None:
                 # New session seen for the first time
-                short_preview_signal = self.short_preview_can_raise_unread and self._signal_kind(content) == "high_sensitivity_short"
+                signal_kind = self._signal_kind(content)
+                short_preview_signal = self.short_preview_can_raise_unread and signal_kind == "high_sensitivity_short"
+                startup_media_baseline = bool(
+                    startup_visual_baseline_active
+                    and signal_kind in MEDIA_CAPTURE_SIGNAL_KINDS
+                    and not has_dispatch_badge
+                    and not self.require_unread_badge_for_dispatch
+                )
                 if self.require_unread_badge_for_dispatch:
                     initial_unread = bool(
                         has_dispatch_badge
@@ -278,6 +303,8 @@ class SessionMonitor:
                         or (self.initial_preview_can_raise_unread and has_signal)
                         or short_preview_signal
                     )
+                if startup_media_baseline:
+                    initial_unread = False
                 self._sessions[state_key] = SessionState(
                     name=name,
                     session_key=session_key,
@@ -293,8 +320,9 @@ class SessionMonitor:
                     conversation_type=conversation_type,
                     preview_change_hits=0,
                     pending_signal_text=content if initial_unread else "",
-                    pending_signal_kind=self._signal_kind(content),
+                    pending_signal_kind=signal_kind if initial_unread else "",
                     signal_ready_after=self._signal_ready_after(now_iso, content) if initial_unread else "",
+                    startup_visual_baseline_at=now_iso if startup_media_baseline else "",
                 )
                 if initial_unread:
                     active.append(ActiveTarget(
@@ -305,7 +333,10 @@ class SessionMonitor:
                         unread_detected=True,
                         session_age_seconds=0,
                         conversation_type=conversation_type,
-                        pending_signal_kind=self._signal_kind(content),
+                        pending_signal_kind=signal_kind,
+                        pending_signal_text=content,
+                        last_message_time=msg_time,
+                        unread_badge=unread_badge,
                     ))
             else:
                 existing.name = name
@@ -331,8 +362,18 @@ class SessionMonitor:
                     existing.last_unread_badge = unread_badge
                     existing.conversation_type = conversation_type
                     existing.last_seen_at = now_iso
+                    signal_kind = self._signal_kind(content)
+                    media_preview_signal = signal_kind in MEDIA_CAPTURE_SIGNAL_KINDS
+                    startup_media_baseline = bool(
+                        startup_visual_baseline_active
+                        and media_preview_signal
+                        and not has_dispatch_badge
+                        and not self.require_unread_badge_for_dispatch
+                    )
                     should_raise_unread = False
-                    if self.require_unread_badge_for_dispatch:
+                    if startup_media_baseline:
+                        existing.startup_visual_baseline_at = now_iso
+                    elif self.require_unread_badge_for_dispatch:
                         if has_dispatch_badge and (
                             not self.require_preview_signal_with_unread_badge
                             or changed_preview_signal
@@ -341,11 +382,12 @@ class SessionMonitor:
                             should_raise_unread = True
                             existing.preview_change_hits = 0
                         elif changed_preview_signal and not has_dispatch_badge:
-                            # In live RPA low-risk mode, a badge-less preview
-                            # change is only a baseline update.  Let the
-                            # session ledger / in-session capture path handle
-                            # already-open chats; do not drive foreground
-                            # switching from list text drift alone.
+                            # Voice/image previews can lose their badge when the
+                            # operator opens the chat. They still need a real
+                            # capture pass so the sidecar can transcribe/archive
+                            # from the chat pane instead of synthesizing text.
+                            if media_preview_signal:
+                                should_raise_unread = True
                             existing.preview_change_hits = 0
                         elif not has_dispatch_badge:
                             existing.preview_change_hits = 0
@@ -353,8 +395,8 @@ class SessionMonitor:
                         should_raise_unread = True
                         existing.preview_change_hits = 0
                     elif changed_by_digest or changed_by_time:
-                        short_preview_signal = self.short_preview_can_raise_unread and self._signal_kind(content) == "high_sensitivity_short"
-                        if short_preview_signal:
+                        short_preview_signal = self.short_preview_can_raise_unread and signal_kind == "high_sensitivity_short"
+                        if media_preview_signal or short_preview_signal:
                             should_raise_unread = True
                             existing.preview_change_hits = 0
                         elif self.preview_change_can_raise_unread:
@@ -383,10 +425,20 @@ class SessionMonitor:
                             session_age_seconds=age_seconds,
                             conversation_type=conversation_type,
                             pending_signal_kind=existing.pending_signal_kind,
+                            pending_signal_text=existing.pending_signal_text,
+                            last_message_time=existing.last_message_time,
+                            unread_badge=existing.last_unread_badge,
                         ))
                 else:
                     existing.last_seen_at = now_iso
                     existing.conversation_type = conversation_type
+                    if (
+                        startup_visual_baseline_active
+                        and self._signal_kind(content) in MEDIA_CAPTURE_SIGNAL_KINDS
+                        and not has_dispatch_badge
+                        and not self.require_unread_badge_for_dispatch
+                    ):
+                        existing.startup_visual_baseline_at = now_iso
                     if existing.last_unread_badge and not unread_badge:
                         existing.last_unread_badge = ""
                     if existing.unread_detected:
@@ -402,11 +454,15 @@ class SessionMonitor:
                             session_age_seconds=_age_seconds(existing.pending_since or existing.last_detected_at or existing.last_seen_at),
                             conversation_type=conversation_type,
                             pending_signal_kind=existing.pending_signal_kind,
+                            pending_signal_text=existing.pending_signal_text,
+                            last_message_time=existing.last_message_time,
+                            unread_badge=existing.last_unread_badge,
                         ))
                     else:
                         existing.preview_change_hits = 0
                         existing.priority_score = max(0, existing.priority_score - 5)
 
+        self._startup_visual_baseline_active = False
         self._save_state()
 
         # Sort by priority descending, then by session_age (older = higher priority)
@@ -538,10 +594,12 @@ class SessionMonitor:
                 "last_dispatched_at": s.last_dispatched_at,
                 "conversation_type": s.conversation_type,
                 "pending_signal_text": s.pending_signal_text,
+                "preview_content": s.pending_signal_text,
                 "pending_signal_kind": s.pending_signal_kind,
                 "signal_ready_after": s.signal_ready_after,
                 "retry_not_before": s.retry_not_before,
                 "empty_capture_retries": int(s.empty_capture_retries or 0),
+                "startup_visual_baseline_at": s.startup_visual_baseline_at,
             }
             for s in self._sessions.values()
         ]
@@ -558,6 +616,9 @@ class SessionMonitor:
                 session_age_seconds=_age_seconds(s.pending_since or s.last_detected_at or s.last_seen_at),
                 conversation_type=s.conversation_type or "unknown",
                 pending_signal_kind=s.pending_signal_kind or "",
+                pending_signal_text=s.pending_signal_text or "",
+                last_message_time=s.last_message_time or "",
+                unread_badge=s.last_unread_badge or "",
             )
             for s in self._sessions.values()
             if s.unread_detected
@@ -616,6 +677,8 @@ class SessionMonitor:
             return False
         if session.pending_signal_kind == "high_sensitivity_short":
             return True
+        if session.pending_signal_kind in MEDIA_CAPTURE_SIGNAL_KINDS:
+            return int(session.empty_capture_retries or 0) < 3
         if int(session.empty_capture_retries or 0) >= 2:
             return False
         return bool(
@@ -635,6 +698,74 @@ class SessionMonitor:
         if len(matches) == 1:
             return matches[0]
         return None
+
+    def _reuse_unique_display_name_session_key(self, name: str, *, candidate_session_key: str) -> str:
+        """Repair inferred type drift without weakening duplicate-name isolation."""
+
+        generated_matches = [
+            (key, state)
+            for key, state in self._sessions.items()
+            if isinstance(state, SessionState)
+            and state.name == name
+            and str(key).startswith("wx:rpa:v1:")
+        ]
+        if not generated_matches:
+            return candidate_session_key
+        if len(generated_matches) == 1:
+            return str(generated_matches[0][0])
+
+        scored: list[tuple[tuple[int, int, int], str, SessionState]] = []
+        for key, state in generated_matches:
+            ledger_summary = self._ledger.load_summary(str(key))
+            recent_count = len(ledger_summary.get("recent_messages") or []) if isinstance(ledger_summary, dict) else 0
+            try:
+                context_version = int((ledger_summary or {}).get("context_version") or 0)
+            except (TypeError, ValueError):
+                context_version = 0
+            candidate_bonus = 1 if str(key) == str(candidate_session_key) else 0
+            scored.append(((recent_count, context_version, candidate_bonus), str(key), state))
+        scored.sort(key=lambda item: (item[0], item[1]), reverse=True)
+        canonical_key = scored[0][1]
+        canonical_state = scored[0][2]
+        alias_keys = [key for _score, key, _state in scored[1:]]
+        try:
+            self._ledger.merge_session_alias_context(
+                canonical_session_key=canonical_key,
+                alias_session_keys=alias_keys,
+                target_name=name,
+            )
+        except Exception:
+            # Monitor identity repair must not block capture; the alias ledger
+            # remains available for a later retry/audit if persistence fails.
+            pass
+        for _score, key, state in scored[1:]:
+            canonical_state.unread_detected = bool(canonical_state.unread_detected or state.unread_detected)
+            canonical_state.priority_score = max(int(canonical_state.priority_score or 0), int(state.priority_score or 0))
+            canonical_state.preview_change_hits = max(
+                int(canonical_state.preview_change_hits or 0),
+                int(state.preview_change_hits or 0),
+            )
+            canonical_state.empty_capture_retries = max(
+                int(canonical_state.empty_capture_retries or 0),
+                int(state.empty_capture_retries or 0),
+            )
+            for field_name in (
+                "first_seen_at",
+                "pending_since",
+                "last_detected_at",
+                "last_dispatched_at",
+                "pending_signal_text",
+                "pending_signal_kind",
+                "signal_ready_after",
+                "retry_not_before",
+            ):
+                if not getattr(canonical_state, field_name) and getattr(state, field_name):
+                    setattr(canonical_state, field_name, getattr(state, field_name))
+            self._sessions.pop(key, None)
+        canonical_state.session_key = canonical_key
+        canonical_state.name = name
+        self._sessions[canonical_key] = canonical_state
+        return canonical_key
 
     def _mark_pending_signal(
         self,
@@ -656,6 +787,9 @@ class SessionMonitor:
         session.empty_capture_retries = 0
 
     def _signal_kind(self, content: str) -> str:
+        media_kind = _media_capture_signal_kind(content)
+        if media_kind:
+            return media_kind
         if _is_high_sensitivity_short_signal(content, max_chars=self.high_sensitivity_short_max_chars):
             return "high_sensitivity_short"
         return "normal"
@@ -709,6 +843,8 @@ class SessionMonitor:
             return True
         if not (str(content or "").strip() or str(msg_time or "").strip()):
             return False
+        if self._signal_kind(content) in MEDIA_CAPTURE_SIGNAL_KINDS:
+            return True
         if self._signal_kind(content) == "high_sensitivity_short":
             return True
         if not str(session.last_dispatched_at or "").strip():
@@ -821,6 +957,26 @@ def _normalize_short_signal_text(text: str) -> str:
     compact = "".join(str(text or "").split())
     compact = "".join(ch for ch in compact if ch not in "，。,.！？!、~～：:；;“”\"'（）()[]【】")
     return compact.strip().lower()
+
+
+def _media_capture_signal_kind(text: str) -> str:
+    raw = str(text or "").strip().lower()
+    compact = _normalize_short_signal_text(raw)
+    if not compact:
+        return ""
+    voice_tokens = {"语音", "语音消息", "voice", "voicemessage", "audio", "audiomessage"}
+    image_tokens = {"图片", "图片消息", "照片", "图像", "image", "photo", "picture", "pic"}
+    media_tokens = {"视频", "视频消息", "video", "文件", "文件消息", "file", "表情", "sticker", "emoji"}
+    if any(token in raw for token in ("[语音]", "【语音】", "[voice]", "[audio]")) or compact in voice_tokens:
+        return "voice_capture"
+    if any(token in raw for token in ("[图片]", "【图片】", "[image]", "[photo]", "[picture]")) or compact in image_tokens:
+        return "image_capture"
+    if (
+        any(token in raw for token in ("[视频]", "【视频】", "[video]", "[文件]", "【文件】", "[file]", "[表情]", "【表情】"))
+        or compact in media_tokens
+    ):
+        return "media_capture"
+    return ""
 
 
 def _is_high_sensitivity_short_signal(text: str, *, max_chars: int) -> bool:

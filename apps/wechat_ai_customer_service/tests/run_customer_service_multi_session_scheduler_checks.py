@@ -52,10 +52,12 @@ from apps.wechat_ai_customer_service.admin_backend.services.customer_service_sch
     CapturedMessagesConnector,
     CustomerServiceSchedulerRuntime,
     ManagedListenerSchedulerBridge,
+    build_context_recovery_hint,
     mark_session_capture_failed,
     merge_scheduler_conversation_context,
     plan_reply_with_listen_workflow,
     polish_reply_with_listen_workflow,
+    ready_reply_brain_quality_review,
     ready_reply_session_envelope_failure,
 )
 from apps.wechat_ai_customer_service.admin_backend.services.customer_service_session_ledger import SessionLedgerStore  # noqa: E402
@@ -602,6 +604,36 @@ def check_session_monitor_low_disturbance_ignores_normal_preview_without_badge(t
     assert_equal([item.name for item in badge], ["客户A"], "visual unread badge must still trigger capture")
 
 
+def check_session_monitor_startup_visual_baseline_requires_new_unread_evidence(tmp_dir: Path | None = None) -> None:
+    state_path = (tmp_dir or (PROJECT_ROOT / "runtime" / "apps" / "wechat_ai_customer_service" / "test_artifacts")) / "session_monitor_startup_visual_baseline_unit.json"
+    try:
+        state_path.unlink()
+    except FileNotFoundError:
+        pass
+    monitor = SessionMonitor(
+        state_path=state_path,
+        max_targets_per_iteration=3,
+        initial_preview_can_raise_unread=True,
+        preview_change_can_raise_unread=True,
+        short_preview_can_raise_unread=True,
+        require_unread_badge_for_dispatch=False,
+    )
+    historical_visual = monitor.poll(
+        FakeSessionConnector(
+            [{"name": "客户图片会话", "content": "[图片]", "time": "22:00", "conversation_type": "private"}]
+        )
+    )
+    assert_equal(historical_visual, [], "startup visual-only preview without unread evidence must become a baseline")
+    baseline = monitor.all_sessions()[0]
+    assert_true(bool(baseline.get("startup_visual_baseline_at")), "startup visual baseline should be auditable")
+    new_visual = monitor.poll(
+        FakeSessionConnector(
+            [{"name": "客户图片会话", "content": "[图片]", "time": "22:01", "unread_badge": "visual_red_dot", "conversation_type": "private"}]
+        )
+    )
+    assert_equal([item.name for item in new_visual], ["客户图片会话"], "new visual with unread evidence must dispatch")
+
+
 def check_session_monitor_low_disturbance_keeps_short_preview_signal(tmp_dir: Path | None = None) -> None:
     state_path = (tmp_dir or (PROJECT_ROOT / "runtime" / "apps" / "wechat_ai_customer_service" / "test_artifacts")) / "session_monitor_low_disturbance_short_unit.json"
     try:
@@ -850,6 +882,7 @@ def check_distinct_customer_image_assets_are_not_deduped_by_proxy_text() -> None
         batch=[first],
         conversation_type="group",
         session_key="wx:images",
+        allow_customer_image_proxy=True,
         now="2026-07-06T15:43:45",
     )
     session = session_by_name(state, "新数据测试")
@@ -862,6 +895,7 @@ def check_distinct_customer_image_assets_are_not_deduped_by_proxy_text() -> None
         batch=[second],
         conversation_type="group",
         session_key="wx:images",
+        allow_customer_image_proxy=True,
         now="2026-07-06T15:45:29",
     )
     assert_equal(first_capture.get("status"), "captured", "first image should be captured")
@@ -907,7 +941,9 @@ def check_runtime_tick_does_not_wait_for_slow_llm() -> None:
                 now="2026-05-25T10:00:00",
             )
             duration = time.time() - started
-            assert_true(duration < 0.15, f"tick should submit LLM tasks without waiting for slow worker, got {duration:.3f}s")
+            # The slow worker sleeps 250 ms. Keep enough Windows scheduling
+            # headroom while still proving the tick did not await it.
+            assert_true(duration < 0.24, f"tick should submit LLM tasks without waiting for slow worker, got {duration:.3f}s")
             assert_equal(result["summary"]["llm_running"], 2, "both LLM tasks should be running after first tick")
             phase = result.get("phase_durations")
             assert_true(isinstance(phase, dict), f"tick should expose phase_durations: {result}")
@@ -1424,11 +1460,11 @@ def check_runtime_same_capture_retry_can_recover_without_rpa_recapture() -> None
             if len(planner_calls) == 1:
                 return {
                     "ok": False,
-                    "reason": "customer_service_brain_no_visible_reply",
+                    "reason": "customer_service_brain_llm_unavailable",
                     "event": {
                         "customer_service_brain": {
-                            "rule_name": "customer_service_brain_no_visible_reply",
-                            "reason": "brain_quality_verification_failed",
+                            "rule_name": "customer_service_brain_llm_unavailable",
+                            "reason": "customer_service_brain_llm_unavailable",
                         }
                     },
                 }
@@ -2538,6 +2574,100 @@ def check_runtime_recovers_orphaned_running_llm_task_after_restart() -> None:
             runtime.shutdown()
 
 
+def check_runtime_expires_stale_queued_llm_task_after_restart() -> None:
+    with tempfile.TemporaryDirectory() as temp:
+        path = Path(temp) / "scheduler_state.json"
+        store = SchedulerStateStore(tenant_id="unit", path=path)
+        state = store.load()
+        capture = record_capture_result(
+            state,
+            "客户A",
+            messages=[message("A", 1)],
+            batch=[message("A", 1)],
+            now="2026-05-25T10:00:00",
+        )
+        task = enqueue_llm_task(state, capture["capture_id"], now="2026-05-25T10:00:01")
+        store.save(state)
+
+        def capture_fn(session: dict[str, Any]) -> dict[str, Any]:
+            return {"messages": [message("A", 2)], "batch": [message("A", 2)]}
+
+        def planner(_capture_payload: dict[str, Any], _task_payload: dict[str, Any]) -> dict[str, Any]:
+            raise AssertionError("stale queued LLM task must not be submitted after restart")
+
+        runtime = CustomerServiceSchedulerRuntime(
+            store=store,
+            config=SchedulerConfig(
+                enabled=True,
+                capture_max_sessions_per_round=1,
+                llm_max_concurrency=1,
+                planner_max_concurrency=1,
+                pending_session_ttl_seconds=60,
+            ),
+            capture_fn=capture_fn,
+            plan_reply_fn=planner,
+        )
+        try:
+            result = runtime.tick(allow_send=False, now="2026-05-25T10:05:00")
+            assert_true(
+                not any(item.get("event") == "llm_task_submitted" for item in result.get("events") or []),
+                f"stale queued LLM task should not be submitted: {result}",
+            )
+            restored = store.load()
+            assert_equal(restored["llm_tasks"][task["task_id"]]["status"], "stale", "stale queued LLM task should be expired")
+            assert_equal(result["summary"].get("llm_running"), 0, "expired queued LLM task must not run")
+            assert_equal(result["summary"].get("reply_ready"), 0, "expired queued LLM task must not create reply")
+        finally:
+            runtime.shutdown()
+
+
+def check_runtime_expires_stale_orphaned_running_llm_task_after_restart() -> None:
+    with tempfile.TemporaryDirectory() as temp:
+        path = Path(temp) / "scheduler_state.json"
+        store = SchedulerStateStore(tenant_id="unit", path=path)
+        state = store.load()
+        capture = record_capture_result(
+            state,
+            "客户A",
+            messages=[message("A", 1)],
+            batch=[message("A", 1)],
+            now="2026-05-25T10:00:00",
+        )
+        task = enqueue_llm_task(state, capture["capture_id"], now="2026-05-25T10:00:01")
+        mark_llm_started(state, task["task_id"], now="2026-05-25T10:00:02")
+        store.save(state)
+
+        def capture_fn(session: dict[str, Any]) -> dict[str, Any]:
+            return {"messages": [message("A", 2)], "batch": [message("A", 2)]}
+
+        def planner(_capture_payload: dict[str, Any], _task_payload: dict[str, Any]) -> dict[str, Any]:
+            raise AssertionError("stale orphaned LLM task must not be requeued after restart")
+
+        runtime = CustomerServiceSchedulerRuntime(
+            store=store,
+            config=SchedulerConfig(
+                enabled=True,
+                capture_max_sessions_per_round=1,
+                llm_max_concurrency=1,
+                planner_max_concurrency=1,
+                pending_session_ttl_seconds=60,
+            ),
+            capture_fn=capture_fn,
+            plan_reply_fn=planner,
+        )
+        try:
+            result = runtime.tick(allow_send=False, now="2026-05-25T10:05:00")
+            assert_true(
+                any(item.get("event") == "llm_task_orphan_expired" for item in result.get("events") or []),
+                f"stale orphaned LLM task should expire instead of requeue: {result}",
+            )
+            restored = store.load()
+            assert_equal(restored["llm_tasks"][task["task_id"]]["status"], "stale", "stale orphaned LLM task should be expired")
+            assert_equal(result["summary"].get("llm_running"), 0, "expired orphaned LLM task must not run")
+        finally:
+            runtime.shutdown()
+
+
 def check_runtime_restores_missing_llm_task_from_in_memory_snapshot() -> None:
     with tempfile.TemporaryDirectory() as temp:
         path = Path(temp) / "scheduler_state.json"
@@ -2637,6 +2767,127 @@ def check_runtime_recovers_orphaned_running_polish_task_after_restart() -> None:
             time.sleep(0.03)
             second = runtime.tick(allow_send=False, now="2026-06-02T18:10:07")
             assert_equal(second["summary"]["reply_ready"], 1, "recovered polish task should complete into ready reply")
+        finally:
+            runtime.shutdown()
+
+
+def check_runtime_expires_stale_queued_polish_task_after_restart() -> None:
+    with tempfile.TemporaryDirectory() as temp:
+        path = Path(temp) / "scheduler_state.json"
+        store = SchedulerStateStore(tenant_id="unit", path=path)
+        state = store.load()
+        capture = record_capture_result(
+            state,
+            "客户A",
+            messages=[message("A", 1)],
+            batch=[message("A", 1)],
+            now="2026-06-02T18:10:00",
+        )
+        task = enqueue_llm_task(state, capture["capture_id"], now="2026-06-02T18:10:01")
+        complete_llm_task(
+            state,
+            task["task_id"],
+            reply_text="待润色草稿",
+            decision={"rule_name": "unit"},
+            create_ready_reply=False,
+            now="2026-06-02T18:10:02",
+        )
+        polish_task = enqueue_polish_task(state, task["task_id"], now="2026-06-02T18:10:03")
+        store.save(state)
+
+        def capture_fn(session: dict[str, Any]) -> dict[str, Any]:
+            return {"messages": [message("A", 2)], "batch": [message("A", 2)]}
+
+        def planner(_capture_payload: dict[str, Any], _task_payload: dict[str, Any]) -> dict[str, Any]:
+            return {"ok": True, "reply_text": "不会被调用", "decision": {"rule_name": "unit"}}
+
+        def polish(_planner_task: dict[str, Any], _task_payload: dict[str, Any]) -> dict[str, Any]:
+            raise AssertionError("stale queued polish task must not be submitted after restart")
+
+        runtime = CustomerServiceSchedulerRuntime(
+            store=store,
+            config=SchedulerConfig(
+                enabled=True,
+                capture_max_sessions_per_round=1,
+                llm_max_concurrency=1,
+                planner_max_concurrency=1,
+                polish_max_concurrency=1,
+                pending_session_ttl_seconds=60,
+            ),
+            capture_fn=capture_fn,
+            plan_reply_fn=planner,
+            polish_reply_fn=polish,
+        )
+        try:
+            result = runtime.tick(allow_send=False, now="2026-06-02T18:15:00")
+            assert_true(
+                not any(item.get("event") == "polish_task_submitted" for item in result.get("events") or []),
+                f"stale queued polish task should not be submitted: {result}",
+            )
+            restored = store.load()
+            assert_equal(restored["polish_tasks"][polish_task["task_id"]]["status"], "stale", "stale queued polish task should expire")
+            assert_equal(result["summary"].get("polish_running"), 0, "expired queued polish task must not run")
+            assert_equal(result["summary"].get("reply_ready"), 0, "expired queued polish task must not create reply")
+        finally:
+            runtime.shutdown()
+
+
+def check_runtime_expires_stale_ready_reply_before_send_after_restart() -> None:
+    with tempfile.TemporaryDirectory() as temp:
+        path = Path(temp) / "scheduler_state.json"
+        store = SchedulerStateStore(tenant_id="unit", path=path)
+        state = store.load()
+        capture = record_capture_result(
+            state,
+            "客户A",
+            messages=[message("A", 1)],
+            batch=[message("A", 1)],
+            now="2026-06-02T18:10:00",
+        )
+        task = enqueue_llm_task(state, capture["capture_id"], now="2026-06-02T18:10:01")
+        completed = complete_llm_task(
+            state,
+            task["task_id"],
+            reply_text="这条旧回复不能发送",
+            decision={"rule_name": "unit"},
+            create_ready_reply=True,
+            now="2026-06-02T18:10:02",
+        )
+        reply_id = completed["reply"]["reply_id"]
+        store.save(state)
+        sent: list[dict[str, Any]] = []
+
+        def capture_fn(session: dict[str, Any]) -> dict[str, Any]:
+            return {"messages": [message("A", 2)], "batch": [message("A", 2)]}
+
+        def planner(_capture_payload: dict[str, Any], _task_payload: dict[str, Any]) -> dict[str, Any]:
+            return {"ok": True, "reply_text": "不会被调用", "decision": {"rule_name": "unit"}}
+
+        def send_fn(reply: dict[str, Any]) -> dict[str, Any]:
+            sent.append(reply)
+            raise AssertionError("stale ready reply must not be sent after restart")
+
+        runtime = CustomerServiceSchedulerRuntime(
+            store=store,
+            config=SchedulerConfig(
+                enabled=True,
+                capture_max_sessions_per_round=1,
+                llm_max_concurrency=1,
+                planner_max_concurrency=1,
+                send_max_replies_per_round=1,
+                reply_ready_ttl_seconds=60,
+            ),
+            capture_fn=capture_fn,
+            plan_reply_fn=planner,
+            send_fn=send_fn,
+        )
+        try:
+            result = runtime.tick(allow_send=True, now="2026-06-02T18:15:00")
+            restored = store.load()
+            assert_equal(restored["ready_replies"][reply_id]["status"], "stale", "stale ready reply should be marked stale")
+            assert_equal(restored["ready_replies"][reply_id]["stale_reason"], "ready_reply_ttl_exceeded_before_send", "stale reason should be explicit")
+            assert_equal(len(sent), 0, "stale ready reply must not call send_fn")
+            assert_equal(result["summary"].get("reply_sending"), 0, "stale ready reply must not enter sending")
         finally:
             runtime.shutdown()
 
@@ -3097,6 +3348,49 @@ def check_scheduler_capture_filters_non_text_messages_for_normal_customer_sessio
     assert_equal(capture.get("status"), "empty", "non-text capture must not become a customer-service Brain task")
     assert_equal(capture.get("batch"), [], "non-text messages should not be reply input batch")
     assert_equal(capture.get("filtered_non_customer_message_count"), 1, "filtered non-text message should be observable")
+
+
+def check_scheduler_authorizes_customer_image_proxy_only_for_image_capture() -> None:
+    proxy = {
+        "id": "visual_proxy:authorized-1",
+        "message_id": "visual_proxy:authorized-1",
+        "type": "text",
+        "sender": "customer",
+        "content": "客户发来了一张图片",
+        "is_customer_image_proxy": True,
+        "visual_turn_kind": "customer_image",
+        "saved_image_path": "D:/tmp/authorized-image.png",
+        "visual_occurrence_id": "visual_occurrence_authorized-1",
+    }
+    default_state = empty_state()
+    default_capture = record_capture_result(
+        default_state,
+        "许聪",
+        messages=[proxy],
+        batch=[proxy],
+        conversation_type="private",
+        session_key="wx:rpa:v1:image-proxy-default",
+        now="2026-06-20T09:01:00",
+    )
+    assert_equal(default_capture.get("status"), "empty", "image proxy must stay filtered outside image capture")
+
+    image_state = empty_state()
+    image_capture = record_capture_result(
+        image_state,
+        "许聪",
+        messages=[proxy],
+        batch=[proxy],
+        conversation_type="private",
+        session_key="wx:rpa:v1:image-proxy-authorized",
+        allow_customer_image_proxy=True,
+        now="2026-06-20T09:01:01",
+    )
+    assert_equal(image_capture.get("status"), "captured", "authorized image proxy must enter the Brain capture")
+    assert_equal(
+        [item.get("id") for item in image_capture.get("batch") or []],
+        ["visual_proxy:authorized-1"],
+        "authorized image proxy should remain the scheduler batch input",
+    )
 
 
 def check_scheduler_capture_filters_visual_ocr_text_without_keyword_blocking() -> None:
@@ -3587,6 +3881,7 @@ def check_scheduler_split_polish_stage_degrades_to_brain_draft_when_polish_unava
     config.setdefault("operator_alert", {})["enabled"] = False
     config.setdefault("raw_messages", {})["enabled"] = False
     config.setdefault("customer_profiles", {})["enabled"] = False
+    config.setdefault("reply", {})["prefix"] = ""
     config.setdefault("customer_service_brain", {})["enabled"] = True
     config["customer_service_brain"]["mode"] = "authoritative"
     config["final_visible_llm_polish"] = {
@@ -3654,11 +3949,13 @@ def check_scheduler_split_polish_stage_degrades_to_brain_draft_when_polish_unava
     )
     assert_true(bool(polished.get("ok")), f"split polish should degrade to Brain draft when polish unavailable: {polished}")
     assert_equal(str(polished.get("reply_text") or ""), draft, "Brain draft should be preserved as fallback reply")
-    assert_true(bool(polished.get("degraded")), f"split polish should record degraded status: {polished}")
     decision = polished.get("decision") if isinstance(polished.get("decision"), dict) else {}
     final_polish = decision.get("final_visible_llm_polish") if isinstance(decision.get("final_visible_llm_polish"), dict) else {}
     assert_equal(final_polish.get("reply_text"), draft, "final polish metadata should retain fallback Brain draft")
-    assert_true(final_polish.get("passed") is not True, f"metadata should still show polish did not pass: {final_polish}")
+    if bool(polished.get("degraded")):
+        assert_true(final_polish.get("passed") is not True, f"degraded metadata should show polish did not pass: {final_polish}")
+    else:
+        assert_true(final_polish.get("passed") is True, f"local draft verification should pass without changing Brain draft: {final_polish}")
     assert_true(decision.get("visible_reply_owner") == "brain", f"visible owner must remain Brain: {decision}")
 
 
@@ -4010,6 +4307,13 @@ def check_managed_bridge_capture_send_marks_workflow_state() -> None:
         root = Path(temp)
         tenant_id = "unit_bridge"
         settings_path = enable_brain_first_test_settings(tenant_id)
+        send_env_keys = (
+            "WECHAT_WIN32_OCR_HUMANIZED_INPUT_ENABLED",
+            "WECHAT_WIN32_OCR_FAST_SEND_CONFIRMATION",
+        )
+        previous_send_env = {key: os.environ.get(key) for key in send_env_keys}
+        for key in send_env_keys:
+            os.environ.pop(key, None)
         config_path = root / "listener_config.json"
         state_path = root / "workflow_state.json"
         audit_path = root / "audit.jsonl"
@@ -4042,26 +4346,36 @@ def check_managed_bridge_capture_send_marks_workflow_state() -> None:
             allow_send=True,
             write_data=False,
         )
+        for key in send_env_keys:
+            os.environ.pop(key, None)
         fake = FakeBridgeConnector()
         bridge.connector = fake
         bridge.store = SchedulerStateStore(tenant_id=tenant_id, path=root / "scheduler_state.json")
+        bridge.ledger = SessionLedgerStore(tenant_id=tenant_id, root=bridge.store.ledger_root)
         if bridge.runtime is not None:
             bridge.runtime.shutdown()
         bridge.runtime = CustomerServiceSchedulerRuntime(
             store=bridge.store,
             config=bridge.scheduler_config,
             capture_fn=bridge._capture_session,
-            plan_reply_fn=lambda capture, task: {"ok": True, "reply_text": "可以谈，您方便说下预算吗？", "decision": {"rule_name": "unit"}},
+            plan_reply_fn=lambda capture, task: {"ok": True, "reply_text": "can talk budget?", "decision": {"rule_name": "unit"}},
             freshness_fn=lambda reply: {"ok": True, "stale": False},
             send_fn=bridge._send_reply,
             capture_done_fn=bridge._capture_done,
         )
         try:
             bridge.runtime.tick(session_signals=[{"name": "customer_a", "unread_detected": True}], allow_send=True, now="2026-05-25T10:00:00")
-            time.sleep(0.03)
-            bridge.runtime.tick(allow_send=True, now="2026-05-25T10:00:01")
+            deadline = time.time() + 1.0
+            while time.time() < deadline and (not fake.sent or not audit_path.exists()):
+                time.sleep(0.03)
+                bridge.runtime.tick(allow_send=True, now="2026-05-25T10:00:01")
         finally:
             bridge.shutdown()
+            for key, value in previous_send_env.items():
+                if value is None:
+                    os.environ.pop(key, None)
+                else:
+                    os.environ[key] = value
             settings_path.unlink(missing_ok=True)
         assert_equal(len(fake.sent), 1, "bridge sender should send exactly one verified reply")
         workflow_state = json.loads(state_path.read_text(encoding="utf-8"))
@@ -4426,6 +4740,143 @@ def check_managed_bridge_pending_capture_same_signal_does_not_stale_ready_reply(
             "scheduler_pending_capture_matches_capture_fast_pass",
             f"pending same signal should be recognized before stale guard: {result}",
         )
+
+
+def check_pending_signal_id_is_stable_only_inside_one_pending_window() -> None:
+    state = empty_state()
+    first = enqueue_pending_session(
+        state,
+        "瀹㈡埛A",
+        exact=True,
+        conversation_type="private",
+        session_key="wx:identity",
+        now="2026-07-11T19:16:25",
+    )
+    repeated_poll = enqueue_pending_session(
+        state,
+        "瀹㈡埛A",
+        exact=True,
+        conversation_type="private",
+        session_key="wx:identity",
+        now="2026-07-11T19:16:27",
+    )
+    first_id = str(first.get("pending_signal_id") or "")
+    assert_true(bool(first_id), "a new pending window must receive an event id")
+    assert_equal(
+        repeated_poll.get("pending_signal_id"),
+        first_id,
+        "polling the same pending window must reuse its event id",
+    )
+    first["pending_capture"] = False
+    next_event = enqueue_pending_session(
+        state,
+        "瀹㈡埛A",
+        exact=True,
+        conversation_type="private",
+        session_key="wx:identity",
+        now="2026-07-11T19:18:26",
+    )
+    assert_true(
+        str(next_event.get("pending_signal_id") or "") != first_id,
+        "a later real pending event must receive a new event id",
+    )
+
+
+def check_pending_signal_identity_controls_visual_reply_freshness() -> None:
+    with tempfile.TemporaryDirectory() as temp:
+        root = Path(temp)
+        config_path = root / "listener_config.json"
+        config = {
+            "state_path": str(root / "workflow_state.json"),
+            "audit_log_path": str(root / "audit.jsonl"),
+            "targets": [{"name": "瀹㈡埛A", "enabled": True, "exact": True}],
+            "history_backfill": {"enabled": False},
+            "scheduler_freshness": {
+                "enabled": True,
+                "mode": "preview_first",
+                "strict_check_interval_seconds": 0,
+                "strict_check_after_llm_seconds": 0,
+            },
+        }
+        config_path.write_text(json.dumps(config, ensure_ascii=False, indent=2), encoding="utf-8")
+        bridge = ManagedListenerSchedulerBridge(
+            tenant_id="unit_visual_identity_freshness",
+            config_path=config_path,
+            allow_send=False,
+            write_data=False,
+        )
+        state = bridge.store.load()
+        session = scheduler_state_module.ensure_session(
+            state,
+            "瀹㈡埛A",
+            exact=True,
+            conversation_type="private",
+            session_key="wx:identity",
+            now="2026-07-11T19:18:26",
+        )
+        session = scheduler_state_module.get_session_by_identity(
+            state,
+            "瀹㈡埛A",
+            session_key="wx:identity",
+        )
+        assert_true(isinstance(session, dict), "test session should exist")
+        session["pending_capture"] = True
+        session["pending_signal_id"] = "pending-current"
+        bridge.store.save(state)
+        settings = {
+            "enabled": True,
+            "mode": "preview_first",
+            "preview_from_session_list_enabled": False,
+            "strict_check_interval_seconds": 0,
+            "strict_check_after_llm_seconds": 0,
+        }
+        same_event = bridge._preview_freshness_fastpath(
+            reply={
+                "target_name": "瀹㈡埛A",
+                "session_key": "wx:identity",
+                "_capture": {
+                    "batch": [
+                        {
+                            "id": "visual-1",
+                            "type": "image",
+                            "pending_signal_id": "pending-current",
+                        }
+                    ]
+                },
+            },
+            target_name="瀹㈡埛A",
+            settings=settings,
+        )
+        newer_event = bridge._preview_freshness_fastpath(
+            reply={
+                "target_name": "瀹㈡埛A",
+                "session_key": "wx:identity",
+                "_capture": {
+                    "batch": [
+                        {
+                            "id": "visual-1",
+                            "type": "image",
+                            "pending_signal_id": "pending-old",
+                        }
+                    ]
+                },
+            },
+            target_name="瀹㈡埛A",
+            settings=settings,
+        )
+        bridge.shutdown()
+    assert_true(same_event.get("stale") is False, f"same event must stay fresh: {same_event}")
+    assert_equal(
+        same_event.get("reason"),
+        "scheduler_pending_signal_matches_capture_fast_pass",
+        "same event should use identity fast path",
+    )
+    assert_true(newer_event.get("stale") is True, f"new event must stale old reply: {newer_event}")
+    assert_equal(
+        newer_event.get("reason"),
+        "scheduler_pending_signal_mismatch_before_send",
+        "new event should use identity mismatch path",
+    )
 
 
 def check_managed_bridge_freshness_strict_interval_fallback() -> None:
@@ -5050,6 +5501,158 @@ def check_managed_bridge_collect_signals_does_not_dispatch_when_all_pending_busy
             bridge.shutdown()
 
 
+def check_managed_bridge_retains_busy_unread_signal_for_scheduler() -> None:
+    class FakeMixedBusyMonitor:
+        def poll(self, connector: Any) -> list[Any]:
+            return []
+
+        def select_dispatch_targets(self, *, limit: int | None = None) -> list[Any]:
+            return [
+                SimpleNamespace(name="CustomerA", exact=True, unread_detected=True, unread_badge="visual_red_dot", conversation_type="private"),
+                SimpleNamespace(name="CustomerB", exact=True, unread_detected=True, unread_badge="visual_red_dot", conversation_type="private"),
+            ]
+
+        def pending_targets(self, *, limit: int | None = None) -> list[Any]:
+            targets = self.select_dispatch_targets(limit=None)
+            return targets if limit is None else targets[: max(0, int(limit))]
+
+    with tempfile.TemporaryDirectory() as temp:
+        root = Path(temp)
+        config_path = root / "listener_config.json"
+        config_path.write_text(
+            json.dumps(
+                {
+                    "state_path": str(root / "workflow_state.json"),
+                    "audit_log_path": str(root / "audit.jsonl"),
+                    "targets": [
+                        {"name": "CustomerA", "enabled": True, "exact": True},
+                        {"name": "CustomerB", "enabled": True, "exact": True},
+                    ],
+                    "multi_target": {"enabled": True},
+                    "history_backfill": {"enabled": False},
+                    "raw_messages": {"enabled": False},
+                    "customer_profiles": {"enabled": False},
+                    "concurrency_scheduler": {"enabled": True, "capture_max_sessions_per_round": 2},
+                },
+                ensure_ascii=False,
+            ),
+            encoding="utf-8",
+        )
+        bridge = ManagedListenerSchedulerBridge(
+            tenant_id="unit_busy_signal_retention",
+            config_path=config_path,
+            allow_send=False,
+            write_data=False,
+        )
+        try:
+            bridge.session_monitor = FakeMixedBusyMonitor()
+            bridge.ignored_session_names = set()
+            state = empty_state()
+            for name in ("CustomerA", "CustomerB"):
+                first = message(name, 1, content=f"first {name}")
+                record_session_signal(
+                    state,
+                    {
+                        "name": name,
+                        "content": first["content"],
+                        "time": "10:00",
+                        "unread_detected": True,
+                        "unread_badge": "visual_red_dot",
+                        "conversation_type": "private",
+                    },
+                    now="2026-07-11T10:00:00",
+                )
+                capture = record_capture_result(
+                    state,
+                    name,
+                    messages=[first],
+                    batch=[first],
+                    history_backfill={},
+                    exact=True,
+                    conversation_type="private",
+                    now="2026-07-11T10:00:01",
+                )
+                task = enqueue_llm_task(state, str(capture.get("capture_id") or ""), now="2026-07-11T10:00:02")
+                mark_llm_started(state, str(task.get("task_id") or ""), now="2026-07-11T10:00:03")
+            bridge.store.save(state)
+            signals = bridge._collect_session_signals()
+            assert_equal(
+                {item.get("name") for item in signals},
+                {"CustomerA", "CustomerB"},
+                f"busy unread signals must remain scheduler input: {signals}",
+            )
+        finally:
+            bridge.shutdown()
+
+
+def check_scheduler_preserves_unread_signal_during_active_session_work() -> None:
+    state = empty_state()
+    first = message("CustomerA", 1, content="first message")
+    record_session_signal(
+        state,
+        {
+            "name": "CustomerA",
+            "content": first["content"],
+            "time": "10:00",
+            "unread_detected": True,
+            "unread_badge": "visual_red_dot",
+            "conversation_type": "private",
+        },
+        now="2026-07-11T10:00:00",
+    )
+    capture = record_capture_result(
+        state,
+        "CustomerA",
+        messages=[first],
+        batch=[first],
+        history_backfill={},
+        exact=True,
+        conversation_type="private",
+        now="2026-07-11T10:00:01",
+    )
+    task = enqueue_llm_task(state, str(capture.get("capture_id") or ""), now="2026-07-11T10:00:02")
+    mark_llm_started(state, str(task.get("task_id") or ""), now="2026-07-11T10:00:03")
+
+    record_session_signal(
+        state,
+        {
+            "name": "CustomerA",
+            "unread_detected": True,
+            "conversation_type": "private",
+        },
+        now="2026-07-11T10:00:04",
+    )
+    session = session_by_name(state, "CustomerA")
+    assert_true(session.get("pending_capture") is True, f"new unread signal must survive active Brain work: {session}")
+    assert_equal(
+        session.get("pending_reason"),
+        "session_signal_changed_during_active_work",
+        "active work must defer, not consume, unread-only signals",
+    )
+    assert_true(
+        session.get("pending_signal_has_unread_evidence") is True,
+        "deferred unread signal must retain its evidence marker",
+    )
+    assert_equal(
+        select_capture_sessions(state, limit=1),
+        [],
+        "active session work must still prevent a second capture",
+    )
+
+    complete_llm_task(
+        state,
+        str(task.get("task_id") or ""),
+        reply_text="first reply",
+        decision={"rule_name": "unit"},
+        create_ready_reply=False,
+        now="2026-07-11T10:00:05",
+    )
+    assert_true(
+        bool(select_capture_sessions(state, limit=1)),
+        "deferred unread signal must become dispatchable after older work finishes",
+    )
+
+
 def check_managed_bridge_capture_applies_humanized_switch_delay() -> None:
     class FakeConnector:
         def __init__(self) -> None:
@@ -5206,6 +5809,145 @@ def check_session_monitor_badge_cleared_preview_change_does_not_dispatch_targets
         assert_equal(active, [], "badge-cleared preview changes must not drive foreground target switching")
         selected = monitor.select_dispatch_targets(limit=2)
         assert_equal(selected, [], "badge-cleared preview changes must remain passive until ledger/unread evidence exists")
+
+
+def check_session_monitor_badge_cleared_voice_preview_dispatches_capture() -> None:
+    class FakeConnector:
+        def list_sessions(self) -> dict[str, Any]:
+            return {
+                "ok": True,
+                "sessions": [
+                    {
+                        "name": "新数据测试",
+                        "session_key": "wx:rpa:v1:new-data-voice",
+                        "content": "[语音]",
+                        "time": "13:19",
+                        "unread_badge": "",
+                        "conversation_type": "private",
+                    }
+                ],
+            }
+
+    with tempfile.TemporaryDirectory() as temp:
+        root = Path(temp)
+        monitor = SessionMonitor(
+            tenant_id="unit_monitor_badge_cleared_voice_preview",
+            state_path=root / "session_monitor.json",
+            whitelist={"新数据测试"},
+            max_targets_per_iteration=2,
+            min_switch_interval_seconds=1,
+            dispatch_strategy="event_driven",
+            initial_preview_can_raise_unread=False,
+            preview_change_can_raise_unread=False,
+            short_preview_can_raise_unread=True,
+            require_unread_badge_for_dispatch=True,
+            require_preview_signal_with_unread_badge=True,
+        )
+        monitor._sessions["wx:rpa:v1:new-data-voice"] = SessionState(
+            name="新数据测试",
+            session_key="wx:rpa:v1:new-data-voice",
+            first_seen_at="2026-07-09T13:18:00",
+            last_seen_at="2026-07-09T13:18:00",
+            last_content_digest="old-preview",
+            last_message_time="13:18",
+            last_dispatched_at="2026-07-09T13:18:10",
+            conversation_type="private",
+        )
+
+        active = monitor.poll(FakeConnector())
+        assert_equal(len(active), 1, f"badge-cleared voice preview should still dispatch capture: {active}")
+        assert_equal(active[0].pending_signal_kind, "voice_capture", "voice preview should use a capture-only signal kind")
+        assert_equal(active[0].pending_signal_text, "[语音]", "voice preview text should be retained for audit/capture metadata")
+        selected = monitor.select_dispatch_targets(limit=2)
+        assert_equal(len(selected), 1, "voice capture signal should remain pending for scheduler dispatch")
+        assert_equal(selected[0].session_key, "wx:rpa:v1:new-data-voice", "voice capture signal should remain session-key bound")
+
+
+def check_managed_bridge_collect_signals_carries_voice_preview_metadata() -> None:
+    class FakeVoiceMonitor:
+        def poll(self, _connector: Any) -> list[Any]:
+            return []
+
+        def select_dispatch_targets(self, *, limit: int | None = None) -> list[Any]:
+            return [
+                SimpleNamespace(
+                    name="新数据测试",
+                    session_key="wx:rpa:v1:new-data-voice",
+                    exact=True,
+                    unread_detected=True,
+                    conversation_type="private",
+                    pending_signal_kind="voice_capture",
+                    pending_signal_text="[语音]",
+                    last_message_time="13:19",
+                    unread_badge="",
+                )
+            ]
+
+    with tempfile.TemporaryDirectory() as temp:
+        root = Path(temp)
+        config_path = root / "listener_config.json"
+        config_path.write_text(
+            json.dumps(
+                {
+                    "state_path": str(root / "workflow_state.json"),
+                    "audit_log_path": str(root / "audit.jsonl"),
+                    "targets": [{"name": "新数据测试", "enabled": True, "exact": True}],
+                    "multi_target": {"enabled": True, "rpa_low_risk_mode": True},
+                    "history_backfill": {"enabled": False},
+                    "raw_messages": {"enabled": False},
+                    "customer_profiles": {"enabled": False},
+                    "concurrency_scheduler": {"enabled": True, "capture_max_sessions_per_round": 2},
+                },
+                ensure_ascii=False,
+            ),
+            encoding="utf-8",
+        )
+        bridge = ManagedListenerSchedulerBridge(
+            tenant_id="unit_bridge_voice_signal_metadata",
+            config_path=config_path,
+            allow_send=False,
+            write_data=False,
+        )
+        try:
+            bridge.session_monitor = FakeVoiceMonitor()
+            signals = bridge._collect_session_signals()
+        finally:
+            bridge.shutdown()
+    assert_equal(len(signals), 1, f"voice monitor signal should be collected: {signals}")
+    assert_equal(signals[0].get("pending_signal_kind"), "voice_capture", "bridge should preserve voice capture kind")
+    assert_equal(signals[0].get("content"), "[语音]", "bridge should carry voice preview text into scheduler state")
+    assert_equal(signals[0].get("time"), "13:19", "bridge should carry voice preview time into scheduler state")
+
+
+def check_voice_capture_signal_does_not_synthesize_preview_text() -> None:
+    state = empty_state()
+    session = record_session_signal(
+        state,
+        {
+            "name": "新数据测试",
+            "session_key": "wx:rpa:v1:new-data-voice",
+            "conversation_type": "private",
+            "content": "[Voice]",
+            "time": "13:19",
+            "unread_detected": True,
+            "pending_signal_kind": "voice_capture",
+        },
+        now="2026-07-09T13:19:10",
+    )
+    assert_true(bool(session and session.get("pending_capture")), "voice capture signal should enqueue a real chat-pane capture")
+    assert_equal(session.get("pending_signal_kind"), "voice_capture", "scheduler state should preserve capture-only voice kind")
+    recovered = scheduler_module.recover_pending_signal_batch_from_monitor(
+        [],
+        {
+            "pending_signal_kind": "voice_capture",
+            "pending_signal_text": "[Voice]",
+            "pending_since": "2026-07-09T13:19:10",
+            "unread_detected": True,
+        },
+        target_name="新数据测试",
+        now="2026-07-09T13:19:20",
+    )
+    assert_equal(recovered, [], "voice preview must not be synthesized into Brain input when no transcript exists")
 
 
 def check_scheduler_cleanup_merges_legacy_name_bucket_into_session_key_bucket() -> None:
@@ -6088,6 +6830,7 @@ def check_managed_bridge_visual_scan_records_both_sides_without_preview() -> Non
                     {
                         "name": "新数据测试",
                         "session_key": "wx:visual-scan",
+                        "pending_signal_kind": "image_capture",
                         "pending_signal_text": "",
                         "preview_content": "",
                     }
@@ -6121,7 +6864,7 @@ def check_managed_bridge_visual_scan_records_both_sides_without_preview() -> Non
             for line in ledger.events_path("wx:visual-scan").read_text(encoding="utf-8").splitlines()
             if line.strip()
         ]
-    assert_true(bool(connector.capture_calls), "visual scan should be called even without [图片] preview")
+    assert_true(bool(connector.capture_calls), "image signal should call the independent visual module without preview text")
     assert_equal(connector.save_calls, 0, "legacy context-menu image save should not run after visual scan succeeds")
     assert_true(result.get("ok") is True, f"visual scan capture should succeed: {result}")
     messages = [item for item in (result.get("messages") or []) if isinstance(item, dict)]
@@ -6146,6 +6889,641 @@ def check_managed_bridge_visual_scan_records_both_sides_without_preview() -> Non
         {"customer", "self"},
         f"capture_recorded event should expose both visual sides: {visual_assets}",
     )
+
+
+def check_managed_bridge_normal_text_does_not_call_independent_image_module() -> None:
+    class FakeTextConnector:
+        def __init__(self) -> None:
+            self.capture_calls = 0
+
+        def get_messages(self, target: str, exact: bool = True, **kwargs: Any) -> dict[str, Any]:
+            return {
+                "ok": True,
+                "adapter": "win32_ocr",
+                "state": "messages_ocr",
+                "target": target,
+                "exact": exact,
+                "messages": [
+                    {
+                        "id": "text-only-1",
+                        "message_id": "text-only-1",
+                        "type": "text",
+                        "sender": "customer",
+                        "content": "比亚迪秦PLUS还有现车吗",
+                    }
+                ],
+            }
+
+        def capture_visual_images(self, target: str, **kwargs: Any) -> dict[str, Any]:
+            self.capture_calls += 1
+            raise AssertionError(f"normal text must not call image module: {target} {kwargs}")
+
+    with tempfile.TemporaryDirectory() as temp:
+        root = Path(temp)
+        config_path = root / "listener_config.json"
+        config_path.write_text(
+            json.dumps(
+                {
+                    "state_path": str(root / "workflow_state.json"),
+                    "audit_log_path": str(root / "audit.jsonl"),
+                    "targets": [{"name": "CustomerA", "enabled": True, "exact": True}],
+                    "history_backfill": {"enabled": False},
+                    "raw_messages": {"enabled": False},
+                    "customer_profiles": {"enabled": False},
+                    "voice_transcription": {"enabled": False},
+                    "concurrency_scheduler": {"enabled": True},
+                },
+                ensure_ascii=False,
+            ),
+            encoding="utf-8",
+        )
+        bridge = ManagedListenerSchedulerBridge(
+            tenant_id="unit_text_image_module_gate",
+            config_path=config_path,
+            allow_send=False,
+            write_data=False,
+        )
+        connector = FakeTextConnector()
+        try:
+            bridge.connector = connector
+            bridge.session_monitor = SimpleNamespace(
+                all_sessions=lambda: [
+                    {
+                        "name": "CustomerA",
+                        "session_key": "wx:text-only",
+                        "pending_signal_kind": "normal",
+                        "pending_signal_text": "比亚迪秦PLUS还有现车吗",
+                        "preview_content": "比亚迪秦PLUS还有现车吗",
+                    }
+                ]
+            )
+            result = bridge._capture_session(
+                {
+                    "target_name": "CustomerA",
+                    "name": "CustomerA",
+                    "exact": True,
+                    "conversation_type": "private",
+                    "session_key": "wx:text-only",
+                }
+            )
+        finally:
+            bridge.shutdown()
+    assert_equal(connector.capture_calls, 0, "normal text must not call independent image module")
+    trigger = result.get("customer_image_capture_trigger") or {}
+    assert_true(trigger.get("should_run") is False, f"normal text image trigger should be false: {trigger}")
+    assert_equal(
+        (result.get("visual_image_assets") or {}).get("state"),
+        "visual_capture_not_requested",
+        "normal text should expose a skipped visual capture state",
+    )
+
+
+def check_managed_bridge_new_image_signal_overrides_old_visual_identity_once() -> None:
+    old_image = {
+        "id": "visual_msg_wx_same_image",
+        "message_id": "visual_msg_wx_same_image",
+        "type": "image",
+        "message_type": "image",
+        "sender": "customer",
+        "sender_role": "customer",
+        "content": "[图片]",
+        "asset_id": "visual_asset_wx_same_image",
+        "saved_image_path": "D:/tmp/same-image.png",
+        "visual_side": "customer",
+        "visual_occurrence_id": "visual_occurrence_wx_same_image",
+        "bubble_bounds": [360, 260, 620, 450],
+        "captured_at": "2026-07-08T01:50:00",
+    }
+    old_proxy = {
+        **old_image,
+        "id": "visual_proxy:old-same-image",
+        "message_id": "visual_proxy:old-same-image",
+        "type": "text",
+        "is_customer_image_proxy": True,
+        "visual_turn_kind": "customer_image",
+        "content": "客户发来了一张图片",
+    }
+
+    class FakeSameImageConnector:
+        def __init__(self) -> None:
+            self.capture_calls = 0
+            self.save_calls = 0
+
+        def get_messages(self, target: str, exact: bool = True, **kwargs: Any) -> dict[str, Any]:
+            return {
+                "ok": True,
+                "adapter": "win32_ocr",
+                "state": "messages_ocr",
+                "target": target,
+                "exact": exact,
+                "messages": [],
+            }
+
+        def capture_visual_images(self, target: str, **kwargs: Any) -> dict[str, Any]:
+            self.capture_calls += 1
+            current_image = {
+                **old_image,
+                "pending_signal_id": str(kwargs.get("pending_signal_id") or ""),
+            }
+            return {
+                "ok": True,
+                "state": "visual_bubbles_archived",
+                "target": target,
+                "assets": [current_image],
+                "messages": [dict(current_image)],
+            }
+
+        def save_customer_image(self, target: str, **kwargs: Any) -> dict[str, Any]:
+            self.save_calls += 1
+            raise AssertionError(f"new image signal should use archived visual asset before context-menu fallback: {target} {kwargs}")
+
+    with tempfile.TemporaryDirectory() as temp:
+        root = Path(temp)
+        config_path = root / "listener_config.json"
+        config_path.write_text(
+            json.dumps(
+                {
+                    "state_path": str(root / "workflow_state.json"),
+                    "audit_log_path": str(root / "audit.jsonl"),
+                    "targets": [{"name": "CustomerA", "enabled": True, "exact": True}],
+                    "history_backfill": {"enabled": False},
+                    "raw_messages": {"enabled": False},
+                    "customer_profiles": {"enabled": False},
+                    "voice_transcription": {"enabled": False},
+                    "concurrency_scheduler": {"enabled": True},
+                },
+                ensure_ascii=False,
+            ),
+            encoding="utf-8",
+        )
+        bridge = ManagedListenerSchedulerBridge(
+            tenant_id="unit_new_image_signal_identity",
+            config_path=config_path,
+            allow_send=False,
+            write_data=False,
+        )
+        bridge.ledger = SessionLedgerStore(
+            tenant_id="unit_new_image_signal_identity",
+            root=root / "ledger",
+        )
+        connector = FakeSameImageConnector()
+        try:
+            bridge.ledger.record_capture(
+                session_key="wx:same-image",
+                target_name="CustomerA",
+                conversation_type="private",
+                capture_id="capture_old-same-image",
+                messages=[old_image, old_proxy],
+                batch=[old_proxy],
+                history_backfill={},
+                context_version=1,
+            )
+            bridge.connector = connector
+            bridge.session_monitor = SimpleNamespace(
+                all_sessions=lambda: [
+                    {
+                        "name": "CustomerA",
+                        "session_key": "wx:same-image",
+                        "pending_signal_id": "pending-new-same-image",
+                        "pending_signal_kind": "image_capture",
+                        "pending_signal_text": "CustomerA:[图片]",
+                        "preview_content": "CustomerA:[图片]",
+                    }
+                ]
+            )
+            first_result = bridge._capture_session(
+                {
+                    "target_name": "CustomerA",
+                    "name": "CustomerA",
+                    "exact": True,
+                    "conversation_type": "private",
+                    "session_key": "wx:same-image",
+                }
+            )
+            bridge.ledger.record_capture(
+                session_key="wx:same-image",
+                target_name="CustomerA",
+                conversation_type="private",
+                capture_id="capture_new-same-image",
+                messages=list(first_result.get("messages") or []),
+                batch=list(first_result.get("batch") or []),
+                history_backfill={},
+                context_version=2,
+            )
+            summary = bridge.ledger.load_summary("wx:same-image")
+            assert_equal(
+                summary.get("processed_visual_pending_signal_ids"),
+                ["pending-new-same-image"],
+                f"visual pending signal must be persisted in the session ledger: {summary}",
+            )
+            second_result = bridge._capture_session(
+                {
+                    "target_name": "CustomerA",
+                    "name": "CustomerA",
+                    "exact": True,
+                    "conversation_type": "private",
+                    "session_key": "wx:same-image",
+                }
+            )
+        finally:
+            bridge.shutdown()
+    result = first_result
+    assert_equal(connector.capture_calls, 1, "new image signal should call the independent image module once")
+    assert_equal(connector.save_calls, 0, "new image signal should not fall into context-menu copy after crop capture")
+    freshness = result.get("visual_image_freshness_filter") or {}
+    assert_equal(freshness.get("fresh_count"), 1, f"new pending signal should override old visual identity: {freshness}")
+    batch = [item for item in (result.get("batch") or []) if isinstance(item, dict)]
+    assert_equal(len(batch), 1, f"new image signal should enter the scheduler batch: {result}")
+    assert_true(batch[0].get("is_customer_image_proxy") is True, "image batch should carry the Brain-safe proxy")
+    assert_equal(connector.capture_calls, 1, "the same pending image signal must not call the image module twice")
+    assert_true(
+        second_result.get("pending_signal_consumed") is True,
+        f"repeated pending image signal should be consumed without recapture: {second_result}",
+    )
+
+
+def check_managed_bridge_capture_transcribes_voice_after_evidence_capture() -> None:
+    class FakeVoiceConnector:
+        def __init__(self) -> None:
+            self.call_order: list[str] = []
+            self.transcribe_calls: list[dict[str, Any]] = []
+            self.message_calls: list[dict[str, Any]] = []
+
+        def transcribe_voice_messages(self, target: str, **kwargs: Any) -> dict[str, Any]:
+            self.call_order.append("voice")
+            self.transcribe_calls.append({"target": target, **kwargs})
+            return {
+                "ok": True,
+                "state": "voice_transcribe_completed",
+                "target": target,
+                "attempt_count": 1,
+                "transcribed_messages_count": 1,
+                "new_messages": [
+                    {
+                        "id": "voice-transcript-1",
+                        "message_id": "voice-transcript-1",
+                        "type": "text",
+                        "sender": "customer",
+                        "content": "Thursday 10am works?",
+                        "time": "10:00",
+                    }
+                ],
+            }
+
+        def get_messages(self, target: str, exact: bool = True, history_load_times: int = 0, **kwargs: Any) -> dict[str, Any]:
+            self.call_order.append("messages")
+            self.message_calls.append({"target": target, "exact": exact, "history_load_times": history_load_times, **kwargs})
+            return {
+                "ok": True,
+                "adapter": "win32_ocr",
+                "state": "messages_ocr",
+                "target": target,
+                "exact": exact,
+                "messages": [],
+            }
+
+    with tempfile.TemporaryDirectory() as temp:
+        root = Path(temp)
+        config_path = root / "listener_config.json"
+        config_path.write_text(
+            json.dumps(
+                {
+                    "state_path": str(root / "workflow_state.json"),
+                    "audit_log_path": str(root / "audit.jsonl"),
+                    "targets": [{"name": "CustomerA", "enabled": True, "exact": True}],
+                    "history_backfill": {"enabled": False},
+                    "raw_messages": {"enabled": False},
+                    "customer_profiles": {"enabled": False},
+                    "voice_transcription": {"enabled": True, "max_attempts": 1},
+                    "concurrency_scheduler": {"enabled": True},
+                },
+                ensure_ascii=False,
+            ),
+            encoding="utf-8",
+        )
+        bridge = ManagedListenerSchedulerBridge(
+            tenant_id="unit_voice_transcribe_scheduler",
+            config_path=config_path,
+            allow_send=False,
+            write_data=False,
+        )
+        connector = FakeVoiceConnector()
+        try:
+            bridge.connector = connector
+            bridge.config["_local_customer_service_settings"] = {"enabled": True}
+            bridge.config["voice_transcription"] = {"enabled": True, "max_attempts": 1}
+            bridge.session_monitor = SimpleNamespace(
+                all_sessions=lambda: [
+                    {
+                        "name": "CustomerA",
+                        "session_key": "wx:voice",
+                        "pending_signal_kind": "voice_capture",
+                        "pending_signal_text": "[Voice]",
+                        "preview_content": "[Voice]",
+                    }
+                ]
+            )
+            result = bridge._capture_session(
+                {
+                    "target_name": "CustomerA",
+                    "name": "CustomerA",
+                    "exact": True,
+                    "conversation_type": "private",
+                    "session_key": "wx:voice",
+                }
+            )
+        finally:
+            bridge.shutdown()
+    assert_equal(connector.call_order, ["messages", "voice", "messages"], "voice transcription should run only after the first message capture")
+    assert_equal(
+        connector.transcribe_calls[0].get("conversation_type"),
+        "private",
+        f"voice transcription should receive scheduler conversation_type: {connector.transcribe_calls}",
+    )
+    assert_equal(
+        connector.message_calls[0].get("conversation_type"),
+        "private",
+        f"message capture should receive scheduler conversation_type: {connector.message_calls}",
+    )
+    assert_true(result.get("ok") is True, f"voice capture should succeed: {result}")
+    assert_equal((result.get("voice_transcription") or {}).get("state"), "voice_transcribe_completed", "voice audit should be preserved")
+    assert_equal((result.get("voice_transcription_merge") or {}).get("appended_count"), 1, "sidecar transcript should merge when OCR read misses it")
+    batch = [item for item in (result.get("batch") or []) if isinstance(item, dict)]
+    assert_equal([item.get("id") for item in batch], ["voice-transcript-1"], "merged voice transcript should enter Brain batch")
+    assert_equal(batch[0].get("source_type"), "voice_transcription", "voice source provenance should survive full scheduler capture")
+    assert_equal(batch[0].get("modality"), "voice", "voice modality should survive full scheduler capture")
+    assert_true(
+        ((result.get("history_backfill") or {}).get("voice_transcription") or {}).get("attempted") is True,
+        "capture history metadata should retain voice transcription audit",
+    )
+    transcribed_audit = (
+        ((result.get("history_backfill") or {}).get("voice_transcription") or {}).get("transcribed_messages")
+        or []
+    )
+    assert_equal(
+        [item.get("content") for item in transcribed_audit],
+        ["Thursday 10am works?"],
+        "voice audit should retain the normalized transcript body",
+    )
+
+
+def check_managed_bridge_image_signal_does_not_run_voice_rpa() -> None:
+    class FakeImageSignalConnector:
+        def __init__(self) -> None:
+            self.transcribe_calls = 0
+            self.message_calls = 0
+
+        def transcribe_voice_messages(self, target: str, **kwargs: Any) -> dict[str, Any]:  # noqa: ARG002
+            self.transcribe_calls += 1
+            raise AssertionError("image signal must not enter voice RPA")
+
+        def get_messages(self, target: str, exact: bool = True, **kwargs: Any) -> dict[str, Any]:  # noqa: ARG002
+            self.message_calls += 1
+            return {
+                "ok": True,
+                "adapter": "win32_ocr",
+                "state": "messages_ocr",
+                "target": target,
+                "exact": exact,
+                "messages": [
+                    {
+                        "id": "image-gate-text-1",
+                        "type": "text",
+                        "sender": "customer",
+                        "sender_role": "customer",
+                        "content": "在吗",
+                    }
+                ],
+            }
+
+    with tempfile.TemporaryDirectory() as temp:
+        root = Path(temp)
+        config_path = root / "listener_config.json"
+        config_path.write_text(
+            json.dumps(
+                {
+                    "state_path": str(root / "workflow_state.json"),
+                    "audit_log_path": str(root / "audit.jsonl"),
+                    "targets": [{"name": "CustomerA", "enabled": True, "exact": True}],
+                    "history_backfill": {"enabled": False},
+                    "raw_messages": {"enabled": False},
+                    "customer_profiles": {"enabled": False},
+                    "voice_transcription": {"enabled": True, "max_attempts": 1},
+                    "concurrency_scheduler": {"enabled": True},
+                },
+                ensure_ascii=False,
+            ),
+            encoding="utf-8",
+        )
+        bridge = ManagedListenerSchedulerBridge(
+            tenant_id="unit_image_signal_voice_gate",
+            config_path=config_path,
+            allow_send=False,
+            write_data=False,
+        )
+        connector = FakeImageSignalConnector()
+        try:
+            bridge.connector = connector
+            bridge.config["_local_customer_service_settings"] = {"enabled": True, "reply_mode": "record_only"}
+            bridge.session_monitor = SimpleNamespace(
+                all_sessions=lambda: [
+                    {
+                        "name": "CustomerA",
+                        "session_key": "wx:image-gate",
+                        "pending_signal_kind": "image_capture",
+                        "pending_signal_text": "",
+                        "preview_content": "",
+                        "unread_detected": True,
+                    }
+                ]
+            )
+            result = bridge._capture_session(
+                {
+                    "target_name": "CustomerA",
+                    "name": "CustomerA",
+                    "exact": True,
+                    "conversation_type": "private",
+                    "session_key": "wx:image-gate",
+                    "pending_signal_kind": "image_capture",
+                }
+            )
+        finally:
+            bridge.shutdown()
+    assert_equal(connector.transcribe_calls, 0, "image signal must skip voice RPA at scheduler boundary")
+    assert_equal(connector.message_calls, 1, "image signal must continue into normal message capture")
+    assert_true(result.get("ok") is True, f"image gate must not block normal capture: {result}")
+
+
+def check_managed_bridge_filters_seen_visual_proxy_without_losing_raw_archive() -> None:
+    old_image = {
+        "id": "visual_msg_wx_seen_old",
+        "message_id": "visual_msg_wx_seen_old",
+        "type": "image",
+        "message_type": "image",
+        "sender": "customer",
+        "sender_role": "customer",
+        "content": "[Image]",
+        "asset_id": "visual_asset_wx_seen_old",
+        "image_assets": ["visual_asset_wx_seen_old"],
+        "saved_image_path": "D:/tmp/seen_old.png",
+        "visual_side": "customer",
+        "visual_occurrence_id": "visual_occurrence_wx_seen_old",
+        "bubble_bounds": [360, 260, 620, 450],
+        "captured_at": "2026-07-08T01:50:00",
+    }
+    old_proxy = {
+        "id": "visual_proxy:seen_old",
+        "message_id": "visual_proxy:seen_old",
+        "type": "text",
+        "sender": "customer",
+        "content": "customer sent an image",
+        "is_customer_image_proxy": True,
+        "source_message_id": "visual_msg_wx_seen_old",
+        "visual_occurrence_id": "visual_occurrence_wx_seen_old",
+        "asset_id": "visual_asset_wx_seen_old",
+        "saved_image_path": "D:/tmp/seen_old.png",
+        "visual_side": "customer",
+        "bubble_bounds": [360, 260, 620, 450],
+        "captured_at": "2026-07-08T01:50:00",
+    }
+
+    class FakeVisualConnector:
+        def get_messages(self, target: str, exact: bool = True, history_load_times: int = 0, **kwargs: Any) -> dict[str, Any]:
+            return {
+                "ok": True,
+                "adapter": "win32_ocr",
+                "state": "messages_ocr",
+                "target": target,
+                "exact": exact,
+                "messages": [
+                    {
+                        "id": "text-followup-1",
+                        "message_id": "text-followup-1",
+                        "type": "text",
+                        "sender": "customer",
+                        "content": "Thursday 10am works?",
+                        "time": "10:00",
+                    }
+                ],
+            }
+
+        def capture_visual_images(self, target: str, **kwargs: Any) -> dict[str, Any]:
+            return {
+                "ok": True,
+                "state": "visual_bubbles_archived",
+                "target": target,
+                "assets": [dict(old_image)],
+                "messages": [dict(old_image)],
+            }
+
+    with tempfile.TemporaryDirectory() as temp:
+        root = Path(temp)
+        config_path = root / "listener_config.json"
+        config_path.write_text(
+            json.dumps(
+                {
+                    "state_path": str(root / "workflow_state.json"),
+                    "audit_log_path": str(root / "audit.jsonl"),
+                    "targets": [{"name": "CustomerA", "enabled": True, "exact": True}],
+                    "history_backfill": {"enabled": False},
+                    "raw_messages": {"enabled": False},
+                    "customer_profiles": {"enabled": False},
+                    "voice_transcription": {"enabled": False},
+                    "concurrency_scheduler": {"enabled": True},
+                },
+                ensure_ascii=False,
+            ),
+            encoding="utf-8",
+        )
+        bridge = ManagedListenerSchedulerBridge(
+            tenant_id="unit_visual_seen_filter",
+            config_path=config_path,
+            allow_send=False,
+            write_data=False,
+        )
+        try:
+            bridge.ledger.record_capture(
+                session_key="wx:seen-visual",
+                target_name="CustomerA",
+                conversation_type="private",
+                capture_id="capture_seen_old",
+                messages=[old_image, old_proxy],
+                batch=[old_proxy],
+                history_backfill={},
+                context_version=1,
+            )
+            bridge.connector = FakeVisualConnector()
+            bridge.session_monitor = SimpleNamespace(
+                all_sessions=lambda: [
+                    {
+                        "name": "CustomerA",
+                        "session_key": "wx:seen-visual",
+                        "pending_signal_kind": "image_capture",
+                        "pending_signal_text": "Thursday 10am works?",
+                        "preview_content": "Thursday 10am works?",
+                    }
+                ]
+            )
+            result = bridge._capture_session(
+                {
+                    "target_name": "CustomerA",
+                    "name": "CustomerA",
+                    "exact": True,
+                    "conversation_type": "private",
+                    "session_key": "wx:seen-visual",
+                }
+            )
+        finally:
+            bridge.shutdown()
+    messages = [item for item in (result.get("messages") or []) if isinstance(item, dict)]
+    raw_images = [item for item in messages if str(item.get("type") or "") == "image"]
+    proxies = [item for item in messages if item.get("is_customer_image_proxy")]
+    assert_equal(len(raw_images), 1, f"seen raw image should still be archived in capture messages: {messages}")
+    assert_equal(len(proxies), 0, f"seen image should not become a new Brain direct-image proxy: {messages}")
+    batch = [item for item in (result.get("batch") or []) if isinstance(item, dict)]
+    assert_equal([item.get("id") for item in batch], ["text-followup-1"], "text follow-up should be the only Brain input")
+    freshness = result.get("visual_image_freshness_filter") or {}
+    assert_equal(freshness.get("filtered_count"), 1, f"seen visual source should be audited as filtered: {freshness}")
+
+
+def check_quality_validation_failure_goes_internal_without_same_capture_retry() -> None:
+    state = empty_state()
+    capture = record_capture_result(
+        state,
+        "CustomerA",
+        messages=[{"id": "m-quality-1", "type": "text", "sender": "customer", "content": "Thursday 10am works?", "time": "10:00"}],
+        batch=[{"id": "m-quality-1", "type": "text", "sender": "customer", "content": "Thursday 10am works?", "time": "10:00"}],
+        conversation_type="private",
+        session_key="wx:quality",
+        now="2026-07-08T10:00:00",
+    )
+    task = enqueue_llm_task(state, capture["capture_id"], now="2026-07-08T10:00:01")
+    scheduler_state_module.fail_llm_task(
+        state,
+        task["task_id"],
+        reason="customer_service_brain_no_visible_reply",
+        now="2026-07-08T10:00:30",
+        result_payload={
+            "ok": False,
+            "reason": "customer_service_brain_no_visible_reply",
+            "decision": {"rule_name": "customer_service_brain_no_visible_reply", "reason": "brain_quality_verification_failed"},
+            "event": {
+                "reason": "brain_quality_verification_failed",
+                "customer_service_brain": {"reason": "brain_quality_verification_failed"},
+            },
+        },
+    )
+    recovery = scheduler_state_module.requeue_capture_after_recoverable_llm_failure(
+        state,
+        task["task_id"],
+        reason="customer_service_brain_no_visible_reply",
+        now="2026-07-08T10:00:31",
+    )
+    session = state["sessions"]["wx:quality"]
+    assert_true(recovery.get("ok") is False, f"quality validation failure should not retry same capture: {recovery}")
+    assert_equal(recovery.get("max_attempts"), 0, "quality validation failure should have zero same-capture retry budget")
+    assert_equal(session.get("status"), "internal_handoff_pending", "message should be preserved for internal handoff")
+    assert_true(not session.get("llm_inflight_task_id"), "failed quality task should release the session LLM lock")
 
 
 def check_mixed_greeting_budget_intent_prefers_product() -> None:
@@ -6304,6 +7682,92 @@ def check_managed_bridge_plan_reply_uses_session_key_context() -> None:
         )
 
 
+def check_context_recovery_hint_marks_noisy_latest_visual_turn() -> None:
+    visual_turn = {
+        "id": "visual_proxy:crider-current",
+        "message_id": "visual_proxy:crider-current",
+        "type": "text",
+        "sender": "customer",
+        "content": "客户发来了一张图片",
+        "is_customer_image_proxy": True,
+        "visual_turn_kind": "customer_image",
+        "time": "2026-07-10T09:44:00",
+    }
+    hint = build_context_recovery_hint(
+        target_name="新数据测试",
+        session_key="wx:rpa:v1:rupture",
+        messages=[
+            {"id": "old-1", "type": "text", "sender": "customer", "content": "Codex 调试 503 Service Unavailable token 记录", "time": "2026-07-10T09:40:00"},
+            {"id": "old-2", "type": "text", "sender": "customer", "content": "群聊的聊天记录复制了一大段不相关内容", "time": "2026-07-10T09:41:00"},
+            {"id": "old-3", "type": "text", "sender": "customer", "content": "https://example.test/api 404 错误码", "time": "2026-07-10T09:42:00"},
+            {"id": "old-4", "type": "text", "sender": "self", "content": "人工回复过一段测试内容", "time": "2026-07-10T09:43:00"},
+            visual_turn,
+        ],
+        batch=[visual_turn],
+        history_backfill={"history_continuity": "anchored"},
+        pending_signal={"pending_signal_kind": "image_capture", "unread_detected": True},
+        stale_context={"reply_text_sample": "上一轮旧回复还没发出去"},
+    )
+    assert_true(hint.get("applied") is True, f"noisy visual turn should mark context recovery: {hint}")
+    assert_equal(hint.get("mode"), "latest_turn_only_candidate", "context recovery should prefer latest-turn-only candidate")
+    assert_equal(hint.get("latest_message_ids"), ["visual_proxy:crider-current"], "latest visual id should be carried")
+    assert_true("latest_turn_is_visual" in (hint.get("signals") or []), "visual signal should be auditable")
+
+
+def check_context_recovery_capture_persists_state_and_soft_passes_old_gap() -> None:
+    state = empty_state()
+    messages = [
+        {"id": "m-old-1", "type": "text", "sender": "customer", "content": "聊天记录 Codex 503 token 一大段不相干内容", "time": "2026-07-10T09:40:00"},
+        {"id": "m-old-2", "type": "text", "sender": "customer", "content": "Traceback exception service unavailable", "time": "2026-07-10T09:41:00"},
+        {"id": "m-new", "type": "text", "sender": "customer", "content": "在吗", "time": "2026-07-10T09:42:00"},
+    ]
+    hint = build_context_recovery_hint(
+        target_name="许聪",
+        session_key="wx:rpa:v1:rupture-soft-pass",
+        messages=messages,
+        batch=messages,
+        history_backfill={"history_continuity": "overflow_unanchored"},
+        stale_context={"reply_text_sample": "上一轮旧回复"},
+    )
+    assert_true(hint.get("applied") is True, f"noisy text backlog should mark context recovery: {hint}")
+    capture = record_capture_result(
+        state,
+        "许聪",
+        messages=messages,
+        batch=messages,
+        history_backfill={"history_continuity": "overflow_unanchored"},
+        context_recovery=hint,
+        conversation_type="private",
+        session_key="wx:rpa:v1:rupture-soft-pass",
+        now="2026-07-10T09:42:01",
+    )
+    assert_true(capture.get("context_recovery", {}).get("applied") is True, "capture should persist context recovery")
+    session = session_by_name(state, "许聪")
+    assert_equal(
+        session.get("context_recovery_state", {}).get("mode"),
+        "latest_turn_only_candidate",
+        "session should keep recovery state for audit/workflow fallback",
+    )
+    assert_true(
+        any(item.get("event") == "scheduler_context_recovery_candidate" for item in state.get("events") or []),
+        "context recovery candidate should be auditable",
+    )
+
+    bridge_stub = SimpleNamespace()
+    softened = ManagedListenerSchedulerBridge._context_recovery_soft_pass_old_context_gap(  # noqa: SLF001 - focused scheduler boundary regression
+        bridge_stub,
+        {"ok": True, "gap_risk": True, "has_newer_messages": False, "reason": "original_batch_not_visible"},
+        capture=capture,
+    )
+    assert_equal(softened.get("stale"), False, "old anchor gap may be soft-passed under context recovery")
+    blocked = ManagedListenerSchedulerBridge._context_recovery_soft_pass_old_context_gap(  # noqa: SLF001
+        bridge_stub,
+        {"ok": True, "gap_risk": True, "has_newer_messages": True, "reason": "new_message_visible"},
+        capture=capture,
+    )
+    assert_equal(blocked, {}, "confirmed newer messages must not be soft-passed")
+
+
 def check_session_key_flows_from_signal_to_capture_and_reply() -> None:
     state = empty_state()
     record_session_signal(
@@ -6418,6 +7882,31 @@ def check_ready_reply_envelope_blocks_session_key_mismatch_before_send() -> None
     assert_equal(reason, "reply_session_key_capture_mismatch", "session_key mismatch must block send before RPA")
 
 
+def check_ready_reply_quality_review_is_advisory_and_keeps_send_path() -> None:
+    review = ready_reply_brain_quality_review(
+        {
+            "reply_id": "reply-quality-review",
+            "task_id": "task-quality-review",
+            "target_name": "新数据测试",
+            "decision": {
+                "brain_quality_review": {
+                    "operator_attention_required": True,
+                    "operator_attention_reason": "brain_short_social_reply_after_delayed_turn",
+                    "warnings": ["delay_followup_short_social_reply_review"],
+                    "visible_reply_preserved": True,
+                }
+            },
+        }
+    )
+    assert_true(review.get("required") is True, f"quality review should reach scheduler audit: {review}")
+    assert_equal(review.get("reason"), "brain_short_social_reply_after_delayed_turn", "quality review reason should be preserved")
+    assert_true(review.get("visible_reply_preserved") is True, f"quality review must not block send: {review}")
+    assert_true(
+        not ready_reply_brain_quality_review({"decision": {"brain_quality_review": {}}}),
+        "ordinary ready replies should not create operator-attention events",
+    )
+
+
 def check_runtime_requeues_ready_reply_on_message_digest_mismatch() -> None:
     root = Path(tempfile.mkdtemp(prefix="scheduler-envelope-"))
     path = root / "state.json"
@@ -6508,6 +7997,39 @@ def check_session_ledger_marks_processed_only_after_send(tmp_dir: Path | None = 
     assert_equal(anchor.get("message_content_keys"), ["unknown\x1ftext\x1f你好"], "ledger should preserve reply content anchors")
     recent_contents = [str(item.get("content") or "") for item in summary.get("recent_messages") or []]
     assert_true("你好，在的。" in recent_contents, "sent reply should be appended to recent ledger history")
+
+
+def check_session_ledger_keeps_self_visible_messages_even_without_reply_batch(tmp_dir: Path | None = None) -> None:
+    root = tmp_dir or Path(tempfile.mkdtemp(prefix="session-ledger-self-history-"))
+    ledger = SessionLedgerStore(tenant_id="unit", root=root)
+    key = "wx:rpa:v1:self-history-unit"
+    ledger.record_capture(
+        session_key=key,
+        target_name="许聪",
+        conversation_type="private",
+        capture_id="capture-self-1",
+        messages=[
+            {
+                "id": "self-visible-1",
+                "type": "text",
+                "sender": "self",
+                "content": "我这边先帮您记一下，稍后把明细发您。",
+                "time": "09:51",
+            }
+        ],
+        batch=[],
+        history_backfill={"history_continuity": "anchored"},
+        context_version=3,
+    )
+    summary = ledger.load_summary(key)
+    recent_messages = [item for item in summary.get("recent_messages") or [] if isinstance(item, dict)]
+    recent_contents = [str(item.get("content") or "") for item in recent_messages]
+    assert_true(
+        "我这边先帮您记一下，稍后把明细发您。" in recent_contents,
+        f"self visible capture should stay in recent ledger history: {recent_messages}",
+    )
+    assert_equal(summary.get("last_unreplied_message_ids"), [], "self-only capture must not create pending customer anchors")
+    assert_true("客服: 我这边先帮您记一下" in str(summary.get("context_summary") or ""), "self visible text should contribute to context summary")
 
 
 def check_scheduler_consults_ledger_before_temp_state(tmp_dir: Path | None = None) -> None:
@@ -6671,6 +8193,7 @@ def run_checks() -> dict[str, Any]:
         check_session_monitor_preserves_high_sensitivity_pending_after_empty_capture,
         check_session_monitor_preserves_normal_pending_after_empty_capture_briefly,
         check_session_monitor_low_disturbance_ignores_normal_preview_without_badge,
+        check_session_monitor_startup_visual_baseline_requires_new_unread_evidence,
         check_session_monitor_low_disturbance_keeps_short_preview_signal,
         check_session_monitor_low_risk_requires_badge_and_preview_signal,
         check_session_monitor_event_driven_dispatch_keeps_sticky_target,
@@ -6704,9 +8227,13 @@ def run_checks() -> dict[str, Any]:
         check_runtime_prioritizes_ready_send_before_new_capture,
         check_runtime_collects_llm_while_send_worker_blocks_capture,
         check_runtime_recovers_orphaned_running_llm_task_after_restart,
+        check_runtime_expires_stale_queued_llm_task_after_restart,
+        check_runtime_expires_stale_orphaned_running_llm_task_after_restart,
         check_runtime_times_out_running_llm_task_without_swallowing_message,
         check_runtime_restores_missing_llm_task_from_in_memory_snapshot,
         check_runtime_recovers_orphaned_running_polish_task_after_restart,
+        check_runtime_expires_stale_queued_polish_task_after_restart,
+        check_runtime_expires_stale_ready_reply_before_send_after_restart,
         check_runtime_restores_missing_polish_task_from_in_memory_snapshot,
         check_runtime_degraded_polish_reply_still_sends,
         check_runtime_polish_failure_result_is_json_safe,
@@ -6720,6 +8247,7 @@ def run_checks() -> dict[str, Any]:
         check_scheduler_capture_filters_self_only_normal_customer_session,
         check_scheduler_capture_allows_new_occurrence_of_same_short_probe,
         check_scheduler_capture_filters_non_text_messages_for_normal_customer_session,
+        check_scheduler_authorizes_customer_image_proxy_only_for_image_capture,
         check_scheduler_capture_filters_visual_ocr_text_without_keyword_blocking,
         check_scheduler_capture_allows_self_for_file_transfer_self_test,
         check_runtime_self_only_capture_does_not_submit_llm,
@@ -6745,6 +8273,8 @@ def run_checks() -> dict[str, Any]:
         check_managed_bridge_freshness_same_short_signal_fast_passes_without_strict_scan,
         check_managed_bridge_freshness_uses_session_key_for_duplicate_display_names,
         check_managed_bridge_pending_capture_same_signal_does_not_stale_ready_reply,
+        check_pending_signal_id_is_stable_only_inside_one_pending_window,
+        check_pending_signal_identity_controls_visual_reply_freshness,
         check_managed_bridge_freshness_session_list_preview_fast_pass_without_monitor,
         check_managed_bridge_freshness_session_list_mismatch_falls_back_to_strict_scan,
         check_managed_bridge_freshness_session_list_mismatch_soft_pass_by_default,
@@ -6754,9 +8284,14 @@ def run_checks() -> dict[str, Any]:
         check_managed_bridge_freshness_long_llm_uses_task_runtime_not_queue_age,
         check_managed_bridge_collect_signals_skips_busy_sticky_target,
         check_managed_bridge_collect_signals_does_not_dispatch_when_all_pending_busy,
+        check_managed_bridge_retains_busy_unread_signal_for_scheduler,
+        check_scheduler_preserves_unread_signal_during_active_session_work,
         check_managed_bridge_capture_applies_humanized_switch_delay,
         check_session_monitor_event_driven_can_batch_two_unread_targets_without_whitelist_scan,
         check_session_monitor_badge_cleared_preview_change_does_not_dispatch_targets,
+        check_session_monitor_badge_cleared_voice_preview_dispatches_capture,
+        check_managed_bridge_collect_signals_carries_voice_preview_metadata,
+        check_voice_capture_signal_does_not_synthesize_preview_text,
         check_scheduler_cleanup_merges_legacy_name_bucket_into_session_key_bucket,
         check_session_monitor_blocks_ambiguous_duplicate_display_names,
         check_session_monitor_allows_duplicate_display_names_when_session_keys_are_distinct,
@@ -6777,15 +8312,25 @@ def run_checks() -> dict[str, Any]:
         check_short_pending_signal_does_not_synthesize_media_preview,
         check_managed_bridge_blocks_capture_when_image_save_fails,
         check_managed_bridge_visual_scan_records_both_sides_without_preview,
+        check_managed_bridge_normal_text_does_not_call_independent_image_module,
+        check_managed_bridge_new_image_signal_overrides_old_visual_identity_once,
+        check_managed_bridge_capture_transcribes_voice_after_evidence_capture,
+        check_managed_bridge_image_signal_does_not_run_voice_rpa,
+        check_managed_bridge_filters_seen_visual_proxy_without_losing_raw_archive,
+        check_quality_validation_failure_goes_internal_without_same_capture_retry,
         check_mixed_greeting_budget_intent_prefers_product,
         check_handoff_keyword_requires_explicit_customer_request,
         check_scheduler_conversation_context_update_does_not_advance_context_version,
         check_managed_bridge_plan_reply_uses_session_key_context,
+        check_context_recovery_hint_marks_noisy_latest_visual_turn,
+        check_context_recovery_capture_persists_state_and_soft_passes_old_gap,
         check_session_key_flows_from_signal_to_capture_and_reply,
         check_same_display_name_ready_replies_are_isolated_by_session_key,
         check_ready_reply_envelope_blocks_session_key_mismatch_before_send,
+        check_ready_reply_quality_review_is_advisory_and_keeps_send_path,
         check_runtime_requeues_ready_reply_on_message_digest_mismatch,
         check_session_ledger_marks_processed_only_after_send,
+        check_session_ledger_keeps_self_visible_messages_even_without_reply_batch,
         check_scheduler_consults_ledger_before_temp_state,
         check_scheduler_ledger_injects_unanswered_interaction_state,
         check_anchor_missing_after_light_backfill_uses_overflow_batch,

@@ -103,8 +103,11 @@ def main() -> int:
         check_brain_input_includes_delay_followup_interaction_hint(),
         check_delay_followup_fast_profile_ignores_current_summon_only_context(),
         check_brain_input_marks_social_turn_context_priority(),
+        check_brain_input_context_recovery_prunes_old_history(),
         check_brain_input_treats_ocr_speaker_prefix_as_metadata(),
-        check_quality_gate_rejects_fresh_greeting_for_delay_followup(),
+        check_quality_gate_keeps_brain_short_social_reply_after_delay(),
+        check_soft_social_quality_review_preserves_brain_reply_and_marks_attention(),
+        check_short_social_quality_warning_does_not_force_semantic_review(),
         check_quality_gate_rejects_self_history_continuation_for_current_summon_only(),
         check_quality_gate_rejects_over_eager_business_redirect_after_social_fatigue(),
         check_quality_gate_warns_thin_social_or_common_sense_reply_without_blocking(),
@@ -1414,6 +1417,89 @@ def check_brain_input_marks_social_turn_context_priority() -> CaseResult:
     return CaseResult("brain_input_marks_social_turn_context_priority", True, {"policy": prompt_policy})
 
 
+def check_brain_input_context_recovery_prunes_old_history() -> CaseResult:
+    settings = brain_module.effective_brain_settings(base_config(base_plan(), include_product=True))
+    pack = fake_evidence_pack(include_product=True)
+    pack["conversation"]["history_text"] = "[许聪] 旧历史里问过完全无关的奥迪和接口报错"
+    pack["conversation"]["conversation_summary"] = "旧摘要：之前混入人工测试、接口报错和无关车源"
+    pack["conversation"]["current_batch_text"] = "[许聪] 旧日志\n[许聪] 客户发来了一张图片"
+    context_recovery = {
+        "schema_version": 1,
+        "applied": True,
+        "mode": "latest_turn_only_candidate",
+        "reason": "suspected_human_intervention_context_rupture",
+        "confidence": 0.82,
+        "score": 5.75,
+        "signals": ["stale_unsent_reply_context_present", "latest_turn_is_visual", "non_dialogue_noise_terms"],
+        "latest_message_ids": ["visual_proxy:current-car"],
+        "latest_customer_text": "客户发来了一张图片",
+        "latest_message_type": "image",
+        "policy": "Brain must judge continuity and answer the latest actionable customer turn.",
+        "hard_guards_preserved": ["product_master_authority", "session_envelope", "guard_and_final_polish"],
+    }
+    brain_input = brain_module.build_brain_input(
+        settings=settings,
+        target_name="许聪",
+        target_state={
+            "conversation_context": {
+                "last_product_id": "old_audi_a4l",
+                "last_product_name": "旧奥迪A4L",
+                "ledger_context_summary": "旧ledger里有无关奥迪和接口报错",
+                "ledger_recent_messages": [{"content": "Service Unavailable 503 token"}],
+            },
+            "conversation_interaction_state": {
+                "schema_version": 1,
+                "unanswered_exists": True,
+                "last_unanswered_customer_text": "旧问题：奥迪A4L多少钱",
+                "suggested_reply_posture": "acknowledge_delay_then_continue",
+                "customer_chase_up_detected": True,
+            },
+        },
+        batch=[
+            {"id": "old-log", "sender": "customer", "content": "Codex 503 token Service Unavailable", "time": "2026-07-10T09:41:00"},
+            {
+                "id": "visual_proxy:current-car",
+                "message_id": "visual_proxy:current-car",
+                "sender": "customer",
+                "content": "客户发来了一张图片",
+                "is_customer_image_proxy": True,
+                "visual_turn_kind": "customer_image",
+                "time": "2026-07-10T09:42:00",
+            },
+        ],
+        combined="Codex 503 token Service Unavailable\n客户发来了一张图片",
+        raw_capture={
+            "conversation": {"conversation_id": "conv-context-recovery", "chat_type": "private"},
+            "context_recovery": context_recovery,
+        },
+        evidence_pack=pack,
+    )
+    current = brain_input.get("current_message") if isinstance(brain_input.get("current_message"), dict) else {}
+    conversation = brain_input.get("conversation") if isinstance(brain_input.get("conversation"), dict) else {}
+    context = conversation.get("context") if isinstance(conversation.get("context"), dict) else {}
+    assert_equal(current.get("clean_text"), "客户发来了一张图片", "current text should be reduced to latest actionable turn")
+    assert_equal(current.get("message_ids"), ["visual_proxy:current-car"], "current message ids should use latest turn only")
+    assert_true(current.get("context_recovery", {}).get("applied") is True, f"context recovery should be carried: {brain_input}")
+    assert_true("old_audi_a4l" not in json.dumps(context, ensure_ascii=False), f"old product context should be prompt-pruned: {context}")
+    assert_equal(conversation.get("history_text"), "", "old history_text should be pruned in recovery mode")
+    assert_equal(conversation.get("summary"), "", "old summary should be pruned in recovery mode")
+    assert_true(context.get("old_context_pruned") is True, f"recovery policy should be explicit: {context}")
+
+    prompt_pack, _user_content, _estimate = brain_module.build_sized_brain_prompt(settings=settings, brain_input=brain_input)
+    slim = (prompt_pack.get("user") or {}).get("brain_input") or {}
+    prompt_current = slim.get("current_message") if isinstance(slim.get("current_message"), dict) else {}
+    prompt_conversation = slim.get("conversation") if isinstance(slim.get("conversation"), dict) else {}
+    prompt_products = (((slim.get("content_basis") or {}).get("product_master") or {}).get("items") or [])
+    assert_true(prompt_current.get("context_recovery", {}).get("applied") is True, f"recovery metadata should reach prompt: {prompt_current}")
+    assert_equal(prompt_conversation.get("history_text"), "", "slim prompt should not reintroduce old history")
+    assert_true(bool(prompt_products), "product master evidence must still be available after context pruning")
+    return CaseResult(
+        "brain_input_context_recovery_prunes_old_history",
+        True,
+        {"prompt_current": prompt_current, "prompt_context": prompt_conversation.get("context")},
+    )
+
+
 def check_brain_input_treats_ocr_speaker_prefix_as_metadata() -> CaseResult:
     settings = brain_module.effective_brain_settings(base_config(base_plan()))
     pack = fake_evidence_pack(include_product=False)
@@ -1435,7 +1521,7 @@ def check_brain_input_treats_ocr_speaker_prefix_as_metadata() -> CaseResult:
     return CaseResult("brain_input_treats_ocr_speaker_prefix_as_metadata", True, {"clean_text": current.get("clean_text"), "metadata": metadata})
 
 
-def check_quality_gate_rejects_fresh_greeting_for_delay_followup() -> CaseResult:
+def check_quality_gate_keeps_brain_short_social_reply_after_delay() -> CaseResult:
     pack = fake_evidence_pack(include_product=False)
     pack["conversation_interaction_state"] = {
         "authority": "non_authoritative_interaction_hint",
@@ -1462,11 +1548,12 @@ def check_quality_gate_rejects_fresh_greeting_for_delay_followup() -> CaseResult
         evidence_pack=pack,
         settings={},
     )
-    assert_true(not bad_quality.get("ok"), f"fresh greeting should be repaired for delay follow-up: {bad_quality}")
+    assert_true(bad_quality.get("ok"), f"short Brain social reply must remain sendable: {bad_quality}")
     assert_true(
-        "delay_followup_reply_looks_like_fresh_greeting" in (bad_quality.get("errors") or []),
-        f"expected delay follow-up continuity error: {bad_quality}",
+        "delay_followup_short_social_reply_review" in (bad_quality.get("warnings") or []),
+        f"expected a non-blocking continuity review warning: {bad_quality}",
     )
+    assert_true(not bad_quality.get("errors"), f"continuity warning must not become a blocking error: {bad_quality}")
 
     good_plan = copy.deepcopy(bad_plan)
     good_plan["reply_segments"] = ["抱歉，刚才在核车源资料，回慢了。", "我接着前面十万左右、适合女性开的电车或混动方向给您说。"]
@@ -1477,7 +1564,71 @@ def check_quality_gate_rejects_fresh_greeting_for_delay_followup() -> CaseResult
         settings={},
     )
     assert_true(good_quality.get("ok"), f"context-aware delay follow-up should pass: {good_quality}")
-    return CaseResult("quality_gate_rejects_fresh_greeting_for_delay_followup", True, {"errors": bad_quality.get("errors")})
+    return CaseResult(
+        "quality_gate_keeps_brain_short_social_reply_after_delay",
+        True,
+        {"warnings": bad_quality.get("warnings")},
+    )
+
+
+def check_soft_social_quality_review_preserves_brain_reply_and_marks_attention() -> CaseResult:
+    plan = normalize_brain_plan(
+        {
+            **base_plan(),
+            "answer_mode": "soft_social_reply",
+            "evidence_used": {"common_sense_topics": ["small_talk_customer_care"]},
+            "facts_claimed": [],
+            "reply_segments": ["在呢，您说。"],
+            "recommended_action": "send_reply",
+            "risk": {"risk_level": "low", "risk_tags": ["small_talk"], "needs_handoff": False},
+        }
+    )
+    quality = {
+        "ok": False,
+        "errors": ["delay_followup_reply_looks_like_fresh_greeting"],
+        "warnings": [],
+    }
+    soft = brain_module.repaired_deterministic_quality_soft_pass_decision(
+        settings={},
+        plan=plan,
+        quality=quality,
+        evidence_pack=fake_evidence_pack(include_product=False),
+    )
+    assert_true(soft.get("ok"), f"soft social quality doubts must not swallow Brain: {soft}")
+    review = brain_module.build_brain_quality_review_metadata(
+        {"warnings": ["delay_followup_short_social_reply_review"]}
+    )
+    assert_true(review.get("required") is True, f"quality review should be visible to operator tooling: {review}")
+    assert_true(review.get("operator_attention_required") is True, f"continuity warning should request operator attention: {review}")
+    assert_true(review.get("visible_reply_preserved") is True, f"quality review must preserve visible reply: {review}")
+    return CaseResult("soft_social_quality_review_preserves_brain_reply_and_marks_attention", True, {"soft": soft, "review": review})
+
+
+def check_short_social_quality_warning_does_not_force_semantic_review() -> CaseResult:
+    plan = normalize_brain_plan(
+        {
+            **base_plan(),
+            "answer_mode": "soft_social_reply",
+            "evidence_used": {"common_sense_topics": ["small_talk_customer_care"]},
+            "facts_claimed": [],
+            "reply_segments": ["在呢，您说。"],
+            "recommended_action": "send_reply",
+            "risk": {"risk_level": "low", "risk_tags": ["small_talk"], "needs_handoff": False},
+        }
+    )
+    should_review = reviewer_module.should_invoke_semantic_reviewer(
+        plan=plan,
+        current_message="在吗",
+        evidence_pack=fake_evidence_pack(include_product=False),
+        deterministic_quality={
+            "ok": True,
+            "errors": [],
+            "warnings": ["delay_followup_short_social_reply_review"],
+        },
+        settings={"semantic_reviewer_low_risk_tail_skip_enabled": True},
+    )
+    assert_true(not should_review, f"advisory continuity warning must not add another LLM hop: {should_review}")
+    return CaseResult("short_social_quality_warning_does_not_force_semantic_review", True, {"should_review": should_review})
 
 
 def check_quality_gate_rejects_self_history_continuation_for_current_summon_only() -> CaseResult:

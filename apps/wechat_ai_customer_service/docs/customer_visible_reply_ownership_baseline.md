@@ -27,9 +27,11 @@ If a reviewer finds a Brain draft wrong, incomplete, unsafe, off-topic, over-str
 Quality gates are reviewer layers, not answer owners. Deterministic quality findings must be classified before they affect outbound send:
 
 - Hard blockers: empty visible reply, AI identity leakage, truncated or incomplete wording, unsupported product facts, price/policy conflicts, hard safety risks, session/cross-chat binding risks, and unresolved authority-boundary violations.
-- Soft reviewer findings: wording directness, recommendation shape, missing preferred phrasing, incomplete but non-dangerous answer focus, or deterministic uncertainty after Brain repair.
+- Soft reviewer findings: wording directness, recommendation shape, missing preferred phrasing, incomplete but non-dangerous answer focus, deterministic uncertainty after Brain repair, and short-social continuity/naturalness notes such as `delay_followup_short_social_reply_review`.
 
 Soft reviewer findings must be fed back to Brain for repair first. After Brain repair, if validation and hard-boundary checks pass, remaining soft quality doubts may only become audit warnings or semantic-review feedback; they must not be escalated into `customer_service_brain_no_visible_reply` by themselves.
+
+In particular, a non-empty Brain-authored short acknowledgement such as a response to "在吗" remains sendable when structural validation, authority, session binding, and hard-risk checks pass. Operator attention may be recorded separately, but it must not replace or erase the Brain reply.
 
 ## Development Requirement
 

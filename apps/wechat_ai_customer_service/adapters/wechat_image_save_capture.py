@@ -36,6 +36,9 @@ COPY_IMAGE_MENU_TOKENS = (
     "copy image",
     "copy",
 )
+CHAT_TIME_RE = re.compile(
+    r"^(?:(?:昨天|前天|星期[一二三四五六日天])\s*)?(?:[01]?\d|2[0-3]):[0-5]\d$"
+)
 
 
 def now_iso() -> str:
@@ -69,6 +72,57 @@ def parse_preview_speaker(source_preview: Any, explicit_speaker: Any = "") -> st
         if image_preview_text(right):
             return left.strip()
     return ""
+
+
+def extract_chat_time_markers(
+    ocr_items: list[dict[str, Any]] | None,
+    image_size: tuple[int, int],
+) -> list[dict[str, Any]]:
+    """Extract centered WeChat time separators without treating them as messages."""
+    width, height = image_size
+    split_x = session_split_x(width)
+    header_cutoff = chat_header_cutoff_y(height)
+    markers: list[dict[str, Any]] = []
+    for item in ocr_items or []:
+        text = re.sub(r"\s+", "", str(item.get("text") or "").strip())
+        if not text or not CHAT_TIME_RE.fullmatch(text):
+            continue
+        center_x = float(item.get("center_x") or 0.0)
+        center_y = float(item.get("center_y") or 0.0)
+        if center_y < header_cutoff or center_y > height - DEFAULT_BOTTOM_EXCLUDE_PX:
+            continue
+        # Session-list times live left of the chat split. Chat separators are
+        # centered in the conversation pane and have compact OCR boxes.
+        if center_x < split_x or center_x > width - 80:
+            continue
+        markers.append(
+            {
+                "text": text,
+                "top": int(float(item.get("top") or center_y)),
+                "bottom": int(float(item.get("bottom") or center_y)),
+                "center_y": center_y,
+            }
+        )
+    return sorted(markers, key=lambda item: float(item.get("center_y") or 0.0))
+
+
+def nearest_chat_time_marker(
+    bubble_bounds: list[int] | tuple[int, int, int, int] | None,
+    markers: list[dict[str, Any]] | None,
+) -> str:
+    """Attach the latest visible time separator above a visual bubble."""
+    bounds = [int(value) for value in list(bubble_bounds or [])[:4]]
+    if len(bounds) != 4:
+        return ""
+    bubble_top = bounds[1]
+    candidates = [
+        item
+        for item in (markers or [])
+        if isinstance(item, dict) and float(item.get("center_y") or 0.0) <= bubble_top
+    ]
+    if not candidates:
+        return ""
+    return str(candidates[-1].get("text") or "").strip()
 
 
 def image_asset_runtime_dir(
@@ -155,6 +209,9 @@ def build_saved_image_asset(
     sender: str = "",
     sender_role: str = "",
     visual_occurrence_id: str = "",
+    pending_signal_id: str = "",
+    wechat_message_time: str = "",
+    visual_index: int = 0,
     diagnostic_path: str = "",
 ) -> dict[str, Any]:
     path = Path(saved_image_path)
@@ -164,20 +221,42 @@ def build_saved_image_asset(
     clean_side = str(visual_side or "").strip().lower()
     if clean_side not in {"customer", "self"}:
         clean_side = "customer"
-    occurrence_seed = json.dumps(
+    resolved_captured_at = str(captured_at or now_iso())
+    clean_pending_signal_id = str(pending_signal_id or "").strip()
+    clean_message_time = str(wechat_message_time or "").strip()
+    clean_visual_index = max(0, int(visual_index or 0))
+    event_identity = clean_pending_signal_id or clean_message_time
+    occurrence_seed_payload = {
+        "sha256": digest,
+        "target_name": str(target_name or ""),
+        "session_key": str(session_key or ""),
+        "bubble_anchor": bubble_anchor or {},
+        "bubble_bounds": list(bubble_bounds or []),
+        "visual_side": clean_side,
+    }
+    # Capture time is observation metadata, not message identity. A durable
+    # pending signal or WeChat-rendered message time is required to distinguish
+    # a second send of identical image bytes from repeated polling.
+    if event_identity:
+        occurrence_seed_payload.update(
+            {
+                "event_identity": event_identity,
+                "visual_index": clean_visual_index,
+            }
+        )
+    occurrence_seed = json.dumps(occurrence_seed_payload, ensure_ascii=False, sort_keys=True)
+    occurrence = str(visual_occurrence_id or "").strip() or f"visual_occurrence_wx_{hashlib.sha256(occurrence_seed.encode('utf-8')).hexdigest()[:16]}"
+    message_id = f"visual_msg_wx_{occurrence.replace('visual_occurrence_wx_', '', 1)[:16]}"
+    observation_seed = json.dumps(
         {
-            "sha256": digest,
-            "target_name": str(target_name or ""),
-            "session_key": str(session_key or ""),
-            "bubble_anchor": bubble_anchor or {},
-            "bubble_bounds": list(bubble_bounds or []),
-            "visual_side": clean_side,
+            "saved_image_path": str(path),
+            "captured_at": resolved_captured_at,
+            "visual_index": clean_visual_index,
         },
         ensure_ascii=False,
         sort_keys=True,
     )
-    occurrence = str(visual_occurrence_id or "").strip() or f"visual_occurrence_wx_{hashlib.sha256(occurrence_seed.encode('utf-8')).hexdigest()[:16]}"
-    message_id = f"visual_msg_wx_{occurrence.replace('visual_occurrence_wx_', '', 1)[:16]}"
+    observation_id = f"visual_observation_wx_{hashlib.sha256(observation_seed.encode('utf-8')).hexdigest()[:16]}"
     resolved_sender = str(sender or sender_role or "").strip().lower()
     if resolved_sender not in {"customer", "self"}:
         resolved_sender = "self" if clean_side == "self" else "customer"
@@ -193,6 +272,10 @@ def build_saved_image_asset(
         "sender_role": str(sender_role or resolved_sender),
         "visual_side": clean_side,
         "visual_occurrence_id": occurrence,
+        "pending_signal_id": clean_pending_signal_id,
+        "wechat_message_time": clean_message_time,
+        "visual_index": clean_visual_index,
+        "visual_observation_id": observation_id,
         "saved_image_path": str(path),
         "sha256": digest,
         "width": int(width),
@@ -200,7 +283,7 @@ def build_saved_image_asset(
         "size_bytes": int(path.stat().st_size),
         "save_method": str(save_method or "context_menu_save_as"),
         "source_preview": str(source_preview or ""),
-        "captured_at": captured_at or now_iso(),
+        "captured_at": resolved_captured_at,
         "bubble_anchor": dict(bubble_anchor or {}),
         "bubble_bounds": [int(value) for value in list(bubble_bounds or [])[:4]],
         "diagnostic_path": str(diagnostic_path or ""),
@@ -227,11 +310,14 @@ def build_image_message_from_asset(asset: dict[str, Any]) -> dict[str, Any]:
         "saved_image_path": str(asset.get("saved_image_path") or ""),
         "visual_side": str(asset.get("visual_side") or sender),
         "visual_occurrence_id": str(asset.get("visual_occurrence_id") or ""),
+        "pending_signal_id": str(asset.get("pending_signal_id") or ""),
+        "wechat_message_time": str(asset.get("wechat_message_time") or ""),
+        "visual_index": int(asset.get("visual_index") or 0),
+        "visual_observation_id": str(asset.get("visual_observation_id") or ""),
         "bubble_bounds": [int(value) for value in (asset.get("bubble_bounds") or [])[:4]],
         "source_adapter": "win32_ocr",
         "captured_at": str(asset.get("captured_at") or ""),
-        "time": str(asset.get("captured_at") or ""),
-        "pending_signal_id": str(asset.get("pending_signal_id") or ""),
+        "time": str(asset.get("wechat_message_time") or asset.get("captured_at") or ""),
         "quality_flags": ["synthetic_visual_turn"],
     }
 
@@ -276,6 +362,7 @@ def detect_visual_image_bubbles(
     messages: list[dict[str, Any]] | None = None,
     max_images: int = 1,
     side_filter: str = "customer",
+    time_markers: list[dict[str, Any]] | None = None,
 ) -> list[dict[str, Any]]:
     image = screenshot.convert("RGB")
     width, height = image.size
@@ -356,6 +443,7 @@ def detect_visual_image_bubbles(
                     "side": side,
                     "score": float(score),
                     "anchor": {"x": int((bounds[0] + bounds[2]) / 2), "y": int((bounds[1] + bounds[3]) / 2)},
+                    "wechat_message_time": nearest_chat_time_marker(bounds, time_markers),
                 }
             )
     candidates.sort(key=lambda item: float(item.get("score") or 0.0), reverse=True)
@@ -680,6 +768,9 @@ def build_image_saved_payload(
     probe: dict[str, Any],
     bubble_bounds: list[int] | tuple[int, int, int, int] | None = None,
     visual_side: str = "customer",
+    pending_signal_id: str = "",
+    wechat_message_time: str = "",
+    visual_index: int = 0,
 ) -> dict[str, Any]:
     resolved_speaker = parse_preview_speaker(source_preview, speaker_name)
     asset = build_saved_image_asset(
@@ -696,6 +787,9 @@ def build_image_saved_payload(
         visual_side=visual_side,
         sender=visual_side,
         sender_role=visual_side,
+        pending_signal_id=pending_signal_id,
+        wechat_message_time=wechat_message_time,
+        visual_index=visual_index,
         diagnostic_path=screenshot_path,
     )
     meta_path = saved_path.with_suffix(saved_path.suffix + ".meta.json")
@@ -729,6 +823,7 @@ def build_visual_bubble_archive_payload(
     captured_at: str,
     diagnostics: dict[str, Any],
     probe: dict[str, Any],
+    pending_signal_id: str = "",
 ) -> dict[str, Any]:
     assets: list[dict[str, Any]] = []
     messages: list[dict[str, Any]] = []
@@ -764,6 +859,9 @@ def build_visual_bubble_archive_payload(
             visual_side=side,
             sender=side,
             sender_role=side,
+            pending_signal_id=pending_signal_id,
+            wechat_message_time=str(bubble.get("wechat_message_time") or ""),
+            visual_index=index,
             diagnostic_path=screenshot_path,
         )
         meta_path = Path(str(crop_result.get("path") or "")).with_suffix(Path(str(crop_result.get("path") or "")).suffix + ".meta.json")
@@ -806,6 +904,7 @@ def execute_wechat_image_save(
     max_images: int = 1,
     side_filter: str = "customer",
     capture_mode: str = "context_menu",
+    pending_signal_id: str = "",
     sidecar_ops: Any,
 ) -> dict[str, Any]:
     output_dir = resolve_artifact_dir(artifact_dir, tenant_id=tenant_id, target_name=target_name, session_key=session_key)
@@ -815,6 +914,7 @@ def execute_wechat_image_save(
     geometry = sidecar_ops.get_window_geometry(hwnd)
     image_size = getattr(screenshot, "size", (int(geometry.get("width") or 0), int(geometry.get("height") or 0)))
     messages = sidecar_ops.parse_messages_from_ocr(ocr_items, image_size, target=target_name)
+    time_markers = extract_chat_time_markers(ocr_items, image_size)
     blocking_reason = sidecar_ops.blocking_screen_reason(ocr_items)
     if blocking_reason:
         return {
@@ -840,6 +940,7 @@ def execute_wechat_image_save(
         messages=messages,
         max_images=max_images,
         side_filter=clean_side_filter,
+        time_markers=time_markers,
     )
     if not bubbles:
         return {
@@ -875,8 +976,10 @@ def execute_wechat_image_save(
                 "ocr_items_count": len(ocr_items),
                 "capture_mode": clean_capture_mode,
                 "side_filter": clean_side_filter,
+                "time_markers": time_markers,
             },
             probe=probe,
+            pending_signal_id=pending_signal_id,
         )
     bubble = bubbles[0]
     anchor = dict(bubble.get("anchor") or {})
@@ -941,6 +1044,9 @@ def execute_wechat_image_save(
                 save_method="context_menu_copy_clipboard",
                 diagnostics=diagnostics,
                 probe=probe,
+                pending_signal_id=pending_signal_id,
+                wechat_message_time=str(bubble.get("wechat_message_time") or ""),
+                visual_index=0,
             )
         try:
             sidecar_ops.key_press(sidecar_ops.win32con.VK_ESCAPE)

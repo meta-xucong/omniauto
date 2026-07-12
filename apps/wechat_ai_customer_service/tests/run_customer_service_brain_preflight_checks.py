@@ -15,6 +15,7 @@ for path in (PROJECT_ROOT, WORKFLOWS_ROOT, APP_ROOT, ADAPTERS_ROOT):
         sys.path.insert(0, str(path))
 
 import customer_service_brain as brain_module  # noqa: E402
+import customer_service_brain_preflight as preflight_module  # noqa: E402
 from apps.wechat_ai_customer_service.knowledge_paths import tenant_context  # noqa: E402
 from customer_service_brain_preflight import (  # noqa: E402
     augment_evidence_text_with_brain_preflight_queries,
@@ -36,6 +37,8 @@ def main() -> int:
         check_short_social_text_gap_skips_preflight,
         check_text_product_with_existing_evidence_does_not_need_preflight,
         check_short_text_product_gap_uses_llm_preflight_query,
+        check_visual_fast_preflight_uses_bridge_without_llm,
+        check_visual_fast_preflight_does_not_borrow_recent_context_for_new_unclear_image,
         check_visual_turn_preflight_forces_product_master_evidence,
         check_recent_visual_followup_reuses_visual_context_for_product_master,
     ]
@@ -199,6 +202,28 @@ def visual_bridge_for_qinplus() -> dict[str, Any]:
             "needs_clarification": False,
         },
         "policy": "visual bridge input is advisory only; product facts must still be grounded in product_master",
+    }
+
+
+def visual_bridge_for_unrelated_image() -> dict[str, Any]:
+    return {
+        "schema_version": 1,
+        "present": True,
+        "vision_summary": "unrelated outdoor image without a clear vehicle subject",
+        "classification": {"is_vehicle": False, "vehicle_confidence": 0.05, "unknown": False},
+        "catalog_assist": {
+            "normalized_vehicle_query": "",
+            "catalog_lookup_mode": "none",
+            "preferred_candidate_ids": [],
+            "candidate_names": [],
+            "exact_candidate_id": "",
+            "exact_candidate_name": "",
+        },
+        "intent_hints": {
+            "wants_catalog_match": False,
+            "wants_similar_recommendation": False,
+            "needs_clarification": False,
+        },
     }
 
 
@@ -377,6 +402,93 @@ def check_short_text_product_gap_uses_llm_preflight_query() -> None:
     assert_true(A4L_ID in product_master_ids(event), f"text gap should retrieve A4L product master: {product_master_ids(event)}")
     current = (((event.get("brain_input") or {}).get("current_message") or {}) if isinstance(event.get("brain_input"), dict) else {})
     assert_equal(current.get("clean_text"), "奥迪a四l有吗", "text gap preflight must keep original clean_text")
+
+
+def check_visual_fast_preflight_uses_bridge_without_llm() -> None:
+    original_run = preflight_module.run_customer_service_brain_preflight_llm
+    calls = {"count": 0}
+
+    def fail_if_called(**kwargs: Any) -> dict[str, Any]:
+        calls["count"] += 1
+        raise AssertionError("visual bridge fast preflight should not call LLM")
+
+    config = base_config(preflight_candidate=preflight_plan_for_qinplus())
+    settings = brain_module.effective_brain_settings(config)
+    try:
+        preflight_module.run_customer_service_brain_preflight_llm = fail_if_called
+        preflight = maybe_run_customer_service_brain_preflight(
+            config=config,
+            settings=settings,
+            target_name="target",
+            target_state={"conversation_context": {}},
+            batch=[{"id": "m-img-qinplus-fast", "sender": "customer", "content": "this one?"}],
+            combined="this one?",
+            visual_bridge_input=visual_bridge_for_qinplus(),
+        )
+    finally:
+        preflight_module.run_customer_service_brain_preflight_llm = original_run
+
+    assert_equal(calls["count"], 0, "visual bridge fast preflight must avoid extra preflight LLM")
+    assert_true(preflight.get("applied"), f"visual fast preflight should apply: {preflight}")
+    assert_equal(preflight.get("reason"), "visual_bridge_fast_preflight", "visual fast path should be explicit")
+    assert_equal((preflight.get("llm_status") or {}).get("status"), "visual_bridge_fast_preflight", "audit should show local fast path")
+    plan = preflight.get("plan") if isinstance(preflight.get("plan"), dict) else {}
+    assert_true(plan.get("requires_product_master"), f"visual fast plan should require product master: {plan}")
+    assert_true(bool(plan.get("normalized_product_queries")), f"visual fast plan should carry product queries: {plan}")
+
+
+def check_visual_fast_preflight_does_not_borrow_recent_context_for_new_unclear_image() -> None:
+    original_run = preflight_module.run_customer_service_brain_preflight_llm
+    calls = {"count": 0}
+
+    def fake_llm(**kwargs: Any) -> dict[str, Any]:
+        calls["count"] += 1
+        return {
+            "ok": True,
+            "provider": "unit_preflight",
+            "model": "unit",
+            "preflight_plan": {
+                "customer_goal": "new unclear image",
+                "business_intent": "general_chat",
+                "requires_product_master": False,
+                "requires_formal_knowledge": False,
+                "requires_current_context": False,
+                "low_authority_fast_allowed": True,
+                "normalized_product_queries": [],
+                "evidence_lookup_mode": "none",
+                "context_resolution": {
+                    "uses_visual_bridge": True,
+                    "uses_recent_visual_context": False,
+                    "ambiguous_reference": False,
+                },
+                "confidence": 0.8,
+                "reason": "current visual has no vehicle query",
+            },
+        }
+
+    config = base_config(preflight_candidate=preflight_plan_for_qinplus())
+    settings = brain_module.effective_brain_settings(config)
+    try:
+        preflight_module.run_customer_service_brain_preflight_llm = fake_llm
+        preflight = maybe_run_customer_service_brain_preflight(
+            config=config,
+            settings=settings,
+            target_name="target",
+            target_state={
+                "conversation_context": {},
+                "visual_context_state": {"last_visual_bridge_input": visual_bridge_for_qinplus()},
+            },
+            batch=[{"id": "m-img-unrelated", "sender": "customer", "content": "[image]"}],
+            combined="",
+            visual_bridge_input=visual_bridge_for_unrelated_image(),
+        )
+    finally:
+        preflight_module.run_customer_service_brain_preflight_llm = original_run
+
+    assert_equal(calls["count"], 1, "unclear new image should fall through to LLM preflight")
+    assert_equal(preflight.get("reason"), "brain_preflight_ready", "unclear new image should not use visual fast path")
+    plan = preflight.get("plan") if isinstance(preflight.get("plan"), dict) else {}
+    assert_true(not plan.get("requires_product_master"), f"unclear current image must not borrow recent product query: {plan}")
 
 
 def check_visual_turn_preflight_forces_product_master_evidence() -> None:

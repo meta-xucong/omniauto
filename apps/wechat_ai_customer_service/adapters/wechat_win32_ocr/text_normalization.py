@@ -208,6 +208,6 @@ def is_message_noise(text: str) -> bool:
 def infer_conversation_type(name: str) -> str:
     if is_file_transfer_session_alias(name):
         return "file_transfer"
-    if re.search(r"(群|群聊|测试|chatroom|room)", name, re.IGNORECASE):
+    if re.search(r"(群|群聊|chatroom|room)", name, re.IGNORECASE):
         return "group"
     return "private"

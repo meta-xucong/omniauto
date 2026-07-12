@@ -21,8 +21,10 @@ from apps.wechat_ai_customer_service.adapters.wechat_image_save_capture import (
     detect_customer_image_bubbles,
     detect_visual_image_bubbles,
     execute_wechat_image_save,
+    extract_chat_time_markers,
     find_copy_menu_item,
     find_save_menu_item,
+    nearest_chat_time_marker,
     image_preview_text,
     parse_preview_speaker,
     save_clipboard_image_to_path,
@@ -35,6 +37,8 @@ def main() -> int:
     checks = [
         check_image_preview_and_speaker_parsing,
         check_saved_image_asset_and_message_contract,
+        check_visual_message_identity_separates_event_from_observation,
+        check_chat_time_marker_is_attached_without_becoming_content,
         check_detect_customer_image_bubble_prefers_customer_side,
         check_detect_visual_image_bubbles_keeps_both_sides,
         check_find_save_menu_item_supports_chinese_and_english,
@@ -81,6 +85,74 @@ def check_saved_image_asset_and_message_contract() -> None:
     assert_equal(message.get("type"), "image", "raw image-save message should be image")
     assert_equal(message.get("sender_role"), "customer", "image message should be customer-authored")
     assert_true(bool(message.get("image_assets")), "message should reference asset")
+
+
+def check_visual_message_identity_separates_event_from_observation() -> None:
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        image_path = Path(tmp_dir) / "same-image.jpg"
+        Image.new("RGB", (64, 48), (240, 240, 240)).save(image_path)
+        first = build_saved_image_asset(
+            saved_image_path=image_path,
+            target_name="session",
+            session_key="wx:test",
+            captured_at="2026-07-11T19:16:25",
+            pending_signal_id="pending-1",
+        )
+        repeated_observation = build_saved_image_asset(
+            saved_image_path=image_path,
+            target_name="session",
+            session_key="wx:test",
+            captured_at="2026-07-11T19:18:26",
+            pending_signal_id="pending-1",
+        )
+        second_send = build_saved_image_asset(
+            saved_image_path=image_path,
+            target_name="session",
+            session_key="wx:test",
+            captured_at="2026-07-11T19:18:27",
+            pending_signal_id="pending-2",
+        )
+    assert_equal(
+        first.get("asset_id"),
+        repeated_observation.get("asset_id"),
+        "same bytes should retain one content asset id",
+    )
+    assert_equal(
+        first.get("visual_occurrence_id"),
+        repeated_observation.get("visual_occurrence_id"),
+        "same pending event should retain one visual occurrence",
+    )
+    assert_true(
+        first.get("visual_observation_id") != repeated_observation.get("visual_observation_id"),
+        "different captures should retain distinct observation ids",
+    )
+    assert_true(
+        first.get("visual_occurrence_id") != second_send.get("visual_occurrence_id"),
+        "same image sent in a new pending event must get a new occurrence",
+    )
+
+
+def check_chat_time_marker_is_attached_without_becoming_content() -> None:
+    markers = extract_chat_time_markers(
+        [
+            {
+                "text": "19:13",
+                "left": 620,
+                "top": 300,
+                "right": 670,
+                "bottom": 322,
+                "center_x": 645,
+                "center_y": 311,
+            }
+        ],
+        (980, 860),
+    )
+    assert_equal(len(markers), 1, "chat time separator should be extracted")
+    assert_equal(
+        nearest_chat_time_marker([422, 410, 744, 652], markers),
+        "19:13",
+        "nearest time separator should be attached to the bubble",
+    )
 
 
 def check_detect_customer_image_bubble_prefers_customer_side() -> None:

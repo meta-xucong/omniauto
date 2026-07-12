@@ -24,6 +24,7 @@ from apps.wechat_ai_customer_service.adapters.wechat_win32_ocr.geometry import s
 
 def main() -> int:
     checks = [
+        check_customer_image_capture_trigger_is_metadata_only,
         check_router_detects_customer_image_region_and_builds_bridge,
         check_router_uses_payload_saved_image_without_sidecar,
         check_router_saves_pending_image_signal_and_builds_safe_proxy,
@@ -40,6 +41,62 @@ def main() -> int:
     failures = [item for item in results if not item.get("ok")]
     print(json.dumps({"ok": not failures, "count": len(results), "failures": failures, "results": results}, ensure_ascii=False, indent=2))
     return 1 if failures else 0
+
+
+def check_customer_image_capture_trigger_is_metadata_only() -> None:
+    normal = router_module.customer_image_capture_trigger(
+        payload={
+            "messages": [
+                {
+                    "type": "text",
+                    "sender": "customer",
+                    "content": "比亚迪秦PLUS还有现车吗",
+                }
+            ]
+        },
+        pending_signal={
+            "pending_signal_kind": "normal",
+            "pending_signal_text": "比亚迪秦PLUS还有现车吗",
+        },
+    )
+    assert_true(normal.get("should_run") is False, f"normal text should not invoke image module: {normal}")
+
+    image = router_module.customer_image_capture_trigger(
+        payload={"messages": []},
+        pending_signal={"pending_signal_kind": "image_capture", "pending_signal_text": "[图片]"},
+    )
+    assert_true(image.get("should_run") is True, f"image signal should invoke image module: {image}")
+
+    already_processed = router_module.customer_image_capture_trigger(
+        payload={"messages": []},
+        pending_signal={
+            "pending_signal_id": "pending-image-1",
+            "pending_signal_kind": "image_capture",
+            "pending_signal_text": "[图片]",
+        },
+        target_state={
+            "conversation_context": {
+                "ledger_recent_messages": [{"pending_signal_id": "pending-image-1"}],
+            }
+        },
+    )
+    assert_true(already_processed.get("should_run") is False, f"same image signal should not re-enter image module: {already_processed}")
+    assert_equal(
+        already_processed.get("reason"),
+        "pending_image_signal_already_processed",
+        "same pending image signal should expose a terminal dedupe reason",
+    )
+
+    recent_self_image = router_module.customer_image_capture_trigger(
+        payload={
+            "messages": [
+                {"type": "text", "sender": "customer", "content": "收到"},
+                {"type": "image", "sender": "self", "content": "[图片]"},
+            ]
+        },
+        pending_signal={"pending_signal_kind": "normal", "pending_signal_text": ""},
+    )
+    assert_true(recent_self_image.get("should_run") is True, f"recent self image should be archived: {recent_self_image}")
 
 
 class FakeConnector:

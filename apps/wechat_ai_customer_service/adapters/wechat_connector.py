@@ -436,11 +436,15 @@ class WeChatConnector:
         restore_to_latest: bool | None = None,
         visible_only_target: bool = False,
         session_key: str = "",
+        conversation_type: str = "",
     ) -> dict[str, Any]:
         args = ["messages", "--target", target]
         clean_session_key = str(session_key or "").strip()
         if clean_session_key:
             args.extend(["--session-key", clean_session_key])
+        clean_conversation_type = str(conversation_type or "").strip().lower()
+        if clean_conversation_type:
+            args.extend(["--conversation-type", clean_conversation_type])
         if exact:
             args.append("--exact")
         mode = str(history_mode or "").strip()
@@ -496,6 +500,11 @@ class WeChatConnector:
                 primary.setdefault("transport_priority", "rpa_first")
                 attach_rpa_lock_meta(primary, lock_meta)
                 return primary
+            if rpa_identity_guard_should_stop(primary):
+                primary.setdefault("adapter", "win32_ocr")
+                primary.setdefault("transport_priority", "rpa_first")
+                attach_rpa_lock_meta(primary, lock_meta)
+                return primary
             if visible_only_target and message_target_pending_visible(primary):
                 primary.setdefault("adapter", "win32_ocr")
                 primary.setdefault("transport_priority", "rpa_first")
@@ -547,10 +556,11 @@ class WeChatConnector:
         exact: bool = True,
         *,
         session_key: str = "",
+        conversation_type: str = "",
         max_attempts: int = 4,
         artifact_dir: str | None = None,
     ) -> dict[str, Any]:
-        """Convert visible WeChat voice bubbles before the normal message read."""
+        """Convert visible voice bubbles after a caller has captured evidence."""
         if not target:
             return {"ok": False, "adapter": "win32_ocr", "state": "voice_transcribe_target_missing"}
         try:
@@ -561,6 +571,9 @@ class WeChatConnector:
         clean_session_key = str(session_key or "").strip()
         if clean_session_key:
             args.extend(["--session-key", clean_session_key])
+        clean_conversation_type = str(conversation_type or "").strip().lower()
+        if clean_conversation_type:
+            args.extend(["--conversation-type", clean_conversation_type])
         if exact:
             args.append("--exact")
         if artifact_dir:
@@ -569,6 +582,12 @@ class WeChatConnector:
         attempts: list[dict[str, Any]] = []
         transcribed_messages: list[dict[str, Any]] = []
         new_messages: list[dict[str, Any]] = []
+        retriable_states = {
+            "voice_transcribe_target_not_found",
+            "voice_transcribe_context_menu_target_not_found",
+            "voice_transcribe_context_menu_click_failed",
+            "voice_transcribe_context_menu_no_new_text",
+        }
         try:
             with wechat_rpa_lock("voice_transcribe", timeout_seconds=lock_timeout) as lock_meta:
                 for attempt_index in range(attempts_limit):
@@ -577,17 +596,62 @@ class WeChatConnector:
                     primary.setdefault("transport_priority", "rpa_first")
                     attach_rpa_lock_meta(primary, lock_meta)
                     click_target = primary.get("click_target") if isinstance(primary.get("click_target"), dict) else {}
+                    context_menu_attempt = (
+                        primary.get("context_menu_attempt") if isinstance(primary.get("context_menu_attempt"), dict) else {}
+                    )
+                    right_click = (
+                        context_menu_attempt.get("right_click")
+                        if isinstance(context_menu_attempt.get("right_click"), dict)
+                        else {}
+                    )
                     attempts.append(
                         {
                             "ok": bool(primary.get("ok")),
                             "state": primary.get("state"),
                             "click_source": click_target.get("source"),
+                            "context_menu_reason": context_menu_attempt.get("reason"),
+                            "context_menu_click_source": (
+                                (context_menu_attempt.get("click_target") or {}).get("source")
+                                if isinstance(context_menu_attempt.get("click_target"), dict)
+                                else ""
+                            ),
+                            "context_menu_screenshot_path": context_menu_attempt.get("menu_screenshot_path"),
+                            "context_menu_ocr_items_count": context_menu_attempt.get("menu_ocr_items_count"),
+                            "context_menu_ocr_text_samples": context_menu_attempt.get("menu_ocr_text_samples") or [],
+                            "right_click_ok": right_click.get("ok"),
                             "new_messages_count": len(primary.get("new_messages") or []),
                             "transcribed_messages_count": len(primary.get("transcribed_messages") or []),
                         }
                     )
                     state = str(primary.get("state") or "")
+                    physical_interaction = bool(
+                        right_click.get("ok")
+                        or isinstance(context_menu_attempt.get("click_target"), dict)
+                        or isinstance(primary.get("click"), dict)
+                    )
+                    if state.startswith("voice_window_lost"):
+                        primary["attempts"] = attempts
+                        primary["attempt_count"] = len(attempts)
+                        primary["physical_interaction"] = physical_interaction
+                        primary["risk_stop_recommended"] = True
+                        return primary
+                    if physical_interaction and state in {
+                        "voice_transcribe_context_menu_no_new_text",
+                        "voice_transcribe_context_menu_click_failed",
+                        "voice_transcribe_context_menu_target_not_found",
+                        "voice_transcribe_window_lost_after_context_menu_click",
+                    }:
+                        # Once a physical right-click/menu click happened, a
+                        # retry can act on a shifted bubble or a different
+                        # foreground surface. Stop and preserve the evidence.
+                        primary["attempts"] = attempts
+                        primary["attempt_count"] = len(attempts)
+                        primary["physical_interaction"] = True
+                        return primary
                     if state == "voice_transcribe_target_not_found":
+                        if attempt_index + 1 < attempts_limit:
+                            time.sleep(0.35)
+                            continue
                         final_state = "voice_transcribe_completed" if transcribed_messages else "voice_transcribe_no_visible_voice"
                         return attach_rpa_lock_meta(
                             {
@@ -599,6 +663,7 @@ class WeChatConnector:
                                 "exact": exact,
                                 "attempts": attempts,
                                 "attempt_count": len(attempts),
+                                "max_attempts": attempts_limit,
                                 "transcribed_messages": transcribed_messages,
                                 "new_messages": new_messages,
                                 "transcribed_messages_count": len(transcribed_messages),
@@ -606,6 +671,9 @@ class WeChatConnector:
                             lock_meta,
                         )
                     if not primary.get("ok"):
+                        if state in retriable_states and attempt_index + 1 < attempts_limit:
+                            time.sleep(0.35)
+                            continue
                         primary["attempts"] = attempts
                         primary["attempt_count"] = len(attempts)
                         return primary
@@ -614,6 +682,9 @@ class WeChatConnector:
                     transcribed_messages.extend(current_transcribed)
                     new_messages.extend(current_new)
                     if not current_transcribed:
+                        if state in retriable_states and attempt_index + 1 < attempts_limit:
+                            time.sleep(0.35)
+                            continue
                         break
                     if attempt_index + 1 < attempts_limit:
                         time.sleep(0.25)
@@ -658,6 +729,7 @@ class WeChatConnector:
         artifact_dir: str | None = None,
         source_preview: str = "",
         speaker_name: str = "",
+        pending_signal_id: str = "",
         tenant_id: str = "",
         max_images: int = 1,
         side_filter: str = "customer",
@@ -676,6 +748,7 @@ class WeChatConnector:
             (artifact_dir, "--artifact-dir"),
             (source_preview, "--source-preview"),
             (speaker_name, "--speaker-name"),
+            (pending_signal_id, "--pending-signal-id"),
             (tenant_id, "--tenant-id"),
         ):
             clean = str(value or "").strip()
@@ -725,6 +798,7 @@ class WeChatConnector:
         artifact_dir: str | None = None,
         source_preview: str = "",
         speaker_name: str = "",
+        pending_signal_id: str = "",
         tenant_id: str = "",
         max_images: int = 6,
     ) -> dict[str, Any]:
@@ -736,6 +810,7 @@ class WeChatConnector:
             artifact_dir=artifact_dir,
             source_preview=source_preview,
             speaker_name=speaker_name,
+            pending_signal_id=pending_signal_id,
             tenant_id=tenant_id,
             max_images=max_images,
             side_filter="all",
@@ -751,6 +826,7 @@ class WeChatConnector:
         skip_send_rate_guard: bool = False,
         artifact_dir: str | None = None,
         session_key: str = "",
+        conversation_type: str = "",
         continuation_prevalidated_guard: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         if not target:
@@ -777,6 +853,9 @@ class WeChatConnector:
         clean_session_key = str(session_key or "").strip()
         if clean_session_key:
             args.extend(["--session-key", clean_session_key])
+        clean_conversation_type = str(conversation_type or "").strip().lower()
+        if clean_conversation_type:
+            args.extend(["--conversation-type", clean_conversation_type])
         if exact:
             args.append("--exact")
         if skip_send_rate_guard:
@@ -816,6 +895,11 @@ class WeChatConnector:
                 primary.setdefault("transport_priority", "rpa_first")
                 attach_rpa_lock_meta(primary, lock_meta)
                 return _finish_send(primary, adapter_stage="win32_render_fault_stop")
+            if rpa_identity_guard_should_stop(primary):
+                primary.setdefault("adapter", "win32_ocr")
+                primary.setdefault("transport_priority", "rpa_first")
+                attach_rpa_lock_meta(primary, lock_meta)
+                return _finish_send(primary, adapter_stage="win32_identity_guard_stop")
             reserve = self.call_reserve_sidecar(args, allow_failure=True, primary_payload=snapshot_payload(primary))
             if reserve.get("ok"):
                 reserve.setdefault("adapter", "wxauto4")
@@ -857,6 +941,7 @@ class WeChatConnector:
         skip_send_rate_guard: bool = False,
         artifact_dir: str | None = None,
         session_key: str = "",
+        conversation_type: str = "",
         continuation_prevalidated_guard: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         verify_started_at = time.time()
@@ -885,6 +970,9 @@ class WeChatConnector:
         clean_session_key = str(session_key or "").strip()
         if clean_session_key:
             send_kwargs["session_key"] = clean_session_key
+        clean_conversation_type = str(conversation_type or "").strip().lower()
+        if clean_conversation_type:
+            send_kwargs["conversation_type"] = clean_conversation_type
         if isinstance(continuation_prevalidated_guard, dict) and continuation_prevalidated_guard:
             send_kwargs["continuation_prevalidated_guard"] = continuation_prevalidated_guard
         send_result = self.send_text(
@@ -1722,6 +1810,8 @@ def _args_to_request(args: list[str]) -> dict[str, Any]:
                 request["target"] = args[i + 1]
             elif arg == "--session-key" and i + 1 < len(args):
                 request["session_key"] = args[i + 1]
+            elif arg == "--conversation-type" and i + 1 < len(args):
+                request["conversation_type"] = args[i + 1]
             elif arg == "--exact":
                 request["exact"] = True
             elif arg == "--history-load-times" and i + 1 < len(args):
@@ -1795,6 +1885,8 @@ def _args_to_request(args: list[str]) -> dict[str, Any]:
                 request["text"] = args[i + 1]
             elif arg == "--session-key" and i + 1 < len(args):
                 request["session_key"] = args[i + 1]
+            elif arg == "--conversation-type" and i + 1 < len(args):
+                request["conversation_type"] = args[i + 1]
             elif arg == "--exact":
                 request["exact"] = True
             elif arg == "--skip-send-rate-guard":
@@ -1843,6 +1935,7 @@ def compat_args(args: list[str]) -> list[str]:
             "--target",
             "--text",
             "--session-key",
+            "--conversation-type",
             "--phone",
             "--wechat",
             "--history-load-times",
@@ -2048,6 +2141,30 @@ def rpa_render_fault_should_stop(payload: dict[str, Any]) -> bool:
     if str(recovery.get("reason") or "") == "auto_render_recovery_disabled":
         return True
     return not auto_render_recovery_enabled()
+
+
+def rpa_identity_guard_should_stop(payload: dict[str, Any]) -> bool:
+    """Never hand an identity-confirmation failure to a name-only reserve path."""
+    if not isinstance(payload, dict):
+        return False
+    state = str(payload.get("state") or "").strip().lower()
+    error_code = str(payload.get("error_code") or "").strip().upper()
+    if state in {
+        "target_not_confirmed",
+        "target_not_confirmed_for_messages",
+        "target_not_confirmed_for_voice_transcribe",
+        "target_not_confirmed_for_image_save",
+    }:
+        return True
+    if error_code.startswith("TARGET_NOT_CONFIRMED"):
+        return True
+    guard = payload.get("guard") if isinstance(payload.get("guard"), dict) else {}
+    guard_reason = str(guard.get("reason") or "").strip().lower()
+    return guard_reason in {
+        "session_key_not_confirmed",
+        "conversation_type_not_confirmed",
+        "target_title_not_confirmed",
+    }
 
 
 def rpa_payload_has_invalid_window_handle(payload: dict[str, Any]) -> bool:

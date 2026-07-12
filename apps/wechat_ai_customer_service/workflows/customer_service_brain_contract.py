@@ -1231,7 +1231,12 @@ def verify_brain_reply_quality(
 
     if is_social_only_message(question):
         if contains_any(clean_reply, UNSUPPORTED_INFO_COLLECTION_TERMS):
-            if not delay_followup_posture or not check_delay_followup_context_continuity(question, clean_reply, evidence_pack or {}) == {}:
+            delay_followup_check = check_delay_followup_context_continuity(
+                question,
+                clean_reply,
+                evidence_pack or {},
+            )
+            if not delay_followup_posture or bool(delay_followup_check.get("error")):
                 errors.append("unsupported_info_collection_for_social_message")
         stale_context_check = check_social_turn_over_carries_stale_business_context(question, clean_reply)
         if stale_context_check.get("error"):
@@ -1268,6 +1273,8 @@ def verify_brain_reply_quality(
     delay_followup_check = check_delay_followup_context_continuity(question, clean_reply, evidence_pack or {})
     if delay_followup_check.get("error"):
         errors.append(str(delay_followup_check["error"]))
+    if delay_followup_check.get("warning"):
+        warnings.append(str(delay_followup_check["warning"]))
 
     if concrete_question and is_generic_stall_reply(clean_reply):
         errors.append("generic_stall_reply_for_concrete_question")
@@ -2075,10 +2082,12 @@ def is_thin_social_or_common_sense_reply(question: str, reply: str, plan: dict[s
 
 
 def check_delay_followup_context_continuity(question: str, reply: str, evidence_pack: dict[str, Any]) -> dict[str, Any]:
-    """Flag fresh-greeting replies when runtime says the customer is chasing.
+    """Audit short social replies without treating them as a send blocker.
 
-    This is a generic continuity check. It only asks Brain to repair; it does
-    not prescribe wording or authorize facts.
+    A customer asking "在吗" after a delayed turn commonly deserves a short
+    Brain-authored acknowledgement such as "在呢，您说".  The wording may be
+    worth reviewing for continuity, but a reviewer must not erase a valid
+    visible reply merely because it contains ordinary greeting language.
     """
 
     state = extract_conversation_interaction_state(evidence_pack)
@@ -2094,19 +2103,6 @@ def check_delay_followup_context_continuity(question: str, reply: str, evidence_
         return {}
     if not is_social_only_message(q):
         return {}
-    delay_ack_terms = (
-        "抱歉",
-        "不好意思",
-        "回慢",
-        "慢了",
-        "等久",
-        "久等",
-        "刚才在",
-        "查",
-        "核",
-        "打字",
-        "处理",
-    )
     context_anchor_terms = (
         "前面",
         "上面",
@@ -2117,12 +2113,15 @@ def check_delay_followup_context_continuity(question: str, reply: str, evidence_
         "刚说",
         "刚问",
     )
-    fresh_greeting_terms = ("您说", "你说", "在的", "在呢", "马上跟您聊", "刚看到")
     mentions_unanswered = reply_mentions_unanswered_context(r, str(state.get("last_unanswered_customer_text") or ""))
-    if contains_any(r, delay_ack_terms) or contains_any(r, context_anchor_terms) or mentions_unanswered:
+    if contains_any(r, context_anchor_terms) or mentions_unanswered:
         return {}
-    if len(r) <= 80 and contains_any(r, fresh_greeting_terms):
-        return {"error": "delay_followup_reply_looks_like_fresh_greeting"}
+    if len(r) <= 80:
+        return {
+            "warning": "delay_followup_short_social_reply_review",
+            "reason": "brain_authored_short_social_reply_is_sendable",
+            "non_blocking": True,
+        }
     return {}
 
 

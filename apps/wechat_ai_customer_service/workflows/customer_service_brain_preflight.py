@@ -109,6 +109,7 @@ def effective_customer_service_brain_preflight_settings(
         "text_evidence_gap_enabled": True,
         "text_evidence_gap_max_chars": 80,
         "text_evidence_gap_probe_short_low_authority": True,
+        "visual_bridge_fast_preflight_enabled": True,
     }
     flat_key_map = {
         "preflight_enabled": "enabled",
@@ -128,6 +129,7 @@ def effective_customer_service_brain_preflight_settings(
         "preflight_text_evidence_gap_enabled": "text_evidence_gap_enabled",
         "preflight_text_evidence_gap_max_chars": "text_evidence_gap_max_chars",
         "preflight_text_evidence_gap_probe_short_low_authority": "text_evidence_gap_probe_short_low_authority",
+        "preflight_visual_bridge_fast_preflight_enabled": "visual_bridge_fast_preflight_enabled",
     }
     for old_key, new_key in flat_key_map.items():
         if old_key in settings:
@@ -161,6 +163,10 @@ def effective_customer_service_brain_preflight_settings(
     merged["text_evidence_gap_max_chars"] = _positive_int(merged.get("text_evidence_gap_max_chars"), 80, minimum=1)
     merged["text_evidence_gap_probe_short_low_authority"] = _as_bool(
         merged.get("text_evidence_gap_probe_short_low_authority"),
+        default=True,
+    )
+    merged["visual_bridge_fast_preflight_enabled"] = _as_bool(
+        merged.get("visual_bridge_fast_preflight_enabled"),
         default=True,
     )
     return merged
@@ -503,6 +509,37 @@ def visual_bridge_evidence_guard_plan(
     }
 
 
+def visual_bridge_fast_preflight_plan(
+    *,
+    settings: dict[str, Any],
+    visual_bridge_input: dict[str, Any] | None,
+    target_state: dict[str, Any],
+    trigger_reason: str,
+) -> dict[str, Any]:
+    if not _as_bool(settings.get("visual_bridge_fast_preflight_enabled"), default=True):
+        return {}
+    reason = str(trigger_reason or "").strip()
+    bridge = _as_dict(visual_bridge_input)
+    if bridge.get("present"):
+        # A new visual turn must stand on its own visual query.  Do not borrow
+        # the previous car context when the current image is unrelated/unclear.
+        current_only_state: dict[str, Any] = {}
+        if not collect_visual_product_queries(visual_bridge_input, target_state=current_only_state):
+            return {}
+        return visual_bridge_evidence_guard_plan(
+            visual_bridge_input=visual_bridge_input,
+            target_state=current_only_state,
+            trigger_reason=reason or "visual_bridge_fast_preflight",
+        )
+    if reason not in {"recent_visual_context_short_followup", "synthetic_visual_turn"}:
+        return {}
+    return visual_bridge_evidence_guard_plan(
+        visual_bridge_input={},
+        target_state=target_state,
+        trigger_reason=reason,
+    )
+
+
 def compact_llm_status(result: dict[str, Any]) -> dict[str, Any]:
     return {
         key: result.get(key)
@@ -554,6 +591,28 @@ def maybe_run_customer_service_brain_preflight(
     payload["trigger"] = trigger
     if not trigger.get("enabled"):
         payload["reason"] = str(trigger.get("reason") or "brain_preflight_not_triggered")
+        payload["duration_seconds"] = round(time.time() - started_at, 4)
+        return payload
+    fast_plan = visual_bridge_fast_preflight_plan(
+        settings=preflight_settings,
+        visual_bridge_input=visual_bridge_input,
+        target_state=target_state,
+        trigger_reason=str(trigger.get("reason") or ""),
+    )
+    if fast_plan:
+        payload.update(
+            {
+                "applied": True,
+                "reason": "visual_bridge_fast_preflight",
+                "provider": "local_visual_bridge",
+                "plan": normalize_customer_service_brain_preflight_plan(fast_plan),
+                "llm_status": {
+                    "ok": True,
+                    "provider": "local_visual_bridge",
+                    "status": "visual_bridge_fast_preflight",
+                },
+            }
+        )
         payload["duration_seconds"] = round(time.time() - started_at, 4)
         return payload
     prompt = build_customer_service_brain_preflight_prompt(

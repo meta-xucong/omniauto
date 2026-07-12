@@ -25,6 +25,35 @@ Do not casually rename existing variables, constants, CLI commands, route names,
 - Before any approved rename, update compatibility tests, documentation, and downstream references in the same change.
 - If a name looks wrong or misleading, document the issue and propose a migration instead of silently changing it.
 
+## External Contract Freeze And Optional Module Isolation (Required)
+
+This repository is consumed by external developers. Treat every value that can cross a module, process, plugin, CLI, HTTP, file, or import boundary as a frozen compatibility contract unless the repository owner explicitly approves a migration.
+
+- Frozen contracts include exported variable/constant/class/function names, import paths, function signatures, positional/keyword argument names, return-object keys, JSON fields, event names, state-file paths and shapes, configuration keys, environment variables, CLI commands/options, HTTP routes, connector methods, artifact names, error codes, default values, nullability, and externally observable semantics.
+- Internal refactors must preserve the existing external name, type, meaning, default, optionality, and error behavior. Keep a facade, wrapper, re-export, alias, or adapter at the old boundary when moving implementation code.
+- Do not move or rename a public symbol and require downstream callers to update. Unknown external consumers must be assumed to exist.
+- Additive extensions must be optional and backward compatible. Existing callers that do not send, read, or understand the new field/module must continue to work unchanged.
+- Any unavoidable breaking change requires the repository owner's explicit approval of the exact old contract, new contract, compatibility window, migration adapter, downstream impact, and removal date. Documentation and contract tests must land before the breaking implementation.
+- Before a large internal refactor, inventory the affected boundary and add characterization/contract tests. After the refactor, run the same tests against the old import path and external payload shape.
+- State-format changes must keep backward readers or an idempotent migration. Never silently reinterpret an existing field.
+
+For `apps/wechat_ai_customer_service`, voice and image-understanding capabilities are strictly independent optional plugin domains:
+
+- Voice and image-understanding implementations must live in separate modules/packages, have separate configuration, dependencies, lifecycle, enablement, failure handling, and tests, and must never import each other's implementation.
+- The core program may expose a small neutral plugin protocol/registry that has no voice, vision, model-provider, OCR, clipboard, image, audio, or other optional dependency. Sharing that protocol does not make the implementations one module.
+- The core must not import an optional voice or image implementation at module-import time. Discovery and loading must be lazy, capability-based, and absence-safe.
+- Core-only, core+voice, core+image, core+both, custom-voice, custom-image, and missing-optional-dependency configurations must all remain valid. Absence or failure of one plugin must not disable the core or the other plugin.
+- Third-party developers must be able to mount their own voice or image plugin without importing the bundled counterpart or changing existing inter-module payload fields.
+- Plugins may enrich existing message/context fields through compatibility adapters, but they must not rename shared fields, change Brain contracts, own scheduler state, or author customer-visible replies.
+- The scheduler and Brain bridge may depend only on the neutral plugin contract and existing compatibility payloads, never on a concrete voice/vision provider implementation.
+
+Within those boundaries, internal cleanup is encouraged: split oversized files, extract pure helpers, isolate state transitions, remove verified-dead private code, and improve naming inside private modules. Prefer a compatibility facade plus small cohesive internal modules over a framework rewrite.
+
+All future WeChat customer-service architecture or refactor documents must reference both:
+
+- `apps/wechat_ai_customer_service/docs/customer_visible_reply_ownership_baseline.md`
+- `apps/wechat_ai_customer_service/docs/customer_service_external_contract_and_optional_plugin_baseline.md`
+
 ## WeChat Cloud Simulation Baseline (Required)
 
 For `apps/wechat_ai_customer_service`, the test environment has an approved local cloud simulation mode:

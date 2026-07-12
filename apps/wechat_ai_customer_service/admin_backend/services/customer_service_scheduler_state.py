@@ -39,9 +39,12 @@ DEFAULT_PENDING_SESSION_TTL_SECONDS = 1800
 DEFAULT_READY_REPLY_TTL_SECONDS = 900
 DEFAULT_READY_REPLY_HISTORY_RETENTION_SECONDS = 7 * 24 * 60 * 60
 DEFAULT_MAX_STORED_READY_REPLIES = 500
+DEFAULT_MAX_STORED_MEDIA_CONTEXT_TASKS = 500
 MAX_STORED_EVENTS = 500
 SELF_MESSAGE_SENDERS = {"self", "assistant", "agent", "me", "outbound", "service", "bot"}
 FILE_TRANSFER_ASSISTANT_NAMES = {"文件传输助手", "file transfer assistant"}
+MEDIA_CAPTURE_SIGNAL_KINDS = {"voice_capture", "image_capture", "media_capture"}
+KNOWN_PENDING_SIGNAL_KINDS = {"normal", "high_sensitivity_short", *MEDIA_CAPTURE_SIGNAL_KINDS}
 
 
 def utcnow_iso() -> str:
@@ -65,6 +68,15 @@ def stable_id(prefix: str, *parts: Any) -> str:
 
 def normalize_target_name(name: Any) -> str:
     return str(name or "").strip()
+
+
+def pending_signal_kind_for_content(content: str, *, explicit_kind: Any = "") -> str:
+    kind = str(explicit_kind or "").strip()
+    if kind in KNOWN_PENDING_SIGNAL_KINDS:
+        return kind
+    if message_has_repeatable_probe_content({"content": content, "type": "text", "sender": "unknown"}):
+        return "high_sensitivity_short"
+    return "normal"
 
 
 def message_content_key(message: dict[str, Any]) -> str:
@@ -174,11 +186,24 @@ def capture_allows_self_messages(*, target_name: Any = "", conversation_type: An
     return normalized_type == "file_transfer" or normalized_name in FILE_TRANSFER_ASSISTANT_NAMES
 
 
+def is_customer_image_proxy_message(message: dict[str, Any]) -> bool:
+    """Identify the text proxy emitted by the independent image module."""
+
+    if not isinstance(message, dict):
+        return False
+    return bool(
+        message.get("is_customer_image_proxy")
+        and str(message.get("visual_turn_kind") or "").strip() == "customer_image"
+        and str(message.get("saved_image_path") or "").strip()
+    )
+
+
 def message_is_reply_input_candidate(
     message: dict[str, Any],
     *,
     target_name: Any = "",
     conversation_type: Any = "unknown",
+    allow_customer_image_proxy: bool = False,
 ) -> bool:
     if not isinstance(message, dict):
         return False
@@ -188,6 +213,12 @@ def message_is_reply_input_candidate(
         return False
     if not content:
         return False
+    image_proxy = is_customer_image_proxy_message(message)
+    if image_proxy and not allow_customer_image_proxy:
+        return False
+    if allow_customer_image_proxy and image_proxy:
+        sender = str(message.get("sender") or message.get("role") or "").strip().lower()
+        return sender not in SELF_MESSAGE_SENDERS
     if message_is_visual_or_media_ocr_noise(message):
         return False
     sender = str(message.get("sender") or message.get("role") or "").strip().lower()
@@ -366,6 +397,7 @@ class SchedulerStateStore:
             "captures": {},
             "llm_tasks": {},
             "polish_tasks": {},
+            "media_context_tasks": {},
             "ready_replies": {},
             "send_sequence": 0,
             "events": [],
@@ -389,6 +421,7 @@ class SchedulerStateStore:
         state.setdefault("captures", {})
         state.setdefault("llm_tasks", {})
         state.setdefault("polish_tasks", {})
+        state.setdefault("media_context_tasks", {})
         state.setdefault("ready_replies", {})
         state.setdefault("send_sequence", 0)
         state.setdefault("events", [])
@@ -503,6 +536,7 @@ def ensure_session(
             "pending_message_count": 0,
             "pending_capture": False,
             "pending_since": "",
+            "pending_signal_id": "",
             "last_detected_at": "",
             "last_dispatched_at": "",
             "last_capture_at": "",
@@ -554,6 +588,126 @@ def seconds_since(value: Any, *, now: str | None = None) -> float:
     return max(0.0, now_ts - ts)
 
 
+def _task_age_seconds(task: dict[str, Any], *, now: str | None = None) -> float:
+    if not isinstance(task, dict):
+        return 0.0
+    return seconds_since(task.get("created_at") or task.get("started_at"), now=now)
+
+
+def _expire_scheduler_task(
+    state: dict[str, Any],
+    *,
+    task_id: str,
+    task: dict[str, Any],
+    task_kind: str,
+    reason: str,
+    now: str | None = None,
+) -> dict[str, Any]:
+    now = now or utcnow_iso()
+    normalized_task_id = str(task.get("task_id") or task_id)
+    task["status"] = "stale"
+    task["finished_at"] = now
+    task["expired_at"] = now
+    task["error"] = reason
+    task["expired_reason"] = reason
+    target_name = str(task.get("target_name") or "")
+    session = ensure_session(state, target_name, session_key=str(task.get("session_key") or ""), now=now)
+    inflight_field = "polish_inflight_task_id" if task_kind == "polish" else "llm_inflight_task_id"
+    if session.get(inflight_field) == normalized_task_id:
+        session[inflight_field] = ""
+    if not bool(session.get("pending_capture")):
+        session["status"] = "idle"
+        session["pending_message_count"] = 0
+        session["oldest_unreplied_at"] = ""
+    risk_state = session.setdefault("risk_state", {})
+    if isinstance(risk_state, dict):
+        risk_state["last_expired_scheduler_task_at"] = now
+        risk_state["last_expired_scheduler_task_reason"] = reason
+    append_event(
+        state,
+        f"scheduler_{task_kind}_task_expired",
+        target_name=session["target_name"],
+        session_key=str(task.get("session_key") or session.get("session_key") or ""),
+        task_id=normalized_task_id,
+        reason=reason,
+        age_seconds=round(_task_age_seconds(task, now=now), 3),
+    )
+    return task
+
+
+def _expire_stale_queued_scheduler_work(
+    state: dict[str, Any],
+    *,
+    config: SchedulerConfig,
+    now: str | None = None,
+) -> dict[str, Any]:
+    """Prevent durable old queued work from being resumed after a restart.
+
+    Running tasks are handled separately: live in-memory futures use runtime
+    timeout checks, and orphaned running tasks use the restart recovery helpers
+    below.  This helper only stales queued work and ready replies that have
+    already outlived their operational freshness window.
+    """
+
+    now = now or utcnow_iso()
+    task_ttl = max(
+        1,
+        int(getattr(config, "pending_session_ttl_seconds", DEFAULT_PENDING_SESSION_TTL_SECONDS) or DEFAULT_PENDING_SESSION_TTL_SECONDS),
+    )
+    reply_ttl = max(
+        1,
+        int(getattr(config, "reply_ready_ttl_seconds", DEFAULT_READY_REPLY_TTL_SECONDS) or DEFAULT_READY_REPLY_TTL_SECONDS),
+    )
+    expired_llm = 0
+    expired_polish = 0
+    expired_ready = 0
+    for task_id, task in list((state.get("llm_tasks", {}) or {}).items()):
+        if not isinstance(task, dict) or str(task.get("status") or "") != "queued":
+            continue
+        age = _task_age_seconds(task, now=now)
+        if age >= task_ttl:
+            _expire_scheduler_task(
+                state,
+                task_id=str(task_id),
+                task=task,
+                task_kind="llm",
+                reason="queued_llm_task_ttl_exceeded_before_submit",
+                now=now,
+            )
+            expired_llm += 1
+    for task_id, task in list((state.get("polish_tasks", {}) or {}).items()):
+        if not isinstance(task, dict) or str(task.get("status") or "") != "queued":
+            continue
+        age = _task_age_seconds(task, now=now)
+        if age >= task_ttl:
+            _expire_scheduler_task(
+                state,
+                task_id=str(task_id),
+                task=task,
+                task_kind="polish",
+                reason="queued_polish_task_ttl_exceeded_before_submit",
+                now=now,
+            )
+            expired_polish += 1
+    for reply_id, reply in list((state.get("ready_replies", {}) or {}).items()):
+        if not isinstance(reply, dict) or str(reply.get("status") or "") != "ready":
+            continue
+        age = seconds_since(reply.get("ready_at"), now=now)
+        if age >= reply_ttl:
+            mark_reply_stale(
+                state,
+                str(reply.get("reply_id") or reply_id),
+                reason="ready_reply_ttl_exceeded_before_send",
+                now=now,
+            )
+            expired_ready += 1
+    return {
+        "expired_queued_llm_task_count": expired_llm,
+        "expired_queued_polish_task_count": expired_polish,
+        "expired_ready_reply_count": expired_ready,
+    }
+
+
 def cleanup_scheduler_state(
     state: dict[str, Any],
     *,
@@ -571,6 +725,7 @@ def cleanup_scheduler_state(
     cfg = config or SchedulerConfig()
     migrated_legacy_sessions = 0
     cleared_stale_recoverable_recaptures = 0
+    expired_work = _expire_stale_queued_scheduler_work(state, config=cfg, now=now)
     sessions = state.setdefault("sessions", {})
     if not isinstance(sessions, dict):
         state["sessions"] = {}
@@ -714,28 +869,53 @@ def cleanup_scheduler_state(
         if reply_id in replies:
             replies.pop(reply_id, None)
             removed_ids.append(reply_id)
-    if removed_ids:
+    media_context_tasks = state.setdefault("media_context_tasks", {})
+    if not isinstance(media_context_tasks, dict):
+        state["media_context_tasks"] = {}
+        media_context_tasks = state["media_context_tasks"]
+    terminal_media_tasks = [
+        (
+            _iso_to_ts(task.get("completed_at") or task.get("failed_at") or task.get("updated_at")),
+            str(task_id),
+        )
+        for task_id, task in media_context_tasks.items()
+        if isinstance(task, dict) and str(task.get("status") or "") in {"completed", "failed"}
+    ]
+    media_overflow_count = max(0, len(media_context_tasks) - DEFAULT_MAX_STORED_MEDIA_CONTEXT_TASKS)
+    removed_media_task_ids: list[str] = []
+    for _timestamp, task_id in sorted(terminal_media_tasks)[:media_overflow_count]:
+        if task_id in media_context_tasks:
+            media_context_tasks.pop(task_id, None)
+            removed_media_task_ids.append(task_id)
+    expired_total = sum(int(value or 0) for value in expired_work.values())
+    if removed_ids or removed_media_task_ids:
         append_event(
             state,
             "scheduler_state_cleanup",
             removed_ready_reply_count=len(removed_ids),
             removed_ready_reply_ids=removed_ids[:20],
+            removed_media_context_task_count=len(removed_media_task_ids),
+            removed_media_context_task_ids=removed_media_task_ids[:20],
             migrated_legacy_sessions=migrated_legacy_sessions,
             cleared_stale_recoverable_recaptures=cleared_stale_recoverable_recaptures,
+            **expired_work,
         )
-    elif migrated_legacy_sessions or cleared_stale_recoverable_recaptures:
+    elif migrated_legacy_sessions or cleared_stale_recoverable_recaptures or expired_total:
         append_event(
             state,
             "scheduler_state_cleanup",
             removed_ready_reply_count=0,
             migrated_legacy_sessions=migrated_legacy_sessions,
             cleared_stale_recoverable_recaptures=cleared_stale_recoverable_recaptures,
+            **expired_work,
         )
     return {
         "removed_ready_reply_count": len(removed_ids),
+        "removed_media_context_task_count": len(removed_media_task_ids),
         "migrated_legacy_sessions": migrated_legacy_sessions,
         "cleared_stale_recoverable_recaptures": cleared_stale_recoverable_recaptures,
         "session_ready_reply_refs_cleaned": True,
+        **expired_work,
     }
 
 
@@ -913,6 +1093,12 @@ def enqueue_pending_session(
     )
     if not session.get("pending_capture"):
         session["pending_since"] = now
+        session["pending_signal_id"] = stable_id(
+            "pending-signal",
+            str(session.get("session_key") or session_key or ""),
+            target_name,
+            now,
+        )
     session["pending_capture"] = True
     session["pending_reason"] = reason
     session["last_detected_at"] = now
@@ -1004,6 +1190,27 @@ def record_session_signal(
             return session
     unread_only_signal = bool(unread_detected and not digest and not msg_time and not unread_badge)
     if unread_only_signal and has_active_work:
+        # Do not drop an unread signal merely because the same session still
+        # has an older Brain/send task in flight. Capture remains blocked by
+        # the active-work gate, but the durable pending flag lets the next
+        # scheduler tick continue the new turn after the older task finishes.
+        if not session.get("pending_capture"):
+            queued = enqueue_pending_session(
+                state,
+                name,
+                exact=bool(session_payload.get("exact", True)),
+                conversation_type=conversation_type,
+                session_key=session_key,
+                row_fingerprint=row_fingerprint,
+                reason="session_signal_changed_during_active_work",
+                now=now,
+            )
+            queued["pending_signal_has_unread_evidence"] = True
+            queued["pending_signal_text"] = content
+            queued["pending_signal_kind"] = session.get("pending_signal_kind") or "normal"
+            queued["last_content_digest"] = digest
+            queued["last_message_time"] = msg_time
+            queued["last_unread_badge"] = unread_badge
         session["last_detected_at"] = now
         return session
     changed = bool(
@@ -1017,10 +1224,9 @@ def record_session_signal(
         session["last_message_time"] = msg_time
         session["last_unread_badge"] = unread_badge
         session["pending_signal_text"] = content
-        session["pending_signal_kind"] = (
-            "high_sensitivity_short"
-            if message_has_repeatable_probe_content({"content": content, "type": "text", "sender": "unknown"})
-            else "normal"
+        session["pending_signal_kind"] = pending_signal_kind_for_content(
+            content,
+            explicit_kind=session_payload.get("pending_signal_kind"),
         )
         has_new_message_evidence = bool(unread_detected or has_unread_badge)
         has_preview_only_evidence = bool((digest and digest != previous_digest) or (msg_time and msg_time != previous_time))
@@ -1231,6 +1437,39 @@ def capture_has_repeatable_customer_probe(capture: dict[str, Any] | None) -> boo
     return seen_customer_probe
 
 
+def quality_failure_retry_limit(task: dict[str, Any], normalized_reason: str, default: int) -> int:
+    """Return retry budget for failures that already reached Brain validation.
+
+    Transient provider/JSON/runtime failures can benefit from one more Brain
+    pass.  Quality/authority validation failures usually mean the same capture
+    needs internal review or fresher evidence, not an immediate same-input loop.
+    """
+
+    result = task.get("result") if isinstance(task.get("result"), dict) else {}
+    event = result.get("event") if isinstance(result.get("event"), dict) else {}
+    decision = result.get("decision") if isinstance(result.get("decision"), dict) else {}
+    brain = event.get("customer_service_brain") if isinstance(event.get("customer_service_brain"), dict) else {}
+    markers = {
+        str(normalized_reason or "").strip(),
+        str(event.get("reason") or "").strip(),
+        str(decision.get("reason") or "").strip(),
+        str(decision.get("rule_name") or "").strip(),
+        str(brain.get("reason") or "").strip(),
+        str(brain.get("failure_reason") or "").strip(),
+    }
+    terminal_validation_markers = {
+        "brain_quality_verification_failed",
+        "brain_plan_validation_failed",
+    }
+    if markers.intersection(terminal_validation_markers) and (
+        str(event.get("reason") or "").strip() in terminal_validation_markers
+        or str(decision.get("reason") or "").strip() in terminal_validation_markers
+        or str(brain.get("reason") or "").strip() in terminal_validation_markers
+    ):
+        return 0
+    return max(1, int(default or 1))
+
+
 def requeue_capture_after_recoverable_llm_failure(
     state: dict[str, Any],
     task_id: str,
@@ -1303,7 +1542,8 @@ def requeue_capture_after_recoverable_llm_failure(
         attempts_by_key = {}
         risk_state["recoverable_llm_retries"] = attempts_by_key
     attempts = int(attempts_by_key.get(retry_key) or 0)
-    if attempts >= max(1, int(max_attempts or 1)):
+    effective_max_attempts = quality_failure_retry_limit(task, normalized_reason, max_attempts)
+    if attempts >= max(0, int(effective_max_attempts or 0)):
         if session.get("llm_inflight_task_id") == task_id:
             session["llm_inflight_task_id"] = ""
         batch = [item for item in (capture.get("batch") or []) if isinstance(item, dict)]
@@ -1345,6 +1585,7 @@ def requeue_capture_after_recoverable_llm_failure(
             reason=normalized_reason,
             recapture_kind=recapture_kind,
             attempts=attempts,
+            max_attempts=effective_max_attempts,
         )
         append_event(
             state,
@@ -1353,8 +1594,9 @@ def requeue_capture_after_recoverable_llm_failure(
             task_id=task_id,
             reason=normalized_reason,
             pending_message_count=session["pending_message_count"],
+            max_attempts=effective_max_attempts,
         )
-        return {"ok": False, "reason": "retry_exhausted", "attempts": attempts}
+        return {"ok": False, "reason": "retry_exhausted", "attempts": attempts, "max_attempts": effective_max_attempts}
     if session.get("llm_inflight_task_id") == task_id:
         session["llm_inflight_task_id"] = ""
     batch = [item for item in (capture.get("batch") or []) if isinstance(item, dict)]
@@ -1456,6 +1698,8 @@ def record_capture_result(
     overflow_messages: list[dict[str, Any]] | None = None,
     history_backfill: dict[str, Any] | None = None,
     batch_selection: dict[str, Any] | None = None,
+    context_recovery: dict[str, Any] | None = None,
+    allow_customer_image_proxy: bool = False,
     exact: bool = True,
     conversation_type: str = "unknown",
     session_key: str = "",
@@ -1476,21 +1720,37 @@ def record_capture_result(
     batch = [
         item
         for item in raw_batch
-        if message_is_reply_input_candidate(item, target_name=target_name, conversation_type=conversation_type)
+        if message_is_reply_input_candidate(
+            item,
+            target_name=target_name,
+            conversation_type=conversation_type,
+            allow_customer_image_proxy=allow_customer_image_proxy,
+        )
     ]
     overflow_messages = [
         item
         for item in raw_overflow_messages
-        if message_is_reply_input_candidate(item, target_name=target_name, conversation_type=conversation_type)
+        if message_is_reply_input_candidate(
+            item,
+            target_name=target_name,
+            conversation_type=conversation_type,
+            allow_customer_image_proxy=allow_customer_image_proxy,
+        )
     ]
     filtered_non_customer_batch = [
         item
         for item in raw_batch
         if isinstance(item, dict)
-        and not message_is_reply_input_candidate(item, target_name=target_name, conversation_type=conversation_type)
+        and not message_is_reply_input_candidate(
+            item,
+            target_name=target_name,
+            conversation_type=conversation_type,
+            allow_customer_image_proxy=allow_customer_image_proxy,
+        )
     ]
     history_backfill = history_backfill or {}
     batch_selection = batch_selection if isinstance(batch_selection, dict) else {}
+    context_recovery = copy.deepcopy(context_recovery) if isinstance(context_recovery, dict) else {}
     continuity = str(history_backfill.get("history_continuity") or "").strip()
     existing_ids = set(session.get("processed_message_ids", []) or [])
     existing_keys = set(session.get("processed_content_keys", []) or [])
@@ -1595,12 +1855,29 @@ def record_capture_result(
         "filtered_non_customer_batch": copy.deepcopy(filtered_non_customer_batch[-20:]),
         "history_backfill": history_backfill,
         "batch_selection": copy.deepcopy(batch_selection),
+        "context_recovery": copy.deepcopy(context_recovery),
         "status": "captured" if new_messages else "empty",
         "latency_trace": {
             **(session.get("latency_trace") if isinstance(session.get("latency_trace"), dict) else {}),
             "capture_finished_at": now,
         },
     }
+    if context_recovery.get("applied") and new_messages:
+        session["context_recovery_state"] = {
+            "schema_version": int(context_recovery.get("schema_version") or 1),
+            "applied": True,
+            "mode": str(context_recovery.get("mode") or ""),
+            "reason": str(context_recovery.get("reason") or ""),
+            "score": context_recovery.get("score"),
+            "confidence": context_recovery.get("confidence"),
+            "signals": list(context_recovery.get("signals") or [])[:12],
+            "latest_message_ids": list(context_recovery.get("latest_message_ids") or [])[:8],
+            "latest_message_type": str(context_recovery.get("latest_message_type") or ""),
+            "capture_id": capture_id,
+            "updated_at": now,
+        }
+    else:
+        session.pop("context_recovery_state", None)
     state.setdefault("captures", {})[capture_id] = capture
     append_event(
         state,
@@ -1614,6 +1891,20 @@ def record_capture_result(
         filtered_non_customer_message_count=len(filtered_non_customer_batch),
         history_continuity=continuity,
     )
+    if context_recovery.get("applied") and new_messages:
+        append_event(
+            state,
+            "scheduler_context_recovery_candidate",
+            target_name=session["target_name"],
+            session_key=str(session.get("session_key") or ""),
+            capture_id=capture_id,
+            mode=str(context_recovery.get("mode") or ""),
+            reason=str(context_recovery.get("reason") or ""),
+            score=context_recovery.get("score"),
+            confidence=context_recovery.get("confidence"),
+            signals=list(context_recovery.get("signals") or [])[:12],
+            latest_message_ids=list(context_recovery.get("latest_message_ids") or [])[:8],
+        )
     try:
         ledger_store_for_state(state).record_capture(
             session_key=str(session.get("session_key") or ""),
@@ -1635,6 +1926,172 @@ def record_capture_result(
             error=repr(exc),
         )
     return capture
+
+
+def enqueue_media_context_task(
+    state: dict[str, Any],
+    capture_id: str,
+    *,
+    image_asset: dict[str, Any],
+    max_attempts: int = 3,
+    now: str | None = None,
+) -> dict[str, Any]:
+    """Queue self-side image understanding without creating reply work."""
+
+    now = now or utcnow_iso()
+    capture = (state.get("captures", {}) or {}).get(capture_id)
+    if not isinstance(capture, dict):
+        raise KeyError(f"capture not found: {capture_id}")
+    identity = ""
+    for key in (
+        "visual_occurrence_id",
+        "message_id",
+        "id",
+        "asset_id",
+        "saved_image_path",
+    ):
+        identity = str(image_asset.get(key) or "").strip()
+        if identity:
+            break
+    if not identity:
+        raise ValueError("media context image identity missing")
+    session_key = str(capture.get("session_key") or "")
+    task_id = stable_id("media_context", session_key, identity)
+    tasks = state.setdefault("media_context_tasks", {})
+    existing = tasks.get(task_id)
+    if isinstance(existing, dict):
+        return existing
+    task = {
+        "task_id": task_id,
+        "task_kind": "self_image_context",
+        "status": "queued",
+        "capture_id": capture_id,
+        "session_key": session_key,
+        "target_name": str(capture.get("target_name") or ""),
+        "conversation_type": str(capture.get("conversation_type") or "unknown"),
+        "image_asset": copy.deepcopy(image_asset),
+        "attempt_count": 0,
+        "max_attempts": max(1, int(max_attempts or 3)),
+        "created_at": now,
+        "updated_at": now,
+    }
+    tasks[task_id] = task
+    append_event(
+        state,
+        "scheduler_media_context_queued",
+        task_id=task_id,
+        capture_id=capture_id,
+        target_name=task["target_name"],
+        session_key=session_key,
+        task_kind=task["task_kind"],
+    )
+    return task
+
+
+def mark_media_context_started(state: dict[str, Any], task_id: str, *, now: str | None = None) -> dict[str, Any]:
+    now = now or utcnow_iso()
+    task = state.setdefault("media_context_tasks", {}).get(task_id)
+    if not isinstance(task, dict):
+        raise KeyError(f"media context task not found: {task_id}")
+    task["status"] = "running"
+    task["attempt_count"] = int(task.get("attempt_count") or 0) + 1
+    task["started_at"] = now
+    task["updated_at"] = now
+    append_event(
+        state,
+        "scheduler_media_context_started",
+        task_id=task_id,
+        target_name=task.get("target_name"),
+        attempt_count=task.get("attempt_count"),
+    )
+    return task
+
+
+def complete_media_context_task(
+    state: dict[str, Any],
+    task_id: str,
+    *,
+    result_payload: dict[str, Any],
+    now: str | None = None,
+) -> dict[str, Any]:
+    now = now or utcnow_iso()
+    task = state.setdefault("media_context_tasks", {}).get(task_id)
+    if not isinstance(task, dict):
+        raise KeyError(f"media context task not found: {task_id}")
+    task["status"] = "completed"
+    task["completed_at"] = now
+    task["updated_at"] = now
+    task["result"] = copy.deepcopy(result_payload)
+    task.pop("last_error", None)
+    append_event(
+        state,
+        "scheduler_media_context_completed",
+        task_id=task_id,
+        target_name=task.get("target_name"),
+        capture_id=task.get("capture_id"),
+    )
+    return task
+
+
+def fail_media_context_task(
+    state: dict[str, Any],
+    task_id: str,
+    *,
+    reason: str,
+    result_payload: dict[str, Any] | None = None,
+    now: str | None = None,
+) -> dict[str, Any]:
+    now = now or utcnow_iso()
+    task = state.setdefault("media_context_tasks", {}).get(task_id)
+    if not isinstance(task, dict):
+        raise KeyError(f"media context task not found: {task_id}")
+    attempts = int(task.get("attempt_count") or 0)
+    max_attempts = max(1, int(task.get("max_attempts") or 3))
+    retrying = attempts < max_attempts
+    task["status"] = "queued" if retrying else "failed"
+    task["last_error"] = str(reason or "media_context_failed")
+    task["updated_at"] = now
+    if result_payload is not None:
+        task["last_result"] = copy.deepcopy(result_payload)
+    if not retrying:
+        task["failed_at"] = now
+    append_event(
+        state,
+        "scheduler_media_context_retry" if retrying else "scheduler_media_context_failed",
+        task_id=task_id,
+        target_name=task.get("target_name"),
+        reason=task["last_error"],
+        attempt_count=attempts,
+        max_attempts=max_attempts,
+    )
+    return task
+
+
+def recover_orphaned_running_media_context_tasks(
+    state: dict[str, Any],
+    *,
+    active_task_ids: set[str] | None = None,
+    now: str | None = None,
+) -> list[dict[str, Any]]:
+    now = now or utcnow_iso()
+    active = {str(item) for item in (active_task_ids or set()) if str(item)}
+    recovered: list[dict[str, Any]] = []
+    for task_id, task in (state.get("media_context_tasks", {}) or {}).items():
+        if not isinstance(task, dict) or str(task.get("status") or "") != "running":
+            continue
+        if str(task_id) in active:
+            continue
+        task["status"] = "queued"
+        task["updated_at"] = now
+        task["recovered_at"] = now
+        recovered.append(task)
+        append_event(
+            state,
+            "scheduler_media_context_orphan_requeued",
+            task_id=str(task_id),
+            target_name=task.get("target_name"),
+        )
+    return recovered
 
 
 def enqueue_llm_task(
@@ -1714,6 +2171,7 @@ def recover_orphaned_running_llm_tasks(
     state: dict[str, Any],
     *,
     active_task_ids: set[str],
+    max_task_age_seconds: int | None = None,
     now: str | None = None,
 ) -> list[dict[str, Any]]:
     """Requeue running LLM tasks whose in-memory future was lost.
@@ -1731,6 +2189,17 @@ def recover_orphaned_running_llm_tasks(
             continue
         normalized_task_id = str(task.get("task_id") or task_id)
         if task.get("status") != "running" or normalized_task_id in active_task_ids:
+            continue
+        if max_task_age_seconds is not None and _task_age_seconds(task, now=now) >= max(1, int(max_task_age_seconds or 1)):
+            expired = _expire_scheduler_task(
+                state,
+                task_id=normalized_task_id,
+                task=task,
+                task_kind="llm",
+                reason="orphaned_running_llm_task_ttl_exceeded_after_restart",
+                now=now,
+            )
+            recovered.append(copy.deepcopy(expired))
             continue
         task["status"] = "queued"
         task["requeued_at"] = now
@@ -1908,6 +2377,7 @@ def recover_orphaned_running_polish_tasks(
     state: dict[str, Any],
     *,
     active_task_ids: set[str],
+    max_task_age_seconds: int | None = None,
     now: str | None = None,
 ) -> list[dict[str, Any]]:
     now = now or utcnow_iso()
@@ -1917,6 +2387,17 @@ def recover_orphaned_running_polish_tasks(
             continue
         normalized_task_id = str(task.get("task_id") or task_id)
         if task.get("status") != "running" or normalized_task_id in active_task_ids:
+            continue
+        if max_task_age_seconds is not None and _task_age_seconds(task, now=now) >= max(1, int(max_task_age_seconds or 1)):
+            expired = _expire_scheduler_task(
+                state,
+                task_id=normalized_task_id,
+                task=task,
+                task_kind="polish",
+                reason="orphaned_running_polish_task_ttl_exceeded_after_restart",
+                now=now,
+            )
+            recovered.append(copy.deepcopy(expired))
             continue
         task["status"] = "queued"
         task["requeued_at"] = now
@@ -2293,6 +2774,7 @@ def state_summary(state: dict[str, Any]) -> dict[str, Any]:
     sessions = [item for item in (state.get("sessions", {}) or {}).values() if isinstance(item, dict)]
     planner_tasks = [item for item in (state.get("llm_tasks", {}) or {}).values() if isinstance(item, dict)]
     polish_tasks = [item for item in (state.get("polish_tasks", {}) or {}).values() if isinstance(item, dict)]
+    media_context_tasks = [item for item in (state.get("media_context_tasks", {}) or {}).values() if isinstance(item, dict)]
     replies = [item for item in (state.get("ready_replies", {}) or {}).values() if isinstance(item, dict)]
     planner_queued = sum(1 for item in planner_tasks if item.get("status") == "queued")
     planner_running = sum(1 for item in planner_tasks if item.get("status") == "running")
@@ -2322,6 +2804,10 @@ def state_summary(state: dict[str, Any]) -> dict[str, Any]:
         "planner_running": planner_running,
         "polish_queued": polish_queued,
         "polish_running": polish_running,
+        "media_context_queued": sum(1 for item in media_context_tasks if item.get("status") == "queued"),
+        "media_context_running": sum(1 for item in media_context_tasks if item.get("status") == "running"),
+        "media_context_completed": sum(1 for item in media_context_tasks if item.get("status") == "completed"),
+        "media_context_failed": sum(1 for item in media_context_tasks if item.get("status") == "failed"),
         "llm_queued": planner_queued + polish_queued,
         "llm_running": planner_running + polish_running,
         "reply_ready": sum(1 for item in replies if item.get("status") == "ready"),
