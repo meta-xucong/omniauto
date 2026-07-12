@@ -72,6 +72,24 @@ from apps.wechat_ai_customer_service.message_identity import (
     apply_canonical_identity_fields,
     canonical_input_message_id,
 )
+from apps.wechat_ai_customer_service.internal.scheduler.voice_bridge import (
+    merge_voice_transcription_messages as _merge_voice_transcription_messages_impl,
+    voice_message_merge_key as _voice_message_merge_key_impl,
+    voice_transcription_audit_messages as _voice_transcription_audit_messages_impl,
+    voice_transcription_envelope as _voice_transcription_envelope_impl,
+)
+from apps.wechat_ai_customer_service.internal.scheduler.vision_bridge import (
+    customer_image_proxy_messages as _customer_image_proxy_messages_impl,
+    customer_visual_image_sources as _customer_visual_image_sources_impl,
+    filter_fresh_customer_visual_sources as _filter_fresh_customer_visual_sources_impl,
+    image_message_refs as _image_message_refs_impl,
+    planner_customer_image_enrichment as _planner_customer_image_enrichment_impl,
+    self_visual_image_sources as _self_visual_image_sources_impl,
+    target_state_seen_visual_identity_keys as _target_state_seen_visual_identity_keys_impl,
+    visual_bounds_key as _visual_bounds_key_impl,
+    visual_image_identity_keys as _visual_image_identity_keys_impl,
+    visual_image_side as _visual_image_side_impl,
+)
 from apps.wechat_ai_customer_service.optional_plugins.vision.compatibility import (
     legacy_build_brain_safe_image_proxy_messages as build_brain_safe_image_proxy_messages,
     legacy_customer_image_capture_trigger as customer_image_capture_trigger,
@@ -160,100 +178,34 @@ _CONTEXT_RECOVERY_NOISE_TERMS = (
 
 
 def _visual_image_side(message: dict[str, Any]) -> str:
-    side = str(message.get("visual_side") or "").strip().lower()
-    if side in {"customer", "self"}:
-        return side
-    sender = str(message.get("sender") or message.get("sender_role") or "").strip().lower()
-    if sender in {"customer", "self"}:
-        return sender
-    return ""
+    return _visual_image_side_impl(message)
 
 
 def _customer_visual_image_sources(sources: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    return [item for item in sources if isinstance(item, dict) and _visual_image_side(item) == "customer"]
+    return _customer_visual_image_sources_impl(sources)
 
 
 def _self_visual_image_sources(sources: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    return [item for item in sources if isinstance(item, dict) and _visual_image_side(item) == "self"]
+    return _self_visual_image_sources_impl(sources)
 
 
 def _customer_image_proxy_messages(messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Return customer image proxies that are safe scheduler input records."""
-
-    result: list[dict[str, Any]] = []
-    for item in messages or []:
-        if not isinstance(item, dict) or not item.get("is_customer_image_proxy"):
-            continue
-        if str(item.get("visual_turn_kind") or "").strip() != "customer_image":
-            continue
-        if _visual_image_side(item) == "self":
-            continue
-        if not str(item.get("saved_image_path") or "").strip():
-            continue
-        result.append(item)
-    return result
+    return _customer_image_proxy_messages_impl(messages)
 
 
 def _visual_bounds_key(value: Any) -> str:
-    try:
-        bounds = [int(float(item)) for item in list(value or [])[:4]]
-    except (TypeError, ValueError):
-        return ""
-    if len(bounds) != 4:
-        return ""
-    return ",".join(str(item) for item in bounds)
+    return _visual_bounds_key_impl(value)
 
 
 def _visual_image_identity_keys(message: dict[str, Any]) -> set[str]:
     """Stable identities for a visual bubble independent from proxy capture time."""
-
-    if not isinstance(message, dict):
-        return set()
-    keys: set[str] = set()
-
-    def add(prefix: str, value: Any) -> None:
-        text = str(value or "").strip()
-        if text:
-            keys.add(f"{prefix}:{text}")
-
-    add("visual_occurrence", message.get("visual_occurrence_id"))
-    add("pending_signal", message.get("pending_signal_id"))
-    add("visual_msg", message.get("message_id") or message.get("id") or message.get("identity"))
-    add("visual_msg", message.get("canonical_visual_id") or message.get("canonical_input_id"))
-    add("source_msg", message.get("source_message_id"))
-    side = _visual_image_side(message) or str(message.get("visual_side") or "").strip().lower() or "unknown"
-    bounds = _visual_bounds_key(message.get("bubble_bounds"))
-    if bounds:
-        add("sha_bounds", f"{side}:{message.get('sha256')}:{bounds}" if message.get("sha256") else "")
-        add("asset_bounds", f"{side}:{message.get('asset_id')}:{bounds}" if message.get("asset_id") else "")
-        add("path_bounds", f"{side}:{message.get('saved_image_path')}:{bounds}" if message.get("saved_image_path") else "")
-    return keys
+    return _visual_image_identity_keys_impl(message)
 
 
 def _target_state_seen_visual_identity_keys(target_state: dict[str, Any]) -> set[str]:
     """Collect visual bubble identities that were already processed or archived."""
-
-    state = target_state if isinstance(target_state, dict) else {}
-    seen: set[str] = set()
-    for item in state.get("processed_message_ids") or []:
-        value = str(item or "").strip()
-        if value:
-            seen.add(f"visual_msg:{value}")
-            seen.add(f"source_msg:{value}")
-    context = state.get("conversation_context") if isinstance(state.get("conversation_context"), dict) else {}
-    recent_sources: list[Any] = []
-    for key in ("ledger_recent_messages", "recent_messages"):
-        value = context.get(key) if isinstance(context, dict) else None
-        if isinstance(value, list):
-            recent_sources.extend(value)
-    for key in ("ledger_recent_messages", "recent_messages", "visual_recent_messages"):
-        value = state.get(key)
-        if isinstance(value, list):
-            recent_sources.extend(value)
-    for item in recent_sources:
-        if isinstance(item, dict):
-            seen.update(_visual_image_identity_keys(item))
-    return seen
+    return _target_state_seen_visual_identity_keys_impl(target_state)
 
 
 def _filter_fresh_customer_visual_sources(
@@ -267,181 +219,36 @@ def _filter_fresh_customer_visual_sources(
     whether a customer-side image becomes a Brain direct-image proxy.
     """
 
-    seen = _target_state_seen_visual_identity_keys(target_state)
-    fresh: list[dict[str, Any]] = []
-    filtered: list[dict[str, Any]] = []
-    for source in sources:
-        if not isinstance(source, dict):
-            continue
-        keys = _visual_image_identity_keys(source)
-        pending_signal_key = str(source.get("pending_signal_id") or "").strip()
-        pending_signal_seen = bool(
-            pending_signal_key and f"pending_signal:{pending_signal_key}" in seen
-        )
-        pending_signal_is_source_identity = bool(
-            pending_signal_key and not source.get("_pending_signal_id_attached_by_scheduler")
-        )
-        occurrence_key = f"visual_occurrence:{str(source.get('visual_occurrence_id') or '').strip()}"
-        occurrence_seen = bool(
-            str(source.get("visual_occurrence_id") or "").strip()
-            and occurrence_key in seen
-        )
-        # A pending signal explicitly carried by the image module represents
-        # a new conversation turn, even when a legacy adapter reused the old
-        # occurrence id. Scheduler-added transport metadata uses setdefault,
-        # so an old re-observed bubble keeps its original occurrence and is
-        # still filtered by the occurrence ledger key.
-        if pending_signal_is_source_identity and not pending_signal_seen:
-            already_seen = False
-        elif occurrence_seen:
-            already_seen = True
-        elif pending_signal_key:
-            already_seen = pending_signal_seen
-        else:
-            already_seen = bool(keys and seen.intersection(keys))
-        if already_seen:
-            filtered.append(
-                {
-                    "message_id": str(source.get("message_id") or source.get("id") or ""),
-                    "visual_occurrence_id": str(source.get("visual_occurrence_id") or ""),
-                    "asset_id": str(source.get("asset_id") or ""),
-                    "pending_signal_id": pending_signal_key,
-                    "reason": "visual_image_already_seen",
-                }
-            )
-            continue
-        fresh.append(source)
-    return fresh, {
-        "seen_key_count": len(seen),
-        "input_count": len(sources),
-        "fresh_count": len(fresh),
-        "filtered_count": len(filtered),
-        "filtered": filtered[:20],
-    }
+    return _filter_fresh_customer_visual_sources_impl(
+        sources,
+        target_state=target_state,
+    )
 
 
 def _voice_message_merge_key(message: dict[str, Any]) -> str:
-    if not isinstance(message, dict):
-        return ""
-    identity = str(message.get("message_id") or message.get("id") or "").strip()
-    if identity:
-        return f"id:{identity}"
-    content = re.sub(r"\s+", "", str(message.get("content") or "")).strip().lower()
-    sender = str(message.get("sender") or message.get("sender_role") or "").strip().lower()
-    msg_type = str(message.get("type") or "text").strip().lower()
-    return f"content:{sender}:{msg_type}:{content}" if content else ""
+    return _voice_message_merge_key_impl(message)
 
 
 def _voice_transcription_envelope(message: dict[str, Any], *, merged_from_sidecar: bool) -> dict[str, Any]:
-    merged = dict(message)
-    content = " ".join(str(merged.get("content") or "").split()).strip()
-    merged.setdefault("type", "text")
-    merged["modality"] = "voice"
-    merged["source_type"] = "voice_transcription"
-    merged["voice_transcribed"] = True
-    merged["voice_transcription_text"] = content
-    merged.setdefault("voice_source_message_id", str(merged.get("source_message_id") or merged.get("message_id") or merged.get("id") or ""))
-    merged.setdefault("voice_transcribed_at", datetime.now().isoformat(timespec="seconds"))
-    flags = [str(item) for item in (merged.get("quality_flags") or []) if str(item)]
-    if merged_from_sidecar and "voice_transcription_merged_from_sidecar" not in flags:
-        flags.append("voice_transcription_merged_from_sidecar")
-    merged["quality_flags"] = flags
-    return merged
+    return _voice_transcription_envelope_impl(
+        message,
+        merged_from_sidecar=merged_from_sidecar,
+    )
 
 
 def _voice_transcription_audit_messages(messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    result: list[dict[str, Any]] = []
-    for item in messages or []:
-        if not isinstance(item, dict):
-            continue
-        if str(item.get("source_type") or "").strip() != "voice_transcription" and not item.get("voice_transcribed"):
-            continue
-        content = " ".join(str(item.get("voice_transcription_text") or item.get("content") or "").split()).strip()
-        if not content:
-            continue
-        result.append(
-            {
-                "id": str(item.get("id") or item.get("message_id") or ""),
-                "sender": str(item.get("sender") or ""),
-                "sender_role": str(item.get("sender_role") or ""),
-                "content": content[:600],
-                "source_type": "voice_transcription",
-                "modality": "voice",
-                "voice_transcribed_at": str(item.get("voice_transcribed_at") or ""),
-            }
-        )
-    return result[-20:]
+    return _voice_transcription_audit_messages_impl(messages)
 
 
 def _image_message_refs(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    refs: list[dict[str, Any]] = []
-    seen: set[str] = set()
-    for item in items or []:
-        if not isinstance(item, dict):
-            continue
-        ref = {
-            key: str(item.get(key) or "").strip()
-            for key in (
-                "id",
-                "message_id",
-                "source_message_id",
-                "visual_occurrence_id",
-                "asset_id",
-                "saved_image_path",
-            )
-            if str(item.get(key) or "").strip()
-        }
-        identity = "|".join(sorted(ref.values()))
-        if not ref or identity in seen:
-            continue
-        seen.add(identity)
-        refs.append(ref)
-    return refs[:20]
+    return _image_message_refs_impl(items)
 
 
 def _planner_customer_image_enrichment(
     capture: dict[str, Any],
     result: dict[str, Any],
 ) -> dict[str, Any]:
-    event = result.get("event") if isinstance(result.get("event"), dict) else {}
-    image_turn = event.get("customer_image_turn") if isinstance(event.get("customer_image_turn"), dict) else {}
-    understanding = (
-        image_turn.get("customer_image_understanding")
-        if isinstance(image_turn.get("customer_image_understanding"), dict)
-        else {}
-    )
-    if not understanding:
-        return {}
-    assets_payload = (
-        capture.get("customer_image_assets")
-        if isinstance(capture.get("customer_image_assets"), dict)
-        else {}
-    )
-    refs = _image_message_refs(
-        [
-            item
-            for item in [
-                *(assets_payload.get("messages") or []),
-                *(assets_payload.get("assets") or []),
-                *(understanding.get("source_messages") or []),
-            ]
-            if isinstance(item, dict)
-        ]
-    )
-    if not refs:
-        refs = _image_message_refs(
-            [
-                item
-                for item in (capture.get("messages") or [])
-                if isinstance(item, dict) and _visual_image_side(item) == "customer"
-            ]
-        )
-    return {
-        "modality": "image",
-        "message_refs": refs,
-        "image_understanding": understanding,
-        "reason": str(image_turn.get("source_reason") or understanding.get("reason") or "customer_image_planner"),
-    }
+    return _planner_customer_image_enrichment_impl(capture, result)
 
 
 def _merge_voice_transcription_messages(
@@ -449,63 +256,7 @@ def _merge_voice_transcription_messages(
     voice_transcription: dict[str, Any],
 ) -> dict[str, Any]:
     """Merge voice-to-text messages when the follow-up OCR read misses them."""
-
-    if not isinstance(payload, dict) or not isinstance(voice_transcription, dict):
-        return payload
-    if not voice_transcription.get("attempted"):
-        return payload
-    voice_messages = [
-        item
-        for item in (voice_transcription.get("new_messages") or voice_transcription.get("transcribed_messages") or [])
-        if isinstance(item, dict)
-        and str(item.get("content") or "").strip()
-        and str(item.get("type") or "text").strip().lower() == "text"
-    ]
-    if not voice_messages:
-        return payload
-    messages = [item for item in (payload.get("messages") or []) if isinstance(item, dict)]
-    existing_indexes = {
-        _voice_message_merge_key(item): index
-        for index, item in enumerate(messages)
-        if _voice_message_merge_key(item)
-    }
-    appended: list[dict[str, Any]] = []
-    annotated_count = 0
-    for item in voice_messages:
-        key = _voice_message_merge_key(item)
-        if key and key in existing_indexes:
-            existing_index = existing_indexes[key]
-            existing = dict(messages[existing_index])
-            source = _voice_transcription_envelope(item, merged_from_sidecar=True)
-            for field in (
-                "modality",
-                "source_type",
-                "voice_transcribed",
-                "voice_transcription_text",
-                "voice_source_message_id",
-                "voice_transcribed_at",
-            ):
-                existing[field] = source.get(field)
-            flags = [str(value) for value in (existing.get("quality_flags") or []) if str(value)]
-            for value in source.get("quality_flags") or []:
-                if value not in flags:
-                    flags.append(value)
-            existing["quality_flags"] = flags
-            messages[existing_index] = existing
-            annotated_count += 1
-            continue
-        merged = _voice_transcription_envelope(item, merged_from_sidecar=True)
-        appended.append(merged)
-        if key:
-            existing_indexes[key] = len(messages) + len(appended) - 1
-    if appended or annotated_count:
-        payload["messages"] = [*messages, *appended]
-        payload["voice_transcription_merge"] = {
-            "appended_count": len(appended),
-            "annotated_existing_count": annotated_count,
-            "source_state": voice_transcription.get("state"),
-        }
-    return payload
+    return _merge_voice_transcription_messages_impl(payload, voice_transcription)
 
 
 def safe_json_roundtrip(value: Any) -> Any:

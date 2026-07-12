@@ -124,6 +124,49 @@ def check_missing_plugin_fails_closed_without_exception() -> None:
     assert_true(bool(status.get("error")), f"missing plugin error not retained: {status}")
 
 
+def check_voice_win32_action_uses_injected_sidecar_primitives() -> None:
+    from apps.wechat_ai_customer_service.optional_plugins.voice.win32_action import (
+        execute_voice_transcribe,
+    )
+
+    class Screenshot:
+        size = (980, 860)
+
+    class FakeSidecarOps:
+        def capture_wechat(self, hwnd: int, *, artifact_dir: str | None, label: str):
+            return Screenshot(), f"{label}.png"
+
+        def run_ocr(self, screenshot: Any) -> list[dict[str, Any]]:
+            return []
+
+        def get_window_geometry(self, hwnd: int) -> dict[str, Any]:
+            return {"width": 980, "height": 860}
+
+        def parse_messages_from_ocr(self, items: Any, image_size: Any, **kwargs: Any):
+            return []
+
+        def find_latest_untranscribed_voice_duration_target(
+            self,
+            items: Any,
+            image_size: Any,
+            *,
+            screenshot: Any,
+        ) -> None:
+            return None
+
+    result = execute_voice_transcribe(
+        sidecar_ops=FakeSidecarOps(),
+        hwnd=1,
+        probe={"online": True},
+        target="contract-target",
+    )
+    assert_true(
+        result.get("state") == "voice_transcribe_target_not_found",
+        f"voice Win32 compatibility state changed: {result}",
+    )
+    assert_true(result.get("messages") == [], f"voice result shape changed: {result}")
+
+
 def main() -> int:
     checks = [
         check_registry_import_is_lazy,
@@ -131,6 +174,7 @@ def main() -> int:
         check_vision_only_implementation_has_no_voice_dependency,
         check_custom_plugins_can_replace_builtins_independently,
         check_missing_plugin_fails_closed_without_exception,
+        check_voice_win32_action_uses_injected_sidecar_primitives,
     ]
     results: list[dict[str, Any]] = []
     for check in checks:
