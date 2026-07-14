@@ -82,9 +82,10 @@ def main() -> int:
         check_rejects_chinese_style_only_authority_fact(),
         check_reply_normalization_avoids_forbidden_commitment_echo(),
         check_nonsemantic_runtime_markers_do_not_break_social_classification(),
-        check_quality_gate_rejects_social_closing_stale_business_context(),
-        check_quality_gate_rejects_social_greeting_reviving_unbacked_visual_entity(),
-        check_quality_gate_rejects_social_greeting_reviving_supported_prior_context(),
+        check_quality_gate_records_social_closing_context_review_without_blocking(),
+        check_quality_gate_records_unbacked_social_context_review_without_blocking(),
+        check_quality_gate_uses_brain_turn_semantics_for_mixed_summon(),
+        check_quality_gate_records_supported_social_context_review_without_blocking(),
         check_quality_gate_rejects_high_risk_commitment_echo(),
         check_quality_gate_rejects_overconfident_sales_pressure(),
         check_normalizes_brain_schema_aliases_without_authorizing_style_facts(),
@@ -103,10 +104,13 @@ def main() -> int:
         check_brain_input_includes_delay_followup_interaction_hint(),
         check_delay_followup_fast_profile_ignores_current_summon_only_context(),
         check_brain_input_marks_social_turn_context_priority(),
+        check_brain_input_context_recovery_prunes_old_history(),
         check_brain_input_treats_ocr_speaker_prefix_as_metadata(),
-        check_quality_gate_rejects_fresh_greeting_for_delay_followup(),
-        check_quality_gate_rejects_self_history_continuation_for_current_summon_only(),
-        check_quality_gate_rejects_over_eager_business_redirect_after_social_fatigue(),
+        check_quality_gate_keeps_brain_short_social_reply_after_delay(),
+        check_soft_social_quality_review_preserves_brain_reply_and_marks_attention(),
+        check_short_social_quality_warning_does_not_force_semantic_review(),
+        check_quality_gate_records_self_history_review_without_blocking(),
+        check_quality_gate_records_social_fatigue_review_without_blocking(),
         check_quality_gate_warns_thin_social_or_common_sense_reply_without_blocking(),
         check_quality_gate_allows_business_appointment_after_social_fatigue(),
         check_quality_gate_allows_internal_probe_boundary_under_social_fatigue(),
@@ -118,6 +122,7 @@ def main() -> int:
         check_routine_product_fast_profile_rejects_complex_or_risky_turns(),
         check_brain_no_visible_payload_classifies_social_empty_reply(),
         check_social_brain_plan_clears_soft_no_evidence_guard(),
+        check_brain_runtime_sends_mixed_summon_with_turn_semantics(),
         check_brain_first_failure_blocks_visible_reply_without_legacy(),
         check_kimi_fenced_json_is_parsed_without_structure_repair(),
         check_kimi_tool_json_is_adopted_without_structure_repair(),
@@ -126,6 +131,8 @@ def main() -> int:
         check_brain_same_capture_retry_recovers_unavailable_response(),
         check_brain_unavailable_retry_recovers_after_non_json_retry_response(),
         check_brain_invalid_plan_retry_recovers_empty_reply_segments(),
+        check_brain_repair_retries_parseable_empty_reply_segments(),
+        check_brain_repair_empty_retry_exhaustion_is_explicit(),
         check_brain_json_structure_repair_failure_classified(),
         check_rejects_product_scoped_master_fact(),
         check_rejects_formal_policy_fact_without_source_id(),
@@ -134,7 +141,7 @@ def main() -> int:
         check_quality_gate_rejects_quantity_quote_ignoring_applicable_price_tier(),
         check_quality_gate_rejects_shipping_policy_contradiction_for_destination(),
         check_quality_gate_accepts_quantity_quote_with_tier_and_shipping_policy(),
-        check_quality_gate_rejects_social_info_collection(),
+        check_quality_gate_records_social_info_collection_review_without_blocking(),
         check_quality_gate_requires_clear_recommendation(),
         check_quality_gate_rejects_broad_need_question_for_direct_decision_request(),
         check_quality_gate_accepts_product_anchored_ranked_recommendation(),
@@ -194,6 +201,8 @@ def main() -> int:
         check_shadow_non_blocking_defers_without_llm(),
         check_shadow_brain_runner_passes_guard(),
         check_brain_runner_records_stage_timings(),
+        check_brain_first_intent_assist_skips_duplicate_llm_advisory(),
+        check_non_brain_first_intent_assist_keeps_llm_advisory(),
         check_brain_runner_rejects_quality_failed_plan(),
         check_original_brain_quality_soft_pass_after_failed_repair_allows_soft_doubts(),
         check_repaired_deterministic_quality_soft_pass_requires_missing_context_anchor(),
@@ -520,7 +529,7 @@ def check_nonsemantic_runtime_markers_do_not_break_social_classification() -> Ca
     return CaseResult("nonsemantic_runtime_markers_do_not_break_social_classification", True, {"clean": clean})
 
 
-def check_quality_gate_rejects_social_closing_stale_business_context() -> CaseResult:
+def check_quality_gate_records_social_closing_context_review_without_blocking() -> CaseResult:
     plan = normalize_brain_plan(
         {
             "can_answer": True,
@@ -537,13 +546,14 @@ def check_quality_gate_rejects_social_closing_stale_business_context() -> CaseRe
         settings={},
     )
     assert_true(
-        "social_closing_over_carries_stale_business_context" in quality.get("errors", []),
-        f"closing should not revive stale business context: {quality}",
+        "social_context_review:social_closing_over_carries_stale_business_context" in quality.get("warnings", []),
+        f"closing-context relevance should be auditable but non-blocking: {quality}",
     )
-    return CaseResult("quality_gate_rejects_social_closing_stale_business_context", True, {"quality": quality})
+    assert_true(quality.get("ok"), f"context relevance alone must not swallow a Brain reply: {quality}")
+    return CaseResult("quality_gate_records_social_closing_context_review_without_blocking", True, {"quality": quality})
 
 
-def check_quality_gate_rejects_social_greeting_reviving_unbacked_visual_entity() -> CaseResult:
+def check_quality_gate_records_unbacked_social_context_review_without_blocking() -> CaseResult:
     polluted_plan = normalize_brain_plan(
         {
             "can_answer": True,
@@ -560,8 +570,8 @@ def check_quality_gate_rejects_social_greeting_reviving_unbacked_visual_entity()
         settings={},
     )
     assert_true(
-        "social_turn_revived_unsupported_business_context" in polluted_quality.get("errors", []),
-        f"social greeting should not revive unbacked visual/entity context: {polluted_quality}",
+        "social_context_review:social_turn_revived_unsupported_business_context" in polluted_quality.get("warnings", []),
+        f"unbacked context relevance should be auditable: {polluted_quality}",
     )
 
     chinese_stale_plan = normalize_brain_plan(
@@ -580,8 +590,8 @@ def check_quality_gate_rejects_social_greeting_reviving_unbacked_visual_entity()
         settings={},
     )
     assert_true(
-        "social_turn_revived_unsupported_business_context" in chinese_stale_quality.get("errors", []),
-        f"social greeting should not revive generic stale business context in Chinese: {chinese_stale_quality}",
+        "social_context_review:social_turn_revived_unsupported_business_context" in chinese_stale_quality.get("warnings", []),
+        f"generic stale context should be an advisory review: {chinese_stale_quality}",
     )
 
     explicit_continue_quality = verify_brain_reply_quality(
@@ -611,8 +621,9 @@ def check_quality_gate_rejects_social_greeting_reviving_unbacked_visual_entity()
         settings={},
     )
     assert_true(normal_quality.get("ok"), f"plain social acknowledgement should still pass: {normal_quality}")
+    assert_true(polluted_quality.get("ok") and chinese_stale_quality.get("ok"), f"soft context review must remain sendable: {polluted_quality}; {chinese_stale_quality}")
     return CaseResult(
-        "quality_gate_rejects_social_greeting_reviving_unbacked_visual_entity",
+        "quality_gate_records_unbacked_social_context_review_without_blocking",
         True,
         {
             "polluted_quality": polluted_quality,
@@ -623,7 +634,52 @@ def check_quality_gate_rejects_social_greeting_reviving_unbacked_visual_entity()
     )
 
 
-def check_quality_gate_rejects_social_greeting_reviving_supported_prior_context() -> CaseResult:
+def check_quality_gate_uses_brain_turn_semantics_for_mixed_summon() -> CaseResult:
+    plan = normalize_brain_plan(
+        {
+            "can_answer": True,
+            "understanding": {"turn_semantics": {"kind": "business", "basis": "current_message", "current_request": "买车咨询"}},
+            "answer_mode": "ask_clarifying_question",
+            "reply_segments": ["在的，您想看轿车还是SUV？预算大概多少，我按您的预算挑几台合适的。"],
+            "recommended_action": "send_reply",
+            "confidence": 0.95,
+        }
+    )
+    quality = verify_brain_reply_quality(
+        plan,
+        current_message="在不？买车",
+        evidence_pack={},
+        settings={},
+    )
+    assert_true(
+        quality.get("ok"),
+        f"Brain-declared current business request must remain sendable: {quality}",
+    )
+    assert_true(
+        quality.get("turn_semantics", {}).get("kind") == "business",
+        f"quality audit should retain Brain-owned turn semantics: {quality}",
+    )
+    legacy_plan = copy.deepcopy(plan)
+    legacy_plan["understanding"] = {}
+    legacy_quality = verify_brain_reply_quality(
+        legacy_plan,
+        current_message="在不？买车",
+        evidence_pack={},
+        settings={},
+    )
+    assert_true(legacy_quality.get("ok"), f"missing optional semantics must remain sendable: {legacy_quality}")
+    assert_true(
+        any(str(item).startswith("social_context_review:") for item in legacy_quality.get("warnings", [])),
+        f"legacy plan should retain an auditable relevance review: {legacy_quality}",
+    )
+    return CaseResult(
+        "quality_gate_uses_brain_turn_semantics_for_mixed_summon",
+        True,
+        {"quality": quality, "legacy_quality": legacy_quality},
+    )
+
+
+def check_quality_gate_records_supported_social_context_review_without_blocking() -> CaseResult:
     pack = fake_evidence_pack(include_product=True)
     stale_plan = normalize_brain_plan(
         {
@@ -643,8 +699,8 @@ def check_quality_gate_rejects_social_greeting_reviving_supported_prior_context(
         settings={},
     )
     assert_true(
-        "social_turn_revived_supported_prior_business_context" in stale_quality.get("errors", []),
-        f"pure greeting should not revive supported prior business context: {stale_quality}",
+        "social_context_review:social_turn_revived_supported_prior_business_context" in stale_quality.get("warnings", []),
+        f"supported old context should be a semantic review, not a hard blocker: {stale_quality}",
     )
 
     continue_quality = verify_brain_reply_quality(
@@ -657,8 +713,9 @@ def check_quality_gate_rejects_social_greeting_reviving_supported_prior_context(
         "social_turn_revived_supported_prior_business_context" not in continue_quality.get("errors", []),
         f"explicit continuation should still allow prior context: {continue_quality}",
     )
+    assert_true(stale_quality.get("ok"), f"supported-context relevance alone must not swallow a Brain reply: {stale_quality}")
     return CaseResult(
-        "quality_gate_rejects_social_greeting_reviving_supported_prior_context",
+        "quality_gate_records_supported_social_context_review_without_blocking",
         True,
         {"stale_quality": stale_quality, "continue_quality": continue_quality},
     )
@@ -1105,6 +1162,63 @@ def check_social_brain_plan_clears_soft_no_evidence_guard() -> CaseResult:
     return CaseResult("social_brain_plan_clears_soft_no_evidence_guard", True, {"reason": event.get("reason")})
 
 
+def check_brain_runtime_sends_mixed_summon_with_turn_semantics() -> CaseResult:
+    """A short summon plus request must not become customer_service_brain_no_visible_reply."""
+
+    plan = {
+        "can_answer": True,
+        "understanding": {
+            "turn_semantics": {
+                "kind": "business",
+                "basis": "current_message",
+                "current_request": "购车咨询",
+            }
+        },
+        "answer_mode": "ask_clarifying_question",
+        "reply_strategy": {"style": "concise_human"},
+        "evidence_used": {"common_sense_topics": ["customer_need_clarification"]},
+        "facts_claimed": [],
+        "reply_segments": ["在的，您想看轿车还是SUV？预算大概多少，我按您的需求帮您筛。"],
+        "risk": {"risk_level": "low", "risk_tags": [], "needs_handoff": False},
+        "recommended_action": "send_reply",
+        "confidence": 0.92,
+        "reason": "当前消息包含新的购车诉求。",
+    }
+    config = base_config(plan, include_product=False)
+    config["customer_service_brain"].update({"mode": "brain_first", "fallback_to_legacy_on_error": False})
+    pack = fake_evidence_pack(include_product=False)
+    pack["current_message"] = "在不？买车"
+    pack["current_batch"] = [{"id": "msg-mixed-summon", "sender": "许聪", "content": "在不？买车"}]
+    pack["conversation"]["current_batch_text"] = "[许聪] 在不？买车"
+    # This turn only clarifies the customer's need; it does not quote a vehicle
+    # fact.  Keep the fixture free of inherited quote/product intent tags so
+    # Guard is tested on the same authority boundary as production.
+    pack["intent_tags"] = []
+    pack["knowledge"]["intent_tags"] = []
+    with patched_evidence_pack(pack):
+        event = brain_module.maybe_run_customer_service_brain(
+            config=config,
+            target_name="许聪",
+            target_state={"conversation_context": {}},
+            batch=pack["current_batch"],
+            combined="在不？买车",
+            decision=ReplyDecision("", "", False, False, ""),
+            reply_text="",
+            intent_assist={},
+            rag_reply={},
+            llm_reply={},
+            product_knowledge={},
+            data_capture={},
+            raw_capture={"conversation": {"conversation_id": "c-mixed-summon", "chat_type": "private"}},
+            customer_profile=None,
+        )
+    quality = event.get("quality_verification") if isinstance(event.get("quality_verification"), dict) else {}
+    assert_true(event.get("applied") is True and event.get("adoptable") is True, f"mixed summon must be sent by Brain: {event}")
+    assert_true(event.get("rule_name") == "customer_service_brain_reply", f"must not become a no-visible-reply: {event}")
+    assert_true(quality.get("turn_semantics", {}).get("kind") == "business", f"turn semantics should reach runtime audit: {quality}")
+    return CaseResult("brain_runtime_sends_mixed_summon_with_turn_semantics", True, {"quality": quality})
+
+
 def check_social_visible_contract_rejects_empty_or_handoff_plan() -> CaseResult:
     empty_plan = copy.deepcopy(base_plan())
     empty_plan.update(
@@ -1414,6 +1528,89 @@ def check_brain_input_marks_social_turn_context_priority() -> CaseResult:
     return CaseResult("brain_input_marks_social_turn_context_priority", True, {"policy": prompt_policy})
 
 
+def check_brain_input_context_recovery_prunes_old_history() -> CaseResult:
+    settings = brain_module.effective_brain_settings(base_config(base_plan(), include_product=True))
+    pack = fake_evidence_pack(include_product=True)
+    pack["conversation"]["history_text"] = "[许聪] 旧历史里问过完全无关的奥迪和接口报错"
+    pack["conversation"]["conversation_summary"] = "旧摘要：之前混入人工测试、接口报错和无关车源"
+    pack["conversation"]["current_batch_text"] = "[许聪] 旧日志\n[许聪] 客户发来了一张图片"
+    context_recovery = {
+        "schema_version": 1,
+        "applied": True,
+        "mode": "latest_turn_only_candidate",
+        "reason": "suspected_human_intervention_context_rupture",
+        "confidence": 0.82,
+        "score": 5.75,
+        "signals": ["stale_unsent_reply_context_present", "latest_turn_is_visual", "non_dialogue_noise_terms"],
+        "latest_message_ids": ["visual_proxy:current-car"],
+        "latest_customer_text": "客户发来了一张图片",
+        "latest_message_type": "image",
+        "policy": "Brain must judge continuity and answer the latest actionable customer turn.",
+        "hard_guards_preserved": ["product_master_authority", "session_envelope", "guard_and_final_polish"],
+    }
+    brain_input = brain_module.build_brain_input(
+        settings=settings,
+        target_name="许聪",
+        target_state={
+            "conversation_context": {
+                "last_product_id": "old_audi_a4l",
+                "last_product_name": "旧奥迪A4L",
+                "ledger_context_summary": "旧ledger里有无关奥迪和接口报错",
+                "ledger_recent_messages": [{"content": "Service Unavailable 503 token"}],
+            },
+            "conversation_interaction_state": {
+                "schema_version": 1,
+                "unanswered_exists": True,
+                "last_unanswered_customer_text": "旧问题：奥迪A4L多少钱",
+                "suggested_reply_posture": "acknowledge_delay_then_continue",
+                "customer_chase_up_detected": True,
+            },
+        },
+        batch=[
+            {"id": "old-log", "sender": "customer", "content": "Codex 503 token Service Unavailable", "time": "2026-07-10T09:41:00"},
+            {
+                "id": "visual_proxy:current-car",
+                "message_id": "visual_proxy:current-car",
+                "sender": "customer",
+                "content": "客户发来了一张图片",
+                "is_customer_image_proxy": True,
+                "visual_turn_kind": "customer_image",
+                "time": "2026-07-10T09:42:00",
+            },
+        ],
+        combined="Codex 503 token Service Unavailable\n客户发来了一张图片",
+        raw_capture={
+            "conversation": {"conversation_id": "conv-context-recovery", "chat_type": "private"},
+            "context_recovery": context_recovery,
+        },
+        evidence_pack=pack,
+    )
+    current = brain_input.get("current_message") if isinstance(brain_input.get("current_message"), dict) else {}
+    conversation = brain_input.get("conversation") if isinstance(brain_input.get("conversation"), dict) else {}
+    context = conversation.get("context") if isinstance(conversation.get("context"), dict) else {}
+    assert_equal(current.get("clean_text"), "客户发来了一张图片", "current text should be reduced to latest actionable turn")
+    assert_equal(current.get("message_ids"), ["visual_proxy:current-car"], "current message ids should use latest turn only")
+    assert_true(current.get("context_recovery", {}).get("applied") is True, f"context recovery should be carried: {brain_input}")
+    assert_true("old_audi_a4l" not in json.dumps(context, ensure_ascii=False), f"old product context should be prompt-pruned: {context}")
+    assert_equal(conversation.get("history_text"), "", "old history_text should be pruned in recovery mode")
+    assert_equal(conversation.get("summary"), "", "old summary should be pruned in recovery mode")
+    assert_true(context.get("old_context_pruned") is True, f"recovery policy should be explicit: {context}")
+
+    prompt_pack, _user_content, _estimate = brain_module.build_sized_brain_prompt(settings=settings, brain_input=brain_input)
+    slim = (prompt_pack.get("user") or {}).get("brain_input") or {}
+    prompt_current = slim.get("current_message") if isinstance(slim.get("current_message"), dict) else {}
+    prompt_conversation = slim.get("conversation") if isinstance(slim.get("conversation"), dict) else {}
+    prompt_products = (((slim.get("content_basis") or {}).get("product_master") or {}).get("items") or [])
+    assert_true(prompt_current.get("context_recovery", {}).get("applied") is True, f"recovery metadata should reach prompt: {prompt_current}")
+    assert_equal(prompt_conversation.get("history_text"), "", "slim prompt should not reintroduce old history")
+    assert_true(bool(prompt_products), "product master evidence must still be available after context pruning")
+    return CaseResult(
+        "brain_input_context_recovery_prunes_old_history",
+        True,
+        {"prompt_current": prompt_current, "prompt_context": prompt_conversation.get("context")},
+    )
+
+
 def check_brain_input_treats_ocr_speaker_prefix_as_metadata() -> CaseResult:
     settings = brain_module.effective_brain_settings(base_config(base_plan()))
     pack = fake_evidence_pack(include_product=False)
@@ -1435,7 +1632,7 @@ def check_brain_input_treats_ocr_speaker_prefix_as_metadata() -> CaseResult:
     return CaseResult("brain_input_treats_ocr_speaker_prefix_as_metadata", True, {"clean_text": current.get("clean_text"), "metadata": metadata})
 
 
-def check_quality_gate_rejects_fresh_greeting_for_delay_followup() -> CaseResult:
+def check_quality_gate_keeps_brain_short_social_reply_after_delay() -> CaseResult:
     pack = fake_evidence_pack(include_product=False)
     pack["conversation_interaction_state"] = {
         "authority": "non_authoritative_interaction_hint",
@@ -1462,11 +1659,12 @@ def check_quality_gate_rejects_fresh_greeting_for_delay_followup() -> CaseResult
         evidence_pack=pack,
         settings={},
     )
-    assert_true(not bad_quality.get("ok"), f"fresh greeting should be repaired for delay follow-up: {bad_quality}")
+    assert_true(bad_quality.get("ok"), f"short Brain social reply must remain sendable: {bad_quality}")
     assert_true(
-        "delay_followup_reply_looks_like_fresh_greeting" in (bad_quality.get("errors") or []),
-        f"expected delay follow-up continuity error: {bad_quality}",
+        "delay_followup_short_social_reply_review" in (bad_quality.get("warnings") or []),
+        f"expected a non-blocking continuity review warning: {bad_quality}",
     )
+    assert_true(not bad_quality.get("errors"), f"continuity warning must not become a blocking error: {bad_quality}")
 
     good_plan = copy.deepcopy(bad_plan)
     good_plan["reply_segments"] = ["抱歉，刚才在核车源资料，回慢了。", "我接着前面十万左右、适合女性开的电车或混动方向给您说。"]
@@ -1477,10 +1675,102 @@ def check_quality_gate_rejects_fresh_greeting_for_delay_followup() -> CaseResult
         settings={},
     )
     assert_true(good_quality.get("ok"), f"context-aware delay follow-up should pass: {good_quality}")
-    return CaseResult("quality_gate_rejects_fresh_greeting_for_delay_followup", True, {"errors": bad_quality.get("errors")})
+    return CaseResult(
+        "quality_gate_keeps_brain_short_social_reply_after_delay",
+        True,
+        {"warnings": bad_quality.get("warnings")},
+    )
 
 
-def check_quality_gate_rejects_self_history_continuation_for_current_summon_only() -> CaseResult:
+def check_soft_social_quality_review_preserves_brain_reply_and_marks_attention() -> CaseResult:
+    plan = normalize_brain_plan(
+        {
+            **base_plan(),
+            "answer_mode": "soft_social_reply",
+            "evidence_used": {"common_sense_topics": ["small_talk_customer_care"]},
+            "facts_claimed": [],
+            "reply_segments": ["在呢，您说。"],
+            "recommended_action": "send_reply",
+            "risk": {"risk_level": "low", "risk_tags": ["small_talk"], "needs_handoff": False},
+        }
+    )
+    quality = {
+        "ok": False,
+        "errors": ["delay_followup_reply_looks_like_fresh_greeting"],
+        "warnings": [],
+    }
+    soft = brain_module.repaired_deterministic_quality_soft_pass_decision(
+        settings={},
+        plan=plan,
+        quality=quality,
+        evidence_pack=fake_evidence_pack(include_product=False),
+    )
+    assert_true(soft.get("ok"), f"soft social quality doubts must not swallow Brain: {soft}")
+    review = brain_module.build_brain_quality_review_metadata(
+        {"warnings": ["delay_followup_short_social_reply_review"]}
+    )
+    assert_true(review.get("required") is True, f"quality review should be visible to operator tooling: {review}")
+    assert_true(review.get("operator_attention_required") is True, f"continuity warning should request operator attention: {review}")
+    assert_true(review.get("visible_reply_preserved") is True, f"quality review must preserve visible reply: {review}")
+    semantic_context_quality = {
+        "ok": False,
+        "source": "semantic_reviewer",
+        "errors": ["semantic_reviewer_repair"],
+        "deterministic_warnings": ["social_context_review:social_turn_revived_unsupported_business_context"],
+        "semantic_review": {
+            "customer_visible_risk": "low",
+            "hard_boundary_concerns": [],
+            "verdict": "repair",
+            "errors": ["context_relevance_needs_improvement"],
+        },
+    }
+    original_soft = brain_module.original_brain_quality_soft_pass_after_failed_repair(
+        settings={},
+        plan=plan,
+        validation={"ok": True},
+        quality=semantic_context_quality,
+        evidence_pack=fake_evidence_pack(include_product=False),
+    )
+    assert_true(original_soft.get("ok"), f"low-risk semantic context review must not swallow the original Brain reply: {original_soft}")
+    assert_true(
+        original_soft.get("reason") == "original_brain_social_context_semantic_review_preserved_after_repair_failure",
+        f"expected explicit semantic-context preservation audit reason: {original_soft}",
+    )
+    return CaseResult(
+        "soft_social_quality_review_preserves_brain_reply_and_marks_attention",
+        True,
+        {"soft": soft, "review": review, "original_soft": original_soft},
+    )
+
+
+def check_short_social_quality_warning_does_not_force_semantic_review() -> CaseResult:
+    plan = normalize_brain_plan(
+        {
+            **base_plan(),
+            "answer_mode": "soft_social_reply",
+            "evidence_used": {"common_sense_topics": ["small_talk_customer_care"]},
+            "facts_claimed": [],
+            "reply_segments": ["在呢，您说。"],
+            "recommended_action": "send_reply",
+            "risk": {"risk_level": "low", "risk_tags": ["small_talk"], "needs_handoff": False},
+        }
+    )
+    should_review = reviewer_module.should_invoke_semantic_reviewer(
+        plan=plan,
+        current_message="在吗",
+        evidence_pack=fake_evidence_pack(include_product=False),
+        deterministic_quality={
+            "ok": True,
+            "errors": [],
+            "warnings": ["delay_followup_short_social_reply_review"],
+        },
+        settings={"semantic_reviewer_low_risk_tail_skip_enabled": True},
+    )
+    assert_true(not should_review, f"advisory continuity warning must not add another LLM hop: {should_review}")
+    return CaseResult("short_social_quality_warning_does_not_force_semantic_review", True, {"should_review": should_review})
+
+
+def check_quality_gate_records_self_history_review_without_blocking() -> CaseResult:
     pack = fake_evidence_pack(include_product=False)
     pack["conversation_interaction_state"] = {
         "authority": "non_authoritative_interaction_hint",
@@ -1507,10 +1797,10 @@ def check_quality_gate_rejects_self_history_continuation_for_current_summon_only
         evidence_pack=pack,
         settings={},
     )
-    assert_true(not bad_quality.get("ok"), f"self-history continuation should be repaired: {bad_quality}")
+    assert_true(bad_quality.get("ok"), f"self-history relevance must not swallow a Brain reply: {bad_quality}")
     assert_true(
-        "social_turn_continued_self_history_without_open_customer_context" in (bad_quality.get("errors") or []),
-        f"expected self-history continuation error: {bad_quality}",
+        "social_context_review:social_turn_continued_self_history_without_open_customer_context" in (bad_quality.get("warnings") or []),
+        f"expected self-history continuity review warning: {bad_quality}",
     )
 
     good_plan = copy.deepcopy(bad_plan)
@@ -1532,17 +1822,17 @@ def check_quality_gate_rejects_self_history_continuation_for_current_summon_only
         settings={},
     )
     assert_true(
-        "social_turn_continued_self_history_without_open_customer_context" not in (allowed_quality.get("errors") or []),
-        f"real unanswered customer context should not trigger self-history-only error: {allowed_quality}",
+        "social_context_review:social_turn_continued_self_history_without_open_customer_context" not in (allowed_quality.get("warnings") or []),
+        f"real unanswered customer context should not trigger self-history review: {allowed_quality}",
     )
     return CaseResult(
-        "quality_gate_rejects_self_history_continuation_for_current_summon_only",
+        "quality_gate_records_self_history_review_without_blocking",
         True,
-        {"errors": bad_quality.get("errors")},
+        {"warnings": bad_quality.get("warnings")},
     )
 
 
-def check_quality_gate_rejects_over_eager_business_redirect_after_social_fatigue() -> CaseResult:
+def check_quality_gate_records_social_fatigue_review_without_blocking() -> CaseResult:
     fatigued_pack = fake_evidence_pack(include_product=False)
     fatigued_pack["conversation_strategy_state"] = {
         "authority": "non_authoritative_strategy_hint",
@@ -1568,10 +1858,10 @@ def check_quality_gate_rejects_over_eager_business_redirect_after_social_fatigue
         evidence_pack=fatigued_pack,
         settings={},
     )
-    assert_true(not quality.get("ok"), f"over-eager business redirect should be repaired: {quality}")
+    assert_true(quality.get("ok"), f"social-fatigue relevance must not swallow a Brain reply: {quality}")
     assert_true(
-        "over_eager_business_redirect_after_social_fatigue" in (quality.get("errors") or []),
-        f"expected social fatigue redirect error: {quality}",
+        "social_context_review:over_eager_business_redirect_after_social_fatigue" in (quality.get("warnings") or []),
+        f"expected social-fatigue review warning: {quality}",
     )
     identity_resistance_plan = normalize_brain_plan(
         {
@@ -1590,10 +1880,10 @@ def check_quality_gate_rejects_over_eager_business_redirect_after_social_fatigue
         evidence_pack=fatigued_pack,
         settings={},
     )
-    assert_true(not identity_quality.get("ok"), f"identity/resistance turn should not pull old business again: {identity_quality}")
+    assert_true(identity_quality.get("ok"), f"identity/resistance relevance must remain sendable: {identity_quality}")
     assert_true(
-        "over_eager_business_redirect_after_social_fatigue" in (identity_quality.get("errors") or []),
-        f"expected identity resistance redirect error: {identity_quality}",
+        "social_context_review:over_eager_business_redirect_after_social_fatigue" in (identity_quality.get("warnings") or []),
+        f"expected identity-resistance review warning: {identity_quality}",
     )
 
     natural_plan = copy.deepcopy(over_eager_plan)
@@ -1606,9 +1896,9 @@ def check_quality_gate_rejects_over_eager_business_redirect_after_social_fatigue
     )
     assert_true(natural_quality.get("ok"), f"natural social companion reply should pass: {natural_quality}")
     return CaseResult(
-        "quality_gate_rejects_over_eager_business_redirect_after_social_fatigue",
+        "quality_gate_records_social_fatigue_review_without_blocking",
         True,
-        {"errors": quality.get("errors"), "identity_errors": identity_quality.get("errors")},
+        {"warnings": quality.get("warnings"), "identity_warnings": identity_quality.get("warnings")},
     )
 
 
@@ -1895,6 +2185,16 @@ def check_low_authority_fast_profile_rejects_authority_or_context_turns() -> Cas
         target_state={},
     )
     assert_true(not product_decision.get("enabled"), f"explicit product/price question must use full authority path: {product_decision}")
+    car_price_decision = brain_module.low_authority_fast_profile_decision(
+        settings=settings,
+        combined="哈弗H6是自动挡吗，车价多少？",
+        batch=[{"id": "msg-car-price", "sender": "许聪", "content": "哈弗H6是自动挡吗，车价多少？"}],
+        target_state={},
+    )
+    assert_true(
+        not car_price_decision.get("enabled") and car_price_decision.get("reason") == "authority_data_signal",
+        f"car-price synonym must retain product evidence instead of using the low-authority profile: {car_price_decision}",
+    )
     ambiguous_decision = brain_module.low_authority_fast_profile_decision(
         settings=settings,
         combined="要",
@@ -1937,6 +2237,7 @@ def check_low_authority_fast_profile_rejects_authority_or_context_turns() -> Cas
         True,
         {
             "product": product_decision,
+            "car_price": car_price_decision,
             "ambiguous": ambiguous_decision,
             "casual_car_word": casual_car_word_decision,
             "generic_vehicle_intent": generic_vehicle_intent_decision,
@@ -1984,6 +2285,7 @@ def check_routine_product_fast_profile_compacts_grounded_product_turn() -> CaseR
     prompt_text = json.dumps(prompt_pack, ensure_ascii=False)
     assert_equal(estimate.get("profile"), "routine_product_fast", f"routine profile should be explicit: {estimate}")
     assert_true("常规商品问价/推荐" in prompt_pack["system"], "routine profile should use short product system prompt")
+    assert_true("不能说替客户直接定车、下单、留车或锁车" in prompt_pack["system"], "routine profile should prevent avoidable sales-pressure repair")
     assert_true("chejin_qinplus_2022_dmi55" in prompt_text, "routine profile must still carry product-master id")
     assert_true("8.68" in prompt_text, "routine profile must still carry product-master price")
     assert_true(int(estimate.get("prompt_chars") or 99999) < 6200, f"routine prompt should be smaller than default lean prompt: {estimate}")
@@ -2462,6 +2764,110 @@ def check_brain_invalid_plan_retry_recovers_empty_reply_segments() -> CaseResult
     return CaseResult("brain_invalid_plan_retry_recovers_empty_reply_segments", True, {"calls": len(calls), "reason": event.get("reason")})
 
 
+def check_brain_repair_retries_parseable_empty_reply_segments() -> CaseResult:
+    settings = {
+        "provider": "openai",
+        "model": "gpt-unit",
+        "model_tier": "flash",
+        "quality_repair_enabled": True,
+        "quality_repair_timeout_seconds": 8,
+        "quality_repair_max_tokens": 520,
+    }
+    empty_plan = {**base_plan(), "reply_segments": []}
+    calls: list[dict[str, Any]] = []
+    original_call = brain_module.call_llm_request_with_failover
+    original_resolve_key = brain_module.resolve_llm_api_key
+
+    def fake_call(**kwargs: Any) -> dict[str, Any]:
+        calls.append(copy.deepcopy(kwargs))
+        if len(calls) == 1:
+            return {
+                "ok": True,
+                "provider": "deepseek",
+                "model": "deepseek-v4-flash",
+                "status": 200,
+                "response_text": json.dumps(empty_plan, ensure_ascii=False),
+                "failover": {
+                    "attempted": True,
+                    "activated": True,
+                    "reason": "fallback_success",
+                    "primary_provider": "openai",
+                },
+            }
+        user_content = str((kwargs.get("messages") or [{}])[-1].get("content") or "")
+        assert_true("reply_segments为空" in user_content, f"empty-repair retry instruction should be explicit: {user_content[:500]}")
+        return {
+            "ok": True,
+            "provider": "openai",
+            "model": "gpt-unit",
+            "status": 200,
+            "response_text": json.dumps(base_plan(), ensure_ascii=False),
+            "failover": {"attempted": False, "activated": False, "reason": "primary_ok"},
+        }
+
+    try:
+        brain_module.call_llm_request_with_failover = fake_call
+        brain_module.resolve_llm_api_key = lambda **_kwargs: "unit-key"
+        result = brain_module.run_brain_repair_llm(
+            settings=settings,
+            brain_input={"current_message": {"clean_text": "秦PLUS多少钱"}},
+            plan=base_plan(),
+            quality={"ok": False, "errors": ["missing_direct_price_response"], "repair_instruction": "直接回答价格。"},
+        )
+    finally:
+        brain_module.call_llm_request_with_failover = original_call
+        brain_module.resolve_llm_api_key = original_resolve_key
+    assert_true(result.get("ok"), f"same-capture empty repair retry should recover: {result}")
+    assert_true(result.get("same_capture_repair_retry") is True, f"retry audit should be retained: {result}")
+    assert_true(result.get("retry_reason") == "brain_repair_empty_reply_segments", f"retry reason mismatch: {result}")
+    assert_true(bool((result.get("brain_plan") or {}).get("reply_segments")), f"retry must return visible Brain segments: {result}")
+    previous = result.get("previous_repair_status") if isinstance(result.get("previous_repair_status"), dict) else {}
+    assert_true((previous.get("failover") or {}).get("activated") is True, f"previous failover must remain auditable: {result}")
+    assert_true(len(calls) == 2, f"expected exactly one empty repair retry, got {len(calls)}")
+    return CaseResult("brain_repair_retries_parseable_empty_reply_segments", True, {"calls": len(calls), "retry_reason": result.get("retry_reason")})
+
+
+def check_brain_repair_empty_retry_exhaustion_is_explicit() -> CaseResult:
+    settings = {
+        "provider": "openai",
+        "model": "gpt-unit",
+        "model_tier": "flash",
+        "quality_repair_timeout_seconds": 8,
+    }
+    empty_plan = {**base_plan(), "reply_segments": []}
+    calls: list[dict[str, Any]] = []
+    original_call = brain_module.call_llm_request_with_failover
+    original_resolve_key = brain_module.resolve_llm_api_key
+
+    def fake_call(**kwargs: Any) -> dict[str, Any]:
+        calls.append(copy.deepcopy(kwargs))
+        return {
+            "ok": True,
+            "provider": "openai",
+            "model": "gpt-unit",
+            "status": 200,
+            "response_text": json.dumps(empty_plan, ensure_ascii=False),
+        }
+
+    try:
+        brain_module.call_llm_request_with_failover = fake_call
+        brain_module.resolve_llm_api_key = lambda **_kwargs: "unit-key"
+        result = brain_module.run_brain_repair_llm(
+            settings=settings,
+            brain_input={"current_message": {"clean_text": "秦PLUS多少钱"}},
+            plan=base_plan(),
+            quality={"ok": False, "errors": ["empty_visible_reply"]},
+        )
+    finally:
+        brain_module.call_llm_request_with_failover = original_call
+        brain_module.resolve_llm_api_key = original_resolve_key
+    assert_true(not result.get("ok"), f"exhausted empty repair must be explicit failure: {result}")
+    assert_true(result.get("error") == "brain_repair_retry_empty_reply_segments", f"empty retry error mismatch: {result}")
+    assert_true(result.get("same_capture_repair_retry") is True, f"exhausted retry should remain auditable: {result}")
+    assert_true(len(calls) == 2, f"empty repair retry must stop after one retry, got {len(calls)} calls")
+    return CaseResult("brain_repair_empty_retry_exhaustion_is_explicit", True, {"calls": len(calls), "error": result.get("error")})
+
+
 def check_brain_json_structure_repair_failure_classified() -> CaseResult:
     config = base_config(base_plan())
     config["customer_service_brain"].update({"provider": "openai", "mode": "brain_first", "fallback_to_legacy_on_error": False})
@@ -2741,7 +3147,7 @@ def check_quality_gate_accepts_quantity_quote_with_tier_and_shipping_policy() ->
     return CaseResult("quality_gate_accepts_quantity_quote_with_tier_and_shipping_policy", True, {"quality": quality})
 
 
-def check_quality_gate_rejects_social_info_collection() -> CaseResult:
+def check_quality_gate_records_social_info_collection_review_without_blocking() -> CaseResult:
     plan = copy.deepcopy(base_plan())
     plan.update(
         {
@@ -2758,9 +3164,12 @@ def check_quality_gate_rejects_social_info_collection() -> CaseResult:
         evidence_pack=fake_evidence_pack(include_product=True),
         settings={},
     )
-    assert_true(not quality["ok"], f"social greeting should not collect unsupported info: {quality}")
-    assert_true("unsupported_info_collection_for_social_message" in quality["errors"], f"expected info-collection error: {quality}")
-    return CaseResult("quality_gate_rejects_social_info_collection", True, {"errors": quality["errors"]})
+    assert_true(quality["ok"], f"social relevance review must not suppress a Brain reply: {quality}")
+    assert_true(
+        "social_context_review:unsupported_info_collection_for_social_message" in quality["warnings"],
+        f"expected auditable info-collection review warning: {quality}",
+    )
+    return CaseResult("quality_gate_records_social_info_collection_review_without_blocking", True, {"warnings": quality["warnings"]})
 
 
 def check_quality_gate_requires_clear_recommendation() -> CaseResult:
@@ -7902,6 +8311,78 @@ def check_brain_runner_ignores_guard_visible_reply_source() -> CaseResult:
     assert_true("不能随口定" not in str(event.get("reply_text") or ""), f"guard visible reply must not leak: {event}")
     assert_true(calls["count"] >= 2, f"legacy guard handoff should force a repair pass: {event}")
     return CaseResult("brain_runner_ignores_guard_visible_reply_source", True, {"visible_reply_owner": event.get("visible_reply_owner"), "reason": event.get("reason")})
+
+
+def check_brain_first_intent_assist_skips_duplicate_llm_advisory() -> CaseResult:
+    config = base_config(base_plan())
+    config["customer_service_brain"]["mode"] = "brain_first"
+    config["intent_assist"] = {
+        "enabled": True,
+        "mode": "heuristic",
+        "advisory_only": True,
+        "llm_advisory": {
+            "enabled": True,
+            "provider": "openai",
+            "advisory_only": True,
+            "apply_to_reply": False,
+        },
+    }
+    original_builder = workflow_module.build_llm_advisory
+
+    def unexpected_llm_advisory(**_kwargs: Any) -> dict[str, Any]:
+        raise AssertionError("Brain First must not synchronously call the duplicate intent advisory LLM")
+
+    try:
+        workflow_module.build_llm_advisory = unexpected_llm_advisory
+        result = workflow_module.maybe_analyze_intent(
+            config=config,
+            combined="预算6万以内，直接推荐一台省油耐用的车",
+            decision=ReplyDecision("", "", False, False, ""),
+            reply_text="",
+            data_capture={"enabled": False},
+            product_knowledge={},
+        )
+    finally:
+        workflow_module.build_llm_advisory = original_builder
+    advisory = result.get("llm_advisory") if isinstance(result.get("llm_advisory"), dict) else {}
+    assert_true(result.get("ok"), f"heuristic intent evidence should remain available: {result}")
+    assert_true(advisory.get("skipped") is True, f"duplicate LLM advisory should be skipped: {result}")
+    assert_true(advisory.get("reason") == "skipped_for_brain_first_single_reasoner", f"skip reason mismatch: {result}")
+    assert_true(bool(result.get("evidence")), f"Brain still needs the intent evidence summary: {result}")
+    return CaseResult("brain_first_intent_assist_skips_duplicate_llm_advisory", True, {"advisory": advisory})
+
+
+def check_non_brain_first_intent_assist_keeps_llm_advisory() -> CaseResult:
+    config = base_config(base_plan())
+    config["customer_service_brain"]["mode"] = "shadow"
+    config["intent_assist"] = {
+        "enabled": True,
+        "mode": "heuristic",
+        "llm_advisory": {"enabled": True, "provider": "openai", "advisory_only": True},
+    }
+    original_builder = workflow_module.build_llm_advisory
+    calls = {"count": 0}
+
+    def fake_llm_advisory(**_kwargs: Any) -> dict[str, Any]:
+        calls["count"] += 1
+        return {"enabled": True, "provider": "openai", "status": "unit_called"}
+
+    try:
+        workflow_module.build_llm_advisory = fake_llm_advisory
+        result = workflow_module.maybe_analyze_intent(
+            config=config,
+            combined="预算6万以内，推荐一台省油耐用的车",
+            decision=ReplyDecision("", "", False, False, ""),
+            reply_text="",
+            data_capture={"enabled": False},
+            product_knowledge={},
+        )
+    finally:
+        workflow_module.build_llm_advisory = original_builder
+    advisory = result.get("llm_advisory") if isinstance(result.get("llm_advisory"), dict) else {}
+    assert_true(calls["count"] == 1, f"non-Brain-First intent advisory behavior must stay compatible: {result}")
+    assert_true(advisory.get("status") == "unit_called", f"non-Brain-First advisory result should be preserved: {result}")
+    return CaseResult("non_brain_first_intent_assist_keeps_llm_advisory", True, {"calls": calls["count"], "advisory": advisory})
 
 
 def check_brain_repair_retry_recovers_guard_repair_non_json() -> CaseResult:

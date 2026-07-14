@@ -1,37 +1,293 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "category_id": "products",
   "id": "chejin_haval_h6_2020_20t",
   "status": "active",
   "source": {
-    "type": "test_fixture",
-    "batch_token": "CHEJIN_SEED_20260507",
-    "legacy_migrated_from": "knowledge_bases/products"
-  },
-  "data": {
-    "name": "2020款哈弗H6 2.0GDIT 自动冠军版",
-    "sku": "CHEJIN-H6-2020-20T",
-    "category": "二手车/SUV",
-    "aliases": [
-      "哈弗H6",
-      "H6",
-      "国产SUV",
-      "性价比",
-      "神车"
-    ],
-    "specs": "2020年7月上牌，表显5.5万公里，2.0T自动挡，配置丰富，全景天窗、360影像，右前叶子板补漆。",
-    "price": 7.28,
-    "unit": "台",
-    "inventory": 1,
-    "shipping_policy": "随时看车，国产SUV性价比高，适合预算有限但需要大空间的客户。",
-    "warranty_policy": "右前叶子板有补漆记录，已如实告知，其余部位原版，以检测报告为准。",
-    "reply_templates": {
-      "recommendation": "这台H6适合7到8万预算、需要大空间SUV但预算有限的客户，配置高是亮点。"
+    "type": "manual",
+    "provider": "manual",
+    "marker": {
+      "ingest_channel": "legacy_v1_migration",
+      "original_source_type": "test_fixture",
+      "recorded_at": "2026-07-13T04:53:45+00:00",
+      "migration_batch": "chejin_v1_to_v2_20260713"
     },
-    "risk_rules": [
-      "右前叶子板补漆已告知",
-      "不承诺最低价"
-    ]
+    "binding": {
+      "state": "unbound"
+    }
+  },
+  "source_payloads": {
+    "vehicle_detail": {
+      "api": "manual.dafengche_shaped_vehicle_detail",
+      "payload": {
+        "baseCarInfo": {
+          "name": "2020款哈弗H6 2.0GDIT 自动冠军版",
+          "firstLicensePlateDate": "2020-07",
+          "mileage": 5.5,
+          "carName": "测试车辆-12",
+          "brandName": "测试品牌-12",
+          "seriesName": "测试车系-12",
+          "modelName": "测试车型-12",
+          "vehicleCondition": "测试车况：良好",
+          "exteriorColor": "测试深灰色",
+          "color": "测试深灰色",
+          "interiorColor": "测试黑色"
+        },
+        "carPriceInfo": {
+          "salePrice": 7.28,
+          "purchasePrice": 12.44,
+          "salesPrice": 14.44,
+          "managerPrice": 13.94,
+          "wholesalePrice": 13.44
+        },
+        "carModelParam": {
+          "displacement": "2.0T",
+          "gearbox": "自动",
+          "gearBox": "测试自动"
+        },
+        "operationPhase": "TEST_SALE",
+        "carLicenseInfo": {
+          "licenseStatus": "测试手续正常"
+        }
+      },
+      "pulled_at": "2026-07-13T04:53:45+00:00",
+      "content_hash": "sha256:23dd4c4c93edc7bc56aeb69aec7e133c298c0c79f63ccbfd9f0603d1cc17c58f",
+      "enriched_at": "2026-07-13T06:42:22+00:00",
+      "test_filled_at": "2026-07-13T07:47:11+00:00"
+    },
+    "vehicle_pictures": {
+      "api": "manual.dafengche_shaped_vehicle_pictures",
+      "payload": [],
+      "pulled_at": "2026-07-13T04:53:45+00:00",
+      "content_hash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  },
+  "extensions": {
+    "manual": {
+      "field_provenance": {
+        "source_payloads.vehicle_detail.payload.baseCarInfo.name": {
+          "source": "legacy_v1_migration",
+          "original_path": "data.name",
+          "original_source_type": "test_fixture",
+          "recorded_at": "2026-07-13T04:53:45+00:00"
+        },
+        "source_payloads.vehicle_detail.payload.carPriceInfo.salePrice": {
+          "source": "legacy_v1_migration",
+          "original_path": "data.price",
+          "original_source_type": "test_fixture",
+          "recorded_at": "2026-07-13T04:53:45+00:00"
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.firstLicensePlateDate": {
+          "source": "legacy_v1_snapshot_enrichment",
+          "original_path": "data.specs",
+          "recorded_at": "2026-07-13T06:42:22+00:00",
+          "evidence": "2020年7月上牌"
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.mileage": {
+          "source": "legacy_v1_snapshot_enrichment",
+          "original_path": "data.specs",
+          "recorded_at": "2026-07-13T06:42:22+00:00",
+          "evidence": "表显5.5万公里"
+        },
+        "source_payloads.vehicle_detail.payload.carModelParam.displacement": {
+          "source": "legacy_v1_snapshot_enrichment",
+          "original_path": "data.specs",
+          "recorded_at": "2026-07-13T06:42:22+00:00",
+          "evidence": "2.0T"
+        },
+        "source_payloads.vehicle_detail.payload.carModelParam.gearbox": {
+          "source": "legacy_v1_snapshot_enrichment",
+          "original_path": "data.specs",
+          "recorded_at": "2026-07-13T06:42:22+00:00",
+          "evidence": "万公里，2.0T自动挡，配置丰富，全"
+        },
+        "source_payloads.vehicle_detail.payload.operationPhase": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.carName": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.brandName": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.seriesName": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.modelName": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.vehicleCondition": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.exteriorColor": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.color": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.interiorColor": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.carModelParam.gearBox": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.carPriceInfo.purchasePrice": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.carPriceInfo.salesPrice": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.carPriceInfo.managerPrice": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.carPriceInfo.wholesalePrice": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.carLicenseInfo.licenseStatus": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        }
+      },
+      "test_fixture": {
+        "enabled": true,
+        "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+        "filled_at": "2026-07-13T07:47:11+00:00",
+        "purpose": "wechat_customer_service_field_recognition"
+      }
+    },
+    "compatibility": {
+      "legacy_v1_record": {
+        "schema_version": 1,
+        "category_id": "products",
+        "id": "chejin_haval_h6_2020_20t",
+        "status": "active",
+        "source": {
+          "type": "test_fixture",
+          "batch_token": "CHEJIN_SEED_20260507",
+          "legacy_migrated_from": "knowledge_bases/products"
+        },
+        "data": {
+          "name": "2020款哈弗H6 2.0GDIT 自动冠军版",
+          "sku": "CHEJIN-H6-2020-20T",
+          "category": "二手车/SUV",
+          "aliases": [
+            "哈弗H6",
+            "H6",
+            "国产SUV",
+            "性价比",
+            "神车"
+          ],
+          "specs": "2020年7月上牌，表显5.5万公里，2.0T自动挡，配置丰富，全景天窗、360影像，右前叶子板补漆。",
+          "price": 7.28,
+          "unit": "台",
+          "inventory": 1,
+          "shipping_policy": "随时看车，国产SUV性价比高，适合预算有限但需要大空间的客户。",
+          "warranty_policy": "右前叶子板有补漆记录，已如实告知，其余部位原版，以检测报告为准。",
+          "reply_templates": {
+            "recommendation": "这台H6适合7到8万预算、需要大空间SUV但预算有限的客户，配置高是亮点。"
+          },
+          "risk_rules": [
+            "右前叶子板补漆已告知",
+            "不承诺最低价"
+          ]
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        },
+        "metadata": {
+          "created_at": "2026-05-07T10:00:00",
+          "updated_at": "2026-05-16T22:51:06",
+          "created_by": "admin",
+          "updated_by": "admin"
+        }
+      },
+      "migration": {
+        "from_schema_version": 1,
+        "batch_id": "chejin_v1_to_v2_20260713",
+        "migrated_at": "2026-07-13T04:53:45+00:00"
+      },
+      "legacy_snapshot_enrichment": {
+        "batch_id": "chejin_v2_legacy_snapshot_enrichment_20260713",
+        "source": "legacy_v1_snapshot_enrichment",
+        "enriched_at": "2026-07-13T06:45:00+00:00",
+        "field_count": 0,
+        "retired_data_shadow_removed": true
+      }
+    },
+    "wechat_customer_service": {
+      "customer_visible_annotations": {
+        "category": "二手车/SUV",
+        "specs": "2020年7月上牌，表显5.5万公里，2.0T自动挡，配置丰富，全景天窗、360影像，右前叶子板补漆。",
+        "shipping_policy": "随时看车，国产SUV性价比高，适合预算有限但需要大空间的客户。",
+        "warranty_policy": "右前叶子板有补漆记录，已如实告知，其余部位原版，以检测报告为准。",
+        "risk_rules": [
+          "右前叶子板补漆已告知",
+          "不承诺最低价"
+        ],
+        "aliases": [
+          "哈弗H6",
+          "H6",
+          "国产SUV",
+          "性价比",
+          "神车"
+        ]
+      },
+      "manual_annotations": {
+        "sku": "CHEJIN-H6-2020-20T",
+        "unit": "台",
+        "inventory": 1,
+        "reply_templates": {
+          "recommendation": "这台H6适合7到8万预算、需要大空间SUV但预算有限的客户，配置高是亮点。"
+        }
+      },
+      "manual_overrides": {}
+    }
   },
   "runtime": {
     "allow_auto_reply": true,
@@ -40,8 +296,14 @@
   },
   "metadata": {
     "created_at": "2026-05-07T10:00:00",
-    "updated_at": "2026-05-16T22:51:06",
+    "updated_at": "2026-07-13T15:47:11",
     "created_by": "admin",
-    "updated_by": "admin"
+    "updated_by": "admin",
+    "migrated_from_schema_version": 1,
+    "migration_batch": "chejin_v1_to_v2_20260713",
+    "legacy_snapshot_enriched_at": "2026-07-13T06:45:00+00:00",
+    "legacy_snapshot_enrichment_batch": "chejin_v2_legacy_snapshot_enrichment_20260713",
+    "test_fixture_last_action": "filled",
+    "test_fixture_batch": "chejin_v2_wechat_recognition_test_fields_20260713"
   }
 }

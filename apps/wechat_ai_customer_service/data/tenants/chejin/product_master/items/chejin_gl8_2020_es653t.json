@@ -1,30 +1,294 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "category_id": "products",
   "id": "chejin_gl8_2020_es653t",
   "status": "active",
   "source": {
-    "type": "test_fixture",
-    "batch_token": "CHEJIN_20260518_150628"
+    "type": "manual",
+    "provider": "manual",
+    "marker": {
+      "ingest_channel": "legacy_v1_migration",
+      "original_source_type": "test_fixture",
+      "recorded_at": "2026-07-13T04:53:45+00:00",
+      "migration_batch": "chejin_v1_to_v2_20260713"
+    },
+    "binding": {
+      "state": "unbound"
+    }
   },
-  "data": {
-    "name": "2020款别克GL8 ES陆尊653T豪华型",
-    "sku": "CHEJIN-GL8-2020ES653T",
-    "category": "二手车/MPV",
-    "aliases": [
-      "GL8",
-      "别克GL8",
-      "商务接待",
-      "七座"
-    ],
-    "specs": "2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。",
-    "price": 17.6,
-    "unit": "台",
-    "inventory": 1,
-    "shipping_policy": "商务客户看车、试乘、付款方式均需人工确认。",
-    "warranty_policy": "内饰磨损和保养记录以门店实车与检测报告为准。",
-    "reply_templates": {
-      "recommendation": "适合商务接待、多人家庭和七座刚需客户。"
+  "source_payloads": {
+    "vehicle_detail": {
+      "api": "manual.dafengche_shaped_vehicle_detail",
+      "payload": {
+        "baseCarInfo": {
+          "name": "2020款别克GL8 ES陆尊653T豪华型",
+          "firstLicensePlateDate": "2020",
+          "mileage": 7.4,
+          "carName": "测试车辆-10",
+          "brandName": "测试品牌-10",
+          "seriesName": "测试车系-10",
+          "modelName": "测试车型-10",
+          "vehicleCondition": "测试车况：良好",
+          "exteriorColor": "测试深灰色",
+          "color": "测试深灰色",
+          "interiorColor": "测试黑色"
+        },
+        "carPriceInfo": {
+          "salePrice": 17.6,
+          "purchasePrice": 11.7,
+          "salesPrice": 13.7,
+          "managerPrice": 13.2,
+          "wholesalePrice": 12.7
+        },
+        "carModelParam": {
+          "displacement": "2.0T",
+          "gearbox": "自动",
+          "gearBox": "测试自动"
+        },
+        "operationPhase": "TEST_SALE",
+        "carLicenseInfo": {
+          "licenseStatus": "测试手续正常"
+        }
+      },
+      "pulled_at": "2026-07-13T04:53:45+00:00",
+      "content_hash": "sha256:8dd03d2a7cdaed64f36d5c5745c3e84ae147dd5a68a30814b7537c9dcd50c8d2",
+      "enriched_at": "2026-07-13T06:42:22+00:00",
+      "test_filled_at": "2026-07-13T07:47:11+00:00"
+    },
+    "vehicle_pictures": {
+      "api": "manual.dafengche_shaped_vehicle_pictures",
+      "payload": [],
+      "pulled_at": "2026-07-13T04:53:45+00:00",
+      "content_hash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  },
+  "extensions": {
+    "manual": {
+      "field_provenance": {
+        "source_payloads.vehicle_detail.payload.baseCarInfo.name": {
+          "source": "legacy_v1_migration",
+          "original_path": "data.name",
+          "original_source_type": "test_fixture",
+          "recorded_at": "2026-07-13T04:53:45+00:00"
+        },
+        "source_payloads.vehicle_detail.payload.carPriceInfo.salePrice": {
+          "source": "legacy_v1_migration",
+          "original_path": "data.price",
+          "original_source_type": "test_fixture",
+          "recorded_at": "2026-07-13T04:53:45+00:00"
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.firstLicensePlateDate": {
+          "source": "legacy_v1_snapshot_enrichment",
+          "original_path": "data.specs",
+          "recorded_at": "2026-07-13T06:42:22+00:00",
+          "evidence": "2020年上牌"
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.mileage": {
+          "source": "legacy_v1_snapshot_enrichment",
+          "original_path": "data.specs",
+          "recorded_at": "2026-07-13T06:42:22+00:00",
+          "evidence": "表显7.4万公里"
+        },
+        "source_payloads.vehicle_detail.payload.carModelParam.displacement": {
+          "source": "legacy_v1_snapshot_enrichment",
+          "original_path": "data.specs",
+          "recorded_at": "2026-07-13T06:42:22+00:00",
+          "evidence": "2.0T"
+        },
+        "source_payloads.vehicle_detail.payload.carModelParam.gearbox": {
+          "source": "legacy_v1_snapshot_enrichment",
+          "original_path": "data.specs",
+          "recorded_at": "2026-07-13T06:42:22+00:00",
+          "evidence": "万公里，2.0T自动挡，七座商务MP"
+        },
+        "source_payloads.vehicle_detail.payload.operationPhase": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.carName": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.brandName": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.seriesName": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.modelName": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.vehicleCondition": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.exteriorColor": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.color": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.interiorColor": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.carModelParam.gearBox": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.carPriceInfo.purchasePrice": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.carPriceInfo.salesPrice": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.carPriceInfo.managerPrice": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.carPriceInfo.wholesalePrice": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.carLicenseInfo.licenseStatus": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        }
+      },
+      "test_fixture": {
+        "enabled": true,
+        "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+        "filled_at": "2026-07-13T07:47:11+00:00",
+        "purpose": "wechat_customer_service_field_recognition"
+      }
+    },
+    "compatibility": {
+      "legacy_v1_record": {
+        "schema_version": 1,
+        "category_id": "products",
+        "id": "chejin_gl8_2020_es653t",
+        "status": "active",
+        "source": {
+          "type": "test_fixture",
+          "batch_token": "CHEJIN_20260518_150628"
+        },
+        "data": {
+          "name": "2020款别克GL8 ES陆尊653T豪华型",
+          "sku": "CHEJIN-GL8-2020ES653T",
+          "category": "二手车/MPV",
+          "aliases": [
+            "GL8",
+            "别克GL8",
+            "商务接待",
+            "七座"
+          ],
+          "specs": "2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。",
+          "price": 17.6,
+          "unit": "台",
+          "inventory": 1,
+          "shipping_policy": "商务客户看车、试乘、付款方式均需人工确认。",
+          "warranty_policy": "内饰磨损和保养记录以门店实车与检测报告为准。",
+          "reply_templates": {
+            "recommendation": "适合商务接待、多人家庭和七座刚需客户。"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        },
+        "review_state": {
+          "is_new": false,
+          "new_reason": "newly_added_formal_knowledge",
+          "marked_at": "2026-05-18T15:07:12",
+          "updated_at": "2026-05-19T11:25:17",
+          "read_at": "2026-05-19T11:25:17",
+          "read_by": "admin",
+          "source": {
+            "source_module": "jiangsu_chejin_test",
+            "target_category": "products",
+            "item_id": "chejin_gl8_2020_es653t"
+          }
+        },
+        "metadata": {
+          "created_at": "2026-05-18T15:07:12",
+          "updated_at": "2026-05-19T11:25:17",
+          "created_by": "admin",
+          "updated_by": "admin"
+        }
+      },
+      "migration": {
+        "from_schema_version": 1,
+        "batch_id": "chejin_v1_to_v2_20260713",
+        "migrated_at": "2026-07-13T04:53:45+00:00"
+      },
+      "legacy_snapshot_enrichment": {
+        "batch_id": "chejin_v2_legacy_snapshot_enrichment_20260713",
+        "source": "legacy_v1_snapshot_enrichment",
+        "enriched_at": "2026-07-13T06:45:00+00:00",
+        "field_count": 0,
+        "retired_data_shadow_removed": true
+      }
+    },
+    "wechat_customer_service": {
+      "customer_visible_annotations": {
+        "category": "二手车/MPV",
+        "specs": "2020年上牌，表显7.4万公里，2.0T自动挡，七座商务MPV。",
+        "shipping_policy": "商务客户看车、试乘、付款方式均需人工确认。",
+        "warranty_policy": "内饰磨损和保养记录以门店实车与检测报告为准。",
+        "aliases": [
+          "GL8",
+          "别克GL8",
+          "商务接待",
+          "七座"
+        ]
+      },
+      "manual_annotations": {
+        "sku": "CHEJIN-GL8-2020ES653T",
+        "unit": "台",
+        "inventory": 1,
+        "reply_templates": {
+          "recommendation": "适合商务接待、多人家庭和七座刚需客户。"
+        }
+      },
+      "manual_overrides": {}
     }
   },
   "runtime": {
@@ -32,23 +296,16 @@
     "requires_handoff": false,
     "risk_level": "normal"
   },
-  "review_state": {
-    "is_new": false,
-    "new_reason": "newly_added_formal_knowledge",
-    "marked_at": "2026-05-18T15:07:12",
-    "updated_at": "2026-05-19T11:25:17",
-    "read_at": "2026-05-19T11:25:17",
-    "read_by": "admin",
-    "source": {
-      "source_module": "jiangsu_chejin_test",
-      "target_category": "products",
-      "item_id": "chejin_gl8_2020_es653t"
-    }
-  },
   "metadata": {
     "created_at": "2026-05-18T15:07:12",
-    "updated_at": "2026-05-19T11:25:17",
+    "updated_at": "2026-07-13T15:47:11",
     "created_by": "admin",
-    "updated_by": "admin"
+    "updated_by": "admin",
+    "migrated_from_schema_version": 1,
+    "migration_batch": "chejin_v1_to_v2_20260713",
+    "legacy_snapshot_enriched_at": "2026-07-13T06:45:00+00:00",
+    "legacy_snapshot_enrichment_batch": "chejin_v2_legacy_snapshot_enrichment_20260713",
+    "test_fixture_last_action": "filled",
+    "test_fixture_batch": "chejin_v2_wechat_recognition_test_fields_20260713"
   }
 }

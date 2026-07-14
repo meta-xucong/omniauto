@@ -1,53 +1,173 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "category_id": "products",
   "id": "packing_carton_ct_50",
   "status": "active",
   "source": {
-    "type": "admin_draft",
-    "legacy_target": "product_knowledge",
-    "legacy_migrated_from": "knowledge_bases/products"
-  },
-  "data": {
-    "name": "五层加硬包装纸箱 CT-50",
-    "sku": "packing_carton_ct_50",
-    "category": "包装耗材",
-    "aliases": [
-      "包装纸箱",
-      "纸箱",
-      "CT-50",
-      "五层纸箱",
-      "快递箱",
-      "打包箱",
-      "发货纸箱",
-      "仓库纸箱",
-      "搬家箱",
-      "加硬纸箱",
-      "五层加硬",
-      "包装箱",
-      "发快递的箱子"
-    ],
-    "specs": "50x40x30cm，五层加硬，牛皮纸色",
-    "price": 3.8,
-    "unit": "个",
-    "price_tiers": [
-      {
-        "min_quantity": 1000,
-        "unit_price": 3.4
-      },
-      {
-        "min_quantity": 5000,
-        "unit_price": 3.1
-      }
-    ],
-    "inventory": 8000,
-    "shipping_policy": "常规尺寸现货，24 小时内出库\n满 1000 个包邮，少量按物流实收",
-    "warranty_policy": "耗材类签收后请当场验收，破损短少 24 小时内反馈",
-    "reply_templates": {
-      "discount_policy": "1000 个起 3.4 元/个，5000 个起 3.1 元/个",
-      "notes": "用于测试低客单高数量耗材采购"
+    "type": "manual",
+    "provider": "manual",
+    "marker": {
+      "ingest_channel": "legacy_v1_migration",
+      "original_source_type": "admin_draft",
+      "recorded_at": "2026-07-13T05:11:12+00:00",
+      "migration_batch": "default_v1_to_v2_20260713"
     },
-    "risk_rules": []
+    "binding": {
+      "state": "unbound"
+    }
+  },
+  "source_payloads": {
+    "vehicle_detail": {
+      "api": "manual.dafengche_shaped_vehicle_detail",
+      "payload": {
+        "baseCarInfo": {
+          "name": "五层加硬包装纸箱 CT-50"
+        },
+        "carPriceInfo": {
+          "salePrice": 3.8
+        }
+      },
+      "pulled_at": "2026-07-13T05:11:12+00:00",
+      "content_hash": "sha256:958c2f60a03d73b1c44736352f041c0fb3f7b8a4d20c8b90495030788660c2ab"
+    },
+    "vehicle_pictures": {
+      "api": "manual.dafengche_shaped_vehicle_pictures",
+      "payload": [],
+      "pulled_at": "2026-07-13T05:11:12+00:00",
+      "content_hash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  },
+  "extensions": {
+    "manual": {
+      "field_provenance": {
+        "source_payloads.vehicle_detail.payload.baseCarInfo.name": {
+          "source": "legacy_v1_migration",
+          "original_path": "data.name",
+          "original_source_type": "admin_draft",
+          "recorded_at": "2026-07-13T05:11:12+00:00"
+        },
+        "source_payloads.vehicle_detail.payload.carPriceInfo.salePrice": {
+          "source": "legacy_v1_migration",
+          "original_path": "data.price",
+          "original_source_type": "admin_draft",
+          "recorded_at": "2026-07-13T05:11:12+00:00"
+        }
+      }
+    },
+    "compatibility": {
+      "legacy_v1_record": {
+        "schema_version": 1,
+        "category_id": "products",
+        "id": "packing_carton_ct_50",
+        "status": "active",
+        "source": {
+          "type": "admin_draft",
+          "legacy_target": "product_knowledge",
+          "legacy_migrated_from": "knowledge_bases/products"
+        },
+        "data": {
+          "name": "五层加硬包装纸箱 CT-50",
+          "sku": "packing_carton_ct_50",
+          "category": "包装耗材",
+          "aliases": [
+            "包装纸箱",
+            "纸箱",
+            "CT-50",
+            "五层纸箱",
+            "快递箱",
+            "打包箱",
+            "发货纸箱",
+            "仓库纸箱",
+            "搬家箱",
+            "加硬纸箱",
+            "五层加硬",
+            "包装箱",
+            "发快递的箱子"
+          ],
+          "specs": "50x40x30cm，五层加硬，牛皮纸色",
+          "price": 3.8,
+          "unit": "个",
+          "price_tiers": [
+            {
+              "min_quantity": 1000,
+              "unit_price": 3.4
+            },
+            {
+              "min_quantity": 5000,
+              "unit_price": 3.1
+            }
+          ],
+          "inventory": 8000,
+          "shipping_policy": "常规尺寸现货，24 小时内出库\n满 1000 个包邮，少量按物流实收",
+          "warranty_policy": "耗材类签收后请当场验收，破损短少 24 小时内反馈",
+          "reply_templates": {
+            "discount_policy": "1000 个起 3.4 元/个，5000 个起 3.1 元/个",
+            "notes": "用于测试低客单高数量耗材采购"
+          },
+          "risk_rules": []
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        },
+        "metadata": {
+          "created_at": "2026-04-26T23:15:06",
+          "updated_at": "2026-05-16T22:51:06",
+          "created_by": "admin",
+          "updated_by": "admin"
+        }
+      },
+      "input_adapter": "generic_product_form_to_manual_v2",
+      "migration": {
+        "from_schema_version": 1,
+        "batch_id": "default_v1_to_v2_20260713",
+        "migrated_at": "2026-07-13T05:11:12+00:00"
+      }
+    },
+    "wechat_customer_service": {
+      "customer_visible_annotations": {
+        "category": "包装耗材",
+        "specs": "50x40x30cm，五层加硬，牛皮纸色",
+        "shipping_policy": "常规尺寸现货，24 小时内出库\n满 1000 个包邮，少量按物流实收",
+        "warranty_policy": "耗材类签收后请当场验收，破损短少 24 小时内反馈",
+        "aliases": [
+          "包装纸箱",
+          "纸箱",
+          "CT-50",
+          "五层纸箱",
+          "快递箱",
+          "打包箱",
+          "发货纸箱",
+          "仓库纸箱",
+          "搬家箱",
+          "加硬纸箱",
+          "五层加硬",
+          "包装箱",
+          "发快递的箱子"
+        ]
+      },
+      "manual_annotations": {
+        "sku": "packing_carton_ct_50",
+        "unit": "个",
+        "inventory": 8000,
+        "price_tiers": [
+          {
+            "min_quantity": 1000,
+            "unit_price": 3.4
+          },
+          {
+            "min_quantity": 5000,
+            "unit_price": 3.1
+          }
+        ],
+        "reply_templates": {
+          "discount_policy": "1000 个起 3.4 元/个，5000 个起 3.1 元/个",
+          "notes": "用于测试低客单高数量耗材采购"
+        }
+      },
+      "manual_overrides": {}
+    }
   },
   "runtime": {
     "allow_auto_reply": true,
@@ -56,8 +176,10 @@
   },
   "metadata": {
     "created_at": "2026-04-26T23:15:06",
-    "updated_at": "2026-05-16T22:51:06",
+    "updated_at": "2026-07-13T13:11:12",
     "created_by": "admin",
-    "updated_by": "admin"
+    "updated_by": "admin",
+    "migrated_from_schema_version": 1,
+    "migration_batch": "default_v1_to_v2_20260713"
   }
 }

@@ -25,6 +25,35 @@ Do not casually rename existing variables, constants, CLI commands, route names,
 - Before any approved rename, update compatibility tests, documentation, and downstream references in the same change.
 - If a name looks wrong or misleading, document the issue and propose a migration instead of silently changing it.
 
+## External Contract Freeze And Optional Module Isolation (Required)
+
+This repository is consumed by external developers. Treat every value that can cross a module, process, plugin, CLI, HTTP, file, or import boundary as a frozen compatibility contract unless the repository owner explicitly approves a migration.
+
+- Frozen contracts include exported variable/constant/class/function names, import paths, function signatures, positional/keyword argument names, return-object keys, JSON fields, event names, state-file paths and shapes, configuration keys, environment variables, CLI commands/options, HTTP routes, connector methods, artifact names, error codes, default values, nullability, and externally observable semantics.
+- Internal refactors must preserve the existing external name, type, meaning, default, optionality, and error behavior. Keep a facade, wrapper, re-export, alias, or adapter at the old boundary when moving implementation code.
+- Do not move or rename a public symbol and require downstream callers to update. Unknown external consumers must be assumed to exist.
+- Additive extensions must be optional and backward compatible. Existing callers that do not send, read, or understand the new field/module must continue to work unchanged.
+- Any unavoidable breaking change requires the repository owner's explicit approval of the exact old contract, new contract, compatibility window, migration adapter, downstream impact, and removal date. Documentation and contract tests must land before the breaking implementation.
+- Before a large internal refactor, inventory the affected boundary and add characterization/contract tests. After the refactor, run the same tests against the old import path and external payload shape.
+- State-format changes must keep backward readers or an idempotent migration. Never silently reinterpret an existing field.
+
+For `apps/wechat_ai_customer_service`, voice and image-understanding capabilities are strictly independent optional plugin domains:
+
+- Voice and image-understanding implementations must live in separate modules/packages, have separate configuration, dependencies, lifecycle, enablement, failure handling, and tests, and must never import each other's implementation.
+- The core program may expose a small neutral plugin protocol/registry that has no voice, vision, model-provider, OCR, clipboard, image, audio, or other optional dependency. Sharing that protocol does not make the implementations one module.
+- The core must not import an optional voice or image implementation at module-import time. Discovery and loading must be lazy, capability-based, and absence-safe.
+- Core-only, core+voice, core+image, core+both, custom-voice, custom-image, and missing-optional-dependency configurations must all remain valid. Absence or failure of one plugin must not disable the core or the other plugin.
+- Third-party developers must be able to mount their own voice or image plugin without importing the bundled counterpart or changing existing inter-module payload fields.
+- Plugins may enrich existing message/context fields through compatibility adapters, but they must not rename shared fields, change Brain contracts, own scheduler state, or author customer-visible replies.
+- The scheduler and Brain bridge may depend only on the neutral plugin contract and existing compatibility payloads, never on a concrete voice/vision provider implementation.
+
+Within those boundaries, internal cleanup is encouraged: split oversized files, extract pure helpers, isolate state transitions, remove verified-dead private code, and improve naming inside private modules. Prefer a compatibility facade plus small cohesive internal modules over a framework rewrite.
+
+All future WeChat customer-service architecture or refactor documents must reference both:
+
+- `apps/wechat_ai_customer_service/docs/customer_visible_reply_ownership_baseline.md`
+- `apps/wechat_ai_customer_service/docs/customer_service_external_contract_and_optional_plugin_baseline.md`
+
 ## WeChat Cloud Simulation Baseline (Required)
 
 For `apps/wechat_ai_customer_service`, the test environment has an approved local cloud simulation mode:
@@ -68,6 +97,26 @@ Documentation rule: every future customer-service development document must refe
 - OCR or RPA speaker labels such as contact names, group sender names, and chat titles are metadata, not customer message content. Apply this rule consistently to both WeChat AI customer service and AI smart recorder flows.
 - When modifying reply logic, include tests for short greetings, explicit product questions, fuzzy names/typos, context follow-ups, customer objections, off-topic friendly redirection, authority-source conflicts, and multi-session no-cross-send behavior.
 - If a change touches cloud gate or live startup, use the local cloud simulation baseline above before reporting a cloud authorization failure as a product defect.
+
+## Dafengche Product Master Mirror Baseline (Required)
+
+For `apps/wechat_ai_customer_service`, when the tenant uses 大风车 (Dafengche) as its vehicle source of truth, the product master must follow the rules below.
+
+- Treat the response fields of every officially authorized Dafengche API as the authoritative vehicle-data contract. Preserve their original field names, nesting, types, meanings, and nullability; do not silently translate them into a competing local vehicle schema.
+- Store the complete authorized source payload with provider, API name/version, `shopCode`, `carId` when present, pull timestamp, and content hash. Unknown future fields must remain retained and readable even before the application adds a first-class view for them.
+- Every vehicle record must have the additive `source.marker` provenance contract. At minimum retain `ingest_channel`, `original_source_type`, and `recorded_at`: official mirror pulls use `dafengche_api`, normal manual entry uses `manual_input`, and a converted historical record uses `legacy_v1_migration` rather than being misrepresented as an API pull. Preserve this marker on subsequent updates and use it for audit/reconciliation only, never as a customer-visible claim.
+- Local data may add only additive, source-neutral operational metadata or extensions that Dafengche does not provide: source binding, sync status/freshness, audit history, explicit manual overrides, customer-display policy, retrieval indexes, and manual marketing annotations. Extensions must not rename, reinterpret, or overwrite a Dafengche field invisibly.
+- A manually added vehicle must use the same Dafengche-shaped vehicle payload contract where applicable, be explicitly marked as unbound/manual, and keep its manual provenance per field. A later Dafengche binding requires an explicit, auditable operator confirmation; it must never result from an unchecked fuzzy match.
+- For a bound vehicle, Dafengche is authoritative for overlapping vehicle facts, including identity, inventory/business phase, model facts, condition, mileage, images, and prices. A manual override must be explicit, scoped to a field, attributable, reviewable, and removable; it must never become the new silent default source.
+- Current generic or test product-master records must not be fabricated into Dafengche records. V1 is a migration input only: never persist, list, resolve, or send it into runtime/Brain evidence. Convert it idempotently and audibly into an unbound V2 manual vehicle with a full internal snapshot and `legacy_v1_migration` marker. A compatibility facade may emit a transient old-shaped projection for frozen callers, but must not re-enable V1 storage or fallback reads.
+- Maintain a field-path policy separate from the source payload. Only data explicitly classified as customer-visible and fresh enough may enter the Brain evidence pack. VINs, license plates, internal identities, purchase prices, sales floors, manager floors, wholesale prices, and any other restricted fields must remain unavailable to Brain and customer-visible replies by default.
+- The database, sync worker, evidence builder, guards, and final polish are data/control layers only. They may supply authorized facts, freshness, provenance, and review feedback but must not author customer-visible wording; `customer_service_brain` remains the sole reply author.
+- The documented Dafengche interfaces currently cover shop, vehicle-ID listing, vehicle detail, and vehicle pictures. Do not claim or scrape CRM, customer, lead, or chat data merely because it appears in the Dafengche UI. Add those domains only through separately authorized official APIs, exports, or webhooks and isolate customer PII from vehicle records.
+- Sync must be read-only until an official write interface is separately approved. Respect per-environment IP allowlists, API permissions, signing freshness, quotas, and source scope. A failed or stale sync must not be represented as a current in-stock fact.
+- Every Dafengche product-master change requires contract tests for raw-payload retention, source-field preservation, manual-extension isolation, customer-visible field filtering, stale-data behavior, and multi-shop/session isolation.
+- Implement the Dafengche mirror as a host-neutral, independently portable core package. Its only dependencies may be declared domain ports (repository, HTTP transport, secret/config provider, clock/lease, tenant/shop scope resolver, and field-policy provider); it must not import the WeChat Brain, scheduler, RPA/OCR adapters, admin API, or this application's path/storage globals. Put this application's filesystem/PostgreSQL, tenant-path, scheduler, and admin-console bindings in thin integration adapters outside that portable core.
+- A Dafengche integration may change only the product-master implementation behind the existing facade and the single product-evidence query seam. It must preserve all existing `ProductMasterStore` public paths/methods, the outer Brain evidence contract, and the RPA reply/send/session/scheduling contracts. `customer_service_brain`, `listen_and_reply`, scheduler/send code, and physical WeChat adapters must neither parse Dafengche fields nor call Dafengche APIs.
+- The product evidence path must read the local mirror only; it must never put live upstream API access on the customer-message or RPA send path. Add portability and boundary tests that load the core with an in-memory host, assert its forbidden-import boundary, and replay unchanged Brain/RPA contract fixtures.
 
 ## Local Test Secrets Policy (Project-Specific Override)
 

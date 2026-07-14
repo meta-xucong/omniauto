@@ -25,7 +25,7 @@ import sys
 import threading
 import time
 import unicodedata
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
@@ -80,7 +80,16 @@ from customer_service_conversation_strategy import (
     update_conversation_interaction_state_on_capture,
     update_conversation_strategy_state,
 )
-from customer_image_turn_router import maybe_route_customer_image_turn
+from apps.wechat_ai_customer_service.optional_plugins.voice.compatibility import (
+    legacy_attach_voice_transcription_audit,
+    legacy_auto_voice_transcription_settings,
+    legacy_maybe_auto_transcribe_voice_messages,
+    legacy_voice_transcription_trigger,
+)
+from apps.wechat_ai_customer_service.optional_plugins.vision.compatibility import (
+    legacy_maybe_capture_self_image_context,
+    legacy_maybe_route_customer_image_turn,
+)
 from product_knowledge import decide_product_knowledge_reply, load_product_knowledge
 from rag_answer_layer import maybe_build_rag_reply
 from rag_experience_store import record_rag_reply_experience
@@ -273,6 +282,7 @@ class TargetConfig:
     allow_self_for_test: bool
     max_batch_messages: int
     session_key: str = ""
+    conversation_type: str = "unknown"
 
 
 @dataclass(frozen=True)
@@ -514,14 +524,19 @@ def run_workflow(args: argparse.Namespace) -> dict[str, Any]:
                 require_unread_badge_for_dispatch=bool(multi_target_cfg.get("require_unread_badge_for_dispatch", False)),
                 require_preview_signal_with_unread_badge=bool(multi_target_cfg.get("require_preview_signal_with_unread_badge", False)),
             )
-        previous_active_names: set[str] = set()
+        previous_active_identity_keys: set[str] = set()
 
         for iteration in range(iterations):
             iteration_events = []
             if use_multi_target and session_monitor is not None:
                 active = session_monitor.poll(connector)
                 active_names = {str(item.name) for item in active if str(getattr(item, "name", "") or "")}
-                if active and active_names != previous_active_names:
+                active_identity_keys = {
+                    active_target_identity_key(item)
+                    for item in active
+                    if str(getattr(item, "name", "") or "").strip()
+                }
+                if active and active_identity_keys != previous_active_identity_keys:
                     warmup_delay = multi_target_change_warmup_delay_seconds(multi_target_cfg)
                     if warmup_delay > 0:
                         write_workflow_phase(
@@ -534,12 +549,17 @@ def run_workflow(args: argparse.Namespace) -> dict[str, Any]:
                         refreshed_active = session_monitor.poll(connector)
                         active = coalesce_active_targets(active, refreshed_active)
                         active_names = {str(item.name) for item in active if str(getattr(item, "name", "") or "")}
+                        active_identity_keys = {
+                            active_target_identity_key(item)
+                            for item in active
+                            if str(getattr(item, "name", "") or "").strip()
+                        }
                         write_workflow_phase(
                             "session_change_warmup_done",
                             iteration=iteration + 1,
                             active_targets=sorted(active_names),
                         )
-                previous_active_names = active_names
+                previous_active_identity_keys = active_identity_keys
                 dynamic_targets = build_iteration_targets(
                     config_targets=targets,
                     active_targets=active,
@@ -678,21 +698,18 @@ def _enqueue_post_reply_work(
 
 
 def auto_voice_transcription_settings(config: dict[str, Any]) -> dict[str, Any]:
-    raw = config.get("voice_transcription") if isinstance(config.get("voice_transcription"), dict) else {}
-    env_value = os.getenv("WECHAT_AUTO_VOICE_TRANSCRIBE")
-    enabled = raw.get("enabled", True)
-    if env_value is not None and env_value.strip():
-        enabled = env_value.strip().lower() in {"1", "true", "yes", "on"}
-    try:
-        max_attempts = int(os.getenv("WECHAT_AUTO_VOICE_TRANSCRIBE_MAX_ATTEMPTS") or raw.get("max_attempts") or 4)
-    except (TypeError, ValueError):
-        max_attempts = 4
-    artifact_dir = str(raw.get("artifact_dir") or os.getenv("WECHAT_AUTO_VOICE_TRANSCRIBE_ARTIFACT_DIR") or "").strip()
-    return {
-        "enabled": bool(enabled),
-        "max_attempts": max(1, min(max_attempts, 8)),
-        "artifact_dir": artifact_dir,
-    }
+    return legacy_auto_voice_transcription_settings(config)
+
+
+def voice_transcription_trigger(
+    payload: dict[str, Any] | None,
+    *,
+    pending_signal_kind: str = "",
+) -> dict[str, Any]:
+    return legacy_voice_transcription_trigger(
+        payload,
+        pending_signal_kind=pending_signal_kind,
+    )
 
 
 def maybe_auto_transcribe_voice_messages(
@@ -701,43 +718,63 @@ def maybe_auto_transcribe_voice_messages(
     target: TargetConfig,
     config: dict[str, Any],
     console_settings: dict[str, Any],
+    conversation_type: str = "",
+    pending_signal_kind: str = "",
 ) -> dict[str, Any]:
-    settings = auto_voice_transcription_settings(config)
-    if not settings.get("enabled"):
-        return {"attempted": False, "enabled": False, "reason": "voice_transcription_disabled"}
-    if console_settings.get("enabled") is False:
-        return {"attempted": False, "enabled": True, "reason": "customer_service_disabled"}
-    transcribe = getattr(connector, "transcribe_voice_messages", None)
-    if not callable(transcribe):
-        return {"attempted": False, "enabled": True, "reason": "connector_voice_transcription_not_supported"}
-    try:
-        result = transcribe(
-            target.name,
-            exact=target.exact,
-            session_key=str(getattr(target, "session_key", "") or ""),
-            max_attempts=int(settings.get("max_attempts") or 4),
-            artifact_dir=str(settings.get("artifact_dir") or "") or None,
-        )
-    except Exception as exc:
-        return {
-            "attempted": True,
-            "enabled": True,
-            "ok": False,
-            "state": "voice_transcription_exception",
-            "error": repr(exc),
-        }
-    if isinstance(result, dict):
-        result = dict(result)
-        result["attempted"] = True
-        result["enabled"] = True
-        return result
-    return {"attempted": True, "enabled": True, "ok": False, "state": "voice_transcription_invalid_result"}
+    return legacy_maybe_auto_transcribe_voice_messages(
+        connector=connector,
+        target=target,
+        config=config,
+        console_settings=console_settings,
+        conversation_type=conversation_type,
+        pending_signal_kind=pending_signal_kind,
+    )
 
 
 def attach_voice_transcription_audit(payload: dict[str, Any], voice_transcription: dict[str, Any]) -> dict[str, Any]:
-    if isinstance(payload, dict) and voice_transcription and voice_transcription.get("attempted"):
-        payload["voice_transcription"] = voice_transcription
-    return payload
+    return legacy_attach_voice_transcription_audit(payload, voice_transcription)
+
+
+def maybe_route_customer_image_turn(
+    *,
+    connector: Any,
+    target: Any,
+    config: dict[str, Any],
+    payload: dict[str, Any],
+    target_state: dict[str, Any],
+    batch: list[dict[str, Any]],
+    combined: str,
+) -> dict[str, Any]:
+    return legacy_maybe_route_customer_image_turn(
+        connector=connector,
+        target=target,
+        config=config,
+        payload=payload,
+        target_state=target_state,
+        batch=batch,
+        combined=combined,
+    )
+
+
+def maybe_capture_self_image_context(
+    *,
+    connector: Any,
+    target: Any,
+    config: dict[str, Any],
+    messages: list[dict[str, Any]],
+    target_state: dict[str, Any],
+    combined: str = "",
+) -> dict[str, Any]:
+    """Optional visual context enrichment for a self-side image, without reply authority."""
+
+    return legacy_maybe_capture_self_image_context(
+        connector=connector,
+        target=target,
+        config=config,
+        messages=messages,
+        target_state=target_state,
+        combined=combined,
+    )
 
 
 def process_target(
@@ -766,28 +803,12 @@ def process_target(
         target_state["_session_key"] = target_state_key
         target_state["_display_name"] = target.name
     console_settings = config.get("_local_customer_service_settings", {}) or {}
-    write_workflow_phase("voice_transcription_start", target=target.name)
-    voice_transcription = maybe_auto_transcribe_voice_messages(
-        connector=connector,
-        target=target,
-        config=config,
-        console_settings=console_settings,
-    )
-    write_workflow_phase(
-        "voice_transcription_done",
-        target=target.name,
-        attempted=bool(voice_transcription.get("attempted")),
-        ok=bool(voice_transcription.get("ok")) if voice_transcription.get("attempted") else None,
-        state=voice_transcription.get("state"),
-        transcribed_messages_count=voice_transcription.get("transcribed_messages_count"),
-    )
     write_workflow_phase("target_get_messages_start", target=target.name, send=bool(send))
     payload = connector.get_messages(
         target.name,
         exact=target.exact,
         session_key=str(getattr(target, "session_key", "") or ""),
     )
-    attach_voice_transcription_audit(payload, voice_transcription)
     write_workflow_phase(
         "target_get_messages_done",
         target=target.name,
@@ -795,7 +816,57 @@ def process_target(
         message_count=len(payload.get("messages") or []),
     )
     if not payload.get("ok"):
-        return base_event(target, "error", {"messages": payload, "voice_transcription": voice_transcription})
+        return base_event(target, "error", {"messages": payload, "voice_transcription": {"attempted": False, "state": "voice_transcription_not_started"}})
+
+    voice_transcription = {
+        "attempted": False,
+        "enabled": True,
+        "ok": True,
+        "state": "voice_transcription_not_started",
+    }
+    voice_trigger = voice_transcription_trigger(payload)
+    voice_transcription["trigger"] = voice_trigger
+    if voice_trigger.get("should_run"):
+        write_workflow_phase("voice_transcription_start", target=target.name, trigger=voice_trigger)
+        voice_transcription = maybe_auto_transcribe_voice_messages(
+            connector=connector,
+            target=target,
+            config=config,
+            console_settings=console_settings,
+        )
+        voice_transcription["trigger"] = voice_trigger
+        if int(voice_transcription.get("transcribed_messages_count") or 0) > 0:
+            refreshed_payload = connector.get_messages(
+                target.name,
+                exact=target.exact,
+                session_key=str(getattr(target, "session_key", "") or ""),
+            )
+            if refreshed_payload.get("ok"):
+                payload = refreshed_payload
+                voice_transcription["message_refresh"] = {"ok": True, "reason": "transcription_visible_after_rpa"}
+            else:
+                voice_transcription["message_refresh"] = {
+                    "ok": False,
+                    "reason": "transcription_refresh_failed_capture_preserved",
+                    "state": refreshed_payload.get("state"),
+                    "error": refreshed_payload.get("error"),
+                }
+        write_workflow_phase(
+            "voice_transcription_done",
+            target=target.name,
+            attempted=bool(voice_transcription.get("attempted")),
+            ok=bool(voice_transcription.get("ok")) if voice_transcription.get("attempted") else None,
+            state=voice_transcription.get("state"),
+            transcribed_messages_count=voice_transcription.get("transcribed_messages_count"),
+        )
+    else:
+        voice_transcription.update(
+            {
+                "state": "voice_transcription_skipped_no_evidence",
+                "reason": str(voice_trigger.get("reason") or "no_voice_evidence_in_capture"),
+            }
+        )
+    attach_voice_transcription_audit(payload, voice_transcription)
     if console_settings.get("enabled") is False:
         raw_capture = maybe_record_raw_messages(target, config, payload.get("messages", []) or [])
         attach_voice_transcription_audit(raw_capture, voice_transcription)
@@ -2375,6 +2446,7 @@ def handle_rate_limit_block(
         notice_text,
         exact=target.exact,
         session_key=str(getattr(target, "session_key", "") or ""),
+        conversation_type=str(getattr(target, "conversation_type", "") or ""),
     )
     event["rate_limit_notice"] = {
         "reply_text": notice_text,
@@ -2903,10 +2975,12 @@ def continuation_prevalidated_guard_from_send_result(
         return None
     clean_target = str(getattr(target, "name", "") or "").strip()
     clean_session_key = str(getattr(target, "session_key", "") or "").strip()
+    clean_conversation_type = str(getattr(target, "conversation_type", "") or "").strip().lower()
     return {
         "target": clean_target,
         "exact": bool(getattr(target, "exact", True)),
         "session_key": clean_session_key,
+        "conversation_type": clean_conversation_type,
         "created_at": time.time(),
         "guard": {
             "ok": True,
@@ -2952,6 +3026,7 @@ def send_reply_with_optional_multi_bubble(
                 segments[0],
                 exact=target.exact,
                 session_key=str(getattr(target, "session_key", "") or ""),
+                conversation_type=str(getattr(target, "conversation_type", "") or ""),
             )
             single = dict(attempt_result) if isinstance(attempt_result, dict) else {"ok": False, "verified": False}
             verified = bool(single.get("verified"))
@@ -3023,6 +3098,7 @@ def send_reply_with_optional_multi_bubble(
                     "exact": target.exact,
                     "skip_send_rate_guard": skip_segment_rate_guard,
                     "session_key": str(getattr(target, "session_key", "") or ""),
+                    "conversation_type": str(getattr(target, "conversation_type", "") or ""),
                 }
                 if continuation_fast_path and isinstance(continuation_prevalidated_guard, dict):
                     continuation_send_kwargs["continuation_prevalidated_guard"] = continuation_prevalidated_guard
@@ -4607,11 +4683,13 @@ def adopt_customer_service_brain_reply_event(
         "mode": brain_result.get("mode"),
         "rule_name": decision.rule_name,
         "reason": decision.reason,
+        "brain_quality_review": brain_result.get("brain_quality_review", {}),
     }
     event["decision"] = {
         **decision.__dict__,
         "raw_reply_text": decision.reply_text,
         "reply_text": reply_text,
+        "brain_quality_review": brain_result.get("brain_quality_review", {}),
     }
     return decision, reply_text
 
@@ -5837,9 +5915,18 @@ def maybe_analyze_intent(
     suggested_reply = str(payload.get("suggested_reply") or "")
     payload["would_change_reply"] = bool(suggested_reply and suggested_reply not in reply_text)
 
-    # Run LLM advisory in background so it never blocks the customer reply path.
+    # Brain First already performs the authoritative intent/reply reasoning. Keep
+    # the heuristic evidence summary, but avoid a second synchronous LLM pass.
     llm_settings = settings.get("llm_advisory", {}) or {}
-    if llm_settings.get("enabled") and str(llm_settings.get("provider") or "") == "deepseek":
+    if llm_settings.get("enabled") and brain_first_requires_brain_owned_visible_reply(config):
+        payload["llm_advisory"] = {
+            "enabled": True,
+            "skipped": True,
+            "advisory_only": True,
+            "reason": "skipped_for_brain_first_single_reasoner",
+            "provider": resolve_effective_llm_provider(llm_settings.get("provider") or "manual_json"),
+        }
+    elif llm_settings.get("enabled") and str(llm_settings.get("provider") or "") == "deepseek":
         def _background_advisory(
             settings_param: dict[str, Any],
             combined_param: str,
@@ -9792,25 +9879,53 @@ def build_iteration_targets(
     ordered: list[TargetConfig] = []
     seen: set[str] = set()
     blocked = blocked_names or set()
+    active_identity_names: set[str] = set()
 
     def push(target: TargetConfig) -> None:
         if target.name in blocked:
             return
-        if target.name in seen:
+        if (
+            target.name in active_identity_names
+            and not str(getattr(target, "session_key", "") or "").strip()
+            and str(getattr(target, "conversation_type", "unknown") or "unknown").strip().lower() == "unknown"
+        ):
             return
-        seen.add(target.name)
+        identity_key = active_target_identity_key(target)
+        if identity_key in seen:
+            return
+        seen.add(identity_key)
         ordered.append(target)
+
+    def configured_target_for_active(item: Any, base: TargetConfig) -> TargetConfig:
+        session_key = str(getattr(item, "session_key", "") or "").strip()
+        conversation_type = str(getattr(item, "conversation_type", "") or "").strip().lower()
+        if not session_key and not conversation_type:
+            return base
+        return replace(
+            base,
+            session_key=session_key or str(getattr(base, "session_key", "") or ""),
+            conversation_type=conversation_type or str(getattr(base, "conversation_type", "unknown") or "unknown"),
+        )
 
     active_candidates = list(active_targets or [])
     if active_limit > 0:
         active_candidates = active_candidates[:active_limit]
+    active_identity_names = {
+        str(getattr(item, "name", "") or "").strip()
+        for item in active_candidates
+        if str(getattr(item, "name", "") or "").strip()
+        and (
+            str(getattr(item, "session_key", "") or "").strip()
+            or str(getattr(item, "conversation_type", "unknown") or "unknown").strip().lower() != "unknown"
+        )
+    }
 
     if prioritize_active:
         for item in active_candidates:
             name = str(getattr(item, "name", "") or "")
             base = config_by_name.get(name)
             if base is not None:
-                push(base)
+                push(configured_target_for_active(item, base))
                 continue
             if allow_dynamic_active_targets and name and name not in blocked:
                 push(
@@ -9820,6 +9935,8 @@ def build_iteration_targets(
                         exact=True,
                         allow_self_for_test=False,
                         max_batch_messages=max(1, dynamic_max_batch),
+                        session_key=str(getattr(item, "session_key", "") or ""),
+                        conversation_type=str(getattr(item, "conversation_type", "") or "unknown"),
                     )
                 )
 
@@ -9831,7 +9948,7 @@ def build_iteration_targets(
             name = str(getattr(item, "name", "") or "")
             base = config_by_name.get(name)
             if base is not None:
-                push(base)
+                push(configured_target_for_active(item, base))
                 continue
             if allow_dynamic_active_targets and name and name not in blocked:
                 push(
@@ -9841,6 +9958,8 @@ def build_iteration_targets(
                         exact=True,
                         allow_self_for_test=False,
                         max_batch_messages=max(1, dynamic_max_batch),
+                        session_key=str(getattr(item, "session_key", "") or ""),
+                        conversation_type=str(getattr(item, "conversation_type", "") or "unknown"),
                     )
                 )
 
@@ -9878,9 +9997,19 @@ def multi_target_change_warmup_delay_seconds(multi_target_cfg: dict[str, Any] | 
     return random.uniform(min_seconds, max_seconds)
 
 
+def active_target_identity_key(item: Any) -> str:
+    """Return a stable identity key without collapsing same-name sessions."""
+    session_key = str(getattr(item, "session_key", "") or "").strip()
+    if session_key:
+        return f"session:{session_key}"
+    name = str(getattr(item, "name", "") or "").strip()
+    conversation_type = str(getattr(item, "conversation_type", "") or "unknown").strip().lower() or "unknown"
+    return f"name:{name}\0type:{conversation_type}"
+
+
 def coalesce_active_targets(*target_groups: list[Any]) -> list[Any]:
     """Merge active target polls while preserving priority and first-seen order."""
-    by_name: dict[str, Any] = {}
+    by_identity: dict[str, Any] = {}
     order: dict[str, int] = {}
     counter = 0
     for group in target_groups:
@@ -9888,25 +10017,26 @@ def coalesce_active_targets(*target_groups: list[Any]) -> list[Any]:
             name = str(getattr(item, "name", "") or "").strip()
             if not name:
                 continue
-            if name not in order:
-                order[name] = counter
+            identity_key = active_target_identity_key(item)
+            if identity_key not in order:
+                order[identity_key] = counter
                 counter += 1
-            existing = by_name.get(name)
+            existing = by_identity.get(identity_key)
             if existing is None:
-                by_name[name] = item
+                by_identity[identity_key] = item
                 continue
             current_score = int(getattr(item, "priority_score", 0) or 0)
             existing_score = int(getattr(existing, "priority_score", 0) or 0)
             current_age = int(getattr(item, "session_age_seconds", 0) or 0)
             existing_age = int(getattr(existing, "session_age_seconds", 0) or 0)
             if (current_score, current_age) > (existing_score, existing_age):
-                by_name[name] = item
+                by_identity[identity_key] = item
     return sorted(
-        by_name.values(),
+        by_identity.values(),
         key=lambda item: (
             -int(getattr(item, "priority_score", 0) or 0),
             -int(getattr(item, "session_age_seconds", 0) or 0),
-            order.get(str(getattr(item, "name", "") or ""), 0),
+            order.get(active_target_identity_key(item), 0),
         ),
     )
 

@@ -1,28 +1,124 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "category_id": "products",
   "id": "test_cargo",
   "status": "archived",
   "source": {
-    "type": "admin_form",
-    "legacy_migrated_from": "knowledge_bases/products"
+    "type": "manual",
+    "provider": "manual",
+    "marker": {
+      "ingest_channel": "legacy_v1_migration",
+      "original_source_type": "admin_form",
+      "recorded_at": "2026-07-13T05:11:12+00:00",
+      "migration_batch": "default_v1_to_v2_20260713"
+    },
+    "binding": {
+      "state": "unbound"
+    }
   },
-  "data": {
-    "name": "人工添加的测试品1",
-    "sku": "t0001",
-    "category": "测试类目",
-    "aliases": [
-      "人工测试、测试"
-    ],
-    "specs": "100克，20*30*40CM",
-    "price": 211,
-    "unit": "个",
-    "price_tiers": [],
-    "inventory": 11,
-    "shipping_policy": "默认顺丰快递，江浙沪包邮，偏远地区邮费参照模版",
-    "warranty_policy": "1年质保",
-    "reply_templates": "",
-    "risk_rules": []
+  "source_payloads": {
+    "vehicle_detail": {
+      "api": "manual.dafengche_shaped_vehicle_detail",
+      "payload": {
+        "baseCarInfo": {
+          "name": "人工添加的测试品1"
+        },
+        "carPriceInfo": {
+          "salePrice": 211
+        }
+      },
+      "pulled_at": "2026-07-13T05:11:12+00:00",
+      "content_hash": "sha256:4fc267df16abf1088c092c7254b99fee772d763192a51b4f2137de8b407895d7"
+    },
+    "vehicle_pictures": {
+      "api": "manual.dafengche_shaped_vehicle_pictures",
+      "payload": [],
+      "pulled_at": "2026-07-13T05:11:12+00:00",
+      "content_hash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  },
+  "extensions": {
+    "manual": {
+      "field_provenance": {
+        "source_payloads.vehicle_detail.payload.baseCarInfo.name": {
+          "source": "legacy_v1_migration",
+          "original_path": "data.name",
+          "original_source_type": "admin_form",
+          "recorded_at": "2026-07-13T05:11:12+00:00"
+        },
+        "source_payloads.vehicle_detail.payload.carPriceInfo.salePrice": {
+          "source": "legacy_v1_migration",
+          "original_path": "data.price",
+          "original_source_type": "admin_form",
+          "recorded_at": "2026-07-13T05:11:12+00:00"
+        }
+      }
+    },
+    "compatibility": {
+      "legacy_v1_record": {
+        "schema_version": 1,
+        "category_id": "products",
+        "id": "test_cargo",
+        "status": "archived",
+        "source": {
+          "type": "admin_form",
+          "legacy_migrated_from": "knowledge_bases/products"
+        },
+        "data": {
+          "name": "人工添加的测试品1",
+          "sku": "t0001",
+          "category": "测试类目",
+          "aliases": [
+            "人工测试、测试"
+          ],
+          "specs": "100克，20*30*40CM",
+          "price": 211,
+          "unit": "个",
+          "price_tiers": [],
+          "inventory": 11,
+          "shipping_policy": "默认顺丰快递，江浙沪包邮，偏远地区邮费参照模版",
+          "warranty_policy": "1年质保",
+          "reply_templates": "",
+          "risk_rules": []
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        },
+        "metadata": {
+          "created_at": "2026-04-26T19:07:18",
+          "updated_at": "2026-05-16T22:51:06",
+          "created_by": "admin",
+          "updated_by": "admin"
+        }
+      },
+      "input_adapter": "generic_product_form_to_manual_v2",
+      "migration": {
+        "from_schema_version": 1,
+        "batch_id": "default_v1_to_v2_20260713",
+        "migrated_at": "2026-07-13T05:11:12+00:00"
+      }
+    },
+    "wechat_customer_service": {
+      "customer_visible_annotations": {
+        "category": "测试类目",
+        "specs": "100克，20*30*40CM",
+        "shipping_policy": "默认顺丰快递，江浙沪包邮，偏远地区邮费参照模版",
+        "warranty_policy": "1年质保",
+        "aliases": [
+          "人工测试、测试"
+        ]
+      },
+      "manual_annotations": {
+        "sku": "t0001",
+        "unit": "个",
+        "inventory": 11,
+        "price_tiers": [],
+        "reply_templates": ""
+      },
+      "manual_overrides": {}
+    }
   },
   "runtime": {
     "allow_auto_reply": true,
@@ -31,8 +127,10 @@
   },
   "metadata": {
     "created_at": "2026-04-26T19:07:18",
-    "updated_at": "2026-05-16T22:51:06",
+    "updated_at": "2026-07-13T13:11:12",
     "created_by": "admin",
-    "updated_by": "admin"
+    "updated_by": "admin",
+    "migrated_from_schema_version": 1,
+    "migration_batch": "default_v1_to_v2_20260713"
   }
 }

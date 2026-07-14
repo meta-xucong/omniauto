@@ -24,9 +24,10 @@ SECRET_KEY_FRAGMENTS = (
 
 DEFAULT_ARCHIVE_SETTINGS: dict[str, Any] = {
     "enabled": True,
-    "include_image_prompts": True,
-    "include_image_results": True,
-    "include_visual_bridge": True,
+    "include_image_prompts": False,
+    "include_image_results": False,
+    "include_visual_bridge": False,
+    "include_visual_brain_prompts": False,
     "include_brain_prompts": True,
     "include_all_brain_prompts": False,
 }
@@ -139,12 +140,15 @@ def _json_safe(value: Any, *, depth: int = 0) -> Any:
 
 
 def _kind_enabled(kind: str, archive_settings: Mapping[str, Any]) -> bool:
+    # An image can only exist during the current clipboard transaction.  These
+    # event types were created for the retired file-backed image pipeline and
+    # must stay non-persistent even if an old local setting enables them.
     if kind in {"customer_image_understanding_prompt", "customer_image_understanding_retry_prompt"}:
-        return _truthy(archive_settings.get("include_image_prompts"), default=True)
+        return False
     if kind in {"customer_image_understanding_result", "customer_image_understanding_error"}:
-        return _truthy(archive_settings.get("include_image_results"), default=True)
+        return False
     if kind == "customer_image_turn_bridge":
-        return _truthy(archive_settings.get("include_visual_bridge"), default=True)
+        return False
     if kind == "customer_service_brain_prompt":
         return _truthy(archive_settings.get("include_brain_prompts"), default=True)
     return True
@@ -161,11 +165,12 @@ def should_archive_brain_prompt(
         return False
     if not _truthy(archive_settings.get("include_brain_prompts"), default=True):
         return False
-    if _truthy(archive_settings.get("include_all_brain_prompts"), default=False):
-        return True
-
     current_message = _nested_mapping(brain_input, "current_message")
-    return bool(current_message and current_message.get("visual_bridge_input"))
+    if current_message and current_message.get("visual_bridge_input"):
+        # A visual bridge is the text consequence of an ephemeral clipboard
+        # image.  Do not archive the expanded Brain prompt for this turn.
+        return False
+    return _truthy(archive_settings.get("include_all_brain_prompts"), default=False)
 
 
 def archive_prompt_event(

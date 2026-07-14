@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import Any
 
 from apps.wechat_ai_customer_service.admin_backend.services.customer_service_session_ledger import (
+    SessionLedgerStore,
     row_fingerprint_from_payload,
     session_key_from_payload,
 )
@@ -44,6 +45,18 @@ class SessionState:
     signal_ready_after: str = ""
     retry_not_before: str = ""
     empty_capture_retries: int = 0
+    startup_visual_baseline_at: str = ""
+    # A session-list row is an observation, not a new-message event.  Keep the
+    # two identities separately so a persistent red dot cannot repeatedly
+    # recreate the already handled event after a capture/reset.
+    last_observation_id: str = ""
+    pending_observation_id: str = ""
+    acknowledged_observation_id: str = ""
+    acknowledged_unread_badge_epoch: int = 0
+    last_observed_unread_badge: bool = False
+    unread_badge_epoch: int = 0
+    candidate_observation_id: str = ""
+    candidate_preview_hits: int = 0
 
 
 @dataclass
@@ -56,6 +69,17 @@ class ActiveTarget:
     session_age_seconds: int = 0
     conversation_type: str = "unknown"
     pending_signal_kind: str = ""
+    pending_signal_text: str = ""
+    last_message_time: str = ""
+    unread_badge: str = ""
+    # Additive event metadata for the scheduler.  ``session_observation_id``
+    # is the stable raw sidebar observation; ``pending_observation_id`` is the
+    # monitor's event identity (including an unread-badge rising-edge epoch).
+    session_observation_id: str = ""
+    pending_observation_id: str = ""
+
+
+MEDIA_CAPTURE_SIGNAL_KINDS = {"voice_capture", "image_capture", "media_capture"}
 
 
 class SessionMonitor:
@@ -118,6 +142,8 @@ class SessionMonitor:
         self._sticky_until_ts: float = 0.0
         self._sticky_dispatch_rounds: int = 0
         self._sessions: dict[str, SessionState] = {}
+        self._startup_visual_baseline_active = True
+        self._ledger = SessionLedgerStore(tenant_id=self.tenant_id)
         self._load_state()
 
     def _load_state(self) -> None:
@@ -166,6 +192,15 @@ class SessionMonitor:
                 signal_ready_after=str(data.get("signal_ready_after") or ""),
                 retry_not_before=str(data.get("retry_not_before") or ""),
                 empty_capture_retries=int(data.get("empty_capture_retries", 0) or 0),
+                startup_visual_baseline_at=str(data.get("startup_visual_baseline_at") or ""),
+                last_observation_id=str(data.get("last_observation_id") or ""),
+                pending_observation_id=str(data.get("pending_observation_id") or ""),
+                acknowledged_observation_id=str(data.get("acknowledged_observation_id") or ""),
+                acknowledged_unread_badge_epoch=int(data.get("acknowledged_unread_badge_epoch", 0) or 0),
+                last_observed_unread_badge=bool(data.get("last_observed_unread_badge", False)),
+                unread_badge_epoch=int(data.get("unread_badge_epoch", 0) or 0),
+                candidate_observation_id=str(data.get("candidate_observation_id") or ""),
+                candidate_preview_hits=int(data.get("candidate_preview_hits", 0) or 0),
             )
         self._sessions = restored
 
@@ -196,6 +231,15 @@ class SessionMonitor:
                     "signal_ready_after": s.signal_ready_after,
                     "retry_not_before": s.retry_not_before,
                     "empty_capture_retries": int(s.empty_capture_retries or 0),
+                    "startup_visual_baseline_at": s.startup_visual_baseline_at,
+                    "last_observation_id": s.last_observation_id,
+                    "pending_observation_id": s.pending_observation_id,
+                    "acknowledged_observation_id": s.acknowledged_observation_id,
+                    "acknowledged_unread_badge_epoch": int(s.acknowledged_unread_badge_epoch or 0),
+                    "last_observed_unread_badge": bool(s.last_observed_unread_badge),
+                    "unread_badge_epoch": int(s.unread_badge_epoch or 0),
+                    "candidate_observation_id": s.candidate_observation_id,
+                    "candidate_preview_hits": int(s.candidate_preview_hits or 0),
                 }
                 for name, s in self._sessions.items()
             },
@@ -212,6 +256,7 @@ class SessionMonitor:
 
         sessions_data = result.get("sessions", []) or []
         now_iso = datetime.now().isoformat(timespec="seconds")
+        startup_visual_baseline_active = bool(self._startup_visual_baseline_active)
         active: list[ActiveTarget] = []
         unsafe_duplicate_display_names = self._unsafe_duplicate_display_names(sessions_data)
 
@@ -242,15 +287,27 @@ class SessionMonitor:
                 },
                 fallback_name=name,
             )
+            if name in unsafe_duplicate_display_names:
+                self._block_ambiguous_display_name(name, now_iso=now_iso, session_key=session_key)
+                continue
+            if not explicit_session_key:
+                session_key = self._reuse_unique_display_name_session_key(
+                    name,
+                    candidate_session_key=session_key,
+                )
             # All runtime session state is keyed by session_key.  The display
             # name is retained only for UI/whitelist/legacy migration.
             state_key = session_key
-            if name in unsafe_duplicate_display_names:
-                self._block_ambiguous_display_name(name, now_iso=now_iso, session_key=state_key)
-                continue
             has_preview_signal = bool(digest or msg_time)
             has_signal = bool(has_preview_signal or unread_badge)
             has_dispatch_badge = bool(unread_badge)
+            observation_id = _session_observation_id(
+                raw,
+                session_key=session_key,
+                content=content,
+                message_time=msg_time,
+                unread_badge=unread_badge,
+            )
 
             existing = self._sessions.get(state_key)
             if existing is None and state_key != name:
@@ -263,7 +320,14 @@ class SessionMonitor:
                     self._sessions.pop(name, None)
             if existing is None:
                 # New session seen for the first time
-                short_preview_signal = self.short_preview_can_raise_unread and self._signal_kind(content) == "high_sensitivity_short"
+                signal_kind = self._signal_kind(content)
+                short_preview_signal = self.short_preview_can_raise_unread and signal_kind == "high_sensitivity_short"
+                startup_media_baseline = bool(
+                    startup_visual_baseline_active
+                    and signal_kind in MEDIA_CAPTURE_SIGNAL_KINDS
+                    and not has_dispatch_badge
+                    and not self.require_unread_badge_for_dispatch
+                )
                 if self.require_unread_badge_for_dispatch:
                     initial_unread = bool(
                         has_dispatch_badge
@@ -278,6 +342,13 @@ class SessionMonitor:
                         or (self.initial_preview_can_raise_unread and has_signal)
                         or short_preview_signal
                     )
+                if startup_media_baseline:
+                    initial_unread = False
+                unread_badge_epoch = 1 if has_dispatch_badge else 0
+                pending_observation_id = _pending_observation_id(
+                    observation_id,
+                    unread_badge_epoch=unread_badge_epoch,
+                )
                 self._sessions[state_key] = SessionState(
                     name=name,
                     session_key=session_key,
@@ -293,8 +364,13 @@ class SessionMonitor:
                     conversation_type=conversation_type,
                     preview_change_hits=0,
                     pending_signal_text=content if initial_unread else "",
-                    pending_signal_kind=self._signal_kind(content),
+                    pending_signal_kind=signal_kind if initial_unread else "",
                     signal_ready_after=self._signal_ready_after(now_iso, content) if initial_unread else "",
+                    startup_visual_baseline_at=now_iso if startup_media_baseline else "",
+                    last_observation_id=observation_id,
+                    pending_observation_id=pending_observation_id if initial_unread else "",
+                    last_observed_unread_badge=has_dispatch_badge,
+                    unread_badge_epoch=unread_badge_epoch,
                 )
                 if initial_unread:
                     active.append(ActiveTarget(
@@ -305,16 +381,54 @@ class SessionMonitor:
                         unread_detected=True,
                         session_age_seconds=0,
                         conversation_type=conversation_type,
-                        pending_signal_kind=self._signal_kind(content),
+                        pending_signal_kind=signal_kind,
+                        pending_signal_text=content,
+                        last_message_time=msg_time,
+                        unread_badge=unread_badge,
+                        session_observation_id=observation_id,
+                        pending_observation_id=pending_observation_id,
                     ))
             else:
                 existing.name = name
                 existing.session_key = session_key or existing.session_key
+                previous_observation_id = str(existing.last_observation_id or "")
+                previous_badge_present = bool(existing.last_observed_unread_badge)
+                if has_dispatch_badge and not previous_badge_present:
+                    existing.unread_badge_epoch = max(0, int(existing.unread_badge_epoch or 0)) + 1
+                elif has_dispatch_badge and int(existing.unread_badge_epoch or 0) <= 0:
+                    # Migration from state written before observation identities.
+                    existing.unread_badge_epoch = 1
+                pending_observation_id = _pending_observation_id(
+                    observation_id,
+                    unread_badge_epoch=int(existing.unread_badge_epoch or 0),
+                )
+                if existing.unread_detected and not str(existing.pending_observation_id or ""):
+                    # State written before observation identities can already
+                    # contain a real pending capture. Bind it to the first
+                    # post-upgrade observation so reset_unread can acknowledge
+                    # that legacy event instead of letting a painted badge
+                    # recreate it one poll later.
+                    existing.pending_observation_id = pending_observation_id
+                observation_changed = bool(observation_id and observation_id != previous_observation_id)
+                observation_already_acknowledged = bool(
+                    pending_observation_id
+                    and pending_observation_id == str(existing.acknowledged_observation_id or "")
+                )
+                badge_epoch_already_acknowledged = bool(
+                    has_dispatch_badge
+                    and int(existing.unread_badge_epoch or 0) > 0
+                    and int(existing.unread_badge_epoch or 0) == int(existing.acknowledged_unread_badge_epoch or 0)
+                )
                 changed_by_digest = bool(digest and digest != existing.last_content_digest)
                 changed_by_time = bool(msg_time and msg_time != existing.last_message_time)
-                changed_by_badge = bool(unread_badge and unread_badge != existing.last_unread_badge)
+                # ``reset_unread`` intentionally clears the logical pending
+                # badge.  Comparing against that logical field would turn the
+                # same painted dot into a fresh edge on the next poll.  The
+                # physical-observation latch is the only valid badge-edge
+                # source.
+                changed_by_badge = bool(has_dispatch_badge and not previous_badge_present)
                 changed_preview_signal = bool(changed_by_digest or changed_by_time)
-                changed = bool(changed_by_digest or changed_by_time or changed_by_badge)
+                changed = bool(changed_by_digest or changed_by_time or changed_by_badge or observation_changed)
 
                 if changed:
                     # Bump priority based on how long since last contact
@@ -325,14 +439,51 @@ class SessionMonitor:
                     except Exception:
                         pass
                     priority = min(100, 50 + age_seconds // 60)
-                    existing.last_content_digest = digest
+                    # A red dot that is already acknowledged can stay painted
+                    # while OCR makes small preview corrections.  Require two
+                    # identical post-acknowledgement preview observations
+                    # before treating a text-only change as a new event.  A
+                    # badge edge or a visible time change remains immediate.
+                    defer_preview_confirmation = bool(
+                        badge_epoch_already_acknowledged
+                        and changed_preview_signal
+                        and not changed_by_time
+                        and not changed_by_badge
+                    )
+                    preview_confirmation_ready = False
+                    if defer_preview_confirmation:
+                        if observation_id and observation_id == str(existing.candidate_observation_id or ""):
+                            existing.candidate_preview_hits = int(existing.candidate_preview_hits or 0) + 1
+                        else:
+                            existing.candidate_observation_id = observation_id
+                            existing.candidate_preview_hits = 1
+                        preview_confirmation_ready = int(existing.candidate_preview_hits or 0) >= self.preview_change_confirmations
+                    else:
+                        existing.candidate_observation_id = ""
+                        existing.candidate_preview_hits = 0
+                    if not defer_preview_confirmation or preview_confirmation_ready:
+                        existing.last_content_digest = digest
+                        existing.last_message_time = msg_time
+                        existing.candidate_observation_id = ""
+                        existing.candidate_preview_hits = 0
                     existing.session_key = existing.session_key or session_key
-                    existing.last_message_time = msg_time
                     existing.last_unread_badge = unread_badge
+                    existing.last_observation_id = observation_id
+                    existing.last_observed_unread_badge = has_dispatch_badge
                     existing.conversation_type = conversation_type
                     existing.last_seen_at = now_iso
+                    signal_kind = self._signal_kind(content)
+                    media_preview_signal = signal_kind in MEDIA_CAPTURE_SIGNAL_KINDS
+                    startup_media_baseline = bool(
+                        startup_visual_baseline_active
+                        and media_preview_signal
+                        and not has_dispatch_badge
+                        and not self.require_unread_badge_for_dispatch
+                    )
                     should_raise_unread = False
-                    if self.require_unread_badge_for_dispatch:
+                    if startup_media_baseline:
+                        existing.startup_visual_baseline_at = now_iso
+                    elif self.require_unread_badge_for_dispatch:
                         if has_dispatch_badge and (
                             not self.require_preview_signal_with_unread_badge
                             or changed_preview_signal
@@ -341,11 +492,12 @@ class SessionMonitor:
                             should_raise_unread = True
                             existing.preview_change_hits = 0
                         elif changed_preview_signal and not has_dispatch_badge:
-                            # In live RPA low-risk mode, a badge-less preview
-                            # change is only a baseline update.  Let the
-                            # session ledger / in-session capture path handle
-                            # already-open chats; do not drive foreground
-                            # switching from list text drift alone.
+                            # Voice/image previews can lose their badge when the
+                            # operator opens the chat. They still need a real
+                            # capture pass so the sidecar can transcribe/archive
+                            # from the chat pane instead of synthesizing text.
+                            if media_preview_signal:
+                                should_raise_unread = True
                             existing.preview_change_hits = 0
                         elif not has_dispatch_badge:
                             existing.preview_change_hits = 0
@@ -353,8 +505,8 @@ class SessionMonitor:
                         should_raise_unread = True
                         existing.preview_change_hits = 0
                     elif changed_by_digest or changed_by_time:
-                        short_preview_signal = self.short_preview_can_raise_unread and self._signal_kind(content) == "high_sensitivity_short"
-                        if short_preview_signal:
+                        short_preview_signal = self.short_preview_can_raise_unread and signal_kind == "high_sensitivity_short"
+                        if media_preview_signal or short_preview_signal:
                             should_raise_unread = True
                             existing.preview_change_hits = 0
                         elif self.preview_change_can_raise_unread:
@@ -367,12 +519,15 @@ class SessionMonitor:
                             # refreshes list previews or timestamps without a
                             # visible unread signal.
                             existing.preview_change_hits = 0
-                    if should_raise_unread:
+                    if defer_preview_confirmation and not preview_confirmation_ready:
+                        should_raise_unread = False
+                    if should_raise_unread and not observation_already_acknowledged:
                         self._mark_pending_signal(
                             existing,
                             content=content,
                             now_iso=now_iso,
                             priority=priority,
+                            observation_id=pending_observation_id,
                         )
                         active.append(ActiveTarget(
                             name=name,
@@ -383,10 +538,43 @@ class SessionMonitor:
                             session_age_seconds=age_seconds,
                             conversation_type=conversation_type,
                             pending_signal_kind=existing.pending_signal_kind,
+                            pending_signal_text=existing.pending_signal_text,
+                            last_message_time=existing.last_message_time,
+                            unread_badge=existing.last_unread_badge,
+                            session_observation_id=observation_id,
+                            pending_observation_id=existing.pending_observation_id,
+                        ))
+                    elif existing.unread_detected:
+                        # A changed/empty sidebar preview is not evidence that
+                        # the already-pending capture finished. Preserve the
+                        # event until reset_unread explicitly acknowledges it.
+                        active.append(ActiveTarget(
+                            name=name,
+                            session_key=existing.session_key or session_key,
+                            exact=True,
+                            priority_score=max(1, existing.priority_score),
+                            unread_detected=True,
+                            session_age_seconds=_age_seconds(existing.pending_since or existing.last_detected_at or existing.last_seen_at),
+                            conversation_type=conversation_type,
+                            pending_signal_kind=existing.pending_signal_kind,
+                            pending_signal_text=existing.pending_signal_text,
+                            last_message_time=existing.last_message_time,
+                            unread_badge=existing.last_unread_badge,
+                            session_observation_id=existing.last_observation_id,
+                            pending_observation_id=existing.pending_observation_id,
                         ))
                 else:
                     existing.last_seen_at = now_iso
                     existing.conversation_type = conversation_type
+                    existing.last_observation_id = observation_id
+                    existing.last_observed_unread_badge = has_dispatch_badge
+                    if (
+                        startup_visual_baseline_active
+                        and self._signal_kind(content) in MEDIA_CAPTURE_SIGNAL_KINDS
+                        and not has_dispatch_badge
+                        and not self.require_unread_badge_for_dispatch
+                    ):
+                        existing.startup_visual_baseline_at = now_iso
                     if existing.last_unread_badge and not unread_badge:
                         existing.last_unread_badge = ""
                     if existing.unread_detected:
@@ -402,11 +590,17 @@ class SessionMonitor:
                             session_age_seconds=_age_seconds(existing.pending_since or existing.last_detected_at or existing.last_seen_at),
                             conversation_type=conversation_type,
                             pending_signal_kind=existing.pending_signal_kind,
+                            pending_signal_text=existing.pending_signal_text,
+                            last_message_time=existing.last_message_time,
+                            unread_badge=existing.last_unread_badge,
+                            session_observation_id=existing.last_observation_id,
+                            pending_observation_id=existing.pending_observation_id,
                         ))
                     else:
                         existing.preview_change_hits = 0
                         existing.priority_score = max(0, existing.priority_score - 5)
 
+        self._startup_visual_baseline_active = False
         self._save_state()
 
         # Sort by priority descending, then by session_age (older = higher priority)
@@ -538,10 +732,20 @@ class SessionMonitor:
                 "last_dispatched_at": s.last_dispatched_at,
                 "conversation_type": s.conversation_type,
                 "pending_signal_text": s.pending_signal_text,
+                "preview_content": s.pending_signal_text,
                 "pending_signal_kind": s.pending_signal_kind,
                 "signal_ready_after": s.signal_ready_after,
                 "retry_not_before": s.retry_not_before,
                 "empty_capture_retries": int(s.empty_capture_retries or 0),
+                "startup_visual_baseline_at": s.startup_visual_baseline_at,
+                "last_observation_id": s.last_observation_id,
+                "pending_observation_id": s.pending_observation_id,
+                "acknowledged_observation_id": s.acknowledged_observation_id,
+                "acknowledged_unread_badge_epoch": int(s.acknowledged_unread_badge_epoch or 0),
+                "last_observed_unread_badge": bool(s.last_observed_unread_badge),
+                "unread_badge_epoch": int(s.unread_badge_epoch or 0),
+                "candidate_observation_id": s.candidate_observation_id,
+                "candidate_preview_hits": int(s.candidate_preview_hits or 0),
             }
             for s in self._sessions.values()
         ]
@@ -558,6 +762,11 @@ class SessionMonitor:
                 session_age_seconds=_age_seconds(s.pending_since or s.last_detected_at or s.last_seen_at),
                 conversation_type=s.conversation_type or "unknown",
                 pending_signal_kind=s.pending_signal_kind or "",
+                pending_signal_text=s.pending_signal_text or "",
+                last_message_time=s.last_message_time or "",
+                unread_badge=s.last_unread_badge or "",
+                session_observation_id=s.last_observation_id or "",
+                pending_observation_id=s.pending_observation_id or "",
             )
             for s in self._sessions.values()
             if s.unread_detected
@@ -595,6 +804,14 @@ class SessionMonitor:
                     session.retry_not_before = (now + timedelta(seconds=delay)).isoformat(timespec="milliseconds")
                 session.signal_ready_after = ""
             else:
+                # A reset is the explicit acknowledgement of the current
+                # sidebar event.  Do not clear the raw-observation/badge-edge
+                # latch: a red dot that remains painted after the capture is
+                # still the same event and must not be re-enqueued next poll.
+                if session.pending_observation_id:
+                    session.acknowledged_observation_id = session.pending_observation_id
+                if session.last_observed_unread_badge:
+                    session.acknowledged_unread_badge_epoch = int(session.unread_badge_epoch or 0)
                 session.unread_detected = False
                 session.priority_score = 0
                 session.pending_since = ""
@@ -602,6 +819,9 @@ class SessionMonitor:
                 session.preview_change_hits = 0
                 session.pending_signal_text = ""
                 session.pending_signal_kind = ""
+                session.pending_observation_id = ""
+                session.candidate_observation_id = ""
+                session.candidate_preview_hits = 0
                 session.signal_ready_after = ""
                 session.retry_not_before = ""
                 session.empty_capture_retries = 0
@@ -616,6 +836,8 @@ class SessionMonitor:
             return False
         if session.pending_signal_kind == "high_sensitivity_short":
             return True
+        if session.pending_signal_kind in MEDIA_CAPTURE_SIGNAL_KINDS:
+            return int(session.empty_capture_retries or 0) < 3
         if int(session.empty_capture_retries or 0) >= 2:
             return False
         return bool(
@@ -636,6 +858,74 @@ class SessionMonitor:
             return matches[0]
         return None
 
+    def _reuse_unique_display_name_session_key(self, name: str, *, candidate_session_key: str) -> str:
+        """Repair inferred type drift without weakening duplicate-name isolation."""
+
+        generated_matches = [
+            (key, state)
+            for key, state in self._sessions.items()
+            if isinstance(state, SessionState)
+            and state.name == name
+            and str(key).startswith("wx:rpa:v1:")
+        ]
+        if not generated_matches:
+            return candidate_session_key
+        if len(generated_matches) == 1:
+            return str(generated_matches[0][0])
+
+        scored: list[tuple[tuple[int, int, int], str, SessionState]] = []
+        for key, state in generated_matches:
+            ledger_summary = self._ledger.load_summary(str(key))
+            recent_count = len(ledger_summary.get("recent_messages") or []) if isinstance(ledger_summary, dict) else 0
+            try:
+                context_version = int((ledger_summary or {}).get("context_version") or 0)
+            except (TypeError, ValueError):
+                context_version = 0
+            candidate_bonus = 1 if str(key) == str(candidate_session_key) else 0
+            scored.append(((recent_count, context_version, candidate_bonus), str(key), state))
+        scored.sort(key=lambda item: (item[0], item[1]), reverse=True)
+        canonical_key = scored[0][1]
+        canonical_state = scored[0][2]
+        alias_keys = [key for _score, key, _state in scored[1:]]
+        try:
+            self._ledger.merge_session_alias_context(
+                canonical_session_key=canonical_key,
+                alias_session_keys=alias_keys,
+                target_name=name,
+            )
+        except Exception:
+            # Monitor identity repair must not block capture; the alias ledger
+            # remains available for a later retry/audit if persistence fails.
+            pass
+        for _score, key, state in scored[1:]:
+            canonical_state.unread_detected = bool(canonical_state.unread_detected or state.unread_detected)
+            canonical_state.priority_score = max(int(canonical_state.priority_score or 0), int(state.priority_score or 0))
+            canonical_state.preview_change_hits = max(
+                int(canonical_state.preview_change_hits or 0),
+                int(state.preview_change_hits or 0),
+            )
+            canonical_state.empty_capture_retries = max(
+                int(canonical_state.empty_capture_retries or 0),
+                int(state.empty_capture_retries or 0),
+            )
+            for field_name in (
+                "first_seen_at",
+                "pending_since",
+                "last_detected_at",
+                "last_dispatched_at",
+                "pending_signal_text",
+                "pending_signal_kind",
+                "signal_ready_after",
+                "retry_not_before",
+            ):
+                if not getattr(canonical_state, field_name) and getattr(state, field_name):
+                    setattr(canonical_state, field_name, getattr(state, field_name))
+            self._sessions.pop(key, None)
+        canonical_state.session_key = canonical_key
+        canonical_state.name = name
+        self._sessions[canonical_key] = canonical_state
+        return canonical_key
+
     def _mark_pending_signal(
         self,
         session: SessionState,
@@ -643,6 +933,7 @@ class SessionMonitor:
         content: str,
         now_iso: str,
         priority: int,
+        observation_id: str = "",
     ) -> None:
         session.unread_detected = True
         if not session.pending_since:
@@ -651,11 +942,15 @@ class SessionMonitor:
         session.priority_score = priority
         session.pending_signal_text = str(content or "").strip()
         session.pending_signal_kind = self._signal_kind(content)
+        session.pending_observation_id = str(observation_id or session.pending_observation_id or "")
         session.signal_ready_after = self._signal_ready_after(now_iso, content)
         session.retry_not_before = ""
         session.empty_capture_retries = 0
 
     def _signal_kind(self, content: str) -> str:
+        media_kind = _media_capture_signal_kind(content)
+        if media_kind:
+            return media_kind
         if _is_high_sensitivity_short_signal(content, max_chars=self.high_sensitivity_short_max_chars):
             return "high_sensitivity_short"
         return "normal"
@@ -709,6 +1004,8 @@ class SessionMonitor:
             return True
         if not (str(content or "").strip() or str(msg_time or "").strip()):
             return False
+        if self._signal_kind(content) in MEDIA_CAPTURE_SIGNAL_KINDS:
+            return True
         if self._signal_kind(content) == "high_sensitivity_short":
             return True
         if not str(session.last_dispatched_at or "").strip():
@@ -788,6 +1085,54 @@ class SessionMonitor:
         return min(self.empty_capture_retry_max_seconds, delay)
 
 
+def _session_observation_id(
+    raw: dict[str, Any],
+    *,
+    session_key: str,
+    content: str,
+    message_time: str,
+    unread_badge: str,
+) -> str:
+    """Return a stable identity for one sidebar observation.
+
+    The sidecar may supply a richer deterministic identity.  Other connectors
+    retain compatibility through a local canonical digest.  Poll time, OCR run
+    time, and screenshot paths are intentionally excluded: they describe a
+    new *measurement*, not a new customer event.
+    """
+
+    supplied = str(raw.get("session_observation_id") or "").strip()
+    if supplied:
+        return supplied
+    evidence = raw.get("unread_badge_evidence") if isinstance(raw.get("unread_badge_evidence"), dict) else {}
+    raw_box = evidence.get("bbox") or evidence.get("red_box") or []
+    box = [int(value) // 4 for value in raw_box[:4] if isinstance(value, (int, float))]
+    row = raw.get("row_fingerprint") if isinstance(raw.get("row_fingerprint"), dict) else {}
+    seed = {
+        "session_key": str(session_key or ""),
+        "content": " ".join(str(content or "").split()),
+        "time": str(message_time or "").strip(),
+        "unread_badge": str(unread_badge or "").strip(),
+        "badge_box": box,
+        "row_y_bucket": row.get("row_y_bucket"),
+        "duplicate_discriminator": row.get("duplicate_discriminator"),
+    }
+    encoded = json.dumps(seed, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    return "session-observation:" + hashlib.sha256(encoded.encode("utf-8")).hexdigest()[:32]
+
+
+def _pending_observation_id(observation_id: str, *, unread_badge_epoch: int) -> str:
+    """Turn a stable sidebar observation into a stable event identity.
+
+    A badge disappearing and later reappearing is a real new trigger even when
+    WeChat clips the visible preview to the same text and minute.  The epoch
+    records that rising edge without treating every later poll as new.
+    """
+
+    seed = f"{str(observation_id or '').strip()}|badge_epoch:{max(0, int(unread_badge_epoch or 0))}"
+    return "pending-observation:" + hashlib.sha256(seed.encode("utf-8")).hexdigest()[:32]
+
+
 def _digest(value: str) -> str:
     return hashlib.sha256(str(value).encode("utf-8")).hexdigest()[:32]
 
@@ -821,6 +1166,26 @@ def _normalize_short_signal_text(text: str) -> str:
     compact = "".join(str(text or "").split())
     compact = "".join(ch for ch in compact if ch not in "，。,.！？!、~～：:；;“”\"'（）()[]【】")
     return compact.strip().lower()
+
+
+def _media_capture_signal_kind(text: str) -> str:
+    raw = str(text or "").strip().lower()
+    compact = _normalize_short_signal_text(raw)
+    if not compact:
+        return ""
+    voice_tokens = {"语音", "语音消息", "voice", "voicemessage", "audio", "audiomessage"}
+    image_tokens = {"图片", "图片消息", "照片", "图像", "image", "photo", "picture", "pic"}
+    media_tokens = {"视频", "视频消息", "video", "文件", "文件消息", "file", "表情", "sticker", "emoji"}
+    if any(token in raw for token in ("[语音]", "【语音】", "[voice]", "[audio]")) or compact in voice_tokens:
+        return "voice_capture"
+    if any(token in raw for token in ("[图片]", "【图片】", "[image]", "[photo]", "[picture]")) or compact in image_tokens:
+        return "image_capture"
+    if (
+        any(token in raw for token in ("[视频]", "【视频】", "[video]", "[文件]", "【文件】", "[file]", "[表情]", "【表情】"))
+        or compact in media_tokens
+    ):
+        return "media_capture"
+    return ""
 
 
 def _is_high_sensitivity_short_signal(text: str, *, max_chars: int) -> bool:

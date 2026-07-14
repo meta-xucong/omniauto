@@ -146,6 +146,7 @@ def run_once(args: argparse.Namespace) -> dict[str, Any]:
             reply_text,
             exact=True,
             session_key=str(getattr(args, "session_key", "") or ""),
+            conversation_type=str(getattr(args, "conversation_type", "") or ""),
         )
         result["send_result"] = verified
         result["verified"] = bool(verified.get("verified"))

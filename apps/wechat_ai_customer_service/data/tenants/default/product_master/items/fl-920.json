@@ -1,50 +1,167 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "category_id": "products",
   "id": "fl-920",
   "status": "active",
   "source": {
-    "type": "raw_upload",
-    "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\raw_inbox\\products\\upload_60f852261dbb5fe6_01_products_new_office_devices.xlsx.txt",
-    "candidate_id": "raw_1ba218dd9616a47f",
-    "legacy_migrated_from": "knowledge_bases/products"
-  },
-  "data": {
-    "name": "智能指纹门锁 FL-920",
-    "sku": "FL-920",
-    "category": "安防门锁",
-    "aliases": [
-      "指纹锁",
-      "智能锁",
-      "公寓门锁",
-      "电子门锁"
-    ],
-    "specs": "半导体指纹识别，C级锁芯，支持密码/指纹/临时密码，适配 40-90mm 门厚",
-    "price": 699.0,
-    "unit": "套",
-    "inventory": 128.0,
-    "shipping_policy": "现货，付款后 24 小时内发出；安装服务需按城市确认",
-    "warranty_policy": "整机质保 2 年，电池和人为损坏不在免费范围内",
-    "risk_rules": [
-      "安装费用、上门时间、特殊门型必须人工确认"
-    ],
-    "reply_templates": {
-      "default": "安装费用、上门时间、特殊门型必须人工确认"
+    "type": "manual",
+    "provider": "manual",
+    "marker": {
+      "ingest_channel": "legacy_v1_migration",
+      "original_source_type": "raw_upload",
+      "recorded_at": "2026-07-13T05:11:12+00:00",
+      "migration_batch": "default_v1_to_v2_20260713"
     },
-    "price_tiers": [
-      {
-        "min_quantity": 1.0,
-        "unit_price": 699.0
+    "binding": {
+      "state": "unbound"
+    }
+  },
+  "source_payloads": {
+    "vehicle_detail": {
+      "api": "manual.dafengche_shaped_vehicle_detail",
+      "payload": {
+        "baseCarInfo": {
+          "name": "智能指纹门锁 FL-920"
+        },
+        "carPriceInfo": {
+          "salePrice": 699.0
+        }
       },
-      {
-        "min_quantity": 10.0,
-        "unit_price": 649.0
-      },
-      {
-        "min_quantity": 50.0,
-        "unit_price": 599.0
+      "pulled_at": "2026-07-13T05:11:12+00:00",
+      "content_hash": "sha256:64f328e337bb52fe0d3c3777ebd3cda4f1debdbd2a16ba38f3437af7451f04c8"
+    },
+    "vehicle_pictures": {
+      "api": "manual.dafengche_shaped_vehicle_pictures",
+      "payload": [],
+      "pulled_at": "2026-07-13T05:11:12+00:00",
+      "content_hash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  },
+  "extensions": {
+    "manual": {
+      "field_provenance": {
+        "source_payloads.vehicle_detail.payload.baseCarInfo.name": {
+          "source": "legacy_v1_migration",
+          "original_path": "data.name",
+          "original_source_type": "raw_upload",
+          "recorded_at": "2026-07-13T05:11:12+00:00"
+        },
+        "source_payloads.vehicle_detail.payload.carPriceInfo.salePrice": {
+          "source": "legacy_v1_migration",
+          "original_path": "data.price",
+          "original_source_type": "raw_upload",
+          "recorded_at": "2026-07-13T05:11:12+00:00"
+        }
       }
-    ]
+    },
+    "compatibility": {
+      "legacy_v1_record": {
+        "schema_version": 1,
+        "category_id": "products",
+        "id": "fl-920",
+        "status": "active",
+        "source": {
+          "type": "raw_upload",
+          "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\raw_inbox\\products\\upload_60f852261dbb5fe6_01_products_new_office_devices.xlsx.txt",
+          "candidate_id": "raw_1ba218dd9616a47f",
+          "legacy_migrated_from": "knowledge_bases/products"
+        },
+        "data": {
+          "name": "智能指纹门锁 FL-920",
+          "sku": "FL-920",
+          "category": "安防门锁",
+          "aliases": [
+            "指纹锁",
+            "智能锁",
+            "公寓门锁",
+            "电子门锁"
+          ],
+          "specs": "半导体指纹识别，C级锁芯，支持密码/指纹/临时密码，适配 40-90mm 门厚",
+          "price": 699.0,
+          "unit": "套",
+          "inventory": 128.0,
+          "shipping_policy": "现货，付款后 24 小时内发出；安装服务需按城市确认",
+          "warranty_policy": "整机质保 2 年，电池和人为损坏不在免费范围内",
+          "risk_rules": [
+            "安装费用、上门时间、特殊门型必须人工确认"
+          ],
+          "reply_templates": {
+            "default": "安装费用、上门时间、特殊门型必须人工确认"
+          },
+          "price_tiers": [
+            {
+              "min_quantity": 1.0,
+              "unit_price": 699.0
+            },
+            {
+              "min_quantity": 10.0,
+              "unit_price": 649.0
+            },
+            {
+              "min_quantity": 50.0,
+              "unit_price": 599.0
+            }
+          ]
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "warning"
+        },
+        "metadata": {
+          "created_at": "2026-04-27T00:55:41",
+          "updated_at": "2026-05-16T22:51:05",
+          "created_by": "admin",
+          "updated_by": "admin"
+        }
+      },
+      "input_adapter": "generic_product_form_to_manual_v2",
+      "migration": {
+        "from_schema_version": 1,
+        "batch_id": "default_v1_to_v2_20260713",
+        "migrated_at": "2026-07-13T05:11:12+00:00"
+      }
+    },
+    "wechat_customer_service": {
+      "customer_visible_annotations": {
+        "category": "安防门锁",
+        "specs": "半导体指纹识别，C级锁芯，支持密码/指纹/临时密码，适配 40-90mm 门厚",
+        "shipping_policy": "现货，付款后 24 小时内发出；安装服务需按城市确认",
+        "warranty_policy": "整机质保 2 年，电池和人为损坏不在免费范围内",
+        "risk_rules": [
+          "安装费用、上门时间、特殊门型必须人工确认"
+        ],
+        "aliases": [
+          "指纹锁",
+          "智能锁",
+          "公寓门锁",
+          "电子门锁"
+        ]
+      },
+      "manual_annotations": {
+        "sku": "FL-920",
+        "unit": "套",
+        "inventory": 128.0,
+        "price_tiers": [
+          {
+            "min_quantity": 1.0,
+            "unit_price": 699.0
+          },
+          {
+            "min_quantity": 10.0,
+            "unit_price": 649.0
+          },
+          {
+            "min_quantity": 50.0,
+            "unit_price": 599.0
+          }
+        ],
+        "reply_templates": {
+          "default": "安装费用、上门时间、特殊门型必须人工确认"
+        }
+      },
+      "manual_overrides": {}
+    }
   },
   "runtime": {
     "allow_auto_reply": true,
@@ -53,8 +170,10 @@
   },
   "metadata": {
     "created_at": "2026-04-27T00:55:41",
-    "updated_at": "2026-05-16T22:51:05",
+    "updated_at": "2026-07-13T13:11:12",
     "created_by": "admin",
-    "updated_by": "admin"
+    "updated_by": "admin",
+    "migrated_from_schema_version": 1,
+    "migration_batch": "default_v1_to_v2_20260713"
   }
 }

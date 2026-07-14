@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import json
+import io
 import os
 import time
+import warnings
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -13,6 +15,8 @@ from apps.wechat_ai_customer_service.workflows.customer_image_understanding_cont
     normalize_customer_image_understanding_result,
 )
 from apps.wechat_ai_customer_service.workflows.customer_image_understanding_provider import (
+    MAX_IMAGE_PIXELS,
+    MAX_IMAGE_SOURCE_BYTES,
     run_customer_image_understanding_provider,
 )
 from apps.wechat_ai_customer_service.workflows.customer_service_prompt_archive import archive_prompt_event
@@ -84,28 +88,42 @@ def effective_customer_image_understanding_settings(config: dict[str, Any] | Non
 
 
 def analyze_customer_image_asset(asset: dict[str, Any]) -> dict[str, Any]:
-    crop_path = Path(str(asset.get("saved_image_path") or asset.get("bubble_crop_path") or asset.get("thumbnail_path") or asset.get("turn_capture_path") or ""))
-    if not crop_path.exists():
-        return {"path": str(crop_path), "available": False}
-    with Image.open(crop_path) as raw:
-        image = ImageOps.exif_transpose(raw).convert("RGB")
-        width, height = image.size
-        sample = image.copy()
-        sample.thumbnail((96, 96), Image.Resampling.LANCZOS)
-        pixels = list(sample.getdata())
-        count = max(1, len(pixels))
-        avg = [
-            int(sum(pixel[index] for pixel in pixels) / count)
-            for index in range(3)
-        ]
-        return {
-            "path": str(crop_path),
-            "available": True,
-            "width": width,
-            "height": height,
-            "orientation": "landscape" if width > height else ("portrait" if height > width else "square"),
-            "dominant_colors": [f"#{avg[0]:02x}{avg[1]:02x}{avg[2]:02x}"],
-        }
+    # Retain the helper name as a compatibility facade, while preventing a
+    # previous screenshot/crop asset from being opened or interpreted again.
+    del asset
+    return {"available": False, "reason": "legacy_image_path_input_rejected"}
+
+
+def analyze_ephemeral_customer_image(payload: Any) -> dict[str, Any]:
+    """Profile an in-memory clipboard payload without exposing image bytes."""
+    raw = payload.get("image_bytes") if isinstance(payload, dict) else getattr(payload, "image_bytes", None)
+    released = bool(payload.get("released", False)) if isinstance(payload, dict) else bool(getattr(payload, "released", False))
+    if released or not isinstance(raw, (bytes, bytearray, memoryview)):
+        return {"available": False, "reason": "ephemeral_image_payload_missing"}
+    try:
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", Image.DecompressionBombWarning)
+            with Image.open(io.BytesIO(bytes(raw))) as decoded:
+                width, height = decoded.size
+                if width <= 0 or height <= 0 or width * height > MAX_IMAGE_PIXELS:
+                    return {"available": False, "reason": "image_pixel_limit_exceeded"}
+                image = ImageOps.exif_transpose(decoded).convert("RGB")
+                sample = image.copy()
+                sample.thumbnail((96, 96), Image.Resampling.LANCZOS)
+                pixels = list(sample.getdata())
+                image.close()
+                sample.close()
+    except (Image.DecompressionBombError, OSError, ValueError, Warning):
+        return {"available": False, "reason": "image_decode_failed"}
+    count = max(1, len(pixels))
+    avg = [int(sum(pixel[index] for pixel in pixels) / count) for index in range(3)]
+    return {
+        "available": True,
+        "width": width,
+        "height": height,
+        "orientation": "landscape" if width > height else ("portrait" if height > width else "square"),
+        "dominant_colors": [f"#{avg[0]:02x}{avg[1]:02x}{avg[2]:02x}"],
+    }
 
 
 def _clip(value: Any, max_chars: int) -> str:
@@ -289,10 +307,14 @@ def maybe_run_customer_image_understanding(
     customer_text: str,
     image_assets: list[dict[str, Any]],
     source_reason: str,
+    image_payloads: list[Any] | None = None,
+    ephemeral_clipboard: bool = False,
 ) -> dict[str, Any]:
     started = time.time()
     settings = effective_customer_image_understanding_settings(config)
-    local_profiles = [analyze_customer_image_asset(item) for item in image_assets if isinstance(item, dict)]
+    memory_payloads = list(image_payloads or [])
+    image_paths = unique_image_paths_for_understanding(image_assets)
+    local_profiles = [analyze_ephemeral_customer_image(item) for item in memory_payloads]
     local_visual_profile = {
         "asset_count": len(local_profiles),
         "profiles": local_profiles[:3],
@@ -320,8 +342,17 @@ def maybe_run_customer_image_understanding(
             source_messages=source_messages,
             local_visual_profile=local_visual_profile,
         )
-    image_paths = unique_image_paths_for_understanding(image_assets)
-    if not image_paths:
+    if image_paths:
+        return normalize_customer_image_understanding_result(
+            {"applied": False, "adoptable": False, "reason": "legacy_image_path_input_rejected"},
+            enabled=bool(settings.get("enabled", True)),
+            provider="",
+            request_style=str(settings.get("request_style") or ""),
+            model=str(settings.get("model") or ""),
+            source_messages=source_messages,
+            local_visual_profile=local_visual_profile,
+        )
+    if not image_paths and not memory_payloads:
         return normalize_customer_image_understanding_result(
             {"applied": False, "adoptable": False, "reason": "customer_image_assets_missing"},
             enabled=True,
@@ -377,24 +408,25 @@ def maybe_run_customer_image_understanding(
         local_profiles=local_profiles,
         catalog_identity_candidates=catalog_identity_candidates,
     )
-    best_effort_archive_prompt_event(
-        "customer_image_understanding_prompt",
-        {
-            "source_reason": source_reason,
-            "customer_text": customer_text,
-            "provider": str(settings.get("base_url") or ""),
-            "model": str(settings.get("model") or ""),
-            "request_style": str(settings.get("request_style") or ""),
-            "timeout_seconds": int(settings.get("timeout_seconds") or 10),
-            "max_tokens": int(settings.get("max_tokens") or DEFAULT_MAX_TOKENS),
-            "image_paths": image_paths[:3],
-            "source_messages": source_messages,
-            "local_profiles": local_profiles,
-            "catalog_identity_candidates": catalog_identity_candidates,
-            "prompt": prompt,
-        },
-        config=config,
-    )
+    if not ephemeral_clipboard:
+        best_effort_archive_prompt_event(
+            "customer_image_understanding_prompt",
+            {
+                "source_reason": source_reason,
+                "customer_text": customer_text,
+                "provider": str(settings.get("base_url") or ""),
+                "model": str(settings.get("model") or ""),
+                "request_style": str(settings.get("request_style") or ""),
+                "timeout_seconds": int(settings.get("timeout_seconds") or 10),
+                "max_tokens": int(settings.get("max_tokens") or DEFAULT_MAX_TOKENS),
+                "image_paths": image_paths[:3],
+                "source_messages": source_messages,
+                "local_profiles": local_profiles,
+                "catalog_identity_candidates": catalog_identity_candidates,
+                "prompt": prompt,
+            },
+            config=config,
+        )
     provider_result = run_customer_image_understanding_provider(
         api_key=str(settings.get("api_key") or ""),
         base_url=str(settings.get("base_url") or ""),
@@ -404,6 +436,7 @@ def maybe_run_customer_image_understanding(
         image_paths=image_paths[:3],
         timeout_seconds=int(settings.get("timeout_seconds") or 10),
         max_tokens=int(settings.get("max_tokens") or DEFAULT_MAX_TOKENS),
+        image_payloads=memory_payloads[:3],
     )
     if (
         not provider_result.get("ok")
@@ -415,26 +448,27 @@ def maybe_run_customer_image_understanding(
             local_profiles=local_profiles,
             catalog_identity_candidates=catalog_identity_candidates,
         )
-        best_effort_archive_prompt_event(
-            "customer_image_understanding_retry_prompt",
-            {
-                "source_reason": source_reason,
-                "customer_text": customer_text,
-                "provider": str(settings.get("base_url") or ""),
-                "model": str(settings.get("model") or ""),
-                "request_style": str(settings.get("request_style") or ""),
-                "timeout_seconds": int(settings.get("timeout_seconds") or 10),
-                "max_tokens": max(int(settings.get("max_tokens") or DEFAULT_MAX_TOKENS), DEFAULT_MAX_TOKENS * 2),
-                "image_paths": image_paths[:2],
-                "source_messages": source_messages,
-                "local_profiles": local_profiles,
-                "catalog_identity_candidates": catalog_identity_candidates,
-                "initial_error": str(provider_result.get("error") or ""),
-                "initial_response_diagnostics": provider_result.get("response_diagnostics"),
-                "prompt": retry_prompt,
-            },
-            config=config,
-        )
+        if not ephemeral_clipboard:
+            best_effort_archive_prompt_event(
+                "customer_image_understanding_retry_prompt",
+                {
+                    "source_reason": source_reason,
+                    "customer_text": customer_text,
+                    "provider": str(settings.get("base_url") or ""),
+                    "model": str(settings.get("model") or ""),
+                    "request_style": str(settings.get("request_style") or ""),
+                    "timeout_seconds": int(settings.get("timeout_seconds") or 10),
+                    "max_tokens": max(int(settings.get("max_tokens") or DEFAULT_MAX_TOKENS), DEFAULT_MAX_TOKENS * 2),
+                    "image_paths": image_paths[:2],
+                    "source_messages": source_messages,
+                    "local_profiles": local_profiles,
+                    "catalog_identity_candidates": catalog_identity_candidates,
+                    "initial_error": str(provider_result.get("error") or ""),
+                    "initial_response_diagnostics": provider_result.get("response_diagnostics"),
+                    "prompt": retry_prompt,
+                },
+                config=config,
+            )
         retry_result = run_customer_image_understanding_provider(
             api_key=str(settings.get("api_key") or ""),
             base_url=str(settings.get("base_url") or ""),
@@ -444,6 +478,7 @@ def maybe_run_customer_image_understanding(
             image_paths=image_paths[:2],
             timeout_seconds=int(settings.get("timeout_seconds") or 10),
             max_tokens=max(int(settings.get("max_tokens") or DEFAULT_MAX_TOKENS), DEFAULT_MAX_TOKENS * 2),
+            image_payloads=memory_payloads[:2],
         )
         if retry_result.get("ok"):
             retry_result["retry_after_non_json"] = True
@@ -496,20 +531,21 @@ def maybe_run_customer_image_understanding(
             source_messages=source_messages,
             local_visual_profile=local_visual_profile,
         )
-        best_effort_archive_prompt_event(
-            "customer_image_understanding_error",
-            {
-                "source_reason": source_reason,
-                "customer_text": customer_text,
-                "provider": str(settings.get("base_url") or ""),
-                "model": str(settings.get("model") or ""),
-                "request_style": str(settings.get("request_style") or ""),
-                "image_paths": image_paths[:3],
-                "provider_result": provider_result,
-                "normalized_result": normalized,
-            },
-            config=config,
-        )
+        if not ephemeral_clipboard:
+            best_effort_archive_prompt_event(
+                "customer_image_understanding_error",
+                {
+                    "source_reason": source_reason,
+                    "customer_text": customer_text,
+                    "provider": str(settings.get("base_url") or ""),
+                    "model": str(settings.get("model") or ""),
+                    "request_style": str(settings.get("request_style") or ""),
+                    "image_paths": image_paths[:3],
+                    "provider_result": provider_result,
+                    "normalized_result": normalized,
+                },
+                config=config,
+            )
         return normalized
     parsed = dict(provider_result.get("parsed") or {})
     stabilize_catalog_alignment_bridge(parsed)
@@ -532,17 +568,18 @@ def maybe_run_customer_image_understanding(
         source_messages=source_messages,
         local_visual_profile=local_visual_profile,
     )
-    best_effort_archive_prompt_event(
-        "customer_image_understanding_result",
-        {
-            "source_reason": source_reason,
-            "customer_text": customer_text,
-            "provider": str(settings.get("base_url") or ""),
-            "model": str(settings.get("model") or ""),
-            "request_style": str(settings.get("request_style") or ""),
-            "image_paths": image_paths[:3],
-            "normalized_result": normalized,
-        },
-        config=config,
-    )
+    if not ephemeral_clipboard:
+        best_effort_archive_prompt_event(
+            "customer_image_understanding_result",
+            {
+                "source_reason": source_reason,
+                "customer_text": customer_text,
+                "provider": str(settings.get("base_url") or ""),
+                "model": str(settings.get("model") or ""),
+                "request_style": str(settings.get("request_style") or ""),
+                "image_paths": image_paths[:3],
+                "normalized_result": normalized,
+            },
+            config=config,
+        )
     return normalized

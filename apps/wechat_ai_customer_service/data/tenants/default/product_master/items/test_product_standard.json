@@ -1,44 +1,155 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "category_id": "products",
   "id": "test_product_standard",
   "status": "archived",
   "source": {
-    "type": "admin_draft",
-    "legacy_target": "product_knowledge",
-    "legacy_migrated_from": "knowledge_bases/products"
-  },
-  "data": {
-    "name": "测试产品 标准款",
-    "sku": "test_product_standard",
-    "category": "测试商品",
-    "aliases": [
-      "测试产品",
-      "测试款",
-      "标准款",
-      "样品测试款"
-    ],
-    "specs": "标准款，白色，单件装",
-    "price": 199,
-    "unit": "个",
-    "price_tiers": [
-      {
-        "min_quantity": 50,
-        "unit_price": 179
-      },
-      {
-        "min_quantity": 100,
-        "unit_price": 159
-      }
-    ],
-    "inventory": 500,
-    "shipping_policy": "现货，当天可发\n满 20 个包邮，不满按 12 元/单",
-    "warranty_policy": "非人为损坏 7 天包换",
-    "reply_templates": {
-      "discount_policy": "50 个起 179 元/个，100 个起 159 元/个",
-      "notes": "用于测试产品、数量、报价、优惠等问答"
+    "type": "manual",
+    "provider": "manual",
+    "marker": {
+      "ingest_channel": "legacy_v1_migration",
+      "original_source_type": "admin_draft",
+      "recorded_at": "2026-07-13T05:11:12+00:00",
+      "migration_batch": "default_v1_to_v2_20260713"
     },
-    "risk_rules": []
+    "binding": {
+      "state": "unbound"
+    }
+  },
+  "source_payloads": {
+    "vehicle_detail": {
+      "api": "manual.dafengche_shaped_vehicle_detail",
+      "payload": {
+        "baseCarInfo": {
+          "name": "测试产品 标准款"
+        },
+        "carPriceInfo": {
+          "salePrice": 199
+        }
+      },
+      "pulled_at": "2026-07-13T05:11:12+00:00",
+      "content_hash": "sha256:2e71db589ec9ebd80ebb4440b164ee98714a11008200eee76f8c9acee346a5bd"
+    },
+    "vehicle_pictures": {
+      "api": "manual.dafengche_shaped_vehicle_pictures",
+      "payload": [],
+      "pulled_at": "2026-07-13T05:11:12+00:00",
+      "content_hash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  },
+  "extensions": {
+    "manual": {
+      "field_provenance": {
+        "source_payloads.vehicle_detail.payload.baseCarInfo.name": {
+          "source": "legacy_v1_migration",
+          "original_path": "data.name",
+          "original_source_type": "admin_draft",
+          "recorded_at": "2026-07-13T05:11:12+00:00"
+        },
+        "source_payloads.vehicle_detail.payload.carPriceInfo.salePrice": {
+          "source": "legacy_v1_migration",
+          "original_path": "data.price",
+          "original_source_type": "admin_draft",
+          "recorded_at": "2026-07-13T05:11:12+00:00"
+        }
+      }
+    },
+    "compatibility": {
+      "legacy_v1_record": {
+        "schema_version": 1,
+        "category_id": "products",
+        "id": "test_product_standard",
+        "status": "archived",
+        "source": {
+          "type": "admin_draft",
+          "legacy_target": "product_knowledge",
+          "legacy_migrated_from": "knowledge_bases/products"
+        },
+        "data": {
+          "name": "测试产品 标准款",
+          "sku": "test_product_standard",
+          "category": "测试商品",
+          "aliases": [
+            "测试产品",
+            "测试款",
+            "标准款",
+            "样品测试款"
+          ],
+          "specs": "标准款，白色，单件装",
+          "price": 199,
+          "unit": "个",
+          "price_tiers": [
+            {
+              "min_quantity": 50,
+              "unit_price": 179
+            },
+            {
+              "min_quantity": 100,
+              "unit_price": 159
+            }
+          ],
+          "inventory": 500,
+          "shipping_policy": "现货，当天可发\n满 20 个包邮，不满按 12 元/单",
+          "warranty_policy": "非人为损坏 7 天包换",
+          "reply_templates": {
+            "discount_policy": "50 个起 179 元/个，100 个起 159 元/个",
+            "notes": "用于测试产品、数量、报价、优惠等问答"
+          },
+          "risk_rules": []
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        },
+        "metadata": {
+          "created_at": "2026-04-26T23:15:06",
+          "updated_at": "2026-05-16T22:51:06",
+          "created_by": "admin",
+          "updated_by": "admin"
+        }
+      },
+      "input_adapter": "generic_product_form_to_manual_v2",
+      "migration": {
+        "from_schema_version": 1,
+        "batch_id": "default_v1_to_v2_20260713",
+        "migrated_at": "2026-07-13T05:11:12+00:00"
+      }
+    },
+    "wechat_customer_service": {
+      "customer_visible_annotations": {
+        "category": "测试商品",
+        "specs": "标准款，白色，单件装",
+        "shipping_policy": "现货，当天可发\n满 20 个包邮，不满按 12 元/单",
+        "warranty_policy": "非人为损坏 7 天包换",
+        "aliases": [
+          "测试产品",
+          "测试款",
+          "标准款",
+          "样品测试款"
+        ]
+      },
+      "manual_annotations": {
+        "sku": "test_product_standard",
+        "unit": "个",
+        "inventory": 500,
+        "price_tiers": [
+          {
+            "min_quantity": 50,
+            "unit_price": 179
+          },
+          {
+            "min_quantity": 100,
+            "unit_price": 159
+          }
+        ],
+        "reply_templates": {
+          "discount_policy": "50 个起 179 元/个，100 个起 159 元/个",
+          "notes": "用于测试产品、数量、报价、优惠等问答"
+        }
+      },
+      "manual_overrides": {}
+    }
   },
   "runtime": {
     "allow_auto_reply": true,
@@ -47,8 +158,10 @@
   },
   "metadata": {
     "created_at": "2026-04-26T23:15:06",
-    "updated_at": "2026-05-16T22:51:06",
+    "updated_at": "2026-07-13T13:11:12",
     "created_by": "admin",
-    "updated_by": "admin"
+    "updated_by": "admin",
+    "migrated_from_schema_version": 1,
+    "migration_batch": "default_v1_to_v2_20260713"
   }
 }

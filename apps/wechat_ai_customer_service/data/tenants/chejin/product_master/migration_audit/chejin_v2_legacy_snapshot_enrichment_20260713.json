@@ -1,0 +1,187 @@
+{
+  "ok": true,
+  "tenant_id": "chejin",
+  "product_master_root": "D:\\AI\\omniauto\\apps\\wechat_ai_customer_service\\data\\tenants\\chejin\\product_master",
+  "batch_id": "chejin_v2_legacy_snapshot_enrichment_20260713",
+  "mode": "apply",
+  "enriched_at": "2026-07-13T06:45:00+00:00",
+  "policy": {
+    "eligibility": "V2 manual records marked legacy_v1_migration with a preserved legacy_v1_record snapshot",
+    "write_rule": "write only directly matched values into currently blank Dafengche-shaped fields",
+    "source_order": {
+      "registration_date": [
+        "data.specs"
+      ],
+      "mileage": [
+        "data.specs"
+      ],
+      "displacement": [
+        "data.specs",
+        "data.name"
+      ],
+      "gearbox": [
+        "data.name",
+        "data.specs"
+      ],
+      "exterior_color": [
+        "data.specs"
+      ]
+    },
+    "never_inferred": [
+      "brandName",
+      "seriesName",
+      "modelName",
+      "vehicleCondition",
+      "interiorColor",
+      "carId",
+      "shopCode",
+      "VIN",
+      "plate",
+      "operationPhase",
+      "photos"
+    ],
+    "does_not_overwrite_existing_v2_fields": true
+  },
+  "records_with_planned_updates": 22,
+  "records_written": 22,
+  "retired_data_shadow_cleanup_ids": [
+    "chejin_5_series_2019_530li",
+    "chejin_audi_a4l_2018_40tfsi",
+    "chejin_bmw320_2019_m",
+    "chejin_c_class_2020_260l",
+    "chejin_camry_2021_20g",
+    "chejin_civic_2020_220turbo",
+    "chejin_crider_2019_180turbo",
+    "chejin_crown_2018_20t",
+    "chejin_elantra_2019_14t",
+    "chejin_gl8_2020_es653t",
+    "chejin_golf_2020_280tsi",
+    "chejin_haval_h6_2020_20t",
+    "chejin_hengyi_2019_es6",
+    "chejin_mazda3_2020_20l",
+    "chejin_model3_2021_srplus",
+    "chejin_odysssey_2020_hybrid",
+    "chejin_polo_2018_15l",
+    "chejin_qinplus_2022_dmi55",
+    "chejin_ranger_2020_23t",
+    "chejin_sienna_2021_hybrid",
+    "chejin_tiguanl_2021_330tsi",
+    "chejin_xtrail_2020_25l"
+  ],
+  "unchanged_ids": [],
+  "skipped": [],
+  "field_counts": {},
+  "planned_updates": [
+    {
+      "id": "chejin_5_series_2019_530li",
+      "fields": [],
+      "removed_retired_data_shadow": true
+    },
+    {
+      "id": "chejin_audi_a4l_2018_40tfsi",
+      "fields": [],
+      "removed_retired_data_shadow": true
+    },
+    {
+      "id": "chejin_bmw320_2019_m",
+      "fields": [],
+      "removed_retired_data_shadow": true
+    },
+    {
+      "id": "chejin_c_class_2020_260l",
+      "fields": [],
+      "removed_retired_data_shadow": true
+    },
+    {
+      "id": "chejin_camry_2021_20g",
+      "fields": [],
+      "removed_retired_data_shadow": true
+    },
+    {
+      "id": "chejin_civic_2020_220turbo",
+      "fields": [],
+      "removed_retired_data_shadow": true
+    },
+    {
+      "id": "chejin_crider_2019_180turbo",
+      "fields": [],
+      "removed_retired_data_shadow": true
+    },
+    {
+      "id": "chejin_crown_2018_20t",
+      "fields": [],
+      "removed_retired_data_shadow": true
+    },
+    {
+      "id": "chejin_elantra_2019_14t",
+      "fields": [],
+      "removed_retired_data_shadow": true
+    },
+    {
+      "id": "chejin_gl8_2020_es653t",
+      "fields": [],
+      "removed_retired_data_shadow": true
+    },
+    {
+      "id": "chejin_golf_2020_280tsi",
+      "fields": [],
+      "removed_retired_data_shadow": true
+    },
+    {
+      "id": "chejin_haval_h6_2020_20t",
+      "fields": [],
+      "removed_retired_data_shadow": true
+    },
+    {
+      "id": "chejin_hengyi_2019_es6",
+      "fields": [],
+      "removed_retired_data_shadow": true
+    },
+    {
+      "id": "chejin_mazda3_2020_20l",
+      "fields": [],
+      "removed_retired_data_shadow": true
+    },
+    {
+      "id": "chejin_model3_2021_srplus",
+      "fields": [],
+      "removed_retired_data_shadow": true
+    },
+    {
+      "id": "chejin_odysssey_2020_hybrid",
+      "fields": [],
+      "removed_retired_data_shadow": true
+    },
+    {
+      "id": "chejin_polo_2018_15l",
+      "fields": [],
+      "removed_retired_data_shadow": true
+    },
+    {
+      "id": "chejin_qinplus_2022_dmi55",
+      "fields": [],
+      "removed_retired_data_shadow": true
+    },
+    {
+      "id": "chejin_ranger_2020_23t",
+      "fields": [],
+      "removed_retired_data_shadow": true
+    },
+    {
+      "id": "chejin_sienna_2021_hybrid",
+      "fields": [],
+      "removed_retired_data_shadow": true
+    },
+    {
+      "id": "chejin_tiguanl_2021_330tsi",
+      "fields": [],
+      "removed_retired_data_shadow": true
+    },
+    {
+      "id": "chejin_xtrail_2020_25l",
+      "fields": [],
+      "removed_retired_data_shadow": true
+    }
+  ],
+  "failures": []
+}

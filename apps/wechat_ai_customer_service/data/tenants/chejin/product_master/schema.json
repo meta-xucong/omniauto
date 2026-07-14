@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "category_id": "products",
   "display_name": "商品资料",
   "description": "用于商品匹配、报价、规格、库存、物流、售后和禁用承诺。",
@@ -138,5 +138,6 @@
     "required_for_auto_reply": [
       "name"
     ]
-  }
+  },
+  "record_storage_contract": "dafengche_product_master_v2"
 }

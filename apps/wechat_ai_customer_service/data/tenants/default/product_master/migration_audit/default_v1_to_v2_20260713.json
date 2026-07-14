@@ -1,0 +1,42 @@
+{
+  "ok": true,
+  "tenant_id": "default",
+  "product_master_root": "D:\\AI\\omniauto\\apps\\wechat_ai_customer_service\\data\\tenants\\default\\product_master",
+  "batch_id": "default_v1_to_v2_20260713",
+  "mode": "apply",
+  "migrated_at": "2026-07-13T05:11:12+00:00",
+  "candidate_count": 15,
+  "converted_ids": [
+    "ap-88",
+    "chejin_bmw320_2019_m",
+    "chejin_camry_2021_20g",
+    "chejin_civic_2020_220turbo",
+    "chejin_gl8_2020_es653t",
+    "chejin_qinplus_2022_dmi55",
+    "chejin_sienna_2021_hybrid",
+    "commercial_fridge_bx_200",
+    "fl-920",
+    "office_chair_oc_300",
+    "packing_carton_ct_50",
+    "test_cargo",
+    "test_product_standard",
+    "water_filter_core",
+    "wooden-rocking-chair"
+  ],
+  "already_v2_ids": [],
+  "failures": [],
+  "mapping_policy": {
+    "source_type": "manual",
+    "source_marker": "legacy_v1_migration",
+    "binding": "unbound",
+    "preserved_legacy_snapshot": true,
+    "never_fabricated": [
+      "shopCode",
+      "carId",
+      "VIN",
+      "plate",
+      "operationPhase",
+      "dafengche_api_provenance"
+    ]
+  }
+}

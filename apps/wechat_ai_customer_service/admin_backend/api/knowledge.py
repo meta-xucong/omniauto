@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from copy import deepcopy
 from typing import Any
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException, Query, Request
@@ -20,7 +21,11 @@ from ..services.knowledge_registry import KnowledgeRegistry
 from ..services.knowledge_schema_manager import KnowledgeSchemaManager
 from ..services.knowledge_store import KnowledgeStore
 from ..services.shared_public_sync import queue_shared_public_scan
-from apps.wechat_ai_customer_service.product_master import PRODUCT_MASTER_CATEGORY_ID, product_master_category_record
+from apps.wechat_ai_customer_service.product_master import (
+    PRODUCT_MASTER_CATEGORY_ID,
+    is_v2_product_item,
+    product_master_category_record,
+)
 
 
 router = APIRouter(prefix="/api/knowledge", tags=["knowledge"])
@@ -282,6 +287,13 @@ def raw_json(file: str = Query(..., pattern="^(manifest|product_knowledge|style_
 
 
 def normalize_item_payload(category_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+    if category_id == PRODUCT_MASTER_CATEGORY_ID and is_v2_product_item(payload):
+        item = deepcopy(payload)
+        item["schema_version"] = 2
+        item["category_id"] = PRODUCT_MASTER_CATEGORY_ID
+        item["id"] = str(payload.get("id") or "")
+        item["status"] = str(payload.get("status") or "active")
+        return item
     data = payload.get("data") if isinstance(payload.get("data"), dict) else {}
     item = {
         "schema_version": int(payload.get("schema_version") or 1),

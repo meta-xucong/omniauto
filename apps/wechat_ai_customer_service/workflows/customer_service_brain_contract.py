@@ -1193,6 +1193,7 @@ def verify_brain_reply_quality(
     clean_reply = normalize_space(reply)
     errors: list[str] = []
     warnings: list[str] = []
+    turn_semantics = extract_brain_turn_semantics(plan)
 
     if not clean_reply:
         errors.append("empty_visible_reply")
@@ -1230,33 +1231,48 @@ def verify_brain_reply_quality(
     delay_followup_posture = str(delay_followup_state.get("suggested_reply_posture") or "") == "acknowledge_delay_then_continue"
 
     if is_social_only_message(question):
-        if contains_any(clean_reply, UNSUPPORTED_INFO_COLLECTION_TERMS):
-            if not delay_followup_posture or not check_delay_followup_context_continuity(question, clean_reply, evidence_pack or {}) == {}:
-                errors.append("unsupported_info_collection_for_social_message")
-        stale_context_check = check_social_turn_over_carries_stale_business_context(question, clean_reply)
-        if stale_context_check.get("error"):
-            errors.append(str(stale_context_check["error"]))
-        unsupported_context_check = check_social_turn_revives_unsupported_business_context(
-            question,
-            clean_reply,
-            evidence_pack or {},
-        )
-        if unsupported_context_check.get("error"):
-            errors.append(str(unsupported_context_check["error"]))
-        supported_context_check = check_social_turn_revives_supported_prior_business_context(
-            question,
-            clean_reply,
-            evidence_pack or {},
-        )
-        if supported_context_check.get("error"):
-            errors.append(str(supported_context_check["error"]))
-        self_history_check = check_social_turn_continues_self_history_without_open_customer_context(
-            question,
-            clean_reply,
-            evidence_pack or {},
-        )
-        if self_history_check.get("error"):
-            errors.append(str(self_history_check["error"]))
+        # A local social-text heuristic is intentionally only a review trigger.
+        # The Brain owns the meaning of a mixed/current customer turn through
+        # ``understanding.turn_semantics``.  Even without that optional field,
+        # a relevance doubt must never turn a valid Brain reply into a silent
+        # no-reply.  Facts, commitments, leakage, and session safety remain
+        # hard checks elsewhere in this verifier/guard pipeline.
+        brain_declares_current_business = turn_semantics["kind"] in {"business", "mixed"} and turn_semantics[
+            "basis"
+        ] == "current_message"
+        if not brain_declares_current_business:
+            if contains_any(clean_reply, UNSUPPORTED_INFO_COLLECTION_TERMS):
+                delay_followup_check = check_delay_followup_context_continuity(
+                    question,
+                    clean_reply,
+                    evidence_pack or {},
+                )
+                if not delay_followup_posture or bool(delay_followup_check.get("error")):
+                    warnings.append("social_context_review:unsupported_info_collection_for_social_message")
+            stale_context_check = check_social_turn_over_carries_stale_business_context(question, clean_reply)
+            if stale_context_check.get("error"):
+                warnings.append(f"social_context_review:{stale_context_check['error']}")
+            unsupported_context_check = check_social_turn_revives_unsupported_business_context(
+                question,
+                clean_reply,
+                evidence_pack or {},
+            )
+            if unsupported_context_check.get("error"):
+                warnings.append(f"social_context_review:{unsupported_context_check['error']}")
+            supported_context_check = check_social_turn_revives_supported_prior_business_context(
+                question,
+                clean_reply,
+                evidence_pack or {},
+            )
+            if supported_context_check.get("error"):
+                warnings.append(f"social_context_review:{supported_context_check['error']}")
+            self_history_check = check_social_turn_continues_self_history_without_open_customer_context(
+                question,
+                clean_reply,
+                evidence_pack or {},
+            )
+            if self_history_check.get("error"):
+                warnings.append(f"social_context_review:{self_history_check['error']}")
         if len(clean_reply) > int(cfg.get("social_reply_soft_max_chars") or 80):
             warnings.append("social_reply_too_long")
     elif is_thin_social_or_common_sense_reply(question, clean_reply, plan):
@@ -1264,10 +1280,12 @@ def verify_brain_reply_quality(
 
     redirect_check = check_over_eager_business_redirect_after_social_fatigue(question, clean_reply, evidence_pack or {})
     if redirect_check.get("error"):
-        errors.append(str(redirect_check["error"]))
+        warnings.append(f"social_context_review:{redirect_check['error']}")
     delay_followup_check = check_delay_followup_context_continuity(question, clean_reply, evidence_pack or {})
     if delay_followup_check.get("error"):
-        errors.append(str(delay_followup_check["error"]))
+        warnings.append(f"social_context_review:{delay_followup_check['error']}")
+    if delay_followup_check.get("warning"):
+        warnings.append(str(delay_followup_check["warning"]))
 
     if concrete_question and is_generic_stall_reply(clean_reply):
         errors.append("generic_stall_reply_for_concrete_question")
@@ -1395,7 +1413,40 @@ def verify_brain_reply_quality(
             break
 
     instruction = build_quality_repair_instruction(errors=errors, warnings=warnings, current_message=question, reply=clean_reply)
-    return {"ok": not errors, "errors": errors, "warnings": warnings, "repair_instruction": instruction}
+    return {
+        "ok": not errors,
+        "errors": errors,
+        "warnings": warnings,
+        "repair_instruction": instruction,
+        # Additive audit metadata; this preserves the historical quality result
+        # shape while making the Brain-vs-heuristic decision inspectable.
+        "turn_semantics": turn_semantics,
+    }
+
+
+def extract_brain_turn_semantics(plan: dict[str, Any]) -> dict[str, str]:
+    """Read optional Brain-owned turn semantics without creating a local intent engine.
+
+    ``understanding`` has always been an open object in BrainPlan.  The optional
+    ``turn_semantics`` object is intentionally additive so old/manual plans keep
+    working.  Only an explicit ``business``/``mixed`` decision grounded in the
+    current message suppresses local social-heuristic review; it never waives
+    fact authority, safety, or send-target checks.
+    """
+
+    understanding = plan.get("understanding") if isinstance(plan.get("understanding"), dict) else {}
+    raw = understanding.get("turn_semantics")
+    if isinstance(raw, str):
+        raw = {"kind": raw}
+    raw = raw if isinstance(raw, dict) else {}
+    kind = str(raw.get("kind") or raw.get("turn_kind") or raw.get("intent_kind") or "uncertain").strip().lower()
+    if kind not in {"business", "social", "mixed", "uncertain"}:
+        kind = "uncertain"
+    basis = str(raw.get("basis") or raw.get("source") or "").strip().lower()
+    if basis not in {"current_message", "context", "mixed", "uncertain"}:
+        basis = "uncertain"
+    current_request = normalize_space(str(raw.get("current_request") or raw.get("request") or ""))[:120]
+    return {"kind": kind, "basis": basis, "current_request": current_request}
 
 
 def plan_requires_fact_claims(plan: dict[str, Any]) -> bool:
@@ -2075,10 +2126,12 @@ def is_thin_social_or_common_sense_reply(question: str, reply: str, plan: dict[s
 
 
 def check_delay_followup_context_continuity(question: str, reply: str, evidence_pack: dict[str, Any]) -> dict[str, Any]:
-    """Flag fresh-greeting replies when runtime says the customer is chasing.
+    """Audit short social replies without treating them as a send blocker.
 
-    This is a generic continuity check. It only asks Brain to repair; it does
-    not prescribe wording or authorize facts.
+    A customer asking "在吗" after a delayed turn commonly deserves a short
+    Brain-authored acknowledgement such as "在呢，您说".  The wording may be
+    worth reviewing for continuity, but a reviewer must not erase a valid
+    visible reply merely because it contains ordinary greeting language.
     """
 
     state = extract_conversation_interaction_state(evidence_pack)
@@ -2094,19 +2147,6 @@ def check_delay_followup_context_continuity(question: str, reply: str, evidence_
         return {}
     if not is_social_only_message(q):
         return {}
-    delay_ack_terms = (
-        "抱歉",
-        "不好意思",
-        "回慢",
-        "慢了",
-        "等久",
-        "久等",
-        "刚才在",
-        "查",
-        "核",
-        "打字",
-        "处理",
-    )
     context_anchor_terms = (
         "前面",
         "上面",
@@ -2117,12 +2157,15 @@ def check_delay_followup_context_continuity(question: str, reply: str, evidence_
         "刚说",
         "刚问",
     )
-    fresh_greeting_terms = ("您说", "你说", "在的", "在呢", "马上跟您聊", "刚看到")
     mentions_unanswered = reply_mentions_unanswered_context(r, str(state.get("last_unanswered_customer_text") or ""))
-    if contains_any(r, delay_ack_terms) or contains_any(r, context_anchor_terms) or mentions_unanswered:
+    if contains_any(r, context_anchor_terms) or mentions_unanswered:
         return {}
-    if len(r) <= 80 and contains_any(r, fresh_greeting_terms):
-        return {"error": "delay_followup_reply_looks_like_fresh_greeting"}
+    if len(r) <= 80:
+        return {
+            "warning": "delay_followup_short_social_reply_review",
+            "reason": "brain_authored_short_social_reply_is_sendable",
+            "non_blocking": True,
+        }
     return {}
 
 

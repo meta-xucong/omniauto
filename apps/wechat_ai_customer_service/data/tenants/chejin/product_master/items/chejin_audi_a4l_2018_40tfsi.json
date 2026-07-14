@@ -1,37 +1,267 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "category_id": "products",
   "id": "chejin_audi_a4l_2018_40tfsi",
   "status": "active",
   "source": {
-    "type": "test_fixture",
-    "batch_token": "CHEJIN_SEED_20260507",
-    "legacy_migrated_from": "knowledge_bases/products"
-  },
-  "data": {
-    "name": "2018款奥迪A4L 40 TFSI 进取型",
-    "sku": "CHEJIN-A4L-2018-40TFSI",
-    "category": "二手车/豪华轿车",
-    "aliases": [
-      "奥迪A4L",
-      "A4L",
-      "四环",
-      "奥迪轿车",
-      "豪华品牌"
-    ],
-    "specs": "2018年6月上牌，表显7.2万公里，2.0T自动挡，南京本地一手车，全程4S店保养记录可查，原版原漆。",
-    "price": 14.5,
-    "unit": "台",
-    "inventory": 1,
-    "shipping_policy": "南京门店随时看车，试驾需提前一天预约并转人工确认。",
-    "warranty_policy": "车况以第三方检测报告为准，支持90天核心部件质保，重大事故/水泡/火烧承诺需人工确认。",
-    "reply_templates": {
-      "recommendation": "这台A4L适合14到16万预算、注重品牌和质感的客户，原版原漆、全程4S保养是亮点。"
+    "type": "manual",
+    "provider": "manual",
+    "marker": {
+      "ingest_channel": "legacy_v1_migration",
+      "original_source_type": "test_fixture",
+      "recorded_at": "2026-07-13T04:53:45+00:00",
+      "migration_batch": "chejin_v1_to_v2_20260713"
     },
-    "risk_rules": [
-      "不承诺贷款必过",
-      "金融方案以资方审批为准"
-    ]
+    "binding": {
+      "state": "unbound"
+    }
+  },
+  "source_payloads": {
+    "vehicle_detail": {
+      "api": "manual.dafengche_shaped_vehicle_detail",
+      "payload": {
+        "baseCarInfo": {
+          "name": "2018款奥迪A4L 40 TFSI 进取型",
+          "firstLicensePlateDate": "2018-06",
+          "mileage": 7.2,
+          "carName": "测试车辆-02",
+          "brandName": "测试品牌-02",
+          "seriesName": "测试车系-02",
+          "modelName": "测试车型-02",
+          "vehicleCondition": "测试车况：良好",
+          "exteriorColor": "白色",
+          "color": "白色",
+          "interiorColor": "测试黑色"
+        },
+        "carPriceInfo": {
+          "salePrice": 14.5,
+          "purchasePrice": 8.74,
+          "salesPrice": 10.74,
+          "managerPrice": 10.24,
+          "wholesalePrice": 9.74
+        },
+        "carModelParam": {
+          "displacement": "2.0T",
+          "gearbox": "自动",
+          "gearBox": "测试自动"
+        },
+        "operationPhase": "TEST_SALE",
+        "carLicenseInfo": {
+          "licenseStatus": "测试手续正常"
+        }
+      },
+      "pulled_at": "2026-07-13T08:59:59+00:00",
+      "content_hash": "sha256:3673b4007e7b4a6fcd1ac3fe361fd9e822a8c04205422616de94279c98123335",
+      "enriched_at": "2026-07-13T06:42:22+00:00",
+      "test_filled_at": "2026-07-13T07:47:11+00:00"
+    },
+    "vehicle_pictures": {
+      "api": "manual.dafengche_shaped_vehicle_pictures",
+      "payload": [
+        {
+          "pictureId": "img_6c0b4e44b073cf432c29c4c1",
+          "pictureUrl": "/api/product-console/products/chejin_audi_a4l_2018_40tfsi/images/img_6c0b4e44b073cf432c29c4c1",
+          "source": "manual_upload",
+          "filename": "微信图片_20260711191534_269_3.jpg",
+          "mimeType": "image/jpeg",
+          "size": 995720,
+          "sha256": "sha256:6c0b4e44b073cf432c29c4c1fc0913816fef14ece88124beb71606e68254c715",
+          "uploadedAt": "2026-07-13T16:30:45",
+          "assetFile": "img_6c0b4e44b073cf432c29c4c1.jpg"
+        }
+      ],
+      "pulled_at": "2026-07-13T08:30:45+00:00",
+      "content_hash": "sha256:4521f803de1c6a89f28f2f48f23627c6ed3d0887f8d0bb94d4cfc7ab4866741d"
+    }
+  },
+  "extensions": {
+    "manual": {
+      "field_provenance": {
+        "source_payloads.vehicle_detail.payload.baseCarInfo.name": {
+          "source": "manual_admin_edit",
+          "recorded_at": "2026-07-13T08:30:44+00:00"
+        },
+        "source_payloads.vehicle_detail.payload.carPriceInfo.salePrice": {
+          "source": "manual_admin_edit",
+          "recorded_at": "2026-07-13T08:30:44+00:00"
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.firstLicensePlateDate": {
+          "source": "manual_admin_edit",
+          "recorded_at": "2026-07-13T08:30:44+00:00"
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.mileage": {
+          "source": "manual_admin_edit",
+          "recorded_at": "2026-07-13T08:30:44+00:00"
+        },
+        "source_payloads.vehicle_detail.payload.carModelParam.displacement": {
+          "source": "manual_admin_edit",
+          "recorded_at": "2026-07-13T08:30:44+00:00"
+        },
+        "source_payloads.vehicle_detail.payload.carModelParam.gearbox": {
+          "source": "manual_admin_edit",
+          "recorded_at": "2026-07-13T08:30:44+00:00"
+        },
+        "source_payloads.vehicle_detail.payload.operationPhase": {
+          "source": "manual_admin_edit",
+          "recorded_at": "2026-07-13T08:30:44+00:00"
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.carName": {
+          "source": "manual_admin_edit",
+          "recorded_at": "2026-07-13T08:30:44+00:00"
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.brandName": {
+          "source": "manual_admin_edit",
+          "recorded_at": "2026-07-13T08:30:44+00:00"
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.seriesName": {
+          "source": "manual_admin_edit",
+          "recorded_at": "2026-07-13T08:30:44+00:00"
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.modelName": {
+          "source": "manual_admin_edit",
+          "recorded_at": "2026-07-13T08:30:44+00:00"
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.vehicleCondition": {
+          "source": "manual_admin_edit",
+          "recorded_at": "2026-07-13T08:30:44+00:00"
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.exteriorColor": {
+          "source": "manual_admin_edit",
+          "recorded_at": "2026-07-13T08:59:59+00:00"
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.color": {
+          "source": "manual_admin_edit",
+          "recorded_at": "2026-07-13T08:59:59+00:00"
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.interiorColor": {
+          "source": "manual_admin_edit",
+          "recorded_at": "2026-07-13T08:30:44+00:00"
+        },
+        "source_payloads.vehicle_detail.payload.carModelParam.gearBox": {
+          "source": "manual_admin_edit",
+          "recorded_at": "2026-07-13T08:30:44+00:00"
+        },
+        "source_payloads.vehicle_detail.payload.carPriceInfo.purchasePrice": {
+          "source": "manual_admin_edit",
+          "recorded_at": "2026-07-13T08:30:44+00:00"
+        },
+        "source_payloads.vehicle_detail.payload.carPriceInfo.salesPrice": {
+          "source": "manual_admin_edit",
+          "recorded_at": "2026-07-13T08:30:44+00:00"
+        },
+        "source_payloads.vehicle_detail.payload.carPriceInfo.managerPrice": {
+          "source": "manual_admin_edit",
+          "recorded_at": "2026-07-13T08:30:44+00:00"
+        },
+        "source_payloads.vehicle_detail.payload.carPriceInfo.wholesalePrice": {
+          "source": "manual_admin_edit",
+          "recorded_at": "2026-07-13T08:30:44+00:00"
+        },
+        "source_payloads.vehicle_detail.payload.carLicenseInfo.licenseStatus": {
+          "source": "manual_admin_edit",
+          "recorded_at": "2026-07-13T08:30:44+00:00"
+        },
+        "source_payloads.vehicle_pictures.payload": {
+          "source": "manual_admin_image_upload",
+          "recorded_at": "2026-07-13T08:30:45+00:00"
+        }
+      },
+      "test_fixture": {
+        "enabled": true,
+        "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+        "filled_at": "2026-07-13T07:47:11+00:00",
+        "purpose": "wechat_customer_service_field_recognition"
+      }
+    },
+    "compatibility": {
+      "legacy_v1_record": {
+        "schema_version": 1,
+        "category_id": "products",
+        "id": "chejin_audi_a4l_2018_40tfsi",
+        "status": "active",
+        "source": {
+          "type": "test_fixture",
+          "batch_token": "CHEJIN_SEED_20260507",
+          "legacy_migrated_from": "knowledge_bases/products"
+        },
+        "data": {
+          "name": "2018款奥迪A4L 40 TFSI 进取型",
+          "sku": "CHEJIN-A4L-2018-40TFSI",
+          "category": "二手车/豪华轿车",
+          "aliases": [
+            "奥迪A4L",
+            "A4L",
+            "四环",
+            "奥迪轿车",
+            "豪华品牌"
+          ],
+          "specs": "2018年6月上牌，表显7.2万公里，2.0T自动挡，南京本地一手车，全程4S店保养记录可查，原版原漆。",
+          "price": 14.5,
+          "unit": "台",
+          "inventory": 1,
+          "shipping_policy": "南京门店随时看车，试驾需提前一天预约并转人工确认。",
+          "warranty_policy": "车况以第三方检测报告为准，支持90天核心部件质保，重大事故/水泡/火烧承诺需人工确认。",
+          "reply_templates": {
+            "recommendation": "这台A4L适合14到16万预算、注重品牌和质感的客户，原版原漆、全程4S保养是亮点。"
+          },
+          "risk_rules": [
+            "不承诺贷款必过",
+            "金融方案以资方审批为准"
+          ]
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        },
+        "metadata": {
+          "created_at": "2026-05-07T10:00:00",
+          "updated_at": "2026-05-16T22:51:06",
+          "created_by": "admin",
+          "updated_by": "admin"
+        }
+      },
+      "migration": {
+        "from_schema_version": 1,
+        "batch_id": "chejin_v1_to_v2_20260713",
+        "migrated_at": "2026-07-13T04:53:45+00:00"
+      },
+      "legacy_snapshot_enrichment": {
+        "batch_id": "chejin_v2_legacy_snapshot_enrichment_20260713",
+        "source": "legacy_v1_snapshot_enrichment",
+        "enriched_at": "2026-07-13T06:45:00+00:00",
+        "field_count": 0,
+        "retired_data_shadow_removed": true
+      }
+    },
+    "wechat_customer_service": {
+      "customer_visible_annotations": {
+        "category": "二手车/豪华轿车",
+        "specs": "2018年6月上牌，表显7.2万公里，2.0T自动挡，南京本地一手车，全程4S店保养记录可查，原版原漆。",
+        "shipping_policy": "南京门店随时看车，试驾需提前一天预约并转人工确认。",
+        "warranty_policy": "车况以第三方检测报告为准，支持90天核心部件质保，重大事故/水泡/火烧承诺需人工确认。",
+        "risk_rules": [
+          "不承诺贷款必过",
+          "金融方案以资方审批为准"
+        ],
+        "aliases": [
+          "奥迪A4L",
+          "A4L",
+          "四环",
+          "奥迪轿车",
+          "豪华品牌"
+        ]
+      },
+      "manual_annotations": {
+        "sku": "CHEJIN-A4L-2018-40TFSI",
+        "unit": "台",
+        "inventory": 1,
+        "reply_templates": {
+          "recommendation": "这台A4L适合14到16万预算、注重品牌和质感的客户，原版原漆、全程4S保养是亮点。"
+        }
+      },
+      "manual_overrides": {}
+    }
   },
   "runtime": {
     "allow_auto_reply": true,
@@ -40,8 +270,15 @@
   },
   "metadata": {
     "created_at": "2026-05-07T10:00:00",
-    "updated_at": "2026-05-16T22:51:06",
+    "updated_at": "2026-07-13T16:59:59",
     "created_by": "admin",
-    "updated_by": "admin"
+    "updated_by": "admin",
+    "migrated_from_schema_version": 1,
+    "migration_batch": "chejin_v1_to_v2_20260713",
+    "legacy_snapshot_enriched_at": "2026-07-13T06:45:00+00:00",
+    "legacy_snapshot_enrichment_batch": "chejin_v2_legacy_snapshot_enrichment_20260713",
+    "test_fixture_last_action": "filled",
+    "test_fixture_batch": "chejin_v2_wechat_recognition_test_fields_20260713",
+    "manual_last_edited_at": "2026-07-13T08:59:59+00:00"
   }
 }

@@ -1,0 +1,1850 @@
+{
+  "ok": true,
+  "tenant_id": "chejin",
+  "product_master_root": "D:\\AI\\omniauto\\apps\\wechat_ai_customer_service\\data\\tenants\\chejin\\product_master",
+  "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+  "mode": "apply",
+  "action": "fill_missing",
+  "observed_at": "2026-07-13T07:47:11+00:00",
+  "policy": {
+    "test_only": true,
+    "source": "test_fixture_fill",
+    "writes_only_to_blank_manual_v2_fields": true,
+    "removes_only_values_with_matching_field_provenance": false,
+    "never_touches": [
+      "source.binding",
+      "carId",
+      "shopCode",
+      "VIN",
+      "plate",
+      "photos",
+      "existing_v2_values"
+    ]
+  },
+  "records_with_planned_updates": 22,
+  "records_written": 22,
+  "field_counts": {
+    "baseCarInfo.brandName": 22,
+    "baseCarInfo.carName": 22,
+    "baseCarInfo.color": 22,
+    "baseCarInfo.exteriorColor": 20,
+    "baseCarInfo.interiorColor": 22,
+    "baseCarInfo.modelName": 22,
+    "baseCarInfo.seriesName": 22,
+    "baseCarInfo.vehicleCondition": 22,
+    "carLicenseInfo.licenseStatus": 22,
+    "carModelParam.displacement": 3,
+    "carModelParam.gearBox": 22,
+    "carModelParam.gearbox": 7,
+    "carPriceInfo.managerPrice": 22,
+    "carPriceInfo.purchasePrice": 22,
+    "carPriceInfo.salesPrice": 22,
+    "carPriceInfo.wholesalePrice": 22,
+    "operationPhase": 22
+  },
+  "updated": [
+    {
+      "id": "chejin_5_series_2019_530li",
+      "fields": [
+        {
+          "path": "operationPhase",
+          "value": "TEST_SALE",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.carName",
+          "value": "测试车辆-01",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.brandName",
+          "value": "测试品牌-01",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.seriesName",
+          "value": "测试车系-01",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.modelName",
+          "value": "测试车型-01",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.vehicleCondition",
+          "value": "测试车况：良好",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.exteriorColor",
+          "value": "测试深灰色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.color",
+          "value": "测试深灰色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.interiorColor",
+          "value": "测试黑色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carModelParam.gearBox",
+          "value": "测试自动",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.purchasePrice",
+          "value": 8.37,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.salesPrice",
+          "value": 10.37,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.managerPrice",
+          "value": 9.87,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.wholesalePrice",
+          "value": 9.37,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carLicenseInfo.licenseStatus",
+          "value": "测试手续正常",
+          "action": "filled_test_value"
+        }
+      ]
+    },
+    {
+      "id": "chejin_audi_a4l_2018_40tfsi",
+      "fields": [
+        {
+          "path": "operationPhase",
+          "value": "TEST_SALE",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.carName",
+          "value": "测试车辆-02",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.brandName",
+          "value": "测试品牌-02",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.seriesName",
+          "value": "测试车系-02",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.modelName",
+          "value": "测试车型-02",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.vehicleCondition",
+          "value": "测试车况：良好",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.exteriorColor",
+          "value": "测试深灰色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.color",
+          "value": "测试深灰色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.interiorColor",
+          "value": "测试黑色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carModelParam.gearBox",
+          "value": "测试自动",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.purchasePrice",
+          "value": 8.74,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.salesPrice",
+          "value": 10.74,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.managerPrice",
+          "value": 10.24,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.wholesalePrice",
+          "value": 9.74,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carLicenseInfo.licenseStatus",
+          "value": "测试手续正常",
+          "action": "filled_test_value"
+        }
+      ]
+    },
+    {
+      "id": "chejin_bmw320_2019_m",
+      "fields": [
+        {
+          "path": "operationPhase",
+          "value": "TEST_SALE",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.carName",
+          "value": "测试车辆-03",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.brandName",
+          "value": "测试品牌-03",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.seriesName",
+          "value": "测试车系-03",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.modelName",
+          "value": "测试车型-03",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.vehicleCondition",
+          "value": "测试车况：良好",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.exteriorColor",
+          "value": "测试深灰色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.color",
+          "value": "测试深灰色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.interiorColor",
+          "value": "测试黑色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carModelParam.gearBox",
+          "value": "测试自动",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.purchasePrice",
+          "value": 9.11,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.salesPrice",
+          "value": 11.11,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.managerPrice",
+          "value": 10.61,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.wholesalePrice",
+          "value": 10.11,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carLicenseInfo.licenseStatus",
+          "value": "测试手续正常",
+          "action": "filled_test_value"
+        }
+      ]
+    },
+    {
+      "id": "chejin_c_class_2020_260l",
+      "fields": [
+        {
+          "path": "operationPhase",
+          "value": "TEST_SALE",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.carName",
+          "value": "测试车辆-04",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.brandName",
+          "value": "测试品牌-04",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.seriesName",
+          "value": "测试车系-04",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.modelName",
+          "value": "测试车型-04",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.vehicleCondition",
+          "value": "测试车况：良好",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.exteriorColor",
+          "value": "测试深灰色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.color",
+          "value": "测试深灰色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.interiorColor",
+          "value": "测试黑色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carModelParam.gearbox",
+          "value": "测试自动",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carModelParam.gearBox",
+          "value": "测试自动",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.purchasePrice",
+          "value": 9.48,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.salesPrice",
+          "value": 11.48,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.managerPrice",
+          "value": 10.98,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.wholesalePrice",
+          "value": 10.48,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carLicenseInfo.licenseStatus",
+          "value": "测试手续正常",
+          "action": "filled_test_value"
+        }
+      ]
+    },
+    {
+      "id": "chejin_camry_2021_20g",
+      "fields": [
+        {
+          "path": "operationPhase",
+          "value": "TEST_SALE",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.carName",
+          "value": "测试车辆-05",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.brandName",
+          "value": "测试品牌-05",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.seriesName",
+          "value": "测试车系-05",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.modelName",
+          "value": "测试车型-05",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.vehicleCondition",
+          "value": "测试车况：良好",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.exteriorColor",
+          "value": "测试深灰色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.color",
+          "value": "测试深灰色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.interiorColor",
+          "value": "测试黑色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carModelParam.gearBox",
+          "value": "测试自动",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.purchasePrice",
+          "value": 9.85,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.salesPrice",
+          "value": 11.85,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.managerPrice",
+          "value": 11.35,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.wholesalePrice",
+          "value": 10.85,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carLicenseInfo.licenseStatus",
+          "value": "测试手续正常",
+          "action": "filled_test_value"
+        }
+      ]
+    },
+    {
+      "id": "chejin_civic_2020_220turbo",
+      "fields": [
+        {
+          "path": "operationPhase",
+          "value": "TEST_SALE",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.carName",
+          "value": "测试车辆-06",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.brandName",
+          "value": "测试品牌-06",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.seriesName",
+          "value": "测试车系-06",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.modelName",
+          "value": "测试车型-06",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.vehicleCondition",
+          "value": "测试车况：良好",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.exteriorColor",
+          "value": "测试深灰色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.color",
+          "value": "测试深灰色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.interiorColor",
+          "value": "测试黑色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carModelParam.gearBox",
+          "value": "测试自动",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.purchasePrice",
+          "value": 10.22,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.salesPrice",
+          "value": 12.22,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.managerPrice",
+          "value": 11.72,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.wholesalePrice",
+          "value": 11.22,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carLicenseInfo.licenseStatus",
+          "value": "测试手续正常",
+          "action": "filled_test_value"
+        }
+      ]
+    },
+    {
+      "id": "chejin_crider_2019_180turbo",
+      "fields": [
+        {
+          "path": "operationPhase",
+          "value": "TEST_SALE",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.carName",
+          "value": "测试车辆-07",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.brandName",
+          "value": "测试品牌-07",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.seriesName",
+          "value": "测试车系-07",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.modelName",
+          "value": "测试车型-07",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.vehicleCondition",
+          "value": "测试车况：良好",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.exteriorColor",
+          "value": "测试深灰色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.color",
+          "value": "测试深灰色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.interiorColor",
+          "value": "测试黑色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carModelParam.gearBox",
+          "value": "测试自动",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.purchasePrice",
+          "value": 10.59,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.salesPrice",
+          "value": 12.59,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.managerPrice",
+          "value": 12.09,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.wholesalePrice",
+          "value": 11.59,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carLicenseInfo.licenseStatus",
+          "value": "测试手续正常",
+          "action": "filled_test_value"
+        }
+      ]
+    },
+    {
+      "id": "chejin_crown_2018_20t",
+      "fields": [
+        {
+          "path": "operationPhase",
+          "value": "TEST_SALE",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.carName",
+          "value": "测试车辆-08",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.brandName",
+          "value": "测试品牌-08",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.seriesName",
+          "value": "测试车系-08",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.modelName",
+          "value": "测试车型-08",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.vehicleCondition",
+          "value": "测试车况：良好",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.exteriorColor",
+          "value": "测试深灰色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.color",
+          "value": "测试深灰色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.interiorColor",
+          "value": "测试黑色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carModelParam.gearbox",
+          "value": "测试自动",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carModelParam.gearBox",
+          "value": "测试自动",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.purchasePrice",
+          "value": 10.96,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.salesPrice",
+          "value": 12.96,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.managerPrice",
+          "value": 12.46,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.wholesalePrice",
+          "value": 11.96,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carLicenseInfo.licenseStatus",
+          "value": "测试手续正常",
+          "action": "filled_test_value"
+        }
+      ]
+    },
+    {
+      "id": "chejin_elantra_2019_14t",
+      "fields": [
+        {
+          "path": "operationPhase",
+          "value": "TEST_SALE",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.carName",
+          "value": "测试车辆-09",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.brandName",
+          "value": "测试品牌-09",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.seriesName",
+          "value": "测试车系-09",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.modelName",
+          "value": "测试车型-09",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.vehicleCondition",
+          "value": "测试车况：良好",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.exteriorColor",
+          "value": "测试深灰色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.color",
+          "value": "测试深灰色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.interiorColor",
+          "value": "测试黑色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carModelParam.gearBox",
+          "value": "测试自动",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.purchasePrice",
+          "value": 11.33,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.salesPrice",
+          "value": 13.33,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.managerPrice",
+          "value": 12.83,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.wholesalePrice",
+          "value": 12.33,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carLicenseInfo.licenseStatus",
+          "value": "测试手续正常",
+          "action": "filled_test_value"
+        }
+      ]
+    },
+    {
+      "id": "chejin_gl8_2020_es653t",
+      "fields": [
+        {
+          "path": "operationPhase",
+          "value": "TEST_SALE",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.carName",
+          "value": "测试车辆-10",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.brandName",
+          "value": "测试品牌-10",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.seriesName",
+          "value": "测试车系-10",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.modelName",
+          "value": "测试车型-10",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.vehicleCondition",
+          "value": "测试车况：良好",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.exteriorColor",
+          "value": "测试深灰色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.color",
+          "value": "测试深灰色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.interiorColor",
+          "value": "测试黑色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carModelParam.gearBox",
+          "value": "测试自动",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.purchasePrice",
+          "value": 11.7,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.salesPrice",
+          "value": 13.7,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.managerPrice",
+          "value": 13.2,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.wholesalePrice",
+          "value": 12.7,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carLicenseInfo.licenseStatus",
+          "value": "测试手续正常",
+          "action": "filled_test_value"
+        }
+      ]
+    },
+    {
+      "id": "chejin_golf_2020_280tsi",
+      "fields": [
+        {
+          "path": "operationPhase",
+          "value": "TEST_SALE",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.carName",
+          "value": "测试车辆-11",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.brandName",
+          "value": "测试品牌-11",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.seriesName",
+          "value": "测试车系-11",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.modelName",
+          "value": "测试车型-11",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.vehicleCondition",
+          "value": "测试车况：良好",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.exteriorColor",
+          "value": "测试深灰色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.color",
+          "value": "测试深灰色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.interiorColor",
+          "value": "测试黑色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carModelParam.gearBox",
+          "value": "测试自动",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.purchasePrice",
+          "value": 12.07,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.salesPrice",
+          "value": 14.07,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.managerPrice",
+          "value": 13.57,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.wholesalePrice",
+          "value": 13.07,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carLicenseInfo.licenseStatus",
+          "value": "测试手续正常",
+          "action": "filled_test_value"
+        }
+      ]
+    },
+    {
+      "id": "chejin_haval_h6_2020_20t",
+      "fields": [
+        {
+          "path": "operationPhase",
+          "value": "TEST_SALE",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.carName",
+          "value": "测试车辆-12",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.brandName",
+          "value": "测试品牌-12",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.seriesName",
+          "value": "测试车系-12",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.modelName",
+          "value": "测试车型-12",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.vehicleCondition",
+          "value": "测试车况：良好",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.exteriorColor",
+          "value": "测试深灰色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.color",
+          "value": "测试深灰色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.interiorColor",
+          "value": "测试黑色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carModelParam.gearBox",
+          "value": "测试自动",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.purchasePrice",
+          "value": 12.44,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.salesPrice",
+          "value": 14.44,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.managerPrice",
+          "value": 13.94,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.wholesalePrice",
+          "value": 13.44,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carLicenseInfo.licenseStatus",
+          "value": "测试手续正常",
+          "action": "filled_test_value"
+        }
+      ]
+    },
+    {
+      "id": "chejin_hengyi_2019_es6",
+      "fields": [
+        {
+          "path": "operationPhase",
+          "value": "TEST_SALE",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.carName",
+          "value": "测试车辆-13",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.brandName",
+          "value": "测试品牌-13",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.seriesName",
+          "value": "测试车系-13",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.modelName",
+          "value": "测试车型-13",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.vehicleCondition",
+          "value": "测试车况：良好",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.exteriorColor",
+          "value": "测试深灰色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.color",
+          "value": "测试深灰色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.interiorColor",
+          "value": "测试黑色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carModelParam.gearbox",
+          "value": "测试自动",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carModelParam.gearBox",
+          "value": "测试自动",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carModelParam.displacement",
+          "value": "测试动力",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.purchasePrice",
+          "value": 12.81,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.salesPrice",
+          "value": 14.81,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.managerPrice",
+          "value": 14.31,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.wholesalePrice",
+          "value": 13.81,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carLicenseInfo.licenseStatus",
+          "value": "测试手续正常",
+          "action": "filled_test_value"
+        }
+      ]
+    },
+    {
+      "id": "chejin_mazda3_2020_20l",
+      "fields": [
+        {
+          "path": "operationPhase",
+          "value": "TEST_SALE",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.carName",
+          "value": "测试车辆-14",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.brandName",
+          "value": "测试品牌-14",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.seriesName",
+          "value": "测试车系-14",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.modelName",
+          "value": "测试车型-14",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.vehicleCondition",
+          "value": "测试车况：良好",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.color",
+          "value": "测试深灰色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.interiorColor",
+          "value": "测试黑色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carModelParam.gearBox",
+          "value": "测试自动",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.purchasePrice",
+          "value": 13.18,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.salesPrice",
+          "value": 15.18,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.managerPrice",
+          "value": 14.68,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.wholesalePrice",
+          "value": 14.18,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carLicenseInfo.licenseStatus",
+          "value": "测试手续正常",
+          "action": "filled_test_value"
+        }
+      ]
+    },
+    {
+      "id": "chejin_model3_2021_srplus",
+      "fields": [
+        {
+          "path": "operationPhase",
+          "value": "TEST_SALE",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.carName",
+          "value": "测试车辆-15",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.brandName",
+          "value": "测试品牌-15",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.seriesName",
+          "value": "测试车系-15",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.modelName",
+          "value": "测试车型-15",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.vehicleCondition",
+          "value": "测试车况：良好",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.color",
+          "value": "测试深灰色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.interiorColor",
+          "value": "测试黑色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carModelParam.gearbox",
+          "value": "测试自动",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carModelParam.gearBox",
+          "value": "测试自动",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carModelParam.displacement",
+          "value": "测试动力",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.purchasePrice",
+          "value": 13.55,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.salesPrice",
+          "value": 15.55,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.managerPrice",
+          "value": 15.05,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.wholesalePrice",
+          "value": 14.55,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carLicenseInfo.licenseStatus",
+          "value": "测试手续正常",
+          "action": "filled_test_value"
+        }
+      ]
+    },
+    {
+      "id": "chejin_odysssey_2020_hybrid",
+      "fields": [
+        {
+          "path": "operationPhase",
+          "value": "TEST_SALE",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.carName",
+          "value": "测试车辆-16",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.brandName",
+          "value": "测试品牌-16",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.seriesName",
+          "value": "测试车系-16",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.modelName",
+          "value": "测试车型-16",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.vehicleCondition",
+          "value": "测试车况：良好",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.exteriorColor",
+          "value": "测试深灰色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.color",
+          "value": "测试深灰色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.interiorColor",
+          "value": "测试黑色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carModelParam.gearbox",
+          "value": "测试自动",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carModelParam.gearBox",
+          "value": "测试自动",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.purchasePrice",
+          "value": 13.92,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.salesPrice",
+          "value": 15.92,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.managerPrice",
+          "value": 15.42,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.wholesalePrice",
+          "value": 14.92,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carLicenseInfo.licenseStatus",
+          "value": "测试手续正常",
+          "action": "filled_test_value"
+        }
+      ]
+    },
+    {
+      "id": "chejin_polo_2018_15l",
+      "fields": [
+        {
+          "path": "operationPhase",
+          "value": "TEST_SALE",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.carName",
+          "value": "测试车辆-17",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.brandName",
+          "value": "测试品牌-17",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.seriesName",
+          "value": "测试车系-17",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.modelName",
+          "value": "测试车型-17",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.vehicleCondition",
+          "value": "测试车况：良好",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.exteriorColor",
+          "value": "测试深灰色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.color",
+          "value": "测试深灰色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.interiorColor",
+          "value": "测试黑色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carModelParam.gearBox",
+          "value": "测试自动",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.purchasePrice",
+          "value": 14.29,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.salesPrice",
+          "value": 16.29,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.managerPrice",
+          "value": 15.79,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.wholesalePrice",
+          "value": 15.29,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carLicenseInfo.licenseStatus",
+          "value": "测试手续正常",
+          "action": "filled_test_value"
+        }
+      ]
+    },
+    {
+      "id": "chejin_qinplus_2022_dmi55",
+      "fields": [
+        {
+          "path": "operationPhase",
+          "value": "TEST_SALE",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.carName",
+          "value": "测试车辆-18",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.brandName",
+          "value": "测试品牌-18",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.seriesName",
+          "value": "测试车系-18",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.modelName",
+          "value": "测试车型-18",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.vehicleCondition",
+          "value": "测试车况：良好",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.exteriorColor",
+          "value": "测试深灰色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.color",
+          "value": "测试深灰色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.interiorColor",
+          "value": "测试黑色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carModelParam.gearbox",
+          "value": "测试自动",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carModelParam.gearBox",
+          "value": "测试自动",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carModelParam.displacement",
+          "value": "测试动力",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.purchasePrice",
+          "value": 14.66,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.salesPrice",
+          "value": 16.66,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.managerPrice",
+          "value": 16.16,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.wholesalePrice",
+          "value": 15.66,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carLicenseInfo.licenseStatus",
+          "value": "测试手续正常",
+          "action": "filled_test_value"
+        }
+      ]
+    },
+    {
+      "id": "chejin_ranger_2020_23t",
+      "fields": [
+        {
+          "path": "operationPhase",
+          "value": "TEST_SALE",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.carName",
+          "value": "测试车辆-19",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.brandName",
+          "value": "测试品牌-19",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.seriesName",
+          "value": "测试车系-19",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.modelName",
+          "value": "测试车型-19",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.vehicleCondition",
+          "value": "测试车况：良好",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.exteriorColor",
+          "value": "测试深灰色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.color",
+          "value": "测试深灰色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.interiorColor",
+          "value": "测试黑色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carModelParam.gearBox",
+          "value": "测试自动",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.purchasePrice",
+          "value": 15.03,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.salesPrice",
+          "value": 17.03,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.managerPrice",
+          "value": 16.53,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.wholesalePrice",
+          "value": 16.03,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carLicenseInfo.licenseStatus",
+          "value": "测试手续正常",
+          "action": "filled_test_value"
+        }
+      ]
+    },
+    {
+      "id": "chejin_sienna_2021_hybrid",
+      "fields": [
+        {
+          "path": "operationPhase",
+          "value": "TEST_SALE",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.carName",
+          "value": "测试车辆-20",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.brandName",
+          "value": "测试品牌-20",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.seriesName",
+          "value": "测试车系-20",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.modelName",
+          "value": "测试车型-20",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.vehicleCondition",
+          "value": "测试车况：良好",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.exteriorColor",
+          "value": "测试深灰色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.color",
+          "value": "测试深灰色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.interiorColor",
+          "value": "测试黑色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carModelParam.gearbox",
+          "value": "测试自动",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carModelParam.gearBox",
+          "value": "测试自动",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.purchasePrice",
+          "value": 15.4,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.salesPrice",
+          "value": 17.4,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.managerPrice",
+          "value": 16.9,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.wholesalePrice",
+          "value": 16.4,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carLicenseInfo.licenseStatus",
+          "value": "测试手续正常",
+          "action": "filled_test_value"
+        }
+      ]
+    },
+    {
+      "id": "chejin_tiguanl_2021_330tsi",
+      "fields": [
+        {
+          "path": "operationPhase",
+          "value": "TEST_SALE",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.carName",
+          "value": "测试车辆-21",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.brandName",
+          "value": "测试品牌-21",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.seriesName",
+          "value": "测试车系-21",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.modelName",
+          "value": "测试车型-21",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.vehicleCondition",
+          "value": "测试车况：良好",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.exteriorColor",
+          "value": "测试深灰色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.color",
+          "value": "测试深灰色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.interiorColor",
+          "value": "测试黑色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carModelParam.gearBox",
+          "value": "测试自动",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.purchasePrice",
+          "value": 15.77,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.salesPrice",
+          "value": 17.77,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.managerPrice",
+          "value": 17.27,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.wholesalePrice",
+          "value": 16.77,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carLicenseInfo.licenseStatus",
+          "value": "测试手续正常",
+          "action": "filled_test_value"
+        }
+      ]
+    },
+    {
+      "id": "chejin_xtrail_2020_25l",
+      "fields": [
+        {
+          "path": "operationPhase",
+          "value": "TEST_SALE",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.carName",
+          "value": "测试车辆-22",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.brandName",
+          "value": "测试品牌-22",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.seriesName",
+          "value": "测试车系-22",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.modelName",
+          "value": "测试车型-22",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.vehicleCondition",
+          "value": "测试车况：良好",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.exteriorColor",
+          "value": "测试深灰色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.color",
+          "value": "测试深灰色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "baseCarInfo.interiorColor",
+          "value": "测试黑色",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carModelParam.gearBox",
+          "value": "测试自动",
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.purchasePrice",
+          "value": 16.14,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.salesPrice",
+          "value": 18.14,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.managerPrice",
+          "value": 17.64,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carPriceInfo.wholesalePrice",
+          "value": 17.14,
+          "action": "filled_test_value"
+        },
+        {
+          "path": "carLicenseInfo.licenseStatus",
+          "value": "测试手续正常",
+          "action": "filled_test_value"
+        }
+      ]
+    }
+  ],
+  "unchanged_ids": [],
+  "skipped": [],
+  "failures": []
+}

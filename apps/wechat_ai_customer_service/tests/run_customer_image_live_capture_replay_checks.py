@@ -91,6 +91,8 @@ def check_record_capture_result_accepts_saved_image_proxy() -> None:
             target_name="新数据测试",
             session_key="wx:capture",
         )
+        proxy["image_capture_pending"] = True
+        proxy["quality_flags"] = ["synthetic_visual_turn", "clipboard_current_transaction_required"]
         state = {"version": 2, "sessions": {}, "captures": {}, "llm_tasks": {}, "ready_replies": {}, "events": []}
         capture = record_capture_result(
             state,
@@ -100,13 +102,14 @@ def check_record_capture_result_accepts_saved_image_proxy() -> None:
             exact=True,
             conversation_type="single",
             session_key="wx:capture",
+            allow_customer_image_proxy=True,
             now="2026-07-06T12:00:01",
         )
     assert_equal(capture.get("status"), "captured", f"image proxy capture should be captured: {capture}")
     assert_equal(capture.get("reply_input_message_count"), 1, f"image proxy should become reply input: {capture}")
     assert_true(bool(capture.get("message_ids")), f"image proxy should have message id: {capture}")
     stored = (capture.get("batch") or [{}])[0]
-    assert_equal(str(stored.get("saved_image_path") or ""), str(saved_path), "capture should preserve saved image path")
+    assert_equal(str(stored.get("saved_image_path") or ""), "", "capture must strip the retired image path")
     assert_equal(str(stored.get("source_message_type") or ""), "image", "capture should preserve source image type as metadata")
 
 

@@ -67,6 +67,8 @@ from listen_and_reply import (  # noqa: E402
     load_config,
     load_rules,
     maybe_enrich_messages_with_history,
+    maybe_auto_transcribe_voice_messages,
+    voice_transcription_trigger,
     normalize_capture_payload_for_semantic_processing,
     plan_message_batch_semantics,
     maybe_apply_llm_reply,
@@ -100,6 +102,7 @@ from listen_and_reply import (  # noqa: E402
 from apps.wechat_ai_customer_service.wechat_message_normalizer import normalize_wechat_message_record  # noqa: E402
 from apps.wechat_ai_customer_service.admin_backend.services.customer_service_scheduler import brain_first_ready_reply_ownership_failure  # noqa: E402
 from apps.wechat_ai_customer_service.admin_backend.services.customer_service_settings import CustomerServiceSettings  # noqa: E402
+import apps.wechat_ai_customer_service.llm_config as llm_config_module  # noqa: E402
 from apps.wechat_ai_customer_service.llm_config import (  # noqa: E402
     DEFAULT_DEEPSEEK_CONTEXT_WINDOW_TOKENS,
     active_llm_provider,
@@ -440,7 +443,9 @@ def run_checks() -> dict[str, Any]:
         check_semantic_batch_planner_groups_split_need,
         check_semantic_batch_planner_separates_stale_general_noise_from_business_turn,
         check_semantic_batch_planner_detects_mixed_risk_questions,
-        check_auto_voice_transcription_runs_before_message_capture,
+        check_auto_voice_transcription_runs_after_message_capture_only_when_evidence_exists,
+        check_voice_transcription_trigger_blocks_normal_text_without_evidence,
+        check_image_signal_skips_voice_rpa_before_capture,
         check_customer_preference_context_preserves_spouse_parking_need,
         check_short_chase_up_after_replied_self_history_does_not_continue_closed_topic,
         check_short_chase_up_with_unanswered_customer_context_can_continue_open_topic,
@@ -503,6 +508,7 @@ def run_checks() -> dict[str, Any]:
         check_final_visible_polish_lightweight_budget_covers_realtime_and_llm,
         check_final_visible_polish_uses_brain_reply_max_cap,
         check_final_visible_polish_brain_source_is_lightweight_but_stricter,
+        check_final_visible_polish_brain_local_verify_avoids_llm,
         check_final_visible_polish_brain_micro_prompt_is_verify_only,
         check_final_visible_polish_brain_micro_rejects_rewrite_and_uses_draft,
         check_final_visible_polish_brain_micro_rejects_incomplete_tail_and_uses_draft,
@@ -520,6 +526,7 @@ def run_checks() -> dict[str, Any]:
         check_multi_target_default_rpa_low_risk_prefers_active_only,
         check_multi_target_dynamic_unread_mode_supports_new_sessions,
         check_multi_target_change_warmup_is_bounded_and_coalesces,
+        check_multi_target_preserves_session_identity_for_same_display_name,
         check_deepseek_flash_is_default,
         check_provider_switch_ignores_stale_provider_scoped_overrides,
         check_anthropic_kimi_route_ignores_stale_openai_model_overrides,
@@ -1307,7 +1314,7 @@ def check_semantic_batch_planner_detects_mixed_risk_questions() -> None:
     assert_equal(plan.get("risk_level"), "boundary", "mixed risk batch should keep boundary risk level")
 
 
-def check_auto_voice_transcription_runs_before_message_capture() -> None:
+def check_auto_voice_transcription_runs_after_message_capture_only_when_evidence_exists() -> None:
     config = load_smoke_config()
     config["_local_customer_service_settings"] = {"enabled": True, "reply_mode": "record_only"}
     config["voice_transcription"] = {"enabled": True, "max_attempts": 2}
@@ -1323,7 +1330,10 @@ def check_auto_voice_transcription_runs_before_message_capture() -> None:
             "quality_flags": ["voice_duration_prefix_removed"],
         }
     ]
-    connector = VoiceTranscribeConnector([], transcribed)
+    connector = VoiceTranscribeConnector(
+        [{"id": "voice-1", "type": "voice", "sender": "customer", "content": "[语音] 3\""}],
+        transcribed,
+    )
     event = process_target(
         connector=connector,  # type: ignore[arg-type]
         target=target,
@@ -1338,8 +1348,8 @@ def check_auto_voice_transcription_runs_before_message_capture() -> None:
     assert_equal(event.get("reason"), "record_only_mode", "record-only should still capture after voice transcription")
     assert_equal(
         connector.call_order[:2],
-        ["transcribe_voice_messages", "get_messages"],
-        "voice transcription must run before message capture",
+        ["get_messages", "transcribe_voice_messages"],
+        "voice transcription must only run after an evidence-bearing message capture",
     )
     assert_equal(len(connector.transcribe_calls), 1, "voice transcription should be attempted once per target poll")
     assert_equal(connector.transcribe_calls[0].get("max_attempts"), 2, "configured max attempts should reach connector")
@@ -1348,6 +1358,49 @@ def check_auto_voice_transcription_runs_before_message_capture() -> None:
     assert_true(voice_audit.get("attempted") is True, f"voice transcription audit should be attached: {voice_audit}")
     assert_equal(voice_audit.get("transcribed_messages_count"), 1, "transcribed message count should be auditable")
     assert_equal(connector.sent_texts, [], "record-only voice transcription must not send a reply")
+
+
+def check_voice_transcription_trigger_blocks_normal_text_without_evidence() -> None:
+    normal = voice_transcription_trigger(
+        {"messages": [{"type": "text", "sender": "customer", "content": "你看到我发的车了吗"}]},
+        pending_signal_kind="normal",
+    )
+    assert_true(normal.get("should_run") is False, f"normal text must not start voice RPA: {normal}")
+    image = voice_transcription_trigger(
+        {"messages": [{"type": "text", "sender": "customer", "content": "[图片]"}]},
+        pending_signal_kind="image_capture",
+    )
+    assert_true(image.get("should_run") is False, f"image capture must not start voice RPA: {image}")
+    voice = voice_transcription_trigger(
+        {"messages": []},
+        pending_signal_kind="voice_capture",
+    )
+    assert_true(voice.get("should_run") is True, f"explicit voice signal must remain actionable: {voice}")
+
+
+def check_image_signal_skips_voice_rpa_before_capture() -> None:
+    config = load_smoke_config()
+    config["_local_customer_service_settings"] = {"enabled": True, "reply_mode": "record_only"}
+    config["voice_transcription"] = {"enabled": True, "max_attempts": 2}
+
+    class MustNotTranscribeConnector:
+        def transcribe_voice_messages(self, *_args: Any, **_kwargs: Any) -> dict[str, Any]:
+            raise AssertionError("image capture must not invoke voice RPA")
+
+    result = maybe_auto_transcribe_voice_messages(
+        connector=MustNotTranscribeConnector(),  # type: ignore[arg-type]
+        target=TargetConfig(name="客户A", enabled=True, exact=True, allow_self_for_test=False, max_batch_messages=4),
+        config=config,
+        console_settings=config["_local_customer_service_settings"],
+        conversation_type="private",
+        pending_signal_kind="image_capture",
+    )
+    assert_true(result.get("attempted") is False, f"image signal should not attempt voice RPA: {result}")
+    assert_equal(
+        result.get("state"),
+        "voice_transcription_skipped_non_voice_signal",
+        "image signal should expose an auditable skip state",
+    )
 
 
 def check_customer_preference_context_preserves_spouse_parking_need() -> None:
@@ -1565,6 +1618,63 @@ def check_multi_target_change_warmup_is_bounded_and_coalesces() -> None:
     )
     assert_equal([item.name for item in merged], ["客户A", "客户B", "客户C"], "warmup merge should keep the highest-priority target per chat")
     assert_equal(merged[0].priority_score, 80, "warmup merge should prefer the refreshed higher-priority copy")
+
+
+def check_multi_target_preserves_session_identity_for_same_display_name() -> None:
+    config = load_smoke_config()
+    config["targets"] = [
+        {"name": "同名会话", "enabled": True, "exact": True, "allow_self_for_test": False, "max_batch_messages": 3},
+    ]
+    targets = parse_targets(config)
+    private = SimpleNamespace(
+        name="同名会话",
+        session_key="wx:rpa:v1:same-name-private",
+        conversation_type="private",
+        priority_score=20,
+        session_age_seconds=3,
+    )
+    group = SimpleNamespace(
+        name="同名会话",
+        session_key="wx:rpa:v1:same-name-group",
+        conversation_type="group",
+        priority_score=30,
+        session_age_seconds=2,
+    )
+    active = coalesce_active_targets([private], [group])
+    assert_equal(
+        {item.session_key for item in active},
+        {private.session_key, group.session_key},
+        "same-display-name active sessions must not be coalesced by name",
+    )
+    dynamic = build_iteration_targets(
+        config_targets=targets,
+        active_targets=[private, group],
+        multi_target_cfg={"max_targets_per_iteration": 5, "prioritize_active_sessions": True},
+    )
+    assert_equal(
+        {item.session_key for item in dynamic},
+        {private.session_key, group.session_key},
+        "active session identity must survive conversion into send targets",
+    )
+    assert_equal(
+        {item.conversation_type for item in dynamic},
+        {"private", "group"},
+        "conversation type must survive conversion into send targets",
+    )
+    with_whitelist_scan = build_iteration_targets(
+        config_targets=targets,
+        active_targets=[private, group],
+        multi_target_cfg={
+            "max_targets_per_iteration": 5,
+            "prioritize_active_sessions": True,
+            "scan_all_whitelist_each_iteration": True,
+        },
+    )
+    assert_equal(
+        len(with_whitelist_scan),
+        2,
+        "whitelist scan must not append an unbound duplicate after identity-bound active sessions",
+    )
 
 
 def check_mixed_safety_batch_forces_handoff() -> None:
@@ -3945,6 +4055,47 @@ def check_final_visible_polish_brain_source_is_lightweight_but_stricter() -> Non
     )
 
 
+def check_final_visible_polish_brain_local_verify_avoids_llm() -> None:
+    original_polish = final_polish_module.polish_with_llm
+    calls = {"count": 0}
+
+    def fail_if_called(**kwargs: Any) -> dict[str, Any]:
+        calls["count"] += 1
+        raise AssertionError("Brain local verify fast path should not call final polish LLM")
+
+    config = {
+        "final_visible_llm_polish": {
+            "enabled": True,
+            "required_for_send": True,
+            "provider": "openai",
+            "model": "unit-polish-model",
+            "cache_enabled": False,
+            "brain_source_policy": "llm_micro_verify",
+            "brain_local_verify_fast_path_enabled": True,
+        }
+    }
+    draft = "Qin PLUS is available in product master. Price is 86800 and stock is 1."
+    try:
+        final_polish_module.polish_with_llm = fail_if_called
+        result = maybe_polish_customer_visible_reply(
+            config=config,
+            customer_message="Do you have Qin PLUS?",
+            reply_text=draft,
+            recent_reply_texts=[],
+            source_channel="brain",
+            needs_handoff=False,
+        )
+    finally:
+        final_polish_module.polish_with_llm = original_polish
+
+    assert_equal(calls["count"], 0, "Brain local verify should avoid the extra LLM call")
+    assert_true(result.get("passed") is True, f"Brain local verify should pass safe draft: {result}")
+    assert_true(result.get("applied") is False, "Brain local verify must not rewrite the Brain draft")
+    assert_equal(result.get("reply_text"), draft, "Brain local verify should keep the original Brain wording")
+    assert_equal(result.get("reason"), "final_visible_llm_polish_brain_local_draft_verified_no_delta", "audit reason should be explicit")
+    assert_equal((result.get("llm_status") or {}).get("status"), "local_draft_verified", "audit should show local verification")
+
+
 def check_final_visible_polish_brain_micro_prompt_is_verify_only() -> None:
     prompt = final_polish_module.build_prompt_pack(
         settings={"brain_source_policy": "llm_micro_verify", "identity_guard_enabled": True},
@@ -3986,6 +4137,7 @@ def check_final_visible_polish_brain_micro_rejects_rewrite_and_uses_draft() -> N
             "cache_enabled": False,
             "brain_source_policy": "llm_micro_verify",
             "brain_micro_guard_fallback_to_draft": True,
+            "brain_local_verify_fast_path_enabled": False,
         }
     }
     draft = "秦PLUS这台目前报价8.68万，通勤省油方向挺合适。"
@@ -4044,6 +4196,7 @@ def check_final_visible_polish_brain_micro_rejects_incomplete_tail_and_uses_draf
             "cache_enabled": False,
             "brain_source_policy": "llm_micro_verify",
             "brain_micro_guard_fallback_to_draft": True,
+            "brain_local_verify_fast_path_enabled": False,
         }
     }
     try:
@@ -4142,6 +4295,7 @@ def check_final_visible_polish_rejects_identity_denial_for_finance_boundary() ->
             "handoff_source_policy": "llm_micro_verify",
             "micro_verify_source_channels": ["brain", "handoff"],
             "brain_micro_guard_fallback_to_draft": True,
+            "brain_local_verify_fast_path_enabled": False,
             "identity_guard_enabled": True,
         }
     }
@@ -4194,6 +4348,7 @@ def check_final_visible_polish_rejects_over_explicit_human_identity_claim() -> N
             "brain_source_policy": "llm_micro_verify",
             "micro_verify_source_channels": ["brain", "handoff"],
             "brain_micro_guard_fallback_to_draft": True,
+            "brain_local_verify_fast_path_enabled": False,
             "identity_guard_enabled": True,
         }
     }
@@ -4246,6 +4401,7 @@ def check_final_visible_polish_rejects_ambiguous_identity_admission() -> None:
             "brain_source_policy": "llm_micro_verify",
             "micro_verify_source_channels": ["brain", "handoff"],
             "brain_micro_guard_fallback_to_draft": True,
+            "brain_local_verify_fast_path_enabled": False,
             "identity_guard_enabled": True,
         }
     }
@@ -4786,13 +4942,29 @@ def check_local_customer_service_settings_follow_active_anthropic_kimi_route() -
     old_anthropic_base_url = os.environ.get("ANTHROPIC_BASE_URL")
     old_anthropic_flash_model = os.environ.get("ANTHROPIC_FLASH_MODEL")
     old_anthropic_pro_model = os.environ.get("ANTHROPIC_PRO_MODEL")
+    old_llm_config_path = llm_config_module._LLM_CONFIG_PATH
+    test_llm_config_path = settings_store.settings_path.with_name("llm_config_kimi_probe.json")
+    llm_config_module._LLM_CONFIG_PATH = test_llm_config_path
     os.environ["WECHAT_KNOWLEDGE_TENANT"] = tenant_id
     os.environ["LLM_PROVIDER"] = "anthropic"
-    os.environ.pop("ACTIVE_LLM_PROVIDER", None)
+    os.environ["ACTIVE_LLM_PROVIDER"] = "anthropic"
     os.environ["ANTHROPIC_BASE_URL"] = "https://aiself.vip/v1"
     os.environ["ANTHROPIC_FLASH_MODEL"] = "kimi-for-coding"
     os.environ["ANTHROPIC_PRO_MODEL"] = "kimi-for-coding"
     remove_file(settings_store.settings_path)
+    test_llm_config_path.write_text(
+        json.dumps(
+            {
+                "LLM_PROVIDER": "anthropic",
+                "ANTHROPIC_BASE_URL": "https://aiself.vip/v1",
+                "ANTHROPIC_FLASH_MODEL": "kimi-for-coding",
+                "ANTHROPIC_PRO_MODEL": "kimi-for-coding",
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
     try:
         settings_store.save({"use_llm": True, "customer_service_brain_mode": "brain_first"})
         config = load_smoke_config()
@@ -4826,6 +4998,8 @@ def check_local_customer_service_settings_follow_active_anthropic_kimi_route() -
         assert_equal(synthesis.get("model"), "kimi-for-coding", "reply synthesis should discard stale OpenAI model after Kimi switch")
     finally:
         remove_file(settings_store.settings_path)
+        remove_file(test_llm_config_path)
+        llm_config_module._LLM_CONFIG_PATH = old_llm_config_path
         if old_tenant is None:
             os.environ.pop("WECHAT_KNOWLEDGE_TENANT", None)
         else:

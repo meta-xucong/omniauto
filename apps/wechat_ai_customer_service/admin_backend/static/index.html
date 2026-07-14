@@ -298,7 +298,7 @@
             <div class="section-head">
               <div>
                 <h2>商品库</h2>
-                <p>首页只看每台车/商品的关键信息；点开卡片后再查看完整资料、库存和专属话术。</p>
+                <p>首页只看每台车源的关键信息；点开卡片后查看完整车辆资料、来源/同步状态和专属话术。</p>
               </div>
               <div class="button-row">
                 <button class="secondary-button" id="refresh-product-catalog">刷新</button>
@@ -307,6 +307,17 @@
             </div>
             <div class="metric-grid metric-grid-tight metric-grid-four" id="product-catalog-cards">
               <div class="status-card loading"><strong><span class="loading-spinner" aria-hidden="true"></span>正在加载商品统计</strong><span>请稍等。</span></div>
+            </div>
+            <div class="button-row product-catalog-filters" aria-label="车源筛选">
+              <label class="form-field inline-field"><span>搜索</span><input id="product-catalog-query" type="search" placeholder="车名、品牌、车型、编号" /></label>
+              <label class="form-field inline-field"><span>来源</span>
+                <select id="product-catalog-source-filter">
+                  <option value="">全部来源</option>
+                  <option value="dafengche">大风车同步</option>
+                  <option value="manual">手动录入</option>
+                  <option value="historical_migration">历史迁入</option>
+                </select>
+              </label>
             </div>
             <div class="product-upload-panel is-hidden" id="product-llm-intake-panel">
               <div class="section-head sub-head">
@@ -334,7 +345,7 @@
               </div>
             </div>
             <div class="product-home-layout" id="product-catalog-list">
-              <div class="status-card loading"><strong><span class="loading-spinner" aria-hidden="true"></span>正在加载商品库</strong><span>正在读取商品和库存。</span></div>
+              <div class="status-card loading"><strong><span class="loading-spinner" aria-hidden="true"></span>正在加载车源库</strong><span>正在读取车源主数据和来源状态。</span></div>
             </div>
           </article>
 

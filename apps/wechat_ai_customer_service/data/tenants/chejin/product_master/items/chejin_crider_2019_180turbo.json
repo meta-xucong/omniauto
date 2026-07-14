@@ -1,37 +1,293 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "category_id": "products",
   "id": "chejin_crider_2019_180turbo",
   "status": "active",
   "source": {
-    "type": "test_fixture",
-    "batch_token": "CHEJIN_SEED_20260507",
-    "legacy_migrated_from": "knowledge_bases/products"
-  },
-  "data": {
-    "name": "2019款本田凌派180TURBO CVT舒适版",
-    "sku": "CHEJIN-CRIDER-2019-180T",
-    "category": "二手车/紧凑型轿车",
-    "aliases": [
-      "凌派",
-      "本田凌派",
-      "大空间",
-      "家用轿车",
-      "省油"
-    ],
-    "specs": "2019年9月上牌，表显6.8万公里，1.0T自动挡，空间宽敞适合家用，右前门轻微钣金修复，其他原版。",
-    "price": 5.88,
-    "unit": "台",
-    "inventory": 1,
-    "shipping_policy": "随时看车，支持第三方检测陪同。",
-    "warranty_policy": "右前门有钣金修复记录，已如实告知，其余部位原版车况，以检测报告为准。",
-    "reply_templates": {
-      "recommendation": "这台凌派适合5到7万预算、注重空间和燃油经济性的家庭用户，空间大是亮点。"
+    "type": "manual",
+    "provider": "manual",
+    "marker": {
+      "ingest_channel": "legacy_v1_migration",
+      "original_source_type": "test_fixture",
+      "recorded_at": "2026-07-13T04:53:45+00:00",
+      "migration_batch": "chejin_v1_to_v2_20260713"
     },
-    "risk_rules": [
-      "钣金修复部位已告知",
-      "不承诺全车原版"
-    ]
+    "binding": {
+      "state": "unbound"
+    }
+  },
+  "source_payloads": {
+    "vehicle_detail": {
+      "api": "manual.dafengche_shaped_vehicle_detail",
+      "payload": {
+        "baseCarInfo": {
+          "name": "2019款本田凌派180TURBO CVT舒适版",
+          "firstLicensePlateDate": "2019-09",
+          "mileage": 6.8,
+          "carName": "测试车辆-07",
+          "brandName": "测试品牌-07",
+          "seriesName": "测试车系-07",
+          "modelName": "测试车型-07",
+          "vehicleCondition": "测试车况：良好",
+          "exteriorColor": "测试深灰色",
+          "color": "测试深灰色",
+          "interiorColor": "测试黑色"
+        },
+        "carPriceInfo": {
+          "salePrice": 5.88,
+          "purchasePrice": 10.59,
+          "salesPrice": 12.59,
+          "managerPrice": 12.09,
+          "wholesalePrice": 11.59
+        },
+        "carModelParam": {
+          "displacement": "1.0T",
+          "gearbox": "CVT",
+          "gearBox": "测试自动"
+        },
+        "operationPhase": "TEST_SALE",
+        "carLicenseInfo": {
+          "licenseStatus": "测试手续正常"
+        }
+      },
+      "pulled_at": "2026-07-13T04:53:45+00:00",
+      "content_hash": "sha256:1f65a1a55ea34aa83ed79ccf770e1159e05dfb6e5625dc7a917dc10b08f76b20",
+      "enriched_at": "2026-07-13T06:42:22+00:00",
+      "test_filled_at": "2026-07-13T07:47:11+00:00"
+    },
+    "vehicle_pictures": {
+      "api": "manual.dafengche_shaped_vehicle_pictures",
+      "payload": [],
+      "pulled_at": "2026-07-13T04:53:45+00:00",
+      "content_hash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  },
+  "extensions": {
+    "manual": {
+      "field_provenance": {
+        "source_payloads.vehicle_detail.payload.baseCarInfo.name": {
+          "source": "legacy_v1_migration",
+          "original_path": "data.name",
+          "original_source_type": "test_fixture",
+          "recorded_at": "2026-07-13T04:53:45+00:00"
+        },
+        "source_payloads.vehicle_detail.payload.carPriceInfo.salePrice": {
+          "source": "legacy_v1_migration",
+          "original_path": "data.price",
+          "original_source_type": "test_fixture",
+          "recorded_at": "2026-07-13T04:53:45+00:00"
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.firstLicensePlateDate": {
+          "source": "legacy_v1_snapshot_enrichment",
+          "original_path": "data.specs",
+          "recorded_at": "2026-07-13T06:42:22+00:00",
+          "evidence": "2019年9月上牌"
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.mileage": {
+          "source": "legacy_v1_snapshot_enrichment",
+          "original_path": "data.specs",
+          "recorded_at": "2026-07-13T06:42:22+00:00",
+          "evidence": "表显6.8万公里"
+        },
+        "source_payloads.vehicle_detail.payload.carModelParam.displacement": {
+          "source": "legacy_v1_snapshot_enrichment",
+          "original_path": "data.specs",
+          "recorded_at": "2026-07-13T06:42:22+00:00",
+          "evidence": "1.0T"
+        },
+        "source_payloads.vehicle_detail.payload.carModelParam.gearbox": {
+          "source": "legacy_v1_snapshot_enrichment",
+          "original_path": "data.name",
+          "recorded_at": "2026-07-13T06:42:22+00:00",
+          "evidence": "80TURBO CVT舒适版"
+        },
+        "source_payloads.vehicle_detail.payload.operationPhase": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.carName": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.brandName": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.seriesName": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.modelName": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.vehicleCondition": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.exteriorColor": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.color": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.interiorColor": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.carModelParam.gearBox": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.carPriceInfo.purchasePrice": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.carPriceInfo.salesPrice": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.carPriceInfo.managerPrice": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.carPriceInfo.wholesalePrice": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.carLicenseInfo.licenseStatus": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        }
+      },
+      "test_fixture": {
+        "enabled": true,
+        "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+        "filled_at": "2026-07-13T07:47:11+00:00",
+        "purpose": "wechat_customer_service_field_recognition"
+      }
+    },
+    "compatibility": {
+      "legacy_v1_record": {
+        "schema_version": 1,
+        "category_id": "products",
+        "id": "chejin_crider_2019_180turbo",
+        "status": "active",
+        "source": {
+          "type": "test_fixture",
+          "batch_token": "CHEJIN_SEED_20260507",
+          "legacy_migrated_from": "knowledge_bases/products"
+        },
+        "data": {
+          "name": "2019款本田凌派180TURBO CVT舒适版",
+          "sku": "CHEJIN-CRIDER-2019-180T",
+          "category": "二手车/紧凑型轿车",
+          "aliases": [
+            "凌派",
+            "本田凌派",
+            "大空间",
+            "家用轿车",
+            "省油"
+          ],
+          "specs": "2019年9月上牌，表显6.8万公里，1.0T自动挡，空间宽敞适合家用，右前门轻微钣金修复，其他原版。",
+          "price": 5.88,
+          "unit": "台",
+          "inventory": 1,
+          "shipping_policy": "随时看车，支持第三方检测陪同。",
+          "warranty_policy": "右前门有钣金修复记录，已如实告知，其余部位原版车况，以检测报告为准。",
+          "reply_templates": {
+            "recommendation": "这台凌派适合5到7万预算、注重空间和燃油经济性的家庭用户，空间大是亮点。"
+          },
+          "risk_rules": [
+            "钣金修复部位已告知",
+            "不承诺全车原版"
+          ]
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        },
+        "metadata": {
+          "created_at": "2026-05-07T10:00:00",
+          "updated_at": "2026-05-16T22:51:06",
+          "created_by": "admin",
+          "updated_by": "admin"
+        }
+      },
+      "migration": {
+        "from_schema_version": 1,
+        "batch_id": "chejin_v1_to_v2_20260713",
+        "migrated_at": "2026-07-13T04:53:45+00:00"
+      },
+      "legacy_snapshot_enrichment": {
+        "batch_id": "chejin_v2_legacy_snapshot_enrichment_20260713",
+        "source": "legacy_v1_snapshot_enrichment",
+        "enriched_at": "2026-07-13T06:45:00+00:00",
+        "field_count": 0,
+        "retired_data_shadow_removed": true
+      }
+    },
+    "wechat_customer_service": {
+      "customer_visible_annotations": {
+        "category": "二手车/紧凑型轿车",
+        "specs": "2019年9月上牌，表显6.8万公里，1.0T自动挡，空间宽敞适合家用，右前门轻微钣金修复，其他原版。",
+        "shipping_policy": "随时看车，支持第三方检测陪同。",
+        "warranty_policy": "右前门有钣金修复记录，已如实告知，其余部位原版车况，以检测报告为准。",
+        "risk_rules": [
+          "钣金修复部位已告知",
+          "不承诺全车原版"
+        ],
+        "aliases": [
+          "凌派",
+          "本田凌派",
+          "大空间",
+          "家用轿车",
+          "省油"
+        ]
+      },
+      "manual_annotations": {
+        "sku": "CHEJIN-CRIDER-2019-180T",
+        "unit": "台",
+        "inventory": 1,
+        "reply_templates": {
+          "recommendation": "这台凌派适合5到7万预算、注重空间和燃油经济性的家庭用户，空间大是亮点。"
+        }
+      },
+      "manual_overrides": {}
+    }
   },
   "runtime": {
     "allow_auto_reply": true,
@@ -40,8 +296,14 @@
   },
   "metadata": {
     "created_at": "2026-05-07T10:00:00",
-    "updated_at": "2026-05-16T22:51:06",
+    "updated_at": "2026-07-13T15:47:11",
     "created_by": "admin",
-    "updated_by": "admin"
+    "updated_by": "admin",
+    "migrated_from_schema_version": 1,
+    "migration_batch": "chejin_v1_to_v2_20260713",
+    "legacy_snapshot_enriched_at": "2026-07-13T06:45:00+00:00",
+    "legacy_snapshot_enrichment_batch": "chejin_v2_legacy_snapshot_enrichment_20260713",
+    "test_fixture_last_action": "filled",
+    "test_fixture_batch": "chejin_v2_wechat_recognition_test_fields_20260713"
   }
 }

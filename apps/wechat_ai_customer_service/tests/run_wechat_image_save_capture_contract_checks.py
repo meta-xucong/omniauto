@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import json
 import sys
 import tempfile
@@ -16,40 +17,34 @@ for path in (PROJECT_ROOT, APP_ROOT):
         sys.path.insert(0, str(path))
 
 from apps.wechat_ai_customer_service.adapters.wechat_image_save_capture import (  # noqa: E402
-    build_image_message_from_asset,
+    build_image_saved_payload,
     build_saved_image_asset,
-    detect_customer_image_bubbles,
     detect_visual_image_bubbles,
+    execute_wechat_clipboard_image_copy,
     execute_wechat_image_save,
     find_copy_menu_item,
-    find_save_menu_item,
-    image_preview_text,
-    parse_preview_speaker,
     save_clipboard_image_to_path,
-    wait_for_file_stable,
 )
+from apps.wechat_ai_customer_service.adapters import wechat_win32_ocr_sidecar  # noqa: E402
 from apps.wechat_ai_customer_service.adapters.wechat_win32_ocr.geometry import session_split_x  # noqa: E402
 
 
 def main() -> int:
     checks = [
-        check_image_preview_and_speaker_parsing,
-        check_saved_image_asset_and_message_contract,
-        check_detect_customer_image_bubble_prefers_customer_side,
-        check_detect_visual_image_bubbles_keeps_both_sides,
-        check_find_save_menu_item_supports_chinese_and_english,
-        check_find_copy_menu_item_supports_wechat_menu,
-        check_save_clipboard_image_to_path_writes_png,
-        check_execute_image_save_prefers_clipboard_copy,
-        check_execute_image_save_crop_mode_archives_both_sides_without_clicks,
-        check_wait_for_file_stable_reports_missing_file,
+        check_structure_locator_excludes_self_image,
+        check_self_structural_observation_is_metadata_only,
+        check_current_copy_transaction_has_no_file_artifact,
+        check_self_copy_transaction_selects_only_self_side,
+        check_current_copy_requires_clipboard_generation_change,
+        check_legacy_file_entrypoints_are_rejected,
+        check_legacy_sidecar_action_rejects_before_platform_probe,
     ]
     results: list[dict[str, Any]] = []
     for check in checks:
         try:
             check()
             results.append({"name": check.__name__, "ok": True})
-        except Exception as exc:  # pragma: no cover - harness
+        except Exception as exc:  # pragma: no cover - test harness
             results.append({"name": check.__name__, "ok": False, "error": repr(exc)})
             break
     failures = [item for item in results if not item.get("ok")]
@@ -57,259 +52,213 @@ def main() -> int:
     return 1 if failures else 0
 
 
-def check_image_preview_and_speaker_parsing() -> None:
-    assert_true(image_preview_text("许聪:[图片]"), "group image preview should be detected")
-    assert_true(image_preview_text("发送了一张图片"), "plain image preview should be detected")
-    assert_equal(parse_preview_speaker("许聪:[图片]"), "许聪", "speaker should be parsed from preview")
-    assert_equal(parse_preview_speaker("[图片]"), "", "single-chat preview should not invent speaker")
-
-
-def check_saved_image_asset_and_message_contract() -> None:
-    with tempfile.TemporaryDirectory() as tmp_dir:
-        image_path = Path(tmp_dir) / "car.jpg"
-        Image.new("RGB", (64, 48), (240, 240, 240)).save(image_path)
-        asset = build_saved_image_asset(
-            saved_image_path=image_path,
-            target_name="新数据测试",
-            session_key="wx:test",
-            speaker_name="许聪",
-            source_preview="许聪:[图片]",
-        )
-        message = build_image_message_from_asset(asset)
-    assert_true(str(asset.get("saved_image_path") or "").endswith("car.jpg"), f"asset should keep saved path: {asset}")
-    assert_equal(asset.get("message_type"), "image", "asset message_type should be image")
-    assert_equal(message.get("type"), "image", "raw image-save message should be image")
-    assert_equal(message.get("sender_role"), "customer", "image message should be customer-authored")
-    assert_true(bool(message.get("image_assets")), "message should reference asset")
-
-
-def check_detect_customer_image_bubble_prefers_customer_side() -> None:
+def _customer_image_surface() -> Image.Image:
     image = Image.new("RGB", (980, 860), (247, 247, 247))
     draw = ImageDraw.Draw(image)
     split = session_split_x(980)
     draw.rectangle([0, 0, split, 860], fill=(240, 240, 240))
     draw.rectangle([split + 12, 90, 972, 760], fill=(255, 255, 255))
-    draw.rectangle([split + 42, 260, split + 262, 440], fill=(30, 120, 190))
-    draw.rectangle([810, 500, 940, 640], fill=(190, 80, 50))
-    bubbles = detect_customer_image_bubbles(image, messages=[], max_images=1)
-    assert_true(bool(bubbles), "customer-side visual bubble should be found")
-    assert_equal(bubbles[0].get("side"), "customer", "detected bubble should be customer side")
-    assert_true(int((bubbles[0].get("anchor") or {}).get("x") or 0) < 760, f"anchor should be on customer side: {bubbles}")
-
-
-def check_detect_visual_image_bubbles_keeps_both_sides() -> None:
-    image = Image.new("RGB", (980, 860), (247, 247, 247))
-    draw = ImageDraw.Draw(image)
-    split = session_split_x(980)
-    draw.rectangle([0, 0, split, 860], fill=(240, 240, 240))
-    draw.rectangle([split + 12, 90, 972, 760], fill=(255, 255, 255))
-    draw.rectangle([split + 42, 250, split + 282, 450], fill=(30, 120, 190))
+    draw.rectangle([split + 42, 260, split + 282, 480], fill=(30, 120, 190))
     draw.rectangle([760, 500, 940, 660], fill=(190, 80, 50))
-    bubbles = detect_visual_image_bubbles(image, messages=[], max_images=8, side_filter="all")
-    sides = {str(item.get("side") or "") for item in bubbles}
-    assert_true("customer" in sides, f"customer visual bubble should be found: {bubbles}")
-    assert_true("self" in sides, f"self visual bubble should be found: {bubbles}")
+    return image
 
 
-def check_find_save_menu_item_supports_chinese_and_english() -> None:
-    chinese = find_save_menu_item(
-        [{"text": "另存为...", "left": 500, "top": 300, "right": 570, "bottom": 326, "center_x": 535, "center_y": 313, "confidence": 0.9}],
-        (980, 860),
+def check_structure_locator_excludes_self_image() -> None:
+    bubbles = detect_visual_image_bubbles(_customer_image_surface(), messages=[], max_images=8, side_filter="customer")
+    assert_true(bool(bubbles), f"customer image needs a structural target: {bubbles}")
+    assert_true(all(item.get("side") == "customer" for item in bubbles), f"self image must never be a customer target: {bubbles}")
+
+
+def check_self_structural_observation_is_metadata_only() -> None:
+    messages = wechat_win32_ocr_sidecar.self_visual_image_messages_from_current_surface(
+        _customer_image_surface(),
+        [],
+        [],
+        target="Customer A",
     )
-    english = find_save_menu_item(
-        [{"text": "Save Image", "left": 500, "top": 300, "right": 590, "bottom": 326, "center_x": 545, "center_y": 313, "confidence": 0.9}],
-        (980, 860),
+    assert_equal(len(messages), 1, "a self-side structural image needs one context envelope")
+    message = messages[0]
+    assert_equal(message.get("sender"), "self", "structural image must be attributed to self")
+    assert_equal(message.get("type"), "image", "structural image retains image modality")
+    assert_true(bool(message.get("is_self_image")), "structural image must be explicit for the context-only route")
+    forbidden = {"bounds", "anchor", "path", "image", "screenshot", "sha256", "bytes"}
+    assert_true(not (forbidden & set(message)), f"image envelope may not expose visual artifact data: {message}")
+
+
+class _Win32Con:
+    VK_ESCAPE = 0x1B
+
+
+class ClipboardCopyOps:
+    win32con = _Win32Con()
+
+    def __init__(self, *, generations: list[int]) -> None:
+        self.generations = list(generations)
+        self.capture_dirs: list[str | None] = []
+        self.right_clicks = 0
+        self.menu_clicks = 0
+        self.surface = _customer_image_surface()
+        self.menu = self.surface.copy()
+
+    def capture_wechat(self, _hwnd: int, *, artifact_dir: str | None = None, label: str = "") -> tuple[Image.Image, str]:
+        self.capture_dirs.append(artifact_dir)
+        return self.surface, ""
+
+    def capture_wechat_window_visible_screen(self, _hwnd: int, *, artifact_dir: str | None = None, label: str = "") -> tuple[Image.Image, str]:
+        self.capture_dirs.append(artifact_dir)
+        return self.menu, ""
+
+    def run_ocr(self, image: Image.Image) -> list[dict[str, Any]]:
+        if image is self.menu:
+            return [{"text": "复制", "left": 600, "top": 488, "right": 636, "bottom": 508, "center_x": 618, "center_y": 498, "confidence": 0.95}]
+        return []
+
+    @staticmethod
+    def get_window_geometry(_hwnd: int) -> dict[str, int]:
+        return {"width": 980, "height": 860}
+
+    @staticmethod
+    def parse_messages_from_ocr(_items: list[dict[str, Any]], _image_size: tuple[int, int], *, target: str = "") -> list[dict[str, Any]]:
+        return []
+
+    @staticmethod
+    def blocking_screen_reason(_items: list[dict[str, Any]]) -> str:
+        return ""
+
+    def clipboard_sequence_number(self) -> int:
+        if len(self.generations) > 1:
+            return self.generations.pop(0)
+        return self.generations[0]
+
+    def human_window_image_right_click_in_bounds(self, _hwnd: int, x: int, y: int, *, bounds: list[int], action_name: str = "") -> dict[str, Any]:
+        self.right_clicks += 1
+        return {"ok": True, "x": x, "y": y, "bounds": bounds, "action_name": action_name}
+
+    def human_window_image_click_in_bounds(self, _hwnd: int, x: int, y: int, *, bounds: list[int], action_name: str = "") -> dict[str, Any]:
+        self.menu_clicks += 1
+        return {"ok": True, "x": x, "y": y, "bounds": bounds, "action_name": action_name}
+
+    @staticmethod
+    def humanized_action_sleep(_minimum: int, _maximum: int) -> None:
+        return None
+
+    def human_screen_click(self, x: int, y: int, *, action_name: str = "") -> dict[str, Any]:
+        self.menu_clicks += 1
+        return {"ok": True, "screen_x": x, "screen_y": y, "action_name": action_name}
+
+
+def check_current_copy_transaction_has_no_file_artifact() -> None:
+    ops = ClipboardCopyOps(generations=[70, 71])
+    result = execute_wechat_clipboard_image_copy(
+        hwnd=100,
+        probe={"ok": True},
+        target_name="Customer A",
+        session_key="wx:copy-contract",
+        pending_signal_id="image-1",
+        sidecar_ops=ops,
     )
-    assert_true(bool(chinese), "Chinese save menu item should be detected")
-    assert_true(bool(english), "English save menu item should be detected")
-    preferred = find_save_menu_item(
-        [
-            {"text": "保存图片", "left": 500, "top": 260, "right": 570, "bottom": 286, "center_x": 535, "center_y": 273, "confidence": 0.99},
-            {"text": "另存为...", "left": 500, "top": 300, "right": 570, "bottom": 326, "center_x": 535, "center_y": 313, "confidence": 0.7},
-        ],
-        (980, 860),
+    assert_true(result.get("ok") is True, f"copy transaction should succeed: {result}")
+    assert_equal(result.get("state"), "image_clipboard_copied", "copy state is stable")
+    assert_equal(result.get("assets"), [], "transaction may not create an image asset")
+    assert_equal(result.get("messages"), [], "transaction may not create an image message")
+    assert_equal(ops.capture_dirs, [None, None], "screenshots are transient and may not get an artifact directory")
+    transaction = result.get("transaction") or {}
+    assert_equal(transaction.get("clipboard_sequence_after"), 71, "new clipboard generation proves the copy")
+    assert_true("path" not in json.dumps(result).lower(), "copy result may not expose a filesystem path")
+
+
+def check_self_copy_transaction_selects_only_self_side() -> None:
+    ops = ClipboardCopyOps(generations=[80, 81])
+    result = execute_wechat_clipboard_image_copy(
+        hwnd=100,
+        probe={"ok": True},
+        target_name="Customer A",
+        session_key="wx:self-copy-contract",
+        pending_signal_id="self-image-1",
+        side_filter="self",
+        sidecar_ops=ops,
     )
-    assert_equal(str((preferred or {}).get("text") or ""), "另存为...", "Save As should win because it allows choosing the dedicated image folder")
+    assert_true(result.get("ok") is True, f"self-side copy transaction should succeed: {result}")
+    assert_equal((result.get("transaction") or {}).get("visual_side"), "self", "copy target must retain self-side proof until the in-memory consumer returns")
+    assert_equal(ops.right_clicks, 1, "self image must cause one bounded context click")
+    assert_equal(ops.capture_dirs, [None, None], "self-side geometry screenshots remain transient")
 
 
-def check_find_copy_menu_item_supports_wechat_menu() -> None:
-    copy_item = find_copy_menu_item(
-        [
-            {"text": "复制", "left": 600, "top": 488, "right": 636, "bottom": 508, "confidence": 0.95},
-            {"text": "另存为...", "left": 604, "top": 884, "right": 672, "bottom": 904, "confidence": 0.9},
-        ],
-        (980, 960),
+def check_current_copy_requires_clipboard_generation_change() -> None:
+    ops = ClipboardCopyOps(generations=[70])
+    result = execute_wechat_clipboard_image_copy(
+        hwnd=100,
+        probe={"ok": True},
+        target_name="Customer A",
+        sidecar_ops=ops,
     )
-    assert_true(bool(copy_item), f"WeChat copy menu item should be detected: {copy_item}")
-    assert_equal(str((copy_item or {}).get("text") or ""), "复制", "copy should be selected before save-as fallback")
+    assert_equal(result.get("ok"), False, "unchanged clipboard must be rejected")
+    assert_equal(result.get("reason"), "clipboard_sequence_unchanged_after_copy", "no stale clipboard fallback is allowed")
 
 
-def check_save_clipboard_image_to_path_writes_png() -> None:
-    class Ops:
+def check_legacy_file_entrypoints_are_rejected() -> None:
+    class OldClipboardOps:
+        def __init__(self) -> None:
+            self.platform_calls = 0
+
         @staticmethod
         def grab_clipboard_image() -> Image.Image:
             return Image.new("RGB", (80, 60), (230, 230, 230))
 
-    with tempfile.TemporaryDirectory() as tmp_dir:
-        path = Path(tmp_dir) / "copied.png"
-        result = save_clipboard_image_to_path(Ops(), path)
-        assert_true(bool(result.get("ok")), f"clipboard image should be written: {result}")
-        with Image.open(path) as saved:
-            assert_equal((saved.width, saved.height), (80, 60), "saved clipboard image should keep dimensions")
-
-
-def check_execute_image_save_prefers_clipboard_copy() -> None:
-    screenshot = Image.new("RGB", (980, 860), (247, 247, 247))
-    draw = ImageDraw.Draw(screenshot)
-    split = session_split_x(980)
-    draw.rectangle([0, 0, split, 860], fill=(240, 240, 240))
-    draw.rectangle([split + 12, 90, 972, 760], fill=(255, 255, 255))
-    draw.rectangle([split + 88, 330, split + 308, 560], fill=(80, 150, 210))
-    menu = screenshot.copy()
-    draw_menu = ImageDraw.Draw(menu)
-    draw_menu.rectangle([560, 468, 762, 904], fill=(255, 255, 255), outline=(220, 220, 220))
-
-    class Win32Con:
-        VK_ESCAPE = 0x1B
-
-    class Win32Gui:
-        @staticmethod
-        def GetWindowRect(_hwnd: int) -> tuple[int, int, int, int]:
-            return (0, 0, 980, 860)
-
-    class Ops:
-        win32con = Win32Con()
-        win32gui = Win32Gui()
-        clipboard_reads = 0
-
-        @staticmethod
-        def capture_wechat(_hwnd: int, *, artifact_dir: str | None = None, label: str = "wechat") -> tuple[Image.Image, str]:
-            return screenshot, str(Path(artifact_dir or ".") / f"{label}.png")
-
-        @staticmethod
-        def capture_wechat_window_visible_screen(_hwnd: int, *, artifact_dir: str | None = None, label: str = "wechat_visible") -> tuple[Image.Image, str]:
-            return menu, str(Path(artifact_dir or ".") / f"{label}.png")
-
-        @staticmethod
-        def run_ocr(image: Image.Image) -> list[dict[str, Any]]:
-            if image is menu:
-                return [{"text": "复制", "left": 600, "top": 488, "right": 636, "bottom": 508, "confidence": 0.95}]
-            return []
-
-        @staticmethod
-        def get_window_geometry(_hwnd: int) -> dict[str, Any]:
-            return {"width": 980, "height": 860}
-
-        @staticmethod
-        def parse_messages_from_ocr(_items: list[dict[str, Any]], _image_size: tuple[int, int], *, target: str = "") -> list[dict[str, Any]]:
-            return []
-
-        @staticmethod
-        def blocking_screen_reason(_items: list[dict[str, Any]]) -> str:
-            return ""
-
-        @staticmethod
-        def human_window_image_right_click_in_bounds(_hwnd: int, x: int, y: int, *, bounds: list[int], action_name: str = "") -> dict[str, Any]:
-            return {"ok": True, "x": x, "y": y, "bounds": bounds}
-
-        @staticmethod
-        def humanized_action_sleep(_minimum: int, _maximum: int) -> None:
-            return None
-
-        @staticmethod
-        def human_screen_click(x: int, y: int, *, action_name: str = "") -> dict[str, Any]:
-            return {"ok": True, "screen_x": x, "screen_y": y, "action_name": action_name}
-
-        @classmethod
-        def grab_clipboard_image(cls) -> Image.Image:
-            cls.clipboard_reads += 1
-            return Image.new("RGB", (120, 90), (245, 245, 245))
+        def capture_wechat(self, *_args: Any, **_kwargs: Any) -> tuple[Image.Image, str]:
+            self.platform_calls += 1
+            raise AssertionError("legacy image save must not begin capture")
 
     with tempfile.TemporaryDirectory() as tmp_dir:
-        result = execute_wechat_image_save(
+        output = Path(tmp_dir) / "old.png"
+        old_ops = OldClipboardOps()
+        clipboard_result = save_clipboard_image_to_path(old_ops, output)
+        legacy_result = execute_wechat_image_save(
             hwnd=100,
             probe={"ok": True},
-            target_name="新数据测试",
-            session_key="wx:test",
+            target_name="Customer A",
             artifact_dir=tmp_dir,
-            tenant_id="chejin",
-            source_preview="许聪:[图片]",
-            speaker_name="许聪",
-            sidecar_ops=Ops,
+            sidecar_ops=old_ops,
         )
-    assert_true(bool(result.get("ok")), f"clipboard-first image save should succeed: {result}")
-    asset = (result.get("assets") or [{}])[0]
-    assert_equal(asset.get("save_method"), "context_menu_copy_clipboard", "clipboard copy should be the primary save method")
-    assert_equal(asset.get("speaker_name"), "许聪", "asset should preserve image speaker")
-    assert_true(str(asset.get("saved_image_path") or "").endswith(".png"), "clipboard image should be stored as PNG")
-    assert_equal(Ops.clipboard_reads, 1, "clipboard should be read exactly once on success")
-
-
-def check_execute_image_save_crop_mode_archives_both_sides_without_clicks() -> None:
-    screenshot = Image.new("RGB", (980, 860), (247, 247, 247))
-    draw = ImageDraw.Draw(screenshot)
-    split = session_split_x(980)
-    draw.rectangle([0, 0, split, 860], fill=(240, 240, 240))
-    draw.rectangle([split + 12, 90, 972, 760], fill=(255, 255, 255))
-    draw.rectangle([split + 50, 260, split + 290, 470], fill=(30, 120, 190))
-    draw.rectangle([740, 500, 940, 690], fill=(190, 80, 50))
-
-    class Ops:
-        right_clicks = 0
-
-        @staticmethod
-        def capture_wechat(_hwnd: int, *, artifact_dir: str | None = None, label: str = "wechat") -> tuple[Image.Image, str]:
-            return screenshot, str(Path(artifact_dir or ".") / f"{label}.png")
-
-        @staticmethod
-        def run_ocr(_image: Image.Image) -> list[dict[str, Any]]:
-            return []
-
-        @staticmethod
-        def get_window_geometry(_hwnd: int) -> dict[str, Any]:
-            return {"width": 980, "height": 860}
-
-        @staticmethod
-        def parse_messages_from_ocr(_items: list[dict[str, Any]], _image_size: tuple[int, int], *, target: str = "") -> list[dict[str, Any]]:
-            return []
-
-        @staticmethod
-        def blocking_screen_reason(_items: list[dict[str, Any]]) -> str:
-            return ""
-
-        @classmethod
-        def human_window_image_right_click_in_bounds(cls, *_args: Any, **_kwargs: Any) -> dict[str, Any]:
-            cls.right_clicks += 1
-            return {"ok": False}
-
-    with tempfile.TemporaryDirectory() as tmp_dir:
-        result = execute_wechat_image_save(
-            hwnd=100,
-            probe={"ok": True},
-            target_name="新数据测试",
-            session_key="wx:test",
-            artifact_dir=tmp_dir,
-            tenant_id="chejin",
-            capture_mode="crop",
-            side_filter="all",
-            max_images=8,
-            sidecar_ops=Ops,
+        asset_result = build_saved_image_asset(
+            saved_image_path=output,
+            target_name="Customer A",
         )
-        assets = [item for item in (result.get("assets") or []) if isinstance(item, dict)]
-        paths = [Path(str(item.get("saved_image_path") or "")) for item in assets]
-        assert_true(all(path.is_file() for path in paths), f"crop assets should be saved: {assets}")
-    sides = {str(item.get("visual_side") or "") for item in assets}
-    assert_true(bool(result.get("ok")), f"crop mode should succeed: {result}")
-    assert_equal(result.get("state"), "visual_bubbles_archived", "crop mode should report archive state")
-    assert_true("customer" in sides and "self" in sides, f"both visual sides should be archived: {assets}")
-    assert_equal(Ops.right_clicks, 0, "crop mode must not use context-menu right click")
+        payload_result = build_image_saved_payload(
+            saved_path=output,
+            target_name="Customer A",
+            session_key="wx:legacy",
+            source_preview="",
+            speaker_name="",
+            captured_at="2026-07-13T12:00:00",
+            anchor={},
+            screenshot_path=str(Path(tmp_dir) / "screen.png"),
+            save_method="context_menu_save_as",
+            diagnostics={},
+            probe={},
+        )
+        assert_true(not output.exists(), "legacy clipboard save must not write a file")
+    assert_equal(old_ops.platform_calls, 0, "legacy file entry points must not begin platform work")
+    assert_equal(clipboard_result.get("reason"), "legacy_clipboard_file_save_rejected", "old clipboard save is fail-closed")
+    assert_equal(legacy_result.get("state"), "legacy_image_file_capture_rejected", "old image-save action is fail-closed")
+    assert_equal(asset_result.get("reason"), "legacy_image_asset_build_rejected", "legacy asset builder is fail-closed")
+    assert_equal(payload_result.get("state"), "legacy_image_file_capture_rejected", "legacy payload builder is fail-closed")
 
 
-def check_wait_for_file_stable_reports_missing_file() -> None:
-    with tempfile.TemporaryDirectory() as tmp_dir:
-        result = wait_for_file_stable(Path(tmp_dir) / "missing.jpg", timeout_seconds=0.2, quiet_period_seconds=0.05)
-    assert_true(result.get("ok") is False, f"missing file should fail: {result}")
-    assert_equal(result.get("reason"), "image_file_unstable", "failure reason should be stable")
+def check_legacy_sidecar_action_rejects_before_platform_probe() -> None:
+    original_probe = wechat_win32_ocr_sidecar.ensure_visible_wechat_window
+
+    def forbidden_probe(*_args: Any, **_kwargs: Any) -> dict[str, Any]:
+        raise AssertionError("legacy image-save must not begin a window probe")
+
+    wechat_win32_ocr_sidecar.ensure_visible_wechat_window = forbidden_probe
+    try:
+        result = wechat_win32_ocr_sidecar.run_action(
+            argparse.Namespace(action="image-save", target="Customer A", session_key="wx:legacy")
+        )
+    finally:
+        wechat_win32_ocr_sidecar.ensure_visible_wechat_window = original_probe
+    assert_equal(result.get("state"), "legacy_image_file_capture_rejected", "legacy sidecar action rejects before platform work")
 
 
 def assert_true(value: bool, message: str) -> None:

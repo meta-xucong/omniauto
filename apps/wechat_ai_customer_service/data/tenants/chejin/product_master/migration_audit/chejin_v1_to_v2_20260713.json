@@ -1,0 +1,49 @@
+{
+  "ok": true,
+  "tenant_id": "chejin",
+  "product_master_root": "D:\\AI\\omniauto\\apps\\wechat_ai_customer_service\\data\\tenants\\chejin\\product_master",
+  "batch_id": "chejin_v1_to_v2_20260713",
+  "mode": "apply",
+  "migrated_at": "2026-07-13T04:53:45+00:00",
+  "candidate_count": 22,
+  "converted_ids": [
+    "chejin_5_series_2019_530li",
+    "chejin_audi_a4l_2018_40tfsi",
+    "chejin_bmw320_2019_m",
+    "chejin_c_class_2020_260l",
+    "chejin_camry_2021_20g",
+    "chejin_civic_2020_220turbo",
+    "chejin_crider_2019_180turbo",
+    "chejin_crown_2018_20t",
+    "chejin_elantra_2019_14t",
+    "chejin_gl8_2020_es653t",
+    "chejin_golf_2020_280tsi",
+    "chejin_haval_h6_2020_20t",
+    "chejin_hengyi_2019_es6",
+    "chejin_mazda3_2020_20l",
+    "chejin_model3_2021_srplus",
+    "chejin_odysssey_2020_hybrid",
+    "chejin_polo_2018_15l",
+    "chejin_qinplus_2022_dmi55",
+    "chejin_ranger_2020_23t",
+    "chejin_sienna_2021_hybrid",
+    "chejin_tiguanl_2021_330tsi",
+    "chejin_xtrail_2020_25l"
+  ],
+  "already_v2_ids": [],
+  "failures": [],
+  "mapping_policy": {
+    "source_type": "manual",
+    "source_marker": "legacy_v1_migration",
+    "binding": "unbound",
+    "preserved_legacy_snapshot": true,
+    "never_fabricated": [
+      "shopCode",
+      "carId",
+      "VIN",
+      "plate",
+      "operationPhase",
+      "dafengche_api_provenance"
+    ]
+  }
+}

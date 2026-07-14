@@ -1,50 +1,167 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "category_id": "products",
   "id": "ap-88",
   "status": "active",
   "source": {
-    "type": "raw_upload",
-    "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\raw_inbox\\products\\upload_60f852261dbb5fe6_01_products_new_office_devices.xlsx.txt",
-    "candidate_id": "raw_4481eff5418256aa",
-    "legacy_migrated_from": "knowledge_bases/products"
-  },
-  "data": {
-    "name": "静音空气净化器 AP-88",
-    "sku": "AP-88",
-    "category": "空气净化设备",
-    "aliases": [
-      "空气净化器",
-      "除甲醛",
-      "会议室净化器",
-      "办公室净化"
-    ],
-    "specs": "适用面积 40-60 平方米，CADR 520m3/h，睡眠档 28dB，滤芯寿命约 6-9 个月",
-    "price": 1299.0,
-    "unit": "台",
-    "inventory": 56.0,
-    "shipping_policy": "江浙沪包邮，其他地区按件核算；默认德邦或顺丰大件",
-    "warranty_policy": "整机质保 1 年，滤芯耗材不保修",
-    "risk_rules": [
-      "净化效果不能承诺百分百去除，只能按检测环境说明"
-    ],
-    "reply_templates": {
-      "default": "净化效果不能承诺百分百去除，只能按检测环境说明"
+    "type": "manual",
+    "provider": "manual",
+    "marker": {
+      "ingest_channel": "legacy_v1_migration",
+      "original_source_type": "raw_upload",
+      "recorded_at": "2026-07-13T05:11:12+00:00",
+      "migration_batch": "default_v1_to_v2_20260713"
     },
-    "price_tiers": [
-      {
-        "min_quantity": 1.0,
-        "unit_price": 1299.0
+    "binding": {
+      "state": "unbound"
+    }
+  },
+  "source_payloads": {
+    "vehicle_detail": {
+      "api": "manual.dafengche_shaped_vehicle_detail",
+      "payload": {
+        "baseCarInfo": {
+          "name": "静音空气净化器 AP-88"
+        },
+        "carPriceInfo": {
+          "salePrice": 1299.0
+        }
       },
-      {
-        "min_quantity": 6.0,
-        "unit_price": 1199.0
-      },
-      {
-        "min_quantity": 20.0,
-        "unit_price": 1099.0
+      "pulled_at": "2026-07-13T05:11:12+00:00",
+      "content_hash": "sha256:cc2f3f8fa5fe5ab730e4bf42b7d242ad7edcaa24a98f6c05b3700e199322dfda"
+    },
+    "vehicle_pictures": {
+      "api": "manual.dafengche_shaped_vehicle_pictures",
+      "payload": [],
+      "pulled_at": "2026-07-13T05:11:12+00:00",
+      "content_hash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  },
+  "extensions": {
+    "manual": {
+      "field_provenance": {
+        "source_payloads.vehicle_detail.payload.baseCarInfo.name": {
+          "source": "legacy_v1_migration",
+          "original_path": "data.name",
+          "original_source_type": "raw_upload",
+          "recorded_at": "2026-07-13T05:11:12+00:00"
+        },
+        "source_payloads.vehicle_detail.payload.carPriceInfo.salePrice": {
+          "source": "legacy_v1_migration",
+          "original_path": "data.price",
+          "original_source_type": "raw_upload",
+          "recorded_at": "2026-07-13T05:11:12+00:00"
+        }
       }
-    ]
+    },
+    "compatibility": {
+      "legacy_v1_record": {
+        "schema_version": 1,
+        "category_id": "products",
+        "id": "ap-88",
+        "status": "active",
+        "source": {
+          "type": "raw_upload",
+          "path": "D:\\AI\\AI_RPA\\apps\\wechat_ai_customer_service\\data\\raw_inbox\\products\\upload_60f852261dbb5fe6_01_products_new_office_devices.xlsx.txt",
+          "candidate_id": "raw_4481eff5418256aa",
+          "legacy_migrated_from": "knowledge_bases/products"
+        },
+        "data": {
+          "name": "静音空气净化器 AP-88",
+          "sku": "AP-88",
+          "category": "空气净化设备",
+          "aliases": [
+            "空气净化器",
+            "除甲醛",
+            "会议室净化器",
+            "办公室净化"
+          ],
+          "specs": "适用面积 40-60 平方米，CADR 520m3/h，睡眠档 28dB，滤芯寿命约 6-9 个月",
+          "price": 1299.0,
+          "unit": "台",
+          "inventory": 56.0,
+          "shipping_policy": "江浙沪包邮，其他地区按件核算；默认德邦或顺丰大件",
+          "warranty_policy": "整机质保 1 年，滤芯耗材不保修",
+          "risk_rules": [
+            "净化效果不能承诺百分百去除，只能按检测环境说明"
+          ],
+          "reply_templates": {
+            "default": "净化效果不能承诺百分百去除，只能按检测环境说明"
+          },
+          "price_tiers": [
+            {
+              "min_quantity": 1.0,
+              "unit_price": 1299.0
+            },
+            {
+              "min_quantity": 6.0,
+              "unit_price": 1199.0
+            },
+            {
+              "min_quantity": 20.0,
+              "unit_price": 1099.0
+            }
+          ]
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "warning"
+        },
+        "metadata": {
+          "created_at": "2026-04-27T00:55:27",
+          "updated_at": "2026-05-16T22:51:05",
+          "created_by": "admin",
+          "updated_by": "admin"
+        }
+      },
+      "input_adapter": "generic_product_form_to_manual_v2",
+      "migration": {
+        "from_schema_version": 1,
+        "batch_id": "default_v1_to_v2_20260713",
+        "migrated_at": "2026-07-13T05:11:12+00:00"
+      }
+    },
+    "wechat_customer_service": {
+      "customer_visible_annotations": {
+        "category": "空气净化设备",
+        "specs": "适用面积 40-60 平方米，CADR 520m3/h，睡眠档 28dB，滤芯寿命约 6-9 个月",
+        "shipping_policy": "江浙沪包邮，其他地区按件核算；默认德邦或顺丰大件",
+        "warranty_policy": "整机质保 1 年，滤芯耗材不保修",
+        "risk_rules": [
+          "净化效果不能承诺百分百去除，只能按检测环境说明"
+        ],
+        "aliases": [
+          "空气净化器",
+          "除甲醛",
+          "会议室净化器",
+          "办公室净化"
+        ]
+      },
+      "manual_annotations": {
+        "sku": "AP-88",
+        "unit": "台",
+        "inventory": 56.0,
+        "price_tiers": [
+          {
+            "min_quantity": 1.0,
+            "unit_price": 1299.0
+          },
+          {
+            "min_quantity": 6.0,
+            "unit_price": 1199.0
+          },
+          {
+            "min_quantity": 20.0,
+            "unit_price": 1099.0
+          }
+        ],
+        "reply_templates": {
+          "default": "净化效果不能承诺百分百去除，只能按检测环境说明"
+        }
+      },
+      "manual_overrides": {}
+    }
   },
   "runtime": {
     "allow_auto_reply": true,
@@ -53,8 +170,10 @@
   },
   "metadata": {
     "created_at": "2026-04-27T00:55:27",
-    "updated_at": "2026-05-16T22:51:05",
+    "updated_at": "2026-07-13T13:11:12",
     "created_by": "admin",
-    "updated_by": "admin"
+    "updated_by": "admin",
+    "migrated_from_schema_version": 1,
+    "migration_batch": "default_v1_to_v2_20260713"
   }
 }

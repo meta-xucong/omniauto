@@ -670,7 +670,17 @@ def prepare_round_state(
     )
 
 
-def configure_settings() -> None:
+def target_conversation_type(
+    target: str,
+    conversation_type_by_target: dict[str, str] | None = None,
+) -> str:
+    detected = str((conversation_type_by_target or {}).get(target) or "").strip().lower()
+    if detected and detected != "unknown":
+        return detected
+    return "group" if target == "新数据测试" else "private"
+
+
+def configure_settings(conversation_type_by_target: dict[str, str] | None = None) -> None:
     CustomerServiceSettings(tenant_id=TENANT_ID).save(
         {
             "enabled": True,
@@ -689,7 +699,18 @@ def configure_settings() -> None:
             "respond_all_unread_sessions": False,
             "session_targets_managed": True,
             "session_targets": [
-                {"name": target, "display_name": target, "enabled": True, "exact": True, "archived": False, "conversation_type": "group" if target == "新数据测试" else "private", "source": "live_acceptance"}
+                {
+                    "name": target,
+                    "display_name": target,
+                    "enabled": True,
+                    "exact": True,
+                    "archived": False,
+                    "conversation_type": target_conversation_type(
+                        target,
+                        conversation_type_by_target,
+                    ),
+                    "source": "live_acceptance",
+                }
                 for target in TARGETS
             ],
         }
@@ -936,16 +957,22 @@ def seed_synthetic_pending_sessions(
     bridge: ManagedListenerSchedulerBridge,
     progress_path: Path,
     session_key_by_target: dict[str, str] | None = None,
+    conversation_type_by_target: dict[str, str] | None = None,
 ) -> None:
     state = bridge.store.load()
     key_map = session_key_by_target or {}
+    type_map = conversation_type_by_target or {}
     for target in TARGETS:
+        conversation_type = target_conversation_type(target, type_map)
         enqueue_pending_session(
             state,
             target,
             exact=True,
-            conversation_type="group" if target == "新数据测试" else "private",
-            session_key=str(key_map.get(target) or stable_session_key(target, conversation_type="group" if target == "新数据测试" else "private")),
+            conversation_type=conversation_type,
+            session_key=str(
+                key_map.get(target)
+                or stable_session_key(target, conversation_type=conversation_type)
+            ),
             reason="two_visible_session_synthetic_inbound",
             now=now_text(),
         )
@@ -956,6 +983,7 @@ def seed_synthetic_pending_sessions(
             "event": "seed_synthetic_pending_sessions",
             "targets": list(TARGETS),
             "session_key_by_target": dict(key_map),
+            "conversation_type_by_target": dict(type_map),
             "summary": {
                 "sessions": len((state.get("sessions") or {})),
                 "pending_sessions": sum(1 for item in (state.get("sessions") or {}).values() if isinstance(item, dict) and item.get("pending_capture")),
@@ -1266,7 +1294,6 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
                 "WECHAT_RPA_OPERATOR_GUARD_CONTROL_HOTKEY": "f8",
             }
         )
-        configure_settings()
         preflight = connector.capabilities(interactive=True)
         sessions = connector.list_sessions(fresh=True)
         result["preflight"] = compact_status(preflight)
@@ -1286,7 +1313,13 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             for item in result["sessions"]
             if isinstance(item, dict) and str(item.get("name") or "") in TARGETS and str(item.get("session_key") or "")
         }
+        conversation_type_by_target = {
+            str(item.get("name") or ""): str(item.get("conversation_type") or "unknown")
+            for item in result["sessions"]
+            if isinstance(item, dict) and str(item.get("name") or "") in TARGETS
+        }
         result["session_key_by_target"] = dict(session_key_by_target)
+        result["conversation_type_by_target"] = dict(conversation_type_by_target)
         append_jsonl(progress_path, {"event": "preflight", "preflight": result["preflight"], "sessions": result["sessions"], "created_at": now_text()})
         reason = hard_status_reason(preflight)
         if reason:
@@ -1303,6 +1336,8 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             result["error"] = "target_session_key_missing"
             result["missing_session_key_targets"] = missing_session_keys
             return finish(result, run_dir)
+
+        configure_settings(conversation_type_by_target)
 
         result["runtime_idle_probe"] = runtime_idle_probe(progress_path)
         if not result["runtime_idle_probe"].get("ok"):
@@ -1400,7 +1435,12 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             if bridge.runtime is not None:
                 bridge.runtime.capture_fn = bridge._capture_session
                 bridge.runtime.send_fn = bridge._send_reply
-            seed_synthetic_pending_sessions(bridge, progress_path, session_key_by_target=session_key_by_target)
+            seed_synthetic_pending_sessions(
+                bridge,
+                progress_path,
+                session_key_by_target=session_key_by_target,
+                conversation_type_by_target=conversation_type_by_target,
+            )
             round_result["ledger_before"] = [ledger_snapshot(target) for target in TARGETS]
             replies = wait_for_replies(
                 bridge,
@@ -1655,6 +1695,10 @@ def main() -> int:
 
 
 def run_self_check() -> bool:
+    if target_conversation_type("新数据测试", {"新数据测试": "private"}) != "private":
+        return False
+    if target_conversation_type("新数据测试", {}) != "group":
+        return False
     split_sent = [
         {"target": "新数据测试", "result": {"ok": True}},
         {"target": "新数据测试", "result": {"ok": True}},
