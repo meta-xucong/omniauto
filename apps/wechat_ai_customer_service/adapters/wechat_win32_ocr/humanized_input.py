@@ -38,6 +38,11 @@ DEFAULT_HUMANIZED_ADAPTIVE_SPEED_ENABLED = True
 DEFAULT_HUMANIZED_SHORT_TEXT_CHARS = 90
 DEFAULT_HUMANIZED_LONG_TEXT_CHARS = 240
 HUMANIZED_TYPO_CANDIDATES = "asdfjkl;,.?/[]"
+INTERACTION_RHYTHM_VARIANTS = {
+    "brief_reading": (0.78, 0.94),
+    "steady_entry": (0.90, 1.08),
+    "deliberate_entry": (1.05, 1.22),
+}
 
 
 def sendinput_safe_text(text: str) -> str:
@@ -315,6 +320,41 @@ def adapt_humanized_input_settings(settings: dict[str, Any], text: str) -> dict[
         ),
     )
     active["adaptive_text_chars"] = text_len
+    return apply_interaction_rhythm(active)
+
+
+def apply_interaction_rhythm(settings: dict[str, Any]) -> dict[str, Any]:
+    """Apply one bounded random interaction rhythm to a verified send.
+
+    This varies pacing while preserving the existing random chunk selection.
+    It never introduces a typo, a retry, or a new send action, and the
+    resulting profile is retained in the existing diagnostic settings payload
+    for later review.
+    """
+    active = dict(settings or {})
+    if not active.get("enabled"):
+        return active
+    variant = random.choice(tuple(INTERACTION_RHYTHM_VARIANTS))
+    scale_low, scale_high = INTERACTION_RHYTHM_VARIANTS[variant]
+    cadence_scale = random.uniform(scale_low, scale_high)
+    pause_shift = random.randint(-8, 16)
+    min_chunk = max(1, int(active.get("chunk_min_chars") or 1))
+    max_chunk = max(min_chunk, int(active.get("chunk_max_chars") or min_chunk))
+    # Keep the proven adaptive chunk bounds intact. `humanized_chunk_text`
+    # already chooses each chunk randomly; the rhythm adds cadence variance
+    # without weakening the short/long-text stability envelope.
+    active["chunk_min_chars"] = min_chunk
+    active["chunk_max_chars"] = max_chunk
+    micro_every = int(active.get("micro_pause_every_chars") or 0)
+    if micro_every > 0:
+        active["micro_pause_every_chars"] = max(12, min(60, micro_every + pause_shift))
+    base_scale = float(active.get("inter_chunk_delay_scale") or 1.0)
+    active["inter_chunk_delay_scale"] = max(0.35, min(1.2, base_scale * cadence_scale))
+    active["interaction_rhythm"] = {
+        "variant": variant,
+        "cadence_scale": round(cadence_scale, 4),
+        "pause_shift": pause_shift,
+    }
     return active
 
 

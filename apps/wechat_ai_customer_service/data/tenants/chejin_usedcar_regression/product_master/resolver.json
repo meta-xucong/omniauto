@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "category_id": "products",
   "match_fields": [
     "name",
@@ -33,5 +33,6 @@
     "additional_details"
   ],
   "minimum_confidence": 0.45,
-  "default_action": "answer_from_product_master"
+  "default_action": "answer_from_product_master",
+  "record_storage_contract": "dafengche_product_master_v2"
 }

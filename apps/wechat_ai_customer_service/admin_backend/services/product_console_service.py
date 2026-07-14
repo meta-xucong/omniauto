@@ -20,6 +20,13 @@ from apps.wechat_ai_customer_service.llm_config import (
     resolve_deepseek_tier_model,
     resolve_deepseek_timeout,
 )
+from apps.wechat_ai_customer_service.product_master import ProductMasterStore
+from packages.dafengche_product_master import (
+    apply_admin_vehicle_update,
+    build_admin_vehicle_view,
+    build_legacy_data_projection,
+    is_v2_vehicle_record,
+)
 
 from .knowledge_base_store import KnowledgeBaseStore
 from .knowledge_compiler import KnowledgeCompiler
@@ -78,6 +85,12 @@ SCOPED_KEYWORD_HINTS = [
     "到货",
 ]
 QUANTITY_UNITS_PATTERN = r"(?:台|个|件|辆|套|只|箱|张|把|条|份|组|批)"
+MAX_MANUAL_VEHICLE_IMAGE_BYTES = 10 * 1024 * 1024
+MANUAL_VEHICLE_IMAGE_TYPES = {
+    "image/jpeg": ".jpg",
+    "image/png": ".png",
+    "image/webp": ".webp",
+}
 
 
 class ProductConsoleService:
@@ -99,6 +112,7 @@ class ProductConsoleService:
         sold_out_count = sum(1 for item in products if item.get("stock_state") == "sold_out")
         runtime_usable_count = sum(1 for item in products if item.get("runtime_usable"))
         unread_count = sum(1 for item in products if item.get("is_unread"))
+        vehicle_counts = build_vehicle_catalog_counts(products)
         return {
             "ok": True,
             "items": products,
@@ -111,6 +125,9 @@ class ProductConsoleService:
                 "runtime_usable": runtime_usable_count,
                 "unread": unread_count,
             },
+            # Additive V2 metrics.  The old ``counts`` payload remains intact
+            # for existing integrations that still understand generic stock.
+            "vehicle_counts": vehicle_counts,
         }
 
     def detail(self, product_id: str) -> dict[str, Any]:
@@ -118,7 +135,7 @@ class ProductConsoleService:
         if not item:
             raise FileNotFoundError(product_id)
         scoped = self.product_scoped_knowledge(product_id)
-        return {"ok": True, "item": self.enrich_product(item, scoped=scoped), "scoped_knowledge": scoped}
+        return {"ok": True, "item": self.enrich_product(item, scoped=scoped, include_admin_raw=True), "scoped_knowledge": scoped}
 
     def product_scoped_knowledge(self, product_id: str) -> dict[str, list[dict[str, Any]]]:
         result: dict[str, list[dict[str, Any]]] = {}
@@ -145,8 +162,26 @@ class ProductConsoleService:
         item = self.get_product_item(product_id, include_archived=True)
         if not item:
             raise FileNotFoundError(product_id)
-        data = dict(item.get("data") or {})
         operation = str(operation or "").strip()
+        if is_v2_vehicle_record(item):
+            if operation in {"archive", "activate"}:
+                updated = dict(item)
+                updated["status"] = "archived" if operation == "archive" else "active"
+                return self.save_v2_product_item(updated, operation=operation)
+            compatibility = build_legacy_data_projection(item)
+            current = to_int(compatibility.get("inventory"), default=0)
+            if operation == "set":
+                inventory = max(0, int(quantity or 0))
+            elif operation == "increase":
+                inventory = max(0, current + int(quantity or 1))
+            elif operation in {"decrease", "sell"}:
+                inventory = max(0, current - int(quantity or 1))
+            else:
+                raise ValueError(f"unsupported operation: {operation}")
+            updated = apply_admin_vehicle_update(item, {"manual_annotations": {"inventory": inventory}})
+            updated["status"] = "active"
+            return self.save_v2_product_item(updated, operation=operation)
+        data = dict(item.get("data") or {})
         current = to_int(data.get("inventory"), default=0)
         if operation == "set":
             data["inventory"] = max(0, int(quantity or 0))
@@ -170,6 +205,8 @@ class ProductConsoleService:
         item = self.get_product_item(product_id, include_archived=True)
         if not item:
             raise FileNotFoundError(product_id)
+        if is_v2_vehicle_record(item):
+            return self.update_v2_from_compatibility_patch(item, data_patch)
         data = dict(item.get("data") or {})
         patch = {key: value for key, value in data_patch.items() if value not in (None, "", [], {})}
         if isinstance(patch.get("reply_templates"), dict):
@@ -192,6 +229,152 @@ class ProductConsoleService:
         data.update(patch)
         item["data"] = data
         return self.save_product_item(item, operation="update_product")
+
+    def update_admin_view(self, product_id: str, patch: dict[str, Any]) -> dict[str, Any]:
+        """Apply the V2 admin-console edit contract without writing ``data``."""
+
+        item = self.get_product_item(product_id, include_archived=True)
+        if not item:
+            raise FileNotFoundError(product_id)
+        if not is_v2_vehicle_record(item):
+            raise ValueError("V2 admin editing is only available for V2 vehicle records")
+        updated = apply_admin_vehicle_update(item, patch)
+        return self.save_v2_product_item(updated, operation="update_admin_view")
+
+    def upload_vehicle_image(
+        self,
+        product_id: str,
+        *,
+        filename: str,
+        content: bytes,
+        content_type: str | None,
+    ) -> dict[str, Any]:
+        """Store one admin-uploaded image in the manual V2 picture payload.
+
+        The image remains under the tenant's product-master root and the V2
+        payload receives a Dafengche-shaped ``pictureUrl`` record.  Official
+        Dafengche mirrors remain read-only: a real API sync owns their image
+        list just as it owns their vehicle facts.
+        """
+
+        item = self.get_product_item(product_id, include_archived=True)
+        if not item:
+            raise FileNotFoundError(product_id)
+        if not is_v2_vehicle_record(item):
+            raise ValueError("vehicle image upload is only available for V2 vehicle records")
+        source = item.get("source") if isinstance(item.get("source"), dict) else {}
+        if str(source.get("type") or "") != "manual":
+            raise ValueError("Dafengche synchronized vehicle pictures are read-only; sync them from Dafengche instead")
+        mime_type, suffix = detect_manual_vehicle_image(content, content_type)
+        asset_root = self._vehicle_image_root(product_id)
+        digest = hashlib.sha256(content).hexdigest()
+        asset_id = f"img_{digest[:24]}"
+        asset_filename = f"{asset_id}{suffix}"
+        asset_path = (asset_root / asset_filename).resolve()
+        if asset_root.resolve() not in asset_path.parents:
+            raise ValueError("vehicle image path escapes product-master root")
+        asset_root.mkdir(parents=True, exist_ok=True)
+        if not asset_path.exists():
+            asset_path.write_bytes(content)
+
+        payloads = item.get("source_payloads") if isinstance(item.get("source_payloads"), dict) else {}
+        snapshot = payloads.get("vehicle_pictures") if isinstance(payloads.get("vehicle_pictures"), dict) else {}
+        pictures = snapshot.get("payload") if isinstance(snapshot.get("payload"), list) else []
+        picture_url = f"/api/product-console/products/{product_id}/images/{asset_id}"
+        next_pictures = [entry for entry in pictures if isinstance(entry, dict) and str(entry.get("pictureUrl") or "") != picture_url]
+        next_pictures.append(
+            {
+                "pictureId": asset_id,
+                "pictureUrl": picture_url,
+                "source": "manual_upload",
+                "filename": safe_vehicle_image_filename(filename),
+                "mimeType": mime_type,
+                "size": len(content),
+                "sha256": f"sha256:{digest}",
+                "uploadedAt": datetime.now().isoformat(timespec="seconds"),
+                "assetFile": asset_filename,
+            }
+        )
+        updated = apply_admin_vehicle_update(item, {"vehicle_pictures_patch": next_pictures})
+        saved = self.save_v2_product_item(updated, operation="upload_vehicle_image")
+        return {
+            **saved,
+            "image": {
+                "picture_id": asset_id,
+                "url": picture_url,
+                "mime_type": mime_type,
+                "filename": safe_vehicle_image_filename(filename),
+                "size": len(content),
+            },
+        }
+
+    def vehicle_image_file(self, product_id: str, image_id: str) -> tuple[Path, str]:
+        """Resolve an authenticated manual V2 image without exposing paths."""
+
+        item = self.get_product_item(product_id, include_archived=True)
+        if not item:
+            raise FileNotFoundError(product_id)
+        if not re.fullmatch(r"img_[a-f0-9]{24}", str(image_id or "")):
+            raise FileNotFoundError(image_id)
+        payloads = item.get("source_payloads") if isinstance(item.get("source_payloads"), dict) else {}
+        snapshot = payloads.get("vehicle_pictures") if isinstance(payloads.get("vehicle_pictures"), dict) else {}
+        pictures = snapshot.get("payload") if isinstance(snapshot.get("payload"), list) else []
+        picture = next(
+            (
+                entry
+                for entry in pictures
+                if isinstance(entry, dict)
+                and str(entry.get("pictureId") or "") == image_id
+                and str(entry.get("source") or "") == "manual_upload"
+            ),
+            None,
+        )
+        if not picture:
+            raise FileNotFoundError(image_id)
+        asset_name = str(picture.get("assetFile") or "")
+        if not re.fullmatch(rf"{re.escape(str(image_id))}\.(?:jpg|png|webp)", asset_name):
+            raise FileNotFoundError(image_id)
+        asset_root = self._vehicle_image_root(product_id)
+        asset_path = (asset_root / asset_name).resolve()
+        if asset_root.resolve() not in asset_path.parents or not asset_path.is_file():
+            raise FileNotFoundError(image_id)
+        return asset_path, str(picture.get("mimeType") or "application/octet-stream")
+
+    def _vehicle_image_root(self, product_id: str) -> Path:
+        store = getattr(self.store, "product_master", None)
+        product_master = store if isinstance(store, ProductMasterStore) else ProductMasterStore()
+        root = (product_master.root / "assets" / product_id).resolve()
+        if product_master.root.resolve() not in root.parents:
+            raise ValueError("vehicle image root escapes product-master root")
+        return root
+
+    def update_v2_from_compatibility_patch(self, item: dict[str, Any], data_patch: dict[str, Any]) -> dict[str, Any]:
+        """Keep legacy command entrypoints usable without persisting V1 ``data``."""
+
+        patch = {key: value for key, value in data_patch.items() if value not in (None, "", [], {})}
+        vehicle_patch: dict[str, Any] = {}
+        annotations: dict[str, Any] = {}
+        manual_annotations: dict[str, Any] = {}
+        if "name" in patch:
+            vehicle_patch.setdefault("baseCarInfo", {})["name"] = patch.pop("name")
+        if "price" in patch:
+            vehicle_patch.setdefault("carPriceInfo", {})["salePrice"] = patch.pop("price")
+        for key in tuple(patch):
+            if key in {"category", "aliases", "specs", "shipping_policy", "warranty_policy", "risk_rules", "additional_details"}:
+                annotations[key] = patch.pop(key)
+            elif key in {"sku", "unit", "inventory", "price_tiers", "reply_templates"}:
+                manual_annotations[key] = patch.pop(key)
+        if patch:
+            raise ValueError("V2 vehicle update contains unsupported generic fields: " + ", ".join(sorted(patch)))
+        updated = apply_admin_vehicle_update(
+            item,
+            {
+                "vehicle_detail_patch": vehicle_patch,
+                "annotations": annotations,
+                "manual_annotations": manual_annotations,
+            },
+        )
+        return self.save_v2_product_item(updated, operation="update_product")
 
     def create_product_scoped_knowledge(
         self,
@@ -266,6 +449,15 @@ class ProductConsoleService:
         self.compiler.compile_to_disk()
         return {"ok": True, "item": self.enrich_product(saved["item"]), "operation": operation}
 
+    def save_v2_product_item(self, item: dict[str, Any], *, operation: str) -> dict[str, Any]:
+        """Persist a V2 record after the product-master controlled mutation."""
+
+        saved = self.store.save_item("products", item)
+        if not saved.get("ok"):
+            raise ValueError(saved)
+        self.compiler.compile_to_disk()
+        return {"ok": True, "item": self.enrich_product(saved["item"]), "operation": operation}
+
     def command(self, message: str, *, use_llm: bool = True, dry_run: bool = False) -> dict[str, Any]:
         text = str(message or "").strip()
         if not text:
@@ -287,7 +479,7 @@ class ProductConsoleService:
                 "message": "已整理成商品草稿，请在商品库确认或修改后直接入库。",
                 "session": session.get("session"),
             }
-        products = self.store.list_items("products", include_archived=True)
+        products = [self.compatibility_catalog_item(item) for item in self.store.list_items("products", include_archived=True)]
         matched = match_product(text, products)
         extracted_patch = extract_product_patch(text)
         missing_patch_fields = detect_missing_update_fields(text, extracted_patch)
@@ -617,14 +809,26 @@ class ProductConsoleService:
                 return item
         return None
 
+    def compatibility_catalog_item(self, item: dict[str, Any]) -> dict[str, Any]:
+        """Provide old command matching with an in-memory V2-derived ``data`` view."""
+
+        if not is_v2_vehicle_record(item):
+            return item
+        result = dict(item)
+        result["data"] = build_legacy_data_projection(item)
+        return result
+
     def enrich_product(
         self,
         item: dict[str, Any],
         *,
         scoped: dict[str, list[dict[str, Any]]] | None = None,
         scoped_counts: dict[str, int] | None = None,
+        include_admin_raw: bool = False,
     ) -> dict[str, Any]:
-        data = item.get("data") if isinstance(item.get("data"), dict) else {}
+        v2_vehicle = is_v2_vehicle_record(item)
+        admin_view = build_admin_vehicle_view(item, include_raw=include_admin_raw)
+        data = build_legacy_data_projection(item) if v2_vehicle else (item.get("data") if isinstance(item.get("data"), dict) else {})
         product_id = str(item.get("id") or "")
         scoped = scoped if scoped is not None else None
         if scoped_counts is None:
@@ -639,6 +843,8 @@ class ProductConsoleService:
         runtime_usable = str(item.get("status") or "active") != "archived" and not is_unread
         return {
             **item,
+            # Output-only compatibility facade.  V2 persistence never uses it.
+            "data": data,
             "is_unread": is_unread,
             "runtime_usable": runtime_usable,
             "display": {
@@ -654,6 +860,7 @@ class ProductConsoleService:
             },
             "stock_state": stock_state,
             "scoped_counts": scoped_counts,
+            "admin_view": admin_view,
         }
 
 
@@ -680,6 +887,36 @@ def match_product(text: str, products: list[dict[str, Any]]) -> dict[str, Any] |
     if not scored:
         return None
     return sorted(scored, key=lambda pair: pair[0], reverse=True)[0][1]
+
+
+def build_vehicle_catalog_counts(items: list[dict[str, Any]]) -> dict[str, int]:
+    """Additive V2 overview counts for the vehicle-oriented admin UI."""
+
+    counts = {
+        "total": len(items),
+        "active": 0,
+        "archived": 0,
+        "dafengche": 0,
+        "manual": 0,
+        "historical_migration": 0,
+        "bound": 0,
+        "unbound": 0,
+    }
+    for item in items:
+        view = item.get("admin_view") if isinstance(item.get("admin_view"), dict) else {}
+        source = view.get("source") if isinstance(view.get("source"), dict) else {}
+        summary = view.get("summary") if isinstance(view.get("summary"), dict) else {}
+        status = str(summary.get("status") or item.get("status") or "active")
+        counts["archived" if status == "archived" else "active"] += 1
+        source_type = str(source.get("type") or "")
+        if source_type in {"dafengche", "manual"}:
+            counts[source_type] += 1
+        sync = source.get("sync") if isinstance(source.get("sync"), dict) else {}
+        if str(sync.get("state") or "") == "historical_migration":
+            counts["historical_migration"] += 1
+        binding_state = str(source.get("binding_state") or "unbound")
+        counts["bound" if binding_state == "bound" else "unbound"] += 1
+    return counts
 
 
 def build_product_match_keywords(value_text: str) -> list[str]:
@@ -1616,6 +1853,34 @@ def to_int(value: Any, *, default: int) -> int:
         return int(float(str(value)))
     except (TypeError, ValueError):
         return default
+
+
+def detect_manual_vehicle_image(content: bytes, declared_content_type: str | None) -> tuple[str, str]:
+    """Validate image bytes by signature; do not trust a browser MIME header."""
+
+    if not content:
+        raise ValueError("vehicle image is empty")
+    if len(content) > MAX_MANUAL_VEHICLE_IMAGE_BYTES:
+        raise ValueError(f"vehicle image exceeds {MAX_MANUAL_VEHICLE_IMAGE_BYTES // (1024 * 1024)} MB limit")
+    detected = ""
+    if content.startswith(b"\xff\xd8\xff"):
+        detected = "image/jpeg"
+    elif content.startswith(b"\x89PNG\r\n\x1a\n"):
+        detected = "image/png"
+    elif len(content) >= 12 and content[:4] == b"RIFF" and content[8:12] == b"WEBP":
+        detected = "image/webp"
+    if not detected:
+        raise ValueError("vehicle image must be a JPEG, PNG, or WebP file")
+    declared = str(declared_content_type or "").lower().strip()
+    if declared and declared.startswith("image/") and declared not in MANUAL_VEHICLE_IMAGE_TYPES:
+        raise ValueError("vehicle image content type must be JPEG, PNG, or WebP")
+    return detected, MANUAL_VEHICLE_IMAGE_TYPES[detected]
+
+
+def safe_vehicle_image_filename(value: str) -> str:
+    name = Path(str(value or "vehicle-image")).name
+    cleaned = re.sub(r"[^A-Za-z0-9_.\-\u4e00-\u9fff]", "_", name).strip("._")
+    return (cleaned or "vehicle-image")[:128]
 
 
 def product_stock_state(item: dict[str, Any], inventory: Any) -> str:

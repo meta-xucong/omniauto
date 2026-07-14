@@ -38,7 +38,10 @@ def customer_image_proxy_messages(messages: list[dict[str, Any]]) -> list[dict[s
             continue
         if visual_image_side(item) == "self":
             continue
-        if not str(item.get("saved_image_path") or "").strip():
+        # Clipboard image turns are represented by a text-only pending/proxy
+        # envelope.  A historical local path must never be required here.
+        flags = {str(flag or "").strip() for flag in (item.get("quality_flags") or [])}
+        if not (item.get("image_capture_pending") or "clipboard_current_transaction" in flags):
             continue
         result.append(item)
     return result
@@ -70,22 +73,6 @@ def visual_image_identity_keys(message: dict[str, Any]) -> set[str]:
     add("visual_msg", message.get("canonical_visual_id") or message.get("canonical_input_id"))
     add("source_msg", message.get("source_message_id"))
     side = visual_image_side(message) or str(message.get("visual_side") or "").strip().lower() or "unknown"
-    bounds = visual_bounds_key(message.get("bubble_bounds"))
-    if bounds:
-        add(
-            "sha_bounds",
-            f"{side}:{message.get('sha256')}:{bounds}" if message.get("sha256") else "",
-        )
-        add(
-            "asset_bounds",
-            f"{side}:{message.get('asset_id')}:{bounds}" if message.get("asset_id") else "",
-        )
-        add(
-            "path_bounds",
-            f"{side}:{message.get('saved_image_path')}:{bounds}"
-            if message.get("saved_image_path")
-            else "",
-        )
     return keys
 
 
@@ -149,7 +136,6 @@ def filter_fresh_customer_visual_sources(
                 {
                     "message_id": str(source.get("message_id") or source.get("id") or ""),
                     "visual_occurrence_id": occurrence_value,
-                    "asset_id": str(source.get("asset_id") or ""),
                     "pending_signal_id": pending_signal_key,
                     "reason": "visual_image_already_seen",
                 }
@@ -178,8 +164,6 @@ def image_message_refs(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 "message_id",
                 "source_message_id",
                 "visual_occurrence_id",
-                "asset_id",
-                "saved_image_path",
             )
             if str(item.get(key) or "").strip()
         }

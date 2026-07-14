@@ -1,12 +1,14 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "authority": "product_master",
   "category_id": "products",
   "tenant_id": "three_session_pressure_speedopt3_20260601_real",
-  "updated_at": "2026-06-01T23:14:07",
+  "updated_at": "2026-07-13T13:15:31",
   "items_path": "items",
   "compatibility": {
-    "legacy_read_fallback": "knowledge_bases/products",
-    "new_writes_to_legacy": false
+    "legacy_read_fallback": false,
+    "legacy_items_require_explicit_migration": true,
+    "new_writes_to_legacy": false,
+    "v1_form_write_adapter": "manual_v2"
   }
 }

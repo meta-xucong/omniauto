@@ -37,9 +37,21 @@ def pending_image_signal_was_processed(
             value = container.get(key) if isinstance(container, dict) else None
             if isinstance(value, list):
                 sources.extend(value)
+    # A captured placeholder is not a completed visual turn.  Marking it as
+    # processed here would prevent the very first planner pass from performing
+    # the required current-clipboard transaction.  Only a prior textual vision
+    # result (or the explicit processed-id ledger above) can suppress a retry.
     return any(
         isinstance(item, dict)
         and str(item.get("pending_signal_id") or "").strip() == clean_signal_id
+        and bool(
+            (
+                item.get("image_understanding")
+                if isinstance(item.get("image_understanding"), dict)
+                else {}
+            ).get("vision_summary")
+            or item.get("vision_summary")
+        )
         for item in sources
     )
 
@@ -89,40 +101,9 @@ def customer_image_capture_trigger(
             "evidence_count": 1,
         }
 
-    messages = [item for item in (source.get("messages") or []) if isinstance(item, dict)]
-    try:
-        limit = max(1, min(int(recent_message_limit or 1), 12))
-    except (TypeError, ValueError):
-        limit = 6
-    evidence: list[str] = []
-    for item in messages[-limit:]:
-        message_type = str(
-            item.get("type") or item.get("message_type") or ""
-        ).strip().lower()
-        if message_type in IMAGE_MESSAGE_TYPES:
-            evidence.append("recent_image_message_type")
-            continue
-        if item.get("is_customer_image_proxy"):
-            continue
-        if str(item.get("saved_image_path") or "").strip():
-            evidence.append("recent_saved_image_asset")
-            continue
-        content = str(item.get("content") or item.get("text") or "").strip()
-        if image_preview_text(content):
-            evidence.append("recent_image_preview")
-
-    if evidence:
-        return {
-            "should_run": True,
-            "reason": evidence[0],
-            "pending_signal_kind": signal_kind,
-            "pending_signal_id": signal_id,
-            "evidence_count": len(evidence),
-            "evidence": evidence[:8],
-        }
     return {
         "should_run": False,
-        "reason": "no_recent_image_evidence",
+        "reason": "current_image_pending_signal_missing",
         "pending_signal_kind": signal_kind,
         "pending_signal_id": signal_id,
         "evidence_count": 0,

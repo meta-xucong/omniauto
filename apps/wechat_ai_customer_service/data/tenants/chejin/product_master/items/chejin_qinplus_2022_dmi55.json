@@ -1,31 +1,296 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "category_id": "products",
   "id": "chejin_qinplus_2022_dmi55",
   "status": "active",
   "source": {
-    "type": "test_fixture",
-    "batch_token": "CHEJIN_20260518_150628"
+    "type": "manual",
+    "provider": "manual",
+    "marker": {
+      "ingest_channel": "legacy_v1_migration",
+      "original_source_type": "test_fixture",
+      "recorded_at": "2026-07-13T04:53:45+00:00",
+      "migration_batch": "chejin_v1_to_v2_20260713"
+    },
+    "binding": {
+      "state": "unbound"
+    }
   },
-  "data": {
-    "name": "2022款比亚迪秦PLUS DM-i 55KM",
-    "sku": "CHEJIN-QINPLUS-2022DMI",
-    "category": "二手车/新能源轿车",
-    "aliases": [
-      "秦PLUS",
-      "比亚迪秦",
-      "新能源",
-      "绿牌",
-      "混动"
-    ],
-    "specs": "2022年上牌，表显3.2万公里，插混，低油耗。",
-    "price": 8.68,
-    "unit": "台",
-    "inventory": 1,
-    "shipping_policy": "新能源车需人工确认电池检测和当地迁入政策。",
-    "warranty_policy": "电池和三电政策以厂家与检测报告为准。",
-    "reply_templates": {
-      "recommendation": "适合通勤、省油、绿牌或网约车用途。"
+  "source_payloads": {
+    "vehicle_detail": {
+      "api": "manual.dafengche_shaped_vehicle_detail",
+      "payload": {
+        "baseCarInfo": {
+          "name": "2022款比亚迪秦PLUS DM-i 55KM",
+          "firstLicensePlateDate": "2022",
+          "mileage": 3.2,
+          "carName": "测试车辆-18",
+          "brandName": "测试品牌-18",
+          "seriesName": "测试车系-18",
+          "modelName": "测试车型-18",
+          "vehicleCondition": "测试车况：良好",
+          "exteriorColor": "测试深灰色",
+          "color": "测试深灰色",
+          "interiorColor": "测试黑色"
+        },
+        "carPriceInfo": {
+          "salePrice": 8.68,
+          "purchasePrice": 14.66,
+          "salesPrice": 16.66,
+          "managerPrice": 16.16,
+          "wholesalePrice": 15.66
+        },
+        "operationPhase": "TEST_SALE",
+        "carModelParam": {
+          "gearbox": "测试自动",
+          "gearBox": "测试自动",
+          "displacement": "测试动力"
+        },
+        "carLicenseInfo": {
+          "licenseStatus": "测试手续正常"
+        }
+      },
+      "pulled_at": "2026-07-13T04:53:45+00:00",
+      "content_hash": "sha256:8f02211913a99e4f747b8df06ec451a26e9ea4e2333452514233512ca7b91947",
+      "enriched_at": "2026-07-13T06:42:22+00:00",
+      "test_filled_at": "2026-07-13T07:47:11+00:00"
+    },
+    "vehicle_pictures": {
+      "api": "manual.dafengche_shaped_vehicle_pictures",
+      "payload": [],
+      "pulled_at": "2026-07-13T04:53:45+00:00",
+      "content_hash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  },
+  "extensions": {
+    "manual": {
+      "field_provenance": {
+        "source_payloads.vehicle_detail.payload.baseCarInfo.name": {
+          "source": "legacy_v1_migration",
+          "original_path": "data.name",
+          "original_source_type": "test_fixture",
+          "recorded_at": "2026-07-13T04:53:45+00:00"
+        },
+        "source_payloads.vehicle_detail.payload.carPriceInfo.salePrice": {
+          "source": "legacy_v1_migration",
+          "original_path": "data.price",
+          "original_source_type": "test_fixture",
+          "recorded_at": "2026-07-13T04:53:45+00:00"
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.firstLicensePlateDate": {
+          "source": "legacy_v1_snapshot_enrichment",
+          "original_path": "data.specs",
+          "recorded_at": "2026-07-13T06:42:22+00:00",
+          "evidence": "2022年上牌"
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.mileage": {
+          "source": "legacy_v1_snapshot_enrichment",
+          "original_path": "data.specs",
+          "recorded_at": "2026-07-13T06:42:22+00:00",
+          "evidence": "表显3.2万公里"
+        },
+        "source_payloads.vehicle_detail.payload.operationPhase": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.carName": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.brandName": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.seriesName": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.modelName": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.vehicleCondition": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.exteriorColor": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.color": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.interiorColor": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.carModelParam.gearbox": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.carModelParam.gearBox": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.carModelParam.displacement": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.carPriceInfo.purchasePrice": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.carPriceInfo.salesPrice": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.carPriceInfo.managerPrice": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.carPriceInfo.wholesalePrice": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.carLicenseInfo.licenseStatus": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        }
+      },
+      "test_fixture": {
+        "enabled": true,
+        "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+        "filled_at": "2026-07-13T07:47:11+00:00",
+        "purpose": "wechat_customer_service_field_recognition"
+      }
+    },
+    "compatibility": {
+      "legacy_v1_record": {
+        "schema_version": 1,
+        "category_id": "products",
+        "id": "chejin_qinplus_2022_dmi55",
+        "status": "active",
+        "source": {
+          "type": "test_fixture",
+          "batch_token": "CHEJIN_20260518_150628"
+        },
+        "data": {
+          "name": "2022款比亚迪秦PLUS DM-i 55KM",
+          "sku": "CHEJIN-QINPLUS-2022DMI",
+          "category": "二手车/新能源轿车",
+          "aliases": [
+            "秦PLUS",
+            "比亚迪秦",
+            "新能源",
+            "绿牌",
+            "混动"
+          ],
+          "specs": "2022年上牌，表显3.2万公里，插混，低油耗。",
+          "price": 8.68,
+          "unit": "台",
+          "inventory": 1,
+          "shipping_policy": "新能源车需人工确认电池检测和当地迁入政策。",
+          "warranty_policy": "电池和三电政策以厂家与检测报告为准。",
+          "reply_templates": {
+            "recommendation": "适合通勤、省油、绿牌或网约车用途。"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        },
+        "review_state": {
+          "is_new": false,
+          "new_reason": "newly_added_formal_knowledge",
+          "marked_at": "2026-05-18T15:07:12",
+          "updated_at": "2026-05-19T13:06:01",
+          "read_at": "2026-05-19T13:06:01",
+          "read_by": "admin",
+          "source": {
+            "source_module": "jiangsu_chejin_test",
+            "target_category": "products",
+            "item_id": "chejin_qinplus_2022_dmi55"
+          }
+        },
+        "metadata": {
+          "created_at": "2026-05-18T15:07:12",
+          "updated_at": "2026-05-19T13:06:01",
+          "created_by": "admin",
+          "updated_by": "admin"
+        }
+      },
+      "migration": {
+        "from_schema_version": 1,
+        "batch_id": "chejin_v1_to_v2_20260713",
+        "migrated_at": "2026-07-13T04:53:45+00:00"
+      },
+      "legacy_snapshot_enrichment": {
+        "batch_id": "chejin_v2_legacy_snapshot_enrichment_20260713",
+        "source": "legacy_v1_snapshot_enrichment",
+        "enriched_at": "2026-07-13T06:45:00+00:00",
+        "field_count": 0,
+        "retired_data_shadow_removed": true
+      }
+    },
+    "wechat_customer_service": {
+      "customer_visible_annotations": {
+        "category": "二手车/新能源轿车",
+        "specs": "2022年上牌，表显3.2万公里，插混，低油耗。",
+        "shipping_policy": "新能源车需人工确认电池检测和当地迁入政策。",
+        "warranty_policy": "电池和三电政策以厂家与检测报告为准。",
+        "aliases": [
+          "秦PLUS",
+          "比亚迪秦",
+          "新能源",
+          "绿牌",
+          "混动"
+        ]
+      },
+      "manual_annotations": {
+        "sku": "CHEJIN-QINPLUS-2022DMI",
+        "unit": "台",
+        "inventory": 1,
+        "reply_templates": {
+          "recommendation": "适合通勤、省油、绿牌或网约车用途。"
+        }
+      },
+      "manual_overrides": {}
     }
   },
   "runtime": {
@@ -33,23 +298,16 @@
     "requires_handoff": false,
     "risk_level": "normal"
   },
-  "review_state": {
-    "is_new": false,
-    "new_reason": "newly_added_formal_knowledge",
-    "marked_at": "2026-05-18T15:07:12",
-    "updated_at": "2026-05-19T13:06:01",
-    "read_at": "2026-05-19T13:06:01",
-    "read_by": "admin",
-    "source": {
-      "source_module": "jiangsu_chejin_test",
-      "target_category": "products",
-      "item_id": "chejin_qinplus_2022_dmi55"
-    }
-  },
   "metadata": {
     "created_at": "2026-05-18T15:07:12",
-    "updated_at": "2026-05-19T13:06:01",
+    "updated_at": "2026-07-13T15:47:11",
     "created_by": "admin",
-    "updated_by": "admin"
+    "updated_by": "admin",
+    "migrated_from_schema_version": 1,
+    "migration_batch": "chejin_v1_to_v2_20260713",
+    "legacy_snapshot_enriched_at": "2026-07-13T06:45:00+00:00",
+    "legacy_snapshot_enrichment_batch": "chejin_v2_legacy_snapshot_enrichment_20260713",
+    "test_fixture_last_action": "filled",
+    "test_fixture_batch": "chejin_v2_wechat_recognition_test_fields_20260713"
   }
 }

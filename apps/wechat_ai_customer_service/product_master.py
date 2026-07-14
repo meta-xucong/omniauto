@@ -12,6 +12,7 @@ import json
 import os
 import re
 import time
+from copy import deepcopy
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -23,6 +24,12 @@ from apps.wechat_ai_customer_service.knowledge_paths import (
     tenant_product_master_root,
 )
 from apps.wechat_ai_customer_service.storage import get_postgres_store, load_storage_config
+from packages.dafengche_product_master.projection import (
+    CustomerEvidencePolicy,
+    project_customer_evidence,
+    project_legacy_record,
+)
+from packages.dafengche_product_master.service import create_manual_vehicle
 
 
 PRODUCT_MASTER_CATEGORY_ID = "products"
@@ -32,7 +39,7 @@ SAFE_PRODUCT_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$")
 
 
 DEFAULT_PRODUCT_MASTER_SCHEMA: dict[str, Any] = {
-    "schema_version": 1,
+    "schema_version": 2,
     "category_id": PRODUCT_MASTER_CATEGORY_ID,
     "display_name": "商品主数据",
     "description": "商品事实权威源：商品、车型、价格、库存、规格、物流、售后和禁用承诺。",
@@ -72,7 +79,7 @@ DEFAULT_PRODUCT_MASTER_SCHEMA: dict[str, Any] = {
 }
 
 DEFAULT_PRODUCT_MASTER_RESOLVER: dict[str, Any] = {
-    "schema_version": 1,
+    "schema_version": 2,
     "category_id": PRODUCT_MASTER_CATEGORY_ID,
     "match_fields": ["name", "sku", "category", "aliases", "specs", "additional_details"],
     "intent_fields": ["reply_templates", "risk_rules", "shipping_policy", "warranty_policy", "additional_details"],
@@ -112,7 +119,12 @@ def product_master_category_record() -> dict[str, Any]:
 
 
 class ProductMasterStore:
-    """Read/write facade for product master data with legacy read fallback."""
+    """Read/write facade for V2 product-master records.
+
+    The public facade remains stable for existing callers, but V1 is no longer
+    a persisted or runtime product format.  A legacy-shaped manual form input
+    is converted at the write boundary into a V2 manual vehicle record.
+    """
 
     def __init__(self, *, tenant_id: str | None = None, root: Path | None = None) -> None:
         self.tenant_id = active_tenant_id(tenant_id)
@@ -135,13 +147,31 @@ class ProductMasterStore:
         self.items_dir.mkdir(parents=True, exist_ok=True)
         changed = False
         if not self.schema_path.exists():
-            write_json(self.schema_path, self._legacy_schema() or DEFAULT_PRODUCT_MASTER_SCHEMA)
+            write_json(self.schema_path, DEFAULT_PRODUCT_MASTER_SCHEMA)
             changed = True
         if not self.resolver_path.exists():
-            write_json(self.resolver_path, self._legacy_resolver() or DEFAULT_PRODUCT_MASTER_RESOLVER)
+            write_json(self.resolver_path, DEFAULT_PRODUCT_MASTER_RESOLVER)
             changed = True
         if changed or self._manifest_needs_refresh():
             self.write_manifest()
+
+    def ensure_v2_contract(self) -> None:
+        """Upgrade the local schema/resolver metadata without re-enabling V1."""
+
+        self.ensure_structure()
+        schema = read_json(self.schema_path, default=DEFAULT_PRODUCT_MASTER_SCHEMA)
+        if isinstance(schema, dict) and int(schema.get("schema_version") or 1) < 2:
+            upgraded_schema = deepcopy(schema)
+            upgraded_schema["schema_version"] = 2
+            upgraded_schema["record_storage_contract"] = "dafengche_product_master_v2"
+            write_json(self.schema_path, upgraded_schema)
+        resolver = read_json(self.resolver_path, default=DEFAULT_PRODUCT_MASTER_RESOLVER)
+        if isinstance(resolver, dict) and int(resolver.get("schema_version") or 1) < 2:
+            upgraded_resolver = deepcopy(resolver)
+            upgraded_resolver["schema_version"] = 2
+            upgraded_resolver["record_storage_contract"] = "dafengche_product_master_v2"
+            write_json(self.resolver_path, upgraded_resolver)
+        self.write_manifest()
 
     def load_schema(self) -> dict[str, Any]:
         self.ensure_structure()
@@ -156,10 +186,11 @@ class ProductMasterStore:
         if db_items:
             return db_items
         self.ensure_structure()
-        items = self._list_file_items(self.items_dir, include_archived=include_archived)
-        if items:
-            return items
-        return self._legacy_items(include_archived=include_archived)
+        return [
+            item
+            for item in self._list_file_items(self.items_dir, include_archived=include_archived)
+            if is_v2_product_item(item)
+        ]
 
     def get_item(self, product_id: str, *, include_archived: bool = False) -> dict[str, Any] | None:
         validate_product_id(product_id)
@@ -170,7 +201,58 @@ class ProductMasterStore:
                 return item
         return None
 
+    def list_compatibility_items(self, *, include_archived: bool = False) -> list[dict[str, Any]]:
+        """Return the stable v1-shaped view required by existing generic callers.
+
+        Administrative and sync callers continue to use :meth:`list_items` and
+        therefore see the exact v2 source mirror.  This method is deliberately
+        a separate read facade so moving a record to v2 cannot make an existing
+        consumer parse Dafengche source payloads.
+        """
+
+        items: list[dict[str, Any]] = []
+        for item in self.list_items(include_archived=include_archived):
+            projected = compatibility_product_item(item)
+            if projected is not None:
+                items.append(projected)
+        return items
+
+    def get_compatibility_item(self, product_id: str, *, include_archived: bool = False) -> dict[str, Any] | None:
+        item = self.get_item(product_id, include_archived=include_archived)
+        return compatibility_product_item(item) if item else None
+
+    def list_customer_evidence_items(
+        self,
+        *,
+        shop_code: str | None = None,
+        policy: CustomerEvidencePolicy | None = None,
+    ) -> list[dict[str, Any]]:
+        """Return customer-safe product records without exposing source payloads.
+
+        Only V2 Dafengche/manual records are eligible. They are projected by
+        the portable product-master core and only enter this result after scope,
+        field-policy, and freshness checks.
+        """
+
+        items: list[dict[str, Any]] = []
+        for item in self.list_items():
+            evidence_item = customer_evidence_item(item, shop_code=shop_code, policy=policy)
+            if evidence_item is not None:
+                items.append(evidence_item)
+        return items
+
+    def get_customer_evidence_item(
+        self,
+        product_id: str,
+        *,
+        shop_code: str | None = None,
+        policy: CustomerEvidencePolicy | None = None,
+    ) -> dict[str, Any] | None:
+        item = self.get_item(product_id)
+        return customer_evidence_item(item, shop_code=shop_code, policy=policy) if item else None
+
     def save_item(self, item: dict[str, Any]) -> dict[str, Any]:
+        self.ensure_v2_contract()
         normalized = normalize_product_item(item)
         validation = validate_product_item(normalized, self.load_schema())
         if not validation["ok"]:
@@ -199,19 +281,29 @@ class ProductMasterStore:
         return self.save_item(item)
 
     def migrate_from_legacy(self, *, overwrite: bool = False) -> dict[str, Any]:
-        self.ensure_structure()
+        """Explicitly convert quarantined V1 records into V2 manual vehicles.
+
+        This is a migration-only reader.  Normal runtime reads never fall back
+        to V1 files or the old knowledge database layer.
+        """
+
+        self.ensure_v2_contract()
         copied = []
         skipped = []
-        for item in self._legacy_items(include_archived=True):
+        for item in self._legacy_items_for_migration(include_archived=True):
             item_id = str(item.get("id") or "")
             if not item_id:
                 continue
             target = self.item_path(item_id)
-            if target.exists() and not overwrite:
+            existing = read_json(target, default=None)
+            if isinstance(existing, dict) and is_v2_product_item(existing) and not overwrite:
                 skipped.append(item_id)
                 continue
-            item = normalize_product_item(item)
-            item.setdefault("source", {})["legacy_migrated_from"] = "knowledge_bases/products"
+            item = convert_generic_product_to_manual_v2(
+                item,
+                ingest_channel="legacy_v1_migration",
+                migration_batch="product_master_legacy_v1_to_v2",
+            )
             result = self.save_item(item)
             if result.get("ok"):
                 copied.append(item_id)
@@ -219,6 +311,11 @@ class ProductMasterStore:
                 skipped.append(item_id)
         self.write_manifest(extra={"legacy_migrated_count": len(copied), "legacy_skipped_count": len(skipped)})
         return {"ok": True, "copied": copied, "skipped": skipped, "count": len(copied)}
+
+    def list_v1_items_for_migration(self, *, include_archived: bool = True) -> list[dict[str, Any]]:
+        """Return quarantined V1 records for an explicit migration tool only."""
+
+        return [deepcopy(item) for item in self._legacy_items_for_migration(include_archived=include_archived)]
 
     def item_path(self, product_id: str) -> Path:
         validate_product_id(product_id)
@@ -231,15 +328,17 @@ class ProductMasterStore:
     def write_manifest(self, extra: dict[str, Any] | None = None) -> None:
         self.root.mkdir(parents=True, exist_ok=True)
         payload = {
-            "schema_version": 1,
+            "schema_version": 2,
             "authority": "product_master",
             "category_id": PRODUCT_MASTER_CATEGORY_ID,
             "tenant_id": self.tenant_id,
             "updated_at": now(),
             "items_path": "items",
             "compatibility": {
-                "legacy_read_fallback": "knowledge_bases/products",
+                "legacy_read_fallback": False,
+                "legacy_items_require_explicit_migration": True,
                 "new_writes_to_legacy": False,
+                "v1_form_write_adapter": "manual_v2",
             },
         }
         if extra:
@@ -252,7 +351,7 @@ class ProductMasterStore:
             return True
         compatibility = payload.get("compatibility") if isinstance(payload.get("compatibility"), dict) else {}
         expected = {
-            "schema_version": 1,
+            "schema_version": 2,
             "authority": "product_master",
             "category_id": PRODUCT_MASTER_CATEGORY_ID,
             "tenant_id": self.tenant_id,
@@ -262,8 +361,10 @@ class ProductMasterStore:
             if payload.get(key) != value:
                 return True
         return (
-            compatibility.get("legacy_read_fallback") != "knowledge_bases/products"
+            compatibility.get("legacy_read_fallback") is not False
+            or compatibility.get("legacy_items_require_explicit_migration") is not True
             or compatibility.get("new_writes_to_legacy") is not False
+            or compatibility.get("v1_form_write_adapter") != "manual_v2"
         )
 
     def _list_db_items(self, *, include_archived: bool) -> list[dict[str, Any]]:
@@ -276,14 +377,7 @@ class ProductMasterStore:
             category_id=PRODUCT_MASTER_CATEGORY_ID,
             include_archived=include_archived,
         )
-        if items:
-            return items
-        return db.list_knowledge_items(
-            self.tenant_id,
-            layer=LEGACY_PRODUCT_DB_LAYER,
-            category_id=PRODUCT_MASTER_CATEGORY_ID,
-            include_archived=include_archived,
-        )
+        return [item for item in items if is_v2_product_item(item)]
 
     def _legacy_root_candidates(self) -> list[Path]:
         tenant_root = tenant_knowledge_base_root(self.tenant_id) / PRODUCT_MASTER_CATEGORY_ID
@@ -317,6 +411,33 @@ class ProductMasterStore:
                     items.append(item)
         return items
 
+    def _legacy_items_for_migration(self, *, include_archived: bool) -> list[dict[str, Any]]:
+        """Read V1 only from explicitly quarantined migration locations."""
+
+        items: list[dict[str, Any]] = []
+        seen: set[str] = set()
+        candidates = [
+            *self._list_file_items(self.items_dir, include_archived=include_archived),
+            *self._legacy_items(include_archived=include_archived),
+        ]
+        db = postgres_store(self.tenant_id)
+        if db:
+            for layer in (PRODUCT_MASTER_DB_LAYER, LEGACY_PRODUCT_DB_LAYER):
+                candidates.extend(
+                    db.list_knowledge_items(
+                        self.tenant_id,
+                        layer=layer,
+                        category_id=PRODUCT_MASTER_CATEGORY_ID,
+                        include_archived=include_archived,
+                    )
+                )
+        for item in candidates:
+            item_id = str(item.get("id") or "")
+            if item_id and item_id not in seen and not is_v2_product_item(item):
+                seen.add(item_id)
+                items.append(item)
+        return items
+
     def _list_file_items(self, root: Path, *, include_archived: bool) -> list[dict[str, Any]]:
         if not root.exists():
             return []
@@ -333,19 +454,261 @@ class ProductMasterStore:
 
 
 def normalize_product_item(item: dict[str, Any]) -> dict[str, Any]:
-    result = dict(item)
+    result = deepcopy(item)
+    timestamp = now()
+    if not is_v2_product_item(result):
+        return convert_generic_product_to_manual_v2(result, observed_at=timestamp)
+    # ``data`` was the retired V1 persistence shape.  Compatibility readers
+    # derive it on demand, but accepting it here would let an admin response
+    # or historical file reintroduce a second, stale fact store into V2.
+    result.pop("data", None)
     result["category_id"] = PRODUCT_MASTER_CATEGORY_ID
-    result.setdefault("schema_version", 1)
+    result["schema_version"] = 2
     result.setdefault("status", "active")
-    result.setdefault("source", {"type": "manual"})
-    result.setdefault("data", {})
+    result["source"] = normalize_product_source(result.get("source"), recorded_at=timestamp)
     result.setdefault("runtime", {"allow_auto_reply": True, "requires_handoff": False, "risk_level": "normal"})
     metadata = result.setdefault("metadata", {})
-    metadata.setdefault("created_at", now())
-    metadata["updated_at"] = now()
+    metadata.setdefault("created_at", timestamp)
+    metadata["updated_at"] = timestamp
     metadata.setdefault("created_by", "admin")
     metadata.setdefault("updated_by", "admin")
     return result
+
+
+def is_v2_product_item(item: Any) -> bool:
+    if not isinstance(item, dict):
+        return False
+    source = item.get("source") if isinstance(item.get("source"), dict) else {}
+    return int(item.get("schema_version") or 1) >= 2 and str(source.get("type") or "") in {"dafengche", "manual"}
+
+
+def convert_generic_product_to_manual_v2(
+    item: dict[str, Any],
+    *,
+    observed_at: str | None = None,
+    ingest_channel: str | None = None,
+    migration_batch: str | None = None,
+) -> dict[str, Any]:
+    """Convert a generic product-form payload into a V2 manual vehicle record.
+
+    This is the one permitted V1 boundary: it is an input adapter, never a
+    stored/read runtime format.  Only facts with an unambiguous mapping are
+    placed in the Dafengche-shaped detail payload; the full input remains in an
+    internal compatibility snapshot for audit and frozen-call-site projection.
+    """
+
+    snapshot = deepcopy(item) if isinstance(item, dict) else {}
+    data = snapshot.get("data") if isinstance(snapshot.get("data"), dict) else {}
+    original_source = snapshot.get("source") if isinstance(snapshot.get("source"), dict) else {}
+    timestamp = observed_at or now()
+    channel = ingest_channel or _generic_input_ingest_channel(str(original_source.get("type") or ""))
+    detail_payload: dict[str, Any] = {}
+    field_provenance: dict[str, Any] = {}
+    if data.get("name") not in (None, ""):
+        detail_payload["baseCarInfo"] = {"name": deepcopy(data.get("name"))}
+        field_provenance["source_payloads.vehicle_detail.payload.baseCarInfo.name"] = _manual_field_provenance(
+            original_path="data.name",
+            original_source=original_source,
+            ingest_channel=channel,
+            recorded_at=timestamp,
+        )
+    if "price" in data and data.get("price") is not None:
+        detail_payload["carPriceInfo"] = {"salePrice": deepcopy(data.get("price"))}
+        field_provenance["source_payloads.vehicle_detail.payload.carPriceInfo.salePrice"] = _manual_field_provenance(
+            original_path="data.price",
+            original_source=original_source,
+            ingest_channel=channel,
+            recorded_at=timestamp,
+        )
+
+    requested_id = str(snapshot.get("id") or "")
+    record = create_manual_vehicle(
+        record_id=requested_id or "invalid_manual_product_id",
+        vehicle_detail_payload=detail_payload,
+        pictures_payload=[],
+        observed_at=timestamp,
+        field_provenance=field_provenance,
+    )
+    record["id"] = requested_id
+    record["status"] = str(snapshot.get("status") or "active")
+    record["runtime"] = deepcopy(
+        snapshot.get("runtime")
+        if isinstance(snapshot.get("runtime"), dict)
+        else {"allow_auto_reply": True, "requires_handoff": False, "risk_level": "normal"}
+    )
+    marker = {
+        "ingest_channel": channel,
+        "original_source_type": str(original_source.get("type") or "legacy_unclassified"),
+        "recorded_at": timestamp,
+    }
+    if migration_batch:
+        marker["migration_batch"] = str(migration_batch)
+    record["source"]["marker"] = marker
+
+    existing_extensions = snapshot.get("extensions") if isinstance(snapshot.get("extensions"), dict) else {}
+    compatibility = deepcopy(existing_extensions.get("compatibility") if isinstance(existing_extensions.get("compatibility"), dict) else {})
+    compatibility["legacy_v1_record"] = snapshot
+    compatibility["input_adapter"] = "generic_product_form_to_manual_v2"
+    if migration_batch:
+        compatibility["migration"] = {
+            "from_schema_version": int(snapshot.get("schema_version") or 1),
+            "batch_id": str(migration_batch),
+            "migrated_at": timestamp,
+        }
+    wechat_extension = deepcopy(
+        existing_extensions.get("wechat_customer_service")
+        if isinstance(existing_extensions.get("wechat_customer_service"), dict)
+        else {}
+    )
+    wechat_extension["customer_visible_annotations"] = _generic_customer_visible_annotations(data)
+    wechat_extension["manual_annotations"] = {
+        key: deepcopy(data[key])
+        for key in ("sku", "unit", "inventory", "price_tiers", "reply_templates")
+        if key in data
+    }
+    wechat_extension.setdefault("manual_overrides", {})
+    record["extensions"] = {
+        **deepcopy(existing_extensions),
+        "manual": deepcopy(record.get("extensions", {}).get("manual") if isinstance(record.get("extensions"), dict) else {}),
+        "compatibility": compatibility,
+        "wechat_customer_service": wechat_extension,
+    }
+    old_metadata = snapshot.get("metadata") if isinstance(snapshot.get("metadata"), dict) else {}
+    record["metadata"] = {
+        **deepcopy(old_metadata),
+        "created_at": str(old_metadata.get("created_at") or timestamp),
+        "updated_at": timestamp,
+        "migrated_from_schema_version": int(snapshot.get("schema_version") or 1),
+    }
+    if migration_batch:
+        record["metadata"]["migration_batch"] = str(migration_batch)
+    return record
+
+
+def _generic_input_ingest_channel(original_source_type: str) -> str:
+    value = str(original_source_type or "").strip()
+    return {
+        "test_fixture": "test_fixture",
+        "raw_upload": "raw_upload",
+        "legacy_migration": "legacy_v1_migration",
+    }.get(value, "manual_input")
+
+
+def _manual_field_provenance(
+    *,
+    original_path: str,
+    original_source: dict[str, Any],
+    ingest_channel: str,
+    recorded_at: str,
+) -> dict[str, Any]:
+    return {
+        "source": ingest_channel,
+        "original_path": original_path,
+        "original_source_type": str(original_source.get("type") or "legacy_unclassified"),
+        "recorded_at": recorded_at,
+    }
+
+
+def _generic_customer_visible_annotations(data: dict[str, Any]) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for key in ("category", "specs", "shipping_policy", "warranty_policy", "risk_rules", "additional_details"):
+        if key in data and data[key] not in (None, "", [], {}):
+            result[key] = deepcopy(data[key])
+    aliases = data.get("aliases")
+    if isinstance(aliases, list):
+        result["aliases"] = deepcopy(aliases)
+    elif aliases not in (None, ""):
+        result["aliases"] = [deepcopy(aliases)]
+    return result
+
+
+def normalize_product_source(value: Any, *, recorded_at: str) -> dict[str, Any]:
+    """Add the additive provenance marker used by every saved vehicle record.
+
+    The marker never changes the original ``source.type`` contract.  It makes
+    the ingestion route explicit for API mirrors, normal manual entry, and an
+    auditable v1-to-v2 migration while allowing integrations to add future
+    source types without being rejected.
+    """
+
+    source = deepcopy(value) if isinstance(value, dict) else {}
+    source_type = str(source.get("type") or "manual").strip() or "manual"
+    source["type"] = source_type
+    if not source.get("provider"):
+        source["provider"] = "dafengche" if source_type == "dafengche" else source_type
+    marker = deepcopy(source.get("marker")) if isinstance(source.get("marker"), dict) else {}
+    marker.setdefault("ingest_channel", _default_ingest_channel(source_type))
+    marker.setdefault("original_source_type", source_type)
+    marker.setdefault("recorded_at", recorded_at)
+    source["marker"] = marker
+    return source
+
+
+def _default_ingest_channel(source_type: str) -> str:
+    channels = {
+        "dafengche": "dafengche_api",
+        "manual": "manual_input",
+        "test_fixture": "test_fixture",
+        "raw_upload": "raw_upload",
+        "admin_form": "admin_form",
+    }
+    return channels.get(str(source_type), "legacy_unclassified")
+
+
+def customer_evidence_item(
+    item: dict[str, Any],
+    *,
+    shop_code: str | None = None,
+    policy: CustomerEvidencePolicy | None = None,
+) -> dict[str, Any] | None:
+    """Convert one product-master record into the pre-existing evidence shape.
+
+    This is the only WeChat-side bridge from a v2 source mirror to the generic
+    catalog contract consumed by legacy callers.  It intentionally keeps the
+    raw Dafengche payload out of the returned item.
+    """
+
+    if not isinstance(item, dict):
+        return None
+    source = item.get("source") if isinstance(item.get("source"), dict) else {}
+    if int(item.get("schema_version") or 1) < 2 or str(source.get("type") or "") not in {"dafengche", "manual"}:
+        return deepcopy(item)
+    evidence = project_customer_evidence(item, shop_code=shop_code, policy=policy)
+    if not evidence:
+        return None
+    result = {
+        "schema_version": 2,
+        "category_id": PRODUCT_MASTER_CATEGORY_ID,
+        "id": item.get("id"),
+        "status": item.get("status") or "active",
+        "source": {
+            "type": source.get("type"),
+            "provider": source.get("provider"),
+            "binding": deepcopy(source.get("binding") if isinstance(source.get("binding"), dict) else {}),
+        },
+        "data": {
+            "name": evidence.get("name"),
+            "category": evidence.get("category"),
+            "aliases": deepcopy(evidence.get("aliases") if isinstance(evidence.get("aliases"), list) else []),
+            "specs": evidence.get("specs"),
+            "price": evidence.get("price"),
+        },
+        "runtime": deepcopy(item.get("runtime") if isinstance(item.get("runtime"), dict) else {}),
+        "metadata": {"source_updated_at": evidence.get("source_updated_at")},
+        "customer_evidence": evidence,
+    }
+    return result
+
+
+def compatibility_product_item(item: dict[str, Any]) -> dict[str, Any] | None:
+    """Project v2 vehicle envelopes into the old generic product contract."""
+
+    if not isinstance(item, dict):
+        return None
+    source = item.get("source") if isinstance(item.get("source"), dict) else {}
+    if int(item.get("schema_version") or 1) < 2 or str(source.get("type") or "") not in {"dafengche", "manual"}:
+        return deepcopy(item)
+    return project_legacy_record(item)
 
 
 def validate_product_item(item: dict[str, Any], schema: dict[str, Any]) -> dict[str, Any]:
@@ -357,6 +720,24 @@ def validate_product_item(item: dict[str, Any], schema: dict[str, Any]) -> dict[
         problems.append(f"unsafe product id: {product_id}")
     if item.get("category_id") != PRODUCT_MASTER_CATEGORY_ID:
         problems.append("item category_id must be products")
+    source = item.get("source") if isinstance(item.get("source"), dict) else {}
+    if int(item.get("schema_version") or 1) >= 2 and str(source.get("type") or "") in {"dafengche", "manual"}:
+        marker = source.get("marker") if isinstance(source.get("marker"), dict) else {}
+        for marker_field in ("ingest_channel", "original_source_type", "recorded_at"):
+            if not str(marker.get(marker_field) or "").strip():
+                problems.append(f"v2 vehicle source marker requires {marker_field}")
+        source_payloads = item.get("source_payloads") if isinstance(item.get("source_payloads"), dict) else {}
+        detail = source_payloads.get("vehicle_detail") if isinstance(source_payloads.get("vehicle_detail"), dict) else {}
+        if not isinstance(detail.get("payload"), dict):
+            problems.append("v2 vehicle_detail payload is required")
+        binding = source.get("binding") if isinstance(source.get("binding"), dict) else {}
+        if str(source.get("type")) == "dafengche" and (
+            str(binding.get("state") or "") != "bound" or not binding.get("shopCode") or not binding.get("carId")
+        ):
+            problems.append("bound Dafengche vehicle requires shopCode and carId")
+        if str(source.get("type")) == "manual" and str(binding.get("state") or "") not in {"unbound", "bound"}:
+            problems.append("manual vehicle requires explicit binding state")
+        return {"ok": not problems, "problems": problems}
     data = item.get("data") if isinstance(item.get("data"), dict) else {}
     fields = {field["id"]: field for field in schema.get("fields", []) or [] if isinstance(field, dict) and field.get("id")}
     for field_id, field in fields.items():

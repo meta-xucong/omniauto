@@ -50,6 +50,26 @@ class BuiltinVisionPlugin:
             combined=str(context.get("combined") or ""),
         )
 
+    def capture_self_context(self, context: dict[str, Any]) -> dict[str, Any]:
+        """Return a text-only self-image context result; never a reply plan."""
+
+        from apps.wechat_ai_customer_service.workflows.customer_image_turn_router import (
+            maybe_capture_self_image_context,
+        )
+
+        return maybe_capture_self_image_context(
+            connector=context.get("connector"),
+            target=context.get("target"),
+            config=context.get("config") if isinstance(context.get("config"), dict) else {},
+            messages=[item for item in (context.get("messages") or []) if isinstance(item, dict)],
+            target_state=(
+                context.get("target_state")
+                if isinstance(context.get("target_state"), dict)
+                else {}
+            ),
+            combined=str(context.get("combined") or ""),
+        )
+
 
 def create_default_vision_plugin() -> BuiltinVisionPlugin:
     return BuiltinVisionPlugin()

@@ -372,6 +372,20 @@ async function apiJson(path, options = {}) {
   return payload;
 }
 
+async function apiForm(path, formData, options = {}) {
+  const response = await fetch(path, {
+    ...options,
+    body: formData,
+    headers: apiHeaders(options.headers || {}),
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    if (response.status === 405) throw new Error("当前本地服务可能还没重启到最新版本，请重启管理台服务后再试。");
+    throw new Error(formatApiError(payload, `${path} ${response.status}`));
+  }
+  return payload;
+}
+
 async function responseErrorMessage(response, path) {
   if (response.status === 405) return "当前本地服务可能还没重启到最新版本，请重启管理台服务后再试。";
   const payload = await response.json().catch(() => ({}));
@@ -2948,52 +2962,55 @@ async function loadProductCatalog(options = {}) {
 
 function renderProductCatalog() {
   const payload = state.productCatalog || {};
-  const counts = payload.counts || {};
+  const counts = payload.vehicle_counts || payload.counts || {};
   document.getElementById("product-catalog-cards").innerHTML = `
-    <div class="metric-card"><span>${counts.active ?? 0}</span><label>在售商品</label></div>
-    <div class="metric-card"><span>${counts.in_stock ?? 0}</span><label>有库存</label></div>
-    <div class="metric-card"><span>${counts.sold_out ?? 0}</span><label>无库存</label></div>
-    <div class="metric-card"><span>${counts.unread ?? 0}</span><label>NEW待确认</label></div>
+    <div class="metric-card"><span>${counts.active ?? 0}</span><label>在售车源</label></div>
+    <div class="metric-card"><span>${counts.dafengche ?? 0}</span><label>大风车同步</label></div>
+    <div class="metric-card"><span>${counts.manual ?? 0}</span><label>手动/迁入</label></div>
     <div class="metric-card"><span>${counts.archived ?? 0}</span><label>已归档</label></div>
   `;
+  bindProductCatalogFilters();
   renderProductCatalogList();
   renderProductCatalogDetail();
 }
 
 function renderProductCatalogList() {
   const list = document.getElementById("product-catalog-list");
-  const items = sortProductCatalogItemsForReview(state.productCatalog?.items || []);
+  const items = filterProductCatalogItems(sortProductCatalogItemsForReview(state.productCatalog?.items || []));
   list.innerHTML = items.map((item, index) => {
-    const display = item.display || {};
-    const data = item.data || {};
+    const view = productAdminView(item);
+    const summary = view.summary || {};
+    const vehicle = view.vehicle || {};
+    const photos = Array.isArray(vehicle.photos) ? vehicle.photos : [];
+    const cardFields = Array.isArray(vehicle.card_fields) ? vehicle.card_fields : [];
+    const title = vehicle.title;
+    const salePrice = vehicle.carPriceInfo?.salePrice;
     const isNew = productItemIsNew(item);
     const badges = [
       ...(isNew ? [{label: "新商品待确认", tone: "warning"}] : []),
       {label: item.status === "archived" ? "已归档" : "在售", tone: item.status === "archived" ? "muted" : "ok"},
-      {label: display.stock_label || "库存未填写", tone: productStockTone(item)},
-      {label: `${productScopedTotal(item)} 条专属话术`, tone: "info"},
     ];
     return `
-      <button class="product-card product-row" data-index="${index}" aria-label="查看 ${escapeHtml(display.name || data.name || item.id)} 的完整资料">
+      <button class="product-card product-row product-card-dafengche" data-index="${index}" aria-label="查看 ${escapeHtml(summary.name || item.id)} 的大风车车辆资料">
         ${isNew ? `
           <span class="product-new-float" aria-label="新商品">
             <span class="experience-new-badge">NEW</span>
           </span>
         ` : ""}
-        <div class="product-card-head">
-          <div>
-            <strong>${escapeHtml(display.name || data.name || item.id)}</strong>
-            <span>${escapeHtml(display.category || data.category || "未分类")}</span>
+        <div class="vehicle-card-main">
+          <div class="vehicle-card-photo ${photos[0] ? "" : "is-empty"}">${photos[0] ? vehiclePictureImageHtml(photos[0], title || "", "vehicle-card-image") : ""}</div>
+          <div class="product-card-head">
+            <div>
+              <span>车辆标题 · baseCarInfo.name</span>
+              <strong>${dafengcheFieldValueHtml(title)}</strong>
+            </div>
+            <em><small>公开售价 · salePrice</small>${dafengcheFieldValueHtml(salePrice)}</em>
           </div>
-          <em>${escapeHtml(formatProductPrice(display))}</em>
         </div>
-        <div class="product-card-facts">
-          <span><b>库存</b>${escapeHtml(display.stock_label || "未填写")}</span>
-          <span><b>编号</b>${escapeHtml(display.sku || item.id)}</span>
+        ${dafengcheFieldGridHtml(cardFields, "vehicle-card-facts")}
+        <div class="vehicle-card-footer">
+          ${badgeListHtml(badges)}
         </div>
-        <p>${escapeHtml(productCardSummary(item))}</p>
-        ${badgeListHtml(badges)}
-        <small>点击查看完整信息</small>
       </button>
     `;
   }).join("") || `<div class="empty-state">暂无商品。可以点击“新增商品”，或在上方用一句话添加。</div>`;
@@ -3005,6 +3022,31 @@ function renderProductCatalogList() {
       state.productScopedEditor = null;
       await loadProductDetail(item?.id);
     });
+  });
+  hydrateAuthorizedVehicleImages(list);
+}
+
+function bindProductCatalogFilters() {
+  const query = document.getElementById("product-catalog-query");
+  const source = document.getElementById("product-catalog-source-filter");
+  [query, source].forEach((input) => {
+    if (!input || input.dataset.productCatalogBound === "true") return;
+    input.dataset.productCatalogBound = "true";
+    input.addEventListener("input", renderProductCatalogList);
+    input.addEventListener("change", renderProductCatalogList);
+  });
+}
+
+function filterProductCatalogItems(items) {
+  const query = (document.getElementById("product-catalog-query")?.value || "").trim().toLowerCase();
+  const sourceFilter = document.getElementById("product-catalog-source-filter")?.value || "";
+  return items.filter((item) => {
+    const view = productAdminView(item);
+    const source = view.source || {};
+    const haystack = JSON.stringify({summary: view.summary, vehicle: view.vehicle, annotations: view.annotations, manual: view.manual_annotations}).toLowerCase();
+    const sourceState = source.sync?.state || "";
+    const sourceMatches = !sourceFilter || source.type === sourceFilter || sourceState === sourceFilter;
+    return sourceMatches && (!query || haystack.includes(query));
   });
 }
 
@@ -3030,13 +3072,19 @@ function renderProductCatalogDetail(scopedKnowledge = null) {
   }
   const data = item.data || {};
   const display = item.display || {};
+  const adminView = productAdminView(item);
   const isNew = productItemIsNew(item);
   const acknowledgeLoading = state.productAcknowledgeLoadingIds.has(item.id);
   if (scopedKnowledge) state.productDetailScopedKnowledge = scopedKnowledge;
   const scoped = scopedKnowledge || state.productDetailScopedKnowledge || {};
   if (state.productDetailMode === "edit") {
-    detail.innerHTML = productEditFormHtml(item, scoped);
+    detail.innerHTML = adminView.record_kind === "vehicle_v2" ? productV2EditFormHtml(item, adminView, scoped) : productEditFormHtml(item, scoped);
     bindProductDetailEditors(detail);
+    hydrateAuthorizedVehicleImages(detail);
+    return;
+  }
+  if (adminView.record_kind === "vehicle_v2") {
+    renderProductV2Detail(detail, item, adminView, scoped, {isNew, acknowledgeLoading});
     return;
   }
   detail.innerHTML = `
@@ -3116,6 +3164,277 @@ function renderProductCatalogDetail(scopedKnowledge = null) {
     button.addEventListener("click", () => openProductScopedInlineEditor(button.dataset.category, ""));
   });
   bindProductScopedEditor(detail);
+}
+
+function renderProductV2Detail(detail, item, view, scoped, {isNew, acknowledgeLoading}) {
+  const summary = view.summary || {};
+  const vehicle = view.vehicle || {};
+  const pricing = vehicle.carPriceInfo || {};
+  const source = view.source || {};
+  const annotations = view.annotations || {};
+  const manual = view.manual_annotations || {};
+  const sync = source.sync || {};
+  const title = vehicle.title;
+  const productName = title || summary.name || item.id;
+  const photos = Array.isArray(vehicle.photos) ? vehicle.photos : [];
+  const fieldGroups = Array.isArray(view.dafengche_field_groups) ? view.dafengche_field_groups : [];
+  const rawPayloads = view.raw_source_payloads && typeof view.raw_source_payloads === "object" ? view.raw_source_payloads : null;
+  detail.innerHTML = `
+    <div class="read-head">
+      <div>
+        <p class="eyebrow">大风车车辆资料（V2）</p>
+        <h2 id="product-detail-title">${dafengcheFieldValueHtml(title)}</h2>
+        ${badgeListHtml([
+          ...(isNew ? [{label: "NEW 待确认", tone: "warning"}] : []),
+          {label: item.status === "archived" ? "已归档" : "在售", tone: item.status === "archived" ? "muted" : "ok"},
+        ])}
+      </div>
+      <div class="read-actions">
+        <button class="secondary-button product-modal-close" type="button">关闭</button>
+        ${isNew ? `<button class="secondary-button product-acknowledge ${acknowledgeLoading ? "is-loading" : ""}" type="button" ${acknowledgeLoading ? "disabled" : ""}>${acknowledgeLoading ? `<span class="loading-spinner button-spinner" aria-hidden="true"></span><span>确认中</span>` : "已阅"}</button>` : ""}
+        <button class="secondary-button product-edit-form" type="button">${view.capabilities?.can_edit_vehicle_source ? "编辑车辆资料" : "补充本地信息"}</button>
+        <button class="secondary-button danger-button product-archive" type="button">${item.status === "archived" ? "重新上架" : "归档"}</button>
+      </div>
+    </div>
+    <div class="vehicle-detail-hero">
+      <div class="vehicle-price-block"><span>公开售价 · carPriceInfo.salePrice</span><strong>${dafengcheFieldValueHtml(pricing.salePrice)}</strong></div>
+    </div>
+    <section class="vehicle-facts-section">
+      <div class="section-heading"><div><span>大风车字段内容</span><strong>固定字段始终显示；空白即当前车源尚未拉取到该字段。</strong></div></div>
+      ${dafengcheFieldGroupsHtml(fieldGroups)}
+    </section>
+    <section class="dafengche-photo-section"><span>车辆图片 · vehicle_pictures.payload（${photos.length}）</span><div class="product-photo-grid dfc-photo-grid">${photos.length ? photos.map((url) => vehiclePictureTileHtml(url, productName)).join("") : `<div class="dfc-empty-photo" aria-label="车辆图片为空">&nbsp;</div>`}</div></section>
+    <details class="vehicle-advanced-panel">
+      <summary>高级</summary>
+      <div class="vehicle-advanced-content">
+        <div class="vehicle-source-strip"><span>来源：${escapeHtml(sync.label || "")}</span><span>绑定：${escapeHtml(vehicleBindingText(source))}</span><span>最近更新：${escapeHtml(formatDateTimeOrBlank(source.last_observed_at || source.detail_pulled_at || sync.observed_at))}</span></div>
+        <div class="read-grid">
+          ${productInfoField("客户常用叫法", userVisibleTags(annotations.aliases).join("、"))}
+          ${productInfoField("核心参数/车况补充", annotations.specs)}
+          ${productInfoField("看车/交付说明", annotations.shipping_policy)}
+          ${productInfoField("售后/合同口径", annotations.warranty_policy)}
+          ${productInfoField("需要谨慎确认的点", (annotations.risk_rules || []).join("、"))}
+          ${productInfoField("内部编号", manual.sku)}
+        </div>
+        ${productReplyTemplatesReadonlyHtml(manual.reply_templates, productName)}
+        <div class="product-scoped-panel">
+          <div class="section-heading"><div><span>专属知识与话术</span><strong>仅供运营配置与 Brain 授权辅助使用。</strong></div></div>
+          ${productScopedHtml("商品专属问答", "product_faq", scoped.product_faq || [], "answer", productName)}
+          ${productScopedHtml("商品专属规则", "product_rules", scoped.product_rules || [], "answer", productName)}
+          ${productScopedHtml("商品专属解释", "product_explanations", scoped.product_explanations || [], "content", productName)}
+          ${productScopedEditorHtml()}
+        </div>
+        ${rawPayloads ? `<details class="product-raw-payload"><summary>完整原始载荷 JSON</summary><pre>${escapeHtml(JSON.stringify(rawPayloads, null, 2))}</pre></details>` : ""}
+      </div>
+    </details>
+  `;
+  detail.querySelector(".product-modal-close")?.addEventListener("click", closeProductDetailModal);
+  detail.querySelector(".product-acknowledge")?.addEventListener("click", () => acknowledgeProductItem().catch((error) => alert(error.message)));
+  detail.querySelector(".product-archive")?.addEventListener("click", () => {
+    const operation = item.status === "archived" ? "activate" : "archive";
+    if (operation === "archive" && !confirm("确认归档此车源吗？归档后不会作为在售车源参与客服回答。")) return;
+    adjustProductInventory(operation, 0);
+  });
+  detail.querySelector(".product-edit-form")?.addEventListener("click", () => {
+    state.productDetailMode = "edit";
+    state.productScopedEditor = null;
+    renderProductCatalogDetail();
+  });
+  detail.querySelectorAll(".product-scoped-edit").forEach((button) => {
+    button.addEventListener("click", () => openProductScopedInlineEditor(button.dataset.category, button.dataset.itemId));
+  });
+  detail.querySelectorAll(".product-scoped-new").forEach((button) => {
+    button.addEventListener("click", () => openProductScopedInlineEditor(button.dataset.category, ""));
+  });
+  bindProductScopedEditor(detail);
+  hydrateAuthorizedVehicleImages(detail);
+}
+
+function productAdminView(item) {
+  const fallback = item?.admin_view && typeof item.admin_view === "object" ? item.admin_view : {};
+  if (fallback.record_kind) return fallback;
+  const data = item?.data || {};
+  return {
+    record_kind: "legacy_generic",
+    summary: {name: data.name || item?.id || "", price: data.price, category: data.category || "", status: item?.status || "active"},
+    vehicle: {baseCarInfo: {}, carModelParam: {}, carPriceInfo: {salePrice: data.price}, photos: []},
+    source: {type: "legacy", sync: {state: "legacy", label: "旧格式"}},
+    annotations: data,
+    manual_annotations: {},
+    capabilities: {},
+  };
+}
+
+function formatVehiclePrice(value) {
+  if (!vehicleValuePresent(value)) return "";
+  const numeric = Number(value);
+  return Number.isFinite(numeric) && numeric > 0 && numeric < 1000 ? `${value} 万` : String(value);
+}
+
+function formatVehicleMileage(value) {
+  if (!vehicleValuePresent(value)) return "";
+  if (typeof value === "string" && /公里|km/i.test(value)) return value;
+  const numeric = Number(value);
+  return Number.isFinite(numeric) && numeric >= 0 && numeric < 1000 ? `${value} 万公里` : String(value);
+}
+
+function vehicleValuePresent(value) {
+  return value !== undefined && value !== null && value !== "" && !(Array.isArray(value) && !value.length);
+}
+
+function dafengcheFieldValueText(value) {
+  if (!vehicleValuePresent(value)) return "";
+  if (typeof value === "object") return JSON.stringify(value, null, 2);
+  return String(value);
+}
+
+function dafengcheFieldValueHtml(value) {
+  const text = dafengcheFieldValueText(value);
+  return text ? escapeHtml(text) : "&nbsp;";
+}
+
+function isAuthenticatedVehicleImageUrl(value) {
+  return String(value || "").startsWith("/api/product-console/products/");
+}
+
+function vehiclePictureImageHtml(url, alt, className = "") {
+  const source = String(url || "").trim();
+  if (!source) return "";
+  const classes = escapeAttr(className || "");
+  if (isAuthenticatedVehicleImageUrl(source)) {
+    return `<img class="${classes}" data-auth-vehicle-image-src="${escapeAttr(source)}" alt="${escapeAttr(alt || "车辆图片")}" loading="lazy" />`;
+  }
+  return `<img class="${classes}" src="${escapeAttr(source)}" alt="${escapeAttr(alt || "车辆图片")}" loading="lazy" />`;
+}
+
+function vehiclePictureTileHtml(url, productName) {
+  const source = String(url || "").trim();
+  const image = vehiclePictureImageHtml(source, `${productName || "车辆"} 图片`);
+  if (!isAuthenticatedVehicleImageUrl(source)) {
+    return `<a href="${escapeAttr(source)}" target="_blank" rel="noreferrer">${image}</a>`;
+  }
+  return `<div class="authenticated-vehicle-image">${image}</div>`;
+}
+
+async function hydrateAuthorizedVehicleImages(root) {
+  const images = Array.from(root?.querySelectorAll?.("img[data-auth-vehicle-image-src]") || []);
+  await Promise.all(images.map(async (image) => {
+    const source = image.dataset.authVehicleImageSrc;
+    if (!source) return;
+    try {
+      const response = await fetch(source, {headers: apiHeaders()});
+      if (!response.ok) throw new Error(`image ${response.status}`);
+      const objectUrl = URL.createObjectURL(await response.blob());
+      const prior = image.dataset.authVehicleImageObjectUrl;
+      if (prior) URL.revokeObjectURL(prior);
+      image.dataset.authVehicleImageObjectUrl = objectUrl;
+      image.src = objectUrl;
+    } catch (error) {
+      image.classList.add("vehicle-image-load-failed");
+      console.warn("vehicle image load failed", error);
+    }
+  }));
+}
+
+function dafengcheFieldGridHtml(fields, className = "") {
+  const rows = Array.isArray(fields) ? fields : [];
+  if (!rows.length) return "";
+  return `<div class="dafengche-field-grid ${escapeHtml(className)}">${rows.map((field) => `
+    <div class="dafengche-field">
+      <span>${escapeHtml(field?.label || "")}</span>
+      <small>${escapeHtml(field?.path || "")}</small>
+      <strong class="dafengche-field-value">${dafengcheFieldValueHtml(field?.value)}</strong>
+    </div>
+  `).join("")}</div>`;
+}
+
+function dafengcheFieldGroupsHtml(groups) {
+  const rows = Array.isArray(groups) ? groups : [];
+  return rows.map((group) => `
+    <section class="dafengche-field-group">
+      <div class="dafengche-field-group-title"><strong>${escapeHtml(group?.label || "")}</strong></div>
+      ${dafengcheFieldGridHtml(group?.fields, "dafengche-detail-fields")}
+    </section>
+  `).join("");
+}
+
+function vehicleCategoryText(value) {
+  const category = String(value || "").trim();
+  return {used_car: "二手车", usedcar: "二手车"}[category.toLowerCase()] || category;
+}
+
+function vehicleOperationPhaseText(value) {
+  const phase = String(value || "").trim();
+  return {
+    sale: "在售",
+    selling: "在售",
+    on_sale: "在售",
+    sold: "已售",
+    prepare: "整备中",
+    preparing: "整备中",
+    pending: "待上架",
+  }[phase.toLowerCase()] || phase;
+}
+
+function vehicleFactEntries(view) {
+  const vehicle = view?.vehicle || {};
+  const base = vehicle.baseCarInfo || {};
+  const model = vehicle.carModelParam || {};
+  const license = vehicle.carLicenseInfo || {};
+  return [
+    {label: "品牌", value: base.brandName},
+    {label: "车系", value: base.seriesName},
+    {label: "车型", value: base.modelName},
+    {label: "上牌时间", value: base.firstLicensePlateDate},
+    {label: "表显里程", value: formatVehicleMileage(base.mileage)},
+    {label: "车况", value: base.vehicleCondition},
+    {label: "外观颜色", value: base.exteriorColor},
+    {label: "内饰颜色", value: base.interiorColor},
+    {label: "变速箱", value: model.gearbox},
+    {label: "排量", value: model.displacement},
+    {label: "手续状态", value: license.licenseStatus},
+    {label: "业务状态", value: vehicleOperationPhaseText(vehicle.operationPhase)},
+  ].filter((item) => vehicleValuePresent(item.value));
+}
+
+function vehicleCardFacts(view) {
+  const cardLabels = new Set(["上牌时间", "表显里程", "变速箱", "排量", "车况", "外观颜色"]);
+  return vehicleFactEntries(view).filter((item) => cardLabels.has(item.label));
+}
+
+function vehicleFactGridHtml(entries, className = "") {
+  const facts = Array.isArray(entries) ? entries.filter((item) => vehicleValuePresent(item?.value)) : [];
+  if (!facts.length) return "";
+  return `<div class="vehicle-fact-grid ${escapeHtml(className)}">${facts.map((item) => `<div class="vehicle-fact"><span>${escapeHtml(item.label)}</span><strong>${escapeHtml(item.value)}</strong></div>`).join("")}</div>`;
+}
+
+function vehicleCardNote(view) {
+  const annotations = view?.annotations || {};
+  return shortBusinessText(String(annotations.specs || "").trim(), 96);
+}
+
+function productSourceTone(source) {
+  if (source?.type === "dafengche") return "ok";
+  if (source?.sync?.state === "historical_migration") return "warning";
+  if (source?.type === "manual") return "info";
+  return "muted";
+}
+
+function vehicleBindingText(source) {
+  if (source?.binding_state === "bound") return `${source.shop_code || "-"} / ${source.car_id || "-"}`;
+  return "未绑定大风车车源";
+}
+
+function formatDateTime(value) {
+  if (!value) return "待确认";
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? String(value) : date.toLocaleString("zh-CN", {hour12: false});
+}
+
+function formatDateTimeOrBlank(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? String(value) : date.toLocaleString("zh-CN", {hour12: false});
 }
 
 function productItemIsNew(item) {
@@ -3297,6 +3616,112 @@ function productEditFormHtml(item, scoped) {
   `;
 }
 
+function productV2EditFormHtml(item, view, scoped) {
+  const summary = view.summary || {};
+  const vehicle = view.vehicle || {};
+  const base = vehicle.baseCarInfo || {};
+  const model = vehicle.carModelParam || {};
+  const pricing = vehicle.carPriceInfo || {};
+  const license = vehicle.carLicenseInfo || {};
+  const annotations = view.annotations || {};
+  const manual = view.manual_annotations || {};
+  const source = view.source || {};
+  const canEditVehicle = Boolean(view.capabilities?.can_edit_vehicle_source);
+  const canEditPictures = Boolean(view.capabilities?.can_edit_vehicle_pictures);
+  const photos = Array.isArray(vehicle.photos) ? vehicle.photos : [];
+  const productName = summary.name || item.id;
+  const vehicleFieldHelp = canEditVehicle
+    ? "字段按大风车 V2 原路径写入 source_payloads；留空不会覆盖已有值。每次保存都保留人工编辑来源。"
+    : "该车源由大风车同步，官方车辆字段在本页只读；请通过同步更新，或在下方补充本地客服注释。";
+  return `
+    <div class="read-head">
+      <div>
+        <p class="eyebrow">编辑 V2 车辆主数据</p>
+        <h2>${escapeHtml(productName)}</h2>
+        ${badgeListHtml([{label: source.sync?.label || "来源待确认", tone: productSourceTone(source)}, {label: canEditVehicle ? "可编辑手动车辆字段" : "官方字段只读", tone: canEditVehicle ? "info" : "warning"}])}
+      </div>
+      <div class="read-actions">
+        <button class="primary-button product-detail-save" type="button">保存 V2 资料</button>
+        <button class="secondary-button product-detail-cancel" type="button">取消</button>
+      </div>
+    </div>
+    <div class="helper-card context-card product-edit-help"><strong>权威字段与本地补充分开保存。</strong><span>${escapeHtml(vehicleFieldHelp)}</span></div>
+    <div class="vehicle-v2-editor-groups">
+      ${vehicleV2EditorGroupHtml("基础车辆信息", [
+        productV2FieldInput("product-v2-name", "车辆标题", "baseCarInfo.name", base.name || productName, "text", !canEditVehicle),
+        productV2FieldInput("product-v2-car-name", "车辆名称", "baseCarInfo.carName", base.carName ?? "", "text", !canEditVehicle),
+        productV2FieldInput("product-v2-brand", "品牌", "baseCarInfo.brandName", base.brandName ?? "", "text", !canEditVehicle),
+        productV2FieldInput("product-v2-series", "车系", "baseCarInfo.seriesName", base.seriesName ?? "", "text", !canEditVehicle),
+        productV2FieldInput("product-v2-model", "车型", "baseCarInfo.modelName", base.modelName ?? "", "text", !canEditVehicle),
+        productV2FieldInput("product-v2-license-date", "首次上牌", "baseCarInfo.firstLicensePlateDate", base.firstLicensePlateDate ?? "", "text", !canEditVehicle),
+        productV2FieldInput("product-v2-mileage", "表显里程（万公里）", "baseCarInfo.mileage", base.mileage ?? "", "number", !canEditVehicle, "any"),
+        productV2FieldInput("product-v2-condition", "车况", "baseCarInfo.vehicleCondition", base.vehicleCondition ?? "", "text", !canEditVehicle),
+        productV2FieldInput("product-v2-exterior", "外观颜色", "baseCarInfo.exteriorColor", base.exteriorColor ?? "", "text", !canEditVehicle),
+        productV2FieldInput("product-v2-color", "车身颜色（备用）", "baseCarInfo.color", base.color ?? "", "text", !canEditVehicle),
+        productV2FieldInput("product-v2-interior", "内饰颜色", "baseCarInfo.interiorColor", base.interiorColor ?? "", "text", !canEditVehicle),
+        productV2FieldInput("product-v2-operation-phase", "业务阶段", "operationPhase", vehicle.operationPhase ?? "", "text", !canEditVehicle),
+      ])}
+      ${vehicleV2EditorGroupHtml("车型参数", [
+        productV2FieldInput("product-v2-gearbox", "变速箱", "carModelParam.gearbox", model.gearbox ?? "", "text", !canEditVehicle),
+        productV2FieldInput("product-v2-gearbox-backup", "变速箱（备用字段）", "carModelParam.gearBox", model.gearBox ?? "", "text", !canEditVehicle),
+        productV2FieldInput("product-v2-displacement", "排量", "carModelParam.displacement", model.displacement ?? "", "text", !canEditVehicle),
+      ])}
+      ${vehicleV2EditorGroupHtml("价格与手续信息", [
+        productV2FieldInput("product-v2-price", "公开售价", "carPriceInfo.salePrice", pricing.salePrice ?? "", "number", !canEditVehicle, "any"),
+        productV2FieldInput("product-v2-purchase-price", "收购价", "carPriceInfo.purchasePrice", pricing.purchasePrice ?? "", "number", !canEditVehicle, "any"),
+        productV2FieldInput("product-v2-sales-price", "成交价", "carPriceInfo.salesPrice", pricing.salesPrice ?? "", "number", !canEditVehicle, "any"),
+        productV2FieldInput("product-v2-manager-price", "经理价", "carPriceInfo.managerPrice", pricing.managerPrice ?? "", "number", !canEditVehicle, "any"),
+        productV2FieldInput("product-v2-wholesale-price", "批发价", "carPriceInfo.wholesalePrice", pricing.wholesalePrice ?? "", "number", !canEditVehicle, "any"),
+        productV2FieldInput("product-v2-license-status", "手续状态", "carLicenseInfo.licenseStatus", license.licenseStatus ?? "", "text", !canEditVehicle),
+      ])}
+      ${vehicleV2PictureEditorHtml(photos, productName, canEditPictures)}
+      ${vehicleV2EditorGroupHtml("本地客服补充（不改大风车原载荷）", [
+        productV2FieldInput("product-v2-sku", "内部编号", "extensions.wechat_customer_service.manual_annotations.sku", manual.sku ?? ""),
+        productV2FieldInput("product-v2-unit", "本地单位", "extensions.wechat_customer_service.manual_annotations.unit", manual.unit ?? ""),
+        productV2Textarea("product-v2-category", "本地类目", annotations.category || "", "", "extensions.wechat_customer_service.customer_visible_annotations.category"),
+        productV2Textarea("product-v2-aliases", "客户常用叫法", displayTags(userVisibleTags(annotations.aliases)), "一行一个，或用逗号分隔", "extensions.wechat_customer_service.customer_visible_annotations.aliases"),
+        productV2Textarea("product-v2-specs", "核心参数/车况补充", annotations.specs || "", "", "extensions.wechat_customer_service.customer_visible_annotations.specs"),
+        productV2Textarea("product-v2-shipping", "看车/交付说明", annotations.shipping_policy || "", "", "extensions.wechat_customer_service.customer_visible_annotations.shipping_policy"),
+        productV2Textarea("product-v2-warranty", "售后/合同口径", annotations.warranty_policy || "", "", "extensions.wechat_customer_service.customer_visible_annotations.warranty_policy"),
+        productV2Textarea("product-v2-risk", "需要谨慎确认的点", displayTags(annotations.risk_rules), "一行一个，或用逗号分隔", "extensions.wechat_customer_service.customer_visible_annotations.risk_rules"),
+      ])}
+      <div class="vehicle-v2-editor-group vehicle-v2-editor-group-local">
+        ${productReplyTemplateEditorHtml(manual.reply_templates, productName)}
+      </div>
+    </div>
+    <div class="product-scoped-panel">
+      <div class="section-heading"><div><span>精准触发知识（强触发）</span><strong>专属知识按当前车源 ID 绑定；保存车辆资料不会覆盖它们。</strong></div></div>
+      ${productScopedHtml("商品专属问答", "product_faq", (scoped || {}).product_faq || [], "answer", productName)}
+      ${productScopedHtml("商品专属规则", "product_rules", (scoped || {}).product_rules || [], "answer", productName)}
+      ${productScopedHtml("商品专属解释", "product_explanations", (scoped || {}).product_explanations || [], "content", productName)}
+      ${productScopedEditorHtml()}
+    </div>
+  `;
+}
+
+function vehicleV2EditorGroupHtml(label, fields) {
+  return `<section class="vehicle-v2-editor-group"><div class="vehicle-v2-editor-group-head"><strong>${escapeHtml(label)}</strong></div><div class="form-grid vehicle-v2-editor-grid">${fields.join("")}</div></section>`;
+}
+
+function productV2FieldInput(id, label, path, value, type = "text", disabled = false, step = "") {
+  return `<label class="form-field product-short-field vehicle-v2-field"><span>${escapeHtml(label)}</span><small>${escapeHtml(path)}</small><input id="${escapeHtml(id)}" type="${escapeHtml(type)}" value="${escapeHtml(value ?? "")}" ${step ? `step="${escapeAttr(step)}"` : ""} ${disabled ? "disabled" : ""} /></label>`;
+}
+
+function productV2Textarea(id, label, value, placeholder = "", path = "") {
+  return `<label class="form-field wide-field vehicle-v2-field"><span>${escapeHtml(label)}</span>${path ? `<small>${escapeHtml(path)}</small>` : ""}<textarea id="${escapeHtml(id)}" placeholder="${escapeHtml(placeholder)}">${escapeHtml(value || "")}</textarea></label>`;
+}
+
+function vehicleV2PictureEditorHtml(photos, productName, canEditPictures) {
+  const existing = Array.isArray(photos) ? photos : [];
+  return `
+    <section class="vehicle-v2-editor-group vehicle-v2-picture-editor">
+      <div class="vehicle-v2-editor-group-head"><strong>车辆图片</strong><small>source_payloads.vehicle_pictures.payload</small></div>
+      <div class="product-photo-grid dfc-photo-grid vehicle-v2-edit-photos">${existing.length ? existing.map((url) => vehiclePictureTileHtml(url, productName)).join("") : `<div class="dfc-empty-photo" aria-label="车辆图片为空">&nbsp;</div>`}</div>
+      ${canEditPictures ? `<label class="vehicle-v2-upload-control"><span>添加图片（JPEG、PNG、WebP；单张不超过 10 MB）</span><input id="product-v2-image-files" type="file" accept="image/jpeg,image/png,image/webp" multiple /></label>` : `<div class="helper-card context-card"><strong>官方图片只读。</strong><span>该车源由大风车同步，图片将随下一次同步更新。</span></div>`}
+    </section>
+  `;
+}
+
 function productTextInput(id, label, value, type = "text") {
   return `
     <label class="form-field product-short-field">
@@ -3351,6 +3776,10 @@ function bindProductDetailEditors(root) {
 async function saveProductDetailForm() {
   const original = state.selectedProduct;
   if (!original?.id) return;
+  if (productAdminView(original).record_kind === "vehicle_v2") {
+    await saveProductV2DetailForm(original);
+    return;
+  }
   const data = {
     ...(original.data || {}),
     name: document.getElementById("product-data-name")?.value.trim() || "",
@@ -3383,6 +3812,89 @@ async function saveProductDetailForm() {
   state.productScopedEditor = null;
   await Promise.all([loadProductCatalog({loadDetail: false}), loadOverview().catch(() => {})]);
   await loadProductDetail(original.id);
+}
+
+async function saveProductV2DetailForm(original) {
+  const view = productAdminView(original);
+  const canEditVehicle = Boolean(view.capabilities?.can_edit_vehicle_source);
+  const vehicleDetailPatch = canEditVehicle ? buildManualVehicleDetailPatch() : {};
+  const annotations = {
+    category: document.getElementById("product-v2-category")?.value.trim() || "",
+    aliases: splitTags(document.getElementById("product-v2-aliases")?.value || ""),
+    specs: document.getElementById("product-v2-specs")?.value.trim() || "",
+    shipping_policy: document.getElementById("product-v2-shipping")?.value.trim() || "",
+    warranty_policy: document.getElementById("product-v2-warranty")?.value.trim() || "",
+    risk_rules: splitTags(document.getElementById("product-v2-risk")?.value || ""),
+  };
+  const manualAnnotations = {
+    sku: document.getElementById("product-v2-sku")?.value.trim() || "",
+    unit: document.getElementById("product-v2-unit")?.value.trim() || "",
+    reply_templates: collectProductReplyTemplates(),
+  };
+  await apiJson(`/api/product-console/products/${encodeURIComponent(original.id)}/admin-view`, {
+    method: "PUT",
+    body: JSON.stringify({vehicle_detail_patch: vehicleDetailPatch, annotations, manual_annotations: manualAnnotations}),
+  });
+  await uploadProductV2VehicleImages(original.id);
+  state.productDetailMode = "view";
+  state.productScopedEditor = null;
+  await Promise.all([loadProductCatalog({loadDetail: false}), loadOverview().catch(() => {})]);
+  await loadProductDetail(original.id);
+}
+
+function buildManualVehicleDetailPatch() {
+  const text = (id) => document.getElementById(id)?.value.trim() || "";
+  const number = (id) => {
+    const value = document.getElementById(id)?.value;
+    return value === undefined || value === "" ? "" : numberOrNull(value);
+  };
+  return compactObject({
+    operationPhase: text("product-v2-operation-phase"),
+    baseCarInfo: compactObject({
+      name: text("product-v2-name"),
+      carName: text("product-v2-car-name"),
+      brandName: text("product-v2-brand"),
+      seriesName: text("product-v2-series"),
+      modelName: text("product-v2-model"),
+      firstLicensePlateDate: text("product-v2-license-date"),
+      mileage: number("product-v2-mileage"),
+      vehicleCondition: text("product-v2-condition"),
+      exteriorColor: text("product-v2-exterior"),
+      color: text("product-v2-color"),
+      interiorColor: text("product-v2-interior"),
+    }),
+    carModelParam: compactObject({
+      gearbox: text("product-v2-gearbox"),
+      gearBox: text("product-v2-gearbox-backup"),
+      displacement: text("product-v2-displacement"),
+    }),
+    carPriceInfo: compactObject({
+      salePrice: number("product-v2-price"),
+      purchasePrice: number("product-v2-purchase-price"),
+      salesPrice: number("product-v2-sales-price"),
+      managerPrice: number("product-v2-manager-price"),
+      wholesalePrice: number("product-v2-wholesale-price"),
+    }),
+    carLicenseInfo: compactObject({licenseStatus: text("product-v2-license-status")}),
+  });
+}
+
+async function uploadProductV2VehicleImages(productId) {
+  const input = document.getElementById("product-v2-image-files");
+  const files = Array.from(input?.files || []);
+  if (!files.length) return;
+  for (const file of files) {
+    const form = new FormData();
+    form.append("file", file, file.name);
+    await apiForm(`/api/product-console/products/${encodeURIComponent(productId)}/images`, form, {method: "POST"});
+  }
+}
+
+function compactObject(value) {
+  return Object.fromEntries(Object.entries(value || {}).filter(([, entry]) => {
+    if (entry && typeof entry === "object" && !Array.isArray(entry)) return Object.keys(entry).length > 0;
+    return entry !== "" && entry !== null && entry !== undefined;
+  }));
 }
 
 function collectProductReplyTemplates() {

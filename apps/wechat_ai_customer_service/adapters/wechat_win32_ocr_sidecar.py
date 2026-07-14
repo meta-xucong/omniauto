@@ -152,6 +152,7 @@ from apps.wechat_ai_customer_service.adapters.wechat_win32_ocr import geometry a
 from apps.wechat_ai_customer_service.adapters.wechat_win32_ocr import capture as win32_ocr_capture
 from apps.wechat_ai_customer_service.adapters.wechat_win32_ocr import env_config as win32_ocr_env
 from apps.wechat_ai_customer_service.adapters.wechat_win32_ocr import humanized_input as win32_ocr_humanized
+from apps.wechat_ai_customer_service.adapters.wechat_win32_ocr import interaction_evidence as win32_ocr_interaction_evidence
 from apps.wechat_ai_customer_service.adapters.wechat_win32_ocr import device_profile as win32_ocr_device_profile
 from apps.wechat_ai_customer_service.adapters.wechat_win32_ocr import ocr_engine as win32_ocr_engine
 from apps.wechat_ai_customer_service.adapters.wechat_win32_ocr import render_diagnostics as win32_ocr_render
@@ -205,6 +206,37 @@ def execute_wechat_image_save(
         sidecar_ops=sidecar_ops,
     )
 
+
+def execute_wechat_clipboard_image_copy(
+    *,
+    hwnd: int,
+    probe: dict[str, Any],
+    target_name: str,
+    session_key: str = "",
+    exact: bool = True,
+    source_preview: str = "",
+    speaker_name: str = "",
+    pending_signal_id: str = "",
+    side_filter: str = "customer",
+    sidecar_ops: Any,
+) -> dict[str, Any]:
+    from apps.wechat_ai_customer_service.adapters.wechat_image_save_capture import (
+        execute_wechat_clipboard_image_copy as execute_clipboard_copy,
+    )
+
+    return execute_clipboard_copy(
+        hwnd=hwnd,
+        probe=probe,
+        target_name=target_name,
+        session_key=session_key,
+        exact=exact,
+        source_preview=source_preview,
+        speaker_name=speaker_name,
+        pending_signal_id=pending_signal_id,
+        side_filter=side_filter,
+        sidecar_ops=sidecar_ops,
+    )
+
 try:
     from rapidocr_onnxruntime import RapidOCR
     _OCR_IMPORT_ERROR = ""
@@ -219,7 +251,17 @@ CHAT_HEADER_MAX_Y = 90
 CHAT_INPUT_BOTTOM_OFFSET = 52
 DEFAULT_MESSAGE_BOTTOM_EXCLUDE_PX = 95
 OCR_MIN_CONFIDENCE = 0.45
-SIDECAR_BASE_ACTIONS = ("status", "capabilities", "sessions", "messages", "send", "recover-render", "voice-transcribe", "image-save")
+SIDECAR_BASE_ACTIONS = (
+    "status",
+    "capabilities",
+    "sessions",
+    "messages",
+    "send",
+    "recover-render",
+    "voice-transcribe",
+    "image-save",
+    "image-clipboard-copy",
+)
 SIDECAR_ACTION_CHOICES = (*SIDECAR_BASE_ACTIONS, *ADD_FRIEND_ROUTES)
 SEND_GUARD_PATH = PROJECT_ROOT / "runtime" / "wechat_win32_ocr_send_guard.json"
 UI_ACTION_GUARD_PATH = PROJECT_ROOT / "runtime" / "wechat_win32_ocr_ui_action_guard.json"
@@ -509,6 +551,19 @@ def clipboard_read() -> str:
         raise RuntimeError("clipboard_read_unavailable: install pyperclip or enable tkinter clipboard support") from exc
 
 
+def clipboard_sequence_number() -> int | None:
+    """Return the Windows clipboard generation without reading its contents."""
+    try:
+        user32 = getattr(getattr(ctypes, "windll", None), "user32", None)
+        getter = getattr(user32, "GetClipboardSequenceNumber", None)
+        if not callable(getter):
+            return None
+        value = int(getter())
+        return value if value > 0 else None
+    except Exception:
+        return None
+
+
 def main() -> int:
     configure_dpi_awareness()
     parser = argparse.ArgumentParser(description=__doc__)
@@ -569,6 +624,21 @@ def main() -> int:
 
 def run_action(args: argparse.Namespace) -> dict[str, Any]:
     action = str(args.action or "").strip().lower()
+    if action == "image-save":
+        # This is a frozen compatibility command only.  Reject it before any
+        # platform import, window probing, OCR, activation, or quick-login
+        # handling so a legacy caller cannot cause incidental RPA activity.
+        return {
+            "ok": False,
+            "online": True,
+            "adapter": "win32_ocr",
+            "state": "legacy_image_file_capture_rejected",
+            "reason": "clipboard_current_transaction_required",
+            "target": str(getattr(args, "target", "") or ""),
+            "session_key": str(getattr(args, "session_key", "") or ""),
+            "assets": [],
+            "messages": [],
+        }
     if action in ADD_FRIEND_ROUTES:
         validation = validate_add_friend_entry_click_contract(
             phone=str(args.phone or ""),
@@ -854,9 +924,9 @@ def run_action(args: argparse.Namespace) -> dict[str, Any]:
             conversation_type=str(args.conversation_type or ""),
             artifact_dir=args.artifact_dir,
         )
-    if action == "image-save":
+    if action == "image-clipboard-copy":
         if not args.target:
-            raise ValueError("--target is required for image-save")
+            raise ValueError("--target is required for image image action")
         clean_sidecar_run_id = str(getattr(args, "sidecar_run_id", "") or "").strip()
         clean_session_key = str(args.session_key or "").strip()
         clean_conversation_type = normalize_identity_conversation_type(args.conversation_type)
@@ -892,7 +962,7 @@ def run_action(args: argparse.Namespace) -> dict[str, Any]:
                 "ok": False,
                 "online": bool(validation.get("online", True)),
                 "adapter": "win32_ocr",
-                "state": "target_not_confirmed_for_image_save",
+                "state": "target_not_confirmed_for_image_clipboard_copy",
                 "sidecar_run_id": clean_sidecar_run_id,
                 "window_probe": probe,
                 "target": args.target,
@@ -901,24 +971,20 @@ def run_action(args: argparse.Namespace) -> dict[str, Any]:
                 "open_chat_timing": dict(_LAST_OPEN_CHAT_TIMING),
                 "assets": [],
                 "messages": [],
-                "error": "The target chat was not confirmed before saving image.",
+                "error": "The target chat was not confirmed before image action.",
             }
         if scroll_to_latest_before_read_enabled():
             scroll_chat_to_latest(hwnd)
-        payload = execute_wechat_image_save(
+        payload = execute_wechat_clipboard_image_copy(
             hwnd=hwnd,
             probe=probe,
             target_name=args.target,
             session_key=clean_session_key,
             exact=bool(args.exact),
-            artifact_dir=args.artifact_dir,
-            tenant_id=str(getattr(args, "tenant_id", "") or os.getenv("WECHAT_KNOWLEDGE_TENANT") or ""),
             source_preview=str(getattr(args, "source_preview", "") or ""),
             speaker_name=str(getattr(args, "speaker_name", "") or ""),
             pending_signal_id=str(getattr(args, "pending_signal_id", "") or ""),
-            max_images=bounded_int(getattr(args, "max_images", 1), default=1, minimum=1, maximum=8),
-            side_filter=str(getattr(args, "side_filter", "") or "customer"),
-            capture_mode=str(getattr(args, "capture_mode", "") or "context_menu"),
+            side_filter=str(getattr(args, "side_filter", "customer") or "customer"),
             sidecar_ops=sys.modules[__name__],
         )
         payload["sidecar_run_id"] = clean_sidecar_run_id
@@ -1751,6 +1817,8 @@ def sessions_payload(hwnd: int, probe: dict[str, Any], *, artifact_dir: str | No
                 "unread_badge": item.get("unread_badge", ""),
                 "unread": item.get("unread_badge", ""),
                 "unread_signal": bool(item.get("unread_badge")),
+                "session_observation_id": item.get("session_observation_id", ""),
+                "unread_badge_evidence": item.get("unread_badge_meta", {}),
                 "conversation_type": item.get("conversation_type") or infer_conversation_type(item["name"]),
                 "source_adapter": "win32_ocr",
                 "ocr_confidence": item.get("confidence"),
@@ -1867,6 +1935,20 @@ def messages_payload(
             "error": f"WeChat messages view is blocked by: {blocking_reason}",
         }
     messages = merge_message_history_snapshots(snapshots)
+    # OCR has no dependable text token for an image-only outbound bubble.  Add
+    # a minimal structural envelope for the latest self-side image so the
+    # optional vision plugin can copy that *current* image and retain only its
+    # text understanding in conversation history.  This is deliberately
+    # metadata-only: no screenshot, image crop, bounds, path, or image hash is
+    # emitted into the message contract.
+    messages.extend(
+        self_visual_image_messages_from_current_surface(
+            latest_screenshot,
+            ocr_items,
+            messages,
+            target=target,
+        )
+    )
     return {
         "ok": True,
         "online": True,
@@ -1883,6 +1965,88 @@ def messages_payload(
         "voice_transcription_candidate": bool(voice_candidate),
         "voice_transcription_candidate_evidence": voice_candidate_evidence,
     }
+
+
+def self_visual_image_messages_from_current_surface(
+    screenshot: Any,
+    ocr_items: list[dict[str, Any]] | None,
+    existing_messages: list[dict[str, Any]] | None,
+    *,
+    target: str,
+) -> list[dict[str, Any]]:
+    """Expose a current self image as metadata-only context input.
+
+    The visual detector is used only to locate the right-side bubble for the
+    immediate clipboard transaction.  Its coordinates never leave this
+    adapter.  The resulting envelope is not a customer turn and cannot itself
+    initiate a reply; it is consumed solely by the optional context-only
+    vision capability.
+    """
+
+    if screenshot is None:
+        return []
+    try:
+        from apps.wechat_ai_customer_service.adapters.wechat_image_save_capture import (
+            detect_visual_image_bubbles,
+            extract_chat_time_markers,
+        )
+
+        bubbles = detect_visual_image_bubbles(
+            screenshot,
+            messages=list(existing_messages or []),
+            max_images=1,
+            side_filter="self",
+            time_markers=extract_chat_time_markers(
+                list(ocr_items or []),
+                tuple(getattr(screenshot, "size", (0, 0))),
+            ),
+        )
+    except Exception:
+        # Image observation is optional and must not make ordinary OCR capture
+        # unavailable when a display/vision dependency is absent.
+        return []
+    if not bubbles:
+        return []
+
+    bubble = bubbles[0] if isinstance(bubbles[0], dict) else {}
+    # WeChat's displayed time separator is the stable, non-image identity
+    # component.  The local structural anchor is kept inside the adapter only
+    # and is not persisted or exposed as a customer-message field.
+    observed_time = str(bubble.get("wechat_message_time") or "").strip()
+    identity_seed = json.dumps(
+        {
+            "target": str(target or ""),
+            "side": "self",
+            "time": observed_time,
+            "anchor": bubble.get("anchor") or {},
+        },
+        ensure_ascii=False,
+        sort_keys=True,
+    )
+    message_id = f"visual_self_context_{hashlib.sha256(identity_seed.encode('utf-8')).hexdigest()[:20]}"
+    known_ids = {
+        str(item.get("id") or item.get("message_id") or "").strip()
+        for item in (existing_messages or [])
+        if isinstance(item, dict)
+    }
+    if message_id in known_ids:
+        return []
+    return [
+        {
+            "id": message_id,
+            "message_id": message_id,
+            "type": "image",
+            "message_type": "image",
+            "sender": "self",
+            "sender_role": "self",
+            "visual_side": "self",
+            "visual_turn_kind": "self_image",
+            "is_self_image": True,
+            "content": "[图片]",
+            "time": observed_time,
+            "source_adapter": "win32_ocr_structural_image_observer",
+        }
+    ]
 
 
 def voice_transcribe_payload(
@@ -4310,6 +4474,10 @@ def adapt_humanized_input_settings(settings: dict[str, Any], text: str) -> dict[
     return win32_ocr_humanized.adapt_humanized_input_settings(settings, text)
 
 
+def apply_interaction_rhythm(settings: dict[str, Any]) -> dict[str, Any]:
+    return win32_ocr_humanized.apply_interaction_rhythm(settings)
+
+
 def humanized_sleep_ms(min_ms: int, max_ms: int) -> float:
     low = max(0, int(min_ms))
     high = max(low, int(max_ms))
@@ -4605,6 +4773,14 @@ def normalize_soft_blank_input_state(state: dict[str, Any], *, reason: str) -> d
     return normalized
 
 
+def input_surface_click_evidence(input_region: dict[str, Any] | None) -> dict[str, Any]:
+    return win32_ocr_interaction_evidence.input_surface_click_evidence(input_region)
+
+
+def choose_verified_input_click_point(evidence: dict[str, Any] | None) -> dict[str, Any]:
+    return win32_ocr_interaction_evidence.choose_input_click_point(evidence, random_module=random)
+
+
 def clear_existing_input_draft(
     hwnd: int,
     *,
@@ -4620,11 +4796,26 @@ def clear_existing_input_draft(
     if input_region_soft_blank_noise(before_state):
         blank = normalize_soft_blank_input_state(before_state, reason="input_region_soft_blank_noise")
         return {"ok": True, "cleared": False, "reason": "input_region_soft_blank_noise", "before": blank, "after": blank}
-    input_x, input_y = jitter_input_click_point(
-        int(points["input_point"][0]),
-        int(points["input_point"][1]),
-        geometry,
-    )
+    input_click_evidence = input_surface_click_evidence(before_state)
+    if not input_click_evidence.get("ok"):
+        return {
+            "ok": False,
+            "cleared": False,
+            "reason": "input_click_evidence_missing_before_clear",
+            "before": before_state,
+            "input_click_evidence": input_click_evidence,
+        }
+    input_click = choose_verified_input_click_point(input_click_evidence)
+    if not input_click.get("ok"):
+        return {
+            "ok": False,
+            "cleared": False,
+            "reason": "input_click_evidence_missing_before_clear",
+            "before": before_state,
+            "input_click_evidence": input_click_evidence,
+            "input_click": input_click,
+        }
+    input_x, input_y = [int(value) for value in input_click["point"]]
     human_client_click(hwnd, input_x, input_y)
     time.sleep(random.uniform(0.08, 0.16))
     # Avoid Ctrl+A here: select-all artifacts can leak to chat history when
@@ -4664,6 +4855,8 @@ def clear_existing_input_draft(
             "reason": "input_region_cleared",
             "before": before_state,
             "after": after_state,
+            "input_click_evidence": input_click_evidence,
+            "input_click": input_click,
         }
     return {
         "ok": False,
@@ -4671,6 +4864,8 @@ def clear_existing_input_draft(
         "reason": "input_region_clear_failed",
         "before": before_state,
         "after": after_state,
+        "input_click_evidence": input_click_evidence,
+        "input_click": input_click,
         "error": "Could not safely clear pre-existing WeChat draft text.",
     }
 
@@ -5193,30 +5388,30 @@ def paste_text_with_confirmation(
     timing: dict[str, Any] = {}
     ocr_trace_token = _ocr_trace_start()
     paste_started = _sidecar_timing_start(timing, "paste_text_with_confirmation")
+    last_input_click_evidence: dict[str, Any] = {}
+    last_input_click: dict[str, Any] = {}
 
     def finish(payload: dict[str, Any]) -> dict[str, Any]:
         _sidecar_timing_finish(timing, "paste_text_with_confirmation", paste_started)
         _sidecar_timing_merge_ocr_trace(timing, "paste_text_with_confirmation", _ocr_trace_finish(ocr_trace_token))
+        if last_input_click_evidence:
+            payload.setdefault("input_click_evidence", last_input_click_evidence)
+        if last_input_click:
+            payload.setdefault("input_click", last_input_click)
         payload["timing"] = dict(timing)
         return payload
 
-    input_x = int(points["input_point"][0])
-    input_y = int(points["input_point"][1])
     probe_tokens = message_probe_tokens(text)
     probe_token = probe_tokens[0] if probe_tokens else ""
     settings = settings or adapt_humanized_input_settings(humanized_input_settings(), text)
-    attempts = [
-        (input_x, input_y, "human"),
-        (max(session_split_x(int(geometry.get("width") or 0)) + 24, input_x - 150), max(int(geometry.get("height") * 0.80), input_y - 18), "client"),
-        (max(session_split_x(int(geometry.get("width") or 0)) + 36, input_x - 220), max(int(geometry.get("height") * 0.82), input_y - 8), "client"),
-    ]
-    confirm_attempts = send_input_confirm_attempt_count(len(attempts))
+    # A missing input proof is a hard stop. Never retry with alternate geometry
+    # coordinates because a shifted surface can turn that into a chat-history click.
+    attempts = ["verified_input_evidence"]
     allow_copyback = env_flag("WECHAT_WIN32_OCR_INPUT_COPYBACK_CONFIRM", default=False)
     fast_visual_confirm = env_flag(
         "WECHAT_WIN32_OCR_INPUT_FAST_VISUAL_CONFIRM",
         default=DEFAULT_INPUT_FAST_VISUAL_CONFIRM,
     )
-    attempts = attempts[:confirm_attempts]
     input_method = "clipboard_chunks"
     last_input_result: dict[str, Any] | None = None
     last_input_region: dict[str, Any] = {}
@@ -5227,7 +5422,7 @@ def paste_text_with_confirmation(
         else:
             # Guarded-click mode is Win32-centric; prefer chunked pacing here.
             input_method = "clipboard_chunks"
-    for attempt, (x, y, mode) in enumerate(attempts, start=1):
+    for attempt, mode in enumerate(attempts, start=1):
         timing["attempts_observed"] = attempt
         activate_started = _sidecar_timing_start(timing, "activate_input_window")
         activate_window(hwnd)
@@ -5308,12 +5503,37 @@ def paste_text_with_confirmation(
                 "input_result": last_input_result,
             })
         before_input_region = clear_result.get("after") or before_input_region
-        click_x, click_y = jitter_input_click_point(int(x), int(y), geometry)
+        last_input_click_evidence = input_surface_click_evidence(before_input_region)
+        if not last_input_click_evidence.get("ok"):
+            return finish({
+                "ok": False,
+                "reason": "input_click_evidence_missing_before_type",
+                "probe_token": probe_token,
+                "probe_tokens": probe_tokens,
+                "attempts": attempt,
+                "copyback_enabled": allow_copyback,
+                "input_region": before_input_region,
+                "input_clear": clear_result,
+                "input_mode": input_method,
+                "input_result": last_input_result,
+            })
+        last_input_click = choose_verified_input_click_point(last_input_click_evidence)
+        if not last_input_click.get("ok"):
+            return finish({
+                "ok": False,
+                "reason": "input_click_evidence_missing_before_type",
+                "probe_token": probe_token,
+                "probe_tokens": probe_tokens,
+                "attempts": attempt,
+                "copyback_enabled": allow_copyback,
+                "input_region": before_input_region,
+                "input_clear": clear_result,
+                "input_mode": input_method,
+                "input_result": last_input_result,
+            })
+        click_x, click_y = [int(value) for value in last_input_click["point"]]
         input_click_started = _sidecar_timing_start(timing, "input_click")
-        if mode == "human":
-            human_client_click(hwnd, click_x, click_y)
-        else:
-            client_click(hwnd, click_x, click_y)
+        human_client_click(hwnd, click_x, click_y)
         time.sleep(random.uniform(0.12, 0.28))
         _sidecar_timing_finish(timing, "input_click", input_click_started)
         focus_guard_started = _sidecar_timing_start(timing, "focus_guard_after_input_click")
@@ -6636,6 +6856,60 @@ def sidebar_search_query_matches(query_text: str, expected: str) -> bool:
     return bool(query and target and query == target)
 
 
+def sidebar_search_box_evidence(
+    ocr_items: list[dict[str, Any]],
+    *,
+    geometry: dict[str, Any],
+) -> dict[str, Any]:
+    """Find the visible sidebar search field before clicking it.
+
+    Geometry remains a boundary check only. The click itself requires the
+    currently observed search label so a stale/login/blank window cannot be
+    treated as a chat surface.
+    """
+    width = int(geometry.get("width") or 0)
+    height = int(geometry.get("height") or 0)
+    split_x = session_split_x(width)
+    if width <= 0 or height <= 0 or split_x <= 0:
+        return {"ok": False, "reason": "search_box_evidence_geometry_invalid"}
+    for item in ocr_items:
+        text = normalize_ocr_text(item.get("text"))
+        compact = re.sub(r"\s+", "", text).lower()
+        # RapidOCR may combine the magnifier with the placeholder as
+        # Q/O/0 + "搜索".  Accept only those known visual variants;
+        # the sidebar bounds check below remains mandatory.
+        visible_search_label = compact == "search" or bool(
+            re.fullmatch(r"[qo0]?\u641c\u7d22", compact)
+        )
+        if not visible_search_label:
+            continue
+        try:
+            left = int(float(item.get("left") or 0))
+            top = int(float(item.get("top") or 0))
+            right = int(float(item.get("right") or 0))
+            bottom = int(float(item.get("bottom") or 0))
+        except (TypeError, ValueError):
+            continue
+        if left < 32 or right > split_x - 12 or top < 28 or bottom > min(142, int(height * 0.20)):
+            continue
+        bounds = [
+            max(42, left - 58),
+            max(42, top - 24),
+            min(max(120, split_x - 34), right + 82),
+            min(132, bottom + 24),
+        ]
+        if bounds[2] <= bounds[0] or bounds[3] <= bounds[1]:
+            continue
+        return {
+            "ok": True,
+            "reason": "visible_sidebar_search_label",
+            "bounds": bounds,
+            "point": [int((bounds[0] + bounds[2]) / 2), int((bounds[1] + bounds[3]) / 2)],
+            "item": item,
+        }
+    return {"ok": False, "reason": "search_box_evidence_missing"}
+
+
 def dismiss_sidebar_search_state(
     hwnd: int,
     *,
@@ -6723,80 +6997,49 @@ def clear_sidebar_search_box_without_select_all(
         humanized_action_sleep(650, 1400)
     click_result: dict[str, Any] = {"ok": True, "bounds": None}
     active_geometry = geometry if isinstance(geometry, dict) else get_window_geometry(hwnd)
-    split_x = session_split_x(int(active_geometry.get("width") or 0))
-    bounds = [
-        max(42, int(search_x) - 56),
-        max(42, int(search_y) - 22),
-        min(max(120, split_x - 34), int(search_x) + 96),
-        min(132, int(search_y) + 26),
-    ]
-    if bounds[2] > bounds[0] and bounds[3] > bounds[1]:
-        click_result = human_window_image_click_in_bounds(
-            hwnd,
-            int(search_x),
-            int(search_y),
-            bounds=bounds,
-            action_name="sidebar_search_box_click",
-        )
-    else:
-        human_window_image_click(hwnd, search_x, search_y)
-    humanized_action_sleep(720, 1600)
-    if not artifact_dir and progress_event is None:
-        # Keep the legacy low-disturbance path for ordinary visible-target
-        # search fallback calls. The strict select-all/OCR verification below
-        # is reserved for artifact-backed remark-code targeting.
-        default_backspaces = random.randint(1, 3)
-        backspaces = bounded_int(
-            os.getenv("WECHAT_WIN32_OCR_TARGET_SEARCH_CLEAR_BACKSPACES"),
-            default=default_backspaces,
-            minimum=0,
-            maximum=8,
-        )
-        deletes = bounded_int(
-            os.getenv("WECHAT_WIN32_OCR_TARGET_SEARCH_CLEAR_DELETES"),
-            default=0,
-            minimum=0,
-            maximum=2,
-        )
-        key_count = 1
-        for idx in range(backspaces):
-            guard = recover_send_window_guard(hwnd, max_attempts=1) if recover_foreground else basic_send_window_guard(hwnd)
-            if not guard.get("ok"):
-                return {
-                    "ok": False,
-                    "reason": "window_guard_failed_during_search_clear",
-                    "window_guard": guard,
-                    "backspaces": idx,
-                    "deletes": 0,
-                    "click": click_result,
-                }
-            key_press(win32con.VK_BACK)
-            key_count += 1
-            humanized_action_sleep(140, 460)
-        for idx in range(deletes):
-            guard = recover_send_window_guard(hwnd, max_attempts=1) if recover_foreground else basic_send_window_guard(hwnd)
-            if not guard.get("ok"):
-                return {
-                    "ok": False,
-                    "reason": "window_guard_failed_during_search_clear",
-                    "window_guard": guard,
-                    "backspaces": backspaces,
-                    "deletes": idx,
-                    "click": click_result,
-                }
-            key_press(win32con.VK_DELETE)
-            key_count += 1
-            humanized_action_sleep(160, 480)
-        humanized_action_sleep(520, 1300)
+    try:
+        evidence_shot, evidence_path = capture_wechat(hwnd, artifact_dir=artifact_dir, label="open_chat_search_box_before_click")
+        evidence_items = run_ocr_traced(evidence_shot, "open_chat_search_box_before_click", source="open_chat")
+    except Exception as exc:
         return {
-            "ok": True,
-            "method": "slow_sidebar_search_prepare",
-            "backspaces": backspaces,
-            "deletes": deletes,
-            "key_count": key_count,
-            "click": click_result,
-            "window_guard": guard,
+            "ok": False,
+            "reason": "search_box_evidence_capture_failed",
+            "error": repr(exc),
         }
+    evidence_surface = target_switch_surface_state(
+        evidence_shot,
+        evidence_items,
+        geometry=active_geometry,
+        screenshot_path=evidence_path,
+        target=target_hint,
+    )
+    search_box_evidence = sidebar_search_box_evidence(evidence_items, geometry=active_geometry)
+    if not evidence_surface.get("ok") or not search_box_evidence.get("ok"):
+        return {
+            "ok": False,
+            "reason": "search_box_evidence_missing_before_click",
+            "surface": evidence_surface,
+            "search_box_evidence": search_box_evidence,
+            "screenshot_path": evidence_path,
+            "ocr_count": len(evidence_items),
+        }
+    bounds = [int(value) for value in search_box_evidence["bounds"]]
+    search_x, search_y = [int(value) for value in search_box_evidence["point"]]
+    click_result = human_window_image_click_in_bounds(
+        hwnd,
+        search_x,
+        search_y,
+        bounds=bounds,
+        action_name="sidebar_search_box_click",
+    )
+    if not click_result.get("ok"):
+        return {
+            "ok": False,
+            "reason": "search_box_click_failed",
+            "click": click_result,
+            "search_box_evidence": search_box_evidence,
+        }
+    humanized_action_sleep(720, 1600)
     probe_shot, probe_path = capture_wechat(hwnd, artifact_dir=artifact_dir, label="open_chat_search_box_after_click")
     probe_items = run_ocr_traced(probe_shot, "open_chat_search_box_after_click", source="open_chat")
     if progress_event is not None:
@@ -6820,6 +7063,7 @@ def clear_sidebar_search_box_without_select_all(
             "reason": str(surface.get("reason") or "search_box_surface_not_ok"),
             "surface": surface,
             "click": click_result,
+            "search_box_evidence": search_box_evidence,
         }
     search_state = sidebar_search_state_detected(probe_shot, probe_items, geometry=active_geometry)
     if not search_state.get("detected"):
@@ -6829,6 +7073,7 @@ def clear_sidebar_search_box_without_select_all(
             "surface": surface,
             "search_state": search_state,
             "click": click_result,
+            "search_box_evidence": search_box_evidence,
         }
 
     guard = recover_send_window_guard(hwnd, max_attempts=2) if recover_foreground else basic_send_window_guard(hwnd)
@@ -6906,6 +7151,7 @@ def clear_sidebar_search_box_without_select_all(
             "surface": clear_surface,
             "search_state": clear_state,
             "click": click_result,
+            "search_box_evidence": search_box_evidence,
             "query_text": clear_query_text,
             "refocus": refocus_result,
         }
@@ -6927,6 +7173,7 @@ def clear_sidebar_search_box_without_select_all(
         "surface": clear_surface,
         "search_state": clear_state,
         "click": click_result,
+        "search_box_evidence": search_box_evidence,
         "window_guard": guard,
         "refocused_after_clear": bool(refocus_result),
         "refocus": refocus_result,
@@ -6952,8 +7199,6 @@ def type_sidebar_search_query(
         humanized_action_sleep(220, 720)
         hotkey(win32con.VK_CONTROL, ord("V"))
         humanized_action_sleep(850, 1700)
-        if not artifact_dir and not verify_after_paste:
-            return {"ok": True, "method": "clipboard", "window_guard": guard}
         active_geometry = geometry if isinstance(geometry, dict) else get_window_geometry(hwnd)
         verify_shot, verify_path = capture_wechat(hwnd, artifact_dir=artifact_dir, label="open_chat_search_box_after_paste")
         verify_items = run_ocr_traced(verify_shot, "open_chat_search_box_after_paste", source="open_chat")
@@ -9545,6 +9790,12 @@ def parse_sessions_from_ocr(
         min_header_y=min_header_y,
         split_x=split_x,
     )
+    for session in sessions:
+        # This is deliberately deterministic: a second OCR poll of the same
+        # sidebar row must retain its identity.  Poll time, screenshot path and
+        # other capture artifacts would turn a persistent red dot into a false
+        # stream of "new" messages.
+        session["session_observation_id"] = session_observation_id(session)
     return sessions
 
 
@@ -9553,6 +9804,31 @@ def rpa_session_key(name: str, *, conversation_type: str = "unknown", row_finger
     duplicate = str(fingerprint.get("duplicate_discriminator") or "").strip()
     seed = json.dumps([str(conversation_type or "unknown"), str(name or ""), duplicate], ensure_ascii=False, sort_keys=True)
     return "wx:rpa:v1:" + hashlib.sha256(seed.encode("utf-8")).hexdigest()[:20]
+
+
+def session_observation_id(session: dict[str, Any]) -> str:
+    """Return a stable identity for one visible sidebar observation.
+
+    This value is transport metadata only.  It gives the monitor a way to
+    distinguish a real preview/badge transition from another OCR read of the
+    exact same row; it must never be treated as customer content.
+    """
+
+    fingerprint = session.get("row_fingerprint") if isinstance(session.get("row_fingerprint"), dict) else {}
+    evidence = session.get("unread_badge_meta") if isinstance(session.get("unread_badge_meta"), dict) else {}
+    bbox = evidence.get("bbox") or evidence.get("red_box") or []
+    normalized_bbox = [int(value) // 4 for value in bbox[:4] if isinstance(value, (int, float))]
+    seed = {
+        "session_key": str(session.get("session_key") or ""),
+        "preview": " ".join(str(session.get("preview") or "").split()),
+        "time": str(session.get("time") or "").strip(),
+        "unread_badge": str(session.get("unread_badge") or "").strip(),
+        "badge_bbox": normalized_bbox,
+        "row_y_bucket": fingerprint.get("row_y_bucket"),
+        "duplicate_discriminator": fingerprint.get("duplicate_discriminator"),
+    }
+    encoded = json.dumps(seed, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    return "session-observation:" + hashlib.sha256(encoded.encode("utf-8")).hexdigest()[:32]
 
 
 def session_row_fingerprint(item: dict[str, Any], *, duplicate_index: int = 0) -> dict[str, Any]:
@@ -9700,6 +9976,9 @@ def detect_visual_session_unread_badge(
         "detected": bool(compact),
         "red_pixel_count": len(red_pixels),
         "red_box": [left + min(xs), top + min(ys), left + max(xs) + 1, top + max(ys) + 1],
+        # ``bbox`` is the generic evidence key expected by downstream audit
+        # adapters.  Retain ``red_box`` above for existing callers.
+        "bbox": [left + min(xs), top + min(ys), left + max(xs) + 1, top + max(ys) + 1],
         "crop": [left, top, right, bottom],
         "reason": "visual_red_dot" if compact else "red_pixels_not_compact",
     }
@@ -11024,7 +11303,7 @@ def args_for_daemon_request(request: dict[str, Any]) -> list[str]:
             argv.append("--restore-to-latest")
         elif request.get("restore_to_latest") is False:
             argv.append("--no-restore-to-latest")
-    if action == "image-save":
+    if action in {"image-save", "image-clipboard-copy"}:
         for key, flag in (
             ("source_preview", "--source-preview"),
             ("speaker_name", "--speaker-name"),

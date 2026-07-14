@@ -190,7 +190,10 @@ def wait_for_file_stable(path: Path, *, timeout_seconds: float = 8.0, quiet_peri
 
 
 def save_asset_metadata(asset: dict[str, Any], meta_path: Path) -> None:
-    meta_path.write_text(json.dumps(asset, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    # Historical no-op compatibility hook.  Metadata files can carry image
+    # paths and must not be created by the clipboard-only pipeline.
+    del asset, meta_path
+    return None
 
 
 def build_saved_image_asset(
@@ -213,7 +216,30 @@ def build_saved_image_asset(
     wechat_message_time: str = "",
     visual_index: int = 0,
     diagnostic_path: str = "",
+    capture_detection: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
+    del (
+        saved_image_path,
+        target_name,
+        session_key,
+        conversation_type,
+        speaker_name,
+        source_preview,
+        save_method,
+        captured_at,
+        bubble_anchor,
+        bubble_bounds,
+        visual_side,
+        sender,
+        sender_role,
+        visual_occurrence_id,
+        pending_signal_id,
+        wechat_message_time,
+        visual_index,
+        diagnostic_path,
+        capture_detection,
+    )
+    return {"ok": False, "reason": "legacy_image_asset_build_rejected"}
     path = Path(saved_image_path)
     digest = file_sha256(path)
     width, height = image_dimensions(path)
@@ -287,6 +313,7 @@ def build_saved_image_asset(
         "bubble_anchor": dict(bubble_anchor or {}),
         "bubble_bounds": [int(value) for value in list(bubble_bounds or [])[:4]],
         "diagnostic_path": str(diagnostic_path or ""),
+        "capture_detection": dict(capture_detection or {}),
     }
 
 
@@ -298,27 +325,17 @@ def build_image_message_from_asset(asset: dict[str, Any]) -> dict[str, Any]:
     return {
         "id": message_id,
         "message_id": message_id,
-        "type": "image",
-        "message_type": "image",
+        "type": "text",
         "sender": sender,
         "sender_role": sender,
         "content": "[图片]",
         "speaker_name": str(asset.get("speaker_name") or ""),
         "group_member_name": str(asset.get("speaker_name") or ""),
-        "image_assets": [str(asset.get("asset_id") or "")],
-        "asset_id": str(asset.get("asset_id") or ""),
-        "saved_image_path": str(asset.get("saved_image_path") or ""),
-        "visual_side": str(asset.get("visual_side") or sender),
-        "visual_occurrence_id": str(asset.get("visual_occurrence_id") or ""),
         "pending_signal_id": str(asset.get("pending_signal_id") or ""),
-        "wechat_message_time": str(asset.get("wechat_message_time") or ""),
-        "visual_index": int(asset.get("visual_index") or 0),
-        "visual_observation_id": str(asset.get("visual_observation_id") or ""),
-        "bubble_bounds": [int(value) for value in (asset.get("bubble_bounds") or [])[:4]],
         "source_adapter": "win32_ocr",
         "captured_at": str(asset.get("captured_at") or ""),
-        "time": str(asset.get("wechat_message_time") or asset.get("captured_at") or ""),
-        "quality_flags": ["synthetic_visual_turn"],
+        "time": str(asset.get("captured_at") or ""),
+        "quality_flags": ["synthetic_visual_turn", "legacy_image_asset_rejected"],
     }
 
 
@@ -356,6 +373,109 @@ def _covered_by_text(bounds: tuple[int, int, int, int], messages: list[dict[str,
     return False
 
 
+def _structural_media_lanes(width: int, height: int) -> dict[str, dict[str, int]]:
+    """Return relative WeChat media/avatar lanes for each message side.
+
+    These are deliberately expressed from the current chat pane instead of
+    fixed screenshot coordinates.  A media candidate is owned by the message
+    row whose avatar column it adjoins; image pixels never decide ownership.
+    """
+    chat_left, top, chat_right, bottom = _chat_bounds(width, height)
+    chat_width = max(1, chat_right - chat_left)
+    avatar_width = max(42, min(64, int(chat_width * 0.10)))
+    media_gap = max(14, min(30, int(chat_width * 0.04)))
+    customer_media_left = chat_left + avatar_width + media_gap
+    self_media_right = chat_right - avatar_width - media_gap
+    media_column_width = max(150, int(chat_width * 0.62))
+    return {
+        "customer": {
+            "avatar_left": max(chat_left - avatar_width - 6, session_split_x(width) + 2),
+            "avatar_right": chat_left + 12,
+            "media_left": customer_media_left,
+            "media_right": min(chat_right, customer_media_left + media_column_width),
+            "top": top,
+            "bottom": bottom,
+        },
+        "self": {
+            "avatar_left": chat_right - 12,
+            "avatar_right": min(width - 2, chat_right + avatar_width + 6),
+            "media_left": max(chat_left, self_media_right - media_column_width),
+            "media_right": self_media_right,
+            "top": top,
+            "bottom": bottom,
+        },
+    }
+
+
+def _avatar_row_presence(
+    image: Image.Image,
+    *,
+    lane: dict[str, int],
+    bubble_bounds: tuple[int, int, int, int],
+) -> bool:
+    """Lightweight same-row avatar confirmation, never an identity classifier."""
+    left = max(0, int(lane.get("avatar_left") or 0))
+    right = min(image.width, int(lane.get("avatar_right") or 0))
+    top = max(0, int(bubble_bounds[1]) - 14)
+    bottom = min(image.height, int(bubble_bounds[1]) + max(72, int((bubble_bounds[3] - bubble_bounds[1]) * 0.28)))
+    if right - left < 12 or bottom - top < 12:
+        return False
+    stat = ImageStat.Stat(image.crop((left, top, right, bottom)).convert("RGB"))
+    mean = stat.mean or [255.0, 255.0, 255.0]
+    spread = sum(float(value) for value in (stat.stddev or [0.0, 0.0, 0.0])) / 3.0
+    brightness = sum(float(value) for value in mean) / 3.0
+    # An avatar normally differs from the blank chat background either by
+    # texture/colour or by a dark surface.  This only corroborates an already
+    # position-valid row; it must not create a media candidate by itself.
+    return spread >= 7.0 or brightness <= 225.0
+
+
+def _structural_media_side(
+    screenshot: Image.Image,
+    bounds: tuple[int, int, int, int],
+) -> tuple[str, float, list[str]] | None:
+    """Resolve sender side from message-lane adjacency before image features.
+
+    The tolerance allows different WeChat DPI/layout variants and permits a
+    mostly white image whose detected visual content starts inside its bubble.
+    """
+    width, height = screenshot.size
+    left, top, right, bottom = bounds
+    if left >= right or top >= bottom:
+        return None
+    lanes = _structural_media_lanes(width, height)
+    candidates: list[tuple[str, float, list[str]]] = []
+    for side, lane in lanes.items():
+        if top < lane["top"] or bottom > lane["bottom"]:
+            continue
+        column_width = max(1, lane["media_right"] - lane["media_left"])
+        edge_tolerance = max(76, min(180, int(column_width * 0.42)))
+        cross_tolerance = max(48, min(110, int(column_width * 0.24)))
+        if side == "customer":
+            edge_distance = abs(left - lane["media_left"])
+            in_column = left <= lane["media_left"] + edge_tolerance and right <= lane["media_right"] + cross_tolerance
+            edge_name = "left_edge_adjacent_to_customer_avatar_column"
+        else:
+            edge_distance = abs(right - lane["media_right"])
+            in_column = right >= lane["media_right"] - edge_tolerance and left >= lane["media_left"] - cross_tolerance
+            edge_name = "right_edge_adjacent_to_self_avatar_column"
+        if not in_column:
+            continue
+        avatar_present = _avatar_row_presence(screenshot, lane=lane, bubble_bounds=bounds)
+        position_score = max(0.0, 1.0 - (edge_distance / float(edge_tolerance + 1)))
+        score = position_score + (0.16 if avatar_present else 0.0)
+        evidence = ["structural_media_lane_v1", edge_name, f"edge_distance={edge_distance}"]
+        if avatar_present:
+            evidence.append("same_row_avatar_column_present")
+        candidates.append((side, score, evidence))
+    if not candidates:
+        return None
+    # A component may visually overlap both broad columns.  The side with the
+    # closer avatar-adjacent edge wins; there is no center-point side fallback.
+    candidates.sort(key=lambda item: item[1], reverse=True)
+    return candidates[0]
+
+
 def detect_visual_image_bubbles(
     screenshot: Image.Image,
     *,
@@ -388,10 +508,17 @@ def detect_visual_image_bubbles(
             mean = stat.mean or [0.0, 0.0, 0.0]
             spread = sum(float(value) for value in (stat.stddev or [0.0, 0.0, 0.0])) / 3.0
             delta = max(mean) - min(mean)
-            active[gy][gx] = spread >= 16.0 or delta >= 24.0
+            brightness = sum(float(value) for value in mean) / 3.0
+            # A screenshot/document image can be almost monochrome (for
+            # example a dark terminal screenshot), so it has neither colour
+            # delta nor enough local texture for the original detector. Keep
+            # sufficiently large dark surfaces as candidates; the later
+            # connected-component size and text-overlap checks still reject
+            # avatars, glyphs and ordinary UI chrome.
+            dark_low_texture_surface = brightness <= 58.0 and spread <= 20.0
+            active[gy][gx] = spread >= 16.0 or delta >= 24.0 or dark_low_texture_surface
     visited: set[tuple[int, int]] = set()
     candidates: list[dict[str, Any]] = []
-    split = session_split_x(width)
     clean_side_filter = str(side_filter or "customer").strip().lower()
     if clean_side_filter not in {"customer", "self", "all"}:
         clean_side_filter = "customer"
@@ -429,11 +556,13 @@ def detect_visual_image_bubbles(
                 continue
             if _covered_by_text(bounds, messages or []):
                 continue
-            center_x = (bounds[0] + bounds[2]) / 2.0
-            side = "customer" if center_x <= (split + (width - split) * 0.58) else "self"
+            structural_side = _structural_media_side(image, bounds)
+            if structural_side is None:
+                continue
+            side, structural_score, structure_evidence = structural_side
             if clean_side_filter != "all" and side != clean_side_filter:
                 continue
-            score = area + bounds[3] * 12
+            score = area + bounds[3] * 12 + structural_score * 10000
             candidates.append(
                 {
                     "bounds": [int(value) for value in bounds],
@@ -442,6 +571,9 @@ def detect_visual_image_bubbles(
                     "area": int(area),
                     "side": side,
                     "score": float(score),
+                    "detection_method": "structural_media_lane_v1",
+                    "structure_evidence": structure_evidence,
+                    "auxiliary_visual_evidence": ["colour_texture_connected_component"],
                     "anchor": {"x": int((bounds[0] + bounds[2]) / 2), "y": int((bounds[1] + bounds[3]) / 2)},
                     "wechat_message_time": nearest_chat_time_marker(bounds, time_markers),
                 }
@@ -617,6 +749,11 @@ def save_visual_bubble_crop(
     bubble: dict[str, Any],
     index: int = 0,
 ) -> dict[str, Any]:
+    return {
+        "ok": False,
+        "reason": "legacy_visual_bubble_crop_rejected",
+        "side": str(bubble.get("side") or "customer"),
+    }
     bounds = clamp_bounds([int(value) for value in (bubble.get("bounds") or [])[:4]], screenshot.size)
     side = str(bubble.get("side") or "customer").strip().lower()
     if side not in {"customer", "self"}:
@@ -651,78 +788,30 @@ def capture_context_menu_image(
     artifact_dir: str,
     label: str,
 ) -> tuple[Any, str, str]:
+    # Geometry/menu OCR is transient.  Ignore the historical artifact-dir
+    # argument so no caller can turn this helper into a screenshot archive.
+    del artifact_dir
     visible_capture = getattr(sidecar_ops, "capture_wechat_window_visible_screen", None)
     if callable(visible_capture):
         try:
-            image, path = visible_capture(hwnd, artifact_dir=artifact_dir, label=label)
-            return image, path, "visible_window"
+            image, _path = visible_capture(hwnd, artifact_dir=None, label=label)
+            return image, "", "visible_window"
         except Exception:
             pass
-    image, path = sidecar_ops.capture_wechat(hwnd, artifact_dir=artifact_dir, label=label)
-    return image, path, "window_capture"
-
-
-def _clipboard_image_value(sidecar_ops: Any) -> Any:
-    grabber = getattr(sidecar_ops, "grab_clipboard_image", None)
-    if callable(grabber):
-        return grabber()
-    image_grab = getattr(sidecar_ops, "ImageGrab", None)
-    grabclipboard = getattr(image_grab, "grabclipboard", None)
-    if callable(grabclipboard):
-        return grabclipboard()
-    from PIL import ImageGrab  # Imported lazily so non-Windows tests can stub sidecar_ops.
-
-    return ImageGrab.grabclipboard()
-
-
-def _clipboard_value_to_image(value: Any) -> tuple[Image.Image | None, dict[str, Any]]:
-    if isinstance(value, Image.Image):
-        return value.copy(), {"clipboard_source": "bitmap"}
-    if isinstance(value, (list, tuple)):
-        for item in value:
-            path = Path(str(item or ""))
-            if not path.is_file():
-                continue
-            try:
-                with Image.open(path) as raw:
-                    return raw.copy(), {"clipboard_source": "file", "clipboard_source_path": str(path)}
-            except Exception:
-                continue
-        return None, {"clipboard_source": "file_list", "reason": "clipboard_file_list_without_readable_image"}
-    if value is None:
-        return None, {"clipboard_source": "empty", "reason": "clipboard_image_missing"}
-    return None, {"clipboard_source": type(value).__name__, "reason": "clipboard_value_not_image"}
+    image, _path = sidecar_ops.capture_wechat(hwnd, artifact_dir=None, label=label)
+    return image, "", "window_capture"
 
 
 def save_clipboard_image_to_path(sidecar_ops: Any, saved_path: Path) -> dict[str, Any]:
-    try:
-        value = _clipboard_image_value(sidecar_ops)
-        image, source = _clipboard_value_to_image(value)
-        if image is None:
-            return {"ok": False, "reason": str(source.get("reason") or "clipboard_image_missing"), **source}
-        if image.width < 16 or image.height < 16:
-            return {
-                "ok": False,
-                "reason": "clipboard_image_too_small",
-                "width": int(image.width),
-                "height": int(image.height),
-                **source,
-            }
-        saved_path.parent.mkdir(parents=True, exist_ok=True)
-        image.save(saved_path, format="PNG")
-        stable = wait_for_file_stable(saved_path, timeout_seconds=1.2, quiet_period_seconds=0.05)
-        if not stable.get("ok"):
-            return {"ok": False, "reason": str(stable.get("reason") or "clipboard_image_file_unstable"), "file_stable": stable, **source}
-        return {
-            "ok": True,
-            "path": str(saved_path),
-            "width": int(image.width),
-            "height": int(image.height),
-            "file_stable": stable,
-            **source,
-        }
-    except Exception as exc:
-        return {"ok": False, "reason": "clipboard_image_read_failed", "error": repr(exc)}
+    # Frozen compatibility entry point.  Saving files and reading image paths
+    # are deliberately unavailable; the sole live route is the current
+    # right-click Copy transaction consumed in memory by the optional vision
+    # plugin.
+    del sidecar_ops, saved_path
+    return {
+        "ok": False,
+        "reason": "legacy_clipboard_file_save_rejected",
+    }
 
 
 def click_context_menu_item(
@@ -771,7 +860,34 @@ def build_image_saved_payload(
     pending_signal_id: str = "",
     wechat_message_time: str = "",
     visual_index: int = 0,
+    capture_detection: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
+    del (
+        saved_path,
+        target_name,
+        session_key,
+        source_preview,
+        speaker_name,
+        captured_at,
+        anchor,
+        screenshot_path,
+        save_method,
+        diagnostics,
+        probe,
+        bubble_bounds,
+        visual_side,
+        pending_signal_id,
+        wechat_message_time,
+        visual_index,
+        capture_detection,
+    )
+    return {
+        "ok": False,
+        "state": "legacy_image_file_capture_rejected",
+        "reason": "clipboard_current_transaction_required",
+        "assets": [],
+        "messages": [],
+    }
     resolved_speaker = parse_preview_speaker(source_preview, speaker_name)
     asset = build_saved_image_asset(
         saved_image_path=saved_path,
@@ -788,6 +904,7 @@ def build_image_saved_payload(
         sender=visual_side,
         sender_role=visual_side,
         pending_signal_id=pending_signal_id,
+        capture_detection=capture_detection,
         wechat_message_time=wechat_message_time,
         visual_index=visual_index,
         diagnostic_path=screenshot_path,
@@ -825,6 +942,27 @@ def build_visual_bubble_archive_payload(
     probe: dict[str, Any],
     pending_signal_id: str = "",
 ) -> dict[str, Any]:
+    del (
+        screenshot,
+        screenshot_path,
+        output_dir,
+        bubbles,
+        target_name,
+        session_key,
+        source_preview,
+        speaker_name,
+        captured_at,
+        diagnostics,
+        probe,
+        pending_signal_id,
+    )
+    return {
+        "ok": False,
+        "state": "legacy_visual_bubble_archive_rejected",
+        "reason": "clipboard_current_transaction_required",
+        "assets": [],
+        "messages": [],
+    }
     assets: list[dict[str, Any]] = []
     messages: list[dict[str, Any]] = []
     failures: list[dict[str, Any]] = []
@@ -863,6 +1001,11 @@ def build_visual_bubble_archive_payload(
             wechat_message_time=str(bubble.get("wechat_message_time") or ""),
             visual_index=index,
             diagnostic_path=screenshot_path,
+            capture_detection={
+                "method": str(bubble.get("detection_method") or ""),
+                "structure_evidence": list(bubble.get("structure_evidence") or []),
+                "auxiliary_visual_evidence": list(bubble.get("auxiliary_visual_evidence") or []),
+            },
         )
         meta_path = Path(str(crop_result.get("path") or "")).with_suffix(Path(str(crop_result.get("path") or "")).suffix + ".meta.json")
         asset["meta_path"] = str(meta_path)
@@ -890,6 +1033,245 @@ def build_visual_bubble_archive_payload(
     }
 
 
+def clipboard_sequence_number(sidecar_ops: Any) -> int | None:
+    """Read the Windows clipboard generation without reading its content.
+
+    The caller uses this to prove that the immediately preceding WeChat copy
+    action replaced the clipboard.  A pre-existing image is never accepted.
+    """
+    provider = getattr(sidecar_ops, "clipboard_sequence_number", None)
+    if not callable(provider):
+        return None
+    try:
+        value = provider()
+        return int(value) if value is not None else None
+    except Exception:
+        return None
+
+
+def execute_wechat_clipboard_image_copy(
+    *,
+    hwnd: int,
+    probe: dict[str, Any],
+    target_name: str,
+    session_key: str = "",
+    exact: bool = True,
+    source_preview: str = "",
+    speaker_name: str = "",
+    pending_signal_id: str = "",
+    side_filter: str = "customer",
+    sidecar_ops: Any,
+) -> dict[str, Any]:
+    """Copy one current customer image to the Windows clipboard without saving it.
+
+    Screenshots are only transient geometry input.  This function deliberately
+    returns no image, file path, crop, bounds, hash, or asset metadata: a
+    caller in the same RPA lock must read the changed clipboard into memory.
+    """
+    captured_at = now_iso()
+    visual_side = str(side_filter or "customer").strip().lower()
+    if visual_side not in {"customer", "self"}:
+        return {
+            "ok": False,
+            "online": True,
+            "adapter": "win32_ocr",
+            "state": "image_clipboard_copy_failed",
+            "reason": "image_clipboard_side_filter_invalid",
+            "target": target_name,
+            "session_key": session_key,
+            "assets": [],
+            "messages": [],
+            "transaction": {"status": "failed", "captured_at": captured_at},
+        }
+    try:
+        screenshot, _ = sidecar_ops.capture_wechat(hwnd, artifact_dir=None, label="image_clipboard_copy_before")
+        ocr_items = sidecar_ops.run_ocr(screenshot)
+    except Exception as exc:
+        return {
+            "ok": False,
+            "online": True,
+            "adapter": "win32_ocr",
+            "state": "image_clipboard_copy_failed",
+            "reason": "image_clipboard_capture_surface_failed",
+            "target": target_name,
+            "session_key": session_key,
+            "assets": [],
+            "messages": [],
+            "transaction": {"status": "failed", "captured_at": captured_at, "error": repr(exc)},
+        }
+    geometry = sidecar_ops.get_window_geometry(hwnd)
+    image_size = getattr(screenshot, "size", (int(geometry.get("width") or 0), int(geometry.get("height") or 0)))
+    messages = sidecar_ops.parse_messages_from_ocr(ocr_items, image_size, target=target_name)
+    blocking_reason = sidecar_ops.blocking_screen_reason(ocr_items)
+    if blocking_reason:
+        return {
+            "ok": False,
+            "online": False if blocking_reason == "login_or_qr" else True,
+            "adapter": "win32_ocr",
+            "state": "image_clipboard_copy_blocked",
+            "reason": blocking_reason,
+            "target": target_name,
+            "session_key": session_key,
+            "assets": [],
+            "messages": [],
+            "transaction": {"status": "blocked", "captured_at": captured_at},
+        }
+    bubbles = detect_visual_image_bubbles(
+        screenshot,
+        messages=messages,
+        max_images=1,
+        side_filter=visual_side,
+        time_markers=extract_chat_time_markers(ocr_items, image_size),
+    )
+    if not bubbles:
+        return {
+            "ok": False,
+            "online": True,
+            "adapter": "win32_ocr",
+            "state": "image_clipboard_copy_failed",
+            "reason": f"{visual_side}_image_target_not_found",
+            "target": target_name,
+            "session_key": session_key,
+            "assets": [],
+            "messages": [],
+            "transaction": {"status": "failed", "captured_at": captured_at},
+        }
+    sequence_before = clipboard_sequence_number(sidecar_ops)
+    if sequence_before is None:
+        return {
+            "ok": False,
+            "online": True,
+            "adapter": "win32_ocr",
+            "state": "image_clipboard_copy_failed",
+            "reason": "clipboard_sequence_unavailable",
+            "target": target_name,
+            "session_key": session_key,
+            "assets": [],
+            "messages": [],
+            "transaction": {"status": "failed", "captured_at": captured_at},
+        }
+    bubble = bubbles[0]
+    anchor = dict(bubble.get("anchor") or {})
+    bounds = [int(value) for value in (bubble.get("bounds") or [])[:4]]
+    right_click = sidecar_ops.human_window_image_right_click_in_bounds(
+        hwnd,
+        int(anchor.get("x") or 0),
+        int(anchor.get("y") or 0),
+        bounds=bounds,
+        action_name="image_clipboard_copy_context_right_click",
+    )
+    sidecar_ops.humanized_action_sleep(360, 720)
+    try:
+        menu_screenshot, _menu_path, _menu_capture_method = capture_context_menu_image(
+            sidecar_ops=sidecar_ops,
+            hwnd=hwnd,
+            artifact_dir="",
+            label="image_clipboard_copy_context_menu",
+        )
+        menu_items = sidecar_ops.run_ocr(menu_screenshot)
+        menu_size = getattr(menu_screenshot, "size", image_size)
+        copy_target = find_copy_menu_item(menu_items, menu_size)
+    except Exception:
+        copy_target = None
+    if not right_click.get("ok") or not copy_target:
+        try:
+            sidecar_ops.key_press(sidecar_ops.win32con.VK_ESCAPE)
+        except Exception:
+            pass
+        return {
+            "ok": False,
+            "online": True,
+            "adapter": "win32_ocr",
+            "state": "image_clipboard_copy_failed",
+            "reason": "image_context_menu_copy_item_missing",
+            "target": target_name,
+            "session_key": session_key,
+            "assets": [],
+            "messages": [],
+            "transaction": {
+                "status": "failed",
+                "captured_at": captured_at,
+                "right_click_ok": bool(right_click.get("ok")),
+                "menu_copy_confirmed": False,
+            },
+        }
+    menu_click = click_context_menu_item(
+        sidecar_ops=sidecar_ops,
+        hwnd=hwnd,
+        menu_target=copy_target,
+        action_name="image_clipboard_copy_menu_item_click",
+    )
+    if not menu_click.get("ok"):
+        try:
+            sidecar_ops.key_press(sidecar_ops.win32con.VK_ESCAPE)
+        except Exception:
+            pass
+        return {
+            "ok": False,
+            "online": True,
+            "adapter": "win32_ocr",
+            "state": "image_clipboard_copy_failed",
+            "reason": "image_context_menu_copy_click_failed",
+            "target": target_name,
+            "session_key": session_key,
+            "assets": [],
+            "messages": [],
+            "transaction": {
+                "status": "failed",
+                "captured_at": captured_at,
+                "right_click_ok": True,
+                "menu_copy_confirmed": False,
+            },
+        }
+    sequence_after: int | None = None
+    for _ in range(6):
+        sidecar_ops.humanized_action_sleep(80, 140)
+        candidate = clipboard_sequence_number(sidecar_ops)
+        if candidate is not None and candidate != sequence_before:
+            sequence_after = candidate
+            break
+    if sequence_after is None:
+        return {
+            "ok": False,
+            "online": True,
+            "adapter": "win32_ocr",
+            "state": "image_clipboard_copy_failed",
+            "reason": "clipboard_sequence_unchanged_after_copy",
+            "target": target_name,
+            "session_key": session_key,
+            "assets": [],
+            "messages": [],
+            "transaction": {
+                "status": "failed",
+                "captured_at": captured_at,
+                "right_click_ok": True,
+                "menu_copy_confirmed": True,
+                "clipboard_sequence_changed": False,
+            },
+        }
+    return {
+        "ok": True,
+        "online": True,
+        "adapter": "win32_ocr",
+        "state": "image_clipboard_copied",
+        "target": target_name,
+        "session_key": session_key,
+        "assets": [],
+        "messages": [],
+        "transaction": {
+            "status": "copied",
+            "captured_at": captured_at,
+            "right_click_ok": True,
+            "menu_copy_confirmed": True,
+            "clipboard_sequence_changed": True,
+            "clipboard_sequence_after": sequence_after,
+            "pending_signal_id": str(pending_signal_id or ""),
+            "source": "clipboard_current_transaction",
+            "visual_side": visual_side,
+        },
+    }
+
+
 def execute_wechat_image_save(
     *,
     hwnd: int,
@@ -907,6 +1289,17 @@ def execute_wechat_image_save(
     pending_signal_id: str = "",
     sidecar_ops: Any,
 ) -> dict[str, Any]:
+    return {
+        "ok": False,
+        "online": True,
+        "adapter": "win32_ocr",
+        "state": "legacy_image_file_capture_rejected",
+        "reason": "clipboard_current_transaction_required",
+        "target": target_name,
+        "session_key": session_key,
+        "assets": [],
+        "messages": [],
+    }
     output_dir = resolve_artifact_dir(artifact_dir, tenant_id=tenant_id, target_name=target_name, session_key=session_key)
     captured_at = now_iso()
     screenshot, screenshot_path = sidecar_ops.capture_wechat(hwnd, artifact_dir=str(output_dir), label="image_save_before")
@@ -984,6 +1377,11 @@ def execute_wechat_image_save(
     bubble = bubbles[0]
     anchor = dict(bubble.get("anchor") or {})
     bounds = [int(value) for value in (bubble.get("bounds") or [])[:4]]
+    capture_detection = {
+        "method": str(bubble.get("detection_method") or ""),
+        "structure_evidence": list(bubble.get("structure_evidence") or []),
+        "auxiliary_visual_evidence": list(bubble.get("auxiliary_visual_evidence") or []),
+    }
     right_click = sidecar_ops.human_window_image_right_click_in_bounds(
         hwnd,
         int(anchor.get("x") or 0),
@@ -1029,6 +1427,7 @@ def execute_wechat_image_save(
                 "right_click": right_click,
                 "menu_click": menu_click,
                 "clipboard_save": clipboard_save,
+                "capture_detection": capture_detection,
             }
             return build_image_saved_payload(
                 saved_path=saved_path,
@@ -1047,6 +1446,7 @@ def execute_wechat_image_save(
                 pending_signal_id=pending_signal_id,
                 wechat_message_time=str(bubble.get("wechat_message_time") or ""),
                 visual_index=0,
+                capture_detection=capture_detection,
             )
         try:
             sidecar_ops.key_press(sidecar_ops.win32con.VK_ESCAPE)
@@ -1073,6 +1473,7 @@ def execute_wechat_image_save(
                 "clipboard_save": clipboard_save,
                 "source_preview": source_preview,
                 "menu_ocr_items_count": len(menu_items),
+                "capture_detection": capture_detection,
             },
         }
     menu_target = find_save_menu_item(menu_items, getattr(menu_screenshot, "size", image_size))
@@ -1099,6 +1500,7 @@ def execute_wechat_image_save(
                 "right_click": right_click,
                 "source_preview": source_preview,
                 "menu_ocr_items_count": len(menu_items),
+                "capture_detection": capture_detection,
             },
         }
     menu_click = click_context_menu_item(
@@ -1134,6 +1536,7 @@ def execute_wechat_image_save(
                 "menu_click": menu_click,
                 "save_path": str(saved_path),
                 "error": repr(exc),
+                "capture_detection": capture_detection,
             },
         }
     stable = wait_for_file_stable(saved_path)
@@ -1156,6 +1559,7 @@ def execute_wechat_image_save(
                 "context_menu_label": menu_target.get("text"),
                 "save_path": str(saved_path),
                 "file_stable": stable,
+                "capture_detection": capture_detection,
             },
         }
     diagnostics = {
@@ -1169,6 +1573,7 @@ def execute_wechat_image_save(
         "file_stable": stable,
         "right_click": right_click,
         "menu_click": menu_click,
+        "capture_detection": capture_detection,
     }
     return build_image_saved_payload(
         saved_path=saved_path,
@@ -1184,4 +1589,5 @@ def execute_wechat_image_save(
         screenshot_path=screenshot_path,
         diagnostics=diagnostics,
         probe=probe,
+        capture_detection=capture_detection,
     )

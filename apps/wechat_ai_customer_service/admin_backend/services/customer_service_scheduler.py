@@ -194,6 +194,53 @@ def _customer_image_proxy_messages(messages: list[dict[str, Any]]) -> list[dict[
     return _customer_image_proxy_messages_impl(messages)
 
 
+def _image_capture_unavailable_message(
+    *,
+    target_name: str,
+    session_key: str,
+    pending_signal_id: str,
+    pending_signal: dict[str, Any] | None,
+    reason: str,
+) -> dict[str, Any]:
+    """Create a non-visible evidence record when an image cannot be persisted.
+
+    This is deliberately a capture fact, not a customer-facing fallback.  It
+    gives the Brain a chance to decide whether an image-only turn warrants a
+    clarification or no visible response while retaining the exact failure for
+    audit.  A text turn is never replaced by this record.
+    """
+
+    signal = pending_signal if isinstance(pending_signal, dict) else {}
+    occurred_at = str(
+        signal.get("pending_since")
+        or signal.get("last_detected_at")
+        or signal.get("last_message_time")
+        or ""
+    )
+    stable = stable_id(
+        "image-capture-unavailable",
+        target_name,
+        session_key,
+        pending_signal_id,
+        occurred_at,
+        reason,
+    )
+    return {
+        "id": f"image_capture_unavailable:{stable}",
+        "message_id": f"image_capture_unavailable:{stable}",
+        "type": "text",
+        "sender": "unknown",
+        "sender_role": "unknown",
+        "content": "客户发送了一张图片，但图片内容暂未取得。",
+        "time": occurred_at,
+        "image_capture_unavailable": True,
+        "image_capture_failure_reason": str(reason or "customer_image_save_failed"),
+        "pending_signal_id": str(pending_signal_id or ""),
+        "pending_signal_kind": str(signal.get("pending_signal_kind") or "image_capture"),
+        "quality_flags": ["image_capture_unavailable"],
+    }
+
+
 def _visual_bounds_key(value: Any) -> str:
     return _visual_bounds_key_impl(value)
 
@@ -271,6 +318,57 @@ def safe_json_roundtrip(value: Any) -> Any:
         return json.loads(json.dumps(value, ensure_ascii=False, default=str))
     except Exception:
         return {"unserializable": repr(value)}
+
+
+_PLANNER_PENDING_SIGNAL_TEXT_FIELDS = (
+    "pending_signal_id",
+    "pending_observation_id",
+    "session_observation_id",
+    "pending_signal_kind",
+    "pending_signal_text",
+    "preview_content",
+    "speaker_name",
+    "group_member_name",
+    "pending_since",
+    "last_detected_at",
+    "last_message_time",
+    "last_unread_badge",
+    "unread_badge",
+)
+_PLANNER_PENDING_SIGNAL_BOOLEAN_FIELDS = (
+    "unread_detected",
+    "pending",
+    "pending_signal_has_unread_evidence",
+)
+
+
+def _planner_pending_signal_metadata(
+    pending_signal: dict[str, Any] | None,
+    *,
+    session_key: str = "",
+) -> dict[str, Any]:
+    """Keep only the current-event metadata required by the read-only planner.
+
+    Captures are persisted before their planner task runs.  Image understanding
+    needs the current event's identity to perform its one clipboard transaction,
+    but must never retain a screenshot, image path, clipboard payload, or an
+    arbitrary sidecar payload.  This narrow projection is deliberately shared
+    only across the scheduler capture-to-planner boundary.
+    """
+
+    source = pending_signal if isinstance(pending_signal, dict) else {}
+    metadata: dict[str, Any] = {}
+    for field in _PLANNER_PENDING_SIGNAL_TEXT_FIELDS:
+        value = str(source.get(field) or "").strip()
+        if value:
+            metadata[field] = value
+    for field in _PLANNER_PENDING_SIGNAL_BOOLEAN_FIELDS:
+        if field in source:
+            metadata[field] = bool(source.get(field))
+    bound_session_key = str(session_key or source.get("session_key") or "").strip()
+    if bound_session_key:
+        metadata["session_key"] = bound_session_key
+    return metadata
 
 
 def _planner_event_latency_trace(event: dict[str, Any]) -> dict[str, Any]:
@@ -1443,38 +1541,15 @@ class CustomerServiceSchedulerRuntime:
                 allow_customer_image_proxy=bool(_customer_image_proxy_messages(batch)),
                 now=now,
             )
-            self_image_sources = _self_visual_image_sources(
-                [
-                    item
-                    for item in (capture.get("messages") or [])
-                    if isinstance(item, dict)
-                    and str(item.get("saved_image_path") or "").strip()
-                    and not item.get("is_customer_image_proxy")
-                ]
+            # The planner runs from the persisted capture through a read-only
+            # connector. Preserve the current signal's minimal metadata before
+            # that hand-off so an image placeholder can initiate its mandated
+            # clipboard transaction. Image bytes, file paths, and raw sidecar
+            # payloads are intentionally excluded by the projection.
+            capture["pending_signal"] = _planner_pending_signal_metadata(
+                result.get("pending_signal") if isinstance(result.get("pending_signal"), dict) else {},
+                session_key=str(capture.get("session_key") or session_key or ""),
             )
-            for image_source in self_image_sources:
-                try:
-                    media_task = enqueue_media_context_task(
-                        state,
-                        str(capture.get("capture_id") or ""),
-                        image_asset=image_source,
-                        now=now,
-                    )
-                    events.append(
-                        {
-                            "event": "media_context_task_queued",
-                            "task_id": media_task.get("task_id"),
-                            "target_name": target_name,
-                        }
-                    )
-                except Exception as exc:  # noqa: BLE001 - context enrichment must not block capture/reply
-                    events.append(
-                        {
-                            "event": "media_context_task_enqueue_failed",
-                            "target_name": target_name,
-                            "error": repr(exc),
-                        }
-                    )
             if self.capture_done_fn is not None:
                 try:
                     self.capture_done_fn(copy.deepcopy(session), copy.deepcopy(result), copy.deepcopy(capture))
@@ -1506,6 +1581,7 @@ class CustomerServiceSchedulerRuntime:
             for task in (state.get("media_context_tasks", {}) or {}).values()
             if isinstance(task, dict)
             and task.get("status") == "queued"
+            and str(task.get("task_kind") or "") != "self_image_context"
             and str(task.get("task_id") or "") not in self._media_context_futures
         ]
         tasks.sort(key=lambda item: str(item.get("created_at") or ""))
@@ -2473,15 +2549,24 @@ def merge_scheduler_conversation_context(
 
 
 class CapturedMessagesConnector:
-    """Connector facade for LLM planning from already-captured messages.
+    """Connector facade for planning from already-captured messages.
 
-    It implements read-only message access so existing workflow planning can run
-    without touching WeChat. Send methods intentionally fail closed.
+    Message retrieval remains read-only and send methods fail closed.  The only
+    optional live capability is a tightly bound current-image clipboard
+    transaction.  It is never persisted, accepts only the capture's session and
+    pending-event identity, and must not expose a path, screenshot, or image
+    bytes outside the in-memory vision callback that owns the transaction.
     """
 
-    def __init__(self, capture: dict[str, Any]) -> None:
+    def __init__(
+        self,
+        capture: dict[str, Any],
+        *,
+        current_image_transaction_runner: Callable[..., dict[str, Any]] | None = None,
+    ) -> None:
         self.capture = copy.deepcopy(capture)
         self.send_attempts: list[dict[str, Any]] = []
+        self._current_image_transaction_runner = current_image_transaction_runner
 
     def get_messages(
         self,
@@ -2531,6 +2616,68 @@ class CapturedMessagesConnector:
             "error": "CapturedMessagesConnector is read-only; planner must not send via RPA.",
         }
 
+    def run_customer_clipboard_image_transaction(
+        self,
+        target: str,
+        exact: bool = True,
+        *,
+        session_key: str = "",
+        source_preview: str = "",
+        speaker_name: str = "",
+        pending_signal_id: str = "",
+        side_filter: str = "customer",
+        consume_current_clipboard: Callable[[dict[str, Any]], dict[str, Any]] | None = None,
+    ) -> dict[str, Any]:
+        """Delegate only the capture-bound current-image copy transaction.
+
+        This is deliberately not a general live connector.  The bound RPA port
+        revalidates the target while holding the WeChat lock; this facade adds
+        capture/session/event checks before it is even invoked.
+        """
+
+        runner = self._current_image_transaction_runner
+        if not callable(runner):
+            return {
+                "ok": False,
+                "state": "scheduler_current_image_transaction_unavailable",
+                "reason": "clipboard_current_transaction_unsupported",
+            }
+        capture_target = str(self.capture.get("target_name") or "").strip()
+        capture_session_key = str(self.capture.get("session_key") or "").strip()
+        pending_signal = self.capture.get("pending_signal") if isinstance(self.capture.get("pending_signal"), dict) else {}
+        capture_pending_signal_id = str(pending_signal.get("pending_signal_id") or "").strip()
+        requested_target = str(target or "").strip()
+        requested_session_key = str(session_key or "").strip()
+        requested_pending_signal_id = str(pending_signal_id or "").strip()
+        if capture_target and requested_target != capture_target:
+            return {
+                "ok": False,
+                "state": "scheduler_current_image_target_mismatch",
+                "reason": "clipboard_current_transaction_target_mismatch",
+            }
+        if capture_session_key and requested_session_key != capture_session_key:
+            return {
+                "ok": False,
+                "state": "scheduler_current_image_session_mismatch",
+                "reason": "clipboard_current_transaction_session_mismatch",
+            }
+        if capture_pending_signal_id and requested_pending_signal_id != capture_pending_signal_id:
+            return {
+                "ok": False,
+                "state": "scheduler_current_image_signal_mismatch",
+                "reason": "clipboard_current_transaction_signal_mismatch",
+            }
+        return runner(
+            requested_target,
+            exact=bool(exact),
+            session_key=requested_session_key,
+            source_preview=str(source_preview or ""),
+            speaker_name=str(speaker_name or ""),
+            pending_signal_id=requested_pending_signal_id,
+            side_filter=str(side_filter or "customer"),
+            consume_current_clipboard=consume_current_clipboard,
+        )
+
 
 def plan_reply_with_listen_workflow(
     capture: dict[str, Any],
@@ -2542,6 +2689,7 @@ def plan_reply_with_listen_workflow(
     workflow_state: dict[str, Any],
     allow_fallback_send: bool = False,
     apply_final_visible_polish: bool = True,
+    current_image_transaction_runner: Callable[..., dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Reuse the existing reply planner without opening or sending WeChat."""
 
@@ -2571,7 +2719,10 @@ def plan_reply_with_listen_workflow(
             finalize_customer_visible_reply_with_llm,
         )
 
-    connector = CapturedMessagesConnector(capture)
+    connector = CapturedMessagesConnector(
+        capture,
+        current_image_transaction_runner=current_image_transaction_runner,
+    )
     retry_instruction = polish_failure_retry_instruction(task)
     if retry_instruction:
         target_state_key = str(getattr(target_config, "session_key", "") or target_config.name)
@@ -3056,6 +3207,7 @@ class ManagedListenerSchedulerBridge:
             attach_voice_transcription_audit,
             maybe_enrich_messages_with_history,
             maybe_auto_transcribe_voice_messages,
+            maybe_capture_self_image_context,
             voice_transcription_trigger,
             normalize_capture_payload_for_semantic_processing,
             parse_targets,
@@ -3088,6 +3240,7 @@ class ManagedListenerSchedulerBridge:
             "attach_voice_transcription_audit": attach_voice_transcription_audit,
             "maybe_enrich_messages_with_history": maybe_enrich_messages_with_history,
             "maybe_auto_transcribe_voice_messages": maybe_auto_transcribe_voice_messages,
+            "maybe_capture_self_image_context": maybe_capture_self_image_context,
             "voice_transcription_trigger": voice_transcription_trigger,
             "customer_image_capture_trigger": customer_image_capture_trigger,
             "normalize_capture_payload_for_semantic_processing": normalize_capture_payload_for_semantic_processing,
@@ -3228,38 +3381,10 @@ class ManagedListenerSchedulerBridge:
         )
 
     def _run_media_context(self, task: dict[str, Any]) -> dict[str, Any]:
-        from apps.wechat_ai_customer_service.workflows.customer_image_understanding import (
-            maybe_run_customer_image_understanding,
-        )
-
-        image_asset = task.get("image_asset") if isinstance(task.get("image_asset"), dict) else {}
-        understanding = maybe_run_customer_image_understanding(
-            config=self.config,
-            customer_text="",
-            image_assets=[image_asset] if image_asset else [],
-            source_reason="self_image_context_only",
-        )
-        vision_summary = str(understanding.get("vision_summary") or "").strip()
-        if not vision_summary:
-            return {
-                "ok": False,
-                "reason": str(understanding.get("reason") or "self_image_understanding_empty"),
-                "image_understanding": understanding,
-            }
         return {
-            "ok": True,
-            "reason": "self_image_context_understood",
-            "image_understanding": understanding,
-            "message_refs": _image_message_refs(
-                [
-                    image_asset,
-                    *[
-                        item
-                        for item in (understanding.get("source_messages") or [])
-                        if isinstance(item, dict)
-                    ],
-                ]
-            ),
+            "ok": False,
+            "reason": "self_image_context_rejected",
+            "message_refs": [],
         }
 
     def _media_context_done(self, task: dict[str, Any], result: dict[str, Any]) -> None:
@@ -3356,6 +3481,8 @@ class ManagedListenerSchedulerBridge:
                     "time": getattr(item, "last_message_time", "") or "",
                     "unread_badge": getattr(item, "unread_badge", "") or "",
                     "pending_signal_kind": getattr(item, "pending_signal_kind", "") or "",
+                    "session_observation_id": getattr(item, "session_observation_id", "") or "",
+                    "pending_observation_id": getattr(item, "pending_observation_id", "") or "",
                 }
                 for item in pending
                 if item.name not in self.ignored_session_names
@@ -3580,6 +3707,18 @@ class ManagedListenerSchedulerBridge:
         )
         if not isinstance(pending_signal, dict):
             pending_signal = {}
+        scheduler_pending_signal_id = str(session.get("pending_signal_id") or "").strip()
+        scheduler_pending_observation_id = str(session.get("pending_observation_id") or "").strip()
+        if pending_signal and (scheduler_pending_signal_id or scheduler_pending_observation_id):
+            # The scheduler state owns the event id used by freshness.  The
+            # monitor supplies the sidebar observation, but must not invent a
+            # second id from a later polling timestamp when we annotate the
+            # captured chat messages.
+            pending_signal = {
+                **pending_signal,
+                "pending_signal_id": scheduler_pending_signal_id or pending_signal.get("pending_signal_id") or "",
+                "pending_observation_id": scheduler_pending_observation_id or pending_signal.get("pending_observation_id") or "",
+            }
         if not pending_signal:
             # Keep the media gate available even if the monitor snapshot is
             # temporarily unavailable. The scheduler session already carries
@@ -3592,6 +3731,8 @@ class ManagedListenerSchedulerBridge:
                 "pending_since": str(session.get("pending_since") or ""),
                 "last_detected_at": str(session.get("last_detected_at") or ""),
                 "last_message_time": str(session.get("time") or ""),
+                "pending_signal_id": scheduler_pending_signal_id,
+                "pending_observation_id": scheduler_pending_observation_id,
             }
         pending_signal_kind = str(pending_signal.get("pending_signal_kind") or "")
         voice_transcription: dict[str, Any] = {
@@ -3728,6 +3869,36 @@ class ManagedListenerSchedulerBridge:
         payload["messages"] = messages
         if isinstance(pending_signal, dict):
             payload["pending_signal"] = pending_signal
+        self_image_context = {
+            "enabled": False,
+            "applied": False,
+            "context_only": True,
+            "reason": "vision_self_image_context_unavailable",
+        }
+        self_context_runner = self._workflow.get("maybe_capture_self_image_context")
+        if callable(self_context_runner):
+            try:
+                self_image_context = self_context_runner(
+                    connector=self.connector,
+                    target=target,
+                    config=self.config,
+                    messages=messages,
+                    target_state=target_state,
+                    combined="\n".join(
+                        str(item.get("content") or "")
+                        for item in messages
+                        if isinstance(item, dict) and str(item.get("content") or "")
+                    ).strip(),
+                )
+            except Exception as exc:  # noqa: BLE001 - context-only vision may not block capture/reply.
+                self_image_context = {
+                    "enabled": True,
+                    "applied": False,
+                    "context_only": True,
+                    "reason": "self_image_context_exception",
+                    "error": repr(exc),
+                }
+        payload["self_image_context"] = self_image_context
         history_meta = payload.get("_history_backfill", {}) if isinstance(payload.get("_history_backfill"), dict) else {}
         if isinstance(voice_transcription, dict) and voice_transcription.get("attempted"):
             history_meta = dict(history_meta)
@@ -3782,153 +3953,59 @@ class ManagedListenerSchedulerBridge:
                 "evidence_count": 0,
             }
         payload["customer_image_capture_trigger"] = visual_capture_trigger
-        capture_visual_images = getattr(self.connector, "capture_visual_images", None)
         visual_image_assets = {
             "ok": True,
-            "state": "visual_capture_not_requested",
+            "state": "clipboard_vision_deferred",
             "reason": str(visual_capture_trigger.get("reason") or "no_recent_image_evidence"),
             "assets": [],
             "messages": [],
             "trigger": copy.deepcopy(visual_capture_trigger),
         }
-        if visual_capture_trigger.get("should_run") and callable(capture_visual_images):
-            visual_image_assets = capture_visual_images(
-                target.name,
-                exact=target.exact,
-                session_key=str(getattr(target, "session_key", "") or session.get("session_key") or ""),
-                source_preview=pending_text,
-                speaker_name=pending_speaker_name,
-                pending_signal_id=pending_signal_id,
-                tenant_id=self.tenant_id,
-                max_images=8,
-            )
-            payload["visual_image_assets"] = visual_image_assets
-            if visual_image_assets.get("ok") and visual_image_assets.get("assets"):
-                visual_sources = [item for item in (visual_image_assets.get("messages") or []) if isinstance(item, dict)]
-                if not visual_sources:
-                    visual_sources = [
-                        item
-                        for item in (visual_image_assets.get("assets") or [])
-                        if isinstance(item, dict)
-                    ]
-                if pending_signal_id:
-                    for visual_source in visual_sources:
-                        if not str(visual_source.get("pending_signal_id") or "").strip():
-                            visual_source["pending_signal_id"] = pending_signal_id
-                            visual_source["_pending_signal_id_attached_by_scheduler"] = True
-                        visual_source.setdefault("pending_signal_text", pending_text)
-                raw_visual_messages = [
-                    item
-                    for item in visual_sources
-                    if isinstance(item, dict) and str(item.get("type") or item.get("message_type") or "").strip().lower() == "image"
-                ]
-                if raw_visual_messages:
-                    messages = [*messages, *raw_visual_messages]
-                customer_sources = _customer_visual_image_sources(visual_sources)
-                fresh_customer_sources, visual_filter = _filter_fresh_customer_visual_sources(
-                    customer_sources,
-                    target_state=target_state,
-                )
-                payload["visual_image_freshness_filter"] = visual_filter
-                history_meta = dict(history_meta)
-                history_meta["visual_image_freshness_filter"] = visual_filter
-                if fresh_customer_sources:
-                    customer_image_assets = {
-                        **visual_image_assets,
-                        "assets": copy.deepcopy(fresh_customer_sources),
-                        "messages": copy.deepcopy(fresh_customer_sources),
-                        "source_scope": "customer_only",
-                    }
-                    image_messages = build_brain_safe_image_proxy_messages(
-                        fresh_customer_sources,
-                        target_name=target.name,
-                        session_key=str(getattr(target, "session_key", "") or session.get("session_key") or ""),
-                    )
-                    messages = [*messages, *image_messages]
-                payload["messages"] = messages
-        visual_capture_succeeded = bool(visual_image_assets.get("ok") and visual_image_assets.get("assets"))
         image_signal_already_processed = (
             str(visual_capture_trigger.get("reason") or "").strip()
             == "pending_image_signal_already_processed"
         )
-        if (
-            not customer_image_assets
-            and explicit_image_pending
-            and not visual_capture_succeeded
-            and not image_signal_already_processed
-        ):
-            save_image = getattr(self.connector, "save_customer_image", None)
-            if callable(save_image):
-                customer_image_assets = save_image(
-                    target.name,
-                    exact=target.exact,
-                    session_key=str(getattr(target, "session_key", "") or session.get("session_key") or ""),
-                    source_preview=pending_text,
-                    speaker_name=pending_speaker_name,
-                    pending_signal_id=pending_signal_id,
-                    tenant_id=self.tenant_id,
-                    max_images=1,
-                )
-            else:
-                customer_image_assets = {"ok": False, "state": "image_save_unsupported", "assets": [], "messages": []}
-            payload["customer_image_assets"] = customer_image_assets
-            if callable(save_image) and (not customer_image_assets.get("ok") or not customer_image_assets.get("assets")):
-                return {
-                    "ok": False,
-                    "blocked": True,
-                    "reason": str(
-                        customer_image_assets.get("reason")
-                        or customer_image_assets.get("state")
-                        or "customer_image_save_failed"
-                    ),
-                    "messages": messages,
-                    "batch": [],
-                    "overflow_messages": [],
-                    "pending_signal": pending_signal if isinstance(pending_signal, dict) else {},
-                    "voice_transcription": voice_transcription,
-                    "voice_transcription_merge": payload.get("voice_transcription_merge") if isinstance(payload.get("voice_transcription_merge"), dict) else {},
-                    "customer_image_assets": customer_image_assets,
-                    "visual_image_assets": visual_image_assets,
-                    "history_backfill": history_meta,
-                    "batch_selection": {"message_ids": [], "eligible_count": 0, "overflow_count": 0},
-                    "batch_authoritative": True,
-                }
-            if customer_image_assets.get("ok") and customer_image_assets.get("assets"):
-                image_sources = [item for item in (customer_image_assets.get("messages") or []) if isinstance(item, dict)]
-                if not image_sources:
-                    image_sources = [
-                        item
-                        for item in (customer_image_assets.get("assets") or [])
-                        if isinstance(item, dict)
-                    ]
-                if pending_signal_id:
-                    for image_source in image_sources:
-                        if not str(image_source.get("pending_signal_id") or "").strip():
-                            image_source["pending_signal_id"] = pending_signal_id
-                            image_source["_pending_signal_id_attached_by_scheduler"] = True
-                        image_source.setdefault("pending_signal_text", pending_text)
-                image_messages = build_brain_safe_image_proxy_messages(
-                    image_sources,
-                    target_name=target.name,
-                    session_key=str(getattr(target, "session_key", "") or session.get("session_key") or ""),
-                )
-                messages = [*messages, *image_messages]
-                payload["messages"] = messages
-        if (
-            explicit_image_pending
-            and (
-                (visual_capture_succeeded and not customer_image_assets)
-                or image_signal_already_processed
+        if explicit_image_pending and visual_capture_trigger.get("should_run"):
+            # Image bytes are deliberately not acquired during capture.  The
+            # optional vision plugin performs one current-clipboard transaction
+            # later in the same target-bound reply task.  A text-only envelope
+            # gives that task a durable turn without retaining image data.
+            placeholder_id = stable_id(
+                "clipboard-image-pending",
+                target.name,
+                str(getattr(target, "session_key", "") or session.get("session_key") or ""),
+                pending_signal_id,
             )
-        ):
-            # The image module did archive the visible bubble, but its stable
-            # identity says this exact image turn was already handled. Consume
-            # the pending signal without entering context-menu copy again.
+            messages = [
+                *messages,
+                {
+                    "id": f"clipboard_image_pending:{placeholder_id}",
+                    "message_id": f"clipboard_image_pending:{placeholder_id}",
+                    "type": "text",
+                    "sender": "customer",
+                    "sender_role": "customer",
+                    "content": "客户发来了一张图片",
+                    "pending_signal_id": pending_signal_id,
+                    "image_capture_pending": True,
+                    "quality_flags": ["synthetic_visual_turn", "clipboard_current_transaction_required"],
+                },
+            ]
+            customer_image_assets = {
+                "ok": True,
+                "state": "clipboard_vision_pending",
+                "assets": [],
+                "messages": [],
+                "pending_signal_id": pending_signal_id,
+            }
+            history_meta = dict(history_meta)
+            history_meta["visual_image_disposition"] = "clipboard_vision_deferred"
+        elif explicit_image_pending and image_signal_already_processed:
             pending_signal_consumed = True
             history_meta = dict(history_meta)
             history_meta["visual_image_disposition"] = "already_seen_pending_signal_consumed"
             history_meta["visual_image_capture_trigger"] = copy.deepcopy(visual_capture_trigger)
         payload["customer_image_assets"] = customer_image_assets
+        payload["visual_image_assets"] = visual_image_assets
         payload["messages"] = messages
         selection = self._workflow["select_batch_details"](
             messages,
@@ -4029,6 +4106,7 @@ class ManagedListenerSchedulerBridge:
             "pending_signal": pending_signal if isinstance(pending_signal, dict) else {},
             "voice_transcription": voice_transcription,
             "voice_transcription_merge": payload.get("voice_transcription_merge") if isinstance(payload.get("voice_transcription_merge"), dict) else {},
+            "self_image_context": self_image_context,
             "customer_image_assets": customer_image_assets,
             "visual_image_assets": visual_image_assets,
             "customer_image_capture_trigger": visual_capture_trigger,
@@ -4041,6 +4119,20 @@ class ManagedListenerSchedulerBridge:
         }
 
     def _capture_done(self, session: dict[str, Any], result: dict[str, Any], capture: dict[str, Any]) -> None:
+        self_image_context = result.get("self_image_context") if isinstance(result.get("self_image_context"), dict) else {}
+        enrichment = self_image_context.get("enrichment") if isinstance(self_image_context.get("enrichment"), dict) else {}
+        if self_image_context.get("applied") and enrichment:
+            try:
+                self.ledger.record_multimodal_enrichment(
+                    session_key=str(capture.get("session_key") or session.get("session_key") or ""),
+                    target_name=str(capture.get("target_name") or session.get("target_name") or ""),
+                    capture_id=str(capture.get("capture_id") or ""),
+                    source="self_image_context_clipboard",
+                    enrichments=[enrichment],
+                )
+            except Exception:
+                # Context enrichment must never become a reply/send blocker.
+                pass
         if self.session_monitor is None:
             return
         if result.get("ok") is False and result.get("blocked"):
@@ -4068,6 +4160,11 @@ class ManagedListenerSchedulerBridge:
                 "session_key": session_key,
             }
         )
+        current_image_transaction_runner = getattr(
+            getattr(self, "connector", None),
+            "run_customer_clipboard_image_transaction",
+            None,
+        )
         with self._tenant_environment():
             planned = plan_reply_with_listen_workflow(
                 capture,
@@ -4078,6 +4175,9 @@ class ManagedListenerSchedulerBridge:
                 workflow_state=self._workflow_state_snapshot(),
                 allow_fallback_send=bool((self.config.get("reply", {}) or {}).get("allow_fallback_send")),
                 apply_final_visible_polish=False,
+                current_image_transaction_runner=(
+                    current_image_transaction_runner if callable(current_image_transaction_runner) else None
+                ),
             )
         event = planned.get("event") if isinstance(planned.get("event"), dict) else {}
         if isinstance(planned.get("decision"), dict) and event:

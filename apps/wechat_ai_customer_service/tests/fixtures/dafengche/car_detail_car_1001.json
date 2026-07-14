@@ -1,0 +1,32 @@
+{
+  "carId": "CAR-1001",
+  "shopCode": "SHOP-001",
+  "operationPhase": "sale",
+  "baseCarInfo": {
+    "name": "2021款 丰田 凯美瑞 2.0G 豪华版",
+    "brandName": "丰田",
+    "seriesName": "凯美瑞",
+    "modelName": "2.0G 豪华版",
+    "firstLicensePlateDate": "2021-05",
+    "vehicleCondition": "良好",
+    "mileage": 3.6,
+    "exteriorColor": "白色",
+    "interiorColor": "黑色",
+    "vinNumber": "TEST-VIN-MUST-NOT-LEAK",
+    "plateNumber": "TEST-PLATE-MUST-NOT-LEAK"
+  },
+  "carModelParam": {
+    "gearbox": "自动",
+    "displacement": "2.0L"
+  },
+  "carPriceInfo": {
+    "salePrice": 15.28,
+    "purchasePrice": 10.01,
+    "salesPrice": 14.5,
+    "managerPrice": 14.2,
+    "wholesalePrice": 13.9
+  },
+  "carLicenseInfo": {
+    "licenseStatus": "normal"
+  }
+}

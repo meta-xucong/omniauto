@@ -231,7 +231,7 @@ class KnowledgeRuntime:
             return filter_runtime_items(
                 [
                     mark_layer(item, "product_master")
-                    for item in self.product_master.list_items(include_archived=include_archived)
+                    for item in self.product_master.list_compatibility_items(include_archived=include_archived)
                 ],
                 include_archived=include_archived,
                 include_unacknowledged=include_unacknowledged,
@@ -292,6 +292,31 @@ class KnowledgeRuntime:
             include_unacknowledged=include_unacknowledged,
         )
 
+    def list_customer_evidence_items(
+        self,
+        category_id: str,
+        *,
+        shop_code: str | None = None,
+        include_archived: bool = False,
+        include_unacknowledged: bool = False,
+    ) -> list[dict[str, Any]]:
+        """Read products through the customer-safe product-master projection."""
+
+        if category_id == PRODUCT_MASTER_CATEGORY_ID and self.product_master is not None:
+            return filter_runtime_items(
+                [
+                    mark_layer(item, "product_master")
+                    for item in self.product_master.list_customer_evidence_items(shop_code=shop_code)
+                ],
+                include_archived=include_archived,
+                include_unacknowledged=include_unacknowledged,
+            )
+        return self.list_items(
+            category_id,
+            include_archived=include_archived,
+            include_unacknowledged=include_unacknowledged,
+        )
+
     def get_item(
         self,
         category_id: str,
@@ -300,7 +325,7 @@ class KnowledgeRuntime:
         include_unacknowledged: bool = False,
     ) -> dict[str, Any] | None:
         if category_id == PRODUCT_MASTER_CATEGORY_ID and self.product_master is not None:
-            item = self.product_master.get_item(item_id, include_archived=True)
+            item = self.product_master.get_compatibility_item(item_id, include_archived=True)
             if not item:
                 return None
             marked = mark_layer(item, "product_master")
@@ -338,6 +363,22 @@ class KnowledgeRuntime:
             marked = mark_layer(item, layer_for_root(root))
             return marked if item_is_runtime_usable(marked, include_unacknowledged=include_unacknowledged) else None
         return None
+
+    def get_customer_evidence_item(
+        self,
+        category_id: str,
+        item_id: str,
+        *,
+        shop_code: str | None = None,
+        include_unacknowledged: bool = False,
+    ) -> dict[str, Any] | None:
+        if category_id == PRODUCT_MASTER_CATEGORY_ID and self.product_master is not None:
+            item = self.product_master.get_customer_evidence_item(item_id, shop_code=shop_code)
+            if not item:
+                return None
+            marked = mark_layer(item, "product_master")
+            return marked if item_is_runtime_usable(marked, include_unacknowledged=include_unacknowledged) else None
+        return self.get_item(category_id, item_id, include_unacknowledged=include_unacknowledged)
 
     def iter_reply_items(self) -> Iterable[tuple[dict[str, Any], dict[str, Any], dict[str, Any], dict[str, Any]]]:
         db = postgres_store(self.tenant_id)

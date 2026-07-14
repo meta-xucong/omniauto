@@ -2,8 +2,60 @@
   "schema_version": 1,
   "examples": [
     {
+      "id": "chejin_budget_recommend_reply",
+      "message": "10万预算选择挺多的，主要看您的用途。家用代步可以考虑{compact_cars}，空间大些的有{SUV_options}。您更偏向轿车还是SUV？主要用途是通勤还是家庭出行？我可以帮您缩小范围。",
+      "intent_tags": [
+        "budget_recommend",
+        "product_inquiry"
+      ],
+      "tone_tags": [
+        "helpful",
+        "consultative"
+      ],
+      "customer_message": "我预算10万左右，有什么推荐？"
+    },
+    {
+      "id": "chejin_condition_inquiry_reply",
+      "message": "您放心，我们所有车辆都经过268项检测，重大事故、水泡、火烧的车我们坚决不卖。这台车{condition_summary}，具体检测报告我可以发给您看。如果您还是不放心，也可以自己带第三方检测师来验车。",
+      "intent_tags": [
+        "condition_inquiry",
+        "trust_building"
+      ],
+      "tone_tags": [
+        "reassuring",
+        "transparent"
+      ],
+      "customer_message": "这车有没有事故？"
+    },
+    {
+      "id": "chejin_loan_inquiry_reply",
+      "message": "这个问题我需要请示负责人确认一下。我先把您的需求记下，确认后第一时间回复您。",
+      "intent_tags": [
+        "loan_inquiry",
+        "finance"
+      ],
+      "tone_tags": [
+        "helpful",
+        "handoff_smooth"
+      ],
+      "customer_message": "这车能贷款吗？首付多少？"
+    },
+    {
+      "id": "chejin_price_inquiry_reply",
+      "message": "这台车的标价是{price}万，目前库存{inventory}台。具体成交价可以到店聊，看您的付款方式和是否需要置换，综合下来可能有优惠空间。",
+      "intent_tags": [
+        "price_inquiry",
+        "product_inquiry"
+      ],
+      "tone_tags": [
+        "friendly",
+        "professional"
+      ],
+      "customer_message": "这车多少钱？"
+    },
+    {
       "id": "customer_service_style_guidelines",
-      "message": "回复要自然，先接住客户使用场景，再问关键参数。对功率、续航、最低价等不确定内容，不能凭空承诺。适合自动回复的内容：参数收集、常规质保说明、使用场景推荐。需要转人工的内容：最低价、特殊补偿、先发货后付款。称呼只在开场寒暄和新话题切入时有选择地使用，连续对话中不要每条都加；男性称呼可在“姓哥/哥/老板”之间自然轮换，女性称呼可用“姓姐/姐”，不要把非真人会话名拆成姓氏称呼。",
+      "message": "回复要自然，先接住客户使用场景，再问关键参数。对功率、续航、最低价等不确定内容，不能凭空承诺。适合自动回复的内容：参数收集、常规质保说明、使用场景推荐。需要转人工的内容：最低价、特殊补偿、先发货后付款。",
       "intent_tags": [
         "greeting",
         "small_talk",
@@ -15,14 +67,13 @@
       "tone_tags": [
         "natural",
         "truthful",
-        "safe",
-        "contextual_honorific"
+        "safe"
       ],
       "customer_message": "客服通用表达与边界原则",
       "details": "source: three_layer_migration；migrated_from: tenant.chats.chat_style_guidelines"
     },
     {
-      "id": "entity_normalization_first",
+      "id": "shared_global_entity_normalization_first",
       "message": "客户提到商品、车型、型号、品牌等实体时，先做别名、错别字、同音、音译、简称归一；确认是同一实体后再按商品库与正式知识回复，不确定时先澄清。",
       "intent_tags": [
         "catalog",
@@ -39,8 +90,27 @@
         "precise",
         "evidence_first"
       ],
-      "customer_message": "实体归一识别优先",
-      "details": "source: platform_global_principle；scope: all_tenants"
+      "customer_message": "实体归一识别优先"
+    },
+    {
+      "id": "shared_global_evidence_first",
+      "message": "回复必须优先依据正式知识、共享规则和已确认上下文；无证据时明确说明需核实并转人工。",
+      "customer_message": "证据优先回复"
+    },
+    {
+      "id": "shared_used_car_compliance_disclosure",
+      "message": "涉及事故、水泡、火烧、里程、过户次数、检修记录等问题，必须基于可验证资料；不确定时先说明待核验。",
+      "customer_message": "二手车车况披露规则"
+    },
+    {
+      "id": "shared_used_car_test_drive_notice",
+      "message": "试驾沟通需明确有效证件、保险覆盖、试驾路线与责任边界；涉及高风险路况或改装车辆必须人工确认。",
+      "customer_message": "二手车试驾安全提示"
+    },
+    {
+      "id": "shared_used_car_transfer_docs",
+      "message": "提醒客户交易完成后应交付合法证照与交易凭证，涉及过户办理必须按登记流程执行。",
+      "customer_message": "二手车交易资料完整性"
     }
   ]
 }

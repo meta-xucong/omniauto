@@ -87,6 +87,7 @@ from apps.wechat_ai_customer_service.optional_plugins.voice.compatibility import
     legacy_voice_transcription_trigger,
 )
 from apps.wechat_ai_customer_service.optional_plugins.vision.compatibility import (
+    legacy_maybe_capture_self_image_context,
     legacy_maybe_route_customer_image_turn,
 )
 from product_knowledge import decide_product_knowledge_reply, load_product_knowledge
@@ -751,6 +752,27 @@ def maybe_route_customer_image_turn(
         payload=payload,
         target_state=target_state,
         batch=batch,
+        combined=combined,
+    )
+
+
+def maybe_capture_self_image_context(
+    *,
+    connector: Any,
+    target: Any,
+    config: dict[str, Any],
+    messages: list[dict[str, Any]],
+    target_state: dict[str, Any],
+    combined: str = "",
+) -> dict[str, Any]:
+    """Optional visual context enrichment for a self-side image, without reply authority."""
+
+    return legacy_maybe_capture_self_image_context(
+        connector=connector,
+        target=target,
+        config=config,
+        messages=messages,
+        target_state=target_state,
         combined=combined,
     )
 

@@ -46,6 +46,17 @@ class SessionState:
     retry_not_before: str = ""
     empty_capture_retries: int = 0
     startup_visual_baseline_at: str = ""
+    # A session-list row is an observation, not a new-message event.  Keep the
+    # two identities separately so a persistent red dot cannot repeatedly
+    # recreate the already handled event after a capture/reset.
+    last_observation_id: str = ""
+    pending_observation_id: str = ""
+    acknowledged_observation_id: str = ""
+    acknowledged_unread_badge_epoch: int = 0
+    last_observed_unread_badge: bool = False
+    unread_badge_epoch: int = 0
+    candidate_observation_id: str = ""
+    candidate_preview_hits: int = 0
 
 
 @dataclass
@@ -61,6 +72,11 @@ class ActiveTarget:
     pending_signal_text: str = ""
     last_message_time: str = ""
     unread_badge: str = ""
+    # Additive event metadata for the scheduler.  ``session_observation_id``
+    # is the stable raw sidebar observation; ``pending_observation_id`` is the
+    # monitor's event identity (including an unread-badge rising-edge epoch).
+    session_observation_id: str = ""
+    pending_observation_id: str = ""
 
 
 MEDIA_CAPTURE_SIGNAL_KINDS = {"voice_capture", "image_capture", "media_capture"}
@@ -177,6 +193,14 @@ class SessionMonitor:
                 retry_not_before=str(data.get("retry_not_before") or ""),
                 empty_capture_retries=int(data.get("empty_capture_retries", 0) or 0),
                 startup_visual_baseline_at=str(data.get("startup_visual_baseline_at") or ""),
+                last_observation_id=str(data.get("last_observation_id") or ""),
+                pending_observation_id=str(data.get("pending_observation_id") or ""),
+                acknowledged_observation_id=str(data.get("acknowledged_observation_id") or ""),
+                acknowledged_unread_badge_epoch=int(data.get("acknowledged_unread_badge_epoch", 0) or 0),
+                last_observed_unread_badge=bool(data.get("last_observed_unread_badge", False)),
+                unread_badge_epoch=int(data.get("unread_badge_epoch", 0) or 0),
+                candidate_observation_id=str(data.get("candidate_observation_id") or ""),
+                candidate_preview_hits=int(data.get("candidate_preview_hits", 0) or 0),
             )
         self._sessions = restored
 
@@ -208,6 +232,14 @@ class SessionMonitor:
                     "retry_not_before": s.retry_not_before,
                     "empty_capture_retries": int(s.empty_capture_retries or 0),
                     "startup_visual_baseline_at": s.startup_visual_baseline_at,
+                    "last_observation_id": s.last_observation_id,
+                    "pending_observation_id": s.pending_observation_id,
+                    "acknowledged_observation_id": s.acknowledged_observation_id,
+                    "acknowledged_unread_badge_epoch": int(s.acknowledged_unread_badge_epoch or 0),
+                    "last_observed_unread_badge": bool(s.last_observed_unread_badge),
+                    "unread_badge_epoch": int(s.unread_badge_epoch or 0),
+                    "candidate_observation_id": s.candidate_observation_id,
+                    "candidate_preview_hits": int(s.candidate_preview_hits or 0),
                 }
                 for name, s in self._sessions.items()
             },
@@ -269,6 +301,13 @@ class SessionMonitor:
             has_preview_signal = bool(digest or msg_time)
             has_signal = bool(has_preview_signal or unread_badge)
             has_dispatch_badge = bool(unread_badge)
+            observation_id = _session_observation_id(
+                raw,
+                session_key=session_key,
+                content=content,
+                message_time=msg_time,
+                unread_badge=unread_badge,
+            )
 
             existing = self._sessions.get(state_key)
             if existing is None and state_key != name:
@@ -305,6 +344,11 @@ class SessionMonitor:
                     )
                 if startup_media_baseline:
                     initial_unread = False
+                unread_badge_epoch = 1 if has_dispatch_badge else 0
+                pending_observation_id = _pending_observation_id(
+                    observation_id,
+                    unread_badge_epoch=unread_badge_epoch,
+                )
                 self._sessions[state_key] = SessionState(
                     name=name,
                     session_key=session_key,
@@ -323,6 +367,10 @@ class SessionMonitor:
                     pending_signal_kind=signal_kind if initial_unread else "",
                     signal_ready_after=self._signal_ready_after(now_iso, content) if initial_unread else "",
                     startup_visual_baseline_at=now_iso if startup_media_baseline else "",
+                    last_observation_id=observation_id,
+                    pending_observation_id=pending_observation_id if initial_unread else "",
+                    last_observed_unread_badge=has_dispatch_badge,
+                    unread_badge_epoch=unread_badge_epoch,
                 )
                 if initial_unread:
                     active.append(ActiveTarget(
@@ -337,15 +385,50 @@ class SessionMonitor:
                         pending_signal_text=content,
                         last_message_time=msg_time,
                         unread_badge=unread_badge,
+                        session_observation_id=observation_id,
+                        pending_observation_id=pending_observation_id,
                     ))
             else:
                 existing.name = name
                 existing.session_key = session_key or existing.session_key
+                previous_observation_id = str(existing.last_observation_id or "")
+                previous_badge_present = bool(existing.last_observed_unread_badge)
+                if has_dispatch_badge and not previous_badge_present:
+                    existing.unread_badge_epoch = max(0, int(existing.unread_badge_epoch or 0)) + 1
+                elif has_dispatch_badge and int(existing.unread_badge_epoch or 0) <= 0:
+                    # Migration from state written before observation identities.
+                    existing.unread_badge_epoch = 1
+                pending_observation_id = _pending_observation_id(
+                    observation_id,
+                    unread_badge_epoch=int(existing.unread_badge_epoch or 0),
+                )
+                if existing.unread_detected and not str(existing.pending_observation_id or ""):
+                    # State written before observation identities can already
+                    # contain a real pending capture. Bind it to the first
+                    # post-upgrade observation so reset_unread can acknowledge
+                    # that legacy event instead of letting a painted badge
+                    # recreate it one poll later.
+                    existing.pending_observation_id = pending_observation_id
+                observation_changed = bool(observation_id and observation_id != previous_observation_id)
+                observation_already_acknowledged = bool(
+                    pending_observation_id
+                    and pending_observation_id == str(existing.acknowledged_observation_id or "")
+                )
+                badge_epoch_already_acknowledged = bool(
+                    has_dispatch_badge
+                    and int(existing.unread_badge_epoch or 0) > 0
+                    and int(existing.unread_badge_epoch or 0) == int(existing.acknowledged_unread_badge_epoch or 0)
+                )
                 changed_by_digest = bool(digest and digest != existing.last_content_digest)
                 changed_by_time = bool(msg_time and msg_time != existing.last_message_time)
-                changed_by_badge = bool(unread_badge and unread_badge != existing.last_unread_badge)
+                # ``reset_unread`` intentionally clears the logical pending
+                # badge.  Comparing against that logical field would turn the
+                # same painted dot into a fresh edge on the next poll.  The
+                # physical-observation latch is the only valid badge-edge
+                # source.
+                changed_by_badge = bool(has_dispatch_badge and not previous_badge_present)
                 changed_preview_signal = bool(changed_by_digest or changed_by_time)
-                changed = bool(changed_by_digest or changed_by_time or changed_by_badge)
+                changed = bool(changed_by_digest or changed_by_time or changed_by_badge or observation_changed)
 
                 if changed:
                     # Bump priority based on how long since last contact
@@ -356,10 +439,37 @@ class SessionMonitor:
                     except Exception:
                         pass
                     priority = min(100, 50 + age_seconds // 60)
-                    existing.last_content_digest = digest
+                    # A red dot that is already acknowledged can stay painted
+                    # while OCR makes small preview corrections.  Require two
+                    # identical post-acknowledgement preview observations
+                    # before treating a text-only change as a new event.  A
+                    # badge edge or a visible time change remains immediate.
+                    defer_preview_confirmation = bool(
+                        badge_epoch_already_acknowledged
+                        and changed_preview_signal
+                        and not changed_by_time
+                        and not changed_by_badge
+                    )
+                    preview_confirmation_ready = False
+                    if defer_preview_confirmation:
+                        if observation_id and observation_id == str(existing.candidate_observation_id or ""):
+                            existing.candidate_preview_hits = int(existing.candidate_preview_hits or 0) + 1
+                        else:
+                            existing.candidate_observation_id = observation_id
+                            existing.candidate_preview_hits = 1
+                        preview_confirmation_ready = int(existing.candidate_preview_hits or 0) >= self.preview_change_confirmations
+                    else:
+                        existing.candidate_observation_id = ""
+                        existing.candidate_preview_hits = 0
+                    if not defer_preview_confirmation or preview_confirmation_ready:
+                        existing.last_content_digest = digest
+                        existing.last_message_time = msg_time
+                        existing.candidate_observation_id = ""
+                        existing.candidate_preview_hits = 0
                     existing.session_key = existing.session_key or session_key
-                    existing.last_message_time = msg_time
                     existing.last_unread_badge = unread_badge
+                    existing.last_observation_id = observation_id
+                    existing.last_observed_unread_badge = has_dispatch_badge
                     existing.conversation_type = conversation_type
                     existing.last_seen_at = now_iso
                     signal_kind = self._signal_kind(content)
@@ -409,12 +519,15 @@ class SessionMonitor:
                             # refreshes list previews or timestamps without a
                             # visible unread signal.
                             existing.preview_change_hits = 0
-                    if should_raise_unread:
+                    if defer_preview_confirmation and not preview_confirmation_ready:
+                        should_raise_unread = False
+                    if should_raise_unread and not observation_already_acknowledged:
                         self._mark_pending_signal(
                             existing,
                             content=content,
                             now_iso=now_iso,
                             priority=priority,
+                            observation_id=pending_observation_id,
                         )
                         active.append(ActiveTarget(
                             name=name,
@@ -428,10 +541,33 @@ class SessionMonitor:
                             pending_signal_text=existing.pending_signal_text,
                             last_message_time=existing.last_message_time,
                             unread_badge=existing.last_unread_badge,
+                            session_observation_id=observation_id,
+                            pending_observation_id=existing.pending_observation_id,
+                        ))
+                    elif existing.unread_detected:
+                        # A changed/empty sidebar preview is not evidence that
+                        # the already-pending capture finished. Preserve the
+                        # event until reset_unread explicitly acknowledges it.
+                        active.append(ActiveTarget(
+                            name=name,
+                            session_key=existing.session_key or session_key,
+                            exact=True,
+                            priority_score=max(1, existing.priority_score),
+                            unread_detected=True,
+                            session_age_seconds=_age_seconds(existing.pending_since or existing.last_detected_at or existing.last_seen_at),
+                            conversation_type=conversation_type,
+                            pending_signal_kind=existing.pending_signal_kind,
+                            pending_signal_text=existing.pending_signal_text,
+                            last_message_time=existing.last_message_time,
+                            unread_badge=existing.last_unread_badge,
+                            session_observation_id=existing.last_observation_id,
+                            pending_observation_id=existing.pending_observation_id,
                         ))
                 else:
                     existing.last_seen_at = now_iso
                     existing.conversation_type = conversation_type
+                    existing.last_observation_id = observation_id
+                    existing.last_observed_unread_badge = has_dispatch_badge
                     if (
                         startup_visual_baseline_active
                         and self._signal_kind(content) in MEDIA_CAPTURE_SIGNAL_KINDS
@@ -457,6 +593,8 @@ class SessionMonitor:
                             pending_signal_text=existing.pending_signal_text,
                             last_message_time=existing.last_message_time,
                             unread_badge=existing.last_unread_badge,
+                            session_observation_id=existing.last_observation_id,
+                            pending_observation_id=existing.pending_observation_id,
                         ))
                     else:
                         existing.preview_change_hits = 0
@@ -600,6 +738,14 @@ class SessionMonitor:
                 "retry_not_before": s.retry_not_before,
                 "empty_capture_retries": int(s.empty_capture_retries or 0),
                 "startup_visual_baseline_at": s.startup_visual_baseline_at,
+                "last_observation_id": s.last_observation_id,
+                "pending_observation_id": s.pending_observation_id,
+                "acknowledged_observation_id": s.acknowledged_observation_id,
+                "acknowledged_unread_badge_epoch": int(s.acknowledged_unread_badge_epoch or 0),
+                "last_observed_unread_badge": bool(s.last_observed_unread_badge),
+                "unread_badge_epoch": int(s.unread_badge_epoch or 0),
+                "candidate_observation_id": s.candidate_observation_id,
+                "candidate_preview_hits": int(s.candidate_preview_hits or 0),
             }
             for s in self._sessions.values()
         ]
@@ -619,6 +765,8 @@ class SessionMonitor:
                 pending_signal_text=s.pending_signal_text or "",
                 last_message_time=s.last_message_time or "",
                 unread_badge=s.last_unread_badge or "",
+                session_observation_id=s.last_observation_id or "",
+                pending_observation_id=s.pending_observation_id or "",
             )
             for s in self._sessions.values()
             if s.unread_detected
@@ -656,6 +804,14 @@ class SessionMonitor:
                     session.retry_not_before = (now + timedelta(seconds=delay)).isoformat(timespec="milliseconds")
                 session.signal_ready_after = ""
             else:
+                # A reset is the explicit acknowledgement of the current
+                # sidebar event.  Do not clear the raw-observation/badge-edge
+                # latch: a red dot that remains painted after the capture is
+                # still the same event and must not be re-enqueued next poll.
+                if session.pending_observation_id:
+                    session.acknowledged_observation_id = session.pending_observation_id
+                if session.last_observed_unread_badge:
+                    session.acknowledged_unread_badge_epoch = int(session.unread_badge_epoch or 0)
                 session.unread_detected = False
                 session.priority_score = 0
                 session.pending_since = ""
@@ -663,6 +819,9 @@ class SessionMonitor:
                 session.preview_change_hits = 0
                 session.pending_signal_text = ""
                 session.pending_signal_kind = ""
+                session.pending_observation_id = ""
+                session.candidate_observation_id = ""
+                session.candidate_preview_hits = 0
                 session.signal_ready_after = ""
                 session.retry_not_before = ""
                 session.empty_capture_retries = 0
@@ -774,6 +933,7 @@ class SessionMonitor:
         content: str,
         now_iso: str,
         priority: int,
+        observation_id: str = "",
     ) -> None:
         session.unread_detected = True
         if not session.pending_since:
@@ -782,6 +942,7 @@ class SessionMonitor:
         session.priority_score = priority
         session.pending_signal_text = str(content or "").strip()
         session.pending_signal_kind = self._signal_kind(content)
+        session.pending_observation_id = str(observation_id or session.pending_observation_id or "")
         session.signal_ready_after = self._signal_ready_after(now_iso, content)
         session.retry_not_before = ""
         session.empty_capture_retries = 0
@@ -922,6 +1083,54 @@ class SessionMonitor:
         retries = max(0, int(session.empty_capture_retries or 0) - 1)
         delay = base * (self.empty_capture_retry_backoff_multiplier ** retries)
         return min(self.empty_capture_retry_max_seconds, delay)
+
+
+def _session_observation_id(
+    raw: dict[str, Any],
+    *,
+    session_key: str,
+    content: str,
+    message_time: str,
+    unread_badge: str,
+) -> str:
+    """Return a stable identity for one sidebar observation.
+
+    The sidecar may supply a richer deterministic identity.  Other connectors
+    retain compatibility through a local canonical digest.  Poll time, OCR run
+    time, and screenshot paths are intentionally excluded: they describe a
+    new *measurement*, not a new customer event.
+    """
+
+    supplied = str(raw.get("session_observation_id") or "").strip()
+    if supplied:
+        return supplied
+    evidence = raw.get("unread_badge_evidence") if isinstance(raw.get("unread_badge_evidence"), dict) else {}
+    raw_box = evidence.get("bbox") or evidence.get("red_box") or []
+    box = [int(value) // 4 for value in raw_box[:4] if isinstance(value, (int, float))]
+    row = raw.get("row_fingerprint") if isinstance(raw.get("row_fingerprint"), dict) else {}
+    seed = {
+        "session_key": str(session_key or ""),
+        "content": " ".join(str(content or "").split()),
+        "time": str(message_time or "").strip(),
+        "unread_badge": str(unread_badge or "").strip(),
+        "badge_box": box,
+        "row_y_bucket": row.get("row_y_bucket"),
+        "duplicate_discriminator": row.get("duplicate_discriminator"),
+    }
+    encoded = json.dumps(seed, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    return "session-observation:" + hashlib.sha256(encoded.encode("utf-8")).hexdigest()[:32]
+
+
+def _pending_observation_id(observation_id: str, *, unread_badge_epoch: int) -> str:
+    """Turn a stable sidebar observation into a stable event identity.
+
+    A badge disappearing and later reappearing is a real new trigger even when
+    WeChat clips the visible preview to the same text and minute.  The epoch
+    records that rising edge without treating every later poll as new.
+    """
+
+    seed = f"{str(observation_id or '').strip()}|badge_epoch:{max(0, int(unread_badge_epoch or 0))}"
+    return "pending-observation:" + hashlib.sha256(seed.encode("utf-8")).hexdigest()[:32]
 
 
 def _digest(value: str) -> str:

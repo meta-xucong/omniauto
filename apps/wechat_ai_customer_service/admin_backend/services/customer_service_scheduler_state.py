@@ -22,6 +22,7 @@ from typing import Any, Callable
 from apps.wechat_ai_customer_service.admin_backend.services.customer_service_session_ledger import (
     SessionLedgerStore,
     row_fingerprint_from_payload,
+    scrub_legacy_image_storage,
     stable_session_key,
 )
 from apps.wechat_ai_customer_service.knowledge_paths import active_tenant_id, tenant_runtime_root
@@ -89,13 +90,10 @@ def message_content_key(message: dict[str, Any]) -> str:
         return ""
     if message.get("is_customer_image_proxy") or str(message.get("visual_turn_kind") or "") == "customer_image":
         visual_identity = ""
-        for key in ("visual_occurrence_id", "source_message_id", "message_id", "id", "saved_image_path", "asset_id"):
+        for key in ("visual_occurrence_id", "source_message_id", "message_id", "id"):
             visual_identity = str(message.get(key) or "").strip()
             if visual_identity:
                 break
-        image_assets = [str(item).strip() for item in (message.get("image_assets") or []) if str(item).strip()]
-        if not visual_identity and image_assets:
-            visual_identity = image_assets[0]
         if visual_identity:
             return hashlib.sha256(f"{sender}|{msg_type}|customer_image|{visual_identity}".encode("utf-8")).hexdigest()[:24]
     return hashlib.sha256(f"{sender}|{msg_type}|{content}".encode("utf-8")).hexdigest()[:24]
@@ -194,7 +192,15 @@ def is_customer_image_proxy_message(message: dict[str, Any]) -> bool:
     return bool(
         message.get("is_customer_image_proxy")
         and str(message.get("visual_turn_kind") or "").strip() == "customer_image"
-        and str(message.get("saved_image_path") or "").strip()
+    )
+
+
+def _is_current_clipboard_image_proxy(message: dict[str, Any]) -> bool:
+    return bool(
+        message.get("image_capture_pending")
+        or "clipboard_current_transaction" in {
+            str(flag or "").strip() for flag in (message.get("quality_flags") or [])
+        }
     )
 
 
@@ -214,6 +220,8 @@ def message_is_reply_input_candidate(
     if not content:
         return False
     image_proxy = is_customer_image_proxy_message(message)
+    if image_proxy and not _is_current_clipboard_image_proxy(message):
+        return False
     if image_proxy and not allow_customer_image_proxy:
         return False
     if allow_customer_image_proxy and image_proxy:
@@ -414,6 +422,9 @@ class SchedulerStateStore:
             return state
         if not isinstance(state, dict):
             return self.empty_state()
+        # Do not let an old scheduler snapshot reintroduce a retired image
+        # path/crop as message context during a later tick.
+        state = scrub_legacy_image_storage(state)
         state.setdefault("version", STATE_VERSION)
         state.setdefault("tenant_id", self.tenant_id)
         state.setdefault("_session_ledger_root", str(self.ledger_root))
@@ -432,7 +443,7 @@ class SchedulerStateStore:
         # encoder is read-only. A top-level copy preserves the historical rule
         # that save() must not alter the caller's updated_at field without
         # duplicating an entire multi-megabyte task history in memory.
-        payload = dict(state)
+        payload = scrub_legacy_image_storage(dict(state))
         payload["updated_at"] = utcnow_iso()
         self.path.parent.mkdir(parents=True, exist_ok=True)
         fd, temp_name = tempfile.mkstemp(
@@ -544,6 +555,11 @@ def ensure_session(
             "pending_capture": False,
             "pending_since": "",
             "pending_signal_id": "",
+            # Additive source-event identity.  It is independent from the
+            # time-based legacy signal id, so repeated OCR polling of one
+            # sidebar observation cannot create a new pending window.
+            "last_session_observation_id": "",
+            "pending_observation_id": "",
             "last_detected_at": "",
             "last_dispatched_at": "",
             "last_capture_at": "",
@@ -772,6 +788,9 @@ def cleanup_scheduler_state(
         for field in (
             "pending_capture",
             "pending_since",
+            "pending_signal_id",
+            "last_session_observation_id",
+            "pending_observation_id",
             "last_detected_at",
             "last_dispatched_at",
             "last_capture_at",
@@ -1086,6 +1105,7 @@ def enqueue_pending_session(
     session_key: str = "",
     row_fingerprint: dict[str, Any] | None = None,
     reason: str = "manual",
+    observation_id: str = "",
     now: str | None = None,
 ) -> dict[str, Any]:
     now = now or utcnow_iso()
@@ -1098,14 +1118,30 @@ def enqueue_pending_session(
         row_fingerprint=row_fingerprint,
         now=now,
     )
-    if not session.get("pending_capture"):
+    clean_observation_id = str(observation_id or "").strip()
+    pending_observation_id = str(session.get("pending_observation_id") or "").strip()
+    replace_pending_event = bool(
+        session.get("pending_capture")
+        and clean_observation_id
+        and clean_observation_id != pending_observation_id
+    )
+    if not session.get("pending_capture") or replace_pending_event:
         session["pending_since"] = now
-        session["pending_signal_id"] = stable_id(
-            "pending-signal",
-            str(session.get("session_key") or session_key or ""),
-            target_name,
-            now,
-        )
+        if clean_observation_id:
+            session["pending_signal_id"] = stable_id(
+                "pending-signal-observation",
+                str(session.get("session_key") or session_key or ""),
+                target_name,
+                clean_observation_id,
+            )
+        else:
+            session["pending_signal_id"] = stable_id(
+                "pending-signal",
+                str(session.get("session_key") or session_key or ""),
+                target_name,
+                now,
+            )
+        session["pending_observation_id"] = clean_observation_id
     session["pending_capture"] = True
     session["pending_reason"] = reason
     session["last_detected_at"] = now
@@ -1131,6 +1167,14 @@ def record_session_signal(
     blacklist: set[str] | None = None,
     now: str | None = None,
 ) -> dict[str, Any] | None:
+    """Record a session-list signal without confusing a level with an event.
+
+    ``unread_detected`` is a level: it remains true while a sidebar red dot is
+    painted.  It is not proof that another customer turn arrived since the
+    prior scheduler tick.  Newer monitors carry a stable observation/event id;
+    legacy callers retain their previous digest/time/badge compatibility path.
+    """
+
     name = normalize_target_name(session_payload.get("name") or session_payload.get("title"))
     if not name:
         return None
@@ -1168,11 +1212,31 @@ def record_session_signal(
     previous_digest = str(session.get("last_content_digest") or "")
     previous_time = str(session.get("last_message_time") or "")
     previous_badge = str(session.get("last_unread_badge") or "")
+    previous_observation_id = str(session.get("last_session_observation_id") or "")
     digest = hashlib.sha256(content.encode("utf-8")).hexdigest()[:32] if content else ""
     unread_detected = bool(session_payload.get("unread_detected") or session_payload.get("pending"))
     has_unread_badge = bool(unread_badge)
     has_active_work = has_active_session_work(state, name, session_key=session_key)
-    has_signal = bool(digest or msg_time or unread_badge or unread_detected)
+    observation_id = str(
+        session_payload.get("pending_observation_id")
+        or session_payload.get("session_observation_id")
+        or ""
+    ).strip()
+    explicit_new_observation = bool(session_payload.get("session_observation_is_new"))
+    observation_changed = bool(observation_id and observation_id != previous_observation_id)
+    new_observation = bool(observation_id and (explicit_new_observation or observation_changed))
+    if observation_id:
+        # Persist before deciding whether to enqueue, so the same level signal
+        # remains deduplicated even after capture clears pending_capture.
+        session["last_session_observation_id"] = observation_id
+    has_signal = bool(digest or msg_time or unread_badge or unread_detected or observation_id)
+    initial_signal = bool(
+        has_signal
+        and not previous_digest
+        and not previous_time
+        and not previous_badge
+        and not previous_observation_id
+    )
     if (
         unread_detected
         and exhausted_until
@@ -1196,7 +1260,12 @@ def record_session_signal(
             )
             return session
     unread_only_signal = bool(unread_detected and not digest and not msg_time and not unread_badge)
-    if unread_only_signal and has_active_work:
+    unread_evidence_is_new = bool(
+        new_observation
+        if observation_id
+        else (unread_detected or has_unread_badge)
+    )
+    if unread_only_signal and has_active_work and unread_evidence_is_new:
         # Do not drop an unread signal merely because the same session still
         # has an older Brain/send task in flight. Capture remains blocked by
         # the active-work gate, but the durable pending flag lets the next
@@ -1210,6 +1279,7 @@ def record_session_signal(
                 session_key=session_key,
                 row_fingerprint=row_fingerprint,
                 reason="session_signal_changed_during_active_work",
+                observation_id=observation_id,
                 now=now,
             )
             queued["pending_signal_has_unread_evidence"] = True
@@ -1224,9 +1294,9 @@ def record_session_signal(
         (digest and digest != previous_digest)
         or (msg_time and msg_time != previous_time)
         or (unread_badge and unread_badge != previous_badge)
-        or unread_detected
+        or observation_changed
     )
-    if changed or (has_signal and not previous_digest and not previous_time and not previous_badge):
+    if changed or initial_signal:
         session["last_content_digest"] = digest
         session["last_message_time"] = msg_time
         session["last_unread_badge"] = unread_badge
@@ -1235,7 +1305,13 @@ def record_session_signal(
             content,
             explicit_kind=session_payload.get("pending_signal_kind"),
         )
-        has_new_message_evidence = bool(unread_detected or has_unread_badge)
+        # For source-aware monitors, an unchanged unread level is explicitly
+        # not new evidence.  Without an observation id, retain the historical
+        # compatibility behavior for first/changed legacy signals.
+        has_new_message_evidence = bool(
+            unread_evidence_is_new
+            or (not observation_id and has_unread_badge)
+        )
         has_preview_only_evidence = bool((digest and digest != previous_digest) or (msg_time and msg_time != previous_time))
         if has_new_message_evidence or (has_active_work and has_preview_only_evidence):
             queued = enqueue_pending_session(
@@ -1246,6 +1322,7 @@ def record_session_signal(
                 session_key=session_key,
                 row_fingerprint=row_fingerprint,
                 reason="session_signal_changed",
+                observation_id=observation_id,
                 now=now,
             )
             queued["pending_signal_has_unread_evidence"] = has_new_message_evidence
@@ -1257,6 +1334,11 @@ def record_session_signal(
             if has_active_work and not has_new_message_evidence:
                 queued["pending_reason"] = "session_signal_preview_changed_during_active_work"
                 queued["pending_signal_has_unread_evidence"] = False
+        elif session.get("pending_capture"):
+            # A passive sidebar observation (for example a badge disappearing
+            # while a capture is queued) never clears the existing event.
+            session["status"] = "capture_pending"
+            session["last_detected_at"] = now
         else:
             session["status"] = "idle"
             session["pending_signal_has_unread_evidence"] = False
@@ -1853,16 +1935,16 @@ def record_capture_result(
             "message_content_digest": digest,
             "history_continuity": continuity,
         },
-        "messages": copy.deepcopy(messages),
-        "batch": copy.deepcopy(batch),
-        "overflow_messages": copy.deepcopy(overflow_messages),
+        "messages": scrub_legacy_image_storage(copy.deepcopy(messages)),
+        "batch": scrub_legacy_image_storage(copy.deepcopy(batch)),
+        "overflow_messages": scrub_legacy_image_storage(copy.deepcopy(overflow_messages)),
         "raw_batch_message_count": len(raw_batch),
         "reply_input_message_count": len(batch),
         "filtered_non_customer_message_count": len(filtered_non_customer_batch),
-        "filtered_non_customer_batch": copy.deepcopy(filtered_non_customer_batch[-20:]),
-        "history_backfill": history_backfill,
-        "batch_selection": copy.deepcopy(batch_selection),
-        "context_recovery": copy.deepcopy(context_recovery),
+        "filtered_non_customer_batch": scrub_legacy_image_storage(copy.deepcopy(filtered_non_customer_batch[-20:])),
+        "history_backfill": scrub_legacy_image_storage(history_backfill),
+        "batch_selection": scrub_legacy_image_storage(copy.deepcopy(batch_selection)),
+        "context_recovery": scrub_legacy_image_storage(copy.deepcopy(context_recovery)),
         "status": "captured" if new_messages else "empty",
         "latency_trace": {
             **(session.get("latency_trace") if isinstance(session.get("latency_trace"), dict) else {}),
@@ -1955,7 +2037,6 @@ def enqueue_media_context_task(
         "message_id",
         "id",
         "asset_id",
-        "saved_image_path",
     ):
         identity = str(image_asset.get(key) or "").strip()
         if identity:

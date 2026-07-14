@@ -82,9 +82,10 @@ def main() -> int:
         check_rejects_chinese_style_only_authority_fact(),
         check_reply_normalization_avoids_forbidden_commitment_echo(),
         check_nonsemantic_runtime_markers_do_not_break_social_classification(),
-        check_quality_gate_rejects_social_closing_stale_business_context(),
-        check_quality_gate_rejects_social_greeting_reviving_unbacked_visual_entity(),
-        check_quality_gate_rejects_social_greeting_reviving_supported_prior_context(),
+        check_quality_gate_records_social_closing_context_review_without_blocking(),
+        check_quality_gate_records_unbacked_social_context_review_without_blocking(),
+        check_quality_gate_uses_brain_turn_semantics_for_mixed_summon(),
+        check_quality_gate_records_supported_social_context_review_without_blocking(),
         check_quality_gate_rejects_high_risk_commitment_echo(),
         check_quality_gate_rejects_overconfident_sales_pressure(),
         check_normalizes_brain_schema_aliases_without_authorizing_style_facts(),
@@ -108,8 +109,8 @@ def main() -> int:
         check_quality_gate_keeps_brain_short_social_reply_after_delay(),
         check_soft_social_quality_review_preserves_brain_reply_and_marks_attention(),
         check_short_social_quality_warning_does_not_force_semantic_review(),
-        check_quality_gate_rejects_self_history_continuation_for_current_summon_only(),
-        check_quality_gate_rejects_over_eager_business_redirect_after_social_fatigue(),
+        check_quality_gate_records_self_history_review_without_blocking(),
+        check_quality_gate_records_social_fatigue_review_without_blocking(),
         check_quality_gate_warns_thin_social_or_common_sense_reply_without_blocking(),
         check_quality_gate_allows_business_appointment_after_social_fatigue(),
         check_quality_gate_allows_internal_probe_boundary_under_social_fatigue(),
@@ -121,6 +122,7 @@ def main() -> int:
         check_routine_product_fast_profile_rejects_complex_or_risky_turns(),
         check_brain_no_visible_payload_classifies_social_empty_reply(),
         check_social_brain_plan_clears_soft_no_evidence_guard(),
+        check_brain_runtime_sends_mixed_summon_with_turn_semantics(),
         check_brain_first_failure_blocks_visible_reply_without_legacy(),
         check_kimi_fenced_json_is_parsed_without_structure_repair(),
         check_kimi_tool_json_is_adopted_without_structure_repair(),
@@ -139,7 +141,7 @@ def main() -> int:
         check_quality_gate_rejects_quantity_quote_ignoring_applicable_price_tier(),
         check_quality_gate_rejects_shipping_policy_contradiction_for_destination(),
         check_quality_gate_accepts_quantity_quote_with_tier_and_shipping_policy(),
-        check_quality_gate_rejects_social_info_collection(),
+        check_quality_gate_records_social_info_collection_review_without_blocking(),
         check_quality_gate_requires_clear_recommendation(),
         check_quality_gate_rejects_broad_need_question_for_direct_decision_request(),
         check_quality_gate_accepts_product_anchored_ranked_recommendation(),
@@ -527,7 +529,7 @@ def check_nonsemantic_runtime_markers_do_not_break_social_classification() -> Ca
     return CaseResult("nonsemantic_runtime_markers_do_not_break_social_classification", True, {"clean": clean})
 
 
-def check_quality_gate_rejects_social_closing_stale_business_context() -> CaseResult:
+def check_quality_gate_records_social_closing_context_review_without_blocking() -> CaseResult:
     plan = normalize_brain_plan(
         {
             "can_answer": True,
@@ -544,13 +546,14 @@ def check_quality_gate_rejects_social_closing_stale_business_context() -> CaseRe
         settings={},
     )
     assert_true(
-        "social_closing_over_carries_stale_business_context" in quality.get("errors", []),
-        f"closing should not revive stale business context: {quality}",
+        "social_context_review:social_closing_over_carries_stale_business_context" in quality.get("warnings", []),
+        f"closing-context relevance should be auditable but non-blocking: {quality}",
     )
-    return CaseResult("quality_gate_rejects_social_closing_stale_business_context", True, {"quality": quality})
+    assert_true(quality.get("ok"), f"context relevance alone must not swallow a Brain reply: {quality}")
+    return CaseResult("quality_gate_records_social_closing_context_review_without_blocking", True, {"quality": quality})
 
 
-def check_quality_gate_rejects_social_greeting_reviving_unbacked_visual_entity() -> CaseResult:
+def check_quality_gate_records_unbacked_social_context_review_without_blocking() -> CaseResult:
     polluted_plan = normalize_brain_plan(
         {
             "can_answer": True,
@@ -567,8 +570,8 @@ def check_quality_gate_rejects_social_greeting_reviving_unbacked_visual_entity()
         settings={},
     )
     assert_true(
-        "social_turn_revived_unsupported_business_context" in polluted_quality.get("errors", []),
-        f"social greeting should not revive unbacked visual/entity context: {polluted_quality}",
+        "social_context_review:social_turn_revived_unsupported_business_context" in polluted_quality.get("warnings", []),
+        f"unbacked context relevance should be auditable: {polluted_quality}",
     )
 
     chinese_stale_plan = normalize_brain_plan(
@@ -587,8 +590,8 @@ def check_quality_gate_rejects_social_greeting_reviving_unbacked_visual_entity()
         settings={},
     )
     assert_true(
-        "social_turn_revived_unsupported_business_context" in chinese_stale_quality.get("errors", []),
-        f"social greeting should not revive generic stale business context in Chinese: {chinese_stale_quality}",
+        "social_context_review:social_turn_revived_unsupported_business_context" in chinese_stale_quality.get("warnings", []),
+        f"generic stale context should be an advisory review: {chinese_stale_quality}",
     )
 
     explicit_continue_quality = verify_brain_reply_quality(
@@ -618,8 +621,9 @@ def check_quality_gate_rejects_social_greeting_reviving_unbacked_visual_entity()
         settings={},
     )
     assert_true(normal_quality.get("ok"), f"plain social acknowledgement should still pass: {normal_quality}")
+    assert_true(polluted_quality.get("ok") and chinese_stale_quality.get("ok"), f"soft context review must remain sendable: {polluted_quality}; {chinese_stale_quality}")
     return CaseResult(
-        "quality_gate_rejects_social_greeting_reviving_unbacked_visual_entity",
+        "quality_gate_records_unbacked_social_context_review_without_blocking",
         True,
         {
             "polluted_quality": polluted_quality,
@@ -630,7 +634,52 @@ def check_quality_gate_rejects_social_greeting_reviving_unbacked_visual_entity()
     )
 
 
-def check_quality_gate_rejects_social_greeting_reviving_supported_prior_context() -> CaseResult:
+def check_quality_gate_uses_brain_turn_semantics_for_mixed_summon() -> CaseResult:
+    plan = normalize_brain_plan(
+        {
+            "can_answer": True,
+            "understanding": {"turn_semantics": {"kind": "business", "basis": "current_message", "current_request": "买车咨询"}},
+            "answer_mode": "ask_clarifying_question",
+            "reply_segments": ["在的，您想看轿车还是SUV？预算大概多少，我按您的预算挑几台合适的。"],
+            "recommended_action": "send_reply",
+            "confidence": 0.95,
+        }
+    )
+    quality = verify_brain_reply_quality(
+        plan,
+        current_message="在不？买车",
+        evidence_pack={},
+        settings={},
+    )
+    assert_true(
+        quality.get("ok"),
+        f"Brain-declared current business request must remain sendable: {quality}",
+    )
+    assert_true(
+        quality.get("turn_semantics", {}).get("kind") == "business",
+        f"quality audit should retain Brain-owned turn semantics: {quality}",
+    )
+    legacy_plan = copy.deepcopy(plan)
+    legacy_plan["understanding"] = {}
+    legacy_quality = verify_brain_reply_quality(
+        legacy_plan,
+        current_message="在不？买车",
+        evidence_pack={},
+        settings={},
+    )
+    assert_true(legacy_quality.get("ok"), f"missing optional semantics must remain sendable: {legacy_quality}")
+    assert_true(
+        any(str(item).startswith("social_context_review:") for item in legacy_quality.get("warnings", [])),
+        f"legacy plan should retain an auditable relevance review: {legacy_quality}",
+    )
+    return CaseResult(
+        "quality_gate_uses_brain_turn_semantics_for_mixed_summon",
+        True,
+        {"quality": quality, "legacy_quality": legacy_quality},
+    )
+
+
+def check_quality_gate_records_supported_social_context_review_without_blocking() -> CaseResult:
     pack = fake_evidence_pack(include_product=True)
     stale_plan = normalize_brain_plan(
         {
@@ -650,8 +699,8 @@ def check_quality_gate_rejects_social_greeting_reviving_supported_prior_context(
         settings={},
     )
     assert_true(
-        "social_turn_revived_supported_prior_business_context" in stale_quality.get("errors", []),
-        f"pure greeting should not revive supported prior business context: {stale_quality}",
+        "social_context_review:social_turn_revived_supported_prior_business_context" in stale_quality.get("warnings", []),
+        f"supported old context should be a semantic review, not a hard blocker: {stale_quality}",
     )
 
     continue_quality = verify_brain_reply_quality(
@@ -664,8 +713,9 @@ def check_quality_gate_rejects_social_greeting_reviving_supported_prior_context(
         "social_turn_revived_supported_prior_business_context" not in continue_quality.get("errors", []),
         f"explicit continuation should still allow prior context: {continue_quality}",
     )
+    assert_true(stale_quality.get("ok"), f"supported-context relevance alone must not swallow a Brain reply: {stale_quality}")
     return CaseResult(
-        "quality_gate_rejects_social_greeting_reviving_supported_prior_context",
+        "quality_gate_records_supported_social_context_review_without_blocking",
         True,
         {"stale_quality": stale_quality, "continue_quality": continue_quality},
     )
@@ -1110,6 +1160,63 @@ def check_social_brain_plan_clears_soft_no_evidence_guard() -> CaseResult:
     assert_true(event.get("rule_name") == "customer_service_brain_reply", f"social turn should not handoff: {event}")
     assert_true("在" in event.get("reply_text", ""), f"social reply should remain natural: {event}")
     return CaseResult("social_brain_plan_clears_soft_no_evidence_guard", True, {"reason": event.get("reason")})
+
+
+def check_brain_runtime_sends_mixed_summon_with_turn_semantics() -> CaseResult:
+    """A short summon plus request must not become customer_service_brain_no_visible_reply."""
+
+    plan = {
+        "can_answer": True,
+        "understanding": {
+            "turn_semantics": {
+                "kind": "business",
+                "basis": "current_message",
+                "current_request": "购车咨询",
+            }
+        },
+        "answer_mode": "ask_clarifying_question",
+        "reply_strategy": {"style": "concise_human"},
+        "evidence_used": {"common_sense_topics": ["customer_need_clarification"]},
+        "facts_claimed": [],
+        "reply_segments": ["在的，您想看轿车还是SUV？预算大概多少，我按您的需求帮您筛。"],
+        "risk": {"risk_level": "low", "risk_tags": [], "needs_handoff": False},
+        "recommended_action": "send_reply",
+        "confidence": 0.92,
+        "reason": "当前消息包含新的购车诉求。",
+    }
+    config = base_config(plan, include_product=False)
+    config["customer_service_brain"].update({"mode": "brain_first", "fallback_to_legacy_on_error": False})
+    pack = fake_evidence_pack(include_product=False)
+    pack["current_message"] = "在不？买车"
+    pack["current_batch"] = [{"id": "msg-mixed-summon", "sender": "许聪", "content": "在不？买车"}]
+    pack["conversation"]["current_batch_text"] = "[许聪] 在不？买车"
+    # This turn only clarifies the customer's need; it does not quote a vehicle
+    # fact.  Keep the fixture free of inherited quote/product intent tags so
+    # Guard is tested on the same authority boundary as production.
+    pack["intent_tags"] = []
+    pack["knowledge"]["intent_tags"] = []
+    with patched_evidence_pack(pack):
+        event = brain_module.maybe_run_customer_service_brain(
+            config=config,
+            target_name="许聪",
+            target_state={"conversation_context": {}},
+            batch=pack["current_batch"],
+            combined="在不？买车",
+            decision=ReplyDecision("", "", False, False, ""),
+            reply_text="",
+            intent_assist={},
+            rag_reply={},
+            llm_reply={},
+            product_knowledge={},
+            data_capture={},
+            raw_capture={"conversation": {"conversation_id": "c-mixed-summon", "chat_type": "private"}},
+            customer_profile=None,
+        )
+    quality = event.get("quality_verification") if isinstance(event.get("quality_verification"), dict) else {}
+    assert_true(event.get("applied") is True and event.get("adoptable") is True, f"mixed summon must be sent by Brain: {event}")
+    assert_true(event.get("rule_name") == "customer_service_brain_reply", f"must not become a no-visible-reply: {event}")
+    assert_true(quality.get("turn_semantics", {}).get("kind") == "business", f"turn semantics should reach runtime audit: {quality}")
+    return CaseResult("brain_runtime_sends_mixed_summon_with_turn_semantics", True, {"quality": quality})
 
 
 def check_social_visible_contract_rejects_empty_or_handoff_plan() -> CaseResult:
@@ -1605,7 +1712,35 @@ def check_soft_social_quality_review_preserves_brain_reply_and_marks_attention()
     assert_true(review.get("required") is True, f"quality review should be visible to operator tooling: {review}")
     assert_true(review.get("operator_attention_required") is True, f"continuity warning should request operator attention: {review}")
     assert_true(review.get("visible_reply_preserved") is True, f"quality review must preserve visible reply: {review}")
-    return CaseResult("soft_social_quality_review_preserves_brain_reply_and_marks_attention", True, {"soft": soft, "review": review})
+    semantic_context_quality = {
+        "ok": False,
+        "source": "semantic_reviewer",
+        "errors": ["semantic_reviewer_repair"],
+        "deterministic_warnings": ["social_context_review:social_turn_revived_unsupported_business_context"],
+        "semantic_review": {
+            "customer_visible_risk": "low",
+            "hard_boundary_concerns": [],
+            "verdict": "repair",
+            "errors": ["context_relevance_needs_improvement"],
+        },
+    }
+    original_soft = brain_module.original_brain_quality_soft_pass_after_failed_repair(
+        settings={},
+        plan=plan,
+        validation={"ok": True},
+        quality=semantic_context_quality,
+        evidence_pack=fake_evidence_pack(include_product=False),
+    )
+    assert_true(original_soft.get("ok"), f"low-risk semantic context review must not swallow the original Brain reply: {original_soft}")
+    assert_true(
+        original_soft.get("reason") == "original_brain_social_context_semantic_review_preserved_after_repair_failure",
+        f"expected explicit semantic-context preservation audit reason: {original_soft}",
+    )
+    return CaseResult(
+        "soft_social_quality_review_preserves_brain_reply_and_marks_attention",
+        True,
+        {"soft": soft, "review": review, "original_soft": original_soft},
+    )
 
 
 def check_short_social_quality_warning_does_not_force_semantic_review() -> CaseResult:
@@ -1635,7 +1770,7 @@ def check_short_social_quality_warning_does_not_force_semantic_review() -> CaseR
     return CaseResult("short_social_quality_warning_does_not_force_semantic_review", True, {"should_review": should_review})
 
 
-def check_quality_gate_rejects_self_history_continuation_for_current_summon_only() -> CaseResult:
+def check_quality_gate_records_self_history_review_without_blocking() -> CaseResult:
     pack = fake_evidence_pack(include_product=False)
     pack["conversation_interaction_state"] = {
         "authority": "non_authoritative_interaction_hint",
@@ -1662,10 +1797,10 @@ def check_quality_gate_rejects_self_history_continuation_for_current_summon_only
         evidence_pack=pack,
         settings={},
     )
-    assert_true(not bad_quality.get("ok"), f"self-history continuation should be repaired: {bad_quality}")
+    assert_true(bad_quality.get("ok"), f"self-history relevance must not swallow a Brain reply: {bad_quality}")
     assert_true(
-        "social_turn_continued_self_history_without_open_customer_context" in (bad_quality.get("errors") or []),
-        f"expected self-history continuation error: {bad_quality}",
+        "social_context_review:social_turn_continued_self_history_without_open_customer_context" in (bad_quality.get("warnings") or []),
+        f"expected self-history continuity review warning: {bad_quality}",
     )
 
     good_plan = copy.deepcopy(bad_plan)
@@ -1687,17 +1822,17 @@ def check_quality_gate_rejects_self_history_continuation_for_current_summon_only
         settings={},
     )
     assert_true(
-        "social_turn_continued_self_history_without_open_customer_context" not in (allowed_quality.get("errors") or []),
-        f"real unanswered customer context should not trigger self-history-only error: {allowed_quality}",
+        "social_context_review:social_turn_continued_self_history_without_open_customer_context" not in (allowed_quality.get("warnings") or []),
+        f"real unanswered customer context should not trigger self-history review: {allowed_quality}",
     )
     return CaseResult(
-        "quality_gate_rejects_self_history_continuation_for_current_summon_only",
+        "quality_gate_records_self_history_review_without_blocking",
         True,
-        {"errors": bad_quality.get("errors")},
+        {"warnings": bad_quality.get("warnings")},
     )
 
 
-def check_quality_gate_rejects_over_eager_business_redirect_after_social_fatigue() -> CaseResult:
+def check_quality_gate_records_social_fatigue_review_without_blocking() -> CaseResult:
     fatigued_pack = fake_evidence_pack(include_product=False)
     fatigued_pack["conversation_strategy_state"] = {
         "authority": "non_authoritative_strategy_hint",
@@ -1723,10 +1858,10 @@ def check_quality_gate_rejects_over_eager_business_redirect_after_social_fatigue
         evidence_pack=fatigued_pack,
         settings={},
     )
-    assert_true(not quality.get("ok"), f"over-eager business redirect should be repaired: {quality}")
+    assert_true(quality.get("ok"), f"social-fatigue relevance must not swallow a Brain reply: {quality}")
     assert_true(
-        "over_eager_business_redirect_after_social_fatigue" in (quality.get("errors") or []),
-        f"expected social fatigue redirect error: {quality}",
+        "social_context_review:over_eager_business_redirect_after_social_fatigue" in (quality.get("warnings") or []),
+        f"expected social-fatigue review warning: {quality}",
     )
     identity_resistance_plan = normalize_brain_plan(
         {
@@ -1745,10 +1880,10 @@ def check_quality_gate_rejects_over_eager_business_redirect_after_social_fatigue
         evidence_pack=fatigued_pack,
         settings={},
     )
-    assert_true(not identity_quality.get("ok"), f"identity/resistance turn should not pull old business again: {identity_quality}")
+    assert_true(identity_quality.get("ok"), f"identity/resistance relevance must remain sendable: {identity_quality}")
     assert_true(
-        "over_eager_business_redirect_after_social_fatigue" in (identity_quality.get("errors") or []),
-        f"expected identity resistance redirect error: {identity_quality}",
+        "social_context_review:over_eager_business_redirect_after_social_fatigue" in (identity_quality.get("warnings") or []),
+        f"expected identity-resistance review warning: {identity_quality}",
     )
 
     natural_plan = copy.deepcopy(over_eager_plan)
@@ -1761,9 +1896,9 @@ def check_quality_gate_rejects_over_eager_business_redirect_after_social_fatigue
     )
     assert_true(natural_quality.get("ok"), f"natural social companion reply should pass: {natural_quality}")
     return CaseResult(
-        "quality_gate_rejects_over_eager_business_redirect_after_social_fatigue",
+        "quality_gate_records_social_fatigue_review_without_blocking",
         True,
-        {"errors": quality.get("errors"), "identity_errors": identity_quality.get("errors")},
+        {"warnings": quality.get("warnings"), "identity_warnings": identity_quality.get("warnings")},
     )
 
 
@@ -2050,6 +2185,16 @@ def check_low_authority_fast_profile_rejects_authority_or_context_turns() -> Cas
         target_state={},
     )
     assert_true(not product_decision.get("enabled"), f"explicit product/price question must use full authority path: {product_decision}")
+    car_price_decision = brain_module.low_authority_fast_profile_decision(
+        settings=settings,
+        combined="哈弗H6是自动挡吗，车价多少？",
+        batch=[{"id": "msg-car-price", "sender": "许聪", "content": "哈弗H6是自动挡吗，车价多少？"}],
+        target_state={},
+    )
+    assert_true(
+        not car_price_decision.get("enabled") and car_price_decision.get("reason") == "authority_data_signal",
+        f"car-price synonym must retain product evidence instead of using the low-authority profile: {car_price_decision}",
+    )
     ambiguous_decision = brain_module.low_authority_fast_profile_decision(
         settings=settings,
         combined="要",
@@ -2092,6 +2237,7 @@ def check_low_authority_fast_profile_rejects_authority_or_context_turns() -> Cas
         True,
         {
             "product": product_decision,
+            "car_price": car_price_decision,
             "ambiguous": ambiguous_decision,
             "casual_car_word": casual_car_word_decision,
             "generic_vehicle_intent": generic_vehicle_intent_decision,
@@ -3001,7 +3147,7 @@ def check_quality_gate_accepts_quantity_quote_with_tier_and_shipping_policy() ->
     return CaseResult("quality_gate_accepts_quantity_quote_with_tier_and_shipping_policy", True, {"quality": quality})
 
 
-def check_quality_gate_rejects_social_info_collection() -> CaseResult:
+def check_quality_gate_records_social_info_collection_review_without_blocking() -> CaseResult:
     plan = copy.deepcopy(base_plan())
     plan.update(
         {
@@ -3018,9 +3164,12 @@ def check_quality_gate_rejects_social_info_collection() -> CaseResult:
         evidence_pack=fake_evidence_pack(include_product=True),
         settings={},
     )
-    assert_true(not quality["ok"], f"social greeting should not collect unsupported info: {quality}")
-    assert_true("unsupported_info_collection_for_social_message" in quality["errors"], f"expected info-collection error: {quality}")
-    return CaseResult("quality_gate_rejects_social_info_collection", True, {"errors": quality["errors"]})
+    assert_true(quality["ok"], f"social relevance review must not suppress a Brain reply: {quality}")
+    assert_true(
+        "social_context_review:unsupported_info_collection_for_social_message" in quality["warnings"],
+        f"expected auditable info-collection review warning: {quality}",
+    )
+    return CaseResult("quality_gate_records_social_info_collection_review_without_blocking", True, {"warnings": quality["warnings"]})
 
 
 def check_quality_gate_requires_clear_recommendation() -> CaseResult:

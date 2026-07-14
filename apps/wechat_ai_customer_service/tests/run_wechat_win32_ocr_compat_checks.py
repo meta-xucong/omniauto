@@ -340,6 +340,15 @@ def test_parse_sessions_detects_visual_unread_red_dot() -> None:
     sessions = parse_sessions_from_ocr(items, (641, 919), screenshot=image)
     assert_true(sessions[0].get("unread_badge") == "visual_red_dot", f"red dot should become unread signal: {sessions}")
     assert_true(not sessions[1].get("unread_badge"), f"nearby rows should not inherit unread dot: {sessions}")
+    evidence = sessions[0].get("unread_badge_meta") or {}
+    assert_true(bool(evidence.get("bbox")), f"badge evidence must retain its actual sidebar bounds: {sessions[0]}")
+    first_identity = str(sessions[0].get("session_observation_id") or "")
+    replayed = parse_sessions_from_ocr(items, (641, 919), screenshot=image)
+    assert_true(first_identity.startswith("session-observation:"), f"sidebar observation needs a stable identity: {sessions[0]}")
+    assert_true(
+        first_identity == str(replayed[0].get("session_observation_id") or ""),
+        "the same OCR sidebar row must not receive a new identity on every poll",
+    )
 
 
 def test_parse_sessions_normalizes_truncated_file_transfer() -> None:
@@ -1950,8 +1959,20 @@ def test_input_fast_visual_confirm_keeps_before_ocr_and_skips_after_ocr() -> Non
         def fake_region(_screenshot, ocr_items, *, geometry):
             calls["region"].append(len(ocr_items))
             if len(calls["region"]) == 1:
-                return {"has_visible_text": False, "ocr_hits": len(ocr_items), "dark_ratio": 0.001}
-            return {"has_visible_text": True, "ocr_hits": len(ocr_items), "dark_ratio": 0.025}
+                return {
+                    "has_visible_text": False,
+                    "reason": "input_region_blank",
+                    "bounds": list(roi_bounds),
+                    "ocr_hits": len(ocr_items),
+                    "dark_ratio": 0.001,
+                }
+            return {
+                "has_visible_text": True,
+                "reason": "ocr_or_dark_pixels",
+                "bounds": list(roi_bounds),
+                "ocr_hits": len(ocr_items),
+                "dark_ratio": 0.025,
+            }
 
         def fake_clear(_hwnd, *, points, geometry, before_state, artifact_dir=None, attempt=1):
             assert_true(before_state.get("has_visible_text") is False, f"before OCR state should be checked: {before_state}")
@@ -7206,6 +7227,10 @@ def test_sidebar_search_clear_uses_window_image_click() -> None:
         "human_window_image_click": sidecar_mod.human_window_image_click,
         "human_window_image_click_in_bounds": sidecar_mod.human_window_image_click_in_bounds,
         "human_client_click": sidecar_mod.human_client_click,
+        "capture_wechat": sidecar_mod.capture_wechat,
+        "run_ocr_traced": sidecar_mod.run_ocr_traced,
+        "target_switch_surface_state": sidecar_mod.target_switch_surface_state,
+        "sidebar_search_state_detected": sidecar_mod.sidebar_search_state_detected,
         "key_press": sidecar_mod.key_press,
         "sleep": sidecar_mod.time.sleep,
     }
@@ -7224,6 +7249,12 @@ def test_sidebar_search_clear_uses_window_image_click() -> None:
         sidecar_mod.human_client_click = (
             lambda hwnd, x, y: calls.__setitem__("client_click", int(calls["client_click"]) + 1)
         )
+        sidecar_mod.capture_wechat = lambda *_args, **_kwargs: (Image.new("RGB", (980, 860), "white"), "search.png")
+        sidecar_mod.run_ocr_traced = lambda *_args, **_kwargs: [
+            {"text": "搜索", "left": 88, "top": 54, "right": 138, "bottom": 78, "center_x": 113, "center_y": 66}
+        ]
+        sidecar_mod.target_switch_surface_state = lambda *_args, **_kwargs: {"ok": True, "reason": "surface_ready"}
+        sidecar_mod.sidebar_search_state_detected = lambda *_args, **_kwargs: {"detected": True, "reason": "search_focus"}
         sidecar_mod.key_press = lambda key: calls["keys"].append(key)  # type: ignore[union-attr]
         sidecar_mod.time.sleep = lambda seconds: None
         result = sidecar_mod.clear_sidebar_search_box_without_select_all(1001, 122, 64, target_hint="新数据测试")
@@ -7277,20 +7308,32 @@ def test_type_sidebar_search_query_defaults_to_clipboard_with_guard() -> None:
     previous_method = os.environ.get("WECHAT_WIN32_OCR_TARGET_SEARCH_INPUT_METHOD")
     originals = {
         "basic_send_window_guard": sidecar_mod.basic_send_window_guard,
+        "get_window_geometry": sidecar_mod.get_window_geometry,
         "clipboard_copy": sidecar_mod.clipboard_copy,
         "hotkey": sidecar_mod.hotkey,
         "type_text_with_sendinput_unicode": sidecar_mod.type_text_with_sendinput_unicode,
+        "capture_wechat": sidecar_mod.capture_wechat,
+        "run_ocr_traced": sidecar_mod.run_ocr_traced,
+        "target_switch_surface_state": sidecar_mod.target_switch_surface_state,
+        "sidebar_search_state_detected": sidecar_mod.sidebar_search_state_detected,
+        "sidebar_search_query_text": sidecar_mod.sidebar_search_query_text,
         "sleep": sidecar_mod.time.sleep,
     }
     calls = {"clipboard": 0, "hotkey": 0, "sendinput": 0}
     try:
         os.environ.pop("WECHAT_WIN32_OCR_TARGET_SEARCH_INPUT_METHOD", None)
         sidecar_mod.basic_send_window_guard = lambda hwnd: {"ok": True, "reason": "foreground_ok"}
+        sidecar_mod.get_window_geometry = lambda hwnd: {"left": 0, "top": 0, "right": 980, "bottom": 860, "width": 980, "height": 860}
         sidecar_mod.clipboard_copy = lambda text: calls.__setitem__("clipboard", calls["clipboard"] + 1)
         sidecar_mod.hotkey = lambda modifier, key: calls.__setitem__("hotkey", calls["hotkey"] + 1)
         sidecar_mod.type_text_with_sendinput_unicode = (
             lambda *args, **kwargs: calls.__setitem__("sendinput", calls["sendinput"] + 1) or {"ok": True}
         )
+        sidecar_mod.capture_wechat = lambda *_args, **_kwargs: (Image.new("RGB", (980, 860), "white"), "search_query.png")
+        sidecar_mod.run_ocr_traced = lambda *_args, **_kwargs: []
+        sidecar_mod.target_switch_surface_state = lambda *_args, **_kwargs: {"ok": True, "reason": "surface_ready"}
+        sidecar_mod.sidebar_search_state_detected = lambda *_args, **_kwargs: {"detected": True, "reason": "search_focus"}
+        sidecar_mod.sidebar_search_query_text = lambda *_args, **_kwargs: "文件传输助手"
         sidecar_mod.time.sleep = lambda seconds: None
         result = sidecar_mod.type_sidebar_search_query(1001, "文件传输助手")
         assert_true(result.get("ok") is True and result.get("method") == "clipboard", f"expected clipboard default: {result}")

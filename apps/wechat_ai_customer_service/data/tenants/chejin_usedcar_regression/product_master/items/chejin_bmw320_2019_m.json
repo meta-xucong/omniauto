@@ -1,31 +1,133 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "category_id": "products",
   "id": "chejin_bmw320_2019_m",
   "status": "active",
   "source": {
-    "type": "test_fixture",
-    "batch_token": "CJCHK_20260610_123846"
+    "type": "manual",
+    "provider": "manual",
+    "marker": {
+      "ingest_channel": "test_fixture",
+      "original_source_type": "test_fixture",
+      "recorded_at": "2026-07-13T13:15:13"
+    },
+    "binding": {
+      "state": "unbound"
+    }
   },
-  "data": {
-    "name": "2019款宝马320Li M运动套装",
-    "sku": "CHEJIN-BMW320-2019M",
-    "category": "二手车/豪华轿车",
-    "aliases": [
-      "宝马320",
-      "宝马3系",
-      "320Li",
-      "德系",
-      "试驾"
-    ],
-    "specs": "2019年上牌，表显5.6万公里，2.0T自动挡，一手车源。",
-    "price": 12.8,
-    "unit": "台",
-    "inventory": 1,
-    "shipping_policy": "高意向试驾需转人工确认门店和时间。",
-    "warranty_policy": "精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。",
-    "reply_templates": {
-      "recommendation": "适合12到14万预算、关注品牌和驾驶感的客户。"
+  "source_payloads": {
+    "vehicle_detail": {
+      "api": "manual.dafengche_shaped_vehicle_detail",
+      "payload": {
+        "baseCarInfo": {
+          "name": "2019款宝马320Li M运动套装"
+        },
+        "carPriceInfo": {
+          "salePrice": 12.8
+        }
+      },
+      "pulled_at": "2026-07-13T13:15:13",
+      "content_hash": "sha256:e50b4a07163b66b155d032b0dd4fb68a133946b99f023ccb8602fd2ee8a83c28"
+    },
+    "vehicle_pictures": {
+      "api": "manual.dafengche_shaped_vehicle_pictures",
+      "payload": [],
+      "pulled_at": "2026-07-13T13:15:13",
+      "content_hash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  },
+  "extensions": {
+    "manual": {
+      "field_provenance": {
+        "source_payloads.vehicle_detail.payload.baseCarInfo.name": {
+          "source": "test_fixture",
+          "original_path": "data.name",
+          "original_source_type": "test_fixture",
+          "recorded_at": "2026-07-13T13:15:13"
+        },
+        "source_payloads.vehicle_detail.payload.carPriceInfo.salePrice": {
+          "source": "test_fixture",
+          "original_path": "data.price",
+          "original_source_type": "test_fixture",
+          "recorded_at": "2026-07-13T13:15:13"
+        }
+      }
+    },
+    "compatibility": {
+      "legacy_v1_record": {
+        "schema_version": 1,
+        "category_id": "products",
+        "id": "chejin_bmw320_2019_m",
+        "status": "active",
+        "source": {
+          "type": "test_fixture",
+          "batch_token": "CJCHK_20260713_131455"
+        },
+        "data": {
+          "name": "2019款宝马320Li M运动套装",
+          "sku": "CHEJIN-BMW320-2019M",
+          "category": "二手车/豪华轿车",
+          "aliases": [
+            "宝马320",
+            "宝马3系",
+            "320Li",
+            "德系",
+            "试驾"
+          ],
+          "specs": "2019年上牌，表显5.6万公里，2.0T自动挡，一手车源。",
+          "price": 12.8,
+          "unit": "台",
+          "inventory": 1,
+          "shipping_policy": "高意向试驾需转人工确认门店和时间。",
+          "warranty_policy": "精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。",
+          "reply_templates": {
+            "recommendation": "适合12到14万预算、关注品牌和驾驶感的客户。"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        },
+        "review_state": {
+          "is_new": true,
+          "new_reason": "newly_added_formal_knowledge",
+          "marked_at": "2026-07-13T13:15:13",
+          "updated_at": "2026-07-13T13:15:13",
+          "read_at": "",
+          "read_by": "",
+          "source": {
+            "source_module": "jiangsu_chejin_test",
+            "target_category": "products",
+            "item_id": "chejin_bmw320_2019_m"
+          }
+        }
+      },
+      "input_adapter": "generic_product_form_to_manual_v2"
+    },
+    "wechat_customer_service": {
+      "customer_visible_annotations": {
+        "category": "二手车/豪华轿车",
+        "specs": "2019年上牌，表显5.6万公里，2.0T自动挡，一手车源。",
+        "shipping_policy": "高意向试驾需转人工确认门店和时间。",
+        "warranty_policy": "精品车况需以检测报告为准，事故、水泡、火烧承诺必须人工确认。",
+        "aliases": [
+          "宝马320",
+          "宝马3系",
+          "320Li",
+          "德系",
+          "试驾"
+        ]
+      },
+      "manual_annotations": {
+        "sku": "CHEJIN-BMW320-2019M",
+        "unit": "台",
+        "inventory": 1,
+        "reply_templates": {
+          "recommendation": "适合12到14万预算、关注品牌和驾驶感的客户。"
+        }
+      },
+      "manual_overrides": {}
     }
   },
   "runtime": {
@@ -33,23 +135,9 @@
     "requires_handoff": false,
     "risk_level": "normal"
   },
-  "review_state": {
-    "is_new": true,
-    "new_reason": "newly_added_formal_knowledge",
-    "marked_at": "2026-06-10T12:38:55",
-    "updated_at": "2026-06-10T12:38:55",
-    "read_at": "",
-    "read_by": "",
-    "source": {
-      "source_module": "jiangsu_chejin_test",
-      "target_category": "products",
-      "item_id": "chejin_bmw320_2019_m"
-    }
-  },
   "metadata": {
-    "created_at": "2026-06-10T12:38:55",
-    "updated_at": "2026-06-10T12:38:55",
-    "created_by": "admin",
-    "updated_by": "admin"
+    "created_at": "2026-07-13T13:15:13",
+    "updated_at": "2026-07-13T13:15:13",
+    "migrated_from_schema_version": 1
   }
 }

@@ -74,6 +74,38 @@ def legacy_maybe_route_customer_image_turn(
     )
 
 
+def legacy_maybe_capture_self_image_context(
+    *,
+    connector: Any,
+    target: Any,
+    config: dict[str, Any],
+    messages: list[dict[str, Any]],
+    target_state: dict[str, Any],
+    combined: str = "",
+) -> dict[str, Any]:
+    """Compatibility seam for optional, context-only self-image vision."""
+
+    plugin = resolve_optional_capability("vision")
+    capture_self_context = getattr(plugin, "capture_self_context", None) if plugin is not None else None
+    if not callable(capture_self_context):
+        return {
+            "enabled": False,
+            "applied": False,
+            "context_only": True,
+            "reason": "vision_self_image_context_unavailable",
+        }
+    return capture_self_context(
+        {
+            "connector": connector,
+            "target": target,
+            "config": config,
+            "messages": messages,
+            "target_state": target_state,
+            "combined": combined,
+        }
+    )
+
+
 def legacy_build_brain_safe_image_proxy_messages(*args: Any, **kwargs: Any) -> list[dict[str, Any]]:
     from apps.wechat_ai_customer_service.workflows.customer_image_asset_store import (
         build_brain_safe_image_proxy_messages,

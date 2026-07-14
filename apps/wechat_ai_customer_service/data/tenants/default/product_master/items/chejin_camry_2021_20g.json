@@ -1,31 +1,145 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "category_id": "products",
   "id": "chejin_camry_2021_20g",
-  "status": "active",
+  "status": "archived",
   "source": {
-    "type": "test_fixture",
-    "batch_token": "DBG_ALT"
+    "type": "manual",
+    "provider": "manual",
+    "marker": {
+      "ingest_channel": "legacy_v1_migration",
+      "original_source_type": "test_fixture",
+      "recorded_at": "2026-07-13T05:11:12+00:00",
+      "migration_batch": "default_v1_to_v2_20260713"
+    },
+    "binding": {
+      "state": "unbound"
+    }
   },
-  "data": {
-    "name": "2021款丰田凯美瑞2.0G豪华版",
-    "sku": "CHEJIN-CAMRY-2021G",
-    "category": "二手车/中级轿车",
-    "aliases": [
-      "凯美瑞",
-      "丰田凯美瑞",
-      "8万预算",
-      "自动挡省油",
-      "通勤"
-    ],
-    "specs": "2021年上牌，表显4.8万公里，2.0L自动挡，南京现车。",
-    "price": 8.98,
-    "unit": "台",
-    "inventory": 1,
-    "shipping_policy": "南京门店可看车，异地提档和物流需人工确认。",
-    "warranty_policy": "车况以检测报告和合同为准，不承诺口头赔付。",
-    "reply_templates": {
-      "recommendation": "适合8到10万预算、家用通勤和省油需求。"
+  "source_payloads": {
+    "vehicle_detail": {
+      "api": "manual.dafengche_shaped_vehicle_detail",
+      "payload": {
+        "baseCarInfo": {
+          "name": "2021款丰田凯美瑞2.0G豪华版"
+        },
+        "carPriceInfo": {
+          "salePrice": 8.98
+        }
+      },
+      "pulled_at": "2026-07-13T05:11:12+00:00",
+      "content_hash": "sha256:76ed95e7524173ee524be7e4ace7f3f0690fb10cc6cde0a956866bfe83c0b9bf"
+    },
+    "vehicle_pictures": {
+      "api": "manual.dafengche_shaped_vehicle_pictures",
+      "payload": [],
+      "pulled_at": "2026-07-13T05:11:12+00:00",
+      "content_hash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  },
+  "extensions": {
+    "manual": {
+      "field_provenance": {
+        "source_payloads.vehicle_detail.payload.baseCarInfo.name": {
+          "source": "legacy_v1_migration",
+          "original_path": "data.name",
+          "original_source_type": "test_fixture",
+          "recorded_at": "2026-07-13T05:11:12+00:00"
+        },
+        "source_payloads.vehicle_detail.payload.carPriceInfo.salePrice": {
+          "source": "legacy_v1_migration",
+          "original_path": "data.price",
+          "original_source_type": "test_fixture",
+          "recorded_at": "2026-07-13T05:11:12+00:00"
+        }
+      }
+    },
+    "compatibility": {
+      "legacy_v1_record": {
+        "schema_version": 1,
+        "category_id": "products",
+        "id": "chejin_camry_2021_20g",
+        "status": "active",
+        "source": {
+          "type": "test_fixture",
+          "batch_token": "DBG_ALT"
+        },
+        "data": {
+          "name": "2021款丰田凯美瑞2.0G豪华版",
+          "sku": "CHEJIN-CAMRY-2021G",
+          "category": "二手车/中级轿车",
+          "aliases": [
+            "凯美瑞",
+            "丰田凯美瑞",
+            "8万预算",
+            "自动挡省油",
+            "通勤"
+          ],
+          "specs": "2021年上牌，表显4.8万公里，2.0L自动挡，南京现车。",
+          "price": 8.98,
+          "unit": "台",
+          "inventory": 1,
+          "shipping_policy": "南京门店可看车，异地提档和物流需人工确认。",
+          "warranty_policy": "车况以检测报告和合同为准，不承诺口头赔付。",
+          "reply_templates": {
+            "recommendation": "适合8到10万预算、家用通勤和省油需求。"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        },
+        "review_state": {
+          "is_new": true,
+          "new_reason": "newly_added_formal_knowledge",
+          "marked_at": "2026-06-05T23:09:08",
+          "updated_at": "2026-06-05T23:09:08",
+          "read_at": "",
+          "read_by": "",
+          "source": {
+            "source_module": "jiangsu_chejin_test",
+            "target_category": "products",
+            "item_id": "chejin_camry_2021_20g"
+          }
+        },
+        "metadata": {
+          "created_at": "2026-06-05T23:09:08",
+          "updated_at": "2026-06-05T23:09:08",
+          "created_by": "admin",
+          "updated_by": "admin"
+        }
+      },
+      "input_adapter": "generic_product_form_to_manual_v2",
+      "migration": {
+        "from_schema_version": 1,
+        "batch_id": "default_v1_to_v2_20260713",
+        "migrated_at": "2026-07-13T05:11:12+00:00"
+      }
+    },
+    "wechat_customer_service": {
+      "customer_visible_annotations": {
+        "category": "二手车/中级轿车",
+        "specs": "2021年上牌，表显4.8万公里，2.0L自动挡，南京现车。",
+        "shipping_policy": "南京门店可看车，异地提档和物流需人工确认。",
+        "warranty_policy": "车况以检测报告和合同为准，不承诺口头赔付。",
+        "aliases": [
+          "凯美瑞",
+          "丰田凯美瑞",
+          "8万预算",
+          "自动挡省油",
+          "通勤"
+        ]
+      },
+      "manual_annotations": {
+        "sku": "CHEJIN-CAMRY-2021G",
+        "unit": "台",
+        "inventory": 1,
+        "reply_templates": {
+          "recommendation": "适合8到10万预算、家用通勤和省油需求。"
+        }
+      },
+      "manual_overrides": {}
     }
   },
   "runtime": {
@@ -33,23 +147,12 @@
     "requires_handoff": false,
     "risk_level": "normal"
   },
-  "review_state": {
-    "is_new": true,
-    "new_reason": "newly_added_formal_knowledge",
-    "marked_at": "2026-06-05T23:09:08",
-    "updated_at": "2026-06-05T23:09:08",
-    "read_at": "",
-    "read_by": "",
-    "source": {
-      "source_module": "jiangsu_chejin_test",
-      "target_category": "products",
-      "item_id": "chejin_camry_2021_20g"
-    }
-  },
   "metadata": {
     "created_at": "2026-06-05T23:09:08",
-    "updated_at": "2026-06-05T23:09:08",
+    "updated_at": "2026-07-13T13:16:12",
     "created_by": "admin",
-    "updated_by": "admin"
+    "updated_by": "admin",
+    "migrated_from_schema_version": 1,
+    "migration_batch": "default_v1_to_v2_20260713"
   }
 }

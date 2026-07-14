@@ -1277,12 +1277,12 @@ def product_has_price_or_stock(item: dict[str, Any]) -> bool:
 
 
 def catalog_product_candidates(text: str, *, limit: int, context: dict[str, Any] | None = None) -> list[dict[str, Any]]:
+    context = context if isinstance(context, dict) else {}
     try:
         runtime = KnowledgeRuntime()
-        items = runtime.list_items("products")
+        items = runtime.list_customer_evidence_items("products", shop_code=customer_evidence_shop_code(context))
     except Exception:
         return []
-    context = context if isinstance(context, dict) else {}
     semantic_text = semantic_text_for_catalog_matching(text)
     context_products = context_product_candidates(runtime, context, semantic_text, items=items)
     context_product = context_products[0] if context_products else None
@@ -1905,7 +1905,7 @@ def context_product_candidate(
     if text_has_unresolved_explicit_product_reference(text, items=items):
         return None
     try:
-        item = runtime.get_item("products", product_id)
+        item = runtime_customer_evidence_item(runtime, product_id, context)
     except Exception:
         return None
     if not isinstance(item, dict):
@@ -1941,7 +1941,7 @@ def context_product_candidates(
             continue
         seen.add(product_id)
         try:
-            item = runtime.get_item("products", product_id)
+            item = runtime_customer_evidence_item(runtime, product_id, context)
         except Exception:
             continue
         if not isinstance(item, dict):
@@ -2168,6 +2168,13 @@ def flatten_text_values(value: Any) -> list[str]:
 
 
 def catalog_product_payload(item: dict[str, Any]) -> dict[str, Any]:
+    customer_evidence = item.get("customer_evidence") if isinstance(item.get("customer_evidence"), dict) else None
+    if customer_evidence is not None:
+        payload = dict(customer_evidence)
+        payload.setdefault("id", item.get("id"))
+        payload.setdefault("category_id", PRODUCT_MASTER_CATEGORY_ID)
+        payload.setdefault("authority_level", "product_master")
+        return payload
     data = item.get("data", {}) or {}
     price_tiers = data.get("price_tiers", []) or data.get("discount_tiers", []) or []
     shipping_policy = str(data.get("shipping_policy") or data.get("shipping") or "")
@@ -2193,6 +2200,33 @@ def catalog_product_payload(item: dict[str, Any]) -> dict[str, Any]:
         "reply_templates": compact_mapping(data.get("reply_templates", {}) or {}, max_text_chars=260),
         "risk_rules": list(data.get("risk_rules", []) or [])[:8],
     }
+
+
+def customer_evidence_shop_code(context: dict[str, Any]) -> str | None:
+    """Read only an explicit session/shop binding; never infer a shop from text."""
+
+    candidates = [context]
+    for key in ("shop_scope", "session_scope", "tenant_scope"):
+        nested = context.get(key)
+        if isinstance(nested, dict):
+            candidates.append(nested)
+    for candidate in candidates:
+        for key in ("shop_code", "shopCode"):
+            value = str(candidate.get(key) or "").strip()
+            if value:
+                return value
+    return None
+
+
+def runtime_customer_evidence_item(runtime: KnowledgeRuntime, product_id: str, context: dict[str, Any]) -> dict[str, Any] | None:
+    try:
+        return runtime.get_customer_evidence_item(
+            "products",
+            product_id,
+            shop_code=customer_evidence_shop_code(context),
+        )
+    except Exception:
+        return None
 
 
 def compact_decision(decision: Any) -> dict[str, Any]:

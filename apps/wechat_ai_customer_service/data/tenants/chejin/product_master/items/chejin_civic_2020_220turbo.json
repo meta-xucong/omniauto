@@ -1,30 +1,294 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "category_id": "products",
   "id": "chejin_civic_2020_220turbo",
   "status": "active",
   "source": {
-    "type": "test_fixture",
-    "batch_token": "CHEJIN_20260518_150628"
+    "type": "manual",
+    "provider": "manual",
+    "marker": {
+      "ingest_channel": "legacy_v1_migration",
+      "original_source_type": "test_fixture",
+      "recorded_at": "2026-07-13T04:53:45+00:00",
+      "migration_batch": "chejin_v1_to_v2_20260713"
+    },
+    "binding": {
+      "state": "unbound"
+    }
   },
-  "data": {
-    "name": "2020款本田思域220TURBO劲动版",
-    "sku": "CHEJIN-CIVIC-2020T",
-    "category": "二手车/紧凑型轿车",
-    "aliases": [
-      "思域",
-      "本田思域",
-      "年轻客户",
-      "首付三成"
-    ],
-    "specs": "2020年上牌，表显6.1万公里，1.5T自动挡，外观轻微补漆。",
-    "price": 7.58,
-    "unit": "台",
-    "inventory": 1,
-    "shipping_policy": "门店看车后可协助过户，金融结果以资方审批为准。",
-    "warranty_policy": "车况以检测报告和合同为准，不承诺贷款必过。",
-    "reply_templates": {
-      "recommendation": "适合年轻客户、预算7到8万、想要动力和外观的需求。"
+  "source_payloads": {
+    "vehicle_detail": {
+      "api": "manual.dafengche_shaped_vehicle_detail",
+      "payload": {
+        "baseCarInfo": {
+          "name": "2020款本田思域220TURBO劲动版",
+          "firstLicensePlateDate": "2020",
+          "mileage": 6.1,
+          "carName": "测试车辆-06",
+          "brandName": "测试品牌-06",
+          "seriesName": "测试车系-06",
+          "modelName": "测试车型-06",
+          "vehicleCondition": "测试车况：良好",
+          "exteriorColor": "测试深灰色",
+          "color": "测试深灰色",
+          "interiorColor": "测试黑色"
+        },
+        "carPriceInfo": {
+          "salePrice": 7.58,
+          "purchasePrice": 10.22,
+          "salesPrice": 12.22,
+          "managerPrice": 11.72,
+          "wholesalePrice": 11.22
+        },
+        "carModelParam": {
+          "displacement": "1.5T",
+          "gearbox": "自动",
+          "gearBox": "测试自动"
+        },
+        "operationPhase": "TEST_SALE",
+        "carLicenseInfo": {
+          "licenseStatus": "测试手续正常"
+        }
+      },
+      "pulled_at": "2026-07-13T04:53:45+00:00",
+      "content_hash": "sha256:5262457f80d72894a0281fcaf6e7667e031cd24634e92f07232f746a07d311f7",
+      "enriched_at": "2026-07-13T06:42:22+00:00",
+      "test_filled_at": "2026-07-13T07:47:11+00:00"
+    },
+    "vehicle_pictures": {
+      "api": "manual.dafengche_shaped_vehicle_pictures",
+      "payload": [],
+      "pulled_at": "2026-07-13T04:53:45+00:00",
+      "content_hash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  },
+  "extensions": {
+    "manual": {
+      "field_provenance": {
+        "source_payloads.vehicle_detail.payload.baseCarInfo.name": {
+          "source": "legacy_v1_migration",
+          "original_path": "data.name",
+          "original_source_type": "test_fixture",
+          "recorded_at": "2026-07-13T04:53:45+00:00"
+        },
+        "source_payloads.vehicle_detail.payload.carPriceInfo.salePrice": {
+          "source": "legacy_v1_migration",
+          "original_path": "data.price",
+          "original_source_type": "test_fixture",
+          "recorded_at": "2026-07-13T04:53:45+00:00"
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.firstLicensePlateDate": {
+          "source": "legacy_v1_snapshot_enrichment",
+          "original_path": "data.specs",
+          "recorded_at": "2026-07-13T06:42:22+00:00",
+          "evidence": "2020年上牌"
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.mileage": {
+          "source": "legacy_v1_snapshot_enrichment",
+          "original_path": "data.specs",
+          "recorded_at": "2026-07-13T06:42:22+00:00",
+          "evidence": "表显6.1万公里"
+        },
+        "source_payloads.vehicle_detail.payload.carModelParam.displacement": {
+          "source": "legacy_v1_snapshot_enrichment",
+          "original_path": "data.specs",
+          "recorded_at": "2026-07-13T06:42:22+00:00",
+          "evidence": "1.5T"
+        },
+        "source_payloads.vehicle_detail.payload.carModelParam.gearbox": {
+          "source": "legacy_v1_snapshot_enrichment",
+          "original_path": "data.specs",
+          "recorded_at": "2026-07-13T06:42:22+00:00",
+          "evidence": "万公里，1.5T自动挡，外观轻微补漆"
+        },
+        "source_payloads.vehicle_detail.payload.operationPhase": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.carName": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.brandName": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.seriesName": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.modelName": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.vehicleCondition": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.exteriorColor": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.color": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.baseCarInfo.interiorColor": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.carModelParam.gearBox": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.carPriceInfo.purchasePrice": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.carPriceInfo.salesPrice": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.carPriceInfo.managerPrice": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.carPriceInfo.wholesalePrice": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        },
+        "source_payloads.vehicle_detail.payload.carLicenseInfo.licenseStatus": {
+          "source": "test_fixture_fill",
+          "recorded_at": "2026-07-13T07:47:11+00:00",
+          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+          "test_only": true
+        }
+      },
+      "test_fixture": {
+        "enabled": true,
+        "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
+        "filled_at": "2026-07-13T07:47:11+00:00",
+        "purpose": "wechat_customer_service_field_recognition"
+      }
+    },
+    "compatibility": {
+      "legacy_v1_record": {
+        "schema_version": 1,
+        "category_id": "products",
+        "id": "chejin_civic_2020_220turbo",
+        "status": "active",
+        "source": {
+          "type": "test_fixture",
+          "batch_token": "CHEJIN_20260518_150628"
+        },
+        "data": {
+          "name": "2020款本田思域220TURBO劲动版",
+          "sku": "CHEJIN-CIVIC-2020T",
+          "category": "二手车/紧凑型轿车",
+          "aliases": [
+            "思域",
+            "本田思域",
+            "年轻客户",
+            "首付三成"
+          ],
+          "specs": "2020年上牌，表显6.1万公里，1.5T自动挡，外观轻微补漆。",
+          "price": 7.58,
+          "unit": "台",
+          "inventory": 1,
+          "shipping_policy": "门店看车后可协助过户，金融结果以资方审批为准。",
+          "warranty_policy": "车况以检测报告和合同为准，不承诺贷款必过。",
+          "reply_templates": {
+            "recommendation": "适合年轻客户、预算7到8万、想要动力和外观的需求。"
+          }
+        },
+        "runtime": {
+          "allow_auto_reply": true,
+          "requires_handoff": false,
+          "risk_level": "normal"
+        },
+        "review_state": {
+          "is_new": false,
+          "new_reason": "newly_added_formal_knowledge",
+          "marked_at": "2026-05-18T15:07:12",
+          "updated_at": "2026-05-19T11:24:18",
+          "read_at": "2026-05-19T11:24:18",
+          "read_by": "admin",
+          "source": {
+            "source_module": "jiangsu_chejin_test",
+            "target_category": "products",
+            "item_id": "chejin_civic_2020_220turbo"
+          }
+        },
+        "metadata": {
+          "created_at": "2026-05-18T15:07:12",
+          "updated_at": "2026-05-19T11:24:18",
+          "created_by": "admin",
+          "updated_by": "admin"
+        }
+      },
+      "migration": {
+        "from_schema_version": 1,
+        "batch_id": "chejin_v1_to_v2_20260713",
+        "migrated_at": "2026-07-13T04:53:45+00:00"
+      },
+      "legacy_snapshot_enrichment": {
+        "batch_id": "chejin_v2_legacy_snapshot_enrichment_20260713",
+        "source": "legacy_v1_snapshot_enrichment",
+        "enriched_at": "2026-07-13T06:45:00+00:00",
+        "field_count": 0,
+        "retired_data_shadow_removed": true
+      }
+    },
+    "wechat_customer_service": {
+      "customer_visible_annotations": {
+        "category": "二手车/紧凑型轿车",
+        "specs": "2020年上牌，表显6.1万公里，1.5T自动挡，外观轻微补漆。",
+        "shipping_policy": "门店看车后可协助过户，金融结果以资方审批为准。",
+        "warranty_policy": "车况以检测报告和合同为准，不承诺贷款必过。",
+        "aliases": [
+          "思域",
+          "本田思域",
+          "年轻客户",
+          "首付三成"
+        ]
+      },
+      "manual_annotations": {
+        "sku": "CHEJIN-CIVIC-2020T",
+        "unit": "台",
+        "inventory": 1,
+        "reply_templates": {
+          "recommendation": "适合年轻客户、预算7到8万、想要动力和外观的需求。"
+        }
+      },
+      "manual_overrides": {}
     }
   },
   "runtime": {
@@ -32,23 +296,16 @@
     "requires_handoff": false,
     "risk_level": "normal"
   },
-  "review_state": {
-    "is_new": false,
-    "new_reason": "newly_added_formal_knowledge",
-    "marked_at": "2026-05-18T15:07:12",
-    "updated_at": "2026-05-19T11:24:18",
-    "read_at": "2026-05-19T11:24:18",
-    "read_by": "admin",
-    "source": {
-      "source_module": "jiangsu_chejin_test",
-      "target_category": "products",
-      "item_id": "chejin_civic_2020_220turbo"
-    }
-  },
   "metadata": {
     "created_at": "2026-05-18T15:07:12",
-    "updated_at": "2026-05-19T11:24:18",
+    "updated_at": "2026-07-13T15:47:11",
     "created_by": "admin",
-    "updated_by": "admin"
+    "updated_by": "admin",
+    "migrated_from_schema_version": 1,
+    "migration_batch": "chejin_v1_to_v2_20260713",
+    "legacy_snapshot_enriched_at": "2026-07-13T06:45:00+00:00",
+    "legacy_snapshot_enrichment_batch": "chejin_v2_legacy_snapshot_enrichment_20260713",
+    "test_fixture_last_action": "filled",
+    "test_fixture_batch": "chejin_v2_wechat_recognition_test_fields_20260713"
   }
 }

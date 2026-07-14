@@ -25,7 +25,7 @@ def main() -> int:
     checks = [
         check_archive_prompt_event_writes_jsonl_and_redacts_secrets,
         check_archive_disable_env_skips_write,
-        check_brain_prompt_archive_defaults_to_visual_turns_only,
+        check_brain_prompt_archive_excludes_ephemeral_visual_turns,
     ]
     results: list[dict[str, Any]] = []
     for check in checks:
@@ -91,11 +91,19 @@ def check_archive_disable_env_skips_write() -> None:
         restore_env("CUSTOMER_SERVICE_PROMPT_ARCHIVE_ENABLED", old_enabled)
 
 
-def check_brain_prompt_archive_defaults_to_visual_turns_only() -> None:
+def check_brain_prompt_archive_excludes_ephemeral_visual_turns() -> None:
     non_visual = {"current_message": {"text": "hello"}}
     visual = {"current_message": {"text": "image", "visual_bridge_input": {"present": True}}}
     assert_true(should_archive_brain_prompt(settings={}, brain_input=non_visual) is False, "non-visual brain prompt should not archive by default")
-    assert_true(should_archive_brain_prompt(settings={}, brain_input=visual) is True, "visual brain prompt should archive by default")
+    assert_true(should_archive_brain_prompt(settings={}, brain_input=visual) is False, "ephemeral visual bridge must never archive a Brain prompt")
+    assert_true(
+        should_archive_brain_prompt(
+            settings={"prompt_archive": {"include_all_brain_prompts": True}},
+            brain_input=visual,
+        )
+        is False,
+        "include_all_brain_prompts must not override the visual privacy block",
+    )
     assert_true(
         should_archive_brain_prompt(
             settings={"prompt_archive": {"include_all_brain_prompts": True}},

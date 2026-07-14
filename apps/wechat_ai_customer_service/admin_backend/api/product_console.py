@@ -9,6 +9,7 @@ from typing import Any
 from uuid import uuid4
 
 from fastapi import APIRouter, File, Form, HTTPException, Query, UploadFile
+from fastapi.responses import FileResponse
 
 from apps.wechat_ai_customer_service.knowledge_paths import runtime_app_root
 
@@ -33,6 +34,45 @@ def product_detail(product_id: str) -> dict[str, Any]:
         return service().detail(product_id)
     except FileNotFoundError as exc:
         raise HTTPException(status_code=404, detail=f"product not found: {product_id}") from exc
+
+
+@router.put("/products/{product_id}/admin-view")
+def update_product_admin_view(product_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+    """V2-only admin edit boundary; never writes the retired generic data map."""
+
+    try:
+        return service().update_admin_view(product_id, payload or {})
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=f"product not found: {product_id}") from exc
+    except (TypeError, ValueError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@router.post("/products/{product_id}/images")
+async def upload_vehicle_image(product_id: str, file: UploadFile = File(...)) -> dict[str, Any]:
+    """Upload one image into a manual V2 vehicle's original picture payload."""
+
+    try:
+        content = await file.read()
+        return service().upload_vehicle_image(
+            product_id,
+            filename=file.filename or "vehicle-image",
+            content=content,
+            content_type=file.content_type,
+        )
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=f"product not found: {product_id}") from exc
+    except (OSError, TypeError, ValueError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@router.get("/products/{product_id}/images/{image_id}")
+def get_vehicle_image(product_id: str, image_id: str) -> FileResponse:
+    try:
+        path, media_type = service().vehicle_image_file(product_id, image_id)
+        return FileResponse(path, media_type=media_type)
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail="vehicle image not found") from exc
 
 
 @router.post("/products/{product_id}/inventory")

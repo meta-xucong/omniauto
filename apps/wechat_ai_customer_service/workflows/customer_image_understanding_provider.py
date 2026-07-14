@@ -1,12 +1,16 @@
 from __future__ import annotations
 
 import base64
+import io
 import json
 import mimetypes
 import urllib.error
 import urllib.request
+import warnings
 from pathlib import Path
 from typing import Any
+
+from PIL import Image, ImageOps
 
 try:
     from llm_output_adapter import parse_llm_json_object
@@ -16,19 +20,76 @@ except Exception:  # pragma: no cover - script mode fallback
 
 DEFAULT_MAX_TOKENS = 1800
 DEFAULT_TEMPERATURE = 0.1
+MAX_IMAGE_PAYLOAD_BYTES = 3 * 1024 * 1024
+MAX_IMAGE_SOURCE_BYTES = 12 * 1024 * 1024
+MAX_IMAGE_EDGE_PX = 2048
+MAX_IMAGE_PIXELS = 20_000_000
+
+
+class ImagePayloadError(ValueError):
+    """Raised when a local visual asset cannot be safely sent to a provider."""
+
+
+def _memory_image_payload_bytes(payload: Any) -> tuple[bytes, str]:
+    """Read an ephemeral image payload without accepting a filesystem path."""
+    if isinstance(payload, dict):
+        raw = payload.get("image_bytes")
+        mime_type = str(payload.get("mime_type") or "image/png")
+        released = bool(payload.get("released", False))
+    else:
+        raw = getattr(payload, "image_bytes", None)
+        mime_type = str(getattr(payload, "mime_type", "") or "image/png")
+        released = bool(getattr(payload, "released", False))
+    if released:
+        raise ImagePayloadError("ephemeral_image_payload_released")
+    if not isinstance(raw, (bytes, bytearray, memoryview)):
+        raise ImagePayloadError("ephemeral_image_payload_missing")
+    image_bytes = bytes(raw)
+    if not image_bytes:
+        raise ImagePayloadError("ephemeral_image_payload_empty")
+    if len(image_bytes) > MAX_IMAGE_PAYLOAD_BYTES:
+        raise ImagePayloadError("ephemeral_image_payload_too_large")
+    if not mime_type.startswith("image/"):
+        raise ImagePayloadError("ephemeral_image_mime_invalid")
+    return image_bytes, mime_type
+
+
+def _payload_image_bytes(path: str | Path) -> tuple[bytes, str]:
+    # Compatibility name retained for callers, but local paths are no longer a
+    # valid vision input.  This prevents historical crops, thumbnails and any
+    # arbitrary local file from being sent to the model.
+    del path
+    raise ImagePayloadError("legacy_image_path_input_rejected")
 
 
 def data_url_from_image_path(path: str | Path) -> str:
-    image_path = Path(path)
-    mime_type = mimetypes.guess_type(str(image_path))[0] or "image/jpeg"
-    encoded = base64.b64encode(image_path.read_bytes()).decode("ascii")
+    image_bytes, mime_type = _payload_image_bytes(path)
+    encoded = base64.b64encode(image_bytes).decode("ascii")
+    return f"data:{mime_type};base64,{encoded}"
+
+
+def data_url_from_memory_image_payload(payload: Any) -> str:
+    image_bytes, mime_type = _memory_image_payload_bytes(payload)
+    encoded = base64.b64encode(image_bytes).decode("ascii")
     return f"data:{mime_type};base64,{encoded}"
 
 
 def anthropic_image_part(path: str | Path) -> dict[str, Any]:
-    image_path = Path(path)
-    mime_type = mimetypes.guess_type(str(image_path))[0] or "image/jpeg"
-    encoded = base64.b64encode(image_path.read_bytes()).decode("ascii")
+    image_bytes, mime_type = _payload_image_bytes(path)
+    encoded = base64.b64encode(image_bytes).decode("ascii")
+    return {
+        "type": "image",
+        "source": {
+            "type": "base64",
+            "media_type": mime_type,
+            "data": encoded,
+        },
+    }
+
+
+def anthropic_memory_image_part(payload: Any) -> dict[str, Any]:
+    image_bytes, mime_type = _memory_image_payload_bytes(payload)
+    encoded = base64.b64encode(image_bytes).decode("ascii")
     return {
         "type": "image",
         "source": {
@@ -46,12 +107,13 @@ def build_openai_chat_vision_payload(
     image_paths: list[str],
     max_tokens: int = DEFAULT_MAX_TOKENS,
     temperature: float = DEFAULT_TEMPERATURE,
+    image_payloads: list[Any] | None = None,
 ) -> dict[str, Any]:
+    if any(str(path).strip() for path in image_paths or []):
+        raise ImagePayloadError("legacy_image_path_input_rejected")
     content = [{"type": "text", "text": str(prompt or "")}]
-    for path in image_paths:
-        if not str(path).strip():
-            continue
-        content.append({"type": "image_url", "image_url": {"url": data_url_from_image_path(path)}})
+    for payload in image_payloads or []:
+        content.append({"type": "image_url", "image_url": {"url": data_url_from_memory_image_payload(payload)}})
     return {
         "model": model,
         "messages": [{"role": "user", "content": content}],
@@ -68,12 +130,13 @@ def build_anthropic_messages_vision_payload(
     image_paths: list[str],
     max_tokens: int = DEFAULT_MAX_TOKENS,
     temperature: float = DEFAULT_TEMPERATURE,
+    image_payloads: list[Any] | None = None,
 ) -> dict[str, Any]:
+    if any(str(path).strip() for path in image_paths or []):
+        raise ImagePayloadError("legacy_image_path_input_rejected")
     content = [{"type": "text", "text": str(prompt or "")}]
-    for path in image_paths:
-        if not str(path).strip():
-            continue
-        content.append(anthropic_image_part(path))
+    for payload in image_payloads or []:
+        content.append(anthropic_memory_image_part(payload))
     return {
         "model": model,
         "messages": [{"role": "user", "content": content}],
@@ -151,39 +214,62 @@ def run_customer_image_understanding_provider(
     timeout_seconds: int,
     max_tokens: int = DEFAULT_MAX_TOKENS,
     temperature: float = DEFAULT_TEMPERATURE,
+    image_payloads: list[Any] | None = None,
 ) -> dict[str, Any]:
     clean_style = str(request_style or "openai_chat_vision").strip().lower()
-    if clean_style == "anthropic_messages_vision":
-        payload = build_anthropic_messages_vision_payload(
-            model=model,
-            prompt=prompt,
-            image_paths=image_paths,
-            max_tokens=max_tokens,
-            temperature=temperature,
-        )
-        url = str(base_url or "").rstrip("/") + "/messages"
-        headers = {
-            "x-api-key": api_key,
-            "anthropic-version": "2023-06-01",
-            "Content-Type": "application/json",
-            "Accept": "application/json",
+    if [str(path).strip() for path in image_paths if str(path).strip()]:
+        return {
+            "ok": False,
+            "status": 0,
+            "error": "legacy_image_path_input_rejected",
+            "provider": "",
+            "model": model,
+            "request_style": clean_style,
         }
-        extractor = extract_anthropic_response_text
-    else:
-        payload = build_openai_chat_vision_payload(
-            model=model,
-            prompt=prompt,
-            image_paths=image_paths,
-            max_tokens=max_tokens,
-            temperature=temperature,
-        )
-        url = str(base_url or "").rstrip("/") + "/chat/completions"
-        headers = {
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json",
-            "Accept": "application/json",
+    try:
+        if clean_style == "anthropic_messages_vision":
+            payload = build_anthropic_messages_vision_payload(
+                model=model,
+                prompt=prompt,
+                image_paths=image_paths,
+                max_tokens=max_tokens,
+                temperature=temperature,
+                image_payloads=image_payloads,
+            )
+            url = str(base_url or "").rstrip("/") + "/messages"
+            headers = {
+                "x-api-key": api_key,
+                "anthropic-version": "2023-06-01",
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+            }
+            extractor = extract_anthropic_response_text
+        else:
+            payload = build_openai_chat_vision_payload(
+                model=model,
+                prompt=prompt,
+                image_paths=image_paths,
+                max_tokens=max_tokens,
+                temperature=temperature,
+                image_payloads=image_payloads,
+            )
+            url = str(base_url or "").rstrip("/") + "/chat/completions"
+            headers = {
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+            }
+            extractor = extract_openai_response_text
+    except (ImagePayloadError, Image.DecompressionBombError, OSError, ValueError, Warning) as exc:
+        return {
+            "ok": False,
+            "status": 0,
+            "error": "customer_image_understanding_image_payload_invalid",
+            "response_diagnostics": {"image_payload_error": str(exc)[:240]},
+            "provider": "",
+            "model": model,
+            "request_style": clean_style,
         }
-        extractor = extract_openai_response_text
     request = urllib.request.Request(
         url,
         data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),

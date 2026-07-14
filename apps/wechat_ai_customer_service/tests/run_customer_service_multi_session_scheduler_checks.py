@@ -451,6 +451,178 @@ def check_session_monitor_visual_unread_badge_retriggers_after_reset(tmp_dir: Pa
     assert_equal([item.name for item in red_again], ["客户A"], "a new visual badge after reset should retrigger capture")
 
 
+def check_session_monitor_persistent_badge_is_acknowledged_once() -> None:
+    """A red dot that stays painted after capture is one event, not a poll loop."""
+
+    with tempfile.TemporaryDirectory() as temp:
+        monitor = SessionMonitor(state_path=Path(temp) / "session_monitor.json", max_targets_per_iteration=2)
+        baseline = {
+            "name": "客户A",
+            "session_key": "wx:rpa:v1:persistent-badge",
+            "content": "",
+            "time": "",
+            "unread_badge": "",
+            "conversation_type": "private",
+        }
+        assert_equal(monitor.poll(FakeSessionConnector([baseline])), [], "baseline should not create a second event")
+        red_row = {**baseline, "content": "库里有A4L吗", "time": "10:00", "unread_badge": "visual_red_dot"}
+        first = monitor.poll(FakeSessionConnector([red_row]))
+        assert_equal(len(first), 1, "a badge rising edge should dispatch once")
+        first_event = str(first[0].pending_observation_id or "")
+        assert_true(bool(first_event), "dispatched monitor target must carry a stable event identity")
+        monitor.reset_unread(first[0].session_key)
+        repeated = monitor.poll(FakeSessionConnector([red_row]))
+        assert_equal(repeated, [], "the unchanged painted badge must not re-arm after acknowledgement")
+        ocr_variant = {**red_row, "content": "库里有A4L么"}
+        assert_equal(
+            monitor.poll(FakeSessionConnector([ocr_variant])),
+            [],
+            "one post-acknowledgement OCR preview correction must not re-arm the same badge event",
+        )
+        state = monitor.all_sessions()[0]
+        assert_equal(
+            state.get("acknowledged_observation_id"),
+            first_event,
+            "reset must persist acknowledgement of the exact sidebar event",
+        )
+        cleared_row = {**red_row, "unread_badge": ""}
+        assert_equal(monitor.poll(FakeSessionConnector([cleared_row])), [], "badge disappearance is a baseline transition only")
+        next_event = monitor.poll(FakeSessionConnector([red_row]))
+        assert_equal(len(next_event), 1, "a later badge rising edge must remain dispatchable")
+        assert_true(
+            str(next_event[0].pending_observation_id or "") != first_event,
+            "a later rising edge must receive a different event identity",
+        )
+
+
+def check_scheduler_observation_identity_dedupes_persistent_unread_after_capture() -> None:
+    """Replay the incident: stable sidebar input must not stale its own reply."""
+
+    state = empty_state()
+    first_message = message("客户A", 1, content="帮我看看你们库里是有这台车吧？")
+    signal = {
+        "name": "客户A",
+        "session_key": "wx:rpa:v1:observation-replay",
+        "conversation_type": "private",
+        "content": first_message["content"],
+        "time": "00:05",
+        "unread_badge": "visual_red_dot",
+        "unread_detected": True,
+        "session_observation_id": "pending-observation:incident-001",
+    }
+    record_session_signal(state, signal, now="2026-07-14T00:07:20")
+    session = session_by_name(state, "客户A")
+    first_signal_id = str(session.get("pending_signal_id") or "")
+    assert_true(bool(first_signal_id), "first source observation must create one pending event")
+    capture = record_capture_result(
+        state,
+        "客户A",
+        messages=[first_message],
+        batch=[first_message],
+        session_key="wx:rpa:v1:observation-replay",
+        conversation_type="private",
+        now="2026-07-14T00:07:22",
+    )
+    assert_equal(capture.get("status"), "captured", "incident replay needs a captured customer turn")
+    record_session_signal(state, signal, now="2026-07-14T00:07:27")
+    session = session_by_name(state, "客户A")
+    assert_true(not session.get("pending_capture"), "same source observation must not create a second capture window")
+    assert_equal(
+        str(session.get("pending_signal_id") or ""),
+        first_signal_id,
+        "a repeat poll must not replace the reply's source event id",
+    )
+    captured_events = [item for item in (state.get("events") or []) if item.get("event") == "scheduler_capture_enqueued"]
+    assert_equal(len(captured_events), 1, "persistent unread polling must enqueue only once")
+    second_signal = {
+        **signal,
+        "content": "那这台车现在还在吗？",
+        "time": "00:08",
+        "session_observation_id": "pending-observation:incident-002",
+    }
+    record_session_signal(state, second_signal, now="2026-07-14T00:08:20")
+    session = session_by_name(state, "客户A")
+    assert_true(bool(session.get("pending_capture")), "a different source observation must still enqueue follow-up work")
+    assert_true(
+        str(session.get("pending_signal_id") or "") != first_signal_id,
+        "a genuine follow-up must replace the old event id and stale only old work",
+    )
+
+
+def check_scheduler_legacy_pending_adopts_first_observation_identity() -> None:
+    """Upgrade must turn an old time-window pending record into a stable event."""
+
+    state = empty_state()
+    pending = enqueue_pending_session(
+        state,
+        "客户A",
+        session_key="wx:rpa:v1:legacy-pending-observation",
+        conversation_type="private",
+        now="2026-07-14T00:09:22",
+    )
+    legacy_id = str(pending.get("pending_signal_id") or "")
+    record_session_signal(
+        state,
+        {
+            "name": "客户A",
+            "session_key": "wx:rpa:v1:legacy-pending-observation",
+            "conversation_type": "private",
+            "content": "帮我看看你们库里是有这台车吧？",
+            "time": "00:05",
+            "unread_detected": True,
+            "session_observation_id": "pending-observation:legacy-adopted",
+        },
+        now="2026-07-14T00:10:00",
+    )
+    session = session_by_name(state, "客户A")
+    assert_equal(
+        session.get("pending_observation_id"),
+        "pending-observation:legacy-adopted",
+        "first post-upgrade observation must bind legacy pending work to its source",
+    )
+    assert_true(
+        str(session.get("pending_signal_id") or "") != legacy_id,
+        "legacy time-window id must be replaced before freshness compares the capture",
+    )
+
+
+def check_session_monitor_legacy_pending_binds_observation_before_reset() -> None:
+    """Persisted monitor state from before this fix must not re-arm once."""
+
+    with tempfile.TemporaryDirectory() as temp:
+        monitor = SessionMonitor(state_path=Path(temp) / "session_monitor.json", max_targets_per_iteration=2)
+        key = "wx:rpa:v1:legacy-monitor-pending"
+        monitor._sessions[key] = SessionState(  # noqa: SLF001 - migration behavior requires a pre-upgrade state fixture.
+            name="客户A",
+            session_key=key,
+            last_content_digest="legacy-digest",
+            last_message_time="00:05",
+            last_unread_badge="visual_red_dot",
+            unread_detected=True,
+            pending_since="2026-07-14T00:08:38",
+            last_detected_at="2026-07-14T00:09:27",
+            conversation_type="private",
+            pending_signal_text="帮我看看你们库里是有..",
+        )
+        row = {
+            "name": "客户A",
+            "session_key": key,
+            "content": "帮我看看你们库里是有..",
+            "time": "00:05",
+            "unread_badge": "visual_red_dot",
+            "conversation_type": "private",
+        }
+        active = monitor.poll(FakeSessionConnector([row]))
+        assert_equal(len(active), 1, "old pending work must remain available for one capture")
+        assert_true(bool(active[0].pending_observation_id), "first upgraded poll must bind old work to an event identity")
+        monitor.reset_unread(key)
+        assert_equal(
+            monitor.poll(FakeSessionConnector([row])),
+            [],
+            "the same legacy red badge must be acknowledged rather than re-armed",
+        )
+
+
 def check_passive_probe_defers_when_monitor_has_unread_signal() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
@@ -854,6 +1026,8 @@ def check_distinct_customer_image_assets_are_not_deduped_by_proxy_text() -> None
         "content": "客户发来了一张图片",
         "is_customer_image_proxy": True,
         "visual_turn_kind": "customer_image",
+        "image_capture_pending": True,
+        "quality_flags": ["synthetic_visual_turn", "clipboard_current_transaction_required"],
         "asset_id": "visual_asset_wx_first",
         "image_assets": ["visual_asset_wx_first"],
         "saved_image_path": "D:/tmp/first.png",
@@ -867,6 +1041,8 @@ def check_distinct_customer_image_assets_are_not_deduped_by_proxy_text() -> None
         "content": "客户发来了一张图片",
         "is_customer_image_proxy": True,
         "visual_turn_kind": "customer_image",
+        "image_capture_pending": True,
+        "quality_flags": ["synthetic_visual_turn", "clipboard_current_transaction_required"],
         "asset_id": "visual_asset_wx_second",
         "image_assets": ["visual_asset_wx_second"],
         "saved_image_path": "D:/tmp/second.png",
@@ -3240,6 +3416,96 @@ def check_captured_messages_connector_uses_batch_when_messages_empty() -> None:
     )
 
 
+def check_scheduler_image_pending_signal_reaches_read_only_planner() -> None:
+    """A current image event must retain only its routing metadata after capture."""
+
+    root = Path(tempfile.mkdtemp(prefix="scheduler-image-pending-handoff-"))
+    store = SchedulerStateStore(tenant_id="unit_image_pending_handoff", path=root / "state.json")
+    state = store.empty_state()
+    session_key = "wx:rpa:v1:planner-image-handoff"
+    pending_signal = {
+        "session_key": session_key,
+        "pending_signal_id": "pending-image-handoff-1",
+        "pending_observation_id": "image-observation-1",
+        "pending_signal_kind": "image_capture",
+        "pending_signal_text": "[图片]",
+        "preview_content": "[图片]",
+        "speaker_name": "Image Customer",
+        "unread_detected": True,
+        # These retired/file-backed fields must never survive the hand-off.
+        "image_bytes": b"must-not-persist",
+        "saved_image_path": "D:/must-not-persist.png",
+        "source_payload": {"clipboard": "must-not-persist"},
+    }
+    placeholder = {
+        "id": "clipboard_image_pending:planner-image-handoff-1",
+        "message_id": "clipboard_image_pending:planner-image-handoff-1",
+        "type": "text",
+        "sender": "customer",
+        "sender_role": "customer",
+        "content": "客户发来了一张图片",
+        "pending_signal_id": "pending-image-handoff-1",
+        "image_capture_pending": True,
+        "quality_flags": ["synthetic_visual_turn", "clipboard_current_transaction_required"],
+    }
+    record_session_signal(
+        state,
+        {
+            "name": "Image Customer",
+            "session_key": session_key,
+            "conversation_type": "private",
+            "content": "[图片]",
+            "time": "2026-07-14T01:02:00",
+            "unread_detected": True,
+            "unread_badge": "visual_red_dot",
+            "pending_signal_kind": "image_capture",
+        },
+        now="2026-07-14T01:02:01",
+    )
+    runtime = CustomerServiceSchedulerRuntime(
+        store=store,
+        config=SchedulerConfig(enabled=True, capture_max_sessions_per_round=1),
+        capture_fn=lambda _session: {
+            "ok": True,
+            "session_key": session_key,
+            "conversation_type": "private",
+            "messages": [copy.deepcopy(placeholder)],
+            "batch": [copy.deepcopy(placeholder)],
+            "pending_signal": copy.deepcopy(pending_signal),
+            "history_backfill": {},
+            "batch_selection": {},
+            "context_recovery": {},
+        },
+        plan_reply_fn=lambda _capture, _task: {"ok": False, "reason": "unit_planner_not_run"},
+    )
+    try:
+        events = runtime._capture_pending(state, now="2026-07-14T01:02:02")
+    finally:
+        runtime.shutdown()
+    store.save(state)
+    reloaded_state = store.load()
+
+    assert_true(
+        any(item.get("event") == "capture_completed" for item in events),
+        f"image placeholder should create a planner capture: {events}",
+    )
+    captures = list((reloaded_state.get("captures") or {}).values())
+    assert_equal(len(captures), 1, f"one image capture should survive save/load: {reloaded_state}")
+    capture = captures[0]
+    persisted_signal = capture.get("pending_signal") or {}
+    assert_equal(persisted_signal.get("pending_signal_id"), "pending-image-handoff-1", "current image event id must survive capture")
+    assert_equal(persisted_signal.get("pending_signal_kind"), "image_capture", "current image event kind must survive capture")
+    assert_equal(persisted_signal.get("session_key"), session_key, "planner signal must stay bound to its session")
+    assert_true("image_bytes" not in persisted_signal, f"image bytes must never enter scheduler state: {persisted_signal}")
+    assert_true("saved_image_path" not in persisted_signal, f"image paths must never enter scheduler state: {persisted_signal}")
+    assert_true("source_payload" not in persisted_signal, f"raw sidecar payload must never enter scheduler state: {persisted_signal}")
+
+    planner_payload = CapturedMessagesConnector(capture).get_messages("Image Customer", exact=True)
+    planner_signal = planner_payload.get("pending_signal") or {}
+    assert_equal(planner_signal.get("pending_signal_id"), "pending-image-handoff-1", "read-only planner connector must receive the same image event")
+    assert_equal(planner_signal.get("pending_signal_kind"), "image_capture", "planner must know this is a current image transaction")
+
+
 def check_scheduler_capture_filters_self_only_normal_customer_session() -> None:
     state = empty_state()
     self_message = {
@@ -3359,6 +3625,8 @@ def check_scheduler_authorizes_customer_image_proxy_only_for_image_capture() -> 
         "content": "客户发来了一张图片",
         "is_customer_image_proxy": True,
         "visual_turn_kind": "customer_image",
+        "image_capture_pending": True,
+        "quality_flags": ["synthetic_visual_turn", "clipboard_current_transaction_required"],
         "saved_image_path": "D:/tmp/authorized-image.png",
         "visual_occurrence_id": "visual_occurrence_authorized-1",
     }
@@ -6656,7 +6924,7 @@ def check_short_pending_signal_does_not_synthesize_media_preview() -> None:
     assert_true(not recovered, "media-only monitor preview should not synthesize a reply-eligible short message")
 
 
-def check_managed_bridge_blocks_capture_when_image_save_fails() -> None:
+def check_managed_bridge_preserves_brain_turn_when_image_save_fails() -> None:
     class FakeImageFailureConnector:
         def get_messages(self, target: str, exact: bool = True, history_load_times: int = 0, **kwargs: Any) -> dict[str, Any]:
             return {
@@ -6727,9 +6995,13 @@ def check_managed_bridge_blocks_capture_when_image_save_fails() -> None:
             )
         finally:
             bridge.shutdown()
-    assert_true(result.get("ok") is False and result.get("blocked") is True, f"image save failure should block capture: {result}")
-    assert_equal(result.get("reason"), "image_bubble_not_found", "image save failure reason should be preserved")
-    assert_equal((result.get("customer_image_assets") or {}).get("state"), "image_save_failed", "image save payload should be attached")
+    assert_true(result.get("ok") is True and result.get("blocked") is not True, f"image save failure must not block capture: {result}")
+    assert_equal((result.get("customer_image_assets") or {}).get("state"), "clipboard_vision_pending", "scheduler must defer image bytes to the clipboard transaction")
+    assert_true(
+        any(item.get("image_capture_pending") for item in (result.get("batch") or [])),
+        f"image-only turn should still enter Brain through a text-only pending envelope: {result}",
+    )
+    assert_true(not hasattr(FakeImageFailureConnector, "capture_visual_images"), "capture phase must not revive screenshot crop collection")
 
 
 def check_managed_bridge_visual_scan_records_both_sides_without_preview() -> None:
@@ -6864,31 +7136,22 @@ def check_managed_bridge_visual_scan_records_both_sides_without_preview() -> Non
             for line in ledger.events_path("wx:visual-scan").read_text(encoding="utf-8").splitlines()
             if line.strip()
         ]
-    assert_true(bool(connector.capture_calls), "image signal should call the independent visual module without preview text")
-    assert_equal(connector.save_calls, 0, "legacy context-menu image save should not run after visual scan succeeds")
-    assert_true(result.get("ok") is True, f"visual scan capture should succeed: {result}")
+    assert_equal(connector.capture_calls, [], "scheduler must defer all image acquisition to the later clipboard transaction")
+    assert_equal(connector.save_calls, 0, "legacy context-menu image save must not run")
+    assert_true(result.get("ok") is True, f"image signal capture should preserve a reply turn: {result}")
     messages = [item for item in (result.get("messages") or []) if isinstance(item, dict)]
     raw_images = [item for item in messages if str(item.get("type") or "") == "image"]
     proxies = [item for item in messages if item.get("is_customer_image_proxy")]
-    assert_equal(len(raw_images), 2, f"both raw image messages should be recorded: {messages}")
-    assert_equal({item.get("visual_side") for item in raw_images}, {"customer", "self"}, "raw image messages should keep both sides")
-    assert_equal(len(proxies), 1, f"only customer image should become a Brain proxy: {messages}")
-    assert_equal(proxies[0].get("source_message_id"), "visual_msg_wx_customer_audi", "Brain proxy should point to customer raw image")
+    assert_equal(raw_images, [], "no raw/cropped image message may enter the capture envelope")
+    assert_equal(proxies, [], "scheduler may not create file-backed image proxies")
     batch = [item for item in (result.get("batch") or []) if isinstance(item, dict)]
-    assert_equal([item.get("message_id") for item in batch], [proxies[0].get("message_id")], "batch should contain only customer image proxy")
-    assert_true(result.get("batch_authoritative") is True, "capture should prevent raw-image fallback into Brain batch")
+    assert_true(any(item.get("image_capture_pending") for item in batch), "Brain receives a text-only pending image envelope")
     recent = summary.get("recent_messages") or []
-    recent_paths = {item.get("saved_image_path") for item in recent}
-    assert_true("D:/tmp/customer_audi.png" in recent_paths, f"customer image should be kept in ledger: {recent}")
-    assert_true("D:/tmp/self_model3.png" in recent_paths, f"self image should be kept in ledger: {recent}")
+    assert_true(all("saved_image_path" not in item for item in recent if isinstance(item, dict)), f"ledger must not retain image paths: {recent}")
     visual_assets = []
     for event in events:
         visual_assets.extend(event.get("visual_assets") or [])
-    assert_equal(
-        {item.get("visual_side") for item in visual_assets},
-        {"customer", "self"},
-        f"capture_recorded event should expose both visual sides: {visual_assets}",
-    )
+    assert_equal(visual_assets, [], "capture record may not persist visual assets")
 
 
 def check_managed_bridge_normal_text_does_not_call_independent_image_module() -> None:
@@ -6973,8 +7236,8 @@ def check_managed_bridge_normal_text_does_not_call_independent_image_module() ->
     assert_true(trigger.get("should_run") is False, f"normal text image trigger should be false: {trigger}")
     assert_equal(
         (result.get("visual_image_assets") or {}).get("state"),
-        "visual_capture_not_requested",
-        "normal text should expose a skipped visual capture state",
+        "clipboard_vision_deferred",
+        "normal text should expose a non-acquiring visual state",
     )
 
 
@@ -7113,8 +7376,24 @@ def check_managed_bridge_new_image_signal_overrides_old_visual_identity_once() -
             summary = bridge.ledger.load_summary("wx:same-image")
             assert_equal(
                 summary.get("processed_visual_pending_signal_ids"),
-                ["pending-new-same-image"],
-                f"visual pending signal must be persisted in the session ledger: {summary}",
+                [],
+                "a pending image is not marked processed before current-clipboard text understanding completes",
+            )
+            bridge.ledger.record_multimodal_enrichment(
+                session_key="wx:same-image",
+                target_name="CustomerA",
+                capture_id="capture_new-same-image",
+                source="test_customer_image_understanding",
+                enrichments=[
+                    {
+                        "modality": "image",
+                        "message_refs": [{"pending_signal_id": "pending-new-same-image"}],
+                        "image_understanding": {
+                            "applied": True,
+                            "vision_summary": "客户发送了一张车辆图片",
+                        },
+                    }
+                ],
             )
             second_result = bridge._capture_session(
                 {
@@ -7128,17 +7407,15 @@ def check_managed_bridge_new_image_signal_overrides_old_visual_identity_once() -
         finally:
             bridge.shutdown()
     result = first_result
-    assert_equal(connector.capture_calls, 1, "new image signal should call the independent image module once")
-    assert_equal(connector.save_calls, 0, "new image signal should not fall into context-menu copy after crop capture")
-    freshness = result.get("visual_image_freshness_filter") or {}
-    assert_equal(freshness.get("fresh_count"), 1, f"new pending signal should override old visual identity: {freshness}")
+    assert_equal(connector.capture_calls, 0, "scheduler may not scan/crop images before the clipboard transaction")
+    assert_equal(connector.save_calls, 0, "new image signal must not fall into context-menu file save")
     batch = [item for item in (result.get("batch") or []) if isinstance(item, dict)]
     assert_equal(len(batch), 1, f"new image signal should enter the scheduler batch: {result}")
-    assert_true(batch[0].get("is_customer_image_proxy") is True, "image batch should carry the Brain-safe proxy")
-    assert_equal(connector.capture_calls, 1, "the same pending image signal must not call the image module twice")
+    assert_true(batch[0].get("image_capture_pending") is True, "image batch should carry a text-only pending envelope")
+    assert_equal(connector.capture_calls, 0, "the same pending signal must not call a legacy image module")
     assert_true(
         second_result.get("pending_signal_consumed") is True,
-        f"repeated pending image signal should be consumed without recapture: {second_result}",
+        f"only the enriched pending envelope may deduplicate a repeated signal before another RPA transaction: {second_result}",
     )
 
 
@@ -7478,12 +7755,11 @@ def check_managed_bridge_filters_seen_visual_proxy_without_losing_raw_archive() 
     messages = [item for item in (result.get("messages") or []) if isinstance(item, dict)]
     raw_images = [item for item in messages if str(item.get("type") or "") == "image"]
     proxies = [item for item in messages if item.get("is_customer_image_proxy")]
-    assert_equal(len(raw_images), 1, f"seen raw image should still be archived in capture messages: {messages}")
+    assert_equal(len(raw_images), 0, f"historical raw image may not be archived into a new capture: {messages}")
     assert_equal(len(proxies), 0, f"seen image should not become a new Brain direct-image proxy: {messages}")
     batch = [item for item in (result.get("batch") or []) if isinstance(item, dict)]
-    assert_equal([item.get("id") for item in batch], ["text-followup-1"], "text follow-up should be the only Brain input")
-    freshness = result.get("visual_image_freshness_filter") or {}
-    assert_equal(freshness.get("filtered_count"), 1, f"seen visual source should be audited as filtered: {freshness}")
+    assert_true(any(item.get("id") == "text-followup-1" for item in batch), "text follow-up must remain a Brain input")
+    assert_true(all("saved_image_path" not in item for item in messages), "capture envelope must not retain historical visual paths")
 
 
 def check_quality_validation_failure_goes_internal_without_same_capture_retry() -> None:
@@ -8188,6 +8464,10 @@ def run_checks() -> dict[str, Any]:
         check_session_monitor_keeps_overflow_pending,
         check_session_monitor_empty_preview_does_not_clear_pending,
         check_session_monitor_visual_unread_badge_retriggers_after_reset,
+        check_session_monitor_persistent_badge_is_acknowledged_once,
+        check_scheduler_observation_identity_dedupes_persistent_unread_after_capture,
+        check_scheduler_legacy_pending_adopts_first_observation_identity,
+        check_session_monitor_legacy_pending_binds_observation_before_reset,
         check_passive_probe_defers_when_monitor_has_unread_signal,
         check_session_monitor_high_sensitivity_short_signal_waits_merge_window,
         check_session_monitor_preserves_high_sensitivity_pending_after_empty_capture,
@@ -8244,6 +8524,7 @@ def run_checks() -> dict[str, Any]:
         check_preview_change_without_unread_evidence_is_baseline_only_when_idle,
         check_captured_messages_connector_accepts_history_kwargs,
         check_captured_messages_connector_uses_batch_when_messages_empty,
+        check_scheduler_image_pending_signal_reaches_read_only_planner,
         check_scheduler_capture_filters_self_only_normal_customer_session,
         check_scheduler_capture_allows_new_occurrence_of_same_short_probe,
         check_scheduler_capture_filters_non_text_messages_for_normal_customer_session,
@@ -8310,7 +8591,7 @@ def run_checks() -> dict[str, Any]:
         check_normal_pending_signal_synthesizes_monitor_only_group_preview,
         check_stale_short_pending_signal_does_not_recover,
         check_short_pending_signal_does_not_synthesize_media_preview,
-        check_managed_bridge_blocks_capture_when_image_save_fails,
+        check_managed_bridge_preserves_brain_turn_when_image_save_fails,
         check_managed_bridge_visual_scan_records_both_sides_without_preview,
         check_managed_bridge_normal_text_does_not_call_independent_image_module,
         check_managed_bridge_new_image_signal_overrides_old_visual_identity_once,

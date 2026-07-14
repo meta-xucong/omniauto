@@ -29,6 +29,30 @@ MAX_LEDGER_MESSAGE_CHARS = 600
 MAX_LEDGER_SEMANTIC_CHARS = 1200
 MAX_LEDGER_JSON_ITEMS = 24
 
+# Image pixels were formerly archived through several intermediate scheduler
+# and ledger shapes.  Vision is now an in-memory clipboard transaction; these
+# historical fields must therefore never be accepted back into persisted
+# context, even when an old state file is replayed.
+LEGACY_IMAGE_STORAGE_KEYS = frozenset(
+    {
+        "asset_id",
+        "image_assets",
+        "saved_image_path",
+        "bubble_crop_path",
+        "thumbnail_path",
+        "turn_capture_path",
+        "meta_path",
+        "diagnostic_path",
+        "sha256",
+        "size_bytes",
+        "width",
+        "height",
+        "bubble_bounds",
+        "bubble_anchor",
+        "capture_detection",
+    }
+)
+
 
 def utcnow_iso() -> str:
     return datetime.now().isoformat(timespec="seconds")
@@ -118,7 +142,7 @@ def ledger_message_content_key(message: dict[str, Any]) -> str:
     content = " ".join(str(message.get("content") or "").split())
     msg_type = str(message.get("type") or "")
     if msg_type in {"image", "picture", "photo"} or message.get("is_customer_image_proxy"):
-        for key in ("visual_occurrence_id", "source_message_id", "message_id", "id", "saved_image_path", "asset_id"):
+        for key in ("visual_occurrence_id", "source_message_id", "message_id", "id", "asset_id"):
             value = str(message.get(key) or "").strip()
             if value:
                 return stable_hash(sender, msg_type, "visual_image", value, length=24)
@@ -151,6 +175,28 @@ def _compact_ledger_json(value: Any, *, depth: int = 0) -> Any:
     if isinstance(value, (bool, int, float)) or value is None:
         return value
     return _clip_ledger_text(value)
+
+
+def scrub_legacy_image_storage(value: Any) -> Any:
+    """Remove retired file/crop metadata without touching textual vision facts.
+
+    This is deliberately recursive because old scheduler captures and ledger
+    summaries can contain the fields below several layers of metadata.  It is
+    used on both read and write paths: stale files cannot become an implicit
+    image input again, and new code cannot accidentally persist one.
+    """
+
+    if isinstance(value, dict):
+        return {
+            key: scrub_legacy_image_storage(item)
+            for key, item in value.items()
+            if str(key) not in LEGACY_IMAGE_STORAGE_KEYS
+        }
+    if isinstance(value, list):
+        return [scrub_legacy_image_storage(item) for item in value]
+    if isinstance(value, tuple):
+        return [scrub_legacy_image_storage(item) for item in value]
+    return value
 
 
 def sanitize_image_understanding(value: Any) -> dict[str, Any]:
@@ -189,11 +235,16 @@ def ledger_message_modality(message: dict[str, Any], *, msg_type: str = "") -> s
     explicit = str(message.get("modality") or "").strip().lower()
     if explicit in {"text", "voice", "image"}:
         return explicit
+    if message.get("image_capture_pending") or str(message.get("visual_turn_kind") or "").strip() in {
+        "customer_image",
+        "self_image",
+    }:
+        return "image"
     source_type = str(message.get("source_type") or "").strip().lower()
     if source_type == "voice_transcription" or message.get("voice_transcribed") or message.get("voice_transcription_text"):
         return "voice"
     normalized_type = str(msg_type or message.get("type") or message.get("message_type") or "").strip().lower()
-    if normalized_type in {"image", "picture", "photo"} or message.get("saved_image_path") or message.get("asset_id"):
+    if normalized_type in {"image", "picture", "photo"}:
         return "image"
     return "text"
 
@@ -245,14 +296,8 @@ def sanitize_ledger_message(message: dict[str, Any] | None) -> dict[str, Any] | 
     if source_type:
         result["source_type"] = source_type
     for key in (
-        "asset_id",
-        "saved_image_path",
-        "visual_side",
-        "visual_occurrence_id",
         "pending_signal_id",
-        "wechat_message_time",
-        "visual_index",
-        "visual_observation_id",
+        "image_capture_pending",
         "source_message_id",
         "source_message_type",
         "is_customer_image_proxy",
@@ -305,17 +350,6 @@ def sanitize_ledger_message(message: dict[str, Any] | None) -> dict[str, Any] | 
         vision_summary = _clip_ledger_text(image_understanding.get("vision_summary"), limit=MAX_LEDGER_MESSAGE_CHARS)
         if vision_summary:
             result["vision_summary"] = vision_summary
-    image_assets = [str(item).strip() for item in (message.get("image_assets") or []) if str(item).strip()]
-    if image_assets:
-        result["image_assets"] = image_assets[:8]
-    bounds = []
-    for value in message.get("bubble_bounds") or []:
-        try:
-            bounds.append(int(value))
-        except (TypeError, ValueError):
-            continue
-    if bounds:
-        result["bubble_bounds"] = bounds[:4]
     return result
 
 
@@ -382,17 +416,12 @@ def _ledger_message_reference_values(message: dict[str, Any] | None) -> set[str]
         "canonical_input_id",
         "canonical_visual_id",
         "source_message_id",
+        "pending_signal_id",
         "visual_occurrence_id",
-        "asset_id",
-        "saved_image_path",
     ):
         value = str(source.get(key) or "").strip()
         if value:
             values.add(value)
-    for value in source.get("image_assets") or []:
-        text = str(value or "").strip()
-        if text:
-            values.add(text)
     return values
 
 
@@ -420,12 +449,12 @@ class SessionLedgerStore:
             data = json.loads(path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError):
             return {}
-        return data if isinstance(data, dict) else {}
+        return scrub_legacy_image_storage(data) if isinstance(data, dict) else {}
 
     def save_summary(self, session_key: str, summary: dict[str, Any]) -> None:
         path = self.summary_path(session_key)
         path.parent.mkdir(parents=True, exist_ok=True)
-        payload = dict(summary)
+        payload = scrub_legacy_image_storage(dict(summary))
         payload["session_key"] = session_key
         payload["updated_at"] = utcnow_iso()
         temp = path.with_suffix(path.suffix + ".tmp")
@@ -433,12 +462,13 @@ class SessionLedgerStore:
         os.replace(temp, path)
 
     def append_event(self, session_key: str, event_type: str, payload: dict[str, Any]) -> dict[str, Any]:
+        safe_payload = scrub_legacy_image_storage(dict(payload))
         event = {
-            "event_id": "ledger_" + stable_hash(session_key, event_type, utcnow_iso(), payload, length=24),
+            "event_id": "ledger_" + stable_hash(session_key, event_type, utcnow_iso(), safe_payload, length=24),
             "event_type": event_type,
             "session_key": session_key,
             "created_at": utcnow_iso(),
-            **dict(payload),
+            **safe_payload,
         }
         path = self.events_path(session_key)
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -462,32 +492,10 @@ class SessionLedgerStore:
             return
         sanitized_messages = [item for item in (sanitize_ledger_message(raw) for raw in messages) if item]
         sanitized_batch = [item for item in (sanitize_ledger_message(raw) for raw in batch) if item]
-        visual_assets = [
-            {
-                "id": str(item.get("identity") or item.get("id") or ""),
-                "sender": str(item.get("sender") or ""),
-                "asset_id": str(item.get("asset_id") or ""),
-                "saved_image_path": str(item.get("saved_image_path") or ""),
-                "visual_side": str(item.get("visual_side") or ""),
-                "visual_occurrence_id": str(item.get("visual_occurrence_id") or ""),
-                "pending_signal_id": str(item.get("pending_signal_id") or ""),
-                "wechat_message_time": str(item.get("wechat_message_time") or ""),
-                "visual_index": int(item.get("visual_index") or 0),
-                "visual_observation_id": str(item.get("visual_observation_id") or ""),
-            }
-            for item in sanitized_messages
-            if str(item.get("saved_image_path") or item.get("asset_id") or "").strip()
-        ][-MAX_LEDGER_EVENT_MESSAGES:]
-        processed_visual_pending_signal_ids = [
-            str(item.get("pending_signal_id") or "").strip()
-            for item in sanitized_messages
-            if str(item.get("pending_signal_id") or "").strip()
-            and (
-                str(item.get("type") or "").strip().lower() in {"image", "picture", "photo"}
-                or bool(item.get("is_customer_image_proxy"))
-                or str(item.get("modality") or "").strip().lower() == "image"
-            )
-        ]
+        # File-backed visual assets are retired.  The event retains the text
+        # turn and any later textual understanding, but never an image path,
+        # crop identity, image hash, thumbnail, or asset reference.
+        visual_assets: list[dict[str, Any]] = []
         message_ids = [
             str(item.get("identity") or item.get("canonical_input_id") or item.get("id") or "")
             for item in sanitized_batch
@@ -541,14 +549,10 @@ class SessionLedgerStore:
                 "context_version": int(context_version or 0),
             }
         )
-        previous_visual_signal_ids = [
-            str(item or "").strip()
-            for item in summary.get("processed_visual_pending_signal_ids") or []
-            if str(item or "").strip()
-        ]
-        summary["processed_visual_pending_signal_ids"] = list(
-            dict.fromkeys(previous_visual_signal_ids + processed_visual_pending_signal_ids)
-        )[-500:]
+        # A pending image signal is not "processed" merely because its text
+        # placeholder was captured.  It is committed only after the current
+        # clipboard transaction produced a textual understanding below.
+        summary.setdefault("processed_visual_pending_signal_ids", [])
         self.save_summary(session_key, summary)
 
     def record_multimodal_enrichment(
@@ -571,6 +575,7 @@ class SessionLedgerStore:
             if isinstance(item, dict)
         ]
         updated_ids: list[str] = []
+        completed_visual_signal_ids: list[str] = []
         event_enrichments: list[dict[str, Any]] = []
         for enrichment in enrichments or []:
             if not isinstance(enrichment, dict):
@@ -635,6 +640,10 @@ class SessionLedgerStore:
                 identity = str(sanitized.get("identity") or sanitized.get("id") or "").strip()
                 if identity and identity not in updated_ids:
                     updated_ids.append(identity)
+                if modality == "image" and str(understanding.get("vision_summary") or "").strip():
+                    signal_id = str(sanitized.get("pending_signal_id") or "").strip()
+                    if signal_id and signal_id not in completed_visual_signal_ids:
+                        completed_visual_signal_ids.append(signal_id)
             event_enrichments.append(
                 {
                     "modality": modality,
@@ -650,6 +659,14 @@ class SessionLedgerStore:
             summary["context_summary"] = build_context_summary(summary["recent_messages"])
             summary["last_multimodal_enrichment_at"] = utcnow_iso()
             summary["last_multimodal_enrichment_source"] = str(source or "")
+            previous_visual_signal_ids = [
+                str(item or "").strip()
+                for item in summary.get("processed_visual_pending_signal_ids") or []
+                if str(item or "").strip()
+            ]
+            summary["processed_visual_pending_signal_ids"] = list(
+                dict.fromkeys(previous_visual_signal_ids + completed_visual_signal_ids)
+            )[-500:]
             self.save_summary(session_key, summary)
         event = self.append_event(
             session_key,

@@ -1036,7 +1036,7 @@
         "workflow_target_state_for_target"
       ],
       "signatures": {
-        "CapturedMessagesConnector": "(capture: 'dict[str, Any]') -> 'None'",
+      "CapturedMessagesConnector": "(capture: 'dict[str, Any]', *, current_image_transaction_runner: 'Callable[..., dict[str, Any]] | None' = None) -> 'None'",
         "CustomerServiceSchedulerRuntime": "(*, store: 'SchedulerStateStore', config: 'SchedulerConfig', capture_fn: 'CaptureFn', plan_reply_fn: 'PlanReplyFn', polish_reply_fn: 'PolishReplyFn | None' = None, freshness_fn: 'FreshnessFn | None' = None, send_fn: 'SendFn | None' = None, capture_done_fn: 'CaptureDoneFn | None' = None, planner_done_fn: 'PlannerDoneFn | None' = None, media_context_fn: 'MediaContextFn | None' = None, media_context_done_fn: 'MediaContextDoneFn | None' = None) -> 'None'",
         "ManagedListenerSchedulerBridge": "(*, tenant_id: 'str', config_path: 'Path', allow_send: 'bool', write_data: 'bool') -> 'None'",
         "_apply_rpa_humanized_send_runtime_env": "(config: 'dict[str, Any]') -> 'None'",
@@ -1078,7 +1078,7 @@
         "mark_session_capture_failed": "(state: 'dict[str, Any]', target_name: 'str', reason: 'str', *, session_key: 'str' = '', now: 'str | None' = None) -> 'None'",
         "merge_scheduler_conversation_context": "(state: 'dict[str, Any]', target_name: 'str', context_update: 'dict[str, Any]', *, session_key: 'str' = '', now: 'str | None' = None) -> 'None'",
         "pending_signal_identity_payload": "(pending_signal: 'dict[str, Any] | None', *, target_name: 'str' = '', session_key: 'str' = '') -> 'dict[str, Any]'",
-        "plan_reply_with_listen_workflow": "(capture: 'dict[str, Any]', task: 'dict[str, Any]', *, target_config: 'Any', config: 'dict[str, Any]', rules: 'dict[str, Any]', workflow_state: 'dict[str, Any]', allow_fallback_send: 'bool' = False, apply_final_visible_polish: 'bool' = True) -> 'dict[str, Any]'",
+      "plan_reply_with_listen_workflow": "(capture: 'dict[str, Any]', task: 'dict[str, Any]', *, target_config: 'Any', config: 'dict[str, Any]', rules: 'dict[str, Any]', workflow_state: 'dict[str, Any]', allow_fallback_send: 'bool' = False, apply_final_visible_polish: 'bool' = True, current_image_transaction_runner: 'Callable[..., dict[str, Any]] | None' = None) -> 'dict[str, Any]'",
         "polish_failure_retry_instruction": "(task: 'dict[str, Any]') -> 'str'",
         "polish_reply_with_listen_workflow": "(planner_task: 'dict[str, Any]', _task: 'dict[str, Any]', *, target_config: 'Any', config: 'dict[str, Any]', workflow_state: 'dict[str, Any]') -> 'dict[str, Any]'",
         "ready_reply_brain_quality_review": "(reply: 'dict[str, Any]') -> 'dict[str, Any]'",
@@ -1246,7 +1246,7 @@
         "complete_polish_task": "(state: 'dict[str, Any]', task_id: 'str', *, reply_text: 'str', decision: 'dict[str, Any] | None' = None, result_payload: 'dict[str, Any] | None' = None, degraded: 'bool' = False, now: 'str | None' = None) -> 'dict[str, Any]'",
         "enqueue_llm_task": "(state: 'dict[str, Any]', capture_id: 'str', *, timeout_seconds: 'int' = 30, now: 'str | None' = None) -> 'dict[str, Any]'",
         "enqueue_media_context_task": "(state: 'dict[str, Any]', capture_id: 'str', *, image_asset: 'dict[str, Any]', max_attempts: 'int' = 3, now: 'str | None' = None) -> 'dict[str, Any]'",
-        "enqueue_pending_session": "(state: 'dict[str, Any]', target_name: 'str', *, exact: 'bool' = True, conversation_type: 'str' = 'unknown', session_key: 'str' = '', row_fingerprint: 'dict[str, Any] | None' = None, reason: 'str' = 'manual', now: 'str | None' = None) -> 'dict[str, Any]'",
+        "enqueue_pending_session": "(state: 'dict[str, Any]', target_name: 'str', *, exact: 'bool' = True, conversation_type: 'str' = 'unknown', session_key: 'str' = '', row_fingerprint: 'dict[str, Any] | None' = None, reason: 'str' = 'manual', observation_id: 'str' = '', now: 'str | None' = None) -> 'dict[str, Any]'",
         "enqueue_polish_task": "(state: 'dict[str, Any]', planner_task_id: 'str', *, timeout_seconds: 'int' = 15, now: 'str | None' = None) -> 'dict[str, Any]'",
         "enqueue_ready_reply": "(state: 'dict[str, Any]', task_id: 'str', *, reply_text: 'str', decision: 'dict[str, Any] | None' = None, now: 'str | None' = None) -> 'dict[str, Any]'",
         "ensure_session": "(state: 'dict[str, Any]', target_name: 'str', *, exact: 'bool' = True, conversation_type: 'str' = 'unknown', session_key: 'str' = '', row_fingerprint: 'dict[str, Any] | None' = None, now: 'str | None' = None) -> 'dict[str, Any]'",
