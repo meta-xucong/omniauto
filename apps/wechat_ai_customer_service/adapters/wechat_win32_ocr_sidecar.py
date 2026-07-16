@@ -1794,6 +1794,30 @@ def sessions_payload(hwnd: int, probe: dict[str, Any], *, artifact_dir: str | No
             "reason": blocking_reason,
             "error": f"WeChat session list is blocked by: {blocking_reason}",
         }
+    service_container = active_service_container_wrong_target(
+        items,
+        screenshot.size,
+        target="customer-service-session-list",
+    )
+    if service_container.get("detected"):
+        # A service-account container can expose provider entries (for example
+        # logistics accounts) in the same left panel that normally holds chat
+        # rows.  They are not customer conversations.  Return an explicit
+        # passive surface state rather than letting the dynamic monitor treat
+        # those provider entries as private chats and click into them.
+        return {
+            "ok": True,
+            "online": True,
+            "adapter": "win32_ocr",
+            "state": "sessions_service_container_detected",
+            "window_probe": probe,
+            "screenshot_path": path,
+            "page_fingerprint": page_fingerprint,
+            "passive_probe": bool(probe.get("passive_probe")),
+            "sessions": [],
+            "service_container_probe": service_container,
+            "ocr_items_count": len(items),
+        }
     sessions = parse_sessions_from_ocr(items, screenshot.size, screenshot=screenshot)
     return {
         "ok": True,

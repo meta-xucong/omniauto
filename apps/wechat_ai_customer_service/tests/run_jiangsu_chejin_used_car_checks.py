@@ -76,7 +76,26 @@ class FakeConnector:
         self.sent_texts: list[str] = []
         self.history_load_calls: list[int] = []
 
-    def get_messages(self, target: str, exact: bool = True, history_load_times: int = 0) -> dict[str, Any]:
+    def get_messages(
+        self,
+        target: str,
+        exact: bool = True,
+        history_load_times: int = 0,
+        *,
+        history_mode: str = "",
+        anchor_ids: list[str] | None = None,
+        anchor_content_keys: list[str] | None = None,
+        reply_content_keys: list[str] | None = None,
+        max_scroll_steps: int | None = None,
+        max_duration_seconds: int | None = None,
+        max_snapshots: int | None = None,
+        min_delay_ms: int | None = None,
+        max_delay_ms: int | None = None,
+        restore_to_latest: bool | None = None,
+        visible_only_target: bool = False,
+        session_key: str = "",
+        conversation_type: str = "",
+    ) -> dict[str, Any]:
         if history_load_times:
             self.history_load_calls.append(history_load_times)
         messages = self.history_messages if history_load_times and self.history_messages is not None else self.messages
@@ -88,7 +107,19 @@ class FakeConnector:
             "messages": messages,
         }
 
-    def send_text_and_verify(self, target: str, text: str, exact: bool = True, *, skip_send_rate_guard: bool = False) -> dict[str, Any]:
+    def send_text_and_verify(
+        self,
+        target: str,
+        text: str,
+        exact: bool = True,
+        *,
+        simulate_inbound_file_transfer: bool = False,
+        skip_send_rate_guard: bool = False,
+        artifact_dir: str | None = None,
+        session_key: str = "",
+        conversation_type: str = "",
+        continuation_prevalidated_guard: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         self.sent_texts.append(text)
         return {"ok": True, "verified": True, "target": target, "exact": exact, "text": text}
 

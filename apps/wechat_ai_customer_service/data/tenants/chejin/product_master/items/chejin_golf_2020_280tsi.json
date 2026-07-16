@@ -57,9 +57,21 @@
     },
     "vehicle_pictures": {
       "api": "manual.dafengche_shaped_vehicle_pictures",
-      "payload": [],
-      "pulled_at": "2026-07-13T04:53:45+00:00",
-      "content_hash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      "payload": [
+        {
+          "pictureId": "img_b074d6887d50878bd1a032b7",
+          "pictureUrl": "/api/product-console/products/chejin_golf_2020_280tsi/images/img_b074d6887d50878bd1a032b7",
+          "source": "manual_upload",
+          "filename": "微信图片_20260706181129_1016_4.jpg",
+          "mimeType": "image/jpeg",
+          "size": 992817,
+          "sha256": "sha256:b074d6887d50878bd1a032b77bfb414f74a0ee95fb86378dc370cb910101693e",
+          "uploadedAt": "2026-07-17T01:27:02",
+          "assetFile": "img_b074d6887d50878bd1a032b7.jpg"
+        }
+      ],
+      "pulled_at": "2026-07-16T17:27:02+00:00",
+      "content_hash": "sha256:6ebb3be98e6646da5e277bc37ebb87bbf24ca733bf624c7396ac4a591c305e50"
     }
   },
   "extensions": {
@@ -190,6 +202,10 @@
           "recorded_at": "2026-07-13T07:47:11+00:00",
           "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
           "test_only": true
+        },
+        "source_payloads.vehicle_pictures.payload": {
+          "source": "manual_admin_image_upload",
+          "recorded_at": "2026-07-16T17:27:02+00:00"
         }
       },
       "test_fixture": {
@@ -287,6 +303,87 @@
         }
       },
       "manual_overrides": {}
+    },
+    "vehicle_image_retrieval": {
+      "schema_version": 1,
+      "status": "ready",
+      "source_payload_fingerprint": "sha256:2c54d57dd2384feb4b1b8c680fad5cb6bf7dac01f3814cda548904a3880e25c2",
+      "image_count": 1,
+      "indexed_image_count": 1,
+      "indexed_at": "2026-07-16T17:27:22+00:00",
+      "engine": {
+        "name": "builtin_vehicle_image_retrieval",
+        "version": "1"
+      },
+      "items": [
+        {
+          "picture_ref": "pictureId:img_b074d6887d50878bd1a032b7",
+          "picture_number": null,
+          "perceptual_hash": "1f4f434a9c9ed803",
+          "descriptor": {
+            "summary": "这是**第七代半高尔夫GTI（MK7.5 GTI）五门版**，是大众非常经典的前驱小钢炮车型： 它保留了GTI标志性的设计元素：中网红线标识、经典战斧轮毂、GTI专属的银耳后视镜，这台还改了水泥灰色的改色膜，质感非常出众。 这代GTI搭载第三代EA888 2.0T涡轮增压发动机，原厂就有220马力，主打运动操控，是很多性能车爱好者非常喜欢的入门钢炮车型，可玩性很高。",
+            "keywords": [
+              "轮毂",
+              "灰色"
+            ],
+            "identity_terms": [
+              "2020款大众高尔夫280TSI DSG舒适型",
+              "测试车辆-11",
+              "测试品牌-11",
+              "测试车系-11",
+              "测试车型-11"
+            ],
+            "view": "",
+            "scene_terms": [],
+            "ocr_text": [],
+            "terms": [
+              "这是**第七代半高尔夫gti（mk7.5 gti）五门版**，是大众非常经典的前驱小钢炮车型： 它保留了gti标志性的设计元素：中网红线标识、经典战斧轮毂、gti专属的银耳后视镜，这台还改了水泥灰色的改色膜，质感非常出众。 这代gti搭载第三代ea888 2.0t涡轮增压发动机，原厂就有220马力，主打运动操控，是很多",
+              "这是",
+              "第七代半高尔夫",
+              "gti",
+              "mk7",
+              "五门版",
+              "是大众非常经典的前驱小钢",
+              "炮车型",
+              "它保留了",
+              "标志性的设计元素",
+              "中网红线标识",
+              "经典战斧轮毂",
+              "专属的银耳后视镜",
+              "这台还改了水泥灰色的改色",
+              "质感非常出众",
+              "这代",
+              "搭载第三代",
+              "ea888",
+              "0t",
+              "涡轮增压发动机",
+              "原厂就有",
+              "220",
+              "马力",
+              "主打运动操控",
+              "是很多",
+              "轮毂",
+              "灰色",
+              "2020款大众高尔夫280tsi dsg舒适型",
+              "2020",
+              "款大众高尔夫",
+              "280tsi",
+              "dsg",
+              "舒适型",
+              "测试车辆-11",
+              "测试车辆",
+              "11",
+              "测试品牌-11",
+              "测试品牌",
+              "测试车系-11",
+              "测试车系",
+              "测试车型-11",
+              "测试车型"
+            ]
+          },
+          "indexed_at": "2026-07-16T17:27:22+00:00"
+        }
+      ]
     }
   },
   "runtime": {
@@ -296,7 +393,7 @@
   },
   "metadata": {
     "created_at": "2026-05-07T10:00:00",
-    "updated_at": "2026-07-13T15:47:11",
+    "updated_at": "2026-07-17T01:27:22",
     "created_by": "admin",
     "updated_by": "admin",
     "migrated_from_schema_version": 1,
@@ -304,6 +401,7 @@
     "legacy_snapshot_enriched_at": "2026-07-13T06:45:00+00:00",
     "legacy_snapshot_enrichment_batch": "chejin_v2_legacy_snapshot_enrichment_20260713",
     "test_fixture_last_action": "filled",
-    "test_fixture_batch": "chejin_v2_wechat_recognition_test_fields_20260713"
+    "test_fixture_batch": "chejin_v2_wechat_recognition_test_fields_20260713",
+    "manual_last_edited_at": "2026-07-16T17:27:02+00:00"
   }
 }

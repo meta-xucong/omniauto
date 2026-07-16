@@ -471,7 +471,8 @@ def check_wall_timeout_primary_activates_fallback() -> None:
             }
         )
         if "slow-primary.invalid" in str(request.full_url):
-            time.sleep(2.0)
+            if float(timeout) <= 1.0:
+                raise TimeoutError("transport deadline reached")
             return FakeResponse()
         return FakeResponse()
 
@@ -502,7 +503,7 @@ def check_wall_timeout_primary_activates_fallback() -> None:
     elapsed = time.time() - started
     assert_true(result.get("ok"), f"fallback should recover wall-timeout primary: {result}")
     assert_equal(result.get("provider"), "deepseek", "fallback result should report DeepSeek after wall timeout")
-    assert_true(elapsed < 1.5, f"wall timeout should not wait for slow primary to finish, elapsed={elapsed:.3f}")
+    assert_true(elapsed < 1.5, f"wall timeout should use the bounded transport deadline, elapsed={elapsed:.3f}")
     assert_true(len(calls) >= 2, f"primary and fallback calls should both be attempted: {calls}")
 
 

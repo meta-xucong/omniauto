@@ -1639,6 +1639,80 @@ details.settings-section > summary .button-row {
   width: 100%;
 }
 
+.vehicle-v2-upload-control small,
+.vehicle-image-upload-status {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.vehicle-image-upload-status {
+  min-height: 18px;
+}
+
+.vehicle-image-upload-status.is-error {
+  color: #b42318;
+}
+
+.vehicle-image-editor-tile {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #f7f8fa;
+}
+
+.vehicle-image-editor-tile > img,
+.vehicle-image-editor-tile .authenticated-vehicle-image img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+
+.vehicle-image-editor-tile .authenticated-vehicle-image {
+  border: 0;
+  border-radius: 0;
+}
+
+.vehicle-image-editor-tile.is-uploading {
+  opacity: 0.72;
+}
+
+.vehicle-image-editor-tile.is-failed {
+  border-color: #b42318;
+}
+
+.vehicle-image-uploading-label {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  padding: 3px 7px;
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(31, 41, 55, 0.76);
+  font-size: 12px;
+}
+
+.vehicle-image-remove {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 1;
+  padding: 4px 8px;
+  border: 0;
+  border-radius: 7px;
+  color: #fff;
+  background: rgba(180, 35, 24, 0.9);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.vehicle-image-remove:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
 .authenticated-vehicle-image {
   display: block;
   overflow: hidden;

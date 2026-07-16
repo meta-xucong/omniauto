@@ -21,6 +21,10 @@ from apps.wechat_ai_customer_service.admin_backend.services.customer_service_ses
     row_fingerprint_from_payload,
     session_key_from_payload,
 )
+from apps.wechat_ai_customer_service.conversation_admission import (
+    customer_session_admission_reason,
+    inferred_non_customer_conversation_type,
+)
 from apps.wechat_ai_customer_service.knowledge_paths import active_tenant_id, tenant_runtime_root
 
 
@@ -108,6 +112,7 @@ class SessionMonitor:
         empty_capture_retry_seconds: float = 3.0,
         empty_capture_retry_backoff_multiplier: float = 1.8,
         empty_capture_retry_max_seconds: float = 15.0,
+        customer_session_only: bool = False,
     ) -> None:
         self.tenant_id = active_tenant_id(tenant_id)
         self.state_path = state_path or (
@@ -136,6 +141,11 @@ class SessionMonitor:
             self.empty_capture_retry_seconds,
             float(empty_capture_retry_max_seconds or self.empty_capture_retry_seconds or 0.0),
         )
+        # Dynamic all-session monitoring is restricted to customer private/group
+        # chats.  Keep explicit/static targets backward compatible (including
+        # the File Transfer Assistant test surface) by making this opt-in.
+        self.customer_session_only = bool(customer_session_only)
+        self._customer_sessions_seen_this_runtime: set[str] = set()
         self._last_switch_at: float = 0.0
         self._last_dispatched_target: str = ""
         self._sticky_target: str = ""
@@ -272,10 +282,6 @@ class SessionMonitor:
                 continue
             if self.blacklist and name in self.blacklist:
                 continue
-            content = str(raw.get("content") or "").strip()
-            msg_time = str(raw.get("time") or "").strip()
-            unread_badge = str(raw.get("unread_badge") or raw.get("unread") or "").strip()
-            digest = _digest(content) if content else ""
             conversation_type = _infer_conversation_type(name, raw)
             explicit_session_key = str(raw.get("session_key") or "").strip()
             session_key = session_key_from_payload(
@@ -287,6 +293,26 @@ class SessionMonitor:
                 },
                 fallback_name=name,
             )
+            admission_reason = self._dynamic_customer_admission_reason(
+                name=name,
+                conversation_type=conversation_type,
+                session_key=explicit_session_key,
+            )
+            if admission_reason:
+                self._clear_excluded_pending_session(
+                    name=name,
+                    session_key=session_key,
+                    conversation_type=conversation_type,
+                    now_iso=now_iso,
+                    reason=admission_reason,
+                )
+                continue
+            if self.customer_session_only:
+                self._customer_sessions_seen_this_runtime.add(session_key)
+            content = str(raw.get("content") or "").strip()
+            msg_time = str(raw.get("time") or "").strip()
+            unread_badge = str(raw.get("unread_badge") or raw.get("unread") or "").strip()
+            digest = _digest(content) if content else ""
             if name in unsafe_duplicate_display_names:
                 self._block_ambiguous_display_name(name, now_iso=now_iso, session_key=session_key)
                 continue
@@ -772,6 +798,15 @@ class SessionMonitor:
             if s.unread_detected
             and (not self.whitelist or s.name in self.whitelist)
             and (not self.blacklist or s.name not in self.blacklist)
+            and not self._dynamic_customer_admission_reason(
+                name=s.name,
+                conversation_type=s.conversation_type,
+                session_key=s.session_key,
+            )
+            and (
+                not self.customer_session_only
+                or str(s.session_key or "").strip() in self._customer_sessions_seen_this_runtime
+            )
             and self._signal_ready_for_dispatch(s)
         ]
         active.sort(key=lambda t: (-t.priority_score, -t.session_age_seconds))
@@ -845,6 +880,53 @@ class SessionMonitor:
             or str(session.last_unread_badge or "").strip()
             or str(session.pending_since or "").strip()
         )
+
+    def _dynamic_customer_admission_reason(
+        self,
+        *,
+        name: str,
+        conversation_type: str,
+        session_key: str,
+    ) -> str:
+        """Keep dynamic all-session monitoring inside confirmed customer chats."""
+
+        if not self.customer_session_only:
+            return ""
+        return customer_session_admission_reason(
+            name=name,
+            conversation_type=conversation_type,
+            session_key=session_key,
+        )
+
+    def _clear_excluded_pending_session(
+        self,
+        *,
+        name: str,
+        session_key: str,
+        conversation_type: str,
+        now_iso: str,
+        reason: str,
+    ) -> None:
+        """Quarantine a persisted non-customer signal without deleting audit state."""
+
+        existing = self._sessions.get(session_key) or self._session_by_identifier(name)
+        if not isinstance(existing, SessionState):
+            return
+        existing.name = name or existing.name
+        existing.session_key = session_key or existing.session_key
+        existing.conversation_type = conversation_type or existing.conversation_type
+        existing.last_seen_at = now_iso
+        existing.unread_detected = False
+        existing.priority_score = 0
+        existing.pending_since = ""
+        existing.last_detected_at = ""
+        existing.last_unread_badge = ""
+        existing.pending_signal_text = ""
+        existing.pending_signal_kind = f"customer_service_excluded:{reason}"
+        existing.pending_observation_id = ""
+        existing.signal_ready_after = ""
+        existing.retry_not_before = ""
+        existing.empty_capture_retries = 0
 
     def _session_by_identifier(self, value: str) -> SessionState | None:
         key = str(value or "").strip()
@@ -1197,8 +1279,13 @@ def _infer_conversation_type(name: str, session: dict[str, Any]) -> str:
     explicit = str(session.get("conversation_type") or session.get("type") or "").strip().lower()
     if explicit in {"private", "group", "file_transfer", "system"}:
         return explicit
+    if explicit == "unknown":
+        return "unknown"
     if name in {"文件传输助手", "File Transfer"}:
         return "file_transfer"
+    non_customer_type = inferred_non_customer_conversation_type(name)
+    if non_customer_type:
+        return non_customer_type
     if "群" in name or "chatroom" in name.lower() or "room" in name.lower():
         return "group"
     if any(keyword in name for keyword in ("微信团队", "系统消息", "服务通知", "订阅号")):

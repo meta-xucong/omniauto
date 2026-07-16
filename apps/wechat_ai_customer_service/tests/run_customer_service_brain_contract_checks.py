@@ -38,6 +38,7 @@ from listen_and_reply import (  # noqa: E402
     should_adopt_customer_service_brain,
 )
 from reply_evidence_builder import (  # noqa: E402
+    authoritative_catalog_alias_matches,
     build_reply_evidence_pack,
     catalog_product_candidates,
     compact_knowledge_pack,
@@ -118,6 +119,7 @@ def main() -> int:
         check_quality_gate_rejects_ambiguous_identity_admission(),
         check_low_authority_fast_profile_compacts_social_turn_without_bypassing_brain(),
         check_low_authority_fast_profile_rejects_authority_or_context_turns(),
+        check_low_authority_fast_profile_retains_catalog_alias_evidence(),
         check_routine_product_fast_profile_compacts_grounded_product_turn(),
         check_routine_product_fast_profile_rejects_complex_or_risky_turns(),
         check_brain_no_visible_payload_classifies_social_empty_reply(),
@@ -196,6 +198,7 @@ def main() -> int:
         check_brain_failure_does_not_use_local_product_candidate_fallback(),
         check_brain_input_keeps_referenced_context_auxiliary(),
         check_brain_prompt_compacts_large_context_under_timeout_budget(),
+        check_brain_prompt_projection_excludes_unbounded_runtime_payloads(),
         check_brain_timeout_budget_scales_with_prompt_pressure(),
         check_repair_prompt_preserves_authority_boundaries(),
         check_shadow_non_blocking_defers_without_llm(),
@@ -287,6 +290,7 @@ def main() -> int:
         check_brain_adoption_gate(),
         check_brain_adoption_gate_rejects_nonadoptable_or_blocked_payloads(),
         check_process_target_brain_first_adopts(),
+        check_process_target_brain_first_uses_operational_intent_route_only(),
         check_process_target_brain_first_low_authority_fast_precheck_skips_legacy_prework(),
         check_process_target_brain_first_low_authority_fast_precheck_rejects_business_turn(),
         check_process_target_brain_first_exception_blocks_visible_reply(),
@@ -2242,6 +2246,79 @@ def check_low_authority_fast_profile_rejects_authority_or_context_turns() -> Cas
             "casual_car_word": casual_car_word_decision,
             "generic_vehicle_intent": generic_vehicle_intent_decision,
             "direct_choice": direct_choice_decision,
+        },
+    )
+
+
+def check_low_authority_fast_profile_retains_catalog_alias_evidence() -> CaseResult:
+    """A natural short vehicle query must keep V2 product evidence for Brain."""
+
+    settings = brain_module.effective_brain_settings({"customer_service_brain": {"enabled": True, "mode": "brain_first"}})
+    text = "把车库里那台 A4L 的详细信息调出来"
+    from knowledge_loader import build_evidence_pack
+
+    with tenant_context("chejin"):
+        alias_matches = authoritative_catalog_alias_matches(text)
+        compact_evidence = compact_knowledge_pack(
+            text,
+            build_evidence_pack(text, context={}),
+            max_rag_hits=5,
+            max_rag_text_chars=900,
+            max_catalog_candidates=8,
+        )
+        decision = brain_module.low_authority_fast_profile_decision(
+            settings=settings,
+            combined=text,
+            batch=[{"id": "msg-a4l-detail", "sender": "许聪", "content": text}],
+            target_state={"conversation_context": {}},
+        )
+    assert_true(alias_matches, f"A4L should resolve through the customer-safe V2 alias index: {alias_matches}")
+    assert_true(
+        any(str(item.get("id") or "") == "chejin_audi_a4l_2018_40tfsi" for item in alias_matches),
+        f"A4L alias should resolve to its V2 record: {alias_matches}",
+    )
+    assert_true(
+        not decision.get("enabled") and decision.get("reason") == "catalog_alias_requires_authoritative_evidence",
+        f"explicit catalog alias must not enter low-authority Brain mode: {decision}",
+    )
+    compact_product_ids = [
+        str(item.get("id") or "")
+        for item in ((compact_evidence.get("product_master") or {}).get("items") or [])
+        if isinstance(item, dict)
+    ]
+    compact_catalog_ids = [
+        str(item.get("id") or "")
+        for item in ((compact_evidence.get("evidence") or {}).get("catalog_candidates") or [])
+        if isinstance(item, dict)
+    ]
+    compact_a4l = next(
+        (
+            item
+            for item in ((compact_evidence.get("product_master") or {}).get("items") or [])
+            if isinstance(item, dict) and str(item.get("id") or "") == "chejin_audi_a4l_2018_40tfsi"
+        ),
+        {},
+    )
+    assert_true(
+        "chejin_audi_a4l_2018_40tfsi" in compact_product_ids,
+        f"A4L must enter the compact Brain product-master evidence: {compact_product_ids}",
+    )
+    assert_true(
+        "chejin_audi_a4l_2018_40tfsi" in compact_catalog_ids,
+        f"A4L must enter the compact Brain catalog evidence: {compact_catalog_ids}",
+    )
+    assert_true(
+        compact_a4l.get("name") and compact_a4l.get("price") == 14.5 and compact_a4l.get("mileage") == 7.2,
+        f"A4L compact evidence must retain its allowed detailed fields: {compact_a4l}",
+    )
+    return CaseResult(
+        "low_authority_fast_profile_retains_catalog_alias_evidence",
+        True,
+        {
+            "aliases": alias_matches,
+            "decision": decision,
+            "compact_product_ids": compact_product_ids,
+            "compact_catalog_ids": compact_catalog_ids,
         },
     )
 
@@ -5855,6 +5932,51 @@ def check_brain_prompt_compacts_large_context_under_timeout_budget() -> CaseResu
     return CaseResult("brain_prompt_compacts_large_context_under_timeout_budget", True, {"prompt_estimate": estimate})
 
 
+def check_brain_prompt_projection_excludes_unbounded_runtime_payloads() -> CaseResult:
+    """Raw mirrors and runtime state must not silently become LLM prompt text."""
+
+    settings = brain_module.effective_brain_settings(base_config(base_plan()))
+    pack = fake_evidence_pack(include_product=True)
+    raw_marker = "RAW_PROVIDER_PAYLOAD_MUST_NOT_REACH_BRAIN_PROMPT"
+    huge_payload = {f"provider_field_{idx}": raw_marker + ("x" * 600) for idx in range(80)}
+    pack["knowledge"]["product_master"]["raw_provider_payload"] = huge_payload
+    pack["knowledge"]["evidence"]["legacy_runtime_dump"] = huge_payload
+    brain_input = brain_module.build_brain_input(
+        settings=settings,
+        target_name="许聪",
+        target_state={
+            "conversation_context": {
+                "last_product_id": "chejin_qinplus_2022_dmi55",
+                "raw_context_dump": huge_payload,
+            }
+        },
+        batch=[{"id": "msg-projection", "sender": "许聪", "content": "秦PLUS多少钱？"}],
+        combined="秦PLUS多少钱？",
+        raw_capture={"conversation": {"conversation_id": "projection-c1", "chat_type": "private"}},
+        evidence_pack=pack,
+    )
+    brain_input["target"]["raw_target_dump"] = huge_payload
+    prompt_pack, _user_content, estimate = brain_module.build_sized_brain_prompt(settings=settings, brain_input=brain_input)
+    prompt_text = json.dumps(prompt_pack, ensure_ascii=False)
+    slim = prompt_pack["user"]["brain_input"]
+    assert_true(raw_marker not in prompt_text, f"unbounded runtime payload leaked into Brain prompt: {estimate}")
+    assert_true("chejin_qinplus_2022_dmi55" in prompt_text, "authoritative product anchor must remain available")
+    assert_true(
+        int(estimate.get("prompt_chars") or 99999) < 9000,
+        f"projection must remain bounded even with large unknown runtime payloads: {estimate}",
+    )
+    assert_equal(
+        slim["conversation"]["context"].get("last_product_id"),
+        "chejin_qinplus_2022_dmi55",
+        "current conversation anchor must remain in the private prompt projection",
+    )
+    return CaseResult(
+        "brain_prompt_projection_excludes_unbounded_runtime_payloads",
+        True,
+        {"prompt_estimate": estimate, "context": slim["conversation"]["context"]},
+    )
+
+
 def check_brain_timeout_budget_scales_with_prompt_pressure() -> CaseResult:
     settings = brain_module.effective_brain_settings(
         {
@@ -8328,12 +8450,19 @@ def check_brain_first_intent_assist_skips_duplicate_llm_advisory() -> CaseResult
         },
     }
     original_builder = workflow_module.build_llm_advisory
+    original_evidence_builder = workflow_module.build_evidence_pack
+    evidence_calls: list[str] = []
 
     def unexpected_llm_advisory(**_kwargs: Any) -> dict[str, Any]:
         raise AssertionError("Brain First must not synchronously call the duplicate intent advisory LLM")
 
+    def unexpected_evidence_builder(*_args: Any, **_kwargs: Any) -> dict[str, Any]:
+        evidence_calls.append("intent_assist_evidence")
+        raise AssertionError("Brain First must not rebuild a second intent-assist evidence pack")
+
     try:
         workflow_module.build_llm_advisory = unexpected_llm_advisory
+        workflow_module.build_evidence_pack = unexpected_evidence_builder
         result = workflow_module.maybe_analyze_intent(
             config=config,
             combined="预算6万以内，直接推荐一台省油耐用的车",
@@ -8344,11 +8473,13 @@ def check_brain_first_intent_assist_skips_duplicate_llm_advisory() -> CaseResult
         )
     finally:
         workflow_module.build_llm_advisory = original_builder
+        workflow_module.build_evidence_pack = original_evidence_builder
     advisory = result.get("llm_advisory") if isinstance(result.get("llm_advisory"), dict) else {}
     assert_true(result.get("ok"), f"heuristic intent evidence should remain available: {result}")
     assert_true(advisory.get("skipped") is True, f"duplicate LLM advisory should be skipped: {result}")
     assert_true(advisory.get("reason") == "skipped_for_brain_first_single_reasoner", f"skip reason mismatch: {result}")
     assert_true(bool(result.get("evidence")), f"Brain still needs the intent evidence summary: {result}")
+    assert_true(not evidence_calls, f"Brain First intent assist must not rebuild evidence: {evidence_calls}")
     return CaseResult("brain_first_intent_assist_skips_duplicate_llm_advisory", True, {"advisory": advisory})
 
 
@@ -9173,6 +9304,20 @@ def check_brain_adoption_gate_rejects_nonadoptable_or_blocked_payloads() -> Case
 
 
 def check_process_target_brain_first_adopts() -> CaseResult:
+    original_realtime_builder = workflow_module.build_realtime_router_evidence_pack
+    original_direct_price_fallback = workflow_module.maybe_build_direct_product_price_fact_fallback
+    forbidden_calls: list[str] = []
+
+    def unexpected_legacy_builder(*args: Any, **kwargs: Any) -> dict[str, Any]:
+        forbidden_calls.append("realtime_evidence")
+        raise AssertionError("Brain-owned reply must not rebuild legacy realtime evidence")
+
+    def unexpected_direct_price_fallback(*args: Any, **kwargs: Any) -> dict[str, Any]:
+        forbidden_calls.append("direct_price_fallback")
+        raise AssertionError("Brain-owned reply must not invoke legacy direct-price fallback")
+
+    workflow_module.build_realtime_router_evidence_pack = unexpected_legacy_builder
+    workflow_module.maybe_build_direct_product_price_fact_fallback = unexpected_direct_price_fallback
     with patched_workflow_brain(mode="brain_first"):
         event = process_target(
             connector=FakeConnector([{"id": "p1", "type": "text", "sender": "customer", "content": "秦PLUS多少钱"}]),
@@ -9185,6 +9330,8 @@ def check_process_target_brain_first_adopts() -> CaseResult:
             allow_fallback_send=True,
             mark_dry_run=True,
         )
+    workflow_module.build_realtime_router_evidence_pack = original_realtime_builder
+    workflow_module.maybe_build_direct_product_price_fact_fallback = original_direct_price_fallback
     decision = event.get("decision") or {}
     audit = event.get("brain_first_reply_audit") if isinstance(event.get("brain_first_reply_audit"), dict) else {}
     runtime_route = event.get("runtime_route") if isinstance(event.get("runtime_route"), dict) else {}
@@ -9200,7 +9347,61 @@ def check_process_target_brain_first_adopts() -> CaseResult:
     assert_true(runtime_route.get("reason") == "realtime_reply_disabled", f"Brain-owned reply must not be routed by realtime local templates: {event}")
     assert_true(realtime_reply.get("applied") is False, f"Brain-owned reply must not apply local realtime reply: {event}")
     assert_true(llm_synthesis.get("reason") == "llm_reply_synthesis_disabled", f"Brain-owned reply must not be rewritten by legacy synthesis: {event}")
+    assert_true(not forbidden_calls, f"Brain-owned reply must skip disabled legacy generators: {forbidden_calls}")
     return CaseResult("process_target_brain_first_adopts", True, {"action": event.get("action")})
+
+
+def check_process_target_brain_first_uses_operational_intent_route_only() -> CaseResult:
+    config = workflow_config("brain_first")
+    config["intent_router"] = {"llm": {"enabled": True, "provider": "openai"}}
+    original_route = workflow_module.route_intent
+    original_evidence_builder = workflow_module.build_evidence_pack
+    route_configs: list[dict[str, Any]] = []
+
+    def fake_route(*, combined: str, config: dict[str, Any], evidence_pack: dict[str, Any], target_state: dict[str, Any]) -> Any:
+        route_configs.append(copy.deepcopy(config))
+        return workflow_module.IntentRouteResult(
+            intent="product_inquiry",
+            confidence=0.9,
+            reasoning="unit_operational_route",
+            entities={},
+            source="unit",
+        )
+
+    def unexpected_evidence_builder(*_args: Any, **_kwargs: Any) -> dict[str, Any]:
+        raise AssertionError("Brain First must not build the obsolete pre-Brain evidence pack")
+
+    workflow_module.route_intent = fake_route
+    workflow_module.build_evidence_pack = unexpected_evidence_builder
+    try:
+        with patched_workflow_brain(mode="brain_first"):
+            event = process_target(
+                connector=FakeConnector([{"id": "p-operational-route", "type": "text", "sender": "customer", "content": "\u79e6PLUS\u591a\u5c11\u94b1\uff1f"}]),
+                target=TargetConfig("test_customer", True, True, False, 3),
+                config=config,
+                rules={"default_reply": "legacy", "rules": []},
+                state={"targets": {}},
+                send=False,
+                write_data=False,
+                allow_fallback_send=True,
+                mark_dry_run=True,
+            )
+    finally:
+        workflow_module.route_intent = original_route
+        workflow_module.build_evidence_pack = original_evidence_builder
+    routed_llm = ((route_configs[0].get("intent_router") or {}).get("llm") or {}) if route_configs else {}
+    assert_true(route_configs, "Brain First must retain an operational intent route for data bookkeeping")
+    assert_true(routed_llm.get("enabled") is False, f"operational route must disable duplicate intent LLM: {route_configs}")
+    assert_true(
+        ((config.get("intent_router") or {}).get("llm") or {}).get("enabled") is True,
+        "private route projection must not mutate the caller configuration",
+    )
+    assert_true(event.get("customer_service_brain_adopted", {}).get("applied") is True, f"Brain reply should remain adoptable: {event}")
+    return CaseResult(
+        "process_target_brain_first_uses_operational_intent_route_only",
+        True,
+        {"intent_route_llm_enabled": routed_llm.get("enabled")},
+    )
 
 
 def check_process_target_brain_first_low_authority_fast_precheck_skips_legacy_prework() -> CaseResult:

@@ -21,6 +21,14 @@ from apps.wechat_ai_customer_service.llm_config import (
     resolve_deepseek_timeout,
 )
 from apps.wechat_ai_customer_service.product_master import ProductMasterStore
+from apps.wechat_ai_customer_service.vehicle_image_retrieval_integration import (
+    index_product_vehicle_images,
+    vehicle_image_retrieval_status,
+)
+from apps.wechat_ai_customer_service.vehicle_image_retrieval_jobs import (
+    enqueue_vehicle_image_index,
+    vehicle_image_index_job_status,
+)
 from packages.dafengche_product_master import (
     apply_admin_vehicle_update,
     build_admin_vehicle_view,
@@ -297,6 +305,22 @@ class ProductConsoleService:
         )
         updated = apply_admin_vehicle_update(item, {"vehicle_pictures_patch": next_pictures})
         saved = self.save_v2_product_item(updated, operation="upload_vehicle_image")
+        # Persistence is already successful.  Indexing is deliberately a
+        # best-effort background concern: a missing provider or a failed
+        # enqueue must never make an uploaded vehicle image disappear.
+        product_master = self._product_master_store()
+        try:
+            index_job = enqueue_vehicle_image_index(
+                product_id,
+                tenant_id=product_master.tenant_id,
+                cause="manual_upload",
+            )
+        except Exception:  # noqa: BLE001 - the upload contract is independent of optional vision
+            index_job = {
+                "accepted": False,
+                "state": "not_queued",
+                "reason": "vehicle_image_index_enqueue_failed",
+            }
         return {
             **saved,
             "image": {
@@ -306,7 +330,103 @@ class ProductConsoleService:
                 "filename": safe_vehicle_image_filename(filename),
                 "size": len(content),
             },
+            # Additive operational metadata only; callers that do not know
+            # this field retain the exact V2 upload behavior.
+            "vehicle_image_retrieval_job": index_job,
         }
+
+    def delete_vehicle_image(self, product_id: str, image_id: str) -> dict[str, Any]:
+        """Remove one manually uploaded V2 vehicle picture and refresh its derived index.
+
+        This deliberately edits only the Dafengche-shaped picture payload for
+        an unbound/manual vehicle.  It never offers a delete path for official
+        Dafengche pictures, whose list is owned by the next source sync.
+        """
+
+        item = self.get_product_item(product_id, include_archived=True)
+        if not item:
+            raise FileNotFoundError(product_id)
+        if not is_v2_vehicle_record(item):
+            raise ValueError("vehicle image deletion is only available for V2 vehicle records")
+        source = item.get("source") if isinstance(item.get("source"), dict) else {}
+        if str(source.get("type") or "") != "manual":
+            raise ValueError("Dafengche synchronized vehicle pictures are read-only; sync them from Dafengche instead")
+        image = str(image_id or "").strip()
+        if not re.fullmatch(r"img_[a-f0-9]{24}", image):
+            raise FileNotFoundError(image_id)
+        payloads = item.get("source_payloads") if isinstance(item.get("source_payloads"), dict) else {}
+        snapshot = payloads.get("vehicle_pictures") if isinstance(payloads.get("vehicle_pictures"), dict) else {}
+        pictures = snapshot.get("payload") if isinstance(snapshot.get("payload"), list) else []
+        target = next(
+            (
+                entry
+                for entry in pictures
+                if isinstance(entry, dict) and str(entry.get("pictureId") or "") == image
+            ),
+            None,
+        )
+        if not isinstance(target, dict):
+            raise FileNotFoundError(image_id)
+        next_pictures = [
+            entry
+            for entry in pictures
+            if isinstance(entry, dict) and str(entry.get("pictureId") or "") != image
+        ]
+        updated = apply_admin_vehicle_update(item, {"vehicle_pictures_patch": next_pictures})
+        saved = self.save_v2_product_item(updated, operation="delete_vehicle_image")
+
+        # Delete the tenant-owned binary only after the source payload no
+        # longer references it.  A cleanup failure leaves at most an orphaned
+        # local file, never a picture record pointing to a missing file.
+        asset_name = str(target.get("assetFile") or "")
+        if re.fullmatch(rf"{re.escape(image)}\.(?:jpg|png|webp)", asset_name):
+            asset_root = self._vehicle_image_root(product_id)
+            asset_path = (asset_root / asset_name).resolve()
+            if asset_root.resolve() in asset_path.parents:
+                try:
+                    asset_path.unlink(missing_ok=True)
+                except OSError:
+                    pass
+
+        product_master = self._product_master_store()
+        try:
+            index_job = enqueue_vehicle_image_index(
+                product_id,
+                tenant_id=product_master.tenant_id,
+                cause="manual_delete",
+            )
+        except Exception:  # noqa: BLE001 - source deletion must not depend on optional vision
+            index_job = {
+                "accepted": False,
+                "state": "not_queued",
+                "reason": "vehicle_image_index_enqueue_failed",
+            }
+        return {
+            **saved,
+            "deleted_image_id": image,
+            "vehicle_image_retrieval_job": index_job,
+        }
+
+    def vehicle_image_retrieval_status(self, product_id: str) -> dict[str, Any]:
+        """Return V2 image-index state without exposing image bytes or secrets."""
+
+        store = self._product_master_store()
+        state = vehicle_image_retrieval_status(
+            product_id,
+            store=store,
+        )
+        state["job"] = vehicle_image_index_job_status(product_id, tenant_id=store.tenant_id)
+        return state
+
+    def index_vehicle_images_for_retrieval(self, product_id: str, *, force: bool = False) -> dict[str, Any]:
+        """Invoke the optional product-photo descriptor plugin through its host seam."""
+
+        store = self._product_master_store()
+        return index_product_vehicle_images(
+            product_id,
+            force=bool(force),
+            store=store,
+        )
 
     def vehicle_image_file(self, product_id: str, image_id: str) -> tuple[Path, str]:
         """Resolve an authenticated manual V2 image without exposing paths."""
@@ -341,12 +461,17 @@ class ProductConsoleService:
         return asset_path, str(picture.get("mimeType") or "application/octet-stream")
 
     def _vehicle_image_root(self, product_id: str) -> Path:
-        store = getattr(self.store, "product_master", None)
-        product_master = store if isinstance(store, ProductMasterStore) else ProductMasterStore()
+        product_master = self._product_master_store()
         root = (product_master.root / "assets" / product_id).resolve()
         if product_master.root.resolve() not in root.parents:
             raise ValueError("vehicle image root escapes product-master root")
         return root
+
+    def _product_master_store(self) -> ProductMasterStore:
+        """Return this console's tenant-scoped V2 store without a fallback leak."""
+
+        store = getattr(self.store, "product_master", None)
+        return store if isinstance(store, ProductMasterStore) else ProductMasterStore()
 
     def update_v2_from_compatibility_patch(self, item: dict[str, Any], data_patch: dict[str, Any]) -> dict[str, Any]:
         """Keep legacy command entrypoints usable without persisting V1 ``data``."""

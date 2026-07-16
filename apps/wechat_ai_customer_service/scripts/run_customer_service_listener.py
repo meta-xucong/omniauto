@@ -392,9 +392,19 @@ def _deduped_names(values: Any) -> list[str]:
 def normalize_runtime_target_guard_settings(settings: dict[str, Any] | None) -> dict[str, Any]:
     source = settings if isinstance(settings, dict) else {}
     enabled = bool(source.get("enabled")) and bool(source.get("enforce_runtime_targets", True))
+    if "allow_dynamic_all_sessions" in source:
+        allow_dynamic_all_sessions = bool(source.get("allow_dynamic_all_sessions"))
+    else:
+        disable_dynamic_all_sessions = source.get("disable_respond_all_unread_sessions")
+        if disable_dynamic_all_sessions is None:
+            disable_dynamic_all_sessions = True
+        if isinstance(disable_dynamic_all_sessions, str):
+            disable_dynamic_all_sessions = disable_dynamic_all_sessions.strip().lower() not in {"0", "false", "no", "off", ""}
+        allow_dynamic_all_sessions = not bool(disable_dynamic_all_sessions)
     return {
         "enabled": enabled,
         "allowed_targets": _deduped_names(source.get("allowed_targets") or source.get("targets")),
+        "allow_dynamic_all_sessions": allow_dynamic_all_sessions,
         "reason": "live_safety_guard_runtime_targets" if enabled else "disabled",
     }
 
@@ -1503,6 +1513,38 @@ def evaluate_runtime_target_guard(
     if not active.get("enabled"):
         return {"enabled": False, "ok": True, "stop": False, "observations": observations}
     allowed = set(active.get("allowed_targets") or [])
+    if active.get("allow_dynamic_all_sessions"):
+        # The operator explicitly enabled dynamic all-session monitoring. The
+        # monitor itself still filters File Transfer Assistant to avoid a
+        # self-message loop; this guard must not silently restore a stale
+        # static whitelist over that opt-in mode.
+        file_transfer_observations = [
+            item
+            for item in observations
+            if str(item.get("target") or "").strip() == "文件传输助手"
+        ]
+        if file_transfer_observations:
+            return {
+                "enabled": True,
+                "ok": False,
+                "stop": True,
+                "reason": "runtime_disallowed_target_detected",
+                "message": "检测到文件传输助手进入自动客服监听，已自动停机保护，避免自消息循环。",
+                "allowed_targets": sorted(allowed),
+                "dynamic_all_sessions": True,
+                "observations": observations,
+                "disallowed_targets": ["文件传输助手"],
+                "disallowed_observations": file_transfer_observations,
+            }
+        return {
+            "enabled": True,
+            "ok": True,
+            "stop": False,
+            "allowed_targets": sorted(allowed),
+            "dynamic_all_sessions": True,
+            "observations": observations,
+            "disallowed_targets": [],
+        }
     if not allowed:
         return {
             "enabled": True,

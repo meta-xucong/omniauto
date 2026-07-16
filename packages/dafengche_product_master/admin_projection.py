@@ -128,6 +128,7 @@ def build_admin_vehicle_view(record: dict[str, Any], *, include_raw: bool = Fals
     operation_phase = detail.get("operationPhase")
     name = _first_text(base.get("name"), base.get("carName"), _joined_text(base.get("brandName"), base.get("seriesName"), base.get("modelName")))
     photos = _picture_urls(pictures_snapshot.get("payload"))
+    photo_entries = _picture_entries(pictures_snapshot.get("payload"))
     metadata = _mapping(record.get("metadata"))
     observed_at = str(marker.get("last_observed_at") or metadata.get("source_last_synced_at") or detail_snapshot.get("pulled_at") or "")
     sync = _sync_view(source_type, ingest_channel, observed_at, marker)
@@ -174,6 +175,10 @@ def build_admin_vehicle_view(record: dict[str, Any], *, include_raw: bool = Fals
             },
             "card_fields": _field_rows(detail, CARD_FIELD_SPECS),
             "photos": photos,
+            # Additive admin projection: existing consumers keep ``photos``;
+            # the V2 editor receives stable local picture identifiers needed
+            # for authenticated deletion without exposing the raw payload.
+            "photo_entries": photo_entries,
         },
         "source": {
             "type": source_type,
@@ -418,6 +423,41 @@ def _picture_urls(value: Any) -> list[str]:
                     urls.append(url)
                 break
     return urls[:24]
+
+
+def _picture_entries(value: Any) -> list[dict[str, Any]]:
+    """Project safe photo controls while preserving the source payload verbatim."""
+
+    if not isinstance(value, list):
+        return []
+    entries: list[dict[str, Any]] = []
+    urls_seen: set[str] = set()
+    for item in value:
+        if not isinstance(item, dict):
+            continue
+        url = next(
+            (
+                str(item.get(key) or "").strip()
+                for key in ("bigPictureUrl", "bigPictureLink", "pictureUrl", "pictureLink", "url")
+                if _is_admin_picture_url(str(item.get(key) or "").strip())
+            ),
+            "",
+        )
+        if not url or url in urls_seen:
+            continue
+        urls_seen.add(url)
+        entries.append(
+            {
+                "url": url,
+                "picture_id": str(item.get("pictureId") or ""),
+                "picture_number": item.get("pictureNumber"),
+                "filename": str(item.get("filename") or ""),
+                "mime_type": str(item.get("mimeType") or ""),
+            }
+        )
+        if len(entries) >= 24:
+            break
+    return entries
 
 
 def _is_admin_picture_url(value: str) -> bool:

@@ -57,9 +57,21 @@
     },
     "vehicle_pictures": {
       "api": "manual.dafengche_shaped_vehicle_pictures",
-      "payload": [],
-      "pulled_at": "2026-07-13T04:53:45+00:00",
-      "content_hash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      "payload": [
+        {
+          "pictureId": "img_d0173b90bef68cae6f365f92",
+          "pictureUrl": "/api/product-console/products/chejin_crider_2019_180turbo/images/img_d0173b90bef68cae6f365f92",
+          "source": "manual_upload",
+          "filename": "微信图片_20260708015021_218_3.jpg",
+          "mimeType": "image/jpeg",
+          "size": 777348,
+          "sha256": "sha256:d0173b90bef68cae6f365f92f9dce642e1775e6cabda2b2cf4aa8c39161d0acb",
+          "uploadedAt": "2026-07-16T20:45:16",
+          "assetFile": "img_d0173b90bef68cae6f365f92.jpg"
+        }
+      ],
+      "pulled_at": "2026-07-16T12:45:16+00:00",
+      "content_hash": "sha256:4d1a3567e8965eee12a08a798f25a2eba995b8acc2da2f603256812be224cbb8"
     }
   },
   "extensions": {
@@ -190,6 +202,10 @@
           "recorded_at": "2026-07-13T07:47:11+00:00",
           "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
           "test_only": true
+        },
+        "source_payloads.vehicle_pictures.payload": {
+          "source": "manual_admin_image_upload",
+          "recorded_at": "2026-07-16T12:45:16+00:00"
         }
       },
       "test_fixture": {
@@ -287,6 +303,69 @@
         }
       },
       "manual_overrides": {}
+    },
+    "vehicle_image_retrieval": {
+      "schema_version": 1,
+      "status": "ready",
+      "source_payload_fingerprint": "sha256:879ed0a6fbd4cf8e27e4a4d70cdcf257c0ce4a6bf2b2f5a20bcd8da7f7171a76",
+      "image_count": 1,
+      "indexed_image_count": 1,
+      "indexed_at": "2026-07-16T12:45:33+00:00",
+      "engine": {
+        "name": "builtin_vehicle_image_retrieval",
+        "version": "1"
+      },
+      "items": [
+        {
+          "picture_ref": "pictureId:img_d0173b90bef68cae6f365f92",
+          "picture_number": null,
+          "perceptual_hash": "f3f35b8be6769827",
+          "descriptor": {
+            "summary": "这是换代后的本田凌派，是本田针对中国市场推出的紧凑型家用轿车，图中这款大致是2018款之后的款式，这个车型主打大空间，定位家用入门紧凑型车。",
+            "keywords": [
+              "轿车"
+            ],
+            "identity_terms": [
+              "2019款本田凌派180TURBO CVT舒适版",
+              "测试车辆-07",
+              "测试品牌-07",
+              "测试车系-07",
+              "测试车型-07"
+            ],
+            "view": "",
+            "scene_terms": [],
+            "ocr_text": [],
+            "terms": [
+              "这是换代后的本田凌派，是本田针对中国市场推出的紧凑型家用轿车，图中这款大致是2018款之后的款式，这个车型主打大空间，定位家用入门紧凑型车。",
+              "这是换代后的本田凌派",
+              "是本田针对中国市场推出的",
+              "紧凑型家用轿车",
+              "图中这款大致是",
+              "2018",
+              "款之后的款式",
+              "这个车型主打大空间",
+              "定位家用入门紧凑型车",
+              "轿车",
+              "2019款本田凌派180turbo cvt舒适版",
+              "2019",
+              "款本田凌派",
+              "180turbo",
+              "cvt",
+              "舒适版",
+              "测试车辆-07",
+              "测试车辆",
+              "07",
+              "测试品牌-07",
+              "测试品牌",
+              "测试车系-07",
+              "测试车系",
+              "测试车型-07",
+              "测试车型"
+            ]
+          },
+          "indexed_at": "2026-07-16T12:45:33+00:00"
+        }
+      ]
     }
   },
   "runtime": {
@@ -296,7 +375,7 @@
   },
   "metadata": {
     "created_at": "2026-05-07T10:00:00",
-    "updated_at": "2026-07-13T15:47:11",
+    "updated_at": "2026-07-16T20:45:33",
     "created_by": "admin",
     "updated_by": "admin",
     "migrated_from_schema_version": 1,
@@ -304,6 +383,7 @@
     "legacy_snapshot_enriched_at": "2026-07-13T06:45:00+00:00",
     "legacy_snapshot_enrichment_batch": "chejin_v2_legacy_snapshot_enrichment_20260713",
     "test_fixture_last_action": "filled",
-    "test_fixture_batch": "chejin_v2_wechat_recognition_test_fields_20260713"
+    "test_fixture_batch": "chejin_v2_wechat_recognition_test_fields_20260713",
+    "manual_last_edited_at": "2026-07-16T12:45:16+00:00"
   }
 }

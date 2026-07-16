@@ -57,9 +57,21 @@
     },
     "vehicle_pictures": {
       "api": "manual.dafengche_shaped_vehicle_pictures",
-      "payload": [],
-      "pulled_at": "2026-07-13T04:53:45+00:00",
-      "content_hash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      "payload": [
+        {
+          "pictureId": "img_e9dd30420ba1c91470be634c",
+          "pictureUrl": "/api/product-console/products/chejin_hengyi_2019_es6/images/img_e9dd30420ba1c91470be634c",
+          "source": "manual_upload",
+          "filename": "微信图片_20260708015221_1065_4.jpg",
+          "mimeType": "image/jpeg",
+          "size": 1208261,
+          "sha256": "sha256:e9dd30420ba1c91470be634cc8383aa929e72ce4e3456116bb56c2bb6b2e7452",
+          "uploadedAt": "2026-07-17T01:26:29",
+          "assetFile": "img_e9dd30420ba1c91470be634c.jpg"
+        }
+      ],
+      "pulled_at": "2026-07-16T17:26:29+00:00",
+      "content_hash": "sha256:e1800ba4222d3dfc2fd069b7ca9ae1e46102e452c1dbcee825907932ecf400cb"
     }
   },
   "extensions": {
@@ -190,6 +202,10 @@
           "recorded_at": "2026-07-13T07:47:11+00:00",
           "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
           "test_only": true
+        },
+        "source_payloads.vehicle_pictures.payload": {
+          "source": "manual_admin_image_upload",
+          "recorded_at": "2026-07-16T17:26:29+00:00"
         }
       },
       "test_fixture": {
@@ -287,6 +303,77 @@
         }
       },
       "manual_overrides": {}
+    },
+    "vehicle_image_retrieval": {
+      "schema_version": 1,
+      "status": "ready",
+      "source_payload_fingerprint": "sha256:da74d42e94f12a02b56eeeac5734ba872b5481369041b8d6749904a184437b6f",
+      "image_count": 1,
+      "indexed_image_count": 1,
+      "indexed_at": "2026-07-16T17:26:57+00:00",
+      "engine": {
+        "name": "builtin_vehicle_image_retrieval",
+        "version": "1"
+      },
+      "items": [
+        {
+          "picture_ref": "pictureId:img_e9dd30420ba1c91470be634c",
+          "picture_number": null,
+          "perceptual_hash": "014b5f4f03c8f873",
+          "descriptor": {
+            "summary": "这是**第二代全新蔚来ES6**，是蔚来NIO推出的豪华中型纯电新能源SUV，采用了蔚来最新的设计语言，分体式大灯的设计辨识度很高，支持蔚来特色的换电补能模式，也是蔚来的走量主力车型之一，图中的绿牌也符合国内新能源汽车牌照的特征。",
+            "keywords": [
+              "SUV"
+            ],
+            "identity_terms": [
+              "蔚来ES6",
+              "蔚来NIO",
+              "2019款蔚来ES6 420KM 运动版",
+              "测试车辆-13",
+              "测试品牌-13",
+              "测试车系-13",
+              "测试车型-13"
+            ],
+            "view": "",
+            "scene_terms": [],
+            "ocr_text": [],
+            "terms": [
+              "这是**第二代全新蔚来es6**，是蔚来nio推出的豪华中型纯电新能源suv，采用了蔚来最新的设计语言，分体式大灯的设计辨识度很高，支持蔚来特色的换电补能模式，也是蔚来的走量主力车型之一，图中的绿牌也符合国内新能源汽车牌照的特征。",
+              "这是",
+              "第二代全新蔚来",
+              "es6",
+              "是蔚来",
+              "nio",
+              "推出的豪华中型纯电新能源",
+              "suv",
+              "采用了蔚来最新的设计语言",
+              "分体式大灯的设计辨识度很",
+              "支持蔚来特色的换电补能模",
+              "也是蔚来的走量主力车型之",
+              "图中的绿牌也符合国内新能",
+              "源汽车牌照的特征",
+              "蔚来es6",
+              "蔚来",
+              "蔚来nio",
+              "2019款蔚来es6 420km 运动版",
+              "2019",
+              "款蔚来",
+              "420km",
+              "运动版",
+              "测试车辆-13",
+              "测试车辆",
+              "13",
+              "测试品牌-13",
+              "测试品牌",
+              "测试车系-13",
+              "测试车系",
+              "测试车型-13",
+              "测试车型"
+            ]
+          },
+          "indexed_at": "2026-07-16T17:26:57+00:00"
+        }
+      ]
     }
   },
   "runtime": {
@@ -296,7 +383,7 @@
   },
   "metadata": {
     "created_at": "2026-05-07T10:00:00",
-    "updated_at": "2026-07-13T15:47:11",
+    "updated_at": "2026-07-17T01:26:57",
     "created_by": "admin",
     "updated_by": "admin",
     "migrated_from_schema_version": 1,
@@ -304,6 +391,7 @@
     "legacy_snapshot_enriched_at": "2026-07-13T06:45:00+00:00",
     "legacy_snapshot_enrichment_batch": "chejin_v2_legacy_snapshot_enrichment_20260713",
     "test_fixture_last_action": "filled",
-    "test_fixture_batch": "chejin_v2_wechat_recognition_test_fields_20260713"
+    "test_fixture_batch": "chejin_v2_wechat_recognition_test_fields_20260713",
+    "manual_last_edited_at": "2026-07-16T17:26:29+00:00"
   }
 }

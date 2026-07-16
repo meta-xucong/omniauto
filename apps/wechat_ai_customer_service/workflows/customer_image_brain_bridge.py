@@ -13,12 +13,14 @@ def build_customer_image_brain_bridge(
     catalog_assist: dict[str, Any] | None,
     *,
     source_reason: str = "",
+    vehicle_image_retrieval: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     understanding = understanding if isinstance(understanding, dict) else {}
     catalog_assist = catalog_assist if isinstance(catalog_assist, dict) else {}
     classification = understanding.get("classification") if isinstance(understanding.get("classification"), dict) else {}
     bridge = understanding.get("bridge") if isinstance(understanding.get("bridge"), dict) else {}
     intent_hints = understanding.get("intent_hints") if isinstance(understanding.get("intent_hints"), dict) else {}
+    retrieval = vehicle_image_retrieval if isinstance(vehicle_image_retrieval, dict) else {}
     source_messages = understanding.get("source_messages") if isinstance(understanding.get("source_messages"), list) else []
     source_message_ids = [
         str(item.get("message_id") or "")
@@ -72,6 +74,21 @@ def build_customer_image_brain_bridge(
                 or catalog_assist.get("needs_clarification", False)
             ),
         },
+        "vehicle_image_retrieval": {
+            "matched": bool(retrieval.get("matched", False)),
+            "reason": str(retrieval.get("reason") or ""),
+            "candidates": [
+                {
+                    "product_id": str(item.get("product_id") or ""),
+                    "product_name": str(item.get("product_name") or ""),
+                    "picture_ref": str(item.get("picture_ref") or ""),
+                    "similarity": float(item.get("similarity") or 0.0),
+                    "visual_similarity": float(item.get("visual_similarity") or 0.0),
+                }
+                for item in (retrieval.get("candidates") or [])
+                if isinstance(item, dict)
+            ][:3],
+        },
         "conversation_visual_context": {
             "last_vehicle_query": normalized_vehicle_query,
             "updated_at": now_iso(),
@@ -83,6 +100,7 @@ def build_customer_image_brain_bridge(
         "audit": {
             "source_reason": str(source_reason or ""),
             "used_catalog_assist": bool(catalog_assist.get("applied", False)),
+            "used_vehicle_image_retrieval": bool(retrieval.get("matched", False)),
             "understanding_reason": str(understanding.get("reason") or ""),
         },
     }
@@ -93,6 +111,7 @@ def compact_customer_image_brain_bridge(value: dict[str, Any] | None) -> dict[st
     classification = payload.get("classification") if isinstance(payload.get("classification"), dict) else {}
     catalog_assist = payload.get("catalog_assist") if isinstance(payload.get("catalog_assist"), dict) else {}
     intent_hints = payload.get("intent_hints") if isinstance(payload.get("intent_hints"), dict) else {}
+    retrieval = payload.get("vehicle_image_retrieval") if isinstance(payload.get("vehicle_image_retrieval"), dict) else {}
     return {
         "present": bool(payload.get("present")),
         "vision_summary": str(payload.get("vision_summary") or "")[:220],
@@ -110,6 +129,14 @@ def compact_customer_image_brain_bridge(value: dict[str, Any] | None) -> dict[st
             "wants_catalog_match": bool(intent_hints.get("wants_catalog_match", False)),
             "wants_similar_recommendation": bool(intent_hints.get("wants_similar_recommendation", False)),
             "needs_clarification": bool(intent_hints.get("needs_clarification", False)),
+        },
+        "vehicle_image_retrieval": {
+            "matched": bool(retrieval.get("matched", False)),
+            "candidate_names": [
+                str(item.get("product_name") or "")
+                for item in (retrieval.get("candidates") or [])
+                if isinstance(item, dict) and str(item.get("product_name") or "")
+            ][:3],
         },
         "source_message_ids": [str(item) for item in (payload.get("source_message_ids") or [])[:3] if str(item)],
     }

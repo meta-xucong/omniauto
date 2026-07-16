@@ -229,6 +229,7 @@ def main() -> int:
         check_listener_transport_risk_stale_hits_do_not_stop_without_new_signal(),
         check_runtime_target_guard_blocks_disallowed_event(),
         check_runtime_target_guard_allows_allowed_scheduler_event(),
+        check_runtime_target_guard_allows_explicit_dynamic_all_session_event(),
         check_listener_humanized_send_env_mapping(),
         check_listener_operator_guard_settings_normalization(),
         check_operator_guard_indicator_three_color_mapping(),
@@ -3846,6 +3847,29 @@ def check_runtime_target_guard_allows_allowed_scheduler_event() -> dict[str, Any
     verdict = evaluate_runtime_target_guard(result, settings=settings)
     ok = bool(verdict.get("ok")) and not bool(verdict.get("stop"))
     return {"name": "runtime_target_guard_allows_allowed_scheduler_event", "ok": ok, "verdict": verdict}
+
+
+def check_runtime_target_guard_allows_explicit_dynamic_all_session_event() -> dict[str, Any]:
+    settings = normalize_runtime_target_guard_settings(
+        {
+            "enabled": True,
+            "allowed_targets": ["许聪"],
+            "enforce_runtime_targets": True,
+            "disable_respond_all_unread_sessions": False,
+        }
+    )
+    result = {
+        "ok": True,
+        "events": [{"ok": True, "target": "服务号", "action": "skipped"}],
+        "active_session_signals": [{"target": "新客户", "reason": "unread"}],
+    }
+    verdict = evaluate_runtime_target_guard(result, settings=settings)
+    ok = (
+        bool(verdict.get("ok"))
+        and not bool(verdict.get("stop"))
+        and verdict.get("dynamic_all_sessions") is True
+    )
+    return {"name": "runtime_target_guard_allows_explicit_dynamic_all_session_event", "ok": ok, "verdict": verdict}
 
 
 def check_listener_humanized_send_env_mapping() -> dict[str, Any]:

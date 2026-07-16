@@ -35,13 +35,22 @@ DEFAULT_CUSTOMER_VISIBLE_PATHS = frozenset(
 
 @dataclass(frozen=True)
 class CustomerEvidencePolicy:
-    """Host-configurable allowlist; deny-by-default for source payload fields."""
+    """Host-configurable allowlist; deny-by-default for source payload fields.
+
+    ``max_age_seconds`` applies to official Dafengche mirror data.  Manual V2
+    records are explicitly maintained by an operator, so their default
+    lifecycle is governed by their record status (for example ``active`` or
+    ``archived``), not by the last upstream-payload timestamp.  A host that
+    needs a review/expiry window for manual records can opt into one through
+    ``manual_max_age_seconds`` without weakening official mirror freshness.
+    """
 
     allowed_paths: frozenset[str] = field(default_factory=lambda: DEFAULT_CUSTOMER_VISIBLE_PATHS)
     max_age_seconds: int | None = 24 * 60 * 60
     require_shop_scope: bool = True
     allowed_operation_phases: frozenset[str] = field(default_factory=frozenset)
     allow_manual_unbound: bool = True
+    manual_max_age_seconds: int | None = None
 
     def allows(self, path: str) -> bool:
         return path in self.allowed_paths
@@ -208,9 +217,12 @@ def project_legacy_record(record: dict[str, Any]) -> dict[str, Any] | None:
 
 
 def _is_fresh(record: dict[str, Any], *, policy: CustomerEvidencePolicy, now: datetime | None) -> bool:
-    if policy.max_age_seconds is None:
+    source = record.get("source") if isinstance(record.get("source"), dict) else {}
+    is_manual = str(source.get("type") or "") == "manual"
+    max_age_seconds = policy.manual_max_age_seconds if is_manual else policy.max_age_seconds
+    if max_age_seconds is None:
         return True
-    observed = _detail_pulled_at(record)
+    observed = _manual_updated_at(record) if is_manual else _detail_pulled_at(record)
     if not observed:
         return False
     try:
@@ -222,12 +234,43 @@ def _is_fresh(record: dict[str, Any], *, policy: CustomerEvidencePolicy, now: da
         current = current.replace(tzinfo=timezone.utc)
     if observed_at.tzinfo is None:
         observed_at = observed_at.replace(tzinfo=timezone.utc)
-    return (current - observed_at).total_seconds() <= policy.max_age_seconds
+    return (current - observed_at).total_seconds() <= max_age_seconds
 
 
 def _detail_pulled_at(record: dict[str, Any]) -> str:
     snapshot = _mapping_at(record, "source_payloads.vehicle_detail")
     return str(snapshot.get("pulled_at") or "") if snapshot else ""
+
+
+def _manual_updated_at(record: dict[str, Any]) -> str:
+    """Return the newest auditable manual-maintenance timestamp when present."""
+
+    candidates = [
+        _detail_pulled_at(record),
+        _value_at(record, "source.marker.recorded_at"),
+        _value_at(record, "source_payloads.vehicle_detail.enriched_at"),
+        _value_at(record, "metadata.updated_at"),
+    ]
+    provenance = _value_at(record, "extensions.manual.field_provenance")
+    if isinstance(provenance, dict):
+        candidates.extend(
+            value.get("recorded_at")
+            for value in provenance.values()
+            if isinstance(value, dict)
+        )
+    dated: list[tuple[datetime, str]] = []
+    for value in candidates:
+        text = str(value or "").strip()
+        if not text:
+            continue
+        try:
+            parsed = datetime.fromisoformat(text.replace("Z", "+00:00"))
+        except ValueError:
+            continue
+        if parsed.tzinfo is None:
+            parsed = parsed.replace(tzinfo=timezone.utc)
+        dated.append((parsed, text))
+    return max(dated, default=(datetime.min.replace(tzinfo=timezone.utc), ""))[1]
 
 
 def _allowed_value(record: dict[str, Any], path: str, policy: CustomerEvidencePolicy) -> Any:

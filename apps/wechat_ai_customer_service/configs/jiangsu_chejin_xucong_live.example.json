@@ -498,8 +498,8 @@
     "allowed_targets": [
       "许聪"
     ],
-    "require_exact_targets": true,
-    "disable_respond_all_unread_sessions": true,
+    "require_exact_targets": false,
+    "disable_respond_all_unread_sessions": false,
     "reject_group_targets": false,
     "low_risk_single_target_scan": true,
     "backend_state_scheduler_enabled": true,

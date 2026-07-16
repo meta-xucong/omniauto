@@ -1370,6 +1370,43 @@ def catalog_product_candidates(text: str, *, limit: int, context: dict[str, Any]
     return ranked[: max(0, limit)]
 
 
+def authoritative_catalog_alias_matches(
+    text: str,
+    *,
+    limit: int = 3,
+    context: dict[str, Any] | None = None,
+) -> list[dict[str, Any]]:
+    """Return explicit local product-alias matches from the customer-safe catalog.
+
+    This is an evidence-routing helper, not an answer generator.  It deliberately
+    returns only a product id and the concrete aliases present in the customer
+    text, so callers can retain authoritative evidence before selecting a lean
+    social/low-authority profile.  The underlying catalog continues to read
+    through the existing customer-evidence seam and never exposes raw source
+    payloads.
+    """
+
+    matches: list[dict[str, Any]] = []
+    for candidate in catalog_product_candidates(text, limit=max(1, int(limit or 1)), context=context):
+        aliases = [
+            str(alias).strip()
+            for alias in candidate.get("matched_aliases", []) or []
+            if is_concrete_catalog_alias(str(alias))
+        ]
+        if not aliases or not is_explicit_catalog_candidate(candidate):
+            continue
+        product_id = str(candidate.get("id") or "").strip()
+        if not product_id:
+            continue
+        matches.append(
+            {
+                "id": product_id,
+                "matched_aliases": list(dict.fromkeys(aliases))[:8],
+            }
+        )
+    return matches[: max(1, int(limit or 1))]
+
+
 def semantic_text_for_catalog_matching(text: str) -> str:
     raw = str(text or "")
     if callable(strip_nonsemantic_runtime_markers):

@@ -75,6 +75,43 @@ def get_vehicle_image(product_id: str, image_id: str) -> FileResponse:
         raise HTTPException(status_code=404, detail="vehicle image not found") from exc
 
 
+@router.delete("/products/{product_id}/images/{image_id}")
+def delete_vehicle_image(product_id: str, image_id: str) -> dict[str, Any]:
+    """Delete one local/manual V2 image without altering official source mirrors."""
+
+    try:
+        return service().delete_vehicle_image(product_id, image_id)
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail="vehicle image not found") from exc
+    except (OSError, TypeError, ValueError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@router.get("/products/{product_id}/vehicle-image-retrieval")
+def get_vehicle_image_retrieval_status(product_id: str) -> dict[str, Any]:
+    """Read the independent multi-photo retrieval index state for one V2 vehicle."""
+
+    try:
+        return service().vehicle_image_retrieval_status(product_id)
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=f"product not found: {product_id}") from exc
+
+
+@router.post("/products/{product_id}/vehicle-image-retrieval/index")
+def index_vehicle_image_retrieval(product_id: str, payload: dict[str, Any] | None = None) -> dict[str, Any]:
+    """Build/refresh terms and fingerprints for every image of a V2 vehicle."""
+
+    try:
+        return service().index_vehicle_images_for_retrieval(
+            product_id,
+            force=bool((payload or {}).get("force", False)),
+        )
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=f"product not found: {product_id}") from exc
+    except (OSError, TypeError, ValueError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
 @router.post("/products/{product_id}/inventory")
 def adjust_inventory(product_id: str, payload: dict[str, Any]) -> dict[str, Any]:
     try:

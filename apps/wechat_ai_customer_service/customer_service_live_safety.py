@@ -371,23 +371,34 @@ def apply_customer_service_live_safety_guard(
     merged["targets"] = [by_name[name] for name in allowed_targets if name in by_name]
 
     routing = dict(merged.get("_local_customer_service_session_routing", {}) or {})
-    routing["respond_all_unread_sessions"] = False
+    dynamic_all_sessions = bool(routing.get("respond_all_unread_sessions", False)) and not _truthy(
+        guard.get("disable_respond_all_unread_sessions"),
+        default=True,
+    )
+    routing["respond_all_unread_sessions"] = dynamic_all_sessions
     routing["enabled_names"] = list(allowed_targets)
     ignored = {
         _name(item)
         for item in routing.get("ignored_names", []) or []
         if _name(item)
     }
-    ignored.update(name for name in summary.get("known_targets", []) or [] if name not in allowed_set)
-    if FILE_TRANSFER_ASSISTANT_NAME not in allowed_set:
+    if dynamic_all_sessions:
+        # The operator explicitly enabled dynamic all-session monitoring. Keep
+        # the customer-session monitor open instead of silently restoring a
+        # static whitelist. File Transfer Assistant remains excluded because
+        # it is a self-message surface, not a customer conversation.
         ignored.add(FILE_TRANSFER_ASSISTANT_NAME)
+    else:
+        ignored.update(name for name in summary.get("known_targets", []) or [] if name not in allowed_set)
+        if FILE_TRANSFER_ASSISTANT_NAME not in allowed_set:
+            ignored.add(FILE_TRANSFER_ASSISTANT_NAME)
     routing["ignored_names"] = sorted(ignored)
     merged["_local_customer_service_session_routing"] = routing
 
     if _truthy(guard.get("low_risk_single_target_scan"), default=True):
         allowed_target_count = len(allowed_targets)
         multi_target = dict(merged.get("multi_target", {}) or {})
-        if allowed_target_count <= 1:
+        if not dynamic_all_sessions and allowed_target_count <= 1:
             multi_target.update(
                 {
                     "enabled": False,

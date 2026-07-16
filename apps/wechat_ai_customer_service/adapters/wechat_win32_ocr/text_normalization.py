@@ -5,6 +5,8 @@ from __future__ import annotations
 import re
 from typing import Any
 
+from apps.wechat_ai_customer_service.conversation_admission import inferred_non_customer_conversation_type
+
 
 LOGIN_WINDOW_MAX_WIDTH = 560
 LOGIN_WINDOW_MAX_HEIGHT = 680
@@ -208,6 +210,9 @@ def is_message_noise(text: str) -> bool:
 def infer_conversation_type(name: str) -> str:
     if is_file_transfer_session_alias(name):
         return "file_transfer"
+    non_customer_type = inferred_non_customer_conversation_type(name)
+    if non_customer_type:
+        return non_customer_type
     if re.search(r"(群|群聊|chatroom|room)", name, re.IGNORECASE):
         return "group"
     return "private"

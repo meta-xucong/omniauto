@@ -12,6 +12,7 @@ PluginFactory = Callable[[], OptionalCapabilityPlugin]
 DEFAULT_PLUGIN_FACTORIES = {
     "voice": "apps.wechat_ai_customer_service.optional_plugins.voice.plugin:create_default_voice_plugin",
     "vision": "apps.wechat_ai_customer_service.optional_plugins.vision.plugin:create_default_vision_plugin",
+    "vehicle_image_retrieval": "apps.wechat_ai_customer_service.optional_plugins.vehicle_image_retrieval.plugin:create_default_vehicle_image_retrieval_plugin",
 }
 
 

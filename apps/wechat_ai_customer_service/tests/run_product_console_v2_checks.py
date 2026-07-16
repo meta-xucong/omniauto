@@ -19,6 +19,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from apps.wechat_ai_customer_service.admin_backend.services.product_console_service import ProductConsoleService
+from apps.wechat_ai_customer_service.admin_backend.services import product_console_service as product_console_service_module
 from apps.wechat_ai_customer_service.admin_backend.api import product_console as product_console_api
 from apps.wechat_ai_customer_service.product_master import ProductMasterStore
 from apps.wechat_ai_customer_service.scripts.enrich_chejin_v2_from_legacy_snapshot import plan_legacy_snapshot_enrichment
@@ -277,19 +278,29 @@ def check_manual_vehicle_image_upload_uses_v2_picture_payload() -> None:
         service.get_product_item = lambda product_id, include_archived=False: copy.deepcopy(record_holder["item"])  # type: ignore[assignment]
 
         def save(updated: dict, *, operation: str) -> dict:
-            assert_equal(operation, "upload_vehicle_image", "image save must use the V2 operation")
+            assert_true(operation in {"upload_vehicle_image", "delete_vehicle_image"}, "image write must use an explicit V2 operation")
             record_holder["item"] = copy.deepcopy(updated)
             return {"ok": True, "item": copy.deepcopy(updated), "operation": operation}
 
         service.save_v2_product_item = save  # type: ignore[assignment]
         png = base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M/wHwAFAAH/e+m+7wAAAABJRU5ErkJggg==")
-        result = service.upload_vehicle_image(
-            "manual_camry_001",
-            filename="测试车辆.png",
-            content=png,
-            content_type="image/png",
-        )
+        queued: list[dict] = []
+        original_enqueue = product_console_service_module.enqueue_vehicle_image_index
+        product_console_service_module.enqueue_vehicle_image_index = lambda product_id, *, tenant_id, cause: queued.append(  # type: ignore[assignment]
+            {"product_id": product_id, "tenant_id": tenant_id, "cause": cause}
+        ) or {"accepted": True, "state": "queued", "reason": "fixture"}
+        try:
+            result = service.upload_vehicle_image(
+                "manual_camry_001",
+                filename="测试车辆.png",
+                content=png,
+                content_type="image/png",
+            )
+        finally:
+            product_console_service_module.enqueue_vehicle_image_index = original_enqueue  # type: ignore[assignment]
         assert_equal(result["image"]["mime_type"], "image/png", "image MIME must come from binary signature")
+        assert_equal(result["vehicle_image_retrieval_job"]["state"], "queued", "successful upload must request a background image index")
+        assert_equal(queued, [{"product_id": "manual_camry_001", "tenant_id": "product_console_image_check", "cause": "manual_upload"}], "upload must enqueue the owning tenant only")
         pictures = record_holder["item"]["source_payloads"]["vehicle_pictures"]["payload"]
         assert_equal(len(pictures), 2, "manual upload must append to the original V2 picture payload")
         uploaded = pictures[-1]
@@ -301,6 +312,21 @@ def check_manual_vehicle_image_upload_uses_v2_picture_payload() -> None:
         assert_equal(mime_type, "image/png", "read route must retain MIME type")
         provenance = record_holder["item"]["extensions"]["manual"]["field_provenance"]
         assert_equal(provenance["source_payloads.vehicle_pictures.payload"]["source"], "manual_admin_image_upload", "image writes need V2 provenance")
+
+        deleted_jobs: list[dict] = []
+        original_enqueue = product_console_service_module.enqueue_vehicle_image_index
+        product_console_service_module.enqueue_vehicle_image_index = lambda product_id, *, tenant_id, cause: deleted_jobs.append(  # type: ignore[assignment]
+            {"product_id": product_id, "tenant_id": tenant_id, "cause": cause}
+        ) or {"accepted": True, "state": "queued", "reason": "fixture"}
+        try:
+            deleted = service.delete_vehicle_image("manual_camry_001", uploaded["pictureId"])
+        finally:
+            product_console_service_module.enqueue_vehicle_image_index = original_enqueue  # type: ignore[assignment]
+        assert_equal(deleted["operation"], "delete_vehicle_image", "image deletion must keep a distinct V2 operation")
+        assert_equal(deleted["deleted_image_id"], uploaded["pictureId"], "delete response must identify the removed local image")
+        assert_equal(deleted_jobs, [{"product_id": "manual_camry_001", "tenant_id": "product_console_image_check", "cause": "manual_delete"}], "delete must refresh the owning vehicle image index")
+        assert_equal(len(record_holder["item"]["source_payloads"]["vehicle_pictures"]["payload"]), 1, "delete must remove only the selected V2 picture payload entry")
+        assert_true(not path.exists(), "deleted local image binary must not remain addressable")
 
         synced = v2_vehicle(source_type="dafengche")
         service.get_product_item = lambda product_id, include_archived=False: copy.deepcopy(synced)  # type: ignore[assignment]
@@ -364,6 +390,11 @@ def check_v2_vehicle_image_api_contract() -> None:
             assert_true(content.startswith(b"\x89PNG"), "image API must retain binary payload")
             return {"ok": True, "operation": "upload_vehicle_image", "image": {"url": "/api/product-console/products/manual_camry_001/images/img_123"}}
 
+        def delete_vehicle_image(self, product_id: str, image_id: str) -> dict:
+            assert_equal(product_id, "manual_camry_001", "delete API must retain product id")
+            assert_equal(image_id, "img_123", "delete API must retain exact image id")
+            return {"ok": True, "operation": "delete_vehicle_image", "deleted_image_id": image_id}
+
     original_service = product_console_api.ProductConsoleService
     product_console_api.ProductConsoleService = FakeProductConsoleService
     try:
@@ -373,10 +404,13 @@ def check_v2_vehicle_image_api_contract() -> None:
             "/api/product-console/products/manual_camry_001/images",
             files={"file": ("camry.png", b"\x89PNG\r\n\x1a\nfixture", "image/png")},
         )
+        deleted = TestClient(app).delete("/api/product-console/products/manual_camry_001/images/img_123")
     finally:
         product_console_api.ProductConsoleService = original_service
     assert_equal(response.status_code, 200, "V2 image upload API route must be available")
     assert_equal(response.json().get("operation"), "upload_vehicle_image", "V2 image upload route must return service result")
+    assert_equal(deleted.status_code, 200, "V2 image delete API route must be available")
+    assert_equal(deleted.json().get("operation"), "delete_vehicle_image", "V2 image delete route must return service result")
 
 
 def check_frontend_uses_v2_console_contract() -> None:
@@ -389,6 +423,10 @@ def check_frontend_uses_v2_console_contract() -> None:
     assert_true("vehicle-advanced-panel" in app_js and ">高级<" in app_js, "operational material must stay behind a collapsed Advanced section")
     assert_true("vehicle-v2-editor-groups" in app_js and "source_payloads.vehicle_pictures.payload" in app_js, "V2 editor must group original Dafengche paths and expose picture payload editing")
     assert_true("uploadProductV2VehicleImages" in app_js and "FormData" in app_js, "V2 editor must submit vehicle image uploads as multipart data")
+    assert_true("data-vehicle-image-remove-id" in app_js and 'method: "DELETE"' in app_js, "manual V2 image editor must expose an explicit delete action")
+    assert_true("选中后立即上传并显示" in app_js and "vehicle-image-uploading-label" in app_js, "manual V2 image editor must render immediate upload feedback")
+    assert_true("productDetailRequestId" in app_js and "state.selectedProduct?.id !== productId" in app_js, "stale vehicle-image responses must not reopen an old selected car")
+    assert_true("productDetailModalOpenRequested" in app_js and "state.productDetailRequestId += 1" in app_js, "closing the vehicle detail must invalidate pending automatic reopen actions")
     assert_true("product-catalog-source-filter" in index_html, "frontend must expose source filtering")
 
 

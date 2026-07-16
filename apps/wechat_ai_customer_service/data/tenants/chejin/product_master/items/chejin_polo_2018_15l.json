@@ -50,7 +50,7 @@
           "licenseStatus": "测试手续正常"
         }
       },
-      "pulled_at": "2026-07-13T04:53:45+00:00",
+      "pulled_at": "2026-07-16T12:27:28+00:00",
       "content_hash": "sha256:b7d6078788ceae5e6ad2e6c66f70ca18b528057e4706ba6a5187162afccfefd6",
       "enriched_at": "2026-07-13T06:42:22+00:00",
       "test_filled_at": "2026-07-13T07:47:11+00:00"
@@ -58,7 +58,7 @@
     "vehicle_pictures": {
       "api": "manual.dafengche_shaped_vehicle_pictures",
       "payload": [],
-      "pulled_at": "2026-07-13T04:53:45+00:00",
+      "pulled_at": "2026-07-16T12:27:24+00:00",
       "content_hash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
     }
   },
@@ -66,130 +66,92 @@
     "manual": {
       "field_provenance": {
         "source_payloads.vehicle_detail.payload.baseCarInfo.name": {
-          "source": "legacy_v1_migration",
-          "original_path": "data.name",
-          "original_source_type": "test_fixture",
-          "recorded_at": "2026-07-13T04:53:45+00:00"
+          "source": "manual_admin_edit",
+          "recorded_at": "2026-07-16T12:27:28+00:00"
         },
         "source_payloads.vehicle_detail.payload.carPriceInfo.salePrice": {
-          "source": "legacy_v1_migration",
-          "original_path": "data.price",
-          "original_source_type": "test_fixture",
-          "recorded_at": "2026-07-13T04:53:45+00:00"
+          "source": "manual_admin_edit",
+          "recorded_at": "2026-07-16T12:27:28+00:00"
         },
         "source_payloads.vehicle_detail.payload.baseCarInfo.firstLicensePlateDate": {
-          "source": "legacy_v1_snapshot_enrichment",
-          "original_path": "data.specs",
-          "recorded_at": "2026-07-13T06:42:22+00:00",
-          "evidence": "2018年10月上牌"
+          "source": "manual_admin_edit",
+          "recorded_at": "2026-07-16T12:27:28+00:00"
         },
         "source_payloads.vehicle_detail.payload.baseCarInfo.mileage": {
-          "source": "legacy_v1_snapshot_enrichment",
-          "original_path": "data.specs",
-          "recorded_at": "2026-07-13T06:42:22+00:00",
-          "evidence": "表显6.2万公里"
+          "source": "manual_admin_edit",
+          "recorded_at": "2026-07-16T12:27:28+00:00"
         },
         "source_payloads.vehicle_detail.payload.carModelParam.displacement": {
-          "source": "legacy_v1_snapshot_enrichment",
-          "original_path": "data.specs",
-          "recorded_at": "2026-07-13T06:42:22+00:00",
-          "evidence": "1.5L"
+          "source": "manual_admin_edit",
+          "recorded_at": "2026-07-16T12:27:28+00:00"
         },
         "source_payloads.vehicle_detail.payload.carModelParam.gearbox": {
-          "source": "legacy_v1_snapshot_enrichment",
-          "original_path": "data.specs",
-          "recorded_at": "2026-07-13T06:42:22+00:00",
-          "evidence": "万公里，1.5L自动挡，车身小巧好停"
+          "source": "manual_admin_edit",
+          "recorded_at": "2026-07-16T12:27:28+00:00"
         },
         "source_payloads.vehicle_detail.payload.operationPhase": {
-          "source": "test_fixture_fill",
-          "recorded_at": "2026-07-13T07:47:11+00:00",
-          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
-          "test_only": true
+          "source": "manual_admin_edit",
+          "recorded_at": "2026-07-16T12:27:28+00:00"
         },
         "source_payloads.vehicle_detail.payload.baseCarInfo.carName": {
-          "source": "test_fixture_fill",
-          "recorded_at": "2026-07-13T07:47:11+00:00",
-          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
-          "test_only": true
+          "source": "manual_admin_edit",
+          "recorded_at": "2026-07-16T12:27:28+00:00"
         },
         "source_payloads.vehicle_detail.payload.baseCarInfo.brandName": {
-          "source": "test_fixture_fill",
-          "recorded_at": "2026-07-13T07:47:11+00:00",
-          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
-          "test_only": true
+          "source": "manual_admin_edit",
+          "recorded_at": "2026-07-16T12:27:28+00:00"
         },
         "source_payloads.vehicle_detail.payload.baseCarInfo.seriesName": {
-          "source": "test_fixture_fill",
-          "recorded_at": "2026-07-13T07:47:11+00:00",
-          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
-          "test_only": true
+          "source": "manual_admin_edit",
+          "recorded_at": "2026-07-16T12:27:28+00:00"
         },
         "source_payloads.vehicle_detail.payload.baseCarInfo.modelName": {
-          "source": "test_fixture_fill",
-          "recorded_at": "2026-07-13T07:47:11+00:00",
-          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
-          "test_only": true
+          "source": "manual_admin_edit",
+          "recorded_at": "2026-07-16T12:27:28+00:00"
         },
         "source_payloads.vehicle_detail.payload.baseCarInfo.vehicleCondition": {
-          "source": "test_fixture_fill",
-          "recorded_at": "2026-07-13T07:47:11+00:00",
-          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
-          "test_only": true
+          "source": "manual_admin_edit",
+          "recorded_at": "2026-07-16T12:27:28+00:00"
         },
         "source_payloads.vehicle_detail.payload.baseCarInfo.exteriorColor": {
-          "source": "test_fixture_fill",
-          "recorded_at": "2026-07-13T07:47:11+00:00",
-          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
-          "test_only": true
+          "source": "manual_admin_edit",
+          "recorded_at": "2026-07-16T12:27:28+00:00"
         },
         "source_payloads.vehicle_detail.payload.baseCarInfo.color": {
-          "source": "test_fixture_fill",
-          "recorded_at": "2026-07-13T07:47:11+00:00",
-          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
-          "test_only": true
+          "source": "manual_admin_edit",
+          "recorded_at": "2026-07-16T12:27:28+00:00"
         },
         "source_payloads.vehicle_detail.payload.baseCarInfo.interiorColor": {
-          "source": "test_fixture_fill",
-          "recorded_at": "2026-07-13T07:47:11+00:00",
-          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
-          "test_only": true
+          "source": "manual_admin_edit",
+          "recorded_at": "2026-07-16T12:27:28+00:00"
         },
         "source_payloads.vehicle_detail.payload.carModelParam.gearBox": {
-          "source": "test_fixture_fill",
-          "recorded_at": "2026-07-13T07:47:11+00:00",
-          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
-          "test_only": true
+          "source": "manual_admin_edit",
+          "recorded_at": "2026-07-16T12:27:28+00:00"
         },
         "source_payloads.vehicle_detail.payload.carPriceInfo.purchasePrice": {
-          "source": "test_fixture_fill",
-          "recorded_at": "2026-07-13T07:47:11+00:00",
-          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
-          "test_only": true
+          "source": "manual_admin_edit",
+          "recorded_at": "2026-07-16T12:27:28+00:00"
         },
         "source_payloads.vehicle_detail.payload.carPriceInfo.salesPrice": {
-          "source": "test_fixture_fill",
-          "recorded_at": "2026-07-13T07:47:11+00:00",
-          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
-          "test_only": true
+          "source": "manual_admin_edit",
+          "recorded_at": "2026-07-16T12:27:28+00:00"
         },
         "source_payloads.vehicle_detail.payload.carPriceInfo.managerPrice": {
-          "source": "test_fixture_fill",
-          "recorded_at": "2026-07-13T07:47:11+00:00",
-          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
-          "test_only": true
+          "source": "manual_admin_edit",
+          "recorded_at": "2026-07-16T12:27:28+00:00"
         },
         "source_payloads.vehicle_detail.payload.carPriceInfo.wholesalePrice": {
-          "source": "test_fixture_fill",
-          "recorded_at": "2026-07-13T07:47:11+00:00",
-          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
-          "test_only": true
+          "source": "manual_admin_edit",
+          "recorded_at": "2026-07-16T12:27:28+00:00"
         },
         "source_payloads.vehicle_detail.payload.carLicenseInfo.licenseStatus": {
-          "source": "test_fixture_fill",
-          "recorded_at": "2026-07-13T07:47:11+00:00",
-          "batch_id": "chejin_v2_wechat_recognition_test_fields_20260713",
-          "test_only": true
+          "source": "manual_admin_edit",
+          "recorded_at": "2026-07-16T12:27:28+00:00"
+        },
+        "source_payloads.vehicle_pictures.payload": {
+          "source": "manual_admin_image_upload",
+          "recorded_at": "2026-07-16T12:27:24+00:00"
         }
       },
       "test_fixture": {
@@ -287,6 +249,19 @@
         }
       },
       "manual_overrides": {}
+    },
+    "vehicle_image_retrieval": {
+      "schema_version": 1,
+      "status": "empty",
+      "source_payload_fingerprint": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "image_count": 0,
+      "indexed_image_count": 0,
+      "indexed_at": "2026-07-16T12:27:25+00:00",
+      "engine": {
+        "name": "vehicle_image_retrieval",
+        "version": "1"
+      },
+      "items": []
     }
   },
   "runtime": {
@@ -296,7 +271,7 @@
   },
   "metadata": {
     "created_at": "2026-05-07T10:00:00",
-    "updated_at": "2026-07-13T15:47:11",
+    "updated_at": "2026-07-16T20:27:28",
     "created_by": "admin",
     "updated_by": "admin",
     "migrated_from_schema_version": 1,
@@ -304,6 +279,7 @@
     "legacy_snapshot_enriched_at": "2026-07-13T06:45:00+00:00",
     "legacy_snapshot_enrichment_batch": "chejin_v2_legacy_snapshot_enrichment_20260713",
     "test_fixture_last_action": "filled",
-    "test_fixture_batch": "chejin_v2_wechat_recognition_test_fields_20260713"
+    "test_fixture_batch": "chejin_v2_wechat_recognition_test_fields_20260713",
+    "manual_last_edited_at": "2026-07-16T12:27:28+00:00"
   }
 }

@@ -914,29 +914,32 @@ def call_llm_request_once_with_wall_timeout(
 ) -> dict[str, Any]:
     if wall_timeout is None or float(wall_timeout) <= 0:
         return call_llm_request_once(**kwargs)
-    result_holder: dict[str, Any] = {}
-    finished = threading.Event()
-
-    def worker() -> None:
-        try:
-            result_holder["result"] = call_llm_request_once(**kwargs)
-        except Exception as exc:  # noqa: BLE001 - convert late worker errors to diagnostics
-            result_holder["result"] = {"ok": False, "status": 0, "error": repr(exc)}
-        finally:
-            finished.set()
-
-    thread = threading.Thread(target=worker, name="llm-wall-timeout", daemon=True)
-    thread.start()
-    if finished.wait(max(1, float(wall_timeout))):
-        result = result_holder.get("result")
-        return result if isinstance(result, dict) else {"ok": False, "status": 0, "error": "llm_wall_timeout_missing_result"}
-    return {
-        "ok": False,
-        "status": 0,
-        "error": f"llm_wall_timeout_after_{max(1, float(wall_timeout)):.1f}s",
-        "wall_timeout": True,
-        "wall_timeout_seconds": max(1, float(wall_timeout)),
-    }
+    # A ThreadPool future cannot cancel an already-running Python thread.  The
+    # former daemon-thread wrapper therefore returned a timeout while its HTTP
+    # request continued to occupy a worker.  Keep the public entry point and
+    # failure markers, but enforce the deadline at the urllib transport that
+    # owns the socket so this call and its scheduler future finish together.
+    effective_wall_timeout = max(1.0, float(wall_timeout))
+    request_kwargs = dict(kwargs)
+    try:
+        configured_timeout = float(request_kwargs.get("timeout") or effective_wall_timeout)
+    except (TypeError, ValueError):
+        configured_timeout = effective_wall_timeout
+    request_kwargs["timeout"] = max(1.0, min(configured_timeout, effective_wall_timeout))
+    result = call_llm_request_once(**request_kwargs)
+    if not isinstance(result, dict):
+        return {"ok": False, "status": 0, "error": "llm_wall_timeout_missing_result"}
+    error_text = str(result.get("error") or "").lower()
+    if not result.get("ok") and request_kwargs["timeout"] == effective_wall_timeout and any(
+        marker in error_text for marker in ("timeout", "timed out", "timedout")
+    ):
+        return {
+            **result,
+            "error": f"llm_wall_timeout_after_{effective_wall_timeout:.1f}s",
+            "wall_timeout": True,
+            "wall_timeout_seconds": effective_wall_timeout,
+        }
+    return result
 
 
 def call_llm_request_with_failover(

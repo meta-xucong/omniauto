@@ -67,7 +67,11 @@ from customer_service_brain_preflight import (
 from customer_service_prompt_archive import archive_prompt_event, should_archive_brain_prompt
 from llm_reply_guard import guard_synthesized_reply
 from evidence_authority import PRODUCT_MASTER_CATEGORY_ID, annotate_authority
-from reply_evidence_builder import build_reply_evidence_pack, catalog_product_payload
+from reply_evidence_builder import (
+    authoritative_catalog_alias_matches,
+    build_reply_evidence_pack,
+    catalog_product_payload,
+)
 try:
     from apps.wechat_ai_customer_service.wechat_message_normalizer import split_wechat_ocr_speaker_prefix
 except Exception:  # pragma: no cover - workflow import fallback for script mode
@@ -386,6 +390,16 @@ def target_state_has_delay_followup_context(target_state: dict[str, Any], curren
     )
 
 
+def low_authority_fast_catalog_alias_matches(*, combined: str, target_state: dict[str, Any]) -> list[dict[str, Any]]:
+    """Use the existing customer-safe catalog alias index for profile gating."""
+
+    context = target_state.get("conversation_context") if isinstance(target_state.get("conversation_context"), dict) else {}
+    try:
+        return authoritative_catalog_alias_matches(combined, limit=3, context=context)
+    except Exception:
+        return []
+
+
 def low_authority_fast_profile_decision(
     *,
     settings: dict[str, Any],
@@ -426,6 +440,13 @@ def low_authority_fast_profile_decision(
         return {"enabled": False, "reason": "numeric_or_contact_signal"}
     if clean in LOW_AUTHORITY_FAST_AMBIGUOUS_ACKS and target_context_has_active_business_state(target_state):
         return {"enabled": False, "reason": "ambiguous_ack_needs_business_context"}
+    catalog_alias_matches = low_authority_fast_catalog_alias_matches(combined=combined, target_state=target_state)
+    if catalog_alias_matches:
+        return {
+            "enabled": False,
+            "reason": "catalog_alias_requires_authoritative_evidence",
+            "catalog_alias_matches": catalog_alias_matches,
+        }
     if target_state_has_delay_followup_context(target_state, combined):
         if social_message_requires_visible_brain_reply(combined):
             return {
@@ -906,21 +927,29 @@ def maybe_run_customer_service_brain(
         batch=batch,
         target_state=target_state,
     )
+    # A catalog-alias turn must use the authoritative evidence path, but it is
+    # still a short textual evidence-gap candidate.  Keep the actual profile
+    # disabled while allowing the existing preflight probe to resolve an alias
+    # before the full evidence pack is built.
+    fast_profile_preflight_candidate = fast_profile
+    if str(fast_profile.get("reason") or "") == "catalog_alias_requires_authoritative_evidence":
+        fast_profile_preflight_candidate = {"enabled": True, "reason": "short_low_authority_turn"}
     if brain_preflight_requires_authoritative_evidence(brain_preflight):
         fast_profile = {
             "enabled": False,
             "reason": "brain_preflight_requires_evidence",
             "blocked_profile": fast_profile if isinstance(fast_profile, dict) else {},
         }
+        fast_profile_preflight_candidate = fast_profile
     text_gap_preflight_attempted = False
-    if fast_profile.get("enabled"):
+    if fast_profile_preflight_candidate.get("enabled"):
         text_gap_probe = text_evidence_gap_preflight_probe_decision(
             config=config,
             settings=settings,
             combined=combined,
             batch=batch,
             target_state=target_state,
-            fast_profile=fast_profile,
+            fast_profile=fast_profile_preflight_candidate,
         )
         payload["text_evidence_gap_preflight_probe"] = text_gap_probe
         if text_gap_probe.get("enabled"):
@@ -3207,13 +3236,26 @@ def slim_brain_input_for_prompt(brain_input: dict[str, Any], *, settings: dict[s
     runtime = brain_input.get("runtime") if isinstance(brain_input.get("runtime"), dict) else {}
     prompt_profile = str(settings.get("prompt_profile") or "").strip()
     routine_product_fast = prompt_profile == "routine_product_fast"
-    content_evidence = dict(knowledge.get("evidence") or {}) if isinstance(knowledge.get("evidence"), dict) else {}
-    style_context = content_evidence.pop("style_examples", [])
+    raw_content_evidence = dict(knowledge.get("evidence") or {}) if isinstance(knowledge.get("evidence"), dict) else {}
+    style_context = raw_content_evidence.get("style_examples", [])
     # Product/formal facts are already present in authoritative buckets below.
     # Removing duplicated evidence lists keeps short customer turns from timing
     # out while preserving the authority boundary.
-    for duplicated_key in ("products", "catalog_candidates", "faq", "policies", "product_scoped"):
-        content_evidence.pop(duplicated_key, None)
+    content_evidence = {
+        key: compact_prompt_value(raw_content_evidence.get(key), max_text_chars=120, max_list_items=4)
+        for key in (
+            "source",
+            "query",
+            "matched_terms",
+            "product_ids",
+            "catalog_candidate_ids",
+            "formal_knowledge_ids",
+            "policy_ids",
+            "match_summary",
+            "retrieval_summary",
+        )
+        if raw_content_evidence.get(key) not in (None, "", [], {})
+    }
     max_product_items = max(0, int(settings.get("max_prompt_product_items", 5) or 0))
     max_formal_items = max(0, int(settings.get("max_prompt_formal_items", 4) or 0))
     max_style_examples = 0 if routine_product_fast else max(0, int(settings.get("max_prompt_style_examples") or 1))
@@ -3252,10 +3294,15 @@ def slim_brain_input_for_prompt(brain_input: dict[str, Any], *, settings: dict[s
         auxiliary["rag"] = rag
     audit_summary = evidence.get("audit_summary", {}) if isinstance(evidence.get("audit_summary"), dict) else {}
     return {
-        "target": brain_input.get("target", {}),
+        "target": {
+            key: compact_prompt_value((brain_input.get("target") or {}).get(key), max_text_chars=100, max_list_items=3)
+            for key in ("name", "session_key", "conversation_id", "conversation_type", "target_type")
+            if isinstance(brain_input.get("target"), dict)
+            and (brain_input.get("target") or {}).get(key) not in (None, "", [], {})
+        },
         "current_message": current_message,
         "conversation": {
-            "context": conversation.get("context", {}),
+            "context": compact_conversation_context_for_prompt(conversation.get("context", {})),
             "summary": clip(str(conversation.get("summary") or ""), int(settings.get("summary_char_budget") or 360)),
             "history_text": clip(str(conversation.get("history_text") or ""), int(settings.get("history_char_budget") or DEFAULT_HISTORY_CHAR_BUDGET)),
             "current_batch_text": clip(str(conversation.get("current_batch_text") or ""), int(settings.get("current_batch_char_budget") or 500)),
@@ -3272,7 +3319,7 @@ def slim_brain_input_for_prompt(brain_input: dict[str, Any], *, settings: dict[s
         },
         "auxiliary": auxiliary,
         "safety": compact_safety_for_prompt(evidence.get("safety", {})),
-        "intent_tags": evidence.get("intent_tags", []),
+        "intent_tags": [clip(str(item), 80) for item in (evidence.get("intent_tags", []) or [])[:12] if str(item).strip()],
         "audit_summary": {
             key: audit_summary.get(key)
             for key in (
@@ -3749,6 +3796,38 @@ def compact_conversation_strategy_state_for_prompt(value: Any) -> dict[str, Any]
         "business_anchor_strength": str(value.get("business_anchor_strength") or "none"),
         "policy_note": clip(str(value.get("policy_note") or ""), 140),
         "visibility_rule": "不得把本状态字段名、内部原因或机制说明写给客户。",
+    }
+
+
+def compact_conversation_context_for_prompt(value: Any) -> dict[str, Any]:
+    """Keep only current-turn reference anchors in the LLM prompt.
+
+    Conversation context is operational state, not a free-form evidence store.
+    The full object remains unchanged in the existing workflow/state contract;
+    this private prompt projection prevents archived captures and raw payloads
+    from turning a single Brain request into an unbounded prompt.
+    """
+
+    if not isinstance(value, dict):
+        return {}
+    return {
+        key: compact_prompt_value(value.get(key), max_text_chars=140, max_list_items=4)
+        for key in (
+            "last_product_id",
+            "last_product_ids",
+            "last_product_name",
+            "recent_product_ids",
+            "recent_product_names",
+            "last_customer_need_text",
+            "last_customer_need_terms",
+            "last_quote_product_id",
+            "last_quote_product_ids",
+            "last_quote_product_name",
+            "last_product_price",
+            "last_unit_price",
+            "old_context_pruned",
+        )
+        if value.get(key) not in (None, "", [], {})
     }
 
 
@@ -5118,7 +5197,18 @@ def build_brain_no_visible_reply_payload(
 
 
 def compact_product_master_for_prompt(payload: dict[str, Any], *, max_items: int, max_text_chars: int) -> dict[str, Any]:
-    data = {key: value for key, value in payload.items() if key != "items"}
+    data = {
+        key: compact_prompt_value(payload.get(key), max_text_chars=max_text_chars, max_list_items=4)
+        for key in (
+            "authority_level",
+            "source",
+            "query",
+            "match_summary",
+            "retrieval_summary",
+            "result_count",
+        )
+        if payload.get(key) not in (None, "", [], {})
+    }
     data["items"] = [
         compact_product_item_for_brain_prompt(item, max_text_chars=max_text_chars)
         for item in (payload.get("items", []) or [])[:max_items]
@@ -5192,25 +5282,61 @@ def legacy_shipping_field_is_prompt_safe(value: Any, *, max_text_chars: int) -> 
 
 
 def compact_formal_knowledge_for_prompt(payload: dict[str, Any], *, max_items: int, max_text_chars: int) -> dict[str, Any]:
-    data = {key: value for key, value in payload.items() if key not in {"faq", "product_scoped"}}
+    data = {
+        key: compact_prompt_value(payload.get(key), max_text_chars=max_text_chars, max_list_items=4)
+        for key in ("authority_level", "source", "query", "match_summary", "retrieval_summary")
+        if payload.get(key) not in (None, "", [], {})
+    }
     data["faq"] = [
-        compact_prompt_value(item, max_text_chars=max_text_chars, max_list_items=5)
+        compact_formal_item_for_prompt(item, max_text_chars=max_text_chars)
         for item in (payload.get("faq", []) or [])[:max_items]
         if isinstance(item, dict)
     ]
     data["product_scoped"] = [
-        compact_prompt_value(item, max_text_chars=max_text_chars, max_list_items=5)
+        compact_formal_item_for_prompt(item, max_text_chars=max_text_chars)
         for item in (payload.get("product_scoped", []) or [])[:max_items]
         if isinstance(item, dict)
     ]
-    data["policies"] = compact_prompt_value(payload.get("policies", {}) or {}, max_text_chars=max_text_chars, max_list_items=max_items)
+    data["policies"] = compact_prompt_value(
+        payload.get("policies", {}) or {},
+        max_text_chars=max_text_chars,
+        max_list_items=max_items,
+    )
     return data
 
 
+def compact_formal_item_for_prompt(item: dict[str, Any], *, max_text_chars: int) -> dict[str, Any]:
+    return {
+        key: compact_prompt_value(item.get(key), max_text_chars=max_text_chars, max_list_items=4)
+        for key in (
+            "id",
+            "source_id",
+            "title",
+            "question",
+            "answer",
+            "content",
+            "policy",
+            "scope",
+            "category",
+            "authority_level",
+            "match_reason",
+        )
+        if item.get(key) not in (None, "", [], {})
+    }
+
+
 def compact_rag_for_prompt(payload: dict[str, Any], *, max_hits: int, max_text_chars: int) -> dict[str, Any]:
-    data = {key: value for key, value in payload.items() if key != "hits"}
+    data = {
+        key: compact_prompt_value(payload.get(key), max_text_chars=max_text_chars, max_list_items=4)
+        for key in ("source", "query", "match_summary", "retrieval_summary")
+        if payload.get(key) not in (None, "", [], {})
+    }
     data["hits"] = [
-        compact_prompt_value(item, max_text_chars=max_text_chars, max_list_items=5)
+        {
+            key: compact_prompt_value(item.get(key), max_text_chars=max_text_chars, max_list_items=4)
+            for key in ("id", "source_id", "title", "text", "content", "category", "score", "match_reason")
+            if item.get(key) not in (None, "", [], {})
+        }
         for item in (payload.get("hits", []) or [])[:max_hits]
         if isinstance(item, dict)
     ]
@@ -5225,7 +5351,7 @@ def compact_prompt_value(value: Any, *, max_text_chars: int, max_list_items: int
     if isinstance(value, dict):
         return {
             str(key): compact_prompt_value(item, max_text_chars=max_text_chars, max_list_items=max_list_items)
-            for key, item in value.items()
+            for key, item in list(value.items())[:16]
         }
     return value
 

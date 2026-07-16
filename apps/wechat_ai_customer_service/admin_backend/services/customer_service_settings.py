@@ -40,6 +40,21 @@ DEFAULT_SETTINGS = {
         "timeout_seconds": 30,
         "max_tokens": 1800,
     },
+    # Separate from customer-image understanding: this optional module indexes
+    # merchant-owned product photos and may be configured/replaced independently.
+    "vehicle_image_retrieval": {
+        "enabled": True,
+        "provider": "anthropic",
+        "request_style": "anthropic_messages_vision",
+        "model": "doubao-seed-2-0-lite-260428",
+        "base_url": "https://aiself.vip/v1",
+        "api_key_env": "ANTHROPIC_AUTH_TOKEN",
+        "api_key": "",
+        "timeout_seconds": 30,
+        "max_tokens": 900,
+        "match_threshold": 0.86,
+        "minimum_visual_similarity": 0.82,
+    },
 }
 
 REPLY_MODES = {
@@ -108,6 +123,44 @@ def customer_image_understanding_api_key_present(settings: dict[str, Any]) -> bo
     return False
 
 
+def normalize_vehicle_image_retrieval_settings(value: Any) -> dict[str, Any]:
+    """Normalize the independent product-photo retrieval configuration."""
+
+    base = dict(DEFAULT_SETTINGS.get("vehicle_image_retrieval", {}) or {})
+    incoming = value if isinstance(value, dict) else {}
+    merged = {**base, **incoming}
+    merged["enabled"] = bool(merged.get("enabled", True))
+    merged["provider"] = str(merged.get("provider") or base.get("provider") or "anthropic").strip() or "anthropic"
+    merged["request_style"] = str(
+        merged.get("request_style") or base.get("request_style") or "anthropic_messages_vision"
+    ).strip() or "anthropic_messages_vision"
+    merged["model"] = str(merged.get("model") or base.get("model") or "").strip()
+    merged["base_url"] = str(merged.get("base_url") or base.get("base_url") or "").strip()
+    merged["api_key_env"] = str(merged.get("api_key_env") or base.get("api_key_env") or "ANTHROPIC_AUTH_TOKEN").strip()
+    merged["api_key"] = str(merged.get("api_key") or "").strip()
+    for key, default, minimum, maximum in (
+        ("timeout_seconds", 30, 3, 120),
+        ("max_tokens", 900, 300, 3000),
+    ):
+        try:
+            parsed = int(merged.get(key) or base.get(key) or default)
+        except (TypeError, ValueError):
+            parsed = default
+        merged[key] = max(minimum, min(parsed, maximum))
+    for key, default in (("match_threshold", 0.86), ("minimum_visual_similarity", 0.82)):
+        try:
+            parsed_float = float(merged.get(key) if merged.get(key) is not None else base.get(key, default))
+        except (TypeError, ValueError):
+            parsed_float = default
+        merged[key] = max(0.50, min(parsed_float, 1.0))
+    return merged
+
+
+def vehicle_image_retrieval_api_key_present(settings: dict[str, Any]) -> bool:
+    nested = normalize_vehicle_image_retrieval_settings(settings.get("vehicle_image_retrieval"))
+    return bool(str(nested.get("api_key") or "").strip() or os.getenv(str(nested.get("api_key_env") or "").strip()))
+
+
 class CustomerServiceSettings:
     def __init__(self, *, tenant_id: str | None = None) -> None:
         self.tenant_id = tenant_id
@@ -140,6 +193,9 @@ class CustomerServiceSettings:
         settings["customer_image_understanding"] = normalize_customer_image_understanding_settings(
             settings.get("customer_image_understanding")
         )
+        settings["vehicle_image_retrieval"] = normalize_vehicle_image_retrieval_settings(
+            settings.get("vehicle_image_retrieval")
+        )
         return settings
 
     def save(self, patch: dict[str, Any]) -> dict[str, Any]:
@@ -164,6 +220,10 @@ class CustomerServiceSettings:
             allowed["customer_image_understanding"] = normalize_customer_image_understanding_settings(
                 allowed.get("customer_image_understanding")
             )
+        if "vehicle_image_retrieval" in allowed:
+            allowed["vehicle_image_retrieval"] = normalize_vehicle_image_retrieval_settings(
+                allowed.get("vehicle_image_retrieval")
+            )
         settings = {**self.get(), **allowed}
         if settings["reply_mode"] not in REPLY_MODES:
             settings["reply_mode"] = DEFAULT_SETTINGS["reply_mode"]
@@ -178,6 +238,9 @@ class CustomerServiceSettings:
         settings["session_targets"] = normalize_session_targets(settings.get("session_targets"))
         settings["customer_image_understanding"] = normalize_customer_image_understanding_settings(
             settings.get("customer_image_understanding")
+        )
+        settings["vehicle_image_retrieval"] = normalize_vehicle_image_retrieval_settings(
+            settings.get("vehicle_image_retrieval")
         )
         self.settings_path.parent.mkdir(parents=True, exist_ok=True)
         temp = self.settings_path.with_suffix(".json.tmp")
@@ -200,6 +263,10 @@ class CustomerServiceSettings:
             "customer_image_understanding_status": {
                 "enabled": bool((settings.get("customer_image_understanding") or {}).get("enabled", True)),
                 "api_key_configured": customer_image_understanding_api_key_present(settings),
+            },
+            "vehicle_image_retrieval_status": {
+                "enabled": bool((settings.get("vehicle_image_retrieval") or {}).get("enabled", True)),
+                "api_key_configured": vehicle_image_retrieval_api_key_present(settings),
             },
             "legacy_customer_service_brain_modes_hidden": True,
             "status": self.status_text(settings),

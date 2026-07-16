@@ -76,6 +76,7 @@ from apps.wechat_ai_customer_service.scripts.run_customer_service_listener impor
 )
 from listen_and_reply import (  # noqa: E402
     TargetConfig,
+    build_iteration_targets,
     customer_service_anchor_payload,
     load_config,
     load_rules,
@@ -1812,7 +1813,13 @@ def check_runtime_latency_trace_flows_through_reply_lifecycle() -> None:
 
         runtime = CustomerServiceSchedulerRuntime(
             store=store,
-            config=SchedulerConfig(enabled=True, capture_max_sessions_per_round=1, llm_max_concurrency=1, send_max_replies_per_round=1),
+            config=SchedulerConfig(
+                enabled=True,
+                capture_max_sessions_per_round=1,
+                llm_max_concurrency=1,
+                planner_max_concurrency=1,
+                send_max_replies_per_round=1,
+            ),
             capture_fn=capture_fn,
             plan_reply_fn=planner,
             send_fn=sender,
@@ -1922,7 +1929,7 @@ def check_runtime_future_latency_trace_exposes_external_overhead() -> None:
 
         runtime = CustomerServiceSchedulerRuntime(
             store=store,
-            config=SchedulerConfig(enabled=True, capture_max_sessions_per_round=1, llm_max_concurrency=1, send_max_replies_per_round=1),
+            config=SchedulerConfig(enabled=True, capture_max_sessions_per_round=1, llm_max_concurrency=1, planner_max_concurrency=1, send_max_replies_per_round=1),
             capture_fn=capture_fn,
             plan_reply_fn=planner,
             polish_reply_fn=polish,
@@ -2032,7 +2039,7 @@ def check_runtime_repeated_unread_signal_does_not_stale_same_batch() -> None:
 
         runtime = CustomerServiceSchedulerRuntime(
             store=store,
-            config=SchedulerConfig(enabled=True, capture_max_sessions_per_round=1, llm_max_concurrency=1, send_max_replies_per_round=1),
+            config=SchedulerConfig(enabled=True, capture_max_sessions_per_round=1, llm_max_concurrency=1, planner_max_concurrency=1, send_max_replies_per_round=1),
             capture_fn=capture_fn,
             plan_reply_fn=planner,
         )
@@ -2068,7 +2075,7 @@ def check_runtime_send_runner_stales_before_send() -> None:
 
         runtime = CustomerServiceSchedulerRuntime(
             store=store,
-            config=SchedulerConfig(enabled=True, capture_max_sessions_per_round=1, llm_max_concurrency=1, send_max_replies_per_round=1),
+            config=SchedulerConfig(enabled=True, capture_max_sessions_per_round=1, llm_max_concurrency=1, planner_max_concurrency=1, send_max_replies_per_round=1),
             capture_fn=capture_fn,
             plan_reply_fn=planner,
             freshness_fn=freshness,
@@ -2113,7 +2120,7 @@ def check_runtime_stale_reply_context_is_preserved_for_brain_repair() -> None:
 
         runtime = CustomerServiceSchedulerRuntime(
             store=store,
-            config=SchedulerConfig(enabled=True, capture_max_sessions_per_round=1, llm_max_concurrency=1, send_max_replies_per_round=1),
+            config=SchedulerConfig(enabled=True, capture_max_sessions_per_round=1, llm_max_concurrency=1, planner_max_concurrency=1, send_max_replies_per_round=1),
             capture_fn=capture_fn,
             plan_reply_fn=planner,
             freshness_fn=freshness,
@@ -2141,7 +2148,7 @@ def check_runtime_stale_reply_context_is_preserved_for_brain_repair() -> None:
             runtime.shutdown()
 
 
-def check_runtime_times_out_running_llm_task_without_swallowing_message() -> None:
+def check_runtime_keeps_running_llm_task_owned_until_worker_exits() -> None:
     with tempfile.TemporaryDirectory() as temp:
         path = Path(temp) / "scheduler_state.json"
         store = SchedulerStateStore(tenant_id="unit", path=path)
@@ -2155,15 +2162,28 @@ def check_runtime_times_out_running_llm_task_without_swallowing_message() -> Non
         )
         task = enqueue_llm_task(state, capture["capture_id"], timeout_seconds=1, now="2026-05-25T10:00:01")
         mark_llm_started(state, task["task_id"], now="2026-05-25T10:00:02")
+        queued_capture = record_capture_result(
+            state,
+            "客户B",
+            messages=[message("B", 1, content="你好")],
+            batch=[message("B", 1, content="你好")],
+            now="2026-05-25T10:00:03",
+        )
+        queued_task = enqueue_llm_task(state, queued_capture["capture_id"], timeout_seconds=1, now="2026-05-25T10:00:04")
         store.save(state)
 
+        release_planner = threading.Event()
+
         def planner(capture_payload: dict[str, Any], task_payload: dict[str, Any]) -> dict[str, Any]:
-            time.sleep(1.0)
+            assert_true(
+                release_planner.wait(timeout=5.0),
+                "test must explicitly release the simulated planner worker",
+            )
             return {"ok": True, "reply_text": "迟到回复", "decision": {"rule_name": "unit"}}
 
         runtime = CustomerServiceSchedulerRuntime(
             store=store,
-            config=SchedulerConfig(enabled=True, capture_max_sessions_per_round=1, llm_max_concurrency=1, send_max_replies_per_round=1),
+            config=SchedulerConfig(enabled=True, capture_max_sessions_per_round=1, llm_max_concurrency=1, planner_max_concurrency=1, send_max_replies_per_round=1),
             capture_fn=lambda session: {"messages": [message("A", 1, content="你好")], "batch": [message("A", 1, content="你好")]},
             plan_reply_fn=planner,
         )
@@ -2174,13 +2194,118 @@ def check_runtime_times_out_running_llm_task_without_swallowing_message() -> Non
             state = store.load()
             session = session_by_name(state, "客户A")
             assert_true(
-                any(item.get("event") == "llm_task_timeout_recovered" for item in result.get("events") or []),
-                f"running LLM timeout should be recovered: {result}",
+                not any(item.get("event") == "llm_task_timeout_recovered" for item in result.get("events") or []),
+                f"a running worker must not be falsely recovered: {result}",
             )
-            assert_equal(session.get("status"), "llm_queued", "timed-out task should keep the same capture queued for Brain retry")
+            assert_equal(session.get("status"), "llm_running", "running task must retain exclusive ownership until its worker exits")
             assert_true(
-                any(item.get("status") == "queued" for item in (state.get("llm_tasks") or {}).values() if isinstance(item, dict)),
-                "message must remain in queued Brain work after timeout",
+                task["task_id"] in runtime._planner_futures,
+                "running future must remain tracked so scheduler capacity cannot be oversubscribed",
+            )
+            assert_true(
+                queued_task["task_id"] not in runtime._planner_futures,
+                "queued work must not be submitted beside the still-running timed-out worker",
+            )
+            assert_equal(
+                ((state.get("llm_tasks") or {}).get(queued_task["task_id"]) or {}).get("status"),
+                "queued",
+                "queued work must retain its original state until real capacity is available",
+            )
+            release_planner.set()
+            time.sleep(0.05)
+            runtime.tick(allow_send=False, now="2026-05-25T10:00:12")
+            state = store.load()
+            assert_true(
+                task["task_id"] not in runtime._planner_futures,
+                "future ownership should release only after the worker exits",
+            )
+            assert_equal(
+                ((state.get("llm_tasks") or {}).get(task["task_id"]) or {}).get("status"),
+                "completed",
+                "completed worker result should continue through the existing scheduler path",
+            )
+        finally:
+            runtime.shutdown()
+
+
+def check_runtime_keeps_running_polish_task_owned_until_worker_exits() -> None:
+    with tempfile.TemporaryDirectory() as temp:
+        path = Path(temp) / "scheduler_state.json"
+        store = SchedulerStateStore(tenant_id="unit", path=path)
+        state = store.load()
+
+        def completed_planner_task(target_name: str, sequence: int) -> tuple[dict[str, Any], dict[str, Any]]:
+            capture = record_capture_result(
+                state,
+                target_name,
+                messages=[message(target_name, sequence, content="hello")],
+                batch=[message(target_name, sequence, content="hello")],
+                now=f"2026-05-25T10:01:0{sequence}",
+            )
+            task = enqueue_llm_task(state, capture["capture_id"], now=f"2026-05-25T10:01:1{sequence}")
+            complete_llm_task(
+                state,
+                task["task_id"],
+                reply_text="draft",
+                decision={"rule_name": "unit"},
+                create_ready_reply=False,
+                now=f"2026-05-25T10:01:2{sequence}",
+            )
+            return capture, (state.get("llm_tasks") or {})[task["task_id"]]
+
+        _, first_planner_task = completed_planner_task("customer_a", 1)
+        first_polish_task = enqueue_polish_task(state, first_planner_task["task_id"], now="2026-05-25T10:01:31")
+        mark_polish_started(state, first_polish_task["task_id"], now="2026-05-25T10:01:32")
+        _, queued_planner_task = completed_planner_task("customer_b", 2)
+        queued_polish_task = enqueue_polish_task(state, queued_planner_task["task_id"], now="2026-05-25T10:01:33")
+        store.save(state)
+
+        release_polish = threading.Event()
+
+        def polish(_planner_task: dict[str, Any], _task: dict[str, Any]) -> dict[str, Any]:
+            assert_true(
+                release_polish.wait(timeout=5.0),
+                "test must explicitly release the simulated polish worker",
+            )
+            return {"ok": True, "reply_text": "polished", "decision": {"rule_name": "unit"}}
+
+        runtime = CustomerServiceSchedulerRuntime(
+            store=store,
+            config=SchedulerConfig(
+                enabled=True,
+                llm_max_concurrency=1,
+                planner_max_concurrency=1,
+                polish_max_concurrency=1,
+            ),
+            capture_fn=lambda _session: {"messages": [], "batch": []},
+            plan_reply_fn=lambda _capture, _task: {"ok": False},
+            polish_reply_fn=polish,
+        )
+        try:
+            first_id = first_polish_task["task_id"]
+            queued_id = queued_polish_task["task_id"]
+            runtime._polish_task_snapshots[first_id] = copy.deepcopy(first_polish_task)
+            runtime._polish_futures[first_id] = runtime._polish_executor.submit(
+                runtime._run_polish_future,
+                copy.deepcopy(first_planner_task),
+                copy.deepcopy(first_polish_task),
+            )
+            runtime._submit_polish_tasks(state, now="2026-05-25T10:01:40")
+            assert_true(first_id in runtime._polish_futures, "running polish worker must remain tracked")
+            assert_true(queued_id not in runtime._polish_futures, "queued polish must not overtake a running worker")
+            assert_equal(
+                ((state.get("polish_tasks") or {}).get(queued_id) or {}).get("status"),
+                "queued",
+                "queued polish task must retain its original state until capacity is free",
+            )
+            release_polish.set()
+            time.sleep(0.05)
+            runtime._collect_polish_results(state, now="2026-05-25T10:01:41")
+            assert_true(first_id not in runtime._polish_futures, "polish ownership should release only after worker exit")
+            assert_equal(
+                ((state.get("polish_tasks") or {}).get(first_id) or {}).get("status"),
+                "completed",
+                "completed polish result should use the existing completion path",
             )
         finally:
             runtime.shutdown()
@@ -2451,7 +2576,7 @@ def check_runtime_same_tick_fast_llm_send_has_capture_snapshot() -> None:
 
         runtime = CustomerServiceSchedulerRuntime(
             store=store,
-            config=SchedulerConfig(enabled=True, capture_max_sessions_per_round=1, llm_max_concurrency=1, send_max_replies_per_round=1),
+            config=SchedulerConfig(enabled=True, capture_max_sessions_per_round=1, llm_max_concurrency=1, planner_max_concurrency=1, send_max_replies_per_round=1),
             capture_fn=capture_fn,
             plan_reply_fn=planner,
             freshness_fn=freshness,
@@ -2536,7 +2661,7 @@ def check_runtime_send_event_includes_observability() -> None:
 
         runtime = CustomerServiceSchedulerRuntime(
             store=store,
-            config=SchedulerConfig(enabled=True, capture_max_sessions_per_round=1, llm_max_concurrency=1, send_max_replies_per_round=1),
+            config=SchedulerConfig(enabled=True, capture_max_sessions_per_round=1, llm_max_concurrency=1, planner_max_concurrency=1, send_max_replies_per_round=1),
             capture_fn=capture_fn,
             plan_reply_fn=planner,
             send_fn=sender,
@@ -2599,7 +2724,7 @@ def check_runtime_prioritizes_ready_send_before_new_capture() -> None:
 
         runtime = CustomerServiceSchedulerRuntime(
             store=store,
-            config=SchedulerConfig(enabled=True, capture_max_sessions_per_round=1, llm_max_concurrency=1, send_max_replies_per_round=1),
+            config=SchedulerConfig(enabled=True, capture_max_sessions_per_round=1, llm_max_concurrency=1, planner_max_concurrency=1, send_max_replies_per_round=1),
             capture_fn=capture_fn,
             plan_reply_fn=planner,
             send_fn=sender,
@@ -2663,7 +2788,7 @@ def check_runtime_collects_llm_while_send_worker_blocks_capture() -> None:
 
         runtime = CustomerServiceSchedulerRuntime(
             store=store,
-            config=SchedulerConfig(enabled=True, capture_max_sessions_per_round=1, llm_max_concurrency=1, send_max_replies_per_round=1),
+            config=SchedulerConfig(enabled=True, capture_max_sessions_per_round=1, llm_max_concurrency=1, planner_max_concurrency=1, send_max_replies_per_round=1),
             capture_fn=capture_fn,
             plan_reply_fn=planner,
             send_fn=sender,
@@ -2733,7 +2858,7 @@ def check_runtime_recovers_orphaned_running_llm_task_after_restart() -> None:
 
         runtime = CustomerServiceSchedulerRuntime(
             store=store,
-            config=SchedulerConfig(enabled=True, capture_max_sessions_per_round=1, llm_max_concurrency=1, send_max_replies_per_round=1),
+            config=SchedulerConfig(enabled=True, capture_max_sessions_per_round=1, llm_max_concurrency=1, planner_max_concurrency=1, send_max_replies_per_round=1),
             capture_fn=capture_fn,
             plan_reply_fn=planner,
         )
@@ -4373,6 +4498,33 @@ def check_live_safety_applies_backend_scheduler_defaults() -> None:
     rollback = apply_customer_service_live_safety_guard(raw, settings={})
     rollback_scheduler = rollback.get("concurrency_scheduler") if isinstance(rollback.get("concurrency_scheduler"), dict) else {}
     assert_true(rollback_scheduler.get("enabled") is False, "explicit scheduler false should survive live safety normalization")
+
+
+def check_live_safety_preserves_explicit_dynamic_all_session_monitoring() -> None:
+    raw = {
+        "targets": [{"name": "客户A", "enabled": True, "exact": True}],
+        "multi_target": {"enabled": True, "rpa_low_risk_mode": True},
+        "_local_customer_service_session_routing": {
+            "managed": False,
+            "respond_all_unread_sessions": True,
+            "ignored_names": [],
+            "enabled_names": ["客户A"],
+        },
+        "live_safety_guard": {
+            "enabled": True,
+            "allowed_targets": ["客户A"],
+            "require_recent_bootstrap": False,
+            "disable_respond_all_unread_sessions": False,
+            "low_risk_single_target_scan": True,
+        },
+    }
+    merged = apply_customer_service_live_safety_guard(raw, settings={})
+    routing = merged.get("_local_customer_service_session_routing") if isinstance(merged.get("_local_customer_service_session_routing"), dict) else {}
+    multi_target = merged.get("multi_target") if isinstance(merged.get("multi_target"), dict) else {}
+    assert_true(routing.get("respond_all_unread_sessions") is True, "explicit all-session monitoring must survive live-safety normalization")
+    assert_true("文件传输助手" in set(routing.get("ignored_names") or []), "self-message File Transfer Assistant must remain excluded")
+    assert_true(multi_target.get("enabled") is True, "dynamic all-session monitoring must keep multi-target dispatch enabled")
+    assert_equal(int(multi_target.get("max_targets_per_iteration") or 0), 2, "dynamic all-session monitoring should retain the bounded multi-session dispatch limit")
 
 
 def check_live_safety_file_transfer_defaults_to_self_test_target() -> None:
@@ -6482,6 +6634,123 @@ def check_session_monitor_poll_repairs_legacy_session_key_only_state() -> None:
         assert_equal(saved_session.get("session_key"), "wx:rpa:v1:xucong-session", "poll should preserve session_key")
 
 
+def check_dynamic_customer_monitor_excludes_service_system_and_unconfirmed_sessions() -> None:
+    """Dynamic all-session mode must filter before any foreground RPA target exists."""
+
+    with tempfile.TemporaryDirectory() as temp:
+        monitor = SessionMonitor(
+            state_path=Path(temp) / "session_monitor.json",
+            max_targets_per_iteration=5,
+            customer_session_only=True,
+            require_unread_badge_for_dispatch=True,
+            require_preview_signal_with_unread_badge=True,
+        )
+        # This is a stale provider entry captured by an older service-container
+        # traversal. It must not be revived merely because it was persisted.
+        monitor._sessions["wx:rpa:v1:legacy-service-child"] = SessionState(  # noqa: SLF001 - admission migration fixture.
+            name="丰巢",
+            session_key="wx:rpa:v1:legacy-service-child",
+            unread_detected=True,
+            priority_score=80,
+            pending_since="2026-07-16T18:56:53",
+            conversation_type="private",
+            pending_signal_text="[8条]物流通知",
+        )
+        active = monitor.poll(
+            FakeSessionConnector(
+                [
+                    {
+                        "name": "服务号",
+                        "session_key": "wx:rpa:v1:service-container",
+                        "content": "丰巢：物流提醒",
+                        "time": "11:54",
+                        "unread_badge": "visual_red_dot",
+                        "conversation_type": "system",
+                    },
+                    {
+                        "name": "微信团队",
+                        "session_key": "wx:rpa:v1:wechat-team",
+                        "content": "安全提醒",
+                        "time": "11:55",
+                        "unread_badge": "visual_red_dot",
+                        "conversation_type": "system",
+                    },
+                    {
+                        "name": "身份未知",
+                        "content": "在吗",
+                        "time": "11:56",
+                        "unread_badge": "visual_red_dot",
+                        "conversation_type": "unknown",
+                    },
+                    {
+                        "name": "身份缺失",
+                        "content": "这台车还在吗",
+                        "time": "11:56",
+                        "unread_badge": "visual_red_dot",
+                        "conversation_type": "private",
+                    },
+                    {
+                        "name": "客户A",
+                        "session_key": "wx:rpa:v1:customer-a",
+                        "content": "奥迪A4L还有吗",
+                        "time": "11:57",
+                        "unread_badge": "visual_red_dot",
+                        "conversation_type": "private",
+                    },
+                    {
+                        "name": "客户群",
+                        "session_key": "wx:rpa:v1:customer-group",
+                        "content": "这台车还能看吗",
+                        "time": "11:58",
+                        "unread_badge": "visual_red_dot",
+                        "conversation_type": "group",
+                    },
+                ]
+            )
+        )
+        assert_equal(
+            {item.name for item in active},
+            {"客户A", "客户群"},
+            "dynamic monitor must emit only customer private/group candidates with confirmed sidebar identity",
+        )
+        assert_equal(
+            {item.name for item in monitor.pending_targets(limit=None)},
+            {"客户A", "客户群"},
+            "persisted service descendants and unconfirmed rows must not re-enter dispatch after polling",
+        )
+
+        dynamic_targets = build_iteration_targets(
+            config_targets=[],
+            active_targets=[
+                SimpleNamespace(name="服务号", session_key="wx:rpa:v1:service-container", conversation_type="system", priority_score=90),
+                SimpleNamespace(name="未确认", session_key="", conversation_type="unknown", priority_score=80),
+                SimpleNamespace(name="客户A", session_key="wx:rpa:v1:customer-a", conversation_type="private", priority_score=70),
+            ],
+            multi_target_cfg={"max_targets_per_iteration": 5, "scan_all_whitelist_each_iteration": False},
+            allow_dynamic_active_targets=True,
+        )
+        assert_equal(
+            [(item.name, item.session_key) for item in dynamic_targets],
+            [("客户A", "wx:rpa:v1:customer-a")],
+            "second dispatch boundary must independently reject non-customer or unconfirmed dynamic targets",
+        )
+
+    bridge = object.__new__(ManagedListenerSchedulerBridge)
+    bridge.respond_all_unread_sessions = True
+    stale_capture = bridge._capture_session(
+        {
+            "target_name": "服务号",
+            "session_key": "wx:rpa:v1:service-container",
+            "conversation_type": "system",
+        }
+    )
+    assert_true(stale_capture.get("blocked") is True, "recovered service-account task must be blocked before capture")
+    assert_true(
+        str(stale_capture.get("reason") or "").startswith("dynamic_non_customer_session_excluded:"),
+        "persisted service-account task must carry an auditable no-click reason",
+    )
+
+
 def check_scheduler_same_display_name_sessions_are_isolated_by_session_key() -> None:
     state = empty_state()
     record_session_signal(
@@ -8509,7 +8778,8 @@ def run_checks() -> dict[str, Any]:
         check_runtime_recovers_orphaned_running_llm_task_after_restart,
         check_runtime_expires_stale_queued_llm_task_after_restart,
         check_runtime_expires_stale_orphaned_running_llm_task_after_restart,
-        check_runtime_times_out_running_llm_task_without_swallowing_message,
+        check_runtime_keeps_running_llm_task_owned_until_worker_exits,
+        check_runtime_keeps_running_polish_task_owned_until_worker_exits,
         check_runtime_restores_missing_llm_task_from_in_memory_snapshot,
         check_runtime_recovers_orphaned_running_polish_task_after_restart,
         check_runtime_expires_stale_queued_polish_task_after_restart,
@@ -8544,6 +8814,7 @@ def run_checks() -> dict[str, Any]:
         check_listener_scheduler_config_gate,
         check_listener_poll_interval_uses_randomized_window_config,
         check_live_safety_applies_backend_scheduler_defaults,
+        check_live_safety_preserves_explicit_dynamic_all_session_monitoring,
         check_live_safety_file_transfer_defaults_to_self_test_target,
         check_listener_rpa_send_rate_zero_is_preserved,
         check_listener_rpa_send_settings_apply_live_safety_effective_defaults,
@@ -8578,6 +8849,7 @@ def run_checks() -> dict[str, Any]:
         check_session_monitor_allows_duplicate_display_names_when_session_keys_are_distinct,
         check_session_monitor_reload_keeps_display_name_for_session_key_pending,
         check_session_monitor_poll_repairs_legacy_session_key_only_state,
+        check_dynamic_customer_monitor_excludes_service_system_and_unconfirmed_sessions,
         check_scheduler_same_display_name_sessions_are_isolated_by_session_key,
         check_managed_bridge_normalizes_legacy_switch_interval_to_humanized_window,
         check_repeatable_short_greeting_is_not_blocked_by_processed_content_keys,

@@ -92,6 +92,22 @@ def test_file_transfer_aliases_match_sidecar() -> None:
         )
 
 
+def test_service_and_system_containers_are_not_private_chats() -> None:
+    for text in ("服务号", "<服务号", "服务通知", "订阅号消息", "微信团队", "微信支付"):
+        assert_true(
+            text_normalization.infer_conversation_type(text) == "system",
+            f"service/system container must not be inferred as a private chat: {text!r}",
+        )
+        assert_true(
+            sidecar.infer_conversation_type(text) == "system",
+            f"sidecar must preserve service/system classification: {text!r}",
+        )
+    assert_true(
+        text_normalization.infer_conversation_type("正常客户") == "private",
+        "ordinary customer names must retain private-chat classification",
+    )
+
+
 def test_session_name_matching_matches_sidecar() -> None:
     pairs = [
         ("许聪", "许聪"),
@@ -141,6 +157,7 @@ def main() -> int:
         test_text_module_exports_expected_helpers,
         test_normalization_helpers_match_sidecar,
         test_file_transfer_aliases_match_sidecar,
+        test_service_and_system_containers_are_not_private_chats,
         test_session_name_matching_matches_sidecar,
         test_quick_login_like_matches_sidecar,
     ]

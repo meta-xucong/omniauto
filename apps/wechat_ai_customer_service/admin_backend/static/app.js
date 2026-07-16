@@ -14,8 +14,12 @@ const state = {
   customerProfileMessages: [],
   productCatalog: null,
   selectedProduct: null,
+  productDetailRequestId: 0,
+  productDetailModalOpenRequested: false,
   productDetailMode: "view",
   productDetailScopedKnowledge: {},
+  productVehicleImageUploadPromise: null,
+  productVehicleImageUploadProductId: "",
   productScopedEditor: null,
   productAcknowledgeLoadingIds: new Set(),
   categories: [],
@@ -3018,6 +3022,7 @@ function renderProductCatalogList() {
     button.addEventListener("click", async () => {
       const item = items[Number(button.dataset.index)];
       state.selectedProduct = item || null;
+      state.productDetailModalOpenRequested = Boolean(item?.id);
       state.productDetailMode = "view";
       state.productScopedEditor = null;
       await loadProductDetail(item?.id);
@@ -3055,12 +3060,18 @@ async function loadProductDetail(productId, options = {}) {
     renderProductCatalogDetail();
     return;
   }
+  if (options.open === true) state.productDetailModalOpenRequested = true;
+  const shouldOpenModal = options.open !== false && state.productDetailModalOpenRequested;
+  const requestId = ++state.productDetailRequestId;
   const payload = await apiGet(`/api/product-console/products/${encodeURIComponent(productId)}`);
+  // A slower response for a previously selected car must never put the UI
+  // back onto that car after the operator has selected another one.
+  if (requestId !== state.productDetailRequestId) return;
   state.selectedProduct = payload.item || state.selectedProduct;
   state.productDetailScopedKnowledge = payload.scoped_knowledge || {};
   renderProductCatalogList();
   renderProductCatalogDetail();
-  if (options.open !== false) openProductDetailModal();
+  if (shouldOpenModal && state.productDetailModalOpenRequested) openProductDetailModal();
 }
 
 function renderProductCatalogDetail(scopedKnowledge = null) {
@@ -3513,6 +3524,7 @@ function productPriceTierText(tiers) {
 function openProductDetailModal() {
   const modal = document.getElementById("product-detail-modal");
   if (!modal) return;
+  state.productDetailModalOpenRequested = true;
   modal.classList.remove("is-hidden");
   modal.setAttribute("aria-hidden", "false");
 }
@@ -3522,6 +3534,10 @@ function closeProductDetailModal() {
   if (!modal) return;
   modal.classList.add("is-hidden");
   modal.setAttribute("aria-hidden", "true");
+  // Invalidate both an already-running detail fetch and all later automatic
+  // continuations of the action the operator just closed.
+  state.productDetailRequestId += 1;
+  state.productDetailModalOpenRequested = false;
   state.productDetailMode = "view";
   state.productScopedEditor = null;
 }
@@ -3629,6 +3645,9 @@ function productV2EditFormHtml(item, view, scoped) {
   const canEditVehicle = Boolean(view.capabilities?.can_edit_vehicle_source);
   const canEditPictures = Boolean(view.capabilities?.can_edit_vehicle_pictures);
   const photos = Array.isArray(vehicle.photos) ? vehicle.photos : [];
+  const photoEntries = Array.isArray(vehicle.photo_entries) && vehicle.photo_entries.length
+    ? vehicle.photo_entries
+    : photos.map((url) => ({url}));
   const productName = summary.name || item.id;
   const vehicleFieldHelp = canEditVehicle
     ? "字段按大风车 V2 原路径写入 source_payloads；留空不会覆盖已有值。每次保存都保留人工编辑来源。"
@@ -3674,7 +3693,7 @@ function productV2EditFormHtml(item, view, scoped) {
         productV2FieldInput("product-v2-wholesale-price", "批发价", "carPriceInfo.wholesalePrice", pricing.wholesalePrice ?? "", "number", !canEditVehicle, "any"),
         productV2FieldInput("product-v2-license-status", "手续状态", "carLicenseInfo.licenseStatus", license.licenseStatus ?? "", "text", !canEditVehicle),
       ])}
-      ${vehicleV2PictureEditorHtml(photos, productName, canEditPictures)}
+      ${vehicleV2PictureEditorHtml(photoEntries, productName, canEditPictures)}
       ${vehicleV2EditorGroupHtml("本地客服补充（不改大风车原载荷）", [
         productV2FieldInput("product-v2-sku", "内部编号", "extensions.wechat_customer_service.manual_annotations.sku", manual.sku ?? ""),
         productV2FieldInput("product-v2-unit", "本地单位", "extensions.wechat_customer_service.manual_annotations.unit", manual.unit ?? ""),
@@ -3711,15 +3730,26 @@ function productV2Textarea(id, label, value, placeholder = "", path = "") {
   return `<label class="form-field wide-field vehicle-v2-field"><span>${escapeHtml(label)}</span>${path ? `<small>${escapeHtml(path)}</small>` : ""}<textarea id="${escapeHtml(id)}" placeholder="${escapeHtml(placeholder)}">${escapeHtml(value || "")}</textarea></label>`;
 }
 
-function vehicleV2PictureEditorHtml(photos, productName, canEditPictures) {
-  const existing = Array.isArray(photos) ? photos : [];
+function vehicleV2PictureEditorHtml(photoEntries, productName, canEditPictures) {
+  const existing = Array.isArray(photoEntries) ? photoEntries : [];
   return `
     <section class="vehicle-v2-editor-group vehicle-v2-picture-editor">
       <div class="vehicle-v2-editor-group-head"><strong>车辆图片</strong><small>source_payloads.vehicle_pictures.payload</small></div>
-      <div class="product-photo-grid dfc-photo-grid vehicle-v2-edit-photos">${existing.length ? existing.map((url) => vehiclePictureTileHtml(url, productName)).join("") : `<div class="dfc-empty-photo" aria-label="车辆图片为空">&nbsp;</div>`}</div>
-      ${canEditPictures ? `<label class="vehicle-v2-upload-control"><span>添加图片（JPEG、PNG、WebP；单张不超过 10 MB）</span><input id="product-v2-image-files" type="file" accept="image/jpeg,image/png,image/webp" multiple /></label>` : `<div class="helper-card context-card"><strong>官方图片只读。</strong><span>该车源由大风车同步，图片将随下一次同步更新。</span></div>`}
+      <div id="product-v2-image-preview" class="product-photo-grid dfc-photo-grid vehicle-v2-edit-photos">${existing.length ? existing.map((entry) => vehiclePictureEditorTileHtml(entry, productName, canEditPictures)).join("") : `<div class="dfc-empty-photo" aria-label="车辆图片为空">&nbsp;</div>`}</div>
+      ${canEditPictures ? `<label class="vehicle-v2-upload-control"><span>添加图片（JPEG、PNG、WebP；单张不超过 10 MB）</span><small>选中后立即上传并显示；不需要先保存整页车辆资料。</small><input id="product-v2-image-files" type="file" accept="image/jpeg,image/png,image/webp" multiple /></label><div id="product-v2-image-upload-status" class="vehicle-image-upload-status" aria-live="polite"></div>` : `<div class="helper-card context-card"><strong>官方图片只读。</strong><span>该车源由大风车同步，图片将随下一次同步更新。</span></div>`}
     </section>
   `;
+}
+
+function vehiclePictureEditorTileHtml(entry, productName, canEditPictures) {
+  const item = entry && typeof entry === "object" ? entry : {url: entry};
+  const source = String(item.url || "").trim();
+  const image = vehiclePictureImageHtml(source, `${productName || "车辆"} 图片`);
+  const pictureId = String(item.picture_id || "").trim();
+  const remove = canEditPictures && pictureId
+    ? `<button class="vehicle-image-remove" type="button" data-vehicle-image-remove-id="${escapeAttr(pictureId)}" title="删除这张图片">删除</button>`
+    : "";
+  return `<div class="vehicle-image-editor-tile" data-vehicle-picture-id="${escapeAttr(pictureId)}">${image}${remove}</div>`;
 }
 
 function productTextInput(id, label, value, type = "text") {
@@ -3771,6 +3801,32 @@ function bindProductDetailEditors(root) {
     button.addEventListener("click", () => openProductScopedInlineEditor(button.dataset.category, ""));
   });
   bindProductScopedEditor(root);
+  const productId = String(state.selectedProduct?.id || "").trim();
+  const imageInput = root.querySelector("#product-v2-image-files");
+  if (productId && imageInput) {
+    imageInput.addEventListener("change", () => {
+      const task = uploadProductV2VehicleImages(productId);
+      state.productVehicleImageUploadPromise = task;
+      state.productVehicleImageUploadProductId = productId;
+      task.catch((error) => alert(error.message)).finally(() => {
+        if (state.productVehicleImageUploadPromise === task) {
+          state.productVehicleImageUploadPromise = null;
+          state.productVehicleImageUploadProductId = "";
+        }
+      });
+    });
+  }
+  root.querySelectorAll("[data-vehicle-image-remove-id]").forEach((button) => {
+    bindVehicleImageRemoveButton(button, productId);
+  });
+}
+
+function bindVehicleImageRemoveButton(button, productId) {
+  if (!button || button.dataset.vehicleImageRemoveBound === "true") return;
+  button.dataset.vehicleImageRemoveBound = "true";
+  button.addEventListener("click", () => {
+    deleteProductV2VehicleImage(productId, button.dataset.vehicleImageRemoveId, button).catch((error) => alert(error.message));
+  });
 }
 
 async function saveProductDetailForm() {
@@ -3815,6 +3871,10 @@ async function saveProductDetailForm() {
 }
 
 async function saveProductV2DetailForm(original) {
+  const pendingImageUpload = state.productVehicleImageUploadProductId === original.id
+    ? state.productVehicleImageUploadPromise
+    : null;
+  if (pendingImageUpload) await pendingImageUpload;
   const view = productAdminView(original);
   const canEditVehicle = Boolean(view.capabilities?.can_edit_vehicle_source);
   const vehicleDetailPatch = canEditVehicle ? buildManualVehicleDetailPatch() : {};
@@ -3835,7 +3895,6 @@ async function saveProductV2DetailForm(original) {
     method: "PUT",
     body: JSON.stringify({vehicle_detail_patch: vehicleDetailPatch, annotations, manual_annotations: manualAnnotations}),
   });
-  await uploadProductV2VehicleImages(original.id);
   state.productDetailMode = "view";
   state.productScopedEditor = null;
   await Promise.all([loadProductCatalog({loadDetail: false}), loadOverview().catch(() => {})]);
@@ -3882,11 +3941,83 @@ function buildManualVehicleDetailPatch() {
 async function uploadProductV2VehicleImages(productId) {
   const input = document.getElementById("product-v2-image-files");
   const files = Array.from(input?.files || []);
-  if (!files.length) return;
+  if (!files.length) return [];
+  // Read and clear the native chooser synchronously, so an accidental click
+  // on "save" cannot submit the same files a second time.
+  input.value = "";
+  const grid = document.getElementById("product-v2-image-preview");
+  const status = document.getElementById("product-v2-image-upload-status");
+  const productName = productAdminView(state.selectedProduct || {}).summary?.name || productId;
+  const failures = [];
+  const uploaded = [];
+  setVehicleImageUploadStatus(status, `正在上传 ${files.length} 张图片…`);
   for (const file of files) {
+    const temporaryId = `vehicle-image-upload-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    const objectUrl = URL.createObjectURL(file);
+    const placeholder = appendVehicleImageUploadPreview(grid, temporaryId, objectUrl, file.name);
     const form = new FormData();
     form.append("file", file, file.name);
-    await apiForm(`/api/product-console/products/${encodeURIComponent(productId)}/images`, form, {method: "POST"});
+    try {
+      const payload = await apiForm(`/api/product-console/products/${encodeURIComponent(productId)}/images`, form, {method: "POST"});
+      const image = payload?.image || {};
+      const entry = {picture_id: image.picture_id, url: image.url, filename: image.filename};
+      const current = grid?.querySelector?.(`[data-vehicle-upload-preview="${temporaryId}"]`);
+      if (current) current.outerHTML = vehiclePictureEditorTileHtml(entry, productName, true);
+      URL.revokeObjectURL(objectUrl);
+      hydrateAuthorizedVehicleImages(grid);
+      const deleteButton = grid?.querySelector?.(`[data-vehicle-image-remove-id="${entry.picture_id}"]`);
+      bindVehicleImageRemoveButton(deleteButton, productId);
+      if (payload?.item && state.selectedProduct?.id === productId) state.selectedProduct = payload.item;
+      uploaded.push(entry);
+    } catch (error) {
+      failures.push(file.name || "未命名图片");
+      const current = grid?.querySelector?.(`[data-vehicle-upload-preview="${temporaryId}"]`);
+      if (current) current.classList.add("is-failed");
+      setVehicleImageUploadStatus(status, `以下图片上传失败：${failures.join("、")}`, true);
+    }
+  }
+  if (!failures.length) setVehicleImageUploadStatus(status, `已上传 ${uploaded.length} 张图片；正在后台生成图片归纳词。`);
+  if (failures.length) throw new Error(`图片上传失败：${failures.join("、")}`);
+  return uploaded;
+}
+
+function appendVehicleImageUploadPreview(grid, temporaryId, objectUrl, filename) {
+  if (!grid) return null;
+  grid.querySelector(".dfc-empty-photo")?.remove();
+  const tile = document.createElement("div");
+  tile.className = "vehicle-image-editor-tile is-uploading";
+  tile.dataset.vehicleUploadPreview = temporaryId;
+  tile.innerHTML = `<img src="${escapeAttr(objectUrl)}" alt="${escapeAttr(filename || "正在上传的车辆图片")}" /><span class="vehicle-image-uploading-label">上传中…</span>`;
+  grid.appendChild(tile);
+  return tile;
+}
+
+function setVehicleImageUploadStatus(target, text, isError = false) {
+  if (!target) return;
+  target.textContent = String(text || "");
+  target.classList.toggle("is-error", Boolean(isError));
+}
+
+async function deleteProductV2VehicleImage(productId, imageId, button) {
+  if (!productId || !imageId) return;
+  if (!confirm("确认删除这张车辆图片吗？删除后会重新生成该车源的图片索引。")) return;
+  if (button) button.disabled = true;
+  try {
+    const payload = await apiJson(`/api/product-console/products/${encodeURIComponent(productId)}/images/${encodeURIComponent(imageId)}`, {method: "DELETE"});
+    // The operator can leave this car while the deletion request is in
+    // flight.  Persist the deletion, but never mutate the newly selected
+    // car's editor or selection state with an old response.
+    if (state.selectedProduct?.id !== productId) return;
+    button?.closest(".vehicle-image-editor-tile")?.remove();
+    const grid = document.getElementById("product-v2-image-preview");
+    if (grid && !grid.querySelector(".vehicle-image-editor-tile")) {
+      grid.innerHTML = `<div class="dfc-empty-photo" aria-label="车辆图片为空">&nbsp;</div>`;
+    }
+    if (payload?.item) state.selectedProduct = payload.item;
+    setVehicleImageUploadStatus(document.getElementById("product-v2-image-upload-status"), "图片已删除，正在后台更新图片归纳词。");
+  } catch (error) {
+    if (button) button.disabled = false;
+    throw error;
   }
 }
 
@@ -4124,7 +4255,10 @@ async function runProductCommand() {
   }
   if (input) input.value = "";
   await Promise.all([loadProductCatalog({loadDetail: false}), loadOverview().catch(() => {})]);
-  if (payload.item?.id) await loadProductDetail(payload.item.id);
+  if (payload.item?.id) {
+    state.productDetailModalOpenRequested = true;
+    await loadProductDetail(payload.item.id);
+  }
   else if (state.selectedProduct?.id) await loadProductDetail(state.selectedProduct.id);
 }
 

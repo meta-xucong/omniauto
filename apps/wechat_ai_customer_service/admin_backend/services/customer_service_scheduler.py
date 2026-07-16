@@ -68,6 +68,7 @@ from apps.wechat_ai_customer_service.admin_backend.services.customer_service_ses
     SessionLedgerStore,
     stable_session_key,
 )
+from apps.wechat_ai_customer_service.conversation_admission import customer_session_admission_reason
 from apps.wechat_ai_customer_service.message_identity import (
     apply_canonical_identity_fields,
     canonical_input_message_id,
@@ -1714,28 +1715,10 @@ class CustomerServiceSchedulerRuntime:
         events: list[dict[str, Any]] = []
         for task_id, future in list(self._planner_futures.items()):
             if not future.done():
-                task = (state.get("llm_tasks", {}) or {}).get(task_id)
-                if self._task_exceeded_runtime_budget(task if isinstance(task, dict) else self._planner_task_snapshots.get(task_id), now=now):
-                    self._planner_futures.pop(task_id, None)
-                    future.cancel()
-                    if not self._restore_missing_llm_task_from_snapshot(state, task_id):
-                        events.append({"event": "llm_task_failed", "task_id": task_id, "reason": "llm_task_timeout_missing_snapshot"})
-                        continue
-                    recovered_task = self._fail_llm_task_with_recovery(
-                        state,
-                        task_id,
-                        reason="llm_task_runtime_timeout",
-                        now=now,
-                        events=events,
-                    )
-                    self._planner_task_snapshots.pop(task_id, None)
-                    events.append(
-                        {
-                            "event": "llm_task_timeout_recovered",
-                            "task_id": task_id,
-                            "target_name": recovered_task.get("target_name"),
-                        }
-                    )
+                # A running ThreadPool future cannot be cancelled safely.  It
+                # must remain the exclusive owner of this task until its
+                # transport-bound planner exits, otherwise a retry can run
+                # beside the original request and exhaust real worker slots.
                 continue
             self._planner_futures.pop(task_id, None)
             try:
@@ -1972,22 +1955,9 @@ class CustomerServiceSchedulerRuntime:
         events: list[dict[str, Any]] = []
         for task_id, future in list(self._polish_futures.items()):
             if not future.done():
-                task = (state.get("polish_tasks", {}) or {}).get(task_id)
-                if self._task_exceeded_runtime_budget(task if isinstance(task, dict) else self._polish_task_snapshots.get(task_id), now=now):
-                    self._polish_futures.pop(task_id, None)
-                    future.cancel()
-                    if not self._restore_missing_polish_task_from_snapshot(state, task_id):
-                        events.append({"event": "polish_task_failed", "task_id": task_id, "reason": "polish_task_timeout_missing_snapshot"})
-                        continue
-                    task = fail_polish_task(state, task_id, reason="polish_task_runtime_timeout", now=now)
-                    self._polish_task_snapshots.pop(task_id, None)
-                    events.append(
-                        {
-                            "event": "polish_task_timeout_failed",
-                            "task_id": task_id,
-                            "target_name": task.get("target_name"),
-                        }
-                    )
+                # See planner counterpart above: preserve ownership of a
+                # running worker until it actually exits.  Final-polish
+                # transport calls use the same bounded request primitive.
                 continue
             self._polish_futures.pop(task_id, None)
             try:
@@ -3295,6 +3265,7 @@ class ManagedListenerSchedulerBridge:
                 tenant_id=self.tenant_id,
                 whitelist=whitelist,
                 blacklist=self.ignored_session_names,
+                customer_session_only=self.respond_all_unread_sessions,
                 max_targets_per_iteration=max(1, max_targets),
                 min_switch_interval_seconds=max(1, min_switch),
                 dispatch_strategy=dispatch_strategy,
@@ -3315,6 +3286,7 @@ class ManagedListenerSchedulerBridge:
             return
         self.session_monitor.whitelist = whitelist
         self.session_monitor.blacklist = set(self.ignored_session_names)
+        self.session_monitor.customer_session_only = self.respond_all_unread_sessions
         self.session_monitor.max_targets_per_iteration = max(1, max_targets)
         self.session_monitor.min_switch_interval_seconds = max(1, min_switch)
         self.session_monitor.dispatch_strategy = dispatch_strategy if dispatch_strategy in {"event_driven", "legacy_pending_scan"} else "event_driven"
@@ -3486,6 +3458,14 @@ class ManagedListenerSchedulerBridge:
                 }
                 for item in pending
                 if item.name not in self.ignored_session_names
+                and not (
+                    self.respond_all_unread_sessions
+                    and customer_session_admission_reason(
+                        name=getattr(item, "name", ""),
+                        conversation_type=getattr(item, "conversation_type", "unknown"),
+                        session_key=getattr(item, "session_key", ""),
+                    )
+                )
             ]
         return [
             {
@@ -3541,6 +3521,18 @@ class ManagedListenerSchedulerBridge:
                 session_key=session_key,
                 conversation_type=conversation_type,
             )
+
+    def _dynamic_customer_admission_reason(self, session: dict[str, Any] | None) -> str:
+        """Apply the same no-click admission rule to persisted scheduler work."""
+
+        if not self.respond_all_unread_sessions:
+            return ""
+        payload = session if isinstance(session, dict) else {}
+        return customer_session_admission_reason(
+            name=payload.get("target_name") or payload.get("name"),
+            conversation_type=payload.get("conversation_type"),
+            session_key=payload.get("session_key"),
+        )
 
     def _workflow_state_snapshot(self) -> dict[str, Any]:
         if self.state_path is None:
@@ -3680,6 +3672,21 @@ class ManagedListenerSchedulerBridge:
         return target_state
 
     def _capture_session(self, session: dict[str, Any]) -> dict[str, Any]:
+        admission_reason = self._dynamic_customer_admission_reason(session)
+        if admission_reason:
+            # The runtime may recover an old persisted capture task before the
+            # monitor has a chance to refresh.  Refuse it here, before target
+            # construction or any WeChat RPA action, so historical service
+            # rows cannot reopen a service-account page after an upgrade.
+            return {
+                "ok": False,
+                "blocked": True,
+                "reason": f"dynamic_non_customer_session_excluded:{admission_reason}",
+                "messages": [],
+                "batch": [],
+                "overflow_messages": [],
+                "history_backfill": {},
+            }
         target = self._target_for_session(session)
         if (
             self._switch_human_delay_enabled
@@ -4883,6 +4890,25 @@ class ManagedListenerSchedulerBridge:
                 "capture_message_content_digest": capture.get("message_content_digest"),
                 "capture_ids": reply.get("capture_ids"),
             })
+        admission_reason = self._dynamic_customer_admission_reason(
+            {
+                "target_name": reply_target_name or capture_target_name,
+                "session_key": str(reply.get("session_key") or capture.get("session_key") or ""),
+                "conversation_type": _effective_conversation_type(
+                    reply.get("conversation_type"),
+                    capture.get("conversation_type"),
+                ),
+            }
+        )
+        if admission_reason:
+            return _finish(
+                {
+                    "ok": False,
+                    "verified": False,
+                    "reason": f"dynamic_non_customer_session_excluded:{admission_reason}",
+                    "target_name": reply_target_name or capture_target_name,
+                }
+            )
         target = self._target_for_session(
             {
                 "target_name": reply_target_name,

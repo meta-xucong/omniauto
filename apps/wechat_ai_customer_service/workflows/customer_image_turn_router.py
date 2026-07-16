@@ -12,6 +12,10 @@ from apps.wechat_ai_customer_service.workflows.customer_image_catalog_assist imp
 from apps.wechat_ai_customer_service.workflows.customer_image_understanding import (
     maybe_run_customer_image_understanding,
 )
+from apps.wechat_ai_customer_service.vehicle_image_retrieval_integration import (
+    match_customer_image_to_product_master,
+    merge_vehicle_image_match_into_catalog_assist,
+)
 from apps.wechat_ai_customer_service.optional_plugins.vision.clipboard_payload import (
     read_current_clipboard_image,
 )
@@ -278,6 +282,19 @@ def maybe_route_customer_image_turn(
             image_payloads=[ephemeral_image],
             ephemeral_clipboard=True,
         )
+        try:
+            vehicle_image_match = match_customer_image_to_product_master(
+                understanding,
+                ephemeral_image,
+                config,
+            )
+        except Exception as exc:  # noqa: BLE001 - optional retrieval must never block image understanding
+            vehicle_image_match = {
+                "matched": False,
+                "reason": "vehicle_image_retrieval_adapter_failed",
+                "error_type": type(exc).__name__,
+                "candidates": [],
+            }
     finally:
         releaser = getattr(ephemeral_image, "release", None)
         if callable(releaser):
@@ -287,10 +304,12 @@ def maybe_route_customer_image_turn(
         customer_text=combined,
         target_state=target_state,
     )
+    catalog_assist = merge_vehicle_image_match_into_catalog_assist(catalog_assist, vehicle_image_match)
     visual_bridge_input = build_customer_image_brain_bridge(
         understanding,
         catalog_assist,
         source_reason=source_reason,
+        vehicle_image_retrieval=vehicle_image_match,
     )
     target_state_for_brain = copy.deepcopy(target_state)
     conversation_context = target_state_for_brain.setdefault("conversation_context", {})
@@ -335,6 +354,7 @@ def maybe_route_customer_image_turn(
         "clipboard_transaction": public_transaction,
         "customer_image_understanding": understanding,
         "customer_image_catalog_assist": catalog_assist,
+        "vehicle_image_retrieval": vehicle_image_match,
         "visual_bridge_input": visual_bridge_input,
         "target_state_for_brain": target_state_for_brain,
         "conversation_context_patch": dict(catalog_assist.get("conversation_context_patch") or {}),

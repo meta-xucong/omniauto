@@ -47,6 +47,7 @@ from customer_intent_assist import (
 )
 from customer_service_loop import BOT_PREFIX, ReplyDecision, decide_reply, format_reply, load_rules
 from apps.wechat_ai_customer_service.cloud_gate import cloud_gate_status, cloud_required_enabled
+from apps.wechat_ai_customer_service.conversation_admission import customer_session_admission_reason
 from apps.wechat_ai_customer_service.llm_config import (
     configured_llm_provider,
     resolve_effective_llm_provider,
@@ -516,6 +517,7 @@ def run_workflow(args: argparse.Namespace) -> dict[str, Any]:
             session_monitor = SessionMonitor(
                 whitelist=whitelist,
                 blacklist=ignored_session_names,
+                customer_session_only=respond_all_unread_sessions,
                 max_targets_per_iteration=int(multi_target_cfg.get("max_targets_per_iteration", 5)),
                 min_switch_interval_seconds=int(multi_target_cfg.get("min_switch_interval_seconds", 2)),
                 initial_preview_can_raise_unread=bool(multi_target_cfg.get("initial_preview_can_raise_unread", True)),
@@ -1234,21 +1236,37 @@ def process_target(
             )
 
     # 1. Build evidence pack for intent analysis and synthesis
-    evidence_pack = build_evidence_pack(
-        combined,
-        context=build_evidence_context_for_pack(
-            config,
-            conversation_context_from_product_result(
-                target_state.get("conversation_context", {}) or {}
+    brain_first_operational_route = brain_first_requires_brain_owned_visible_reply(config)
+    if brain_first_operational_route:
+        # Brain First owns semantic understanding and authoritative evidence.
+        # The older intent route remains only for data-capture/handoff
+        # bookkeeping, so it must not run a duplicate retrieval or LLM pass.
+        evidence_pack = build_brain_first_intent_evidence_projection()
+        intent_route_config = copy.deepcopy(config)
+        intent_router_config = dict(intent_route_config.get("intent_router", {}) or {})
+        intent_router_config["heuristic_first"] = True
+        intent_router_config["heuristic_first_min_confidence"] = 0.0
+        intent_router_llm = dict(intent_router_config.get("llm", {}) or {})
+        intent_router_llm["enabled"] = False
+        intent_router_config["llm"] = intent_router_llm
+        intent_route_config["intent_router"] = intent_router_config
+    else:
+        evidence_pack = build_evidence_pack(
+            combined,
+            context=build_evidence_context_for_pack(
+                config,
+                conversation_context_from_product_result(
+                    target_state.get("conversation_context", {}) or {}
+                ),
             ),
-        ),
-    )
+        )
+        intent_route_config = config
 
     # 2. LLM intent routing — replaces keyword-based customer_data gate
     write_workflow_phase("intent_route_start", target=target.name, message_count=len(batch))
     intent_result = route_intent(
         combined=combined,
-        config=config,
+        config=intent_route_config,
         evidence_pack=evidence_pack,
         target_state=target_state,
     )
@@ -1525,11 +1543,17 @@ def process_target(
         "text": realtime_combined[:1200] if realtime_combined != combined else "",
     }
     write_workflow_phase("realtime_route_start", target=target.name)
-    realtime_evidence_pack = build_realtime_router_evidence_pack(
-        combined=realtime_combined,
-        evidence_pack=evidence_pack,
-        config=config,
-    )
+    if customer_service_brain_controls_reply(event["customer_service_brain"]):
+        # The compatibility projection below preserves legacy audit fields,
+        # while the disabled legacy generators must not rebuild a second
+        # evidence/RAG route after Brain has already planned the reply.
+        realtime_evidence_pack: dict[str, Any] = {}
+    else:
+        realtime_evidence_pack = build_realtime_router_evidence_pack(
+            combined=realtime_combined,
+            evidence_pack=evidence_pack,
+            config=config,
+        )
     runtime_route = decide_realtime_reply_route(
         config=config,
         combined=realtime_combined,
@@ -1639,13 +1663,16 @@ def process_target(
     token_budget = update_token_budget_from_synthesis(token_budget, llm_synthesis)
     event["token_budget"] = token_budget
     event["llm_reply_synthesis"] = llm_synthesis
-    direct_price_fact_fallback = maybe_build_direct_product_price_fact_fallback(
-        runtime_route=runtime_route,
-        llm_synthesis=llm_synthesis,
-        combined=realtime_combined,
-        evidence_pack=realtime_evidence_pack,
-        recent_reply_texts=recent_reply_texts,
-    )
+    if customer_service_brain_controls_reply(event["customer_service_brain"]):
+        direct_price_fact_fallback = {"applied": False, "reason": "brain_first_authoritative_control"}
+    else:
+        direct_price_fact_fallback = maybe_build_direct_product_price_fact_fallback(
+            runtime_route=runtime_route,
+            llm_synthesis=llm_synthesis,
+            combined=realtime_combined,
+            evidence_pack=realtime_evidence_pack,
+            recent_reply_texts=recent_reply_texts,
+        )
     if direct_price_fact_fallback.get("applied"):
         realtime_reply = direct_price_fact_fallback
         event["realtime_reply"] = realtime_reply
@@ -5856,13 +5883,19 @@ def maybe_analyze_intent(
             "reason": "unsupported_intent_assist_mode",
         }
 
-    evidence_pack = build_evidence_pack(
-        combined,
-        context=build_evidence_context_for_pack(
-            config,
-            conversation_context_from_product_result(product_knowledge or {}),
-        ),
-    )
+    if brain_first_requires_brain_owned_visible_reply(config):
+        # Intent assist remains a compatibility/audit input.  The Brain builds
+        # the sole authoritative evidence pack for the turn, so rebuilding a
+        # full RAG/product pack here only duplicates synchronous work.
+        evidence_pack = build_brain_first_intent_evidence_projection()
+    else:
+        evidence_pack = build_evidence_pack(
+            combined,
+            context=build_evidence_context_for_pack(
+                config,
+                conversation_context_from_product_result(product_knowledge or {}),
+            ),
+        )
     clear_finance_process_handoff_for_intent_evidence(evidence_pack, combined=combined)
     analysis_context = build_intent_context(
         config,
@@ -6097,6 +6130,40 @@ def conversation_context_from_product_result(product_knowledge: dict[str, Any]) 
         "last_total": product_knowledge.get("total"),
         "last_shipping_city": product_knowledge.get("shipping_city"),
         **preserved_context,
+    }
+
+
+def build_brain_first_intent_evidence_projection() -> dict[str, Any]:
+    """Return the existing intent-assist evidence shape without a second retrieval.
+
+    This is private, per-turn compatibility data only.  Product and policy
+    authority still comes from the later Brain evidence build; no state, event,
+    config, or inter-module payload field is added or changed.
+    """
+
+    return {
+        "schema_version": 1,
+        "scope": "brain_first_intent_assist_compatibility",
+        "intent_tags": [],
+        "selected_items": [],
+        "evidence": {
+            "products": [],
+            "faq": [],
+            "policies": {},
+            "style_examples": [],
+            "product_scoped": [],
+        },
+        "rag_evidence": {
+            "hits": [],
+            "confidence": 0.0,
+            "rag_can_authorize": False,
+            "structured_priority": True,
+        },
+        "safety": {
+            "must_handoff": False,
+            "allowed_auto_reply": True,
+            "reasons": [],
+        },
     }
 
 
@@ -9883,6 +9950,12 @@ def build_iteration_targets(
 
     def push(target: TargetConfig) -> None:
         if target.name in blocked:
+            return
+        if allow_dynamic_active_targets and customer_session_admission_reason(
+            name=target.name,
+            conversation_type=getattr(target, "conversation_type", "unknown"),
+            session_key=getattr(target, "session_key", ""),
+        ):
             return
         if (
             target.name in active_identity_names

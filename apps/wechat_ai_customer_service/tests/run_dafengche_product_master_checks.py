@@ -19,6 +19,7 @@ for import_root in (APP_ROOT / "workflows", APP_ROOT / "adapters", APP_ROOT):
     if str(import_root) not in sys.path:
         sys.path.insert(0, str(import_root))
 
+from apps.wechat_ai_customer_service import dafengche_product_master_host_adapter as host_adapter_module  # noqa: E402
 from apps.wechat_ai_customer_service.dafengche_product_master_host_adapter import ProductMasterStoreMirrorRepository  # noqa: E402
 from apps.wechat_ai_customer_service.product_master import ProductMasterStore, customer_evidence_item, write_json  # noqa: E402
 from apps.wechat_ai_customer_service.scripts.migrate_chejin_v1_to_v2_manual import (  # noqa: E402
@@ -150,6 +151,20 @@ def check_manual_vehicle_and_host_storage_adapter() -> dict[str, Any]:
         vehicle_detail_payload=load_fixture("car_detail_car_1001.json"),
         field_provenance={"baseCarInfo.name": {"operator": "admin", "source": "manual"}},
     )
+    assert_equal(
+        len(manual_service.list_customer_evidence(shop_code=None, now=NOW + timedelta(days=14))),
+        1,
+        "active manual V2 records must not inherit Dafengche mirror expiry",
+    )
+    assert_equal(
+        manual_service.list_customer_evidence(
+            shop_code=None,
+            policy=CustomerEvidencePolicy(manual_max_age_seconds=60),
+            now=NOW + timedelta(minutes=2),
+        ),
+        [],
+        "hosts may opt into an explicit manual-review expiry without changing mirror freshness",
+    )
     try:
         manual_service.bind_manual_vehicle(
             record_id=saved_manual["id"],
@@ -182,8 +197,27 @@ def check_manual_vehicle_and_host_storage_adapter() -> dict[str, Any]:
         assert_true("source_payloads" not in json.dumps(evidence_item, ensure_ascii=False), "compatibility record must not expose raw payload")
         _repository, synced = synced_service()
         mirrored_record = _repository.list_records()[0]
-        adapter.upsert(mirrored_record)
-        customer_items = store.list_customer_evidence_items(shop_code="SHOP-001")
+        queued: list[dict[str, str]] = []
+        original_enqueue = host_adapter_module.enqueue_vehicle_image_index
+        host_adapter_module.enqueue_vehicle_image_index = lambda product_id, *, tenant_id, cause: queued.append(  # type: ignore[assignment]
+            {"product_id": product_id, "tenant_id": tenant_id, "cause": cause}
+        ) or {"accepted": True, "state": "queued"}
+        try:
+            adapter.upsert(mirrored_record)
+            adapter.upsert(mirrored_record)
+            changed_picture_record = json.loads(json.dumps(mirrored_record, ensure_ascii=False))
+            changed_picture_record["source_payloads"]["vehicle_pictures"]["payload"].append(
+                {"pictureId": "new-sync-picture", "pictureUrl": "https://cdn.example.invalid/new.jpg"}
+            )
+            adapter.upsert(changed_picture_record)
+        finally:
+            host_adapter_module.enqueue_vehicle_image_index = original_enqueue  # type: ignore[assignment]
+        assert_equal(len(queued), 2, "Dafengche image source changes must enqueue one derived index, while an unchanged sync must not")
+        assert_equal(queued[0]["cause"], "dafengche_sync", "Dafengche sync must retain its distinct index trigger cause")
+        customer_items = store.list_customer_evidence_items(
+            shop_code="SHOP-001",
+            policy=CustomerEvidencePolicy(max_age_seconds=None),
+        )
         bound_item = next((item for item in customer_items if item.get("id") == mirrored_record.get("id")), None)
         assert_true(isinstance(bound_item, dict) and isinstance(bound_item.get("customer_evidence"), dict), "bound v2 item should use customer-evidence bridge")
         assert_true("source_payloads" not in json.dumps(bound_item, ensure_ascii=False), "bound compatibility record must not expose raw payload")
@@ -211,7 +245,11 @@ def check_legacy_facade_and_brain_input_contract() -> dict[str, Any]:
     assert_equal(brain_input["price"], 15.28, "Brain sees authorized public price through existing field")
     brain_text = json.dumps(brain_input, ensure_ascii=False)
     assert_true("vin" not in brain_text.lower() and "plate" not in brain_text.lower(), "Brain compact input must not contain raw identifiers")
-    projected_item = customer_evidence_item(_repository.list_records()[0], shop_code="SHOP-001")
+    projected_item = customer_evidence_item(
+        _repository.list_records()[0],
+        shop_code="SHOP-001",
+        policy=CustomerEvidencePolicy(max_age_seconds=None),
+    )
     assert_true(isinstance(projected_item, dict), "bound record should produce bridge item")
     legacy_projection = project_legacy_record(_repository.list_records()[0])
     assert_true(isinstance(legacy_projection, dict), "portable core should offer a compatibility projection")
@@ -227,10 +265,17 @@ def check_legacy_facade_and_brain_input_contract() -> dict[str, Any]:
     try:
         reply_evidence_builder_module.KnowledgeRuntime = FakeRuntime
         candidates = reply_evidence_builder_module.catalog_product_candidates("凯美瑞报价", limit=3, context={"shopCode": "SHOP-001"})
+        alias_matches = reply_evidence_builder_module.authoritative_catalog_alias_matches(
+            "那台凯美瑞的详细信息发我看看",
+            limit=3,
+            context={"shopCode": "SHOP-001"},
+        )
     finally:
         reply_evidence_builder_module.KnowledgeRuntime = original_runtime
     assert_equal(candidates[0]["price"], 15.28, "catalog should retain public-price field through unchanged evidence output")
     assert_true("source_payloads" not in json.dumps(candidates, ensure_ascii=False), "catalog must never receive raw source payload")
+    assert_equal(alias_matches[0]["id"], projected_item["id"], "explicit customer alias should retain authoritative product evidence")
+    assert_true(alias_matches[0]["matched_aliases"], "alias routing result should include the matched visible alias")
     return {"name": "legacy_facade_and_brain_input_contract", "ok": True}
 
 
