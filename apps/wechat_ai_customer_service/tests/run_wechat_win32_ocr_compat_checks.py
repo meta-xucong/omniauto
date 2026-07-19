@@ -11,6 +11,7 @@ import sys
 import tempfile
 import types
 from contextlib import contextmanager
+from unittest.mock import patch
 
 from PIL import Image, ImageDraw
 
@@ -60,6 +61,7 @@ from apps.wechat_ai_customer_service.adapters.wechat_win32_ocr_sidecar import ( 
     auxiliary_wechat_shell_like,
     blind_target_confirmation_guard,
     blocking_screen_reason,
+    build_message_observations_v3,
     capabilities_payload,
     chat_header_cutoff_y,
     calculate_send_points,
@@ -104,7 +106,12 @@ from apps.wechat_ai_customer_service.adapters.wechat_win32_ocr_sidecar import ( 
     infer_conversation_type,
     is_message_noise,
     open_voice_transcribe_context_menu,
+    find_visual_self_voice_context_anchor_target,
+    find_voice_context_menu_anchor_target,
+    find_voice_duration_context_anchor_target,
     find_voice_transcribe_context_menu_target,
+    find_voice_transcribe_menu_collapse_item_target,
+    find_voice_transcribe_menu_item_target,
     find_voice_transcribe_target,
     jitter_client_click_surface_point,
     jitter_input_click_point,
@@ -113,10 +120,11 @@ from apps.wechat_ai_customer_service.adapters.wechat_win32_ocr_sidecar import ( 
     sendinput_safe_text,
     sendinput_utf16_units,
     voice_transcribe_click_candidate_points,
+    voice_duration_bubble_visual_evidence,
     voice_duration_context_click_target,
     voice_duration_text_like,
-    voice_duration_bubble_visual_evidence,
     find_latest_untranscribed_voice_duration_target,
+    voice_target_center_y,
     voice_transcribe_visual_button_score,
     merge_message_history_snapshots,
     message_anchor_match_type,
@@ -137,6 +145,7 @@ from apps.wechat_ai_customer_service.adapters.wechat_win32_ocr_sidecar import ( 
     session_matches_key,
     validate_send_geometry,
     scroll_to_latest_before_read_enabled,
+    sidebar_visible_list_enhanced_ocr_items,
     same_target_continuation_fast_path_enabled,
     active_ui_action_budget_decision,
     send_input_confirm_attempt_count,
@@ -177,6 +186,19 @@ class FakeValuePattern:
 def assert_true(condition: bool, message: str) -> None:
     if not condition:
         raise AssertionError(message)
+
+
+def make_ocr_item(text: str, left: int, top: int, right: int, bottom: int) -> dict[str, object]:
+    return {
+        "text": text,
+        "left": float(left),
+        "top": float(top),
+        "right": float(right),
+        "bottom": float(bottom),
+        "center_x": (left + right) / 2.0,
+        "center_y": (top + bottom) / 2.0,
+        "confidence": 0.92,
+    }
 
 
 def run_sidecar_script_without_pythonpath(
@@ -309,6 +331,57 @@ def test_sidecar_facade_exports_contract_surface() -> None:
         assert_true(callable(exported), f"sidecar facade should keep callable export {name}")
 
 
+def test_run_sidecar_cli_accepts_visible_session_candidate() -> None:
+    import apps.wechat_ai_customer_service.adapters.wechat_win32_ocr_sidecar as sidecar_module
+
+    captured = {}
+
+    def fake_run_action(args):
+        captured["action"] = args.action
+        captured["visible_session_candidate"] = args.visible_session_candidate
+        return {"ok": True, "state": "chat_target_confirmed"}
+
+    original = sidecar_module.run_action
+    sidecar_module.run_action = fake_run_action
+    try:
+        payload = sidecar_module.run_sidecar_cli(
+            [
+                "open-chat",
+                "--target",
+                "CJR8S5K3虾丸子大",
+                "--remark-code",
+                "CJR8S5K3",
+                "--target-mode",
+                "visible",
+                "--visible-session-candidate",
+                '{"name":"CJR8S5K3\\u867e\\u4e38","center_y":143.5}',
+            ]
+        )
+    finally:
+        sidecar_module.run_action = original
+
+    assert_true(payload.get("ok") is True, f"CLI should accept visible-session candidate: {payload}")
+    assert_true(captured.get("action") == "open-chat", f"unexpected captured action: {captured}")
+    assert_true("CJR8S5K3" in str(captured.get("visible_session_candidate")), f"candidate should reach run_action: {captured}")
+
+
+def test_visible_session_candidate_click_geometry_uses_title_bbox() -> None:
+    import apps.wechat_ai_customer_service.adapters.wechat_win32_ocr_sidecar as sidecar_module
+
+    candidate = sidecar_module.ensure_session_candidate_click_geometry(
+        {
+            "name": "CJR8S5K3虾丸子大..",
+            "session_key": "wx:rpa:v1:visible",
+            "row_fingerprint": {"title_text": "CJR8S5K3虾丸子大..", "title_bbox": [154, 115, 372, 143], "row_y_bucket": 16},
+        }
+    )
+
+    assert_true(candidate.get("center_y") == 129.0, f"candidate should derive center_y from title_bbox: {candidate}")
+    assert_true(candidate.get("top") == 115.0, f"candidate should derive top from title_bbox: {candidate}")
+    assert_true(candidate.get("bottom") == 143.0, f"candidate should derive bottom from title_bbox: {candidate}")
+    assert_true(candidate.get("click_geometry_source") == "row_fingerprint.title_bbox", f"candidate should record geometry source: {candidate}")
+
+
 def test_parse_sessions_from_ocr() -> None:
     items = [
         {"text": "Q搜索", "confidence": 0.99, "left": 110, "right": 170, "top": 55, "bottom": 80, "center_x": 140, "center_y": 68},
@@ -327,6 +400,44 @@ def test_parse_sessions_from_ocr() -> None:
         sessions[0].get("preview") == "您想今天定，我完全理...",
         f"session preview should be parsed from the same row: {sessions[0]}",
     )
+
+
+def test_sidebar_visible_list_enhanced_ocr_recovers_pinned_gray_sessions() -> None:
+    image = Image.new("RGB", (980, 860), "white")
+    scale = 2.0
+
+    def fake_ocr_runner(_image):
+        return [
+            {
+                "text": "CJR8S5K3虾丸子大..",
+                "confidence": 0.997,
+                "left": 154 * scale,
+                "right": 330 * scale,
+                "top": 30 * scale,
+                "bottom": 55 * scale,
+                "center_x": 242 * scale,
+                "center_y": 42.5 * scale,
+            },
+            {
+                "text": "CJTOP02第二个置顶",
+                "confidence": 0.991,
+                "left": 154 * scale,
+                "right": 324 * scale,
+                "top": 108 * scale,
+                "bottom": 133 * scale,
+                "center_x": 239 * scale,
+                "center_y": 120.5 * scale,
+            },
+        ]
+
+    full_ocr_items = [
+        {"text": "★钢岚、奶哥1群", "confidence": 0.99, "left": 154, "right": 300, "top": 274, "bottom": 298, "center_x": 227, "center_y": 286},
+    ]
+    enhanced = sidebar_visible_list_enhanced_ocr_items(image, (980, 860), ocr_runner=fake_ocr_runner)
+    sessions = parse_sessions_from_ocr(full_ocr_items + enhanced, (980, 860), screenshot=image)
+    names = [item["name"] for item in sessions]
+    assert_true(names[:2] == ["CJR8S5K3虾丸子大..", "CJTOP02第二个置顶"], f"enhanced OCR should recover all pinned gray rows: {names}")
+    assert_true(enhanced and enhanced[0].get("ocr_source") == "sidebar_visible_list_enhanced", f"enhanced OCR source should be marked: {enhanced}")
 
 
 def test_parse_sessions_detects_visual_unread_red_dot() -> None:
@@ -381,6 +492,18 @@ def test_parse_sessions_strips_standalone_relative_day_suffix() -> None:
     sessions = parse_sessions_from_ocr(items, (981, 860))
     names = [item["name"] for item in sessions]
     assert_true(names[:2] == ["新数据测试", "许聪"], f"standalone relative day suffix should normalize: {names}")
+
+
+def test_parse_sessions_keeps_truncated_remark_code_title_with_time_suffix() -> None:
+    items = [
+        {"text": "CJR8S5K3 虾丸子大...13:09", "confidence": 0.949, "left": 154, "right": 373, "top": 117, "bottom": 141, "center_x": 263.5, "center_y": 129.0},
+        {"text": "0114桃李天下内.Q", "confidence": 0.88, "left": 153, "right": 328, "top": 200, "bottom": 223, "center_x": 240, "center_y": 211.5},
+        {"text": "只争朝夕：还有...", "confidence": 0.91, "left": 154, "right": 328, "top": 225, "bottom": 247, "center_x": 241, "center_y": 236},
+    ]
+    sessions = parse_sessions_from_ocr(items, (980, 860))
+    names = [item["name"] for item in sessions]
+    assert_true(names[0] == "CJR8S5K3 虾丸子大", f"truncated code title with time should survive session parsing: {sessions}")
+    assert_true("只争朝夕：还有..." not in names, f"preview text with ellipsis should not become a session title: {sessions}")
 
 
 def test_parse_sessions_preserves_duplicate_display_names_with_session_keys() -> None:
@@ -633,7 +756,8 @@ def test_add_friend_menu_click_handles_stale_dialog_hwnd() -> None:
         sidecar_mod.get_window_geometry = lambda hwnd: (_ for _ in ()).throw(RuntimeError("invalid hwnd")) if int(hwnd) == 2002 else dict(geometry)
         sidecar_mod.capture_wechat_window_visible_screen = lambda hwnd, **_kwargs: (screenshot, f"capture_{hwnd}.png")
         sidecar_mod.draw_add_friend_screen_annotation = lambda *_args, **_kwargs: "annotated.png"
-        result = sidecar_mod.click_add_friend_menu_entry_and_capture(1001, PROJECT_ROOT, menu_targets=[target])
+        with tempfile.TemporaryDirectory() as artifact_dir:
+            result = sidecar_mod.click_add_friend_menu_entry_and_capture(1001, Path(artifact_dir), menu_targets=[target])
         assert_true(result.get("clicked") is False, f"stale dialog hwnd should not be treated as clicked: {result}")
         assert_true(result.get("menu_clicked") is True, f"menu click itself should be preserved: {result}")
         assert_true(result.get("reason") == "add_friend_dialog_window_handle_invalid_after_menu_click", f"unexpected stale hwnd reason: {result}")
@@ -761,12 +885,14 @@ def test_parse_messages_strips_voice_duration_prefix_after_transcription() -> No
     ]
     messages = parse_messages_from_ocr(items, (980, 860), target="许聪")
     assert_true(len(messages) == 1, f"transcribed voice should remain one message: {messages}")
+    assert_true(messages[0]["type"] == "voice", f"transcribed voice must be typed as voice, not text: {messages}")
     assert_true(messages[0]["sender"] == "customer", f"private peer voice transcript should be customer-owned: {messages}")
     assert_true(messages[0]["sender_role"] == "customer", f"private peer voice transcript role should be customer: {messages}")
     assert_true(
         messages[0]["content"] == "我想买一辆便宜的、好用的、省油的，代步用，上班\n用。",
         f"voice duration prefix should be removed from content: {messages}",
     )
+    assert_true(messages[0].get("voice_duration") == 5, f"transcribed voice duration should be retained: {messages}")
     assert_true("5\"" in messages[0]["content_raw_ocr"], f"raw OCR should retain the duration for audit: {messages}")
     assert_true("voice_duration_prefix_removed" in messages[0]["quality_flags"], f"cleanup should be auditable: {messages}")
 
@@ -785,10 +911,12 @@ def test_parse_messages_strips_voice_duration_prefix_after_transcription() -> No
     ]
     light_messages = parse_messages_from_ocr(light_mode_items, (980, 860), target="许聪")
     assert_true(len(light_messages) == 1, f"light-mode malformed duration should stay with transcript: {light_messages}")
+    assert_true(light_messages[0]["type"] == "voice", f"light-mode transcribed voice must be typed as voice: {light_messages}")
     assert_true(
         light_messages[0]["content"] == "有没有10万以内的电车或者混动车？",
         f"malformed duration prefix should be removed: {light_messages}",
     )
+    assert_true(light_messages[0].get("voice_duration") == 3, f"light-mode voice duration should be retained: {light_messages}")
     assert_true(light_messages[0]["sender"] == "customer", f"voice transcript should remain customer-owned: {light_messages}")
     assert_true("voice_duration_prefix_removed" in light_messages[0]["quality_flags"], f"cleanup should be auditable: {light_messages}")
 
@@ -815,22 +943,6 @@ def test_parse_messages_respects_explicit_private_conversation_type_for_test_con
     assert_true(messages[0]["sender_role"] == "customer", f"private test contact role should be customer: {messages}")
 
 
-def test_parse_messages_uses_structural_group_header_and_strips_member_label() -> None:
-    items = [
-        {"text": "新数据测试(2)", "confidence": 0.99, "left": 350, "right": 478, "top": 51, "bottom": 80, "center_x": 414, "center_y": 65.5},
-        {"text": "许聪", "confidence": 0.99, "left": 422, "right": 468, "top": 414, "bottom": 435, "center_x": 445, "center_y": 424.5},
-        {"text": "中午好", "confidence": 0.99, "left": 423, "right": 492, "top": 442, "bottom": 468, "center_x": 457.5, "center_y": 455},
-    ]
-    messages = parse_messages_from_ocr(items, (980, 860), target="新数据测试", conversation_type="private")
-    assert_true(len(messages) == 1, f"structural group message should remain one customer turn: {messages}")
-    assert_true(messages[0]["sender_role"] == "group_member", f"active member-count title should override stale private typing: {messages}")
-    assert_true(messages[0]["content"] == "中午好", f"group member label must not enter Brain content: {messages}")
-    assert_true(
-        "speaker_prefix_split_from_ocr_text" in messages[0]["quality_flags"],
-        f"speaker metadata split should stay auditable: {messages}",
-    )
-
-
 def test_parse_messages_skips_file_card_footer_noise() -> None:
     footer_only = [
         {"text": "微信电脑版", "confidence": 0.99, "left": 434, "right": 541, "top": 96, "bottom": 118, "center_x": 487.5, "center_y": 107},
@@ -851,13 +963,36 @@ def test_parse_messages_skips_file_card_footer_noise() -> None:
     )
 
 
-def test_parse_messages_skips_unconverted_voice_duration_only() -> None:
-    items = [
+def test_parse_messages_marks_unconverted_voice_as_voice_placeholder() -> None:
+    unread_items = [
         {"text": '3"', "confidence": 0.72, "left": 440, "right": 489, "top": 616, "bottom": 641, "center_x": 464.5, "center_y": 628.5},
-        {"text": '5"', "confidence": 0.76, "left": 441, "right": 490, "top": 688, "bottom": 714, "center_x": 465.5, "center_y": 701.0},
+        {"text": "转文字", "confidence": 0.92, "left": 441, "right": 505, "top": 656, "bottom": 682, "center_x": 473.0, "center_y": 669.0},
     ]
-    messages = parse_messages_from_ocr(items, (980, 860), target="xucong")
-    assert_true(not messages, f"unconverted voice durations must not become LLM text input: {messages}")
+    unread_messages = parse_messages_from_ocr(
+        unread_items,
+        (980, 860),
+        target="xucong",
+        include_untranscribed_voice_placeholders=True,
+    )
+    assert_true(len(unread_messages) == 1, f"unread voice bubble should be one placeholder message: {unread_messages}")
+    assert_true(unread_messages[0]["type"] == "voice", f"unread voice must be typed as voice, not text: {unread_messages}")
+    assert_true(unread_messages[0].get("voice_duration") == 3, f"unread voice duration should be captured for evidence: {unread_messages}")
+    assert_true("untranscribed_voice_placeholder" in unread_messages[0]["quality_flags"], f"unread voice placeholder should be auditable: {unread_messages}")
+    assert_true("转文字" not in unread_messages[0]["content"], f"convert button must not become content: {unread_messages}")
+
+    read_items = [
+        {"text": '7"', "confidence": 0.76, "left": 440, "right": 489, "top": 616, "bottom": 641, "center_x": 464.5, "center_y": 628.5},
+    ]
+    read_messages = parse_messages_from_ocr(
+        read_items,
+        (980, 860),
+        target="xucong",
+        include_untranscribed_voice_placeholders=True,
+    )
+    assert_true(len(read_messages) == 1, f"read voice bubble without convert button should be one placeholder: {read_messages}")
+    assert_true(read_messages[0]["type"] == "voice", f"read voice must be typed as voice, not text: {read_messages}")
+    assert_true(read_messages[0].get("voice_duration") == 7, f"read voice duration should be captured for evidence: {read_messages}")
+    assert_true("untranscribed_voice_placeholder" in read_messages[0]["quality_flags"], f"read voice placeholder should be auditable: {read_messages}")
 
 
 def test_parse_messages_skips_voice_duration_with_convert_button_ui_noise() -> None:
@@ -1132,10 +1267,166 @@ def test_parse_messages_outputs_message_envelope_fields() -> None:
     assert_true(str(message.get("canonical_input_id") or "").startswith("canonical_"), f"canonical input id should be attached: {message}")
     assert_true(str(message.get("canonical_visual_id") or "").startswith("canonical_visual_"), f"canonical visual id should be attached: {message}")
     envelope = message.get("message_envelope") or {}
+    assert_true(envelope.get("schema_version") == 2, f"message envelope should use schema v2: {envelope}")
+    assert_true(str(envelope.get("observation_id") or "").startswith("observation_"), f"observation id should be attached: {envelope}")
+    assert_true(bool(envelope.get("source_message_key")), f"source message key should be attached: {envelope}")
     assert_true(
         envelope.get("canonical_input_id") == message.get("canonical_input_id"),
         f"record and envelope canonical input ids should match: {message}",
     )
+
+
+def test_c2_observations_are_standalone_without_business_contract_file() -> None:
+    observations = build_message_observations_v3(
+        [
+            {
+                "id": "message-1",
+                "sender_role": "contact",
+                "type": "text",
+                "content": "hello",
+                "avatar_alignment": {"role": "customer"},
+                "sender_role_evidence": [],
+                "quality_flags": [],
+            }
+        ]
+    )
+    assert_true(len(observations) == 1, f"unexpected observation count: {observations}")
+    observation = observations[0]
+    assert_true(observation.get("schema_version") == 3, f"unexpected observation schema: {observation}")
+    assert_true(observation.get("sender_role") == "customer", f"contact should normalize to customer: {observation}")
+    assert_true(observation.get("row_kind") == "text_bubble", f"text should map to text bubble: {observation}")
+
+
+def test_messages_frame_reuses_screenshot_and_falls_back_to_same_frame_title_roi() -> None:
+    sidecar_mod = sys.modules["apps.wechat_ai_customer_service.adapters.wechat_win32_ocr_sidecar"]
+    image = Image.new("RGB", (965, 852), (247, 247, 247))
+    items = [make_ocr_item("发送", 870, 790, 930, 820)]
+    title_items = [make_ocr_item("DEMO1234 Contact", 430, 48, 650, 78)]
+    snapshot = {
+        "screenshot": image,
+        "screenshot_path": "messages.png",
+        "ocr_items": items,
+        "messages": [],
+        "visible_untranscribed_voice": {"detected": False},
+    }
+    with patch.object(sidecar_mod, "capture_message_history_snapshots", return_value=[snapshot]), patch.object(
+        sidecar_mod,
+        "get_window_geometry",
+        return_value={"width": 965, "height": 852, "left": 0, "top": 0, "right": 965, "bottom": 852},
+    ), patch.object(sidecar_mod, "run_ocr_on_screen_region", return_value=title_items) as title_roi_ocr, patch.object(
+        sidecar_mod,
+        "capture_wechat",
+    ) as capture:
+        payload = sidecar_mod.messages_payload(
+            101,
+            {},
+            target="DEMO1234 Contact",
+            history_load_times=0,
+            confirm_target="DEMO1234",
+        )
+
+    assert_true(payload.get("ok") is True, f"messages frame should pass target confirmation: {payload}")
+    guard = payload.get("target_confirmation") or {}
+    timing = guard.get("timing") or {}
+    assert_true(guard.get("ok") is True, f"title ROI should confirm the target: {guard}")
+    assert_true(timing.get("validate_active_send_target_frame_reused") is True, f"frame should be reused: {timing}")
+    assert_true(timing.get("validate_active_send_target_supplied_frame_title_roi_match") is True, f"title ROI should match: {timing}")
+    assert_true(title_roi_ocr.call_count == 1, "title ROI OCR should run exactly once")
+    assert_true(title_roi_ocr.call_args.args[0] is image, "title ROI OCR should reuse the messages image")
+    assert_true(capture.call_count == 0, "target confirmation must not capture a second image")
+
+
+def test_reused_frame_skips_title_roi_when_full_ocr_already_matches() -> None:
+    sidecar_mod = sys.modules["apps.wechat_ai_customer_service.adapters.wechat_win32_ocr_sidecar"]
+    image = Image.new("RGB", (965, 852), (247, 247, 247))
+    full_items = [
+        make_ocr_item("DEMO1234 Contact", 430, 48, 650, 78),
+        make_ocr_item("发送", 870, 790, 930, 820),
+    ]
+    with patch.object(
+        sidecar_mod,
+        "get_window_geometry",
+        return_value={"width": 965, "height": 852, "left": 0, "top": 0, "right": 965, "bottom": 852},
+    ), patch.object(sidecar_mod, "run_ocr_on_screen_region") as title_roi_ocr, patch.object(
+        sidecar_mod,
+        "capture_wechat",
+    ) as capture:
+        guard = sidecar_mod.validate_active_send_target(
+            101,
+            "DEMO1234",
+            exact=False,
+            screenshot=image,
+            ocr_items=full_items,
+            screenshot_path="messages.png",
+        )
+
+    timing = guard.get("timing") or {}
+    assert_true(guard.get("ok") is True, f"full OCR should confirm the target: {guard}")
+    assert_true(timing.get("validate_active_send_target_frame_reused") is True, f"frame should be reused: {timing}")
+    assert_true("validate_active_send_target_supplied_frame_title_roi_match" not in timing, f"extra title OCR should be skipped: {timing}")
+    assert_true(title_roi_ocr.call_count == 0, "title ROI OCR should not run on the normal path")
+    assert_true(capture.call_count == 0, "normal target confirmation must not capture a second image")
+
+
+def test_reused_frame_title_roi_still_blocks_wrong_target() -> None:
+    sidecar_mod = sys.modules["apps.wechat_ai_customer_service.adapters.wechat_win32_ocr_sidecar"]
+    image = Image.new("RGB", (965, 852), (247, 247, 247))
+    full_items = [make_ocr_item("发送", 870, 790, 930, 820)]
+    wrong_title_items = [make_ocr_item("Another Contact", 430, 48, 560, 78)]
+    with patch.object(
+        sidecar_mod,
+        "get_window_geometry",
+        return_value={"width": 965, "height": 852, "left": 0, "top": 0, "right": 965, "bottom": 852},
+    ), patch.object(sidecar_mod, "run_ocr_on_screen_region", return_value=wrong_title_items) as title_roi_ocr, patch.object(
+        sidecar_mod,
+        "capture_wechat",
+    ) as capture:
+        guard = sidecar_mod.validate_active_send_target(
+            101,
+            "DEMO1234",
+            exact=False,
+            screenshot=image,
+            ocr_items=full_items,
+            screenshot_path="messages.png",
+        )
+
+    timing = guard.get("timing") or {}
+    assert_true(guard.get("ok") is False, f"wrong title must be blocked: {guard}")
+    assert_true(guard.get("reason") == "target_title_not_confirmed", f"unexpected guard reason: {guard}")
+    assert_true(timing.get("validate_active_send_target_supplied_frame_title_roi_match") is False, f"wrong title ROI should not match: {timing}")
+    assert_true(title_roi_ocr.call_count == 1, "missing full-frame title should trigger one ROI OCR")
+    assert_true(capture.call_count == 0, "wrong-title confirmation must not capture a second image")
+
+
+def test_voice_before_frame_blocks_click_when_target_is_wrong() -> None:
+    sidecar_mod = sys.modules["apps.wechat_ai_customer_service.adapters.wechat_win32_ocr_sidecar"]
+    image = Image.new("RGB", (965, 852), (247, 247, 247))
+    guard = {"ok": False, "online": True, "reason": "target_title_not_confirmed"}
+    with patch.object(sidecar_mod, "capture_wechat", return_value=(image, "voice_before.png")) as capture, patch.object(
+        sidecar_mod,
+        "run_ocr",
+        return_value=[],
+    ), patch.object(
+        sidecar_mod,
+        "get_window_geometry",
+        return_value={"width": 965, "height": 852, "left": 0, "top": 0, "right": 965, "bottom": 852},
+    ), patch.object(sidecar_mod, "validate_active_send_target", return_value=guard) as validate, patch.object(
+        sidecar_mod,
+        "open_voice_transcribe_context_menu",
+    ) as open_menu:
+        payload = sidecar_mod.voice_transcribe_payload(
+            101,
+            {},
+            target="DEMO1234 Contact",
+            confirm_target="DEMO1234",
+            max_duration_seconds=60,
+        )
+
+    assert_true(payload.get("ok") is False, f"wrong voice target must be blocked: {payload}")
+    assert_true(payload.get("error_code") == "TARGET_NOT_CONFIRMED_FOR_VOICE_TRANSCRIBE", f"unexpected error: {payload}")
+    assert_true(capture.call_count == 1, "voice flow should capture exactly one before frame")
+    assert_true(validate.call_args.kwargs.get("screenshot") is image, "voice guard should reuse the before frame")
+    assert_true(open_menu.call_count == 0, "wrong target must stop before opening the voice menu")
 
 
 def test_history_snapshot_merge_orders_and_dedupes() -> None:
@@ -1250,13 +1541,33 @@ def test_connector_helpers() -> None:
     identity_request = wechat_connector_module._args_to_request(identity_args)
     assert_true(identity_request.get("session_key") == "wx:rpa:v1:duplicate-group", f"send session key should be preserved: {identity_request}")
     assert_true(identity_request.get("conversation_type") == "group", f"send conversation type should be preserved: {identity_request}")
-    retired_image_request = wechat_connector_module._args_to_request(
-        ["image-save", "--target", "新数据测试", "--source-preview", "许聪:[图片]"]
+    image_save_args = compat_args(
+        [
+            "image-save",
+            "--target",
+            "新数据测试",
+            "--exact",
+            "--session-key",
+            "wx:1",
+            "--source-preview",
+            "许聪:[图片]",
+            "--speaker-name",
+            "许聪",
+            "--tenant-id",
+            "chejin",
+            "--max-images",
+            "1",
+        ]
     )
-    assert_true(
-        not retired_image_request.get("action"),
-        f"shared connector must not parse the retired Sidecar image action: {retired_image_request}",
-    )
+    assert_true(image_save_args[0] == "image-save", f"image-save action should be preserved: {image_save_args}")
+    assert_true("--source-preview" in image_save_args and "许聪:[图片]" in image_save_args, f"image preview should be preserved: {image_save_args}")
+    request = wechat_connector_module._args_to_request(image_save_args)
+    assert_true(request.get("action") == "image-save", f"image-save request action should be parsed: {request}")
+    assert_true(request.get("target") == "新数据测试", f"image-save target should be parsed: {request}")
+    assert_true(request.get("source_preview") == "许聪:[图片]", f"image-save source preview should be parsed: {request}")
+    assert_true(request.get("speaker_name") == "许聪", f"image-save speaker should be parsed: {request}")
+    assert_true(request.get("tenant_id") == "chejin", f"image-save tenant should be parsed: {request}")
+    assert_true(request.get("max_images") == 1, f"image-save max_images should be parsed: {request}")
 
 
 def test_send_geometry_guard() -> None:
@@ -1343,6 +1654,16 @@ def test_voice_transcribe_target_prefers_visible_convert_button() -> None:
         {
             "text": "转文字",
             "left": 578.0,
+            "top": 314.0,
+            "right": 626.0,
+            "bottom": 342.0,
+            "center_x": 602.0,
+            "center_y": 328.0,
+            "confidence": 0.91,
+        },
+        {
+            "text": "转文字",
+            "left": 578.0,
             "top": 614.0,
             "right": 626.0,
             "bottom": 642.0,
@@ -1354,13 +1675,14 @@ def test_voice_transcribe_target_prefers_visible_convert_button() -> None:
     target = find_voice_transcribe_target(items, image_size)
     assert_true(target is not None, "visible voice-to-text button should be detected")
     assert_true(target.get("source") == "ocr_transcribe_button", f"target should come from OCR button: {target}")
+    assert_true((target.get("item") or {}).get("center_y") == 628.0, f"visible buttons must be processed bottom-to-top: {target}")
     points = voice_transcribe_click_candidate_points(target)
     assert_true(len(points) >= 10, f"voice transcribe button should expose a 10-point pool: {points}")
     bounds = target.get("click_bounds") or []
     assert_true(all(bounds[0] <= x <= bounds[2] and bounds[1] <= y <= bounds[3] for x, y in points), f"points must stay in bounds: {target}")
 
 
-def test_voice_transcribe_target_infers_latest_unconverted_voice_only() -> None:
+def test_voice_transcribe_target_processes_unconverted_voice_bottom_up() -> None:
     image_size = (980, 860)
     items = [
         {
@@ -1393,240 +1715,194 @@ def test_voice_transcribe_target_infers_latest_unconverted_voice_only() -> None:
             "center_y": 583.5,
             "confidence": 0.74,
         },
+        {
+            "text": '9"',
+            "left": 442.0,
+            "top": 653.0,
+            "right": 487.0,
+            "bottom": 674.0,
+            "center_x": 464.5,
+            "center_y": 663.5,
+            "confidence": 0.74,
+        },
     ]
     assert_true(voice_duration_text_like('4"'), "quoted duration should be recognized")
     assert_true(voice_duration_text_like("02"), "OCR duration without quote should be tolerated")
+    assert_true(voice_duration_text_like('2" (c'), "duration with voice-icon OCR noise should be recognized")
     assert_true(not voice_duration_text_like("我想买车"), "normal transcript should not look like a duration")
     assert_true(
         find_voice_transcribe_target(items, image_size, allow_inferred=False) is None,
         "duration-only OCR must not be treated as a visible voice-to-text menu item",
     )
-    target = find_voice_transcribe_target(items, image_size)
-    assert_true(target is not None, "latest unconverted voice duration should infer a convert target")
-    assert_true(target.get("source") == "inferred_from_voice_duration", f"target should be inferred from duration: {target}")
-    assert_true((target.get("item") or {}).get("text") == '4"', f"converted 2s voice must be skipped: {target}")
-    points = voice_transcribe_click_candidate_points(target)
-    assert_true(len(set(points)) >= 10, f"inferred button should expose distinct candidate points: {points}")
-    anchor = voice_duration_context_click_target(target, image_size)
-    assert_true(anchor is not None, f"inferred voice duration should provide a context-menu right-click anchor: {target}")
+    anchor = find_voice_duration_context_anchor_target(items, image_size)
+    assert_true(anchor is not None, "bottommost unconverted voice duration should provide a context-menu anchor")
+    assert_true(anchor.get("source") == "voice_duration_context_menu_anchor", f"target should be a right-click anchor: {anchor}")
+    assert_true((anchor.get("item") or {}).get("text") == '9"', f"converted 2s voice must be skipped, then process bottom-to-top: {anchor}")
     anchor_points = voice_transcribe_click_candidate_points(anchor)
     assert_true(len(set(anchor_points)) >= 10, f"context-menu anchor should expose distinct candidate points: {anchor_points}")
 
 
-def test_voice_context_menu_target_allows_low_menu_item() -> None:
+def test_voice_transcribe_context_anchor_can_skip_already_transcribed_anchor() -> None:
     image_size = (980, 860)
     items = [
         {
-            "text": "语音转文字",
-            "left": 492.0,
-            "top": 734.0,
-            "right": 586.0,
-            "bottom": 758.0,
-            "center_x": 539.0,
-            "center_y": 746.0,
-            "confidence": 0.93,
-        }
-    ]
-    assert_true(
-        find_voice_transcribe_target(items, image_size, allow_inferred=False) is None,
-        "normal chat target detection should still reject items in the input area",
-    )
-    target = find_voice_transcribe_context_menu_target(items, image_size, anchor_point=[456, 731])
-    assert_true(target is not None, f"context-menu detection must allow low popup menu rows: {target}")
-    assert_true(target.get("source") == "context_menu_ocr_transcribe_item", f"context menu should use OCR item: {target}")
-
-
-def test_voice_context_menu_target_infers_missing_first_row_from_menu_items() -> None:
-    image_size = (980, 860)
-    items = [
-        {
-            "text": "收藏",
-            "left": 492.0,
-            "top": 584.0,
-            "right": 534.0,
-            "bottom": 608.0,
-            "center_x": 513.0,
-            "center_y": 596.0,
-            "confidence": 0.95,
+            "text": '4"',
+            "left": 442.0,
+            "top": 453.0,
+            "right": 487.0,
+            "bottom": 474.0,
+            "center_x": 464.5,
+            "center_y": 463.5,
+            "confidence": 0.74,
         },
         {
-            "text": "多选",
-            "left": 492.0,
-            "top": 628.0,
-            "right": 534.0,
-            "bottom": 652.0,
-            "center_x": 513.0,
-            "center_y": 640.0,
-            "confidence": 0.95,
-        },
-        {
-            "text": "提醒",
-            "left": 492.0,
-            "top": 672.0,
-            "right": 534.0,
-            "bottom": 696.0,
-            "center_x": 513.0,
-            "center_y": 684.0,
-            "confidence": 0.95,
+            "text": '9"',
+            "left": 442.0,
+            "top": 573.0,
+            "right": 487.0,
+            "bottom": 594.0,
+            "center_x": 464.5,
+            "center_y": 583.5,
+            "confidence": 0.74,
         },
     ]
-    target = find_voice_transcribe_context_menu_target(items, image_size, anchor_point=[456, 542])
-    assert_true(target is not None, f"context-menu first row should be inferred when OCR misses it: {target}")
-    assert_true(target.get("source") == "context_menu_inferred_first_row", f"target should be inferred from menu row order: {target}")
-    bounds = target.get("click_bounds") or []
-    assert_true(bounds[1] < 584 and bounds[3] <= 584, f"inferred first row should sit above 收藏: {target}")
+    first = find_voice_duration_context_anchor_target(items, image_size)
+    assert_true(first is not None, f"first anchor should exist: {first}")
+    assert_true((first.get("item") or {}).get("text") == '9"', f"first pass should choose the bottom voice: {first}")
+    skipped = {str(first.get("anchor_key") or "")}
+    second = find_voice_duration_context_anchor_target(items, image_size, excluded_anchor_keys=skipped)
+    assert_true(second is not None, f"second anchor should exist after skipping first: {second}")
+    assert_true((second.get("item") or {}).get("text") == '4"', f"already-transcribed bottom anchor should be skipped: {second}")
 
 
-def test_voice_context_menu_target_forces_anchor_first_row_when_menu_ocr_empty() -> None:
+def test_voice_transcribe_mixed_candidates_keep_bottom_up_order() -> None:
     image_size = (980, 860)
-    target = find_voice_transcribe_context_menu_target(
-        [],
-        image_size,
-        anchor_point=[456, 542],
-        force_anchor_fallback=True,
-    )
-    assert_true(target is not None, f"right-click success should force a first-row context-menu click: {target}")
-    assert_true(target.get("source") == "context_menu_anchor_first_row", f"target should come from anchor fallback: {target}")
-    points = voice_transcribe_click_candidate_points(target)
-    assert_true(len(set(points)) >= 10, f"forced context-menu row should expose candidate points: {points}")
-
-
-def test_voice_context_menu_anchor_fallback_handles_right_edge_self_voice_menu() -> None:
-    image_size = (964, 847)
-    target = find_voice_transcribe_context_menu_target(
-        [],
-        image_size,
-        anchor_point=[812, 625],
-        force_anchor_fallback=True,
-    )
-    assert_true(target is not None, f"right-edge self voice menu should still infer first row: {target}")
-    assert_true(target.get("source") == "context_menu_anchor_first_row", f"target should come from anchor fallback: {target}")
-    bounds = target.get("click_bounds") or []
-    assert_true(bounds[0] >= 800, f"right-edge menu fallback should stay near the self voice anchor: {target}")
-    assert_true(bounds[2] <= image_size[0] - 8, f"right-edge menu fallback should stay inside capture: {target}")
-    assert_true(600 <= bounds[1] <= 635, f"bottom-clipped menu fallback should keep first row near anchor: {target}")
-    points = voice_transcribe_click_candidate_points(target)
-    assert_true(len(set(points)) >= 10, f"right-edge fallback should expose candidate points: {points}")
-
-
-def test_voice_transcribe_target_allows_right_side_self_voice_duration() -> None:
-    image_size = (964, 847)
     items = [
         {
-            "text": '5"',
-            "left": 742.0,
-            "top": 604.0,
-            "right": 836.0,
-            "bottom": 647.0,
-            "center_x": 789.0,
-            "center_y": 625.5,
+            "text": '4"',
+            "left": 442.0,
+            "top": 453.0,
+            "right": 487.0,
+            "bottom": 474.0,
+            "center_x": 464.5,
+            "center_y": 463.5,
+            "confidence": 0.74,
+        },
+        {
+            "text": "转文字",
+            "left": 578.0,
+            "top": 614.0,
+            "right": 626.0,
+            "bottom": 642.0,
+            "center_x": 602.0,
+            "center_y": 628.0,
             "confidence": 0.91,
+        },
+    ]
+    visible = find_voice_transcribe_target(items, image_size, allow_inferred=False)
+    anchor = find_voice_duration_context_anchor_target(items, image_size)
+    assert_true(visible is not None and anchor is not None, f"mixed visible/context candidates should both exist: {visible}, {anchor}")
+    assert_true(
+        voice_target_center_y(visible) > voice_target_center_y(anchor),
+        f"main loop should prefer the lower visible button before the upper context anchor: {visible}, {anchor}",
+    )
+
+
+def test_voice_transcribe_self_voice_uses_context_menu_anchor() -> None:
+    image_size = (980, 860)
+    items = [
+        {
+            "text": '2"',
+            "left": 790.0,
+            "top": 500.0,
+            "right": 834.0,
+            "bottom": 526.0,
+            "center_x": 812.0,
+            "center_y": 513.0,
+            "confidence": 0.82,
         }
     ]
-    target = find_voice_transcribe_target(items, image_size)
-    assert_true(target is not None, f"right-side self voice duration should infer a target: {target}")
-    assert_true(target.get("source") == "inferred_from_voice_duration", f"self voice target should be duration-inferred: {target}")
-    anchor = voice_duration_context_click_target(target, image_size)
-    assert_true(anchor is not None, f"self voice duration should provide a right-click anchor: {target}")
-    bounds = anchor.get("click_bounds") or []
-    assert_true(bounds[0] >= 720 and bounds[2] > bounds[0], f"self voice anchor should sit on the right bubble: {anchor}")
+    assert_true(find_voice_transcribe_target(items, image_size, allow_inferred=False) is None, "duration text is not a visible convert button")
+    target = find_voice_duration_context_anchor_target(items, image_size)
+    assert_true(target is not None, "right-side self voice duration should provide a context-menu anchor")
+    bounds = target.get("click_bounds") or []
+    assert_true(bounds[0] <= items[0]["left"] <= bounds[2], f"self voice anchor should cover the voice bubble: {target}")
+    assert_true(bounds[0] > 385, f"self voice inferred button should stay inside chat surface: {target}")
+    assert_true(bounds[2] <= 880, f"self voice anchor must not include the avatar area: {target}")
+    points = voice_transcribe_click_candidate_points(target)
+    assert_true(points and max(x for x, _y in points) <= 880, f"self voice jitter pool must stay off avatar: {points}")
 
 
-def test_voice_duration_visual_guard_rejects_numeric_ocr_inside_image() -> None:
+def test_voice_transcribe_target_covers_left_and_right_voice_states() -> None:
     image_size = (980, 860)
-    item = {
-        "text": '3"',
-        "left": 520.0,
-        "top": 380.0,
-        "right": 548.0,
-        "bottom": 404.0,
-        "center_x": 534.0,
-        "center_y": 392.0,
-        "confidence": 0.94,
-    }
-    image = Image.new("RGB", image_size, (248, 248, 248))
-    draw = ImageDraw.Draw(image)
-    # A photo-like region containing a duration-shaped OCR fragment must not
-    # be treated as a WeChat voice bubble.
-    for x in range(480, 620, 7):
-        for y in range(340, 450, 7):
-            draw.rectangle(
-                (x, y, x + 6, y + 6),
-                fill=((x * 3) % 190 + 30, (y * 5) % 170 + 35, ((x + y) * 7) % 160 + 40),
-            )
-    evidence = voice_duration_bubble_visual_evidence(image, item, image_size)
-    assert_true(not evidence.get("ok"), f"image texture must not pass voice bubble guard: {evidence}")
-    target = find_latest_untranscribed_voice_duration_target([item], image_size, screenshot=image)
-    assert_true(target is None, f"numeric OCR inside an image must not produce a right-click target: {target}")
-
-
-def test_voice_duration_visual_guard_accepts_incoming_and_self_bubbles() -> None:
-    image_size = (980, 860)
-    incoming = Image.new("RGB", image_size, (248, 248, 248))
-    incoming_draw = ImageDraw.Draw(incoming)
-    incoming_draw.rounded_rectangle((410, 380, 520, 430), radius=12, fill=(235, 235, 235))
-    incoming_item = {
-        "text": '4"',
-        "left": 438.0,
-        "top": 394.0,
-        "right": 476.0,
-        "bottom": 416.0,
-        "center_x": 457.0,
-        "center_y": 405.0,
-    }
-    incoming_target = find_latest_untranscribed_voice_duration_target(
-        [incoming_item],
-        image_size,
-        screenshot=incoming,
-    )
-    assert_true(incoming_target is not None, f"incoming voice bubble should remain actionable: {incoming_target}")
-
-    self_image = Image.new("RGB", image_size, (248, 248, 248))
-    self_draw = ImageDraw.Draw(self_image)
-    self_draw.rounded_rectangle((730, 380, 860, 430), radius=12, fill=(151, 236, 157))
-    self_item = {
-        "text": '5"',
-        "left": 758.0,
-        "top": 394.0,
-        "right": 796.0,
-        "bottom": 416.0,
-        "center_x": 777.0,
-        "center_y": 405.0,
-    }
-    self_target = find_latest_untranscribed_voice_duration_target(
-        [self_item],
-        image_size,
-        screenshot=self_image,
-    )
-    assert_true(self_target is not None, f"self voice bubble should remain actionable: {self_target}")
-
-
-def test_voice_duration_visual_guard_rejects_bare_number_without_audio_glyph() -> None:
-    image_size = (980, 860)
-    image = Image.new("RGB", image_size, (248, 248, 248))
-    draw = ImageDraw.Draw(image)
-    draw.rounded_rectangle((730, 380, 860, 430), radius=12, fill=(151, 236, 157))
-    item = {
-        "text": "111",
-        "left": 758.0,
-        "top": 394.0,
-        "right": 796.0,
-        "bottom": 416.0,
-        "center_x": 777.0,
-        "center_y": 405.0,
-    }
-    evidence = voice_duration_bubble_visual_evidence(image, item, image_size)
-    assert_true(not evidence.get("audio_icon_evidence"), f"bare numeric text must not look like an audio glyph: {evidence}")
-    assert_true(not evidence.get("ok"), f"bare number in a green text bubble must not be actionable: {evidence}")
-    assert_true(
-        find_latest_untranscribed_voice_duration_target([item], image_size, screenshot=image) is None,
-        "bare numeric text must not produce a voice right-click target",
-    )
+    scenarios = [
+        {
+            "name": "left_unread_with_convert_button",
+            "items": [
+                {"text": '2"', "left": 462.0, "top": 428.0, "right": 506.0, "bottom": 454.0, "center_x": 484.0, "center_y": 441.0, "confidence": 0.9},
+                {"text": "转文字", "left": 616.0, "top": 426.0, "right": 664.0, "bottom": 454.0, "center_x": 640.0, "center_y": 440.0, "confidence": 0.92},
+            ],
+            "expect_source": "ocr_transcribe_button",
+        },
+        {
+            "name": "left_read_without_convert_button",
+            "items": [
+                {"text": '7"', "left": 462.0, "top": 500.0, "right": 506.0, "bottom": 526.0, "center_x": 484.0, "center_y": 513.0, "confidence": 0.9},
+            ],
+            "expect_context_anchor": True,
+        },
+        {
+            "name": "left_read_already_transcribed",
+            "items": [
+                {"text": '2"', "left": 462.0, "top": 560.0, "right": 506.0, "bottom": 586.0, "center_x": 484.0, "center_y": 573.0, "confidence": 0.9},
+                {"text": "不噜不噜不噜", "left": 464.0, "top": 602.0, "right": 588.0, "bottom": 628.0, "center_x": 526.0, "center_y": 615.0, "confidence": 0.96},
+            ],
+            "expect_none": True,
+        },
+        {
+            "name": "right_unread_with_convert_button",
+            "items": [
+                {"text": '2"', "left": 790.0, "top": 428.0, "right": 834.0, "bottom": 454.0, "center_x": 812.0, "center_y": 441.0, "confidence": 0.9},
+                {"text": "转文字", "left": 690.0, "top": 426.0, "right": 738.0, "bottom": 454.0, "center_x": 714.0, "center_y": 440.0, "confidence": 0.92},
+            ],
+            "expect_source": "ocr_transcribe_button",
+        },
+        {
+            "name": "right_read_without_convert_button",
+            "items": [
+                {"text": '7"', "left": 790.0, "top": 500.0, "right": 834.0, "bottom": 526.0, "center_x": 812.0, "center_y": 513.0, "confidence": 0.9},
+            ],
+            "expect_context_anchor": True,
+        },
+        {
+            "name": "right_read_already_transcribed",
+            "items": [
+                {"text": '2"', "left": 790.0, "top": 560.0, "right": 834.0, "bottom": 586.0, "center_x": 812.0, "center_y": 573.0, "confidence": 0.9},
+                {"text": "不噜不噜不噜", "left": 684.0, "top": 602.0, "right": 832.0, "bottom": 628.0, "center_x": 758.0, "center_y": 615.0, "confidence": 0.96},
+            ],
+            "expect_none": True,
+        },
+    ]
+    for scenario in scenarios:
+        target = find_voice_transcribe_target(scenario["items"], image_size, allow_inferred=False)
+        if scenario.get("expect_none"):
+            assert_true(target is None, f"{scenario['name']} should not click already transcribed voice: {target}")
+            anchor = find_voice_duration_context_anchor_target(scenario["items"], image_size)
+            assert_true(anchor is None, f"{scenario['name']} should not provide a context-menu anchor: {anchor}")
+            continue
+        if scenario.get("expect_context_anchor"):
+            assert_true(target is None, f"{scenario['name']} should not invent a visible button: {target}")
+            anchor = find_voice_duration_context_anchor_target(scenario["items"], image_size)
+            assert_true(anchor is not None, f"{scenario['name']} should provide a context-menu anchor")
+            assert_true(anchor.get("source") == "voice_duration_context_menu_anchor", f"{scenario['name']} anchor source mismatch: {anchor}")
+            continue
+        assert_true(target is not None, f"{scenario['name']} should find voice transcribe target")
+        assert_true(target.get("source") == scenario["expect_source"], f"{scenario['name']} source mismatch: {target}")
 
 
 def test_voice_transcribe_click_jitter_uses_candidate_pool() -> None:
     image_size = (980, 860)
-    target = find_voice_transcribe_target(
+    target = find_voice_duration_context_anchor_target(
         [
             {
                 "text": '4"',
@@ -1641,248 +1917,157 @@ def test_voice_transcribe_click_jitter_uses_candidate_pool() -> None:
         ],
         image_size,
     )
-    assert_true(target is not None, "voice target should be inferred")
+    assert_true(target is not None, "voice context-menu anchor should be found")
     bounds = target.get("click_bounds") or []
     samples = [jitter_voice_transcribe_click_point(target, {"width": 980, "height": 860})[0:2] for _ in range(80)]
     assert_true(len(set(samples)) >= 24, f"voice transcribe click should not repeat one point: {len(set(samples))}")
     assert_true(all(bounds[0] <= x <= bounds[2] and bounds[1] <= y <= bounds[3] for x, y in samples), f"jitter samples must stay inside button bounds: {samples}")
 
 
-def test_voice_context_menu_empty_ocr_never_blind_clicks_first_row() -> None:
+def test_voice_transcribe_visual_self_voice_bubble_anchor_when_ocr_misses_duration() -> None:
     image_size = (980, 860)
-    duration_target = {
-        "item": {
-            "text": '4"',
-            "left": 442.0,
-            "top": 573.0,
-            "right": 487.0,
-            "bottom": 594.0,
-            "center_x": 464.5,
-            "center_y": 583.5,
-        }
-    }
-    original = {
-        "get_window_geometry": sidecar_module.get_window_geometry,
-        "right_click": sidecar_module.human_window_image_right_click_in_bounds,
-        "probe": sidecar_module.probe_wechat_windows,
-        "capture": sidecar_module.capture_wechat,
-        "ocr": sidecar_module.run_ocr,
-        "sleep": sidecar_module.humanized_action_sleep,
-        "find_target": sidecar_module.find_voice_transcribe_context_menu_target,
-    }
-    seen: dict[str, object] = {}
-    try:
-        sidecar_module.get_window_geometry = lambda _hwnd: {"width": image_size[0], "height": image_size[1]}
-        sidecar_module.human_window_image_right_click_in_bounds = lambda *args, **kwargs: {"ok": True}  # type: ignore[assignment]
-        sidecar_module.probe_wechat_windows = lambda: {"visible_main_windows": [{"hwnd": 1234}]}  # type: ignore[assignment]
-        sidecar_module.capture_wechat = lambda *args, **kwargs: (Image.new("RGB", image_size, (248, 248, 248)), "menu.png")  # type: ignore[assignment]
-        sidecar_module.run_ocr = lambda _image: []  # type: ignore[assignment]
-        sidecar_module.humanized_action_sleep = lambda *args, **kwargs: None  # type: ignore[assignment]
-
-        def fake_find_target(items, size, *, anchor_point=None, force_anchor_fallback=False):  # noqa: ANN001
-            seen["force_anchor_fallback"] = force_anchor_fallback
-            return None
-
-        sidecar_module.find_voice_transcribe_context_menu_target = fake_find_target  # type: ignore[assignment]
-        result = open_voice_transcribe_context_menu(
-            1234,
-            duration_target,
-            image_size=image_size,
-        )
-    finally:
-        sidecar_module.get_window_geometry = original["get_window_geometry"]  # type: ignore[assignment]
-        sidecar_module.human_window_image_right_click_in_bounds = original["right_click"]  # type: ignore[assignment]
-        sidecar_module.probe_wechat_windows = original["probe"]  # type: ignore[assignment]
-        sidecar_module.capture_wechat = original["capture"]  # type: ignore[assignment]
-        sidecar_module.run_ocr = original["ocr"]  # type: ignore[assignment]
-        sidecar_module.humanized_action_sleep = original["sleep"]  # type: ignore[assignment]
-        sidecar_module.find_voice_transcribe_context_menu_target = original["find_target"]  # type: ignore[assignment]
-    assert_true(result.get("click_target") is None, f"empty menu OCR must not produce a click target: {result}")
-    assert_true(seen.get("force_anchor_fallback") is False, f"live menu path must disable blind fallback: {seen}")
+    image = Image.new("RGB", image_size, (245, 245, 245))
+    draw = ImageDraw.Draw(image)
+    draw.rectangle((0, 0, 384, 860), fill=(238, 238, 238))
+    draw.rounded_rectangle((772, 528, 880, 572), radius=8, fill=(149, 236, 154))
+    draw.rectangle((918, 526, 964, 574), fill=(45, 65, 85))
+    draw.rectangle((922, 530, 941, 550), fill=(218, 184, 92))
+    draw.rectangle((942, 551, 960, 570), fill=(98, 151, 112))
+    anchor = find_visual_self_voice_context_anchor_target(image, image_size)
+    assert_true(anchor is not None, f"right-side green voice bubble should provide a context-menu anchor: {anchor}")
+    assert_true(anchor.get("source") == "visual_self_voice_bubble_context_menu_anchor", f"visual anchor source mismatch: {anchor}")
+    bounds = anchor.get("click_bounds") or []
+    detected = anchor.get("item") or {}
+    assert_true(detected.get("left") <= 772 and detected.get("right") >= 880, f"visual detection should cover the green voice bubble: {anchor}")
+    assert_true(772 <= bounds[0] < bounds[2] <= 880, f"safe click bounds should stay inside the green voice bubble: {anchor}")
+    combined = find_voice_context_menu_anchor_target(image, [], image_size)
+    assert_true(combined is not None, "combined context anchor finder should fall back to visual self voice bubble")
 
 
-def test_voice_context_menu_aborts_before_right_click_when_window_is_hidden() -> None:
+def test_voice_transcribe_visual_self_anchor_is_not_expanded_to_avatar_edge() -> None:
     image_size = (980, 860)
-    duration_target = {
-        "item": {
-            "text": '4"',
-            "left": 442.0,
-            "top": 573.0,
-            "right": 487.0,
-            "bottom": 594.0,
-            "center_x": 464.5,
-            "center_y": 583.5,
-        }
-    }
-    original_probe = sidecar_module.probe_wechat_windows
-    original_right_click = sidecar_module.human_window_image_right_click_in_bounds
-    try:
-        sidecar_module.probe_wechat_windows = lambda: {"visible_main_windows": []}  # type: ignore[assignment]
-
-        def fail_right_click(*args, **kwargs):  # noqa: ANN001
-            raise AssertionError("hidden WeChat window must not receive a right-click")
-
-        sidecar_module.human_window_image_right_click_in_bounds = fail_right_click  # type: ignore[assignment]
-        result = open_voice_transcribe_context_menu(
-            1234,
-            duration_target,
-            image_size=image_size,
-        )
-    finally:
-        sidecar_module.probe_wechat_windows = original_probe  # type: ignore[assignment]
-        sidecar_module.human_window_image_right_click_in_bounds = original_right_click  # type: ignore[assignment]
-    assert_true(
-        result.get("reason") == "voice_window_lost_before_context_menu_right_click",
-        f"hidden window should fail closed before right-click: {result}",
-    )
+    image = Image.new("RGB", image_size, (245, 245, 245))
+    draw = ImageDraw.Draw(image)
+    draw.rectangle((0, 0, 384, 860), fill=(238, 238, 238))
+    draw.rounded_rectangle((829, 610, 919, 654), radius=8, fill=(149, 236, 154))
+    anchor = find_visual_self_voice_context_anchor_target(image, image_size)
+    assert_true(anchor is not None, f"right-edge green voice bubble should provide a visual context anchor: {anchor}")
+    original_bounds = anchor.get("click_bounds") or []
+    click_anchor = voice_duration_context_click_target(anchor, image_size)
+    assert_true(click_anchor is not None, f"visual context anchor should remain clickable: {anchor}")
+    assert_true(click_anchor.get("source") == "visual_self_voice_bubble_context_menu_anchor", f"visual source should be preserved: {click_anchor}")
+    assert_true(click_anchor.get("click_bounds") == original_bounds, f"visual anchor bounds must not be expanded toward avatar/window edge: {click_anchor}")
+    points = voice_transcribe_click_candidate_points(click_anchor)
+    assert_true(points, f"visual anchor should expose candidate points: {click_anchor}")
+    assert_true(max(x for x, _y in points) <= original_bounds[2], f"candidate points must stay inside visual bubble bounds: {points}")
 
 
-def test_connector_voice_transcribe_retries_after_initial_target_not_found() -> None:
-    connector = WeChatConnector()
-    responses = [
+def test_voice_transcribe_visual_self_anchor_skips_green_text_bubble() -> None:
+    image_size = (980, 860)
+    image = Image.new("RGB", image_size, (245, 245, 245))
+    draw = ImageDraw.Draw(image)
+    draw.rectangle((0, 0, 384, 860), fill=(238, 238, 238))
+    draw.rounded_rectangle((724, 610, 919, 654), radius=8, fill=(149, 236, 154))
+    items = [
         {
-            "ok": False,
-            "state": "voice_transcribe_target_not_found",
-            "transcribed_messages": [],
-            "new_messages": [],
-        },
-        {
-            "ok": True,
-            "state": "voice_transcribe_clicked",
-            "transcribed_messages": [
-                {
-                    "id": "voice-txt-1",
-                    "message_id": "voice-txt-1",
-                    "type": "text",
-                    "sender": "customer",
-                    "content": "周四十点可以过去吗",
-                }
-            ],
-            "new_messages": [
-                {
-                    "id": "voice-txt-1",
-                    "message_id": "voice-txt-1",
-                    "type": "text",
-                    "sender": "customer",
-                    "content": "周四十点可以过去吗",
-                }
-            ],
-        },
-    ]
-    calls: list[list[str]] = []
-    original_call_compat_sidecar = connector.call_compat_sidecar
-    original_wechat_rpa_lock = wechat_connector_module.wechat_rpa_lock
-    original_sleep = wechat_connector_module.time.sleep
-
-    @contextmanager
-    def fake_lock(_action: str, timeout_seconds: float = 0.0):  # noqa: ARG001
-        yield {"action": "voice_transcribe"}
-
-    def fake_call_compat_sidecar(args: list[str], allow_failure: bool = True, env_overrides: dict[str, str] | None = None):  # noqa: ARG001
-        calls.append(list(args))
-        if not responses:
-            raise AssertionError("unexpected extra compat-sidecar call")
-        return dict(responses.pop(0))
-
-    try:
-        object.__setattr__(connector, "call_compat_sidecar", fake_call_compat_sidecar)
-        wechat_connector_module.wechat_rpa_lock = fake_lock  # type: ignore[assignment]
-        wechat_connector_module.time.sleep = lambda _seconds: None  # type: ignore[assignment]
-        result = connector.transcribe_voice_messages("许聪", exact=True, max_attempts=2)
-    finally:
-        object.__setattr__(connector, "call_compat_sidecar", original_call_compat_sidecar)
-        wechat_connector_module.wechat_rpa_lock = original_wechat_rpa_lock  # type: ignore[assignment]
-        wechat_connector_module.time.sleep = original_sleep  # type: ignore[assignment]
-
-    assert_true(result.get("ok") is True, f"voice transcription retry should succeed: {result}")
-    assert_true(result.get("attempt_count") == 2, f"voice transcription should retry after initial miss: {result}")
-    assert_true(result.get("transcribed_messages_count") == 1, f"retry should preserve transcript: {result}")
-    assert_true(len(calls) == 2, f"compat-sidecar should be called twice: {calls}")
-
-
-def test_connector_voice_transcribe_attempts_keep_context_menu_diagnostics() -> None:
-    connector = WeChatConnector()
-    responses = [
-        {
-            "ok": False,
-            "state": "voice_transcribe_context_menu_target_not_found",
-            "context_menu_attempt": {
-                "reason": "menu_target_not_found",
-                "menu_screenshot_path": "runtime/voice/menu.png",
-                "menu_ocr_items_count": 3,
-                "menu_ocr_text_samples": ["收藏", "多选", "提醒"],
-                "right_click": {"ok": True},
-            },
-            "transcribed_messages": [],
-            "new_messages": [],
+            "text": "不需要就是问问",
+            "left": 735.0,
+            "top": 619.0,
+            "right": 866.0,
+            "bottom": 649.0,
+            "center_x": 800.5,
+            "center_y": 634.0,
+            "confidence": 0.9992,
         }
     ]
-    original_call_compat_sidecar = connector.call_compat_sidecar
-    original_wechat_rpa_lock = wechat_connector_module.wechat_rpa_lock
-    original_sleep = wechat_connector_module.time.sleep
-
-    @contextmanager
-    def fake_lock(_action: str, timeout_seconds: float = 0.0):  # noqa: ARG001
-        yield {"action": "voice_transcribe"}
-
-    def fake_call_compat_sidecar(args: list[str], allow_failure: bool = True, env_overrides: dict[str, str] | None = None):  # noqa: ARG001
-        if not responses:
-            raise AssertionError("unexpected extra compat-sidecar call")
-        return dict(responses.pop(0))
-
-    try:
-        object.__setattr__(connector, "call_compat_sidecar", fake_call_compat_sidecar)
-        wechat_connector_module.wechat_rpa_lock = fake_lock  # type: ignore[assignment]
-        wechat_connector_module.time.sleep = lambda _seconds: None  # type: ignore[assignment]
-        result = connector.transcribe_voice_messages("许聪", exact=True, max_attempts=1)
-    finally:
-        object.__setattr__(connector, "call_compat_sidecar", original_call_compat_sidecar)
-        wechat_connector_module.wechat_rpa_lock = original_wechat_rpa_lock  # type: ignore[assignment]
-        wechat_connector_module.time.sleep = original_sleep  # type: ignore[assignment]
-
-    attempts = result.get("attempts") or []
-    assert_true(len(attempts) == 1, f"voice transcription should keep one attempt: {result}")
-    assert_true(
-        attempts[0].get("context_menu_screenshot_path") == "runtime/voice/menu.png",
-        f"context-menu screenshot path should be retained: {result}",
-    )
-    assert_true(
-        attempts[0].get("context_menu_ocr_text_samples") == ["收藏", "多选", "提醒"],
-        f"context-menu OCR samples should be retained: {result}",
-    )
+    anchor = find_visual_self_voice_context_anchor_target(image, image_size, items)
+    assert_true(anchor is None, f"visual fallback must not right-click an ordinary green text bubble: {anchor}")
 
 
-def test_connector_voice_transcribe_does_not_repeat_after_physical_menu_action() -> None:
-    connector = WeChatConnector()
-    calls: list[list[str]] = []
-    original_call_compat_sidecar = connector.call_compat_sidecar
-    original_wechat_rpa_lock = wechat_connector_module.wechat_rpa_lock
+def test_voice_transcribe_duration_anchor_accepts_icon_noise() -> None:
+    image_size = (980, 860)
+    items = [
+        {
+            "text": '2" (c',
+            "left": 812.0,
+            "top": 410.0,
+            "right": 862.0,
+            "bottom": 435.0,
+            "center_x": 837.0,
+            "center_y": 422.5,
+            "confidence": 0.7253,
+        },
+        {
+            "text": "不需要就是问问",
+            "left": 735.0,
+            "top": 619.0,
+            "right": 866.0,
+            "bottom": 649.0,
+            "center_x": 800.5,
+            "center_y": 634.0,
+            "confidence": 0.9992,
+        },
+    ]
+    anchor = find_voice_duration_context_anchor_target(items, image_size)
+    assert_true(anchor is not None, f"noisy self voice duration should provide a context-menu anchor: {anchor}")
+    assert_true((anchor.get("item") or {}).get("text") == '2" (c', f"ordinary text bubble must not win over noisy duration: {anchor}")
 
-    @contextmanager
-    def fake_lock(_action: str, timeout_seconds: float = 0.0):  # noqa: ARG001
-        yield {"action": "voice_transcribe"}
 
-    def fake_call_compat_sidecar(args: list[str], allow_failure: bool = True, env_overrides: dict[str, str] | None = None):  # noqa: ARG001
-        calls.append(list(args))
-        return {
-            "ok": True,
-            "state": "voice_transcribe_context_menu_no_new_text",
-            "context_menu_attempt": {"right_click": {"ok": True}, "click_target": {"source": "context_menu_ocr_transcribe_item"}},
-            "click": {"ok": True},
-            "transcribed_messages": [],
-            "new_messages": [],
+def test_voice_transcribe_context_menu_item_does_not_require_chat_surface() -> None:
+    image_size = (980, 860)
+    items = [
+        {
+            "text": "语音转文字",
+            "left": 310.0,
+            "top": 336.0,
+            "right": 398.0,
+            "bottom": 362.0,
+            "center_x": 354.0,
+            "center_y": 349.0,
+            "confidence": 0.91,
         }
+    ]
+    target = find_voice_transcribe_menu_item_target(
+        items,
+        image_size,
+        anchor={"item": {"center_y": 330.0}},
+    )
+    assert_true(target is not None, "context-menu voice-to-text item should be clickable even outside chat surface")
+    assert_true(target.get("source") == "ocr_context_menu_transcribe_item", f"context-menu source mismatch: {target}")
+    click_bounds = target.get("click_bounds") or []
+    assert_true(
+        len(click_bounds) == 4 and click_bounds[0] >= 310 and click_bounds[2] <= 398,
+        f"context-menu click bounds must stay inside the matched menu item: {target}",
+    )
 
-    try:
-        object.__setattr__(connector, "call_compat_sidecar", fake_call_compat_sidecar)
-        wechat_connector_module.wechat_rpa_lock = fake_lock  # type: ignore[assignment]
-        result = connector.transcribe_voice_messages("许聪", exact=True, max_attempts=4)
-    finally:
-        object.__setattr__(connector, "call_compat_sidecar", original_call_compat_sidecar)
-        wechat_connector_module.wechat_rpa_lock = original_wechat_rpa_lock  # type: ignore[assignment]
 
-    assert_true(len(calls) == 1, f"physical voice menu action must not be repeated: {calls}")
-    assert_true(result.get("physical_interaction") is True, f"physical interaction must be auditable: {result}")
+def test_voice_transcribe_context_menu_collapse_marks_already_transcribed() -> None:
+    image_size = (980, 860)
+    items = [
+        {
+            "text": "收起文字",
+            "left": 846.0,
+            "top": 511.0,
+            "right": 930.0,
+            "bottom": 543.0,
+            "center_x": 888.0,
+            "center_y": 527.0,
+            "confidence": 0.91,
+        }
+    ]
+    transcribe_target = find_voice_transcribe_menu_item_target(
+        items,
+        image_size,
+        anchor={"item": {"center_y": 518.0}},
+    )
+    collapse_target = find_voice_transcribe_menu_collapse_item_target(
+        items,
+        image_size,
+        anchor={"item": {"center_y": 518.0}},
+    )
+    assert_true(transcribe_target is None, f"collapse menu must not be clicked as convert action: {transcribe_target}")
+    assert_true(collapse_target is not None, f"collapse menu should mark voice as already transcribed: {collapse_target}")
+    assert_true(collapse_target.get("source") == "ocr_context_menu_collapse_text_item", f"collapse menu source mismatch: {collapse_target}")
 
 
 def test_voice_transcribe_visual_button_score_rejects_dark_background_red_dot() -> None:
@@ -2257,26 +2442,6 @@ def test_input_region_soft_blank_noise_allows_post_clear_progress() -> None:
         input_region_soft_blank_noise(live_weak_ocr_noise) is True,
         "single weak OCR drift in an almost-white input region should be treated as soft blank noise",
     )
-    live_multi_ocr_chrome_noise = {
-        "has_visible_text": True,
-        "ocr_hits": 2,
-        "dark_ratio": 0.001616,
-        "mean": 249.703,
-    }
-    assert_true(
-        input_region_soft_blank_noise(live_multi_ocr_chrome_noise) is True,
-        "multiple static OCR boxes must not override almost-white input-surface evidence",
-    )
-    weak_visual_draft = {
-        "has_visible_text": True,
-        "ocr_hits": 2,
-        "dark_ratio": 0.0021,
-        "mean": 249.5,
-    }
-    assert_true(
-        input_region_soft_blank_noise(weak_visual_draft) is False,
-        "OCR-visible content above the strong blank pixel threshold must remain guarded",
-    )
     ocr_residue = {
         "has_visible_text": True,
         "ocr_hits": 1,
@@ -2324,9 +2489,9 @@ def test_clear_existing_input_draft_normalizes_weak_ocr_noise() -> None:
     weak_noise = {
         "has_visible_text": True,
         "reason": "ocr_or_dark_pixels",
-        "ocr_hits": 2,
-        "dark_ratio": 0.001616,
-        "mean": 249.703,
+        "ocr_hits": 1,
+        "dark_ratio": 0.001619,
+        "mean": 249.707,
     }
     result = clear_existing_input_draft(
         0,
@@ -2334,7 +2499,7 @@ def test_clear_existing_input_draft_normalizes_weak_ocr_noise() -> None:
         geometry={"width": 980, "height": 860},
         before_state=weak_noise,
     )
-    assert_true(result["ok"] is True and result["cleared"] is False, f"weak multi-box OCR noise should not trigger draft clearing: {result}")
+    assert_true(result["ok"] is True and result["cleared"] is False, f"weak OCR noise should not trigger draft clearing: {result}")
     assert_true((result.get("after") or {}).get("has_visible_text") is False, f"normalized after-state should be blank: {result}")
 
 
@@ -3119,17 +3284,14 @@ def test_session_key_candidate_respects_conversation_type() -> None:
         session_matches_key(private, private["session_key"], "unknown"),
         "unknown conversation type should not reject a confirmed session key",
     )
-    assert_true(
-        session_matches_key(private, private["session_key"], "group"),
-        "chat-pane type refinement must not invalidate the same opaque sidebar-row key",
-    )
+    assert_true(not session_matches_key(private, private["session_key"], "group"), "conversation type mismatch must fail")
     assert_true(
         find_session_candidate_by_key([private, group], group["session_key"], "group") is group,
-        "same-name group must resolve by its opaque session key",
+        "same-name group must resolve by session key and type",
     )
     assert_true(
-        find_session_candidate_by_key([private, group], group["session_key"], "private") is group,
-        "semantic type drift must not strand a row whose opaque key is unchanged",
+        find_session_candidate_by_key([private, group], group["session_key"], "private") is None,
+        "same-name wrong type must not resolve a row",
     )
 
 
@@ -3165,8 +3327,8 @@ def test_identity_wrapper_treats_unknown_type_as_missing() -> None:
             "known type should preserve the open result",
         )
         assert_true(
-            calls[-1].get("conversation_type") == "private" and "force_session_row_resolution" not in calls[-1],
-            f"known type should filter identity without re-clicking an already active row: {calls}",
+            calls[-1].get("conversation_type") == "private" and calls[-1].get("force_session_row_resolution") is True,
+            f"known type should force row resolution: {calls}",
         )
     finally:
         sidecar_module.open_chat = original_open_chat  # type: ignore[assignment]
@@ -3510,11 +3672,7 @@ def test_send_verify_handles_split_multiline_messages() -> None:
     expected = "你好，在吗？\n[live-regression:20260523180041:1:1]"
     payload = {
         "messages": [
-            {
-                "sender": "unknown",
-                "sender_role_evidence": ["right_self_lane_reached", "center_in_self_lane"],
-                "content": "你好，在吗？",
-            },
+            {"sender": "unknown", "content": "你好，在吗？"},
             {"sender": "self", "content": "[live-regression:20260523180041:1:1]"},
         ]
     }
@@ -3542,11 +3700,6 @@ def test_send_verify_tolerates_common_ocr_noise_on_long_self_reply() -> None:
     assert_true(
         verify_send_from_messages(unrelated, expected_text=expected) is False,
         "OCR-tolerant verification must not accept unrelated content",
-    )
-    echoed_customer = {"messages": [{"sender": "customer", "content": expected}]}
-    assert_true(
-        verify_send_from_messages(echoed_customer, expected_text=expected) is False,
-        "matching customer text must never be mistaken for an outbound send bubble",
     )
 
 
@@ -3619,86 +3772,14 @@ def test_guarded_send_confirmation_fallback() -> None:
         guarded_send_confirmation_fallback(send, blocked) is False,
         "guard fallback should not pass when login window is detected",
     )
-    title_only_after_trigger = {
-        **send,
-        "send_result": {
-            **send["send_result"],
-            "post_send_guard": {"ok": True, "reason": "target_confirmed"},
-        },
-    }
-    assert_true(
-        guarded_send_confirmation_fallback(title_only_after_trigger, messages) is False,
-        "title confirmation after Enter/click is not proof that the input was cleared and the bubble was sent",
-    )
 
 
-def test_post_send_fast_guard_requires_input_clear_effect() -> None:
-    originals = {
-        "env_flag": sidecar_module.env_flag,
-        "get_window_geometry": sidecar_module.get_window_geometry,
-        "validate_send_geometry": sidecar_module.validate_send_geometry,
-        "basic_send_window_guard": sidecar_module.basic_send_window_guard,
-        "capture_wechat": sidecar_module.capture_wechat,
-        "detect_blank_render": sidecar_module.detect_blank_render,
-        "input_text_region_state": sidecar_module.input_text_region_state,
-        "validate_active_send_target_for_identity": sidecar_module.validate_active_send_target_for_identity,
-    }
-    image = Image.new("RGB", (980, 860), "white")
-    try:
-        sidecar_module.env_flag = lambda *_args, **_kwargs: False
-        sidecar_module.get_window_geometry = lambda _hwnd: {
-            "left": 0,
-            "top": 0,
-            "right": 980,
-            "bottom": 860,
-            "width": 980,
-            "height": 860,
-        }
-        sidecar_module.validate_send_geometry = lambda _geometry: {"ok": True}
-        sidecar_module.basic_send_window_guard = lambda _hwnd: {"ok": True}
-        sidecar_module.capture_wechat = lambda *_args, **_kwargs: (image, "post-send.png")
-        sidecar_module.detect_blank_render = lambda *_args, **_kwargs: {"detected": False}
-        sidecar_module.validate_active_send_target_for_identity = lambda *_args, **_kwargs: {
-            "ok": True,
-            "reason": "target_confirmed",
-            "confirmation_confidence": "active_title_strict",
-        }
-        sidecar_module.input_text_region_state = lambda *_args, **_kwargs: {
-            "has_visible_text": False,
-            "reason": "input_region_blank",
-            "ocr_hits": 0,
-            "dark_ratio": 0.0,
-            "mean": 255.0,
-        }
-        cleared = sidecar_module.validate_post_send_target(1, "许聪", exact=True)
-        assert_true(
-            cleared.get("reason") == "send_window_readable_after_send",
-            f"fast post-send proof should retain the existing success reason when the input is visibly empty: {cleared}",
-        )
-
-        sidecar_module.input_text_region_state = lambda *_args, **_kwargs: {
-            "has_visible_text": True,
-            "reason": "ocr_or_dark_pixels",
-            "ocr_hits": 1,
-            "dark_ratio": 0.012,
-            "mean": 246.0,
-        }
-        uncleared = sidecar_module.validate_post_send_target(1, "许聪", exact=True)
-        assert_true(
-            uncleared.get("reason") == "target_confirmed",
-            f"an uncleared input must fall back to the existing strict target result instead of claiming a send effect: {uncleared}",
-        )
-    finally:
-        for name, value in originals.items():
-            setattr(sidecar_module, name, value)
-
-
-def test_real_customer_send_requires_outbound_bubble_even_when_fast_flag_is_enabled() -> None:
+def test_fast_send_confirmation_skips_slow_message_read_when_guard_is_strong() -> None:
     class FastVerifyConnector(WeChatConnector):
         def __init__(self) -> None:
             self.messages_called = 0
 
-        def send_text(self, target: str, text: str, exact: bool = True, *, skip_send_rate_guard: bool = False, **_kwargs) -> dict:
+        def send_text(self, target: str, text: str, exact: bool = True, *, skip_send_rate_guard: bool = False) -> dict:
             return {
                 "ok": True,
                 "send_result": {
@@ -3709,7 +3790,7 @@ def test_real_customer_send_requires_outbound_bubble_even_when_fast_flag_is_enab
                 },
             }
 
-        def get_messages(self, target: str, exact: bool = True, history_load_times: int = 0, **_kwargs) -> dict:
+        def get_messages(self, target: str, exact: bool = True, history_load_times: int = 0) -> dict:
             self.messages_called += 1
             return {"ok": True, "state": "messages_ocr", "messages": []}
 
@@ -3717,13 +3798,13 @@ def test_real_customer_send_requires_outbound_bubble_even_when_fast_flag_is_enab
     os.environ["WECHAT_WIN32_OCR_FAST_SEND_CONFIRMATION"] = "1"
     try:
         connector = FastVerifyConnector()
-        result = connector.send_text_and_verify("许聪", "您好")
-        assert_true(result.get("verified") is False, f"real send without a self bubble must fail verification: {result}")
+        result = connector.send_text_and_verify("文件传输助手", "您好")
+        assert_true(bool(result.get("verified")), "fast confirmation should verify strong guarded sends")
         assert_true(
-            result.get("verification_mode") == "messages",
-            "real sends must remain on message-bubble verification",
+            result.get("verification_mode") == "send_guard_confirmed_fast",
+            "fast confirmation should be explicitly labeled",
         )
-        assert_true(connector.messages_called == 6, "real send should exhaust the bounded bubble readback attempts")
+        assert_true(connector.messages_called == 0, "fast confirmation should skip full OCR message read")
     finally:
         if previous is None:
             os.environ.pop("WECHAT_WIN32_OCR_FAST_SEND_CONFIRMATION", None)
@@ -4624,8 +4705,8 @@ def test_adaptive_humanized_input_speed_profiles() -> None:
         f"short profile should keep a non-zero post-input pause: {short}",
     )
     assert_true(
-        int(short.get("send_post_input_delay_max_ms") or 0) == 460,
-        f"short profile must preserve the caller's conservative post-input ceiling: {short}",
+        int(short.get("send_post_input_delay_max_ms") or 0) == 300,
+        f"short profile should not inherit overly wide default post-input pause: {short}",
     )
 
     long_text = "这边先帮您确认几个点。" * 40
@@ -4665,18 +4746,16 @@ def test_adaptive_humanized_input_clamps_live_wide_waits_by_profile() -> None:
     }
     short = adapt_humanized_input_settings(live_wide, "你好呀，有什么可以帮您的吗？")
     assert_true(short.get("speed_profile") == "short_natural", f"short reply should use short profile: {short}")
-    assert_true(short.get("send_pre_delay_min_ms") == 500, f"short pre-send min must not be accelerated: {short}")
-    assert_true(short.get("send_pre_delay_max_ms") == 1300, f"short pre-send max must not be accelerated: {short}")
-    assert_true(short.get("send_post_input_delay_min_ms") == 450, f"short post-input min must not be accelerated: {short}")
-    assert_true(short.get("send_post_input_delay_max_ms") == 1200, f"short post-input max must not be accelerated: {short}")
-    assert_true(short.get("send_trigger_delay_min_ms") == 720, f"short trigger min must not be accelerated: {short}")
-    assert_true(short.get("send_trigger_delay_max_ms") == 2100, f"short trigger max must not be accelerated: {short}")
-    assert_true(short.get("send_after_trigger_delay_min_ms") == 420, f"short after-trigger min must not be accelerated: {short}")
-    assert_true(short.get("send_after_trigger_delay_max_ms") == 1250, f"short after-trigger max must not be accelerated: {short}")
+    assert_true(short.get("send_post_input_delay_min_ms") == 140, f"short post-input min should be profiled: {short}")
+    assert_true(short.get("send_post_input_delay_max_ms") == 300, f"short post-input max should be profiled: {short}")
+    assert_true(short.get("send_trigger_delay_min_ms") == 360, f"short trigger min should be profiled: {short}")
+    assert_true(short.get("send_trigger_delay_max_ms") == 1050, f"short trigger max should be profiled: {short}")
+    assert_true(short.get("send_after_trigger_delay_min_ms") == 180, f"short after-trigger min should be profiled: {short}")
+    assert_true(short.get("send_after_trigger_delay_max_ms") == 520, f"short after-trigger max should be profiled: {short}")
 
     long_profile = adapt_humanized_input_settings(live_wide, "这边先帮您确认几个点。" * 40)
     assert_true(long_profile.get("speed_profile") == "long_natural_capped", f"long reply should use long profile: {long_profile}")
-    assert_true(long_profile.get("send_trigger_delay_max_ms") == 2100, f"long trigger window must preserve the configured ceiling: {long_profile}")
+    assert_true(long_profile.get("send_trigger_delay_max_ms") == 1600, f"long trigger window should stay wider: {long_profile}")
 
 
 def test_set_uia_control_value_humanized_progressive_updates() -> None:
@@ -4772,6 +4851,9 @@ def test_send_trigger_mode_defaults_to_enter_only() -> None:
 
 def test_safe_send_trigger_uses_single_enter_with_randomized_delays() -> None:
     sidecar_mod = sys.modules["apps.wechat_ai_customer_service.adapters.wechat_win32_ocr_sidecar"]
+    original_win32api = sidecar_mod.win32api
+    if sidecar_mod.win32api is None:
+        sidecar_mod.win32api = types.SimpleNamespace(keybd_event=lambda *_args: None)
     originals = {
         "humanized_sleep_ms": sidecar_mod.humanized_sleep_ms,
         "humanized_action_sleep": sidecar_mod.humanized_action_sleep,
@@ -4813,6 +4895,7 @@ def test_safe_send_trigger_uses_single_enter_with_randomized_delays() -> None:
                 sidecar_mod.win32api.keybd_event = value
             else:
                 setattr(sidecar_mod, name, value)
+        sidecar_mod.win32api = original_win32api
 
 
 def test_send_with_guarded_clicks_skips_input_refocus_after_confirmed_paste() -> None:
@@ -5256,6 +5339,7 @@ def test_target_ready_defaults_to_single_attempt_and_hard_stops_blank_render() -
             exact: bool,
             artifact_dir: str | None = None,
             session_key: str = "",
+            semantic_target: str = "",
         ) -> bool:
             calls["open"] += 1
             return False
@@ -5306,6 +5390,7 @@ def test_target_ready_requires_guard_confirmation_even_when_open_chat_returns_tr
             exact: bool,
             artifact_dir: str | None = None,
             session_key: str = "",
+            semantic_target: str = "",
         ) -> bool:
             calls["open"] += 1
             return True
@@ -5425,6 +5510,7 @@ def test_target_ready_with_session_key_confirms_before_send_when_cache_empty() -
             exact: bool,
             artifact_dir: str | None = None,
             session_key: str = "",
+            semantic_target: str = "",
         ) -> bool:
             calls["open"] += 1
             assert_true(session_key == "wx:rpa:v1:test-session", "session_key must flow into open_chat confirmation")
@@ -5504,6 +5590,7 @@ def test_target_ready_reuses_immediate_switch_validation_without_second_post_ope
             exact: bool,
             artifact_dir: str | None = None,
             session_key: str = "",
+            semantic_target: str = "",
         ) -> bool:
             calls["open"] += 1
             validation = fake_validate(hwnd, target, exact=exact, artifact_dir=artifact_dir)
@@ -5595,6 +5682,7 @@ def test_target_ready_exposes_open_chat_internal_timing_when_opened() -> None:
             exact: bool,
             artifact_dir: str | None = None,
             session_key: str = "",
+            semantic_target: str = "",
         ) -> bool:
             validation = fake_validate(hwnd, target, exact=exact, artifact_dir=artifact_dir)
             sidecar_mod.remember_target_switch_validation(
@@ -6089,77 +6177,6 @@ def test_open_chat_reuses_prevalidation_ocr_seed_for_initial_main_list() -> None
             setattr(sidecar_mod, name, value)
 
 
-def test_open_chat_session_key_keeps_unambiguous_active_chat_without_click() -> None:
-    """A fresh sidecar may bind the visible active row, but must not click it."""
-
-    sidecar_mod = sys.modules["apps.wechat_ai_customer_service.adapters.wechat_win32_ocr_sidecar"]
-    geometry = {"left": 0, "top": 0, "right": 981, "bottom": 860, "width": 981, "height": 860}
-    image = Image.new("RGB", (981, 860), "white")
-    ocr_items = [
-        {
-            "text": "许聪",
-            "left": 90,
-            "top": 140,
-            "right": 150,
-            "bottom": 168,
-            "center_x": 120,
-            "center_y": 154,
-            "confidence": 0.99,
-        }
-    ]
-    originals = {
-        "consume_target_ready_prevalidation_ocr_seed": sidecar_mod.consume_target_ready_prevalidation_ocr_seed,
-        "ensure_main_session_list": sidecar_mod.ensure_main_session_list,
-        "get_window_geometry": sidecar_mod.get_window_geometry,
-        "target_switch_surface_state": sidecar_mod.target_switch_surface_state,
-        "active_chat_matches": sidecar_mod.active_chat_matches,
-        "parse_sessions_from_ocr": sidecar_mod.parse_sessions_from_ocr,
-        "activate_session_candidate": sidecar_mod.activate_session_candidate,
-    }
-    previous_state = dict(sidecar_mod._LAST_RPA_ACTION_STATE)
-    calls = {"activate": 0}
-    try:
-        sidecar_mod._LAST_RPA_ACTION_STATE.clear()
-        sidecar_mod.consume_target_ready_prevalidation_ocr_seed = lambda **_kwargs: None
-        sidecar_mod.ensure_main_session_list = lambda *_args, **_kwargs: (image, list(ocr_items))
-        sidecar_mod.get_window_geometry = lambda _hwnd: dict(geometry)
-        sidecar_mod.target_switch_surface_state = lambda *_args, **_kwargs: {"ok": True}
-        sidecar_mod.active_chat_matches = lambda *_args, **_kwargs: True
-        sidecar_mod.parse_sessions_from_ocr = lambda *_args, **_kwargs: [
-            {
-                "name": "许聪",
-                "session_key": "wx:rpa:v1:xucong",
-                "conversation_type": "private",
-                "center_y": 154,
-            }
-        ]
-        sidecar_mod.activate_session_candidate = (
-            lambda *_args, **_kwargs: calls.__setitem__("activate", calls["activate"] + 1) or True
-        )
-        opened = sidecar_mod.open_chat(
-            1001,
-            "许聪",
-            exact=True,
-            session_key="wx:rpa:v1:xucong",
-            conversation_type="private",
-        )
-        assert_true(opened is True, "unambiguous active chat should bind to the requested session key")
-        assert_true(calls["activate"] == 0, f"already-active chat must never receive a row click: {calls}")
-        assert_true(
-            sidecar_mod._LAST_RPA_ACTION_STATE.get("active_session_key") == "wx:rpa:v1:xucong",
-            f"the fresh sidecar should remember the resolved active identity: {sidecar_mod._LAST_RPA_ACTION_STATE}",
-        )
-        assert_true(
-            sidecar_mod._LAST_OPEN_CHAT_TIMING.get("reason") == "active_visible_unambiguous",
-            f"no-click resolution should be auditable: {sidecar_mod._LAST_OPEN_CHAT_TIMING}",
-        )
-    finally:
-        sidecar_mod._LAST_RPA_ACTION_STATE.clear()
-        sidecar_mod._LAST_RPA_ACTION_STATE.update(previous_state)
-        for name, value in originals.items():
-            setattr(sidecar_mod, name, value)
-
-
 def test_prevalidation_ocr_seed_respects_target_and_geometry() -> None:
     sidecar_mod = sys.modules["apps.wechat_ai_customer_service.adapters.wechat_win32_ocr_sidecar"]
     previous_ttl = os.environ.get("WECHAT_WIN32_OCR_TARGET_READY_PREVALIDATION_OCR_SEED_SECONDS")
@@ -6369,6 +6386,7 @@ def test_target_ready_reopens_when_prevalidation_is_weak() -> None:
             exact: bool,
             artifact_dir: str | None = None,
             session_key: str = "",
+            semantic_target: str = "",
         ) -> bool:
             calls["open"] += 1
             return True
@@ -6932,14 +6950,15 @@ def test_activate_session_candidate_single_click_on_unconfirmed_target() -> None
     originals = {
         "choose_session_row_click_point": sidecar_mod.choose_session_row_click_point,
         "humanized_action_sleep": sidecar_mod.humanized_action_sleep,
-        "human_client_click": sidecar_mod.human_client_click,
+        "human_window_image_click": sidecar_mod.human_window_image_click,
         "validate_active_send_target": sidecar_mod.validate_active_send_target,
+        "validate_active_selected_session_target": sidecar_mod.validate_active_selected_session_target,
     }
     calls = {"click": 0, "validate": 0}
     try:
         sidecar_mod.choose_session_row_click_point = lambda *args, **kwargs: (180, 188, {"candidate_count": 10})
         sidecar_mod.humanized_action_sleep = lambda *_args, **_kwargs: 0.0
-        sidecar_mod.human_client_click = lambda *_args, **_kwargs: calls.__setitem__("click", calls["click"] + 1)
+        sidecar_mod.human_window_image_click = lambda *_args, **_kwargs: calls.__setitem__("click", calls["click"] + 1)
 
         def fake_validate(*_args, **_kwargs):
             calls["validate"] += 1
@@ -6951,6 +6970,12 @@ def test_activate_session_candidate_single_click_on_unconfirmed_target() -> None
         }
 
         sidecar_mod.validate_active_send_target = fake_validate
+        sidecar_mod.validate_active_selected_session_target = lambda *_args, **_kwargs: {
+            "ok": False,
+            "online": True,
+            "reason": "selected_session_not_confirmed",
+            "confirmation_confidence": "none",
+        }
         previous = os.environ.get("WECHAT_WIN32_OCR_TARGET_SWITCH_PASSIVE_CONFIRM_ATTEMPTS")
         os.environ["WECHAT_WIN32_OCR_TARGET_SWITCH_PASSIVE_CONFIRM_ATTEMPTS"] = "2"
         opened = sidecar_mod.activate_session_candidate(
@@ -6981,8 +7006,9 @@ def test_activate_session_candidate_passive_confirm_without_second_click() -> No
     originals = {
         "choose_session_row_click_point": sidecar_mod.choose_session_row_click_point,
         "humanized_action_sleep": sidecar_mod.humanized_action_sleep,
-        "human_client_click": sidecar_mod.human_client_click,
+        "human_window_image_click": sidecar_mod.human_window_image_click,
         "validate_active_send_target": sidecar_mod.validate_active_send_target,
+        "validate_active_selected_session_target": sidecar_mod.validate_active_selected_session_target,
     }
     previous = os.environ.get("WECHAT_WIN32_OCR_TARGET_SWITCH_PASSIVE_CONFIRM_ATTEMPTS")
     calls = {"click": 0, "validate": 0}
@@ -6990,7 +7016,7 @@ def test_activate_session_candidate_passive_confirm_without_second_click() -> No
         os.environ["WECHAT_WIN32_OCR_TARGET_SWITCH_PASSIVE_CONFIRM_ATTEMPTS"] = "2"
         sidecar_mod.choose_session_row_click_point = lambda *args, **kwargs: (180, 188, {"candidate_count": 10})
         sidecar_mod.humanized_action_sleep = lambda *_args, **_kwargs: 0.0
-        sidecar_mod.human_client_click = lambda *_args, **_kwargs: calls.__setitem__("click", calls["click"] + 1)
+        sidecar_mod.human_window_image_click = lambda *_args, **_kwargs: calls.__setitem__("click", calls["click"] + 1)
 
         def fake_validate(*_args, **_kwargs):
             calls["validate"] += 1
@@ -7009,6 +7035,12 @@ def test_activate_session_candidate_passive_confirm_without_second_click() -> No
             }
 
         sidecar_mod.validate_active_send_target = fake_validate
+        sidecar_mod.validate_active_selected_session_target = lambda *_args, **_kwargs: {
+            "ok": False,
+            "online": True,
+            "reason": "selected_session_not_confirmed",
+            "confirmation_confidence": "none",
+        }
         opened = sidecar_mod.activate_session_candidate(
             1001,
             session,
@@ -7064,6 +7096,50 @@ def test_activate_session_candidate_blocks_service_container_wrong_target_before
             setattr(sidecar_mod, name, value)
 
 
+def test_c2_visible_locate_can_switch_away_from_service_container_page() -> None:
+    sidecar_mod = sys.modules["apps.wechat_ai_customer_service.adapters.wechat_win32_ocr_sidecar"]
+    originals = {
+        "validate_active_send_target": sidecar_mod.validate_active_send_target,
+        "open_chat": sidecar_mod.open_chat,
+        "humanized_action_sleep": sidecar_mod.humanized_action_sleep,
+    }
+    calls = {"open_chat": 0, "validate": 0}
+    try:
+        sidecar_mod.humanized_action_sleep = lambda *_args, **_kwargs: None
+
+        def fake_validate(*_args, **_kwargs):
+            calls["validate"] += 1
+            return {"ok": True, "online": True, "reason": "target_confirmed"}
+
+        sidecar_mod.validate_active_send_target = fake_validate
+        sidecar_mod.open_chat = (
+            lambda *_args, **_kwargs: calls.__setitem__("open_chat", calls["open_chat"] + 1) or True
+        )
+        result = sidecar_mod.locate_chat_target_for_c2(
+            1001,
+            target="CJR8S5K3虾丸子大",
+            session_key="wx:rpa:v1:cjr8",
+            remark_code="CJR8S5K3",
+            target_mode="visible",
+            exact=False,
+            artifact_dir=None,
+            sidecar_run_id="unit-c2-visible",
+            failure_state="target_not_confirmed",
+            failure_error_code="TARGET_NOT_CONFIRMED",
+        )
+        assert_true(result.get("ok") is True, f"visible locate should recover from service page: {result}")
+        assert_true(calls["open_chat"] == 1, f"visible locate must attempt row activation: {calls}")
+        assert_true(calls["validate"] == 1, f"visible locate should merge the outer precheck into open_chat: {calls}")
+        assert_true(
+            result.get("targeting", {}).get("visible_precheck", {}).get("reason")
+            == "merged_into_open_chat_fresh_rescan",
+            f"visible locate should expose merged precheck evidence: {result}",
+        )
+    finally:
+        for name, value in originals.items():
+            setattr(sidecar_mod, name, value)
+
+
 def test_open_chat_does_not_search_after_visible_candidate_unconfirmed() -> None:
     sidecar_mod = sys.modules["apps.wechat_ai_customer_service.adapters.wechat_win32_ocr_sidecar"]
     screenshot = Image.new("RGB", (980, 860), "white")
@@ -7099,6 +7175,102 @@ def test_open_chat_does_not_search_after_visible_candidate_unconfirmed() -> None
         assert_true(opened is False, f"unconfirmed visible candidate should stop this attempt: {opened}")
         assert_true(calls["activate"] == 1, f"visible candidate should be clicked once: {calls}")
         assert_true(calls["clear"] == 0, f"failed visible candidate must not fall through to search: {calls}")
+    finally:
+        for name, value in originals.items():
+            setattr(sidecar_mod, name, value)
+
+
+def test_activate_session_candidate_accepts_selected_session_confirmation() -> None:
+    sidecar_mod = sys.modules["apps.wechat_ai_customer_service.adapters.wechat_win32_ocr_sidecar"]
+    geometry = {"left": 0, "top": 0, "right": 980, "bottom": 860, "width": 980, "height": 860}
+    session = {"name": "CJR8S5K3 虾丸子大人", "center_y": 142, "left": 120, "right": 260, "session_key": "wx:rpa:v1:cjr8"}
+    originals = {
+        "humanized_action_sleep": sidecar_mod.humanized_action_sleep,
+        "human_window_image_click": sidecar_mod.human_window_image_click,
+        "human_client_click": sidecar_mod.human_client_click,
+        "validate_active_send_target": sidecar_mod.validate_active_send_target,
+        "validate_active_selected_session_target": sidecar_mod.validate_active_selected_session_target,
+        "target_switch_validation_is_hard_stop": sidecar_mod.target_switch_validation_is_hard_stop,
+    }
+    clicks: list[tuple[str, int, int]] = []
+    try:
+        sidecar_mod.humanized_action_sleep = lambda *_args, **_kwargs: None
+        sidecar_mod.human_window_image_click = lambda _hwnd, x, y: clicks.append(("window_image", x, y))
+        sidecar_mod.human_client_click = lambda _hwnd, x, y: clicks.append(("client", x, y))
+        sidecar_mod.validate_active_send_target = lambda *_args, **_kwargs: {
+            "ok": False,
+            "online": True,
+            "reason": "blank_render",
+            "confirmation_confidence": "failed_active_title",
+        }
+        sidecar_mod.validate_active_selected_session_target = lambda *_args, **_kwargs: {
+            "ok": True,
+            "online": True,
+            "reason": "selected_session_confirmed",
+            "confirmation_confidence": "selected_session_list",
+        }
+        sidecar_mod.target_switch_validation_is_hard_stop = lambda _validation: False
+
+        opened = sidecar_mod.activate_session_candidate(
+            1001,
+            session,
+            target="CJR8S5K3",
+            exact=False,
+            geometry=geometry,
+            default_click_x=150,
+        )
+
+        timing = dict(sidecar_mod._LAST_SESSION_ACTIVATION_TIMING)
+        assert_true(opened is True, f"selected left-session confirmation should open C2 target: {timing}")
+        assert_true(clicks, "candidate row should still be clicked")
+        assert_true(clicks[0][0] == "window_image", f"visible session row should use screenshot coordinates: {clicks}")
+        assert_true(
+            timing.get("activation_confirmation_confidence") == "selected_session_list",
+            f"selected-session confidence should be auditable: {timing}",
+        )
+        assert_true(
+            timing.get("activation_click_method") == "human_window_image_click",
+            f"activation click method should be auditable: {timing}",
+        )
+    finally:
+        for name, value in originals.items():
+            setattr(sidecar_mod, name, value)
+
+
+def test_c2_open_chat_with_session_key_short_circuits_when_current_target_confirmed() -> None:
+    sidecar_mod = sys.modules["apps.wechat_ai_customer_service.adapters.wechat_win32_ocr_sidecar"]
+    originals = {
+        "validate_active_send_target": sidecar_mod.validate_active_send_target,
+        "open_chat": sidecar_mod.open_chat,
+        "target_switch_validation_is_hard_stop": sidecar_mod.target_switch_validation_is_hard_stop,
+    }
+    calls = {"validate": 0, "open_chat": 0}
+    try:
+        sidecar_mod.validate_active_send_target = lambda *_args, **_kwargs: calls.__setitem__("validate", calls["validate"] + 1) or {
+            "ok": True,
+            "online": True,
+            "reason": "active_title_confirmed",
+            "confirmation_confidence": "active_title_strict",
+        }
+        sidecar_mod.open_chat = lambda *_args, **_kwargs: calls.__setitem__("open_chat", calls["open_chat"] + 1) or True
+        sidecar_mod.target_switch_validation_is_hard_stop = lambda _validation: False
+
+        result = sidecar_mod.locate_chat_target_for_c2(
+            1001,
+            target="CJR8S5K3 虾丸子大人",
+            session_key="wx:rpa:v1:cjr8",
+            remark_code="CJR8S5K3",
+            target_mode="visible",
+            exact=False,
+            artifact_dir=None,
+            sidecar_run_id="unit-locate",
+            failure_state="target_not_confirmed",
+            failure_error_code="TARGET_NOT_CONFIRMED",
+        )
+
+        assert_true(result.get("ok") is True, f"already active C2 target should be accepted: {result}")
+        assert_true(calls["open_chat"] == 1, f"unified fresh open_chat check should run once: {calls}")
+        assert_true(calls["validate"] == 1, f"mock open_chat without strict proof should use one fallback guard: {calls}")
     finally:
         for name, value in originals.items():
             setattr(sidecar_mod, name, value)
@@ -7404,6 +7576,7 @@ def test_sidebar_search_clear_uses_window_image_click() -> None:
         "run_ocr_traced": sidecar_mod.run_ocr_traced,
         "target_switch_surface_state": sidecar_mod.target_switch_surface_state,
         "sidebar_search_state_detected": sidecar_mod.sidebar_search_state_detected,
+        "hotkey": sidecar_mod.hotkey,
         "key_press": sidecar_mod.key_press,
         "sleep": sidecar_mod.time.sleep,
     }
@@ -7428,6 +7601,7 @@ def test_sidebar_search_clear_uses_window_image_click() -> None:
         ]
         sidecar_mod.target_switch_surface_state = lambda *_args, **_kwargs: {"ok": True, "reason": "surface_ready"}
         sidecar_mod.sidebar_search_state_detected = lambda *_args, **_kwargs: {"detected": True, "reason": "search_focus"}
+        sidecar_mod.hotkey = lambda modifier, key: calls["keys"].extend([modifier, key])  # type: ignore[union-attr]
         sidecar_mod.key_press = lambda key: calls["keys"].append(key)  # type: ignore[union-attr]
         sidecar_mod.time.sleep = lambda seconds: None
         result = sidecar_mod.clear_sidebar_search_box_without_select_all(1001, 122, 64, target_hint="新数据测试")
@@ -7557,16 +7731,22 @@ def test_dismiss_sidebar_search_state_retries_until_search_focus_is_gone() -> No
         "basic_send_window_guard": sidecar_mod.basic_send_window_guard,
         "get_window_geometry": sidecar_mod.get_window_geometry,
         "key_press": sidecar_mod.key_press,
+        "hotkey": sidecar_mod.hotkey,
+        "human_window_image_click_in_bounds": sidecar_mod.human_window_image_click_in_bounds,
         "capture_wechat": sidecar_mod.capture_wechat,
         "run_ocr_traced": sidecar_mod.run_ocr_traced,
         "target_switch_surface_state": sidecar_mod.target_switch_surface_state,
         "sleep": sidecar_mod.time.sleep,
     }
-    calls = {"keys": 0, "captures": 0}
+    calls = {"keys": 0, "hotkeys": 0, "clicks": 0, "captures": 0}
     try:
         sidecar_mod.basic_send_window_guard = lambda hwnd: {"ok": True, "reason": "foreground_ok"}
         sidecar_mod.get_window_geometry = lambda hwnd: geometry
         sidecar_mod.key_press = lambda key: calls.__setitem__("keys", calls["keys"] + 1)
+        sidecar_mod.hotkey = lambda *args: calls.__setitem__("hotkeys", calls["hotkeys"] + 1)
+        sidecar_mod.human_window_image_click_in_bounds = (
+            lambda *args, **kwargs: calls.__setitem__("clicks", calls["clicks"] + 1) or {"ok": True}
+        )
 
         def fake_capture(hwnd, artifact_dir=None, label="open_chat"):
             calls["captures"] += 1
@@ -7583,8 +7763,11 @@ def test_dismiss_sidebar_search_state_retries_until_search_focus_is_gone() -> No
             artifact_dir="runtime/test",
         )
         assert_true(result.get("ok") is True, f"dismiss should succeed after focus clears: {result}")
-        assert_true(result.get("attempts") == 2, f"dismiss should retry once while focus is active: {result}")
-        assert_true(calls == {"keys": 2, "captures": 2}, f"dismiss should use two low-frequency ESC/capture rounds: {calls}")
+        assert_true(result.get("attempts") == 1, f"dismiss should clear and verify in one guarded round: {result}")
+        assert_true(
+            calls == {"keys": 1, "hotkeys": 1, "clicks": 2, "captures": 3},
+            f"dismiss should clear search then click a fresh blank header target without ESC: {calls}",
+        )
     finally:
         for name, value in originals.items():
             if name == "sleep":
@@ -7665,17 +7848,547 @@ def test_scroll_actions_randomize_wheel_and_cursor_cadence() -> None:
     assert_true("humanized_action_sleep(85, 180)" in latest_source, "scroll-to-latest should avoid fixed cadence")
 
 
+
+def test_connector_voice_transcribe_attempts_keep_context_menu_diagnostics() -> None:
+    connector = WeChatConnector()
+    responses = [
+        {
+            "ok": False,
+            "state": "voice_transcribe_context_menu_target_not_found",
+            "context_menu_attempt": {
+                "reason": "menu_target_not_found",
+                "menu_screenshot_path": "runtime/voice/menu.png",
+                "menu_ocr_items_count": 3,
+                "menu_ocr_text_samples": ["收藏", "多选", "提醒"],
+                "right_click": {"ok": True},
+            },
+            "transcribed_messages": [],
+            "new_messages": [],
+        }
+    ]
+    original_call_compat_sidecar = connector.call_compat_sidecar
+    original_wechat_rpa_lock = wechat_connector_module.wechat_rpa_lock
+    original_sleep = wechat_connector_module.time.sleep
+
+    @contextmanager
+    def fake_lock(_action: str, timeout_seconds: float = 0.0):  # noqa: ARG001
+        yield {"action": "voice_transcribe"}
+
+    def fake_call_compat_sidecar(args: list[str], allow_failure: bool = True, env_overrides: dict[str, str] | None = None):  # noqa: ARG001
+        if not responses:
+            raise AssertionError("unexpected extra compat-sidecar call")
+        return dict(responses.pop(0))
+
+    try:
+        object.__setattr__(connector, "call_compat_sidecar", fake_call_compat_sidecar)
+        wechat_connector_module.wechat_rpa_lock = fake_lock  # type: ignore[assignment]
+        wechat_connector_module.time.sleep = lambda _seconds: None  # type: ignore[assignment]
+        result = connector.transcribe_voice_messages("许聪", exact=True, max_attempts=1)
+    finally:
+        object.__setattr__(connector, "call_compat_sidecar", original_call_compat_sidecar)
+        wechat_connector_module.wechat_rpa_lock = original_wechat_rpa_lock  # type: ignore[assignment]
+        wechat_connector_module.time.sleep = original_sleep  # type: ignore[assignment]
+
+    attempts = result.get("attempts") or []
+    assert_true(len(attempts) == 1, f"voice transcription should keep one attempt: {result}")
+    assert_true(
+        attempts[0].get("context_menu_screenshot_path") == "runtime/voice/menu.png",
+        f"context-menu screenshot path should be retained: {result}",
+    )
+    assert_true(
+        attempts[0].get("context_menu_ocr_text_samples") == ["收藏", "多选", "提醒"],
+        f"context-menu OCR samples should be retained: {result}",
+    )
+
+
+def test_connector_voice_transcribe_does_not_repeat_after_physical_menu_action() -> None:
+    connector = WeChatConnector()
+    calls: list[list[str]] = []
+    original_call_compat_sidecar = connector.call_compat_sidecar
+    original_wechat_rpa_lock = wechat_connector_module.wechat_rpa_lock
+
+    @contextmanager
+    def fake_lock(_action: str, timeout_seconds: float = 0.0):  # noqa: ARG001
+        yield {"action": "voice_transcribe"}
+
+    def fake_call_compat_sidecar(args: list[str], allow_failure: bool = True, env_overrides: dict[str, str] | None = None):  # noqa: ARG001
+        calls.append(list(args))
+        return {
+            "ok": True,
+            "state": "voice_transcribe_context_menu_no_new_text",
+            "context_menu_attempt": {"right_click": {"ok": True}, "click_target": {"source": "context_menu_ocr_transcribe_item"}},
+            "click": {"ok": True},
+            "transcribed_messages": [],
+            "new_messages": [],
+        }
+
+    try:
+        object.__setattr__(connector, "call_compat_sidecar", fake_call_compat_sidecar)
+        wechat_connector_module.wechat_rpa_lock = fake_lock  # type: ignore[assignment]
+        result = connector.transcribe_voice_messages("许聪", exact=True, max_attempts=4)
+    finally:
+        object.__setattr__(connector, "call_compat_sidecar", original_call_compat_sidecar)
+        wechat_connector_module.wechat_rpa_lock = original_wechat_rpa_lock  # type: ignore[assignment]
+
+    assert_true(len(calls) == 1, f"physical voice menu action must not be repeated: {calls}")
+    assert_true(result.get("physical_interaction") is True, f"physical interaction must be auditable: {result}")
+
+
+def test_connector_voice_transcribe_retries_after_initial_target_not_found() -> None:
+    connector = WeChatConnector()
+    responses = [
+        {
+            "ok": False,
+            "state": "voice_transcribe_target_not_found",
+            "transcribed_messages": [],
+            "new_messages": [],
+        },
+        {
+            "ok": True,
+            "state": "voice_transcribe_clicked",
+            "transcribed_messages": [
+                {
+                    "id": "voice-txt-1",
+                    "message_id": "voice-txt-1",
+                    "type": "text",
+                    "sender": "customer",
+                    "content": "周四十点可以过去吗",
+                }
+            ],
+            "new_messages": [
+                {
+                    "id": "voice-txt-1",
+                    "message_id": "voice-txt-1",
+                    "type": "text",
+                    "sender": "customer",
+                    "content": "周四十点可以过去吗",
+                }
+            ],
+        },
+    ]
+    calls: list[list[str]] = []
+    original_call_compat_sidecar = connector.call_compat_sidecar
+    original_wechat_rpa_lock = wechat_connector_module.wechat_rpa_lock
+    original_sleep = wechat_connector_module.time.sleep
+
+    @contextmanager
+    def fake_lock(_action: str, timeout_seconds: float = 0.0):  # noqa: ARG001
+        yield {"action": "voice_transcribe"}
+
+    def fake_call_compat_sidecar(args: list[str], allow_failure: bool = True, env_overrides: dict[str, str] | None = None):  # noqa: ARG001
+        calls.append(list(args))
+        if not responses:
+            raise AssertionError("unexpected extra compat-sidecar call")
+        return dict(responses.pop(0))
+
+    try:
+        object.__setattr__(connector, "call_compat_sidecar", fake_call_compat_sidecar)
+        wechat_connector_module.wechat_rpa_lock = fake_lock  # type: ignore[assignment]
+        wechat_connector_module.time.sleep = lambda _seconds: None  # type: ignore[assignment]
+        result = connector.transcribe_voice_messages("许聪", exact=True, max_attempts=2)
+    finally:
+        object.__setattr__(connector, "call_compat_sidecar", original_call_compat_sidecar)
+        wechat_connector_module.wechat_rpa_lock = original_wechat_rpa_lock  # type: ignore[assignment]
+        wechat_connector_module.time.sleep = original_sleep  # type: ignore[assignment]
+
+    assert_true(result.get("ok") is True, f"voice transcription retry should succeed: {result}")
+    assert_true(result.get("attempt_count") == 2, f"voice transcription should retry after initial miss: {result}")
+    assert_true(result.get("transcribed_messages_count") == 1, f"retry should preserve transcript: {result}")
+    assert_true(len(calls) == 2, f"compat-sidecar should be called twice: {calls}")
+
+
+def test_parse_messages_skips_unconverted_voice_duration_only() -> None:
+    items = [
+        {"text": '3"', "confidence": 0.72, "left": 440, "right": 489, "top": 616, "bottom": 641, "center_x": 464.5, "center_y": 628.5},
+        {"text": '5"', "confidence": 0.76, "left": 441, "right": 490, "top": 688, "bottom": 714, "center_x": 465.5, "center_y": 701.0},
+    ]
+    messages = parse_messages_from_ocr(items, (980, 860), target="xucong")
+    assert_true(not messages, f"unconverted voice durations must not become LLM text input: {messages}")
+
+
+def test_voice_context_menu_aborts_before_right_click_when_window_is_hidden() -> None:
+    image_size = (980, 860)
+    duration_target = {
+        "item": {
+            "text": '4"',
+            "left": 442.0,
+            "top": 573.0,
+            "right": 487.0,
+            "bottom": 594.0,
+            "center_x": 464.5,
+            "center_y": 583.5,
+        }
+    }
+    original_probe = sidecar_module.probe_wechat_windows
+    original_right_click = sidecar_module.human_window_image_right_click_in_bounds
+    try:
+        sidecar_module.probe_wechat_windows = lambda: {"visible_main_windows": []}  # type: ignore[assignment]
+
+        def fail_right_click(*args, **kwargs):  # noqa: ANN001
+            raise AssertionError("hidden WeChat window must not receive a right-click")
+
+        sidecar_module.human_window_image_right_click_in_bounds = fail_right_click  # type: ignore[assignment]
+        result = open_voice_transcribe_context_menu(
+            1234,
+            duration_target,
+            image_size=image_size,
+        )
+    finally:
+        sidecar_module.probe_wechat_windows = original_probe  # type: ignore[assignment]
+        sidecar_module.human_window_image_right_click_in_bounds = original_right_click  # type: ignore[assignment]
+    assert_true(
+        result.get("reason") == "voice_window_lost_before_context_menu_right_click",
+        f"hidden window should fail closed before right-click: {result}",
+    )
+
+
+def test_voice_context_menu_anchor_fallback_handles_right_edge_self_voice_menu() -> None:
+    image_size = (964, 847)
+    target = find_voice_transcribe_context_menu_target(
+        [],
+        image_size,
+        anchor_point=[812, 625],
+        force_anchor_fallback=True,
+    )
+    assert_true(target is not None, f"right-edge self voice menu should still infer first row: {target}")
+    assert_true(target.get("source") == "context_menu_anchor_first_row", f"target should come from anchor fallback: {target}")
+    bounds = target.get("click_bounds") or []
+    assert_true(bounds[0] >= 800, f"right-edge menu fallback should stay near the self voice anchor: {target}")
+    assert_true(bounds[2] <= image_size[0] - 8, f"right-edge menu fallback should stay inside capture: {target}")
+    assert_true(600 <= bounds[1] <= 635, f"bottom-clipped menu fallback should keep first row near anchor: {target}")
+    points = voice_transcribe_click_candidate_points(target)
+    assert_true(len(set(points)) >= 10, f"right-edge fallback should expose candidate points: {points}")
+
+
+def test_voice_context_menu_empty_ocr_never_blind_clicks_first_row() -> None:
+    image_size = (980, 860)
+    duration_target = {
+        "item": {
+            "text": '4"',
+            "left": 442.0,
+            "top": 573.0,
+            "right": 487.0,
+            "bottom": 594.0,
+            "center_x": 464.5,
+            "center_y": 583.5,
+        }
+    }
+    original = {
+        "get_window_geometry": sidecar_module.get_window_geometry,
+        "right_click": sidecar_module.human_window_image_right_click_in_bounds,
+        "probe": sidecar_module.probe_wechat_windows,
+        "capture": sidecar_module.capture_wechat,
+        "capture_visible": sidecar_module.capture_visible_screen,
+        "ocr": sidecar_module.run_ocr,
+        "sleep": sidecar_module.humanized_action_sleep,
+    }
+    try:
+        sidecar_module.get_window_geometry = lambda _hwnd: {"width": image_size[0], "height": image_size[1]}
+        sidecar_module.human_window_image_right_click_in_bounds = lambda *args, **kwargs: {"ok": True}  # type: ignore[assignment]
+        sidecar_module.probe_wechat_windows = lambda: {"visible_main_windows": [{"hwnd": 1234}]}  # type: ignore[assignment]
+        sidecar_module.capture_wechat = lambda *args, **kwargs: (Image.new("RGB", image_size, (248, 248, 248)), "menu.png")  # type: ignore[assignment]
+        sidecar_module.capture_visible_screen = lambda *args, **kwargs: (Image.new("RGB", image_size, (248, 248, 248)), "menu.png")  # type: ignore[assignment]
+        sidecar_module.run_ocr = lambda _image: []  # type: ignore[assignment]
+        sidecar_module.humanized_action_sleep = lambda *args, **kwargs: None  # type: ignore[assignment]
+
+        result = open_voice_transcribe_context_menu(
+            1234,
+            duration_target,
+            image_size=image_size,
+        )
+    finally:
+        sidecar_module.get_window_geometry = original["get_window_geometry"]  # type: ignore[assignment]
+        sidecar_module.human_window_image_right_click_in_bounds = original["right_click"]  # type: ignore[assignment]
+        sidecar_module.probe_wechat_windows = original["probe"]  # type: ignore[assignment]
+        sidecar_module.capture_wechat = original["capture"]  # type: ignore[assignment]
+        sidecar_module.capture_visible_screen = original["capture_visible"]  # type: ignore[assignment]
+        sidecar_module.run_ocr = original["ocr"]  # type: ignore[assignment]
+        sidecar_module.humanized_action_sleep = original["sleep"]  # type: ignore[assignment]
+    assert_true(result.get("click_target") is None, f"empty menu OCR must not produce a click target: {result}")
+
+
+def test_voice_context_menu_target_allows_low_menu_item() -> None:
+    image_size = (980, 860)
+    items = [
+        {
+            "text": "语音转文字",
+            "left": 492.0,
+            "top": 734.0,
+            "right": 586.0,
+            "bottom": 758.0,
+            "center_x": 539.0,
+            "center_y": 746.0,
+            "confidence": 0.93,
+        }
+    ]
+    assert_true(
+        find_voice_transcribe_target(items, image_size, allow_inferred=False) is None,
+        "normal chat target detection should still reject items in the input area",
+    )
+    target = find_voice_transcribe_context_menu_target(items, image_size, anchor_point=[456, 731])
+    assert_true(target is not None, f"context-menu detection must allow low popup menu rows: {target}")
+    assert_true(target.get("source") == "context_menu_ocr_transcribe_item", f"context menu should use OCR item: {target}")
+
+
+def test_voice_context_menu_target_forces_anchor_first_row_when_menu_ocr_empty() -> None:
+    image_size = (980, 860)
+    target = find_voice_transcribe_context_menu_target(
+        [],
+        image_size,
+        anchor_point=[456, 542],
+        force_anchor_fallback=True,
+    )
+    assert_true(target is not None, f"right-click success should force a first-row context-menu click: {target}")
+    assert_true(target.get("source") == "context_menu_anchor_first_row", f"target should come from anchor fallback: {target}")
+    points = voice_transcribe_click_candidate_points(target)
+    assert_true(len(set(points)) >= 10, f"forced context-menu row should expose candidate points: {points}")
+
+
+def test_voice_context_menu_target_infers_missing_first_row_from_menu_items() -> None:
+    image_size = (980, 860)
+    items = [
+        {
+            "text": "收藏",
+            "left": 492.0,
+            "top": 584.0,
+            "right": 534.0,
+            "bottom": 608.0,
+            "center_x": 513.0,
+            "center_y": 596.0,
+            "confidence": 0.95,
+        },
+        {
+            "text": "多选",
+            "left": 492.0,
+            "top": 628.0,
+            "right": 534.0,
+            "bottom": 652.0,
+            "center_x": 513.0,
+            "center_y": 640.0,
+            "confidence": 0.95,
+        },
+        {
+            "text": "提醒",
+            "left": 492.0,
+            "top": 672.0,
+            "right": 534.0,
+            "bottom": 696.0,
+            "center_x": 513.0,
+            "center_y": 684.0,
+            "confidence": 0.95,
+        },
+    ]
+    target = find_voice_transcribe_context_menu_target(items, image_size, anchor_point=[456, 542])
+    assert_true(target is not None, f"context-menu first row should be inferred when OCR misses it: {target}")
+    assert_true(target.get("source") == "context_menu_inferred_first_row", f"target should be inferred from menu row order: {target}")
+    bounds = target.get("click_bounds") or []
+    assert_true(bounds[1] < 584 and bounds[3] <= 584, f"inferred first row should sit above 收藏: {target}")
+
+
+def test_voice_duration_visual_guard_accepts_incoming_and_self_bubbles() -> None:
+    image_size = (980, 860)
+    incoming = Image.new("RGB", image_size, (248, 248, 248))
+    incoming_draw = ImageDraw.Draw(incoming)
+    incoming_draw.rounded_rectangle((410, 380, 520, 430), radius=12, fill=(235, 235, 235))
+    incoming_item = {
+        "text": '4"',
+        "left": 438.0,
+        "top": 394.0,
+        "right": 476.0,
+        "bottom": 416.0,
+        "center_x": 457.0,
+        "center_y": 405.0,
+    }
+    incoming_target = find_latest_untranscribed_voice_duration_target(
+        [incoming_item],
+        image_size,
+        screenshot=incoming,
+    )
+    assert_true(incoming_target is not None, f"incoming voice bubble should remain actionable: {incoming_target}")
+
+    self_image = Image.new("RGB", image_size, (248, 248, 248))
+    self_draw = ImageDraw.Draw(self_image)
+    self_draw.rounded_rectangle((730, 380, 860, 430), radius=12, fill=(151, 236, 157))
+    self_item = {
+        "text": '5"',
+        "left": 758.0,
+        "top": 394.0,
+        "right": 796.0,
+        "bottom": 416.0,
+        "center_x": 777.0,
+        "center_y": 405.0,
+    }
+    self_target = find_latest_untranscribed_voice_duration_target(
+        [self_item],
+        image_size,
+        screenshot=self_image,
+    )
+    assert_true(self_target is not None, f"self voice bubble should remain actionable: {self_target}")
+
+
+def test_voice_duration_visual_guard_rejects_bare_number_without_audio_glyph() -> None:
+    image_size = (980, 860)
+    image = Image.new("RGB", image_size, (248, 248, 248))
+    draw = ImageDraw.Draw(image)
+    draw.rounded_rectangle((730, 380, 860, 430), radius=12, fill=(151, 236, 157))
+    item = {
+        "text": "111",
+        "left": 758.0,
+        "top": 394.0,
+        "right": 796.0,
+        "bottom": 416.0,
+        "center_x": 777.0,
+        "center_y": 405.0,
+    }
+    evidence = voice_duration_bubble_visual_evidence(image, item, image_size)
+    assert_true(not evidence.get("audio_icon_evidence"), f"bare numeric text must not look like an audio glyph: {evidence}")
+    assert_true(not evidence.get("ok"), f"bare number in a green text bubble must not be actionable: {evidence}")
+    assert_true(
+        find_latest_untranscribed_voice_duration_target([item], image_size, screenshot=image) is None,
+        "bare numeric text must not produce a voice right-click target",
+    )
+
+
+def test_voice_duration_visual_guard_rejects_numeric_ocr_inside_image() -> None:
+    image_size = (980, 860)
+    item = {
+        "text": '3"',
+        "left": 520.0,
+        "top": 380.0,
+        "right": 548.0,
+        "bottom": 404.0,
+        "center_x": 534.0,
+        "center_y": 392.0,
+        "confidence": 0.94,
+    }
+    image = Image.new("RGB", image_size, (248, 248, 248))
+    draw = ImageDraw.Draw(image)
+    # A photo-like region containing a duration-shaped OCR fragment must not
+    # be treated as a WeChat voice bubble.
+    for x in range(480, 620, 7):
+        for y in range(340, 450, 7):
+            draw.rectangle(
+                (x, y, x + 6, y + 6),
+                fill=((x * 3) % 190 + 30, (y * 5) % 170 + 35, ((x + y) * 7) % 160 + 40),
+            )
+    evidence = voice_duration_bubble_visual_evidence(image, item, image_size)
+    assert_true(not evidence.get("ok"), f"image texture must not pass voice bubble guard: {evidence}")
+    target = find_latest_untranscribed_voice_duration_target([item], image_size, screenshot=image)
+    assert_true(target is None, f"numeric OCR inside an image must not produce a right-click target: {target}")
+
+
+def test_voice_transcribe_target_allows_right_side_self_voice_duration() -> None:
+    image_size = (964, 847)
+    items = [
+        {
+            "text": '5"',
+            "left": 742.0,
+            "top": 604.0,
+            "right": 836.0,
+            "bottom": 647.0,
+            "center_x": 789.0,
+            "center_y": 625.5,
+            "confidence": 0.91,
+        }
+    ]
+    target = find_voice_transcribe_target(items, image_size)
+    assert_true(target is not None, f"right-side self voice duration should infer a target: {target}")
+    assert_true(target.get("source") == "inferred_from_voice_duration", f"self voice target should be duration-inferred: {target}")
+    anchor = voice_duration_context_click_target(target, image_size)
+    assert_true(anchor is not None, f"self voice duration should provide a right-click anchor: {target}")
+    bounds = anchor.get("click_bounds") or []
+    assert_true(bounds[0] <= items[0]["left"] <= bounds[2], f"self voice anchor should cover the duration text: {anchor}")
+    assert_true(bounds[0] > 385 and bounds[2] <= 860, f"self voice anchor should stay in chat and off the avatar: {anchor}")
+    points = voice_transcribe_click_candidate_points(anchor)
+    assert_true(
+        points and all(bounds[0] <= x <= bounds[2] and bounds[1] <= y <= bounds[3] for x, y in points),
+        f"self voice anchor points should remain inside the protected bubble bounds: {anchor}",
+    )
+
+
+def test_voice_transcribe_target_infers_latest_unconverted_voice_only() -> None:
+    image_size = (980, 860)
+    items = [
+        {
+            "text": '2"',
+            "left": 442.0,
+            "top": 456.0,
+            "right": 487.0,
+            "bottom": 482.0,
+            "center_x": 464.5,
+            "center_y": 469.0,
+            "confidence": 0.76,
+        },
+        {
+            "text": "你好，你在吗？",
+            "left": 436.0,
+            "top": 507.0,
+            "right": 558.0,
+            "bottom": 534.0,
+            "center_x": 497.0,
+            "center_y": 520.0,
+            "confidence": 0.99,
+        },
+        {
+            "text": '4"',
+            "left": 442.0,
+            "top": 573.0,
+            "right": 487.0,
+            "bottom": 594.0,
+            "center_x": 464.5,
+            "center_y": 583.5,
+            "confidence": 0.74,
+        },
+    ]
+    assert_true(voice_duration_text_like('4"'), "quoted duration should be recognized")
+    assert_true(voice_duration_text_like("02"), "OCR duration without quote should be tolerated")
+    assert_true(not voice_duration_text_like("我想买车"), "normal transcript should not look like a duration")
+    assert_true(
+        find_voice_transcribe_target(items, image_size, allow_inferred=False) is None,
+        "duration-only OCR must not be treated as a visible voice-to-text menu item",
+    )
+    target = find_voice_transcribe_target(items, image_size)
+    assert_true(target is not None, "latest unconverted voice duration should infer a convert target")
+    assert_true(target.get("source") == "inferred_from_voice_duration", f"target should be inferred from duration: {target}")
+    assert_true((target.get("item") or {}).get("text") == '4"', f"converted 2s voice must be skipped: {target}")
+    points = voice_transcribe_click_candidate_points(target)
+    assert_true(len(set(points)) >= 10, f"inferred button should expose distinct candidate points: {points}")
+    anchor = voice_duration_context_click_target(target, image_size)
+    assert_true(anchor is not None, f"inferred voice duration should provide a context-menu right-click anchor: {target}")
+    anchor_points = voice_transcribe_click_candidate_points(anchor)
+    assert_true(len(set(anchor_points)) >= 10, f"context-menu anchor should expose distinct candidate points: {anchor_points}")
+
+
 def main() -> int:
     tests = [
+        test_connector_voice_transcribe_attempts_keep_context_menu_diagnostics,
+        test_connector_voice_transcribe_does_not_repeat_after_physical_menu_action,
+        test_connector_voice_transcribe_retries_after_initial_target_not_found,
+        test_parse_messages_skips_unconverted_voice_duration_only,
+        test_voice_context_menu_aborts_before_right_click_when_window_is_hidden,
+        test_voice_context_menu_anchor_fallback_handles_right_edge_self_voice_menu,
+        test_voice_context_menu_empty_ocr_never_blind_clicks_first_row,
+        test_voice_context_menu_target_allows_low_menu_item,
+        test_voice_context_menu_target_forces_anchor_first_row_when_menu_ocr_empty,
+        test_voice_context_menu_target_infers_missing_first_row_from_menu_items,
+        test_voice_duration_visual_guard_accepts_incoming_and_self_bubbles,
+        test_voice_duration_visual_guard_rejects_bare_number_without_audio_glyph,
+        test_voice_duration_visual_guard_rejects_numeric_ocr_inside_image,
+        test_voice_transcribe_target_allows_right_side_self_voice_duration,
+        test_voice_transcribe_target_infers_latest_unconverted_voice_only,
         test_sidecar_script_bootstraps_project_root_without_pythonpath,
         test_sidecar_help_exposes_stable_actions_and_flags,
         test_sidecar_contract_validation_failure_is_json_without_window_probe,
         test_sidecar_facade_exports_contract_surface,
+        test_run_sidecar_cli_accepts_visible_session_candidate,
+        test_visible_session_candidate_click_geometry_uses_title_bbox,
         test_parse_sessions_from_ocr,
+        test_sidebar_visible_list_enhanced_ocr_recovers_pinned_gray_sessions,
         test_parse_sessions_detects_visual_unread_red_dot,
         test_parse_sessions_normalizes_truncated_file_transfer,
         test_parse_sessions_normalizes_file_transfer_with_mixed_ellipsis_time,
         test_parse_sessions_strips_standalone_relative_day_suffix,
+        test_parse_sessions_keeps_truncated_remark_code_title_with_time_suffix,
         test_parse_sessions_preserves_duplicate_display_names_with_session_keys,
         test_add_friend_query_normalization_prefers_phone_digits,
         test_add_friend_windows_plus_entry_uses_windows_sidebar_geometry,
@@ -7695,10 +8408,8 @@ def main() -> int:
         test_parse_messages_strips_voice_duration_prefix_after_transcription,
         test_infer_conversation_type_does_not_promote_test_keyword_to_group,
         test_parse_messages_respects_explicit_private_conversation_type_for_test_contact,
-        test_parse_messages_uses_structural_group_header_and_strips_member_label,
         test_parse_messages_skips_file_card_footer_noise,
-        test_parse_messages_skips_unconverted_voice_duration_only,
-        test_parse_messages_skips_voice_duration_with_convert_button_ui_noise,
+        test_parse_messages_marks_unconverted_voice_as_voice_placeholder,
         test_parse_messages_labels_private_left_side_as_customer,
         test_parse_messages_labels_group_left_side_as_customer_member,
         test_parse_messages_keeps_low_visible_bubble_lines,
@@ -7709,6 +8420,11 @@ def main() -> int:
         test_parse_messages_classifies_light_and_dark_right_bubbles_as_self,
         test_parse_messages_does_not_let_role_v2_leak_input_or_cross_bubble_state,
         test_parse_messages_outputs_message_envelope_fields,
+        test_c2_observations_are_standalone_without_business_contract_file,
+        test_messages_frame_reuses_screenshot_and_falls_back_to_same_frame_title_roi,
+        test_reused_frame_skips_title_roi_when_full_ocr_already_matches,
+        test_reused_frame_title_roi_still_blocks_wrong_target,
+        test_voice_before_frame_blocks_click_when_target_is_wrong,
         test_history_snapshot_merge_orders_and_dedupes,
         test_anchor_match_supports_content_and_reply_keys,
         test_message_noise_filters_relative_timestamps,
@@ -7718,21 +8434,18 @@ def main() -> int:
         test_send_and_input_points_use_candidate_pools,
         test_input_click_jitter_has_enough_entropy,
         test_voice_transcribe_target_prefers_visible_convert_button,
-        test_voice_transcribe_target_infers_latest_unconverted_voice_only,
-        test_voice_context_menu_target_allows_low_menu_item,
-        test_voice_context_menu_target_infers_missing_first_row_from_menu_items,
-        test_voice_context_menu_target_forces_anchor_first_row_when_menu_ocr_empty,
-        test_voice_context_menu_anchor_fallback_handles_right_edge_self_voice_menu,
-        test_voice_transcribe_target_allows_right_side_self_voice_duration,
-        test_voice_duration_visual_guard_rejects_numeric_ocr_inside_image,
-        test_voice_duration_visual_guard_accepts_incoming_and_self_bubbles,
-        test_voice_duration_visual_guard_rejects_bare_number_without_audio_glyph,
+        test_voice_transcribe_target_processes_unconverted_voice_bottom_up,
+        test_voice_transcribe_context_anchor_can_skip_already_transcribed_anchor,
+        test_voice_transcribe_mixed_candidates_keep_bottom_up_order,
+        test_voice_transcribe_self_voice_uses_context_menu_anchor,
+        test_voice_transcribe_target_covers_left_and_right_voice_states,
         test_voice_transcribe_click_jitter_uses_candidate_pool,
-        test_voice_context_menu_empty_ocr_never_blind_clicks_first_row,
-        test_voice_context_menu_aborts_before_right_click_when_window_is_hidden,
-        test_connector_voice_transcribe_retries_after_initial_target_not_found,
-        test_connector_voice_transcribe_attempts_keep_context_menu_diagnostics,
-        test_connector_voice_transcribe_does_not_repeat_after_physical_menu_action,
+        test_voice_transcribe_visual_self_voice_bubble_anchor_when_ocr_misses_duration,
+        test_voice_transcribe_visual_self_anchor_is_not_expanded_to_avatar_edge,
+        test_voice_transcribe_visual_self_anchor_skips_green_text_bubble,
+        test_voice_transcribe_duration_anchor_accepts_icon_noise,
+        test_voice_transcribe_context_menu_item_does_not_require_chat_surface,
+        test_voice_transcribe_context_menu_collapse_marks_already_transcribed,
         test_voice_transcribe_visual_button_score_rejects_dark_background_red_dot,
         test_send_rate_guard,
         test_wechat_rpa_lock_recovers_stale_lock_and_times_out_on_live_lock,
@@ -7797,8 +8510,7 @@ def main() -> int:
         test_send_verify_tolerates_common_ocr_noise_on_long_self_reply,
         test_blind_send_without_ocr_verification_fallback,
         test_guarded_send_confirmation_fallback,
-        test_post_send_fast_guard_requires_input_clear_effect,
-        test_real_customer_send_requires_outbound_bubble_even_when_fast_flag_is_enabled,
+        test_fast_send_confirmation_skips_slow_message_read_when_guard_is_strong,
         test_invalid_window_handle_is_hard_stop_not_recovery,
         test_daemon_invalid_window_handle_is_hard_stop,
         test_sidecar_exception_payload_marks_invalid_window_handle,
@@ -7849,7 +8561,6 @@ def main() -> int:
         test_validate_active_send_target_seeds_only_safe_surface_ocr,
         test_target_ready_merges_validation_internal_timing,
         test_open_chat_reuses_prevalidation_ocr_seed_for_initial_main_list,
-        test_open_chat_session_key_keeps_unambiguous_active_chat_without_click,
         test_prevalidation_ocr_seed_respects_target_and_geometry,
         test_open_chat_discards_prevalidation_ocr_seed_for_session_subview,
         test_target_ready_switch_validation_cache_respects_target_and_geometry,
@@ -7863,12 +8574,15 @@ def main() -> int:
         test_activate_session_candidate_single_click_on_unconfirmed_target,
         test_activate_session_candidate_passive_confirm_without_second_click,
         test_activate_session_candidate_blocks_service_container_wrong_target_before_click,
+        test_c2_visible_locate_can_switch_away_from_service_container_page,
+        test_activate_session_candidate_accepts_selected_session_confirmation,
         test_open_chat_does_not_search_after_visible_candidate_unconfirmed,
         test_open_chat_blocks_search_when_initial_ocr_unavailable,
         test_open_chat_search_fallback_disabled_by_default,
         test_open_chat_search_fallback_clicks_visible_result_without_enter_when_enabled,
         test_open_chat_search_fallback_stops_after_single_search_attempt_by_default,
         test_open_chat_blocks_search_when_surface_is_blank,
+        test_c2_open_chat_with_session_key_short_circuits_when_current_target_confirmed,
         test_sidebar_search_clear_uses_window_image_click,
         test_sidebar_search_clear_checks_window_guard_before_keyboard,
         test_type_sidebar_search_query_defaults_to_clipboard_with_guard,

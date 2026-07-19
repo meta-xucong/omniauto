@@ -396,9 +396,16 @@ def build_message_envelope(
         target_name=target_name,
         conversation_type=conversation_type,
     )
+    observation_id = "observation_" + stable_digest(
+        {"captured_at": capture_time, "source_adapter": source_adapter, "message_id": message_id},
+        24,
+    )
+    source_message_key = str(record.get("source_message_key") or existing.get("source_message_key") or canonical_visual_id or message_id)
 
     envelope = {
-        "schema_version": 1,
+        "schema_version": 2,
+        "observation_id": observation_id,
+        "source_message_key": source_message_key,
         "message_id": message_id,
         "canonical_visual_id": canonical_visual_id,
         "canonical_input_id": canonical_input_id,
@@ -436,6 +443,8 @@ def apply_message_envelope_to_record(record: dict[str, Any], envelope: dict[str,
     next_record["message_id"] = str(next_record.get("message_id") or envelope.get("message_id") or "")
     next_record["canonical_visual_id"] = str(envelope.get("canonical_visual_id") or next_record.get("canonical_visual_id") or "")
     next_record["canonical_input_id"] = str(envelope.get("canonical_input_id") or next_record.get("canonical_input_id") or "")
+    next_record["observation_id"] = str(envelope.get("observation_id") or next_record.get("observation_id") or "")
+    next_record["source_message_key"] = str(envelope.get("source_message_key") or next_record.get("source_message_key") or "")
     next_record["bubble_id"] = str(envelope.get("bubble_id") or "")
     next_record["content"] = content_body
     next_record["content_body"] = content_body
