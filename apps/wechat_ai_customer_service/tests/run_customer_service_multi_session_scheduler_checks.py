@@ -502,7 +502,7 @@ def check_session_monitor_persistent_badge_is_acknowledged_once() -> None:
 
 
 def check_session_monitor_changed_preview_still_reaches_reconciliation_capture() -> None:
-    """Monitor similarity must never swallow a potentially repeated customer turn."""
+    """OCR correction alone must not recreate an acknowledged badge event."""
 
     with tempfile.TemporaryDirectory() as temp:
         monitor = SessionMonitor(
@@ -534,11 +534,10 @@ def check_session_monitor_changed_preview_still_reaches_reconciliation_capture()
             "the first OCR-corrected handled preview observation must stay acknowledged",
         )
         assert_equal(
-            len(monitor.poll(FakeSessionConnector([corrected_preview]))),
-            1,
-            "a stable changed preview must reach chat-pane reconciliation instead of being suppressed by similarity",
+            monitor.poll(FakeSessionConnector([corrected_preview])),
+            [],
+            "a stable OCR correction with the same badge epoch/time must remain the handled event",
         )
-        monitor.reset_unread(session_key)
         new_row = {
             **corrected_preview,
             "content": "许聪：这是新的追问",

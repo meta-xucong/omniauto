@@ -30,6 +30,20 @@ def legacy_observe_current_surface(
 ) -> dict[str, Any]:
     """Preserve the historical test/host seam inside the Vision owner."""
 
+    # The bundled worker is a binding for the generic PR host.  A custom/test
+    # connector without that host capability remains valid and absence-safe;
+    # it must not accidentally start a real desktop worker.  Keep this check
+    # inside the default host binding so an injected/custom Vision observer at
+    # the same frozen seam can still work.
+    if not callable(getattr(connector, "call_compat_sidecar", None)):
+        return {
+            "ok": False,
+            "state": "vision_current_surface_host_unavailable",
+            "reason": "vision_current_surface_host_unavailable",
+            "assets": [],
+            "messages": [],
+        }
+
     from .integrations.wechat_current import observe_current_surface
 
     return observe_current_surface(
@@ -98,9 +112,20 @@ def prepare_scheduler_capture(
         str(visual_capture_trigger.get("reason") or "").strip()
         == "pending_image_signal_already_processed"
     )
+    # Every real scheduler capture already reaches this optional plugin seam.
+    # Observe the current surface once even when a later text preview has
+    # replaced the sidebar's image preview.  This probe is structural only;
+    # clipboard acquisition and LLM work still require a fresh bound
+    # occurrence below.
+    # Preserve the established explicit-media path even for a legacy monitor
+    # event that has not yet acquired a canonical signal id.  Text-preview
+    # recovery is stricter and requires the current id for adjacency binding.
+    should_observe_current_surface = bool(
+        signal and (pending_signal_id or explicit_image_pending)
+    )
     if (
-        explicit_image_pending
-        and visual_capture_trigger.get("should_run")
+        should_observe_current_surface
+        and not image_signal_already_processed
         and not any(is_structural_visual_occurrence(item) for item in current_messages)
     ):
         try:
@@ -141,9 +166,7 @@ def prepare_scheduler_capture(
         else resolve_pending_visual_occurrence(
             current_messages,
             target_state=target_state,
-            explicit_image_pending=bool(
-                explicit_image_pending and visual_capture_trigger.get("should_run")
-            ),
+            explicit_image_pending=bool(explicit_image_pending),
             pending_signal_id=pending_signal_id,
         )
     )
@@ -185,7 +208,10 @@ def prepare_scheduler_capture(
                     "reason": "self_image_context_exception",
                     "error": repr(exc),
                 }
-        pending_signal_consumed = True
+        # An explicit self-image monitor event has no customer text to pass
+        # onward.  A self image recovered next to the current customer text is
+        # context enrichment only and must not consume that text turn.
+        pending_signal_consumed = bool(explicit_image_pending)
         current_history["visual_image_disposition"] = "self_context_only"
     elif resolution_state == "customer_confirmed":
         placeholder = confirmed_customer_image_placeholder(

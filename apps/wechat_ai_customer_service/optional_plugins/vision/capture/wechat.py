@@ -777,6 +777,30 @@ def build_image_saved_payload(
         visual_index,
         capture_detection,
     )
+
+
+def _latest_visual_bubble(bubbles: list[dict[str, Any]] | None) -> dict[str, Any]:
+    """Select the latest visible occurrence by conversation position.
+
+    Detection score may prefer a large older photo.  Clipboard acquisition is
+    occurrence-oriented, so final selection must follow chat order rather
+    than image appearance or area.
+    """
+
+    candidates = [item for item in (bubbles or []) if isinstance(item, dict)]
+    if not candidates:
+        return {}
+
+    def position(item: dict[str, Any]) -> tuple[int, int, float]:
+        bounds = item.get("bounds")
+        try:
+            top = int(float(bounds[1]))
+            bottom = int(float(bounds[3]))
+        except (TypeError, ValueError, IndexError):
+            top, bottom = 0, 0
+        return bottom, top, float(item.get("score") or 0.0)
+
+    return dict(max(candidates, key=position))
     return {
         "ok": False,
         "state": "legacy_image_file_capture_rejected",
@@ -912,7 +936,7 @@ def execute_wechat_clipboard_image_copy(
     bubbles = detect_visual_image_bubbles(
         screenshot,
         messages=messages,
-        max_images=1,
+        max_images=8,
         side_filter=visual_side,
         time_markers=extract_chat_time_markers(ocr_items, image_size),
     )
@@ -943,7 +967,7 @@ def execute_wechat_clipboard_image_copy(
             "messages": [],
             "transaction": {"status": "failed", "captured_at": captured_at},
         }
-    bubble = bubbles[0]
+    bubble = _latest_visual_bubble(bubbles)
     anchor = dict(bubble.get("anchor") or {})
     bounds = [int(value) for value in (bubble.get("bounds") or [])[:4]]
     right_click = sidecar_ops.human_window_image_right_click_in_bounds(

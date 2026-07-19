@@ -499,6 +499,7 @@ def run_checks() -> dict[str, Any]:
         check_live_safety_guard_enforces_single_allowed_target,
         check_bootstrap_target_records_pending_visible_without_error,
         check_visible_only_bootstrap_does_not_mark_customer_messages_processed,
+        check_visible_only_bootstrap_queues_verified_customer_without_badge,
         check_live_safety_guard_multi_allowed_targets_do_not_starve_secondary_sessions,
         check_rpa_safety_allows_standalone_greeting_by_default,
         check_rpa_safety_defers_standalone_greeting_when_explicitly_enabled,
@@ -2689,6 +2690,66 @@ def check_visible_only_bootstrap_does_not_mark_customer_messages_processed() -> 
     assert_true("m-self-1" in processed_ids, "visible-only bootstrap may mark self messages as processed")
     assert_equal(event.get("deferred_customer_count"), 1, "deferred customer message should be auditable")
     assert_equal(event.get("mark_customer_messages_processed"), False, "visible-only bootstrap should default to customer-safe mode")
+
+
+def check_visible_only_bootstrap_queues_verified_customer_without_badge() -> None:
+    class VisibleConnector:
+        def list_sessions(self) -> dict[str, Any]:
+            return {
+                "ok": True,
+                "sessions": [
+                    {
+                        "name": "客户A",
+                        "session_key": "wx:rpa:v1:customer-a",
+                        "conversation_type": "private",
+                        "unread_badge": "",
+                        "unread_signal": False,
+                    }
+                ],
+            }
+
+        def get_messages(self, target: str, exact: bool = True, history_load_times: int = 0, **kwargs: Any) -> dict[str, Any]:
+            return {
+                "ok": True,
+                "target": target,
+                "messages": [
+                    {
+                        "id": "chat-pane-customer-1",
+                        "type": "text",
+                        "sender": "customer",
+                        "content": "打开窗口后红点已经消失",
+                        "time": "22:10",
+                    }
+                ],
+                "history_load": {"requested_load_times": history_load_times},
+            }
+
+    from apps.wechat_ai_customer_service.admin_backend.services import customer_service_scheduler_state as scheduler_state_module
+
+    target = TargetConfig(
+        name="客户A",
+        enabled=True,
+        exact=True,
+        allow_self_for_test=False,
+        max_batch_messages=2,
+    )
+    config = load_smoke_config()
+    config["bootstrap"] = {"visible_only_target_confirmation": True, "history_load_times": 0}
+    state: dict[str, Any] = {"targets": {}}
+    original_store = scheduler_state_module.SchedulerStateStore
+    with tempfile.TemporaryDirectory() as temp:
+        store = original_store(tenant_id="workflow_badgeless_bootstrap_probe", path=Path(temp) / "scheduler.json")
+        scheduler_state_module.SchedulerStateStore = lambda *args, **kwargs: store  # type: ignore[assignment]
+        try:
+            event = bootstrap_target(VisibleConnector(), target, state, config)  # type: ignore[arg-type]
+        finally:
+            scheduler_state_module.SchedulerStateStore = original_store
+        scheduler_state = store.load()
+
+    assert_equal(event.get("action"), "bootstrapped", f"verified badgeless customer batch should bootstrap: {event}")
+    assert_equal(len(scheduler_state.get("llm_tasks") or {}), 1, "verified badgeless customer batch should queue one Brain task")
+    task = next(iter((scheduler_state.get("llm_tasks") or {}).values()))
+    assert_equal(task.get("session_key"), "wx:rpa:v1:customer-a", "bootstrap task must retain the exact current session key")
 
 
 def check_live_safety_guard_multi_allowed_targets_do_not_starve_secondary_sessions() -> None:

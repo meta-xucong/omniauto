@@ -600,7 +600,11 @@ def run_workflow(args: argparse.Namespace) -> dict[str, Any]:
                 event["iteration"] = iteration + 1
                 append_audit(audit_path, event)
                 iteration_events.append(event)
-                if use_multi_target and session_monitor is not None:
+                bootstrap_may_acknowledge = bool(
+                    not args.bootstrap
+                    or (event.get("ok") is True and str(event.get("action") or "") == "bootstrapped")
+                )
+                if use_multi_target and session_monitor is not None and bootstrap_may_acknowledge:
                     session_monitor.reset_unread(target.name)
             save_state(state_path, state)
             summary["events"].extend(iteration_events)
@@ -8091,7 +8095,41 @@ def bootstrap_target(
     visible_only = bootstrap_visible_only_target_confirmation_enabled(config)
     if visible_only:
         load_times = 0
-    clean_session_key = str(getattr(target, "session_key", "") or "")
+    bootstrap_session_row: dict[str, Any] = {}
+    if visible_only:
+        try:
+            from apps.wechat_ai_customer_service.admin_backend.services.bootstrap_scheduler_handoff import (
+                resolve_unique_bootstrap_session_row,
+            )
+
+            bootstrap_session_row = resolve_unique_bootstrap_session_row(
+                connector.list_sessions(),
+                target_name=target.name,
+            )
+        except Exception:
+            # Session-list identity is an optimization and handoff gate. Keep
+            # the historical bootstrap readiness check available, but never
+            # create a Scheduler task without one exact current row.
+            bootstrap_session_row = {}
+    clean_session_key = str(
+        bootstrap_session_row.get("session_key")
+        or getattr(target, "session_key", "")
+        or ""
+    )
+    bootstrap_conversation_type = str(
+        bootstrap_session_row.get("conversation_type")
+        or getattr(target, "conversation_type", "")
+        or "unknown"
+    )
+    bootstrap_target_config = TargetConfig(
+        name=str(target.name),
+        enabled=bool(getattr(target, "enabled", True)),
+        exact=bool(getattr(target, "exact", True)),
+        allow_self_for_test=bool(getattr(target, "allow_self_for_test", False)),
+        max_batch_messages=max(1, int(getattr(target, "max_batch_messages", DEFAULT_MAX_BATCH_MESSAGES) or DEFAULT_MAX_BATCH_MESSAGES)),
+        session_key=clean_session_key,
+        conversation_type=bootstrap_conversation_type,
+    )
     try:
         latest_payload = connector.get_messages(
             target.name,
@@ -8168,6 +8206,78 @@ def bootstrap_target(
             "created_at": datetime.now().isoformat(timespec="seconds"),
         }
     )
+    if visible_only and not mark_customer_messages:
+        normalized_payload = normalize_capture_payload_for_semantic_processing(
+            {"messages": candidates},
+            target=bootstrap_target_config,
+            config=config,
+        )
+        normalized_messages = [
+            item
+            for item in (normalized_payload.get("messages") or [])
+            if isinstance(item, dict)
+        ]
+        startup_selection = select_batch_details(
+            normalized_messages,
+            target_state=target_state,
+            allow_self_for_test=bootstrap_target_config.allow_self_for_test,
+            max_batch_messages=bootstrap_target_config.max_batch_messages,
+            config=config,
+        )
+        startup_has_customer_batch = bool(startup_selection.batch)
+        handoff: dict[str, Any] = {"ok": True, "queued": False, "reason": "bootstrap_no_customer_batch"}
+        if startup_has_customer_batch and not bootstrap_session_row:
+            handoff = {
+                "ok": False,
+                "queued": False,
+                "reason": "bootstrap_session_identity_unconfirmed",
+            }
+        elif bootstrap_session_row:
+            try:
+                from apps.wechat_ai_customer_service.admin_backend.services.bootstrap_scheduler_handoff import (
+                    queue_verified_bootstrap_capture,
+                )
+                from apps.wechat_ai_customer_service.admin_backend.services.customer_service_scheduler_state import (
+                    SchedulerConfig,
+                    SchedulerStateStore,
+                )
+
+                scheduler_config = SchedulerConfig.from_config(config)
+                handoff = queue_verified_bootstrap_capture(
+                    SchedulerStateStore(),
+                    target_name=target.name,
+                    session_row=bootstrap_session_row,
+                    messages=normalized_messages,
+                    batch=list(startup_selection.batch),
+                    overflow_messages=list(startup_selection.overflow_messages),
+                    llm_timeout_seconds=scheduler_config.planner_task_timeout_seconds,
+                )
+            except Exception as exc:
+                handoff = {"ok": False, "queued": False, "reason": "bootstrap_scheduler_handoff_exception", "error": repr(exc)}
+        handoff_reason = str(handoff.get("reason") or "")
+        customer_batch_durably_handled = bool(
+            handoff.get("queued") is True
+            or handoff_reason == "bootstrap_batch_already_closed"
+        )
+        handoff_failed = bool(
+            handoff.get("ok") is not True
+            or (startup_has_customer_batch and not customer_batch_durably_handled)
+        )
+        if handoff_failed:
+            return base_event(
+                target,
+                "error",
+                {
+                    "messages": {
+                        "ok": False,
+                        "reason": str(handoff.get("reason") or "bootstrap_scheduler_handoff_failed"),
+                        "error": str(handoff.get("error") or ""),
+                    },
+                    "deferred_customer_message_ids": deferred_customer_message_ids,
+                    "deferred_customer_count": len(deferred_customer_message_ids),
+                    "mark_customer_messages_processed": mark_customer_messages,
+                },
+            )
     return base_event(
         target,
         "bootstrapped",

@@ -73,7 +73,12 @@ def visual_image_identity_keys(message: dict[str, Any]) -> set[str]:
     add("pending_signal", message.get("pending_signal_id"))
     add("visual_msg", message.get("message_id") or message.get("id") or message.get("identity"))
     add("visual_msg", message.get("canonical_visual_id") or message.get("canonical_input_id"))
-    add("source_msg", message.get("source_message_id"))
+    source_message_id = message.get("source_message_id")
+    add("source_msg", source_message_id)
+    # A resolved occurrence retains the original structural id as
+    # source_message_id.  Treat that value as the same visual identity when a
+    # later surface probe sees the original structural envelope again.
+    add("visual_msg", source_message_id)
     side = visual_image_side(message) or str(message.get("visual_side") or "").strip().lower() or "unknown"
     return keys
 
@@ -257,8 +262,6 @@ def resolve_pending_visual_occurrence(
 ) -> dict[str, Any]:
     """Bind the current media signal to one direction-confirmed occurrence."""
 
-    if not explicit_image_pending:
-        return {"state": "sidebar_signal_only", "direction": "", "occurrence": {}}
     processed_signal_ids = {
         str(item or "").strip()
         for item in (target_state.get("processed_visual_pending_signal_ids") or [])
@@ -268,6 +271,36 @@ def resolve_pending_visual_occurrence(
     if clean_signal_id and clean_signal_id in processed_signal_ids:
         return {"state": "completed", "direction": "", "occurrence": {}}
     candidates = [dict(item) for item in messages if is_structural_visual_occurrence(item)]
+    if not explicit_image_pending:
+        pending_message_ids: set[str] = set()
+        for item in messages:
+            if not isinstance(item, dict) or is_structural_visual_occurrence(item):
+                continue
+            if str(item.get("pending_signal_id") or "").strip() != clean_signal_id:
+                continue
+            for key in (
+                "message_id",
+                "id",
+                "legacy_message_id",
+                "original_message_id",
+                "canonical_input_id",
+                "canonical_visual_id",
+            ):
+                value = str(item.get(key) or "").strip()
+                if value:
+                    pending_message_ids.add(value)
+        if not pending_message_ids:
+            return {"state": "sidebar_signal_only", "direction": "", "occurrence": {}}
+        seen = target_state_seen_visual_identity_keys(target_state)
+        candidates = [
+            item
+            for item in candidates
+            if str(item.get("_vision_following_text_id") or "").strip()
+            in pending_message_ids
+            and not seen.intersection(visual_image_identity_keys(item))
+        ]
+        if not candidates:
+            return {"state": "sidebar_signal_only", "direction": "", "occurrence": {}}
     if not candidates:
         return {"state": "no_candidate", "direction": "", "occurrence": {}}
     occurrence = dict(candidates[-1])
@@ -290,6 +323,9 @@ def resolve_pending_visual_occurrence(
     occurrence["sender"] = direction
     occurrence["sender_role"] = direction
     occurrence["visual_side"] = direction
+    for key in list(occurrence):
+        if str(key).startswith("_vision_"):
+            occurrence.pop(key, None)
     return {
         "state": f"{direction}_confirmed",
         "direction": direction,

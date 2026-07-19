@@ -94,6 +94,42 @@ def _current_image_pending_signal(
             text = str(signal.get("pending_signal_text") or signal.get("preview_content") or "").strip()
             if kind in {"image_capture", "media_capture"} or image_preview_text(text):
                 return dict(signal)
+    # Phase-one structural recovery: the sidebar may already show the text
+    # sent immediately after an image.  The scheduler-confirmed customer
+    # occurrence is still bound to that same pending signal id, so accept the
+    # existing normal signal without changing its kind or outer contract.
+    occurrence_signal_id = ""
+    for message in reversed(source.get("messages") or []):
+        if not isinstance(message, dict):
+            continue
+        message_type = str(message.get("type") or message.get("message_type") or "").strip().lower()
+        side = str(
+            message.get("visual_side")
+            or message.get("sender")
+            or message.get("sender_role")
+            or ""
+        ).strip().lower()
+        if (
+            message_type in {"image", "picture", "photo"}
+            and side == "customer"
+            and str(message.get("source_adapter") or "").strip()
+            == "win32_ocr_structural_image_observer"
+        ):
+            occurrence_signal_id = str(message.get("pending_signal_id") or "").strip()
+            if occurrence_signal_id:
+                break
+    if occurrence_signal_id:
+        for container in (source, target_state if isinstance(target_state, dict) else {}):
+            for key in ("pending_signal", "session_monitor_pending_signal", "_session_monitor_pending_signal"):
+                signal = container.get(key) if isinstance(container, dict) else None
+                if not isinstance(signal, dict):
+                    continue
+                signal_id = str(signal.get("pending_signal_id") or "").strip()
+                if signal_id and signal_id != occurrence_signal_id:
+                    continue
+                recovered = dict(signal)
+                recovered["pending_signal_id"] = occurrence_signal_id
+                return recovered
     return {}
 
 

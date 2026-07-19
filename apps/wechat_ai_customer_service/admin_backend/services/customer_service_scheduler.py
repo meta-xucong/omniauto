@@ -68,6 +68,12 @@ from apps.wechat_ai_customer_service.admin_backend.services.customer_service_ses
     SessionLedgerStore,
     stable_session_key,
 )
+from apps.wechat_ai_customer_service.admin_backend.services.session_runtime_reconciliation import (
+    ACKNOWLEDGE as MONITOR_ACKNOWLEDGE,
+    DEFER as MONITOR_DEFER,
+    capture_observation_disposition,
+    reconcile_stale_scheduler_pending_at_startup,
+)
 from apps.wechat_ai_customer_service.conversation_admission import customer_session_admission_reason
 from apps.wechat_ai_customer_service.message_identity import (
     apply_canonical_identity_fields,
@@ -114,6 +120,10 @@ CaptureDoneFn = Callable[[dict[str, Any], dict[str, Any], dict[str, Any]], None]
 PlannerDoneFn = Callable[[dict[str, Any], dict[str, Any], dict[str, Any]], None]
 MediaContextFn = Callable[[dict[str, Any]], dict[str, Any]]
 MediaContextDoneFn = Callable[[dict[str, Any], dict[str, Any]], None]
+
+
+_EMPTY_CAPTURE_NO_VERIFIED_MESSAGE = "empty_capture_no_verified_message"
+_EMPTY_CAPTURE_RETRY_LIMIT = 3
 
 
 def _effective_conversation_type(*values: Any) -> str:
@@ -951,6 +961,25 @@ def recover_pending_signal_batch_from_monitor(
         synthetic["original_content"] = speaker_meta.get("original_content")
         synthetic["ocr_speaker_prefix"] = speaker_meta
     return [synthetic]
+
+
+def _remove_preview_only_synthetic_reply_inputs(
+    batch: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Keep sidebar preview proxies out of the production reply batch.
+
+    Preview synthesis remains import-compatible for historical callers, but a
+    session-list observation has no chat-pane occurrence or trustworthy sender
+    direction and therefore cannot authorize a customer-visible reply.
+    """
+
+    return [
+        item
+        for item in batch
+        if isinstance(item, dict)
+        and not bool(item.get("monitor_pending_synthesized_from_preview"))
+        and not bool(item.get("short_pending_synthesized_from_monitor"))
+    ]
 
 
 def _pending_signal_replays_replied_ledger_input(
@@ -1955,6 +1984,18 @@ class CustomerServiceSchedulerRuntime:
                 result.get("pending_signal") if isinstance(result.get("pending_signal"), dict) else {},
                 session_key=str(capture.get("session_key") or session_key or ""),
             )
+            if (
+                capture.get("status") == "empty"
+                and not messages
+                and not bool(result.get("pending_signal_consumed"))
+            ):
+                mark_session_capture_failed(
+                    state,
+                    target_name,
+                    _EMPTY_CAPTURE_NO_VERIFIED_MESSAGE,
+                    session_key=session_key,
+                    now=now,
+                )
             if self.capture_done_fn is not None:
                 try:
                     self.capture_done_fn(copy.deepcopy(session), copy.deepcopy(result), copy.deepcopy(capture))
@@ -2967,6 +3008,8 @@ def mark_session_capture_failed(
     backoff_seconds = min(90, max(3, 3 * (2 ** min(fail_count - 1, 4))))
     soft_target_unconfirmed = "target_not_confirmed_for_messages" in reason_lower or "target_title_not_confirmed" in reason_lower
     soft_target_unconfirmed_exhausted = bool(soft_target_unconfirmed and fail_count >= 5)
+    empty_capture_unverified = _EMPTY_CAPTURE_NO_VERIFIED_MESSAGE in reason_lower
+    empty_capture_exhausted = bool(empty_capture_unverified and fail_count >= _EMPTY_CAPTURE_RETRY_LIMIT)
     if "lock_timeout" in reason_lower:
         # Lock contention is usually transient; retry sooner to avoid
         # customer-visible long-tail waiting while still preventing tight loops.
@@ -2979,6 +3022,11 @@ def mark_session_capture_failed(
         # record_session_signal.
         backoff_seconds = min(90, max(3, 3 * (2 ** min(fail_count - 1, 5))))
         backoff_seconds = min(90, backoff_seconds + random.uniform(0.4, 1.8))
+    if empty_capture_unverified:
+        # An empty chat-pane read may be transient, but the sidebar preview is
+        # not message content.  Give the same observation a small bounded
+        # retry budget without letting it become an infinite foreground loop.
+        backoff_seconds = min(15, max(3, 3 * (2 ** min(fail_count - 1, 2))))
     if "blank_render" in reason_lower:
         backoff_seconds = max(backoff_seconds, 25)
     if (
@@ -2991,18 +3039,25 @@ def mark_session_capture_failed(
         # longer floor so a single bad menu/clipboard state does not look like
         # mechanical repeated right-clicking in the chat window.
         backoff_seconds = max(backoff_seconds, 45)
+    capture_retry_exhausted = bool(soft_target_unconfirmed_exhausted or empty_capture_exhausted)
     retry_not_before = (
         ""
-        if soft_target_unconfirmed_exhausted
+        if capture_retry_exhausted
         else (now_dt + timedelta(seconds=backoff_seconds)).isoformat(timespec="seconds")
     )
-    session["status"] = "capture_cooldown" if soft_target_unconfirmed and not soft_target_unconfirmed_exhausted else "capture_failed"
-    session["pending_capture"] = bool(soft_target_unconfirmed and not soft_target_unconfirmed_exhausted)
+    retryable_capture = bool(
+        (soft_target_unconfirmed and not soft_target_unconfirmed_exhausted)
+        or (empty_capture_unverified and not empty_capture_exhausted)
+    )
+    session["status"] = "capture_cooldown" if retryable_capture else "capture_failed"
+    session["pending_capture"] = retryable_capture
     if soft_target_unconfirmed and not soft_target_unconfirmed_exhausted:
         session["pending_reason"] = "target_unconfirmed_retry"
+    elif empty_capture_unverified and not empty_capture_exhausted:
+        session["pending_reason"] = "empty_capture_retry"
     else:
         session["pending_reason"] = ""
-    if soft_target_unconfirmed_exhausted:
+    if capture_retry_exhausted:
         session["pending_signal_has_unread_evidence"] = False
     risk_state["last_error"] = reason_text
     risk_state["last_capture_failed_at"] = now_text
@@ -3016,7 +3071,7 @@ def mark_session_capture_failed(
         target_name=session["target_name"],
         reason=reason_text,
         fail_count=fail_count,
-        retry_after_seconds=0 if soft_target_unconfirmed_exhausted else backoff_seconds,
+        retry_after_seconds=0 if capture_retry_exhausted else backoff_seconds,
         retry_not_before=retry_not_before,
     )
 
@@ -3514,6 +3569,8 @@ class ManagedListenerSchedulerBridge:
         self._last_capture_signal_target = ""
         self._last_actual_capture_target = ""
         self._last_capture_switch_delay_seconds = 0.0
+        self._runtime_started_at = datetime.now().isoformat(timespec="milliseconds")
+        self._startup_pending_reconciliation_complete = False
         self._load_workflow_symbols()
         self.reload()
 
@@ -4011,6 +4068,14 @@ class ManagedListenerSchedulerBridge:
         self._last_capture_switch_delay_seconds = 0.0
         if self.session_monitor is not None:
             self.session_monitor.poll(self.connector)
+            all_pending = (
+                list(self.session_monitor.pending_targets(limit=None))
+                if hasattr(self.session_monitor, "pending_targets")
+                else []
+            )
+            self._reconcile_stale_scheduler_pending_once(all_pending)
+            state = self._scheduler_state_for_read()
+            self._reconcile_monitor_scheduler_observations(all_pending, state)
             if hasattr(self.session_monitor, "select_dispatch_targets"):
                 pending = self.session_monitor.select_dispatch_targets(limit=self.scheduler_config.capture_max_sessions_per_round)
             else:
@@ -4019,7 +4084,6 @@ class ManagedListenerSchedulerBridge:
             # different unread session for the next capture tick. This avoids
             # wasting rounds on a busy session and reduces cross-session lag.
             if pending:
-                state = self._scheduler_state_for_read()
                 expanded_pending = list(pending)
                 if all(
                     has_active_session_work(
@@ -4098,6 +4162,89 @@ class ManagedListenerSchedulerBridge:
         # session key and an unread edge here creates an unconfirmable shadow
         # session and can drive an endless foreground capture loop.
         return []
+
+    def _reconcile_stale_scheduler_pending_once(self, pending: list[Any]) -> None:
+        """Authenticate persisted capture levels before the first RPA visit."""
+
+        if bool(getattr(self, "_startup_pending_reconciliation_complete", False)):
+            return
+        store = getattr(self, "store", None)
+        if store is None or not callable(getattr(store, "update", None)):
+            self._startup_pending_reconciliation_complete = True
+            return
+        identifiers = {
+            str(getattr(item, "session_key", "") or getattr(item, "name", "") or "").strip()
+            for item in pending
+            if str(getattr(item, "session_key", "") or getattr(item, "name", "") or "").strip()
+        }
+
+        def mutate(state: dict[str, Any]) -> list[str]:
+            closed = reconcile_stale_scheduler_pending_at_startup(
+                state,
+                current_pending_identifiers=identifiers,
+                runtime_started_at=getattr(
+                    self,
+                    "_runtime_started_at",
+                    datetime.now().isoformat(timespec="milliseconds"),
+                ),
+            )
+            for identifier in closed:
+                append_event(
+                    state,
+                    "scheduler_startup_stale_pending_closed",
+                    session_key=identifier,
+                    reason="no_current_monitor_evidence_in_new_runtime",
+                )
+            return closed
+
+        # Mark completion only after the state mutation is durable.  If the
+        # store fails, let this listener tick fail closed before any physical
+        # session visit; the next tick may safely retry the idempotent repair.
+        store.update(mutate)
+        self._startup_pending_reconciliation_complete = True
+
+    def _reconcile_monitor_scheduler_observations(
+        self,
+        pending: list[Any],
+        scheduler_state: dict[str, Any],
+    ) -> None:
+        """Keep Monitor dispatch eligibility aligned with Scheduler outcome.
+
+        The connector may yield a temporarily unavailable or invalid target.
+        Reconcile only an exact session-key/observation pair so cooldown and
+        terminal failure cannot consume the bounded dispatch window, while a
+        genuinely new observation remains eligible.
+        """
+
+        monitor = self.session_monitor
+        if monitor is None:
+            return
+        for item in pending:
+            name = str(getattr(item, "name", "") or "").strip()
+            session_key = str(getattr(item, "session_key", "") or "").strip()
+            observation_id = str(
+                getattr(item, "pending_observation_id", "")
+                or getattr(item, "session_observation_id", "")
+                or ""
+            ).strip()
+            disposition, retry_seconds = capture_observation_disposition(
+                scheduler_state,
+                target_name=name,
+                session_key=session_key,
+                pending_observation_id=observation_id,
+            )
+            identifier = session_key or name
+            if disposition == MONITOR_DEFER and identifier:
+                defer = getattr(monitor, "_defer_pending_until", None)
+                if callable(defer):
+                    retry_not_before = (datetime.now() + timedelta(seconds=max(0.0, retry_seconds))).isoformat(
+                        timespec="milliseconds"
+                    )
+                    defer(identifier, retry_not_before=retry_not_before)
+            elif disposition == MONITOR_ACKNOWLEDGE and identifier:
+                reset = getattr(monitor, "reset_unread", None)
+                if callable(reset):
+                    reset(identifier)
 
     def _target_for_name(self, name: str, *, exact: bool = True) -> Any:
         target = self.target_by_name.get(str(name))
@@ -4754,30 +4901,19 @@ class ManagedListenerSchedulerBridge:
                 target_state,
                 target_name=target.name,
             )
-            recovered_short_batch = [] if ledger_replay else recover_pending_signal_batch_from_monitor(
-                messages,
-                pending_signal,
-                target_name=target.name,
-                allow_self_for_test=target.allow_self_for_test,
-                max_batch_messages=min(2, max(1, int(target.max_batch_messages or 1))),
-                now=datetime.now().isoformat(timespec="seconds"),
-            )
             if ledger_replay:
                 # The real chat-pane read found no new occurrence and the
                 # sidebar text is already closed by a later assistant ledger
                 # entry. Consume this one monitor fallback so it cannot be
                 # synthesized back into Brain as a duplicate customer turn.
                 pending_signal_consumed = True
-            if recovered_short_batch:
-                selection = replace(
-                    selection,
-                    batch=recovered_short_batch,
-                    overflow_messages=[],
-                    eligible_count=len(recovered_short_batch),
-                )
-                history_meta = dict(history_meta)
-                history_meta["monitor_pending_recovered_from_anchor_empty"] = True
-                history_meta["short_pending_recovered_count"] = len(recovered_short_batch)
+        verified_batch = _remove_preview_only_synthetic_reply_inputs(list(selection.batch))
+        if len(verified_batch) != len(selection.batch):
+            selection = replace(
+                selection,
+                batch=verified_batch,
+                eligible_count=len(verified_batch),
+            )
         stale_context = session.get("stale_reply_context") if isinstance(session.get("stale_reply_context"), dict) else {}
         context_recovery = build_context_recovery_hint(
             target_name=target.name,
@@ -4878,6 +5014,7 @@ class ManagedListenerSchedulerBridge:
         if reset_key:
             if (
                 capture.get("status") == "empty"
+                and not list(result.get("messages") or [])
                 and not result.get("pending_signal_consumed")
                 and hasattr(self.session_monitor, "should_preserve_pending_after_empty_capture")
                 and self.session_monitor.should_preserve_pending_after_empty_capture(reset_key)
