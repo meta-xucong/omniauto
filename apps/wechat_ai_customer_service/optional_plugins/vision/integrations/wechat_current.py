@@ -144,9 +144,16 @@ def observe_current_surface(
     ]
     if exact:
         worker_args.append("--exact")
+    from apps.wechat_ai_customer_service.adapters.wechat_pr28_runtime_adapter import (
+        physical_rpa_identity_kwargs,
+    )
+
+    physical_identity = physical_rpa_identity_kwargs(
+        {"session_key": session_key, "conversation_type": conversation_type}
+    )
     for value, flag in (
         (session_key, "--session-key"),
-        (conversation_type, "--conversation-type"),
+        (physical_identity.get("conversation_type"), "--conversation-type"),
     ):
         clean = str(value or "").strip()
         if clean:

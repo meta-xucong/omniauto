@@ -14,6 +14,7 @@ from typing import Any
 from .raw_message_learning_service import RawMessageLearningService
 from .raw_message_store import RawMessageStore
 from apps.wechat_ai_customer_service.adapters.wechat_connector import WeChatConnector
+from apps.wechat_ai_customer_service.adapters.wechat_pr28_runtime_adapter import adapt_wechat_pr28_connector
 from apps.wechat_ai_customer_service.knowledge_paths import tenant_runtime_root
 from apps.wechat_ai_customer_service.wechat_message_normalizer import normalize_wechat_message_record
 from apps.wechat_ai_customer_service.wechat_message_envelope import (
@@ -49,7 +50,7 @@ class RecorderService:
     def __init__(self, *, tenant_id: str | None = None) -> None:
         self.raw_store = RawMessageStore(tenant_id=tenant_id)
         self.learning = RawMessageLearningService(tenant_id=tenant_id)
-        self.connector = WeChatConnector()
+        self.connector = adapt_wechat_pr28_connector(WeChatConnector())
         self._last_idle_foreground_refresh_at = 0.0
 
     @property

@@ -12,6 +12,9 @@ from typing import Any, Mapping
 import psutil
 
 from apps.wechat_ai_customer_service.adapters.wechat_connector import WeChatConnector
+from apps.wechat_ai_customer_service.adapters.wechat_pr28_runtime_adapter import (
+    adapt_wechat_pr28_connector,
+)
 from apps.wechat_ai_customer_service.admin_backend.services.customer_service_runtime import CustomerServiceRuntime
 from apps.wechat_ai_customer_service.admin_backend.services.recorder_runtime import RecorderRuntime
 from apps.wechat_ai_customer_service.customer_service_live_safety import (
@@ -80,7 +83,7 @@ def collect_rpa_acceptance_report(
         raise ValueError("wechat_probe must be one of: none, passive, interactive")
     if wechat_probe != "none":
         capability = probe_wechat_capability(
-            connector or WeChatConnector(),
+            connector or adapt_wechat_pr28_connector(WeChatConnector()),
             mode=wechat_probe,
         )
 

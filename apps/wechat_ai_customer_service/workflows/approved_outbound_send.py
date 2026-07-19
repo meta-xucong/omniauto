@@ -35,6 +35,7 @@ from listen_and_reply import (
     save_state,
 )
 from wechat_connector import WeChatConnector
+from apps.wechat_ai_customer_service.adapters.wechat_pr28_runtime_adapter import adapt_wechat_pr28_connector
 
 
 def main() -> int:
@@ -115,7 +116,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             append_audit(audit_path, event)
             return event
 
-        connector = WeChatConnector()
+        connector = adapt_wechat_pr28_connector(WeChatConnector())
         send_result = connector.send_text_and_verify(
             target.name,
             args.text,

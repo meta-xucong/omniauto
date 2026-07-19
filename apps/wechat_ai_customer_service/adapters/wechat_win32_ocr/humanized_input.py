@@ -287,11 +287,11 @@ def adapt_humanized_input_settings(settings: dict[str, Any], text: str) -> dict[
         current = int(active.get(key) or 0)
         target = int(profile[key])
         if key.startswith("send_post_input") or key.startswith("send_trigger") or key.startswith("send_after_trigger"):
-            # Adaptive pacing may fill in a missing operational pause, but it
-            # must never make an explicitly conservative caller profile
-            # faster.  The previous assignment silently collapsed live/test
-            # guard windows to the much smaller adaptive target.
-            active[key] = max(current, target)
+            # PR #28 defines these bounded windows as the effective profile,
+            # not as lower bounds.  Keeping a wider inherited window defeats
+            # the selected short/medium/long pacing profile and recreates the
+            # long mechanical pauses the profile is meant to replace.
+            active[key] = target
         else:
             active[key] = 0 if current <= 0 else max(current, target)
     active["chunk_min_chars"] = max(int(active.get("chunk_min_chars") or 1), int(profile["chunk_min_chars"]))

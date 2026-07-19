@@ -38,7 +38,7 @@ def main() -> int:
         check_self_copy_transaction_selects_only_self_side,
         check_current_copy_requires_clipboard_generation_change,
         check_legacy_file_entrypoints_are_rejected,
-        check_shared_sidecar_has_no_image_action,
+        check_pr28_sidecar_image_residual_is_runtime_quarantined,
     ]
     results: list[dict[str, Any]] = []
     for check in checks:
@@ -246,13 +246,29 @@ def check_legacy_file_entrypoints_are_rejected() -> None:
     assert_equal(payload_result.get("state"), "legacy_image_file_capture_rejected", "legacy payload builder is fail-closed")
 
 
-def check_shared_sidecar_has_no_image_action() -> None:
+def check_pr28_sidecar_image_residual_is_runtime_quarantined() -> None:
     from apps.wechat_ai_customer_service.adapters import wechat_win32_ocr_sidecar
+    from apps.wechat_ai_customer_service.adapters.wechat_pr28_runtime_adapter import (
+        adapt_wechat_pr28_connector,
+    )
 
-    assert_true("image-save" not in wechat_win32_ocr_sidecar.SIDECAR_ACTION_CHOICES, "Sidecar must not expose image-save")
-    assert_true("image-clipboard-copy" not in wechat_win32_ocr_sidecar.SIDECAR_ACTION_CHOICES, "Sidecar must not expose clipboard image copy")
-    assert_true(not hasattr(wechat_win32_ocr_sidecar, "execute_wechat_image_save"), "Sidecar must not retain the legacy image facade")
-    assert_true(not hasattr(wechat_win32_ocr_sidecar, "execute_wechat_clipboard_image_copy"), "Sidecar must not retain clipboard image execution")
+    assert_true(hasattr(wechat_win32_ocr_sidecar, "execute_wechat_image_save"), "audited PR image residual changed unexpectedly")
+    assert_true(hasattr(wechat_win32_ocr_sidecar, "execute_wechat_clipboard_image_copy"), "audited PR clipboard residual changed unexpectedly")
+
+    class LegacyTrap:
+        def call_compat_sidecar(self, _args: list[str], **_kwargs: Any) -> dict[str, Any]:
+            return {"ok": True}
+
+        def run_customer_clipboard_image_transaction(self, *_args: Any, **_kwargs: Any) -> dict[str, Any]:
+            raise AssertionError("PR legacy image action became reachable")
+
+        def run_self_clipboard_image_transaction(self, *_args: Any, **_kwargs: Any) -> dict[str, Any]:
+            raise AssertionError("PR legacy self-image action became reachable")
+
+    connector = adapt_wechat_pr28_connector(LegacyTrap())
+    result = connector.run_customer_clipboard_image_transaction("Image Customer")
+    assert_equal(result.get("state"), "pr28_legacy_image_entry_quarantined", "PR residual must be fail-closed")
+    assert_equal(result.get("reason"), "vision_owned_transaction_required", "Vision must remain the only production owner")
 
 
 def assert_true(value: bool, message: str) -> None:

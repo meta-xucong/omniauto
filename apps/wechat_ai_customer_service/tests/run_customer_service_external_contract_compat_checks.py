@@ -209,7 +209,9 @@ def check_voice_and_image_legacy_result_shapes() -> None:
     assert_true(image_trigger.get("should_run") is True, "image signal must keep legacy trigger behavior")
 
     # The legacy image-call contract remains frozen at its image-owned adapter
-    # path.  It must not be re-exported from the replaceable OCR/RPA Sidecar.
+    # path. PR #28 reintroduced old Sidecar symbols byte-for-byte, so the host
+    # runtime must quarantine those symbols instead of treating them as the
+    # production Vision route.
     image_capture = importlib.import_module(
         "apps.wechat_ai_customer_service.adapters.wechat_image_save_capture"
     )
@@ -225,8 +227,26 @@ def check_voice_and_image_legacy_result_shapes() -> None:
     )
     sidecar = importlib.import_module(MODULES["wechat_win32_ocr_sidecar"])
     assert_true(
-        not hasattr(sidecar, "execute_wechat_image_save"),
-        "replaceable OCR/RPA Sidecar must not regain the legacy image facade",
+        hasattr(sidecar, "execute_wechat_image_save"),
+        "audited PR #28 residual changed unexpectedly",
+    )
+    runtime_adapter = importlib.import_module(
+        "apps.wechat_ai_customer_service.adapters.wechat_pr28_runtime_adapter"
+    )
+
+    class LegacyTrap:
+        def call_compat_sidecar(self, _args: list[str], **_kwargs: Any) -> dict[str, Any]:
+            return {"ok": True}
+
+        def run_customer_clipboard_image_transaction(self, *_args: Any, **_kwargs: Any) -> dict[str, Any]:
+            raise AssertionError("PR legacy image entry became reachable")
+
+    contained = runtime_adapter.adapt_wechat_pr28_connector(LegacyTrap())
+    rejected = contained.run_customer_clipboard_image_transaction("contract-probe")
+    assert_equal(
+        rejected.get("reason"),
+        "vision_owned_transaction_required",
+        "immutable PR image residual is not quarantined",
     )
 
 

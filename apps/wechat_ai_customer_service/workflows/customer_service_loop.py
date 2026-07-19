@@ -31,6 +31,7 @@ for path in (WORKFLOWS_ROOT, APP_ROOT, ADAPTERS_ROOT):
         sys.path.insert(0, str(path))
 
 from wechat_connector import FILE_TRANSFER_ASSISTANT, ROOT, WeChatConnector, WeChatConnectorError
+from apps.wechat_ai_customer_service.adapters.wechat_pr28_runtime_adapter import adapt_wechat_pr28_connector
 
 
 RULES_PATH = ROOT / "apps/wechat_ai_customer_service/configs/customer_service_rules.example.json"
@@ -90,7 +91,7 @@ def run_once(args: argparse.Namespace) -> dict[str, Any]:
     if args.allow_self_for_test and args.target != FILE_TRANSFER_ASSISTANT:
         raise ValueError("--allow-self-for-test is only allowed for File Transfer Assistant")
 
-    connector = WeChatConnector()
+    connector = adapt_wechat_pr28_connector(WeChatConnector())
     status = connector.require_online()
     rules = load_rules(args.rules)
     state = load_state(args.state)

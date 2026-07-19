@@ -24,6 +24,9 @@ from apps.wechat_ai_customer_service.optional_plugins.vision import (  # noqa: E
 from apps.wechat_ai_customer_service.optional_plugins.vision.capture.wechat import (  # noqa: E402
     session_split_x,
 )
+from apps.wechat_ai_customer_service.adapters.wechat_pr28_runtime_adapter import (  # noqa: E402
+    PR28_BLOBS,
+)
 
 
 def assert_true(value: Any, message: str) -> None:
@@ -89,26 +92,26 @@ def _function(relative: str, name: str) -> ast.FunctionDef:
     raise AssertionError(f"function missing: {relative}:{name}")
 
 
-def check_connector_facades_and_sidecar_zero_vision_boundary() -> None:
+def check_pr28_blobs_and_legacy_vision_paths_are_quarantined() -> None:
+    for relative, expected in PR28_BLOBS.items():
+        completed = subprocess.run(
+            ["git", "hash-object", "--", relative],
+            cwd=PROJECT_ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+        )
+        assert_true(
+            completed.stdout.strip() == expected,
+            f"PR #28 byte-immutable file changed: {relative}",
+        )
+
     connector = "apps/wechat_ai_customer_service/adapters/wechat_connector.py"
-    for name in ("run_customer_clipboard_image_transaction", "run_self_clipboard_image_transaction"):
-        node = _function(connector, name)
-        forbidden = (ast.If, ast.For, ast.While, ast.Try, ast.With)
-        assert_true(not any(isinstance(item, forbidden) for item in ast.walk(node)), f"connector image facade contains business flow: {name}")
     sidecar = _source("apps/wechat_ai_customer_service/adapters/wechat_win32_ocr_sidecar.py")
-    forbidden_sidecar_tokens = (
-        "optional_plugins.vision",
-        "wechat_image_save_capture",
-        "image-clipboard-copy",
-        '"image-save"',
-        "execute_wechat_clipboard_image_copy",
-        "execute_wechat_image_save",
-        "visual_image_messages_from_current_surface",
-        "self_visual_image_messages_from_current_surface",
-    )
     assert_true(
-        not any(token in sidecar for token in forbidden_sidecar_tokens),
-        "shared Sidecar still owns or dispatches vision behavior",
+        "image-clipboard-copy" in sidecar and '"image-save"' in sidecar,
+        "audited PR residual unexpectedly changed; re-audit the PR head instead of hiding it",
     )
     integration = _source(
         "apps/wechat_ai_customer_service/optional_plugins/vision/integrations/wechat_current.py"
@@ -120,8 +123,14 @@ def check_connector_facades_and_sidecar_zero_vision_boundary() -> None:
     )
     assert_true("execute_wechat_clipboard_image_copy" in worker, "vision worker does not own clipboard copy")
     assert_true("visual_image_messages_from_current_surface" in worker, "vision worker does not own surface observation")
-    connector_source = _source(connector)
-    assert_true("image-clipboard-copy" not in connector_source, "connector still parses or dispatches a Sidecar image action")
+    runtime_adapter = _source(
+        "apps/wechat_ai_customer_service/adapters/wechat_pr28_runtime_adapter.py"
+    )
+    assert_true(
+        "pr28_legacy_image_entry_quarantined" in runtime_adapter
+        and "vision_owned_transaction_required" in runtime_adapter,
+        "immutable PR legacy image entry is not quarantined by the host adapter",
+    )
     capture_method = _function(
         "apps/wechat_ai_customer_service/admin_backend/services/customer_service_scheduler.py",
         "_capture_session",
@@ -138,6 +147,18 @@ def check_connector_facades_and_sidecar_zero_vision_boundary() -> None:
         "explicit_image_pending",
     ):
         assert_true(forbidden not in capture_source, f"scheduler still owns image orchestration: {forbidden}")
+    plan_method = _function(
+        "apps/wechat_ai_customer_service/admin_backend/services/customer_service_scheduler.py",
+        "_plan_reply",
+    )
+    plan_source = ast.get_source_segment(
+        _source("apps/wechat_ai_customer_service/admin_backend/services/customer_service_scheduler.py"),
+        plan_method,
+    ) or ""
+    assert_true(
+        "run_customer_clipboard_image_transaction" not in plan_source,
+        "production planner still discovers the immutable PR image transaction",
+    )
 
 
 def check_retired_file_and_crop_routes_have_no_live_implementation() -> None:
@@ -307,7 +328,7 @@ def main() -> int:
     checks = [
         check_public_api_import_is_lightweight,
         check_legacy_paths_are_logic_free_aliases,
-        check_connector_facades_and_sidecar_zero_vision_boundary,
+        check_pr28_blobs_and_legacy_vision_paths_are_quarantined,
         check_retired_file_and_crop_routes_have_no_live_implementation,
         check_dependency_direction_and_single_owner,
         check_core_uses_only_neutral_optional_capability_dispatch,

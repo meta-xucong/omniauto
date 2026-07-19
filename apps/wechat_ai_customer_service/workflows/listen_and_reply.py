@@ -489,7 +489,11 @@ def run_workflow(args: argparse.Namespace) -> dict[str, Any]:
         timeout_seconds=int(lock_settings.get("timeout_seconds", 120)),
         stale_seconds=int(lock_settings.get("stale_seconds", 900)),
     ):
-        connector = WeChatConnector()
+        from apps.wechat_ai_customer_service.adapters.wechat_pr28_runtime_adapter import (
+            adapt_wechat_pr28_connector,
+        )
+
+        connector = adapt_wechat_pr28_connector(WeChatConnector())
         state = load_state(state_path)
 
         skip_pre_status = listener_skip_pre_status_check()

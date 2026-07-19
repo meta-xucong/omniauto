@@ -33,6 +33,7 @@ os.environ.setdefault("WECHAT_CLOUD_STRICT_ONLINE", "0")
 import customer_intent_assist as customer_intent_assist_module  # noqa: E402
 import customer_service_brain as customer_service_brain_module  # noqa: E402
 import final_visible_llm_polish as final_polish_module  # noqa: E402
+import listen_and_reply as listen_and_reply_module  # noqa: E402
 import llm_reply_synthesis as synthesis_module  # noqa: E402
 import reply_style_adapter as reply_style_adapter_module  # noqa: E402
 from customer_intent_assist import IntentAssistResult, call_deepseek_advisory  # noqa: E402
@@ -2317,18 +2318,56 @@ def check_customer_service_console_switches_take_effect() -> None:
             }
         )
         no_handoff_config = apply_local_customer_service_settings(load_smoke_config())
+        # This sub-check owns only the console handoff switch.  Inject a
+        # deterministic, Brain-owned handoff decision so a live model cannot
+        # turn the fixture into a safe direct reply and make the switch check
+        # nondeterministic.  Final polish is orthogonal here because the
+        # expected outcome is a blocked outbound send.
+        no_handoff_config["final_visible_llm_polish"]["enabled"] = False
         no_handoff_connector = FakeConnector([{"id": "risk-1", "type": "text", "content": "买10台冰箱能按20台价格吗？", "sender": "self"}])
-        no_handoff_event = process_target(
-            connector=no_handoff_connector,  # type: ignore[arg-type]
-            target=parse_targets(no_handoff_config)[0],
-            config=no_handoff_config,
-            rules=load_rules(resolve_path(no_handoff_config.get("rules_path"))),
-            state={"version": 1, "targets": {}},
-            send=True,
-            write_data=False,
-            allow_fallback_send=False,
-            mark_dry_run=False,
-        )
+        original_brain_runner = listen_and_reply_module.maybe_run_customer_service_brain
+
+        def deterministic_handoff_brain(**_kwargs: Any) -> dict[str, Any]:
+            reply_text = "这个价格需要进一步核实，确认后再回复您。"
+            return {
+                "enabled": True,
+                "mode": "brain_first",
+                "applied": True,
+                "adoptable": True,
+                "rule_name": "customer_service_brain_handoff",
+                "reason": "approval_required",
+                "needs_handoff": True,
+                "raw_reply_text": reply_text,
+                "reply_text": reply_text,
+                "visible_reply_owner": "brain",
+                "visible_reply_source": "brain_plan.reply_segments",
+                "brain_plan": {
+                    "reply_segments": [reply_text],
+                    "risk": {
+                        "risk_level": "high",
+                        "risk_tags": ["approval_required"],
+                        "needs_handoff": True,
+                        "handoff_reason": "approval_required",
+                    },
+                },
+                "brain_quality_review": {"passed": True, "reason": "deterministic_test_fixture"},
+            }
+
+        try:
+            listen_and_reply_module.maybe_run_customer_service_brain = deterministic_handoff_brain
+            no_handoff_event = process_target(
+                connector=no_handoff_connector,  # type: ignore[arg-type]
+                target=parse_targets(no_handoff_config)[0],
+                config=no_handoff_config,
+                rules=load_rules(resolve_path(no_handoff_config.get("rules_path"))),
+                state={"version": 1, "targets": {}},
+                send=True,
+                write_data=False,
+                allow_fallback_send=False,
+                mark_dry_run=False,
+            )
+        finally:
+            listen_and_reply_module.maybe_run_customer_service_brain = original_brain_runner
         assert_true(
             no_handoff_event.get("reason") in {"operator_handoff_disabled", "customer_service_brain_no_visible_reply"},
             f"handoff-off switch should block outbound send without legacy visible text: {no_handoff_event.get('reason')}",

@@ -3777,7 +3777,11 @@ class ManagedListenerSchedulerBridge:
 
     def _ensure_connector(self) -> None:
         if self.connector is None:
-            self.connector = self._workflow["WeChatConnector"]()
+            from apps.wechat_ai_customer_service.adapters.wechat_pr28_runtime_adapter import (
+                adapt_wechat_pr28_connector,
+            )
+
+            self.connector = adapt_wechat_pr28_connector(self._workflow["WeChatConnector"]())
 
     def _ensure_session_monitor(self, multi_target_cfg: dict[str, Any]) -> None:
         # ``multi_target.enabled`` controls dispatch breadth, not whether the
@@ -4892,11 +4896,6 @@ class ManagedListenerSchedulerBridge:
                 "session_key": session_key,
             }
         )
-        current_image_transaction_runner = getattr(
-            getattr(self, "connector", None),
-            "run_customer_clipboard_image_transaction",
-            None,
-        )
         with self._tenant_environment():
             planned = plan_reply_with_listen_workflow(
                 capture,
@@ -4907,9 +4906,6 @@ class ManagedListenerSchedulerBridge:
                 workflow_state=self._workflow_state_snapshot(),
                 allow_fallback_send=bool((self.config.get("reply", {}) or {}).get("allow_fallback_send")),
                 apply_final_visible_polish=False,
-                current_image_transaction_runner=(
-                    current_image_transaction_runner if callable(current_image_transaction_runner) else None
-                ),
             )
         event = planned.get("event") if isinstance(planned.get("event"), dict) else {}
         if isinstance(planned.get("decision"), dict) and event:
