@@ -8,6 +8,7 @@ the process-wide RPA lock primitives.
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -36,10 +37,19 @@ def _run_vision_worker(connector: Any, args: list[str]) -> dict[str, Any]:
     command = [_worker_python(connector), "-m", _WORKER_MODULE, *args]
     timeout = max(5.0, float(getattr(connector, "timeout_seconds", 90.0) or 90.0))
     creationflags = int(getattr(subprocess, "CREATE_NO_WINDOW", 0))
+    worker_env = os.environ.copy()
+    # PR #28 deliberately remains byte-immutable.  Its generic Win32 host
+    # defaults fixed-origin normalization off, while OmniAuto's existing
+    # physical-coordinate contract requires it on.  The normal Connector path
+    # receives this host policy from ``wechat_pr28_runtime_adapter``; Vision
+    # starts its own worker and therefore must carry the same additive default
+    # at this external binding.  An explicit operator setting still wins.
+    worker_env.setdefault("WECHAT_WIN32_OCR_WINDOW_FIXED_ORIGIN", "1")
     try:
         completed = subprocess.run(
             command,
             cwd=str(_worker_root(connector)),
+            env=worker_env,
             capture_output=True,
             text=True,
             encoding="utf-8",
