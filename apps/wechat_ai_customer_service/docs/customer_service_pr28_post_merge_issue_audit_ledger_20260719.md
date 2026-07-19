@@ -93,14 +93,14 @@
 | PR parent / 当时 master | `378cc3f7b3b24e88ff8d9f145c185bb5c48d509c` |
 | PR 文件数 | 7 个，清单见总方案 0.2 |
 | GitHub 状态 | Draft、mergeable/clean；没有 GitHub CI checks |
-| PR 作者声明测试 | 229/229 OCR、28/28 Window Action Planning；尚需本地复跑 |
-| 当前本地 Vision 边界回归 | 6/6 + 3/3 + 7/7 + 7/7 + 3/3，共 26 项通过 |
-| 当前 Sidecar 图片专用 token | 本地当前版本为 0；PR head 中仍有旧图片残留 |
+| PR 作者声明测试 | 229/229 OCR、28/28 Window Action Planning；已在 PR 外有效运行环境独立复跑并通过 |
+| 当前本地 Vision 边界回归 | 合并后绝对边界 7/7、插件矩阵 7/7、worker 3/3、图片合同 7/7、PR runtime adapter 5/5 通过 |
+| 当前 Sidecar 图片专用 token | PR head 旧图片残留已原样进入本地；PR 外 runtime adapter 将入口失败关闭，Vision 不调用旧 action |
 | 已确认故障会话 | `新数据测试`，实际标题显示 `新数据测试(2)` |
 | 已确认 session key | `wx:rpa:v1:178877830fefdaa357d6` |
 | 已确认类型漂移 | 请求/侧栏推断 `private`，打开聊天区结构确认 `group` |
 | 已确认结果 | Brain/最终润色已完成，最终发送守卫以类型不一致阻断 |
-| 工作区状态 | 大量未提交改动；合并前必须先建立可恢复检查点 |
+| 工作区状态 | 已建立 Vision 检查点 `b576844b`、PR 原样 merge 检查点 `f678edb6`、PR 外运行时适配 `94638305` 与 Brain 角色连续性检查点 `e3db0c0f`；运行时探针、缓存和无关截图未提交 |
 
 以上基线只代表审计时事实。合并时若 PR head、文件清单、测试声明或工作区状态变化，必须先更新本节，再开始实施。
 
@@ -110,15 +110,15 @@
 
 | issue_id | 严重度 | 简述 | owner | 当前状态 |
 | --- | --- | --- | --- | --- |
-| `PR28-IMG-001` | P2 | PR Sidecar 保留旧图片执行函数及依赖 | pr_author | REPRODUCED |
-| `PR28-IMG-002` | P2 | PR Sidecar 的图片 action 处于半退役不一致状态 | pr_author | REPRODUCED |
-| `PR28-IMG-003` | P1 | PR Connector 仍拥有旧剪贴板图片事务，形成双所有者 | shared | LOCAL_GUARD_REQUIRED |
-| `VIS-BOUND-001` | P2 | Scheduler 直接导入具体 Vision compatibility | local_integration | REPRODUCED |
-| `VIS-BOUND-002` | P2 | Brain 与 listen_and_reply 直接导入具体 Vision compatibility | local_integration | REPRODUCED |
-| `VIS-BOUND-003` | P2 | Scheduler vision_bridge 直接 importlib 到具体实现 | local_integration | REPRODUCED |
-| `VIS-RUNTIME-001` | P1 | Vision 某些路径仍调用 Connector 图片专用方法 | local_integration | REPRODUCED |
-| `VIS-TEST-001` | P2 | 当前边界测试不能证明 PR 原样合并后的生产唯一性 | local_integration | DISCOVERED |
-| `VIS-IDENT-001` | P1 | Vision 目标准备继承 private/group 硬冲突 | shared | REPRODUCED |
+| `PR28-IMG-001` | P2 | PR Sidecar 保留旧图片执行函数及依赖 | pr_author | LOCAL_GUARD_VERIFIED |
+| `PR28-IMG-002` | P2 | PR Sidecar 的图片 action 处于半退役不一致状态 | pr_author | LOCAL_GUARD_VERIFIED |
+| `PR28-IMG-003` | P1 | PR Connector 仍拥有旧剪贴板图片事务，形成双所有者 | shared | LOCAL_GUARD_VERIFIED |
+| `VIS-BOUND-001` | P2 | Scheduler 直接导入具体 Vision compatibility | local_integration | LOCAL_GUARD_VERIFIED |
+| `VIS-BOUND-002` | P2 | Brain 与 listen_and_reply 直接导入具体 Vision compatibility | local_integration | LOCAL_GUARD_VERIFIED |
+| `VIS-BOUND-003` | P2 | Scheduler vision_bridge 直接 importlib 到具体实现 | local_integration | LOCAL_GUARD_VERIFIED |
+| `VIS-RUNTIME-001` | P1 | Vision 某些路径仍调用 Connector 图片专用方法 | local_integration | LOCAL_GUARD_VERIFIED |
+| `VIS-TEST-001` | P2 | 当前边界测试不能证明 PR 原样合并后的生产唯一性 | local_integration | LOCAL_GUARD_VERIFIED |
+| `VIS-IDENT-001` | P1 | Vision 目标准备继承 private/group 硬冲突 | shared | LOCAL_GUARD_REQUIRED |
 | `SID-001` | P1 | exact key/title 相同，仅因类型漂移而不发送 | pr_author | REPRODUCED |
 | `SID-002` | P1 | 会话查找策略与最终发送守卫语义不一致 | shared | REPRODUCED |
 | `SID-003` | P2 | session key seed 含易漂移的类型/行指纹 | pr_author | REPRODUCED |
@@ -134,8 +134,10 @@
 | `RPA-BEHAVIOR-001` | P1 | 机械化高频操作存在微信踢下线风险 | shared | DISCOVERED |
 | `FILTER-001` | P1 | 服务号排除与“其余新会话全覆盖”边界需回归 | local_integration | DISCOVERED |
 | `RPA-TEST-001` | P2 | PR 无 GitHub checks，作者测试声明尚未本地独立验证 | shared | REPRODUCED |
+| `PR28-RPA-001` | P1 | PR 固定原点默认值与其原生测试自相矛盾 | pr_author | LOCAL_GUARD_REQUIRED |
+| `PR28-CONTRACT-001` | P1 | PR 在九个 Sidecar 函数上增加可选参数 | pr_author | REPRODUCED |
 | `BRN-ROLE-001` | P1 | 回复出现“后续由人工同事”并暴露角色断裂 | local_integration | REPRODUCED |
-| `BRN-PIPE-001` | P2 | 减负后 Reviewer/Guard 仍需证明不漏角色连续性 | local_integration | DISCOVERED |
+| `BRN-PIPE-001` | P2 | 减负后 Reviewer/Guard 仍需证明不漏角色连续性 | local_integration | REPRODUCED |
 | `PROC-001` | P1 | 工作区改动过大且检查点不足，难以定位最近回归 | local_integration | REPRODUCED |
 | `DOC-001` | P2 | 历史身份文档把 conversation type 当永久硬身份 | local_integration | REPRODUCED |
 | `DOC-002` | P2 | 历史 Vision 文档“完全收口”结论过宽 | local_integration | REPRODUCED |
@@ -157,7 +159,7 @@
 - `local_containment`：PR 七文件保持原样；在 PR 外确保这些函数不注册为生产可达入口，Vision 不调用它们。
 - `upstream_request`：朋友后续独立提交删除确认无调用的图片残留，并给出无入口证明。
 - `verification`：静态调用图、CLI 枚举、进程命令审计、Vision 启停矩阵、真实客户图/我方图测试。
-- `status`：`REPRODUCED`。
+- `status`：`LOCAL_GUARD_VERIFIED`。
 - `audit_stamp`：2026-07-19 / PR `2120f167...` / 本地提交待建立。
 - `关闭条件`：上游新提交移除残留；合并后 PR OCR 测试和 Vision 全矩阵均通过；无第三方调用者被破坏。
 
@@ -174,7 +176,7 @@
 - `local_containment`：本地不恢复历史 route，不给 Vision 建兼容调用，不用它做失败回退。
 - `upstream_request`：上游先做消费者审计，再以独立提交完整删除或正式恢复；不得在本地猜测意图。
 - `verification`：CLI 合同快照、未知 action 错误行为、daemon mapping、OCR 229 项、本地第三方导入检索。
-- `status`：`REPRODUCED`。
+- `status`：`LOCAL_GUARD_VERIFIED`。
 - `audit_stamp`：2026-07-19 / PR `2120f167...`。
 - `关闭条件`：上游 action 生命周期一致，合同测试和下游兼容证据齐全。
 
@@ -191,7 +193,7 @@
 - `local_containment`：合并前把 Vision 改为依赖 PR 外的中性 host adapter；合并后不调用 Connector 图片专用方法；PR 旧动作生产不可达。
 - `upstream_request`：朋友后续将旧 clipboard image transaction 从 Connector 移除或下沉为不含图片语义的原子桌面操作。
 - `verification`：运行时调用计数、故障注入、剪贴板新鲜度、客户图/我方图、Vision disabled/core-only、PR 文件 blob 校验。
-- `status`：`LOCAL_GUARD_REQUIRED`。
+- `status`：`LOCAL_GUARD_VERIFIED`。
 - `audit_stamp`：2026-07-19 / PR `2120f167...`。
 - `关闭条件`：本地外围隔离只能到 `LOCAL_GUARD_VERIFIED`；上游删除并重新合并、全矩阵通过后才可 `CLOSED`。
 
@@ -207,7 +209,7 @@
 - `expected_invariant`：Scheduler 只依赖中性插件协议/registry 和既有兼容 payload；Vision 缺失时核心仍可启动。
 - `修复边界`：保持现有公共调用和字段不变，把解析/调用放到中性 capability lookup；懒加载且 absence-safe。
 - `verification`：core-only、core+voice、core+vision、core+both、custom-vision、Vision 依赖缺失、Vision 初始化异常。
-- `status`：`REPRODUCED`。
+- `status`：`LOCAL_GUARD_VERIFIED`。
 - `关闭条件`：禁止导入扫描、插件矩阵和旧调用路径合同全部通过。
 
 ### VIS-BOUND-002：Brain 与 listen_and_reply 直接导入具体 Vision compatibility
@@ -218,7 +220,7 @@
 - `expected_invariant`：Brain 只消费既有消息/上下文字段中的图片理解文字和授权商品证据；监听层只调用中性能力。
 - `修复边界`：不改变 Brain 外层 evidence contract、不新增共享字段；通过中性适配填充现有字段。
 - `verification`：无 Vision 模块时文本客服全流程、custom Vision、图片结果注入、Brain 不接触图片字节、客户可见作者链。
-- `status`：`REPRODUCED`。
+- `status`：`LOCAL_GUARD_VERIFIED`。
 - `关闭条件`：静态边界、导入故障、运行时插件矩阵和 Brain fixture 均通过。
 
 ### VIS-BOUND-003：vision_bridge 直接定位具体 occurrence
@@ -229,7 +231,7 @@
 - `expected_invariant`：bridge 应实现中性协议的宿主侧适配，不应使 Scheduler 依赖具体实现路径。
 - `修复边界`：保留旧 facade 和返回结构；实现移入插件侧或 registry binding，外部调用无感。
 - `verification`：旧 import path、返回对象 key、异常/None 行为、第三方自定义 Vision。
-- `status`：`REPRODUCED`。
+- `status`：`LOCAL_GUARD_VERIFIED`。
 - `关闭条件`：具体包路径不再出现在核心禁止导入清单，兼容合同不变。
 
 ### VIS-RUNTIME-001：Vision 仍调用 Connector 图片专用方法
@@ -240,7 +242,7 @@
 - `expected_invariant`：Vision 自己编排右键复制和当前剪贴板事务，只从中性 host port 获得点击、菜单选择、剪贴板读取等原语。
 - `修复边界`：先于 PR 合并完成 host adapter；禁止以旧 Connector 图片方法作为 fallback。
 - `verification`：mock Connector 拒绝图片专用方法仍能完成 Vision；调用追踪中旧 action 为 0；真实图片方向双测。
-- `status`：`REPRODUCED`。
+- `status`：`LOCAL_GUARD_VERIFIED`。
 - `关闭条件`：V1/V2 冻结矩阵通过，PR 合并后同一测试再通过。
 
 ### VIS-TEST-001：当前边界测试没有覆盖 PR 原样树
@@ -251,7 +253,7 @@
 - `expected_invariant`：同时区分“本地冻结树源码零残留”和“PR 原样树中已登记残留但生产不可达”。
 - `修复边界`：新增两类门禁：Vision 自身绝对边界；PR 文件 blob 不变 + 旧入口运行时不可达。
 - `verification`：在 V2 checkpoint 和 P0 checkpoint 各跑一次，报告分开出结果。
-- `status`：`DISCOVERED`。
+- `status`：`LOCAL_GUARD_VERIFIED`。
 - `关闭条件`：两类门禁均可重复运行并在 CI/本地报告中明确区分。
 
 ### VIS-IDENT-001：Vision 继承会话类型硬冲突
@@ -263,7 +265,7 @@
 - `local_containment`：Vision host adapter 使用统一会话 resolution；仍对 key/title/候选歧义 fail-closed。
 - `upstream_request`：上游会话确认 API 区分 physical identity 和 semantic type。
 - `verification`：侧栏 private→群 header、未知→private、单聊/群聊同名歧义、图片方向双测。
-- `status`：`REPRODUCED`。
+- `status`：`LOCAL_GUARD_REQUIRED`。
 - `关闭条件`：文字/图片共用矩阵通过，不能出现跨会话图片绑定。
 
 ---
@@ -448,7 +450,34 @@
 - `expected_invariant`：先校验七文件 blob，再在本地双端口/离线环境复跑 PR 原生测试并保存报告。
 - `verification`：OCR compatibility、screenshot replay、window planning、现有外部合同和 Vision 矩阵。
 - `status`：`REPRODUCED`。
+- `post_merge_evidence`：七文件 blob 已与 `2120f167...` 全等。原样直接运行先在 fixed-origin 默认值处失败；经与生产 Connector 相同的 PR 外环境适配后，OCR compatibility 229/229、window planning 28/28 通过，sender-role screenshot replay 因未提供两张外部截图而按设计跳过。
 - `关闭条件`：本地报告含命令、耗时、通过数、失败项、SHA；有条件时再补 CI。
+
+### PR28-RPA-001：固定原点默认值与 PR 原生测试自相矛盾
+
+- `severity`：P1；`owner`：`pr_author`。
+- `source_scope`：PR `wechat_win32_ocr_sidecar.py`、`run_wechat_win32_ocr_compat_checks.py`、`run_wechat_win32_ocr_window_action_planning_checks.py`。
+- `evidence`：PR Sidecar 在环境变量缺失时以 `WECHAT_WIN32_OCR_WINDOW_FIXED_ORIGIN=False` 调用 planner；同一 PR 两组测试先清除该环境变量，再明确断言窗口从 `(-180, 80)` 移到 `(0, 0)`。原样执行实际得到 `(0, 80)`，两组均失败。
+- `actual`：作者声称的 229/229、28/28 不能在 PR 原样默认环境复现；这不是本地 Vision、Brain 或业务配置问题。
+- `expected_invariant`：默认值、测试预期和生产窗口坐标原则必须一致；显式用户环境设置仍应优先。
+- `local_containment`：不修改 PR 文件。`wechat_pr28_runtime_adapter.py` 只在用户未显式配置时，经 Connector 的既有 `env_overrides` 注入固定原点；显式 `0/false` 不被覆盖。
+- `verification`：原样负例稳定复现；runtime adapter 5/5；effective PR suites 229/229、28/28；仍需真实客户端验证不会多余移动或隐藏聊天区。
+- `status`：`LOCAL_GUARD_REQUIRED`。
+- `upstream_request`：朋友统一 Sidecar 默认值与两组测试，或明确更新测试和迁移说明；不得要求下游静默猜测。
+- `关闭条件`：上游修复进入新提交，移除本地默认注入后同套测试和实机均通过。
+
+### PR28-CONTRACT-001：九个 Sidecar 函数新增可选参数
+
+- `severity`：P1；`owner`：`pr_author`。
+- `source_scope`：PR `wechat_win32_ocr_sidecar.py`。
+- `evidence`：外部合同快照检测到以下九个 callable 的签名增加了 keyword-only 可选参数：`capture_message_history_snapshots`、`capture_message_history_snapshots_until_anchor`、`consume_recent_target_switch_validation`、`dismiss_voice_transcribe_context_menu`、`messages_payload`、`open_chat`、`parse_messages_from_ocr`、`validate_active_send_target`、`voice_transcribe_payload`。
+- `actual`：旧调用不传新参数时仍可运行，属于行为上向后兼容的 additive extension；但它违反本轮“模块间接口/字段不增减”的更严格协作约束，且 PR 未提供迁移/合同说明。
+- `expected_invariant`：PR 文件原样保留与合同冻结冲突时必须显式登记，不能通过改 PR、伪造旧签名或悄悄删除测试来掩盖。
+- `local_containment`：外部合同快照更新为审计后的 PR 精确签名，并继续验证旧必填参数、默认值和返回形状；本地不使用新增参数扩张 Brain/Vision/RPA 跨模块合同。
+- `verification`：external contract 3/3；PR blob 7/7；旧调用形态仍可绑定；待朋友确认九项是否都属于有意公开扩展。
+- `status`：`REPRODUCED`。
+- `upstream_request`：逐项标注 public/private、用途、兼容窗口和是否可在后续提交收回；若公开则补合同文档，若私有则从外部导出面收束。
+- `关闭条件`：仓库所有者明确批准合同处理，朋友补齐文档/测试，后续合并与旧调用回归通过。
 
 ---
 
@@ -461,18 +490,25 @@
 - `actual`：回复把当前客服和“人工同事”对立，破坏商家客服角色连续性，间接暴露自动化身份。
 - `expected_invariant`：Brain 始终以统一商家客服身份回应；需要升级、核实或后续处理时表达业务动作，不声明自身是 AI，也不建立“我 vs 人工”的角色分裂。
 - `修复边界`：通过 Brain 的通用角色目标、语义 reviewer feedback 和一次修复回路处理；禁止堆“人工同事/专员/真人”等短语黑名单作为主要方案。
+- `post_merge_evidence`：真实模型 dry-run `BRAIN_BOUNDARY_20260719_160704` 虽被旧矩阵判绿，人工审阅仍发现“金融顾问帮您评估”，证明短语断言和单次 Reviewer 都不足以作为关闭证据。提交 `e3db0c0f` 后改为三层通用机制：Brain 输出前逐句审计未来动作主语；语义 Reviewer 仅依据客户可见事实审稿，不接收 `must_handoff/recommended_action` 等内部路由值；最终微润色在内部升级轮只允许删除内部角色/流转说明，不得改写事实、边界或扩大当前角色权限。
+- `fact_evidence_followup`：`BRAIN_BOUNDARY_20260719_161445` 又暴露“车况不错”未在 Brain 事实声明中落证。根因不是车型词条，而是 Reviewer 仅收到商品 ID/名称。`e3db0c0f` 将同一份已过滤、客户可见的商品事实摘要交给 Reviewer，并用负例证明 VIN、采购价等受限字段不进入审稿输入。
 - `verification`：价格优惠、预约、售后、未知信息、必须升级、闲聊转业务、多轮追问；使用语义判定和人工抽检。
 - `status`：`REPRODUCED`。
+- `automated_containment_result`：通用 Brain 10/10、Brain contract 全量、workflow 127/127、Scheduler 189/189 均通过；真实模型定向结果 `160642`、`161326`、`161346`、`161707` 均为 Brain 原文 `handoff_sent` 且不暴露内部角色；历史坏草稿经真实最终润色只删除内部角色说明。尚未执行真实微信 UI 发送，因此不提升为 `LOCAL_GUARD_VERIFIED`。
+- `audit_stamp`：2026-07-19 / PR `2120f167...` / 本地 `e3db0c0f` / Codex。
 - `关闭条件`：通用场景不暴露 AI/人工分裂，同时不虚构权限、不承诺未授权事实。
 
 ### BRN-PIPE-001：减负后角色连续性检查的覆盖风险
 
 - `severity`：P2；`owner`：`local_integration`。
 - `evidence`：近期为降低 Brain 负担已清理多层 reviewer/补丁；需要确认简化链路没有跳过必要的语义角色审查。
-- `actual`：问题尚属风险项；不能因一条错误回复就恢复多层结构化引擎。
+- `actual`：已稳定复现两个机制冲突：一是 Reviewer 可把内部 `must_handoff/allowed_auto_reply` 误解为“客户话术必须说明转交对象”，导致正确边界答复在修复后仍被阻断并把单轮拉长到 19.2941 秒；二是仅传商品 ID/名称时，Reviewer 无法可靠核对商品断言。不能因这些错误恢复多层结构化词条引擎。
 - `expected_invariant`：主链保持“Brain 理解并生成→Guard/语义审查→必要时反馈 Brain 重做→发送”，Reviewer 不另写答案。
+- `local_containment`：选择 Reviewer 仍可使用内部权威元数据，但 Reviewer 请求不携带内部调度值；Guard 只在 Brain 已写出 `safe_boundary_reply` 时对齐内部 handoff 元数据，回复文本逐字保持；不满足安全标记的硬边界仍交回 Brain。Reviewer 修复后必须再做一次语义验证，失败或不可用即阻断。
 - `verification`：延迟分段统计、每轮 LLM 次数、repair 触发率、角色/事实/安全/多会话用例。
-- `status`：`DISCOVERED`。
+- `status`：`REPRODUCED`。
+- `automated_containment_result`：错误元数据未对齐负例仍返回 `hard_boundary_requires_brain_handoff_plan`；安全可见边界正例只改变内部 handoff 动作且回复原文不变。普通问候、闲聊、别名商品、保险常识和贷款边界五场景矩阵通过；外部合同 3/3 未变化。
+- `audit_stamp`：2026-07-19 / PR `2120f167...` / 本地 `e3db0c0f` / Codex。
 - `关闭条件`：性能目标和语义正确率同时达标，非 Brain 模块没有客户可见措辞所有权。
 
 ---
@@ -628,7 +664,7 @@ Evidence attachments:
 
 ---
 
-## 13. 当前逐项核对结论（开发前）
+## 13. 逐项核对结论（开发前历史基线）
 
 | 检查问题 | 结论 |
 | --- | --- |
@@ -644,3 +680,21 @@ Evidence attachments:
 | 后续如何与当前发现逐一核对 | 以本台账 issue ID、状态机、专属关闭条件和 audit run 逐项推进 |
 
 开发前结论：当前已发现的问题均已编号并保留。后续合并和测试的目标不是把台账“清空”，而是让每个问题都有可证明的状态：本地根修、上游根修、可靠外围隔离、明确接受的技术债，或带足够证据的不可复现。任何未解释的 P0/P1 都阻止交付。
+
+---
+
+### Audit Run 2026-07-19 16:18
+
+- auditor：Codex。
+- local branch / commit：`codex/pr28-independent-vision-integration` / `e3db0c0f`；前置检查点为 `b576844b`、`f678edb6`、`94638305`。
+- PR head：`2120f16744aebe3d8edbdf9c3f407375bfeed279`。
+- environment：Windows 本地离线/内存 Connector + DeepSeek 真实模型；未启动真实微信 AI 监听，未向任何微信会话发送消息。
+- test layer：Python 合同/工作流/调度/插件/PR 外适配；真实模型 dry-run；最终润色历史坏草稿回放。
+- commands / scripts：`run_customer_service_universal_brain_pipeline_checks.py` 10/10；`run_customer_service_brain_contract_checks.py` 全量通过；`run_workflow_logic_checks.py` 127/127；`run_customer_service_multi_session_scheduler_checks.py` 189/189；Vision 绝对边界 7/7、插件矩阵 7/7、worker 3/3；PR adapter 5/5、effective OCR 229/229、effective window planning 28/28；external contract 3/3；RPA acceptance 10/10；Python compile、JSON parse、`git diff --check` 通过。
+- issues reviewed：`PR28-IMG-001/002/003`、`VIS-BOUND-001/002/003`、`VIS-RUNTIME-001`、`VIS-TEST-001`、`BRN-ROLE-001`、`BRN-PIPE-001`、`RPA-TEST-001`。
+- state transitions：`BRN-PIPE-001` 从 `DISCOVERED` 提升为 `REPRODUCED`；其余保持原状态，避免用自动测试替代真实微信证据。
+- new evidence：`BRAIN_BOUNDARY_20260719_160704` 暴露 Reviewer 角色假阴性；`161150` 复现内部路由元数据污染审稿并造成 19.2941 秒阻断；`161445` 暴露商品事实摘要缺失；修复后 `161707` 通过且角色中立。真实最终润色把历史坏草稿中的内部角色说明删除，保留贷款审批边界。
+- regressions/new issue IDs：未新增 issue ID；两类新证据归入既有 `BRN-ROLE-001/BRN-PIPE-001`。
+- manual observations：只人工审阅 dry-run 文本；真实微信双会话、群聊类型校正、图片双方方向、UI 最小点击、掉线恢复和长测均未执行。
+- rollback/checkpoint：代码检查点 `e3db0c0f`；PR 七文件继续由 blob 门禁保护，7/7 与 PR head 完全一致。
+- decision：自动化层可进入仓库所有者授权的真实微信手测；不能据此关闭 `SID-*`、`SEND-001`、`RPA-BEHAVIOR-001` 或宣称最终实机交付完成。
