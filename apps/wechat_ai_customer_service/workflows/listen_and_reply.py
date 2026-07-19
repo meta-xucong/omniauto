@@ -54,6 +54,9 @@ from apps.wechat_ai_customer_service.llm_config import (
     resolve_llm_base_url,
     resolve_llm_tier_model,
 )
+from apps.wechat_ai_customer_service.internal.conversation_context import (
+    merge_conversation_context_patch,
+)
 from apps.wechat_ai_customer_service.platform_safety_rules import guard_term_set, load_platform_safety_rules
 from apps.wechat_ai_customer_service.wechat_message_envelope import (
     apply_message_envelope_to_record,
@@ -87,9 +90,9 @@ from apps.wechat_ai_customer_service.optional_plugins.voice.compatibility import
     legacy_maybe_auto_transcribe_voice_messages,
     legacy_voice_transcription_trigger,
 )
-from apps.wechat_ai_customer_service.optional_plugins.vision.compatibility import (
-    legacy_maybe_capture_self_image_context,
-    legacy_maybe_route_customer_image_turn,
+from apps.wechat_ai_customer_service.internal.vision_bridge import (
+    maybe_capture_self_image_context as legacy_maybe_capture_self_image_context,
+    maybe_route_customer_image_turn as legacy_maybe_route_customer_image_turn,
 )
 from product_knowledge import decide_product_knowledge_reply, load_product_knowledge
 from rag_answer_layer import maybe_build_rag_reply
@@ -954,10 +957,16 @@ def process_target(
         batch=preview_batch,
         combined=preview_combined,
     )
+    customer_image_context_update: dict[str, Any] = {}
     if customer_image_turn.get("applied"):
         context_patch = customer_image_turn.get("conversation_context_patch") if isinstance(customer_image_turn.get("conversation_context_patch"), dict) else {}
         if context_patch:
-            target_state.setdefault("conversation_context", {}).update(context_patch)
+            customer_image_context_update = dict(context_patch)
+            current_context = target_state.setdefault("conversation_context", {})
+            if isinstance(current_context, dict):
+                merged_context = merge_conversation_context_patch(current_context, context_patch)
+                current_context.clear()
+                current_context.update(merged_context)
         visual_context_patch = customer_image_turn.get("visual_context_state_patch") if isinstance(customer_image_turn.get("visual_context_state_patch"), dict) else {}
         if visual_context_patch:
             target_state.setdefault("visual_context_state", {}).update(visual_context_patch)
@@ -1003,19 +1012,48 @@ def process_target(
         }
 
     routing_batch = normalize_batch_content_for_reply_routing(batch)
-    semantic_batch_plan = plan_message_batch_semantics(routing_batch, config)
+    if brain_first_requires_brain_owned_visible_reply(config):
+        # Brain First must receive the chronological customer text, not a local
+        # business-intent rewrite.  Keep the historical audit field/shape for
+        # frozen callers, but make it deliberately content-neutral.
+        semantic_batch_plan = brain_first_neutral_batch_audit(routing_batch)
+    else:
+        semantic_batch_plan = plan_message_batch_semantics(routing_batch, config)
     combined = str(semantic_batch_plan.get("combined_text") or "\n".join(str(item.get("content") or "") for item in batch))
     if not str(combined or "").strip() and customer_image_turn.get("adoptable"):
         combined = str(customer_image_turn.get("combined_text_override") or "").strip()
-    preference_context_update = update_conversation_preference_context(target_state, combined)
-    strategy_state = update_conversation_strategy_state(target_state, combined)
-    message_ids = [reply_input_message_identity(item) for item in batch if reply_input_message_identity(item)]
-    interaction_state = update_conversation_interaction_state_on_capture(
-        target_state,
-        combined,
-        message_ids=message_ids,
+    brain_first_universal_route = brain_first_requires_brain_owned_visible_reply(config)
+    preference_context_update = (
+        {}
+        if brain_first_universal_route
+        else update_conversation_preference_context(target_state, combined)
     )
-    if send and should_defer_standalone_greeting(config, routing_batch, combined):
+    conversation_context_update = {
+        **preference_context_update,
+        **customer_image_context_update,
+    }
+    conversation_context_update_sources: list[str] = []
+    if preference_context_update:
+        conversation_context_update_sources.append("customer_preference_capture")
+    if customer_image_context_update:
+        conversation_context_update_sources.append("customer_image_turn")
+    conversation_context_update_source = "+".join(conversation_context_update_sources)
+    strategy_state = (
+        dict(target_state.get("conversation_strategy_state", {}) or {})
+        if brain_first_universal_route
+        else update_conversation_strategy_state(target_state, combined)
+    )
+    message_ids = [reply_input_message_identity(item) for item in batch if reply_input_message_identity(item)]
+    interaction_state = (
+        dict(target_state.get("conversation_interaction_state", {}) or {})
+        if brain_first_universal_route
+        else update_conversation_interaction_state_on_capture(
+            target_state,
+            combined,
+            message_ids=message_ids,
+        )
+    )
+    if send and not brain_first_universal_route and should_defer_standalone_greeting(config, routing_batch, combined):
         mark_coalesced_messages(
             target_state,
             batch,
@@ -1101,20 +1139,26 @@ def process_target(
                 "reply_routing_normalization": batch_routing_normalization_payload(batch, routing_batch),
                 "history_backfill": payload.get("_history_backfill", {}),
                 "product_knowledge": product_knowledge,
-                "conversation_context_update": dict(preference_context_update),
-                "conversation_context_update_source": "customer_preference_capture" if preference_context_update else "",
+                "conversation_context_update": dict(conversation_context_update),
+                "conversation_context_update_source": conversation_context_update_source,
                 "intent_result": {
-                    "intent": "greeting",
-                    "confidence": 0.95,
-                    "reasoning": "brain_first_low_authority_fast_precheck",
+                    "intent": "unclear",
+                    "confidence": 0.0,
+                    "reasoning": "brain_first_semantics_owned_by_brain",
                     "entities": {},
-                    "source": "brain_first_low_authority_fast_precheck",
+                    "source": "brain_first_semantics_owned_by_brain",
                 },
                 "intent_assist": intent_assist,
                 "dry_run": not send,
                 "brain_first_low_authority_fast_precheck": low_authority_fast_precheck,
                 "customer_image_turn": customer_image_turn,
                 "brain_visual_context_used": bool(visual_bridge_input),
+                "rag_reply": {"applied": False, "reason": "rag_response_disabled"},
+                "llm_reply": {"applied": False, "reason": "llm_advisory_disabled"},
+                "realtime_context": {"applied": False, "text": ""},
+                "runtime_route": {"applied": False, "reason": "realtime_reply_disabled"},
+                "realtime_reply": {"applied": False, "reason": "realtime_reply_disabled"},
+                "llm_reply_synthesis": {"applied": False, "reason": "llm_reply_synthesis_disabled"},
             },
         )
         write_workflow_phase("customer_service_brain_start", target=target.name)
@@ -1236,7 +1280,7 @@ def process_target(
             )
 
     # 1. Build evidence pack for intent analysis and synthesis
-    brain_first_operational_route = brain_first_requires_brain_owned_visible_reply(config)
+    brain_first_operational_route = brain_first_universal_route
     if brain_first_operational_route:
         # Brain First owns semantic understanding and authoritative evidence.
         # The older intent route remains only for data-capture/handoff
@@ -1262,14 +1306,25 @@ def process_target(
         )
         intent_route_config = config
 
-    # 2. LLM intent routing — replaces keyword-based customer_data gate
+    # 2. Brain First owns intent and reply in one call.  Keep the frozen
+    # intent_result shape as a neutral audit projection; do not run a local
+    # keyword/LLM intent engine before the Brain.
     write_workflow_phase("intent_route_start", target=target.name, message_count=len(batch))
-    intent_result = route_intent(
-        combined=combined,
-        config=intent_route_config,
-        evidence_pack=evidence_pack,
-        target_state=target_state,
-    )
+    if brain_first_operational_route:
+        intent_result = IntentRouteResult(
+            intent="unclear",
+            confidence=0.0,
+            reasoning="brain_first_semantics_owned_by_brain",
+            entities={},
+            source="brain_first_semantics_owned_by_brain",
+        )
+    else:
+        intent_result = route_intent(
+            combined=combined,
+            config=intent_route_config,
+            evidence_pack=evidence_pack,
+            target_state=target_state,
+        )
     write_workflow_phase("intent_route_done", target=target.name, intent=intent_result.intent, confidence=intent_result.confidence)
 
     # 3. Branch by intent
@@ -1277,7 +1332,17 @@ def process_target(
     product_knowledge: dict[str, Any] | None = None
     decision: ReplyDecision
 
-    if intent_result.intent == "customer_data_provide":
+    if brain_first_operational_route:
+        data_capture = {"enabled": False, "reason": "brain_first_semantics_owned_by_brain"}
+        product_knowledge = {"enabled": False, "reason": "brain_first_authoritative_evidence_pipeline"}
+        decision = ReplyDecision(
+            reply_text="",
+            rule_name="brain_first_universal_pipeline",
+            matched=True,
+            need_handoff=False,
+            reason="brain_first_semantics_owned_by_brain",
+        )
+    elif intent_result.intent == "customer_data_provide":
         write_workflow_phase("data_capture_start", target=target.name, intent=intent_result.intent)
         data_capture = maybe_capture_customer_data(
             config=config,
@@ -1361,8 +1426,8 @@ def process_target(
             "reply_routing_normalization": batch_routing_normalization_payload(batch, routing_batch),
             "history_backfill": payload.get("_history_backfill", {}),
             "product_knowledge": product_knowledge,
-            "conversation_context_update": dict(preference_context_update),
-            "conversation_context_update_source": "customer_preference_capture" if preference_context_update else "",
+            "conversation_context_update": dict(conversation_context_update),
+            "conversation_context_update_source": conversation_context_update_source,
             "intent_result": intent_result.to_dict(),
             "intent_assist": skipped_intent_assist(config, "not_evaluated_yet"),
             "dry_run": not send,
@@ -1386,14 +1451,17 @@ def process_target(
     clear_rate_limit_backoff(target_state, message_ids)
 
     write_workflow_phase("intent_assist_start", target=target.name)
-    event["intent_assist"] = maybe_analyze_intent(
-        config=config,
-        combined=combined,
-        decision=decision,
-        reply_text=reply_text,
-        data_capture=data_capture,
-        product_knowledge=product_knowledge,
-    )
+    if brain_first_operational_route:
+        event["intent_assist"] = skipped_intent_assist(config, "brain_first_semantics_owned_by_brain")
+    else:
+        event["intent_assist"] = maybe_analyze_intent(
+            config=config,
+            combined=combined,
+            decision=decision,
+            reply_text=reply_text,
+            data_capture=data_capture,
+            product_knowledge=product_knowledge,
+        )
     write_workflow_phase(
         "intent_assist_done",
         target=target.name,
@@ -1770,7 +1838,12 @@ def process_target(
     if context_update:
         existing_context_update = event.get("conversation_context_update") if isinstance(event.get("conversation_context_update"), dict) else {}
         event["conversation_context_update"] = {**existing_context_update, **context_update}
-        event["conversation_context_update_source"] = "customer_preference_capture+visible_reply_product_context" if existing_context_update else "visible_reply_product_context"
+        existing_context_source = str(event.get("conversation_context_update_source") or "").strip()
+        event["conversation_context_update_source"] = (
+            f"{existing_context_source}+visible_reply_product_context"
+            if existing_context_source
+            else "visible_reply_product_context"
+        )
 
     brain_reply_adopted = bool(event.get("customer_service_brain_adopted"))
     style_channel = (
@@ -2286,7 +2359,12 @@ def process_target(
         if final_context_update:
             existing_context_update = event.get("conversation_context_update") if isinstance(event.get("conversation_context_update"), dict) else {}
             event["conversation_context_update"] = {**existing_context_update, **final_context_update}
-            event["conversation_context_update_source"] = "customer_preference_capture+final_visible_reply" if existing_context_update else "final_visible_reply"
+            existing_context_source = str(event.get("conversation_context_update_source") or "").strip()
+            event["conversation_context_update_source"] = (
+                f"{existing_context_source}+final_visible_reply"
+                if existing_context_source
+                else "final_visible_reply"
+            )
         finalize_data_capture_state(target_state, data_capture)
         record = maybe_record_rag_experience(
             target=target,
@@ -3152,9 +3230,41 @@ def send_reply_with_optional_multi_bubble(
                             **continuation_send_kwargs,
                         )  # type: ignore[attr-defined]
                         send_only_meta = send_only if isinstance(send_only, dict) else {}
+                        nested_send_result = (
+                            send_only_meta.get("send_result")
+                            if isinstance(send_only_meta.get("send_result"), dict)
+                            else {}
+                        )
+                        post_guard = (
+                            nested_send_result.get("post_send_guard")
+                            if isinstance(nested_send_result.get("post_send_guard"), dict)
+                            else {}
+                        )
+                        send_only_verified = bool(
+                            send_only_meta.get("ok")
+                            and post_guard.get("ok") is True
+                            and str(post_guard.get("reason") or "") == "send_window_readable_after_send"
+                        )
+                        if send_only_meta.get("ok") and not send_only_verified:
+                            # Do not trigger send a second time. An older/strict
+                            # sidecar may only return title confirmation, so read
+                            # the existing bubble once and verify it in place.
+                            try:
+                                from wechat_connector import verify_send_from_messages
+
+                                readback = connector.get_messages(
+                                    target.name,
+                                    exact=target.exact,
+                                    session_key=str(getattr(target, "session_key", "") or ""),
+                                )
+                                send_only_verified = bool(
+                                    verify_send_from_messages(readback, expected_text=segment)
+                                )
+                            except Exception:
+                                send_only_verified = False
                         result = {
                             "ok": bool(send_only_meta.get("ok")),
-                            "verified": bool(send_only_meta.get("ok")),
+                            "verified": send_only_verified,
                             "send": send_only_meta,
                             "verification_mode": "send_only_intermediate",
                             "adapter": send_only_meta.get("adapter"),
@@ -5701,20 +5811,25 @@ def brain_first_low_authority_fast_plan_precheck(
     batch: list[dict[str, Any]],
     target_state: dict[str, Any],
 ) -> dict[str, Any]:
-    """Detect low-authority short turns that can skip legacy pre-Brain work."""
+    """Route every Brain First turn around legacy semantic bookkeeping.
+
+    The public helper name and result shape are retained for compatibility.
+    The decision no longer classifies customer language or selects a special
+    reply engine: one Brain owns every natural-language turn.
+    """
 
     settings = effective_brain_settings(config)
     if not bool(settings.get("enabled")) or str(settings.get("mode") or "") != "brain_first":
         return {"enabled": False, "reason": "brain_first_not_enabled"}
-    decision = low_authority_fast_profile_decision(
-        settings=settings,
-        combined=combined,
-        batch=batch,
-        target_state=target_state,
-    )
-    if not bool(decision.get("enabled")):
-        return {"enabled": False, "reason": str(decision.get("reason") or "not_low_authority_fast"), "profile": decision}
-    return {"enabled": True, "reason": "brain_first_low_authority_fast_precheck", "profile": decision}
+    return {
+        "enabled": True,
+        "reason": "brain_first_low_authority_fast_precheck",
+        "profile": {
+            "enabled": True,
+            "reason": "brain_first_universal_pipeline",
+            "message_count": len([item for item in batch if isinstance(item, dict)]),
+        },
+    }
 
 
 def visible_reply_product_preference_rank(clean: str, aliases: list[str], first_index: int) -> int:
@@ -8410,6 +8525,44 @@ def batch_routing_normalization_payload(original: list[dict[str, Any]], normaliz
         "applied": bool(changed),
         "changed_count": len(changed),
         "changed": changed[:8],
+    }
+
+
+def brain_first_neutral_batch_audit(batch: list[dict[str, Any]]) -> dict[str, Any]:
+    """Preserve the legacy audit envelope without interpreting the message.
+
+    Natural-language relevance, intent and risk are Brain-owned.  This helper
+    only preserves chronological text and existing audit keys so downstream
+    consumers do not need a contract migration.
+    """
+
+    texts = [str(item.get("content") or "").strip() for item in batch if isinstance(item, dict) and str(item.get("content") or "").strip()]
+    if not texts:
+        return {
+            "enabled": True,
+            "kind": "empty",
+            "reply_strategy": "skip",
+            "risk_level": "normal",
+            "combined_text": "",
+            "segments": [],
+        }
+    return {
+        "enabled": True,
+        "kind": "single_event",
+        "reply_strategy": "answer_as_one_need",
+        "risk_level": "normal",
+        "combined_text": "\n".join(texts),
+        "segments": [
+            {
+                "index": index + 1,
+                "text": text,
+                "categories": ["general"],
+                "question_like": False,
+            }
+            for index, text in enumerate(texts)
+        ],
+        "message_count": len(texts),
+        "considered_count": len(texts),
     }
 
 

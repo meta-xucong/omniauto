@@ -815,6 +815,22 @@ def test_parse_messages_respects_explicit_private_conversation_type_for_test_con
     assert_true(messages[0]["sender_role"] == "customer", f"private test contact role should be customer: {messages}")
 
 
+def test_parse_messages_uses_structural_group_header_and_strips_member_label() -> None:
+    items = [
+        {"text": "新数据测试(2)", "confidence": 0.99, "left": 350, "right": 478, "top": 51, "bottom": 80, "center_x": 414, "center_y": 65.5},
+        {"text": "许聪", "confidence": 0.99, "left": 422, "right": 468, "top": 414, "bottom": 435, "center_x": 445, "center_y": 424.5},
+        {"text": "中午好", "confidence": 0.99, "left": 423, "right": 492, "top": 442, "bottom": 468, "center_x": 457.5, "center_y": 455},
+    ]
+    messages = parse_messages_from_ocr(items, (980, 860), target="新数据测试", conversation_type="private")
+    assert_true(len(messages) == 1, f"structural group message should remain one customer turn: {messages}")
+    assert_true(messages[0]["sender_role"] == "group_member", f"active member-count title should override stale private typing: {messages}")
+    assert_true(messages[0]["content"] == "中午好", f"group member label must not enter Brain content: {messages}")
+    assert_true(
+        "speaker_prefix_split_from_ocr_text" in messages[0]["quality_flags"],
+        f"speaker metadata split should stay auditable: {messages}",
+    )
+
+
 def test_parse_messages_skips_file_card_footer_noise() -> None:
     footer_only = [
         {"text": "微信电脑版", "confidence": 0.99, "left": 434, "right": 541, "top": 96, "bottom": 118, "center_x": 487.5, "center_y": 107},
@@ -1234,33 +1250,13 @@ def test_connector_helpers() -> None:
     identity_request = wechat_connector_module._args_to_request(identity_args)
     assert_true(identity_request.get("session_key") == "wx:rpa:v1:duplicate-group", f"send session key should be preserved: {identity_request}")
     assert_true(identity_request.get("conversation_type") == "group", f"send conversation type should be preserved: {identity_request}")
-    image_save_args = compat_args(
-        [
-            "image-save",
-            "--target",
-            "新数据测试",
-            "--exact",
-            "--session-key",
-            "wx:1",
-            "--source-preview",
-            "许聪:[图片]",
-            "--speaker-name",
-            "许聪",
-            "--tenant-id",
-            "chejin",
-            "--max-images",
-            "1",
-        ]
+    retired_image_request = wechat_connector_module._args_to_request(
+        ["image-save", "--target", "新数据测试", "--source-preview", "许聪:[图片]"]
     )
-    assert_true(image_save_args[0] == "image-save", f"image-save action should be preserved: {image_save_args}")
-    assert_true("--source-preview" in image_save_args and "许聪:[图片]" in image_save_args, f"image preview should be preserved: {image_save_args}")
-    request = wechat_connector_module._args_to_request(image_save_args)
-    assert_true(request.get("action") == "image-save", f"image-save request action should be parsed: {request}")
-    assert_true(request.get("target") == "新数据测试", f"image-save target should be parsed: {request}")
-    assert_true(request.get("source_preview") == "许聪:[图片]", f"image-save source preview should be parsed: {request}")
-    assert_true(request.get("speaker_name") == "许聪", f"image-save speaker should be parsed: {request}")
-    assert_true(request.get("tenant_id") == "chejin", f"image-save tenant should be parsed: {request}")
-    assert_true(request.get("max_images") == 1, f"image-save max_images should be parsed: {request}")
+    assert_true(
+        not retired_image_request.get("action"),
+        f"shared connector must not parse the retired Sidecar image action: {retired_image_request}",
+    )
 
 
 def test_send_geometry_guard() -> None:
@@ -2261,6 +2257,26 @@ def test_input_region_soft_blank_noise_allows_post_clear_progress() -> None:
         input_region_soft_blank_noise(live_weak_ocr_noise) is True,
         "single weak OCR drift in an almost-white input region should be treated as soft blank noise",
     )
+    live_multi_ocr_chrome_noise = {
+        "has_visible_text": True,
+        "ocr_hits": 2,
+        "dark_ratio": 0.001616,
+        "mean": 249.703,
+    }
+    assert_true(
+        input_region_soft_blank_noise(live_multi_ocr_chrome_noise) is True,
+        "multiple static OCR boxes must not override almost-white input-surface evidence",
+    )
+    weak_visual_draft = {
+        "has_visible_text": True,
+        "ocr_hits": 2,
+        "dark_ratio": 0.0021,
+        "mean": 249.5,
+    }
+    assert_true(
+        input_region_soft_blank_noise(weak_visual_draft) is False,
+        "OCR-visible content above the strong blank pixel threshold must remain guarded",
+    )
     ocr_residue = {
         "has_visible_text": True,
         "ocr_hits": 1,
@@ -2308,9 +2324,9 @@ def test_clear_existing_input_draft_normalizes_weak_ocr_noise() -> None:
     weak_noise = {
         "has_visible_text": True,
         "reason": "ocr_or_dark_pixels",
-        "ocr_hits": 1,
-        "dark_ratio": 0.001619,
-        "mean": 249.707,
+        "ocr_hits": 2,
+        "dark_ratio": 0.001616,
+        "mean": 249.703,
     }
     result = clear_existing_input_draft(
         0,
@@ -2318,7 +2334,7 @@ def test_clear_existing_input_draft_normalizes_weak_ocr_noise() -> None:
         geometry={"width": 980, "height": 860},
         before_state=weak_noise,
     )
-    assert_true(result["ok"] is True and result["cleared"] is False, f"weak OCR noise should not trigger draft clearing: {result}")
+    assert_true(result["ok"] is True and result["cleared"] is False, f"weak multi-box OCR noise should not trigger draft clearing: {result}")
     assert_true((result.get("after") or {}).get("has_visible_text") is False, f"normalized after-state should be blank: {result}")
 
 
@@ -3103,14 +3119,17 @@ def test_session_key_candidate_respects_conversation_type() -> None:
         session_matches_key(private, private["session_key"], "unknown"),
         "unknown conversation type should not reject a confirmed session key",
     )
-    assert_true(not session_matches_key(private, private["session_key"], "group"), "conversation type mismatch must fail")
     assert_true(
-        find_session_candidate_by_key([private, group], group["session_key"], "group") is group,
-        "same-name group must resolve by session key and type",
+        session_matches_key(private, private["session_key"], "group"),
+        "chat-pane type refinement must not invalidate the same opaque sidebar-row key",
     )
     assert_true(
-        find_session_candidate_by_key([private, group], group["session_key"], "private") is None,
-        "same-name wrong type must not resolve a row",
+        find_session_candidate_by_key([private, group], group["session_key"], "group") is group,
+        "same-name group must resolve by its opaque session key",
+    )
+    assert_true(
+        find_session_candidate_by_key([private, group], group["session_key"], "private") is group,
+        "semantic type drift must not strand a row whose opaque key is unchanged",
     )
 
 
@@ -3146,8 +3165,8 @@ def test_identity_wrapper_treats_unknown_type_as_missing() -> None:
             "known type should preserve the open result",
         )
         assert_true(
-            calls[-1].get("conversation_type") == "private" and calls[-1].get("force_session_row_resolution") is True,
-            f"known type should force row resolution: {calls}",
+            calls[-1].get("conversation_type") == "private" and "force_session_row_resolution" not in calls[-1],
+            f"known type should filter identity without re-clicking an already active row: {calls}",
         )
     finally:
         sidecar_module.open_chat = original_open_chat  # type: ignore[assignment]
@@ -3491,7 +3510,11 @@ def test_send_verify_handles_split_multiline_messages() -> None:
     expected = "你好，在吗？\n[live-regression:20260523180041:1:1]"
     payload = {
         "messages": [
-            {"sender": "unknown", "content": "你好，在吗？"},
+            {
+                "sender": "unknown",
+                "sender_role_evidence": ["right_self_lane_reached", "center_in_self_lane"],
+                "content": "你好，在吗？",
+            },
             {"sender": "self", "content": "[live-regression:20260523180041:1:1]"},
         ]
     }
@@ -3519,6 +3542,11 @@ def test_send_verify_tolerates_common_ocr_noise_on_long_self_reply() -> None:
     assert_true(
         verify_send_from_messages(unrelated, expected_text=expected) is False,
         "OCR-tolerant verification must not accept unrelated content",
+    )
+    echoed_customer = {"messages": [{"sender": "customer", "content": expected}]}
+    assert_true(
+        verify_send_from_messages(echoed_customer, expected_text=expected) is False,
+        "matching customer text must never be mistaken for an outbound send bubble",
     )
 
 
@@ -3591,14 +3619,86 @@ def test_guarded_send_confirmation_fallback() -> None:
         guarded_send_confirmation_fallback(send, blocked) is False,
         "guard fallback should not pass when login window is detected",
     )
+    title_only_after_trigger = {
+        **send,
+        "send_result": {
+            **send["send_result"],
+            "post_send_guard": {"ok": True, "reason": "target_confirmed"},
+        },
+    }
+    assert_true(
+        guarded_send_confirmation_fallback(title_only_after_trigger, messages) is False,
+        "title confirmation after Enter/click is not proof that the input was cleared and the bubble was sent",
+    )
 
 
-def test_fast_send_confirmation_skips_slow_message_read_when_guard_is_strong() -> None:
+def test_post_send_fast_guard_requires_input_clear_effect() -> None:
+    originals = {
+        "env_flag": sidecar_module.env_flag,
+        "get_window_geometry": sidecar_module.get_window_geometry,
+        "validate_send_geometry": sidecar_module.validate_send_geometry,
+        "basic_send_window_guard": sidecar_module.basic_send_window_guard,
+        "capture_wechat": sidecar_module.capture_wechat,
+        "detect_blank_render": sidecar_module.detect_blank_render,
+        "input_text_region_state": sidecar_module.input_text_region_state,
+        "validate_active_send_target_for_identity": sidecar_module.validate_active_send_target_for_identity,
+    }
+    image = Image.new("RGB", (980, 860), "white")
+    try:
+        sidecar_module.env_flag = lambda *_args, **_kwargs: False
+        sidecar_module.get_window_geometry = lambda _hwnd: {
+            "left": 0,
+            "top": 0,
+            "right": 980,
+            "bottom": 860,
+            "width": 980,
+            "height": 860,
+        }
+        sidecar_module.validate_send_geometry = lambda _geometry: {"ok": True}
+        sidecar_module.basic_send_window_guard = lambda _hwnd: {"ok": True}
+        sidecar_module.capture_wechat = lambda *_args, **_kwargs: (image, "post-send.png")
+        sidecar_module.detect_blank_render = lambda *_args, **_kwargs: {"detected": False}
+        sidecar_module.validate_active_send_target_for_identity = lambda *_args, **_kwargs: {
+            "ok": True,
+            "reason": "target_confirmed",
+            "confirmation_confidence": "active_title_strict",
+        }
+        sidecar_module.input_text_region_state = lambda *_args, **_kwargs: {
+            "has_visible_text": False,
+            "reason": "input_region_blank",
+            "ocr_hits": 0,
+            "dark_ratio": 0.0,
+            "mean": 255.0,
+        }
+        cleared = sidecar_module.validate_post_send_target(1, "许聪", exact=True)
+        assert_true(
+            cleared.get("reason") == "send_window_readable_after_send",
+            f"fast post-send proof should retain the existing success reason when the input is visibly empty: {cleared}",
+        )
+
+        sidecar_module.input_text_region_state = lambda *_args, **_kwargs: {
+            "has_visible_text": True,
+            "reason": "ocr_or_dark_pixels",
+            "ocr_hits": 1,
+            "dark_ratio": 0.012,
+            "mean": 246.0,
+        }
+        uncleared = sidecar_module.validate_post_send_target(1, "许聪", exact=True)
+        assert_true(
+            uncleared.get("reason") == "target_confirmed",
+            f"an uncleared input must fall back to the existing strict target result instead of claiming a send effect: {uncleared}",
+        )
+    finally:
+        for name, value in originals.items():
+            setattr(sidecar_module, name, value)
+
+
+def test_real_customer_send_requires_outbound_bubble_even_when_fast_flag_is_enabled() -> None:
     class FastVerifyConnector(WeChatConnector):
         def __init__(self) -> None:
             self.messages_called = 0
 
-        def send_text(self, target: str, text: str, exact: bool = True, *, skip_send_rate_guard: bool = False) -> dict:
+        def send_text(self, target: str, text: str, exact: bool = True, *, skip_send_rate_guard: bool = False, **_kwargs) -> dict:
             return {
                 "ok": True,
                 "send_result": {
@@ -3609,7 +3709,7 @@ def test_fast_send_confirmation_skips_slow_message_read_when_guard_is_strong() -
                 },
             }
 
-        def get_messages(self, target: str, exact: bool = True, history_load_times: int = 0) -> dict:
+        def get_messages(self, target: str, exact: bool = True, history_load_times: int = 0, **_kwargs) -> dict:
             self.messages_called += 1
             return {"ok": True, "state": "messages_ocr", "messages": []}
 
@@ -3617,13 +3717,13 @@ def test_fast_send_confirmation_skips_slow_message_read_when_guard_is_strong() -
     os.environ["WECHAT_WIN32_OCR_FAST_SEND_CONFIRMATION"] = "1"
     try:
         connector = FastVerifyConnector()
-        result = connector.send_text_and_verify("文件传输助手", "您好")
-        assert_true(bool(result.get("verified")), "fast confirmation should verify strong guarded sends")
+        result = connector.send_text_and_verify("许聪", "您好")
+        assert_true(result.get("verified") is False, f"real send without a self bubble must fail verification: {result}")
         assert_true(
-            result.get("verification_mode") == "send_guard_confirmed_fast",
-            "fast confirmation should be explicitly labeled",
+            result.get("verification_mode") == "messages",
+            "real sends must remain on message-bubble verification",
         )
-        assert_true(connector.messages_called == 0, "fast confirmation should skip full OCR message read")
+        assert_true(connector.messages_called == 6, "real send should exhaust the bounded bubble readback attempts")
     finally:
         if previous is None:
             os.environ.pop("WECHAT_WIN32_OCR_FAST_SEND_CONFIRMATION", None)
@@ -4524,8 +4624,8 @@ def test_adaptive_humanized_input_speed_profiles() -> None:
         f"short profile should keep a non-zero post-input pause: {short}",
     )
     assert_true(
-        int(short.get("send_post_input_delay_max_ms") or 0) == 300,
-        f"short profile should not inherit overly wide default post-input pause: {short}",
+        int(short.get("send_post_input_delay_max_ms") or 0) == 460,
+        f"short profile must preserve the caller's conservative post-input ceiling: {short}",
     )
 
     long_text = "这边先帮您确认几个点。" * 40
@@ -4565,16 +4665,18 @@ def test_adaptive_humanized_input_clamps_live_wide_waits_by_profile() -> None:
     }
     short = adapt_humanized_input_settings(live_wide, "你好呀，有什么可以帮您的吗？")
     assert_true(short.get("speed_profile") == "short_natural", f"short reply should use short profile: {short}")
-    assert_true(short.get("send_post_input_delay_min_ms") == 140, f"short post-input min should be profiled: {short}")
-    assert_true(short.get("send_post_input_delay_max_ms") == 300, f"short post-input max should be profiled: {short}")
-    assert_true(short.get("send_trigger_delay_min_ms") == 360, f"short trigger min should be profiled: {short}")
-    assert_true(short.get("send_trigger_delay_max_ms") == 1050, f"short trigger max should be profiled: {short}")
-    assert_true(short.get("send_after_trigger_delay_min_ms") == 180, f"short after-trigger min should be profiled: {short}")
-    assert_true(short.get("send_after_trigger_delay_max_ms") == 520, f"short after-trigger max should be profiled: {short}")
+    assert_true(short.get("send_pre_delay_min_ms") == 500, f"short pre-send min must not be accelerated: {short}")
+    assert_true(short.get("send_pre_delay_max_ms") == 1300, f"short pre-send max must not be accelerated: {short}")
+    assert_true(short.get("send_post_input_delay_min_ms") == 450, f"short post-input min must not be accelerated: {short}")
+    assert_true(short.get("send_post_input_delay_max_ms") == 1200, f"short post-input max must not be accelerated: {short}")
+    assert_true(short.get("send_trigger_delay_min_ms") == 720, f"short trigger min must not be accelerated: {short}")
+    assert_true(short.get("send_trigger_delay_max_ms") == 2100, f"short trigger max must not be accelerated: {short}")
+    assert_true(short.get("send_after_trigger_delay_min_ms") == 420, f"short after-trigger min must not be accelerated: {short}")
+    assert_true(short.get("send_after_trigger_delay_max_ms") == 1250, f"short after-trigger max must not be accelerated: {short}")
 
     long_profile = adapt_humanized_input_settings(live_wide, "这边先帮您确认几个点。" * 40)
     assert_true(long_profile.get("speed_profile") == "long_natural_capped", f"long reply should use long profile: {long_profile}")
-    assert_true(long_profile.get("send_trigger_delay_max_ms") == 1600, f"long trigger window should stay wider: {long_profile}")
+    assert_true(long_profile.get("send_trigger_delay_max_ms") == 2100, f"long trigger window must preserve the configured ceiling: {long_profile}")
 
 
 def test_set_uia_control_value_humanized_progressive_updates() -> None:
@@ -5983,6 +6085,77 @@ def test_open_chat_reuses_prevalidation_ocr_seed_for_initial_main_list() -> None
         sidecar_mod._TARGET_READY_PREVALIDATION_OCR_SEED.update(previous_seed)
         sidecar_mod._LAST_OPEN_CHAT_TIMING.clear()
         sidecar_mod._LAST_OPEN_CHAT_TIMING.update(previous_open_timing)
+        for name, value in originals.items():
+            setattr(sidecar_mod, name, value)
+
+
+def test_open_chat_session_key_keeps_unambiguous_active_chat_without_click() -> None:
+    """A fresh sidecar may bind the visible active row, but must not click it."""
+
+    sidecar_mod = sys.modules["apps.wechat_ai_customer_service.adapters.wechat_win32_ocr_sidecar"]
+    geometry = {"left": 0, "top": 0, "right": 981, "bottom": 860, "width": 981, "height": 860}
+    image = Image.new("RGB", (981, 860), "white")
+    ocr_items = [
+        {
+            "text": "许聪",
+            "left": 90,
+            "top": 140,
+            "right": 150,
+            "bottom": 168,
+            "center_x": 120,
+            "center_y": 154,
+            "confidence": 0.99,
+        }
+    ]
+    originals = {
+        "consume_target_ready_prevalidation_ocr_seed": sidecar_mod.consume_target_ready_prevalidation_ocr_seed,
+        "ensure_main_session_list": sidecar_mod.ensure_main_session_list,
+        "get_window_geometry": sidecar_mod.get_window_geometry,
+        "target_switch_surface_state": sidecar_mod.target_switch_surface_state,
+        "active_chat_matches": sidecar_mod.active_chat_matches,
+        "parse_sessions_from_ocr": sidecar_mod.parse_sessions_from_ocr,
+        "activate_session_candidate": sidecar_mod.activate_session_candidate,
+    }
+    previous_state = dict(sidecar_mod._LAST_RPA_ACTION_STATE)
+    calls = {"activate": 0}
+    try:
+        sidecar_mod._LAST_RPA_ACTION_STATE.clear()
+        sidecar_mod.consume_target_ready_prevalidation_ocr_seed = lambda **_kwargs: None
+        sidecar_mod.ensure_main_session_list = lambda *_args, **_kwargs: (image, list(ocr_items))
+        sidecar_mod.get_window_geometry = lambda _hwnd: dict(geometry)
+        sidecar_mod.target_switch_surface_state = lambda *_args, **_kwargs: {"ok": True}
+        sidecar_mod.active_chat_matches = lambda *_args, **_kwargs: True
+        sidecar_mod.parse_sessions_from_ocr = lambda *_args, **_kwargs: [
+            {
+                "name": "许聪",
+                "session_key": "wx:rpa:v1:xucong",
+                "conversation_type": "private",
+                "center_y": 154,
+            }
+        ]
+        sidecar_mod.activate_session_candidate = (
+            lambda *_args, **_kwargs: calls.__setitem__("activate", calls["activate"] + 1) or True
+        )
+        opened = sidecar_mod.open_chat(
+            1001,
+            "许聪",
+            exact=True,
+            session_key="wx:rpa:v1:xucong",
+            conversation_type="private",
+        )
+        assert_true(opened is True, "unambiguous active chat should bind to the requested session key")
+        assert_true(calls["activate"] == 0, f"already-active chat must never receive a row click: {calls}")
+        assert_true(
+            sidecar_mod._LAST_RPA_ACTION_STATE.get("active_session_key") == "wx:rpa:v1:xucong",
+            f"the fresh sidecar should remember the resolved active identity: {sidecar_mod._LAST_RPA_ACTION_STATE}",
+        )
+        assert_true(
+            sidecar_mod._LAST_OPEN_CHAT_TIMING.get("reason") == "active_visible_unambiguous",
+            f"no-click resolution should be auditable: {sidecar_mod._LAST_OPEN_CHAT_TIMING}",
+        )
+    finally:
+        sidecar_mod._LAST_RPA_ACTION_STATE.clear()
+        sidecar_mod._LAST_RPA_ACTION_STATE.update(previous_state)
         for name, value in originals.items():
             setattr(sidecar_mod, name, value)
 
@@ -7522,6 +7695,7 @@ def main() -> int:
         test_parse_messages_strips_voice_duration_prefix_after_transcription,
         test_infer_conversation_type_does_not_promote_test_keyword_to_group,
         test_parse_messages_respects_explicit_private_conversation_type_for_test_contact,
+        test_parse_messages_uses_structural_group_header_and_strips_member_label,
         test_parse_messages_skips_file_card_footer_noise,
         test_parse_messages_skips_unconverted_voice_duration_only,
         test_parse_messages_skips_voice_duration_with_convert_button_ui_noise,
@@ -7623,7 +7797,8 @@ def main() -> int:
         test_send_verify_tolerates_common_ocr_noise_on_long_self_reply,
         test_blind_send_without_ocr_verification_fallback,
         test_guarded_send_confirmation_fallback,
-        test_fast_send_confirmation_skips_slow_message_read_when_guard_is_strong,
+        test_post_send_fast_guard_requires_input_clear_effect,
+        test_real_customer_send_requires_outbound_bubble_even_when_fast_flag_is_enabled,
         test_invalid_window_handle_is_hard_stop_not_recovery,
         test_daemon_invalid_window_handle_is_hard_stop,
         test_sidecar_exception_payload_marks_invalid_window_handle,
@@ -7674,6 +7849,7 @@ def main() -> int:
         test_validate_active_send_target_seeds_only_safe_surface_ocr,
         test_target_ready_merges_validation_internal_timing,
         test_open_chat_reuses_prevalidation_ocr_seed_for_initial_main_list,
+        test_open_chat_session_key_keeps_unambiguous_active_chat_without_click,
         test_prevalidation_ocr_seed_respects_target_and_geometry,
         test_open_chat_discards_prevalidation_ocr_seed_for_session_subview,
         test_target_ready_switch_validation_cache_respects_target_and_geometry,

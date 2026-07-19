@@ -6,6 +6,7 @@ import json
 import os
 import ssl
 import threading
+import time
 import urllib.error
 import urllib.request
 from collections.abc import Callable
@@ -64,6 +65,10 @@ GATEWAY_FAILOVERABLE_LLM_ERROR_MARKERS = (
     "upstream request failed",
     "upstream_error",
 )
+
+_LLM_FAILOVER_AFFINITY_TTL_SECONDS = 300.0
+_LLM_FAILOVER_AFFINITY_LOCK = threading.Lock()
+_LLM_FAILOVER_AFFINITY: dict[tuple[str, str, str, str], dict[str, Any]] = {}
 
 
 LLM_PROVIDER_PRESETS: dict[str, dict[str, Any]] = {
@@ -786,6 +791,7 @@ def call_llm_request_once(
     explicit_reasoning_effort: Any | None = None,
     allow_insecure_tls: Any | None = None,
 ) -> dict[str, Any]:
+    request_deadline = time.monotonic() + max(1.0, float(timeout))
     provider_id = normalize_llm_provider(provider)
     request_style = llm_provider_request_style(provider_id)
     if request_style == "anthropic_messages":
@@ -867,23 +873,36 @@ def call_llm_request_once(
             provider=provider_id,
             allow_insecure_tls=allow_insecure_tls,
         ) as response:
-            raw = response.read().decode("utf-8", errors="replace")
+            raw = _read_http_response_before_deadline(response, deadline=request_deadline).decode("utf-8", errors="replace")
             data = json.loads(raw)
-            return {
+            tool_payload = extract_anthropic_tool_json_object(data) if json_mode else None
+            response_text = (
+                json.dumps(tool_payload, ensure_ascii=False)
+                if isinstance(tool_payload, dict)
+                else extract_llm_response_text(provider=provider_id, data=data)
+            )
+            result = {
                 "ok": True,
                 "provider": provider_id,
                 "provider_label": llm_route_display_label(provider=provider_id, model=model, request_style=request_style),
                 "model": model,
                 "base_url": normalize_llm_base_url(base_url),
                 "status": int(getattr(response, "status", 200) or 200),
-                "response_text": json.dumps(tool_payload, ensure_ascii=False) if (json_mode and isinstance(tool_payload := extract_anthropic_tool_json_object(data), dict)) else extract_llm_response_text(provider=provider_id, data=data),
+                "response_text": response_text,
                 "usage": data.get("usage", {}) if isinstance(data, dict) else {},
                 "request_style": request_style,
                 "tool_json_mode": bool(json_mode and isinstance(tool_payload, dict)),
                 "tool_json_payload": tool_payload if json_mode and isinstance(tool_payload, dict) else None,
             }
+            if json_mode and not str(response_text or "").strip():
+                result["ok"] = False
+                result["error"] = "upstream_error: llm_empty_json_response"
+            return result
     except urllib.error.HTTPError as exc:
-        body = exc.read().decode("utf-8", errors="replace")
+        try:
+            body = _read_http_response_before_deadline(exc, deadline=request_deadline).decode("utf-8", errors="replace")
+        except Exception:
+            body = ""
         return {
             "ok": False,
             "provider": provider_id,
@@ -907,6 +926,45 @@ def call_llm_request_once(
         }
 
 
+def _read_http_response_before_deadline(response: Any, *, deadline: float, chunk_size: int = 65536) -> bytes:
+    chunks: list[bytes] = []
+    while True:
+        remaining = float(deadline) - time.monotonic()
+        if remaining <= 0:
+            raise TimeoutError("llm response read exceeded request deadline")
+        _set_http_response_socket_timeout(response, remaining)
+        try:
+            chunk = response.read(max(1, int(chunk_size)))
+        except TypeError:
+            # Lightweight test doubles and a few custom transports expose only
+            # read() without a size argument. They are already bounded by the
+            # outer transport call and return immediately in supported paths.
+            return bytes(response.read())
+        if not chunk:
+            return b"".join(chunks)
+        chunks.append(bytes(chunk))
+
+
+def _set_http_response_socket_timeout(response: Any, remaining_seconds: float) -> None:
+    timeout = max(0.05, float(remaining_seconds))
+    candidates = [response]
+    for path in (("fp",), ("fp", "raw"), ("fp", "raw", "_sock"), ("fp", "_sock"), ("_sock",)):
+        current = response
+        for name in path:
+            current = getattr(current, name, None)
+            if current is None:
+                break
+        if current is not None:
+            candidates.append(current)
+    for candidate in candidates:
+        setter = getattr(candidate, "settimeout", None)
+        if not callable(setter):
+            continue
+        try:
+            setter(timeout)
+            return
+        except Exception:
+            continue
 def call_llm_request_once_with_wall_timeout(
     *,
     wall_timeout: int | float | None = None,
@@ -914,11 +972,13 @@ def call_llm_request_once_with_wall_timeout(
 ) -> dict[str, Any]:
     if wall_timeout is None or float(wall_timeout) <= 0:
         return call_llm_request_once(**kwargs)
-    # A ThreadPool future cannot cancel an already-running Python thread.  The
-    # former daemon-thread wrapper therefore returned a timeout while its HTTP
-    # request continued to occupy a worker.  Keep the public entry point and
-    # failure markers, but enforce the deadline at the urllib transport that
-    # owns the socket so this call and its scheduler future finish together.
+    # urllib's timeout is a per-blocking-operation socket timeout.  DNS, TLS,
+    # response headers and a trickled body can therefore exceed it in total.
+    # Keep the transport-level deadlines as the first line of defence, and add
+    # one daemon boundary around the *whole* request so the scheduler-facing
+    # call always returns within the advertised wall budget.  A dedicated
+    # daemon is used instead of ThreadPoolExecutor: executor shutdown waits for
+    # an already-running future and would recreate the latency amplification.
     effective_wall_timeout = max(1.0, float(wall_timeout))
     request_kwargs = dict(kwargs)
     try:
@@ -926,7 +986,44 @@ def call_llm_request_once_with_wall_timeout(
     except (TypeError, ValueError):
         configured_timeout = effective_wall_timeout
     request_kwargs["timeout"] = max(1.0, min(configured_timeout, effective_wall_timeout))
-    result = call_llm_request_once(**request_kwargs)
+    completed = threading.Event()
+    result_box: dict[str, Any] = {}
+
+    def execute_request() -> None:
+        try:
+            result_box["result"] = call_llm_request_once(**request_kwargs)
+        except BaseException as exc:  # pragma: no cover - transport normally returns a failure dict
+            result_box["exception"] = exc
+        finally:
+            completed.set()
+
+    worker = threading.Thread(target=execute_request, name="llm-http-wall-timeout", daemon=True)
+    worker.start()
+    if not completed.wait(effective_wall_timeout):
+        timeout_provider = normalize_llm_provider(request_kwargs.get("provider"))
+        timeout_model = str(request_kwargs.get("model") or "")
+        timeout_base_url = normalize_llm_base_url(str(request_kwargs.get("base_url") or ""))
+        return {
+            "ok": False,
+            "provider": timeout_provider,
+            "provider_label": llm_route_display_label(provider=timeout_provider, model=timeout_model),
+            "model": timeout_model,
+            "base_url": timeout_base_url,
+            "status": 0,
+            "error": f"llm_wall_timeout_after_{effective_wall_timeout:.1f}s",
+            "wall_timeout": True,
+            "wall_timeout_seconds": effective_wall_timeout,
+        }
+    if "exception" in result_box:
+        return {
+            "ok": False,
+            "provider": normalize_llm_provider(request_kwargs.get("provider")),
+            "model": str(request_kwargs.get("model") or ""),
+            "base_url": normalize_llm_base_url(str(request_kwargs.get("base_url") or "")),
+            "status": 0,
+            "error": f"llm_request_worker_failed:{type(result_box['exception']).__name__}",
+        }
+    result = result_box.get("result")
     if not isinstance(result, dict):
         return {"ok": False, "status": 0, "error": "llm_wall_timeout_missing_result"}
     error_text = str(result.get("error") or "").lower()
@@ -962,6 +1059,90 @@ def call_llm_request_with_failover(
     fallback_wall_timeout: int | float | None = None,
     config: dict[str, str] | None = None,
 ) -> dict[str, Any]:
+    fallback = resolve_llm_fallback_settings(config=config, tier=tier) if allow_fallback else {"enabled": False}
+    primary_signature = llm_route_signature(provider=provider, base_url=base_url, model=model, api_key=api_key)
+    fallback_signature = llm_route_signature(
+        provider=fallback.get("provider"),
+        base_url=str(fallback.get("base_url") or ""),
+        model=str(fallback.get("model") or ""),
+        api_key=str(fallback.get("api_key") or ""),
+    )
+    affinity = _active_llm_failover_affinity(primary_signature, fallback_signature=fallback_signature)
+    if affinity and _llm_fallback_route_ready(fallback) and fallback_signature != primary_signature:
+        fallback_result = call_llm_request_once_with_wall_timeout(
+            provider=fallback.get("provider"),
+            api_key=str(fallback.get("api_key") or ""),
+            base_url=str(fallback.get("base_url") or ""),
+            model=str(fallback.get("model") or ""),
+            messages=messages,
+            timeout=max(1, fallback_timeout if fallback_timeout is not None else timeout),
+            max_tokens=max_tokens,
+            temperature=temperature,
+            tier=tier,
+            json_mode=json_mode,
+            explicit_reasoning_effort=(
+                fallback.get("pro_reasoning_effort")
+                if normalize_deepseek_model_tier(tier) == "pro"
+                else fallback.get("flash_reasoning_effort")
+            ),
+            allow_insecure_tls=fallback.get("allow_insecure_tls"),
+            wall_timeout=fallback_wall_timeout if fallback_wall_timeout is not None else fallback_timeout,
+        )
+        if fallback_result.get("ok"):
+            fallback_result["failover"] = _successful_failover_audit(
+                provider=provider,
+                model=model,
+                primary_status=affinity.get("primary_status", 0),
+                primary_error=str(affinity.get("primary_error") or ""),
+                primary_provider_label=str(affinity.get("primary_provider_label") or ""),
+                fallback=fallback,
+                fallback_result=fallback_result,
+                fallback_timeout=fallback_timeout,
+                timeout=timeout,
+            )
+            # Keep the original expiry fixed.  Refreshing it on every healthy
+            # fallback response would prevent a busy process from ever probing
+            # the recovered primary route again.
+            return fallback_result
+        # The primary route is still inside a live failure-affinity window.
+        # If the preferred fallback also misses, return immediately instead of
+        # paying for the already-known-bad primary again in the same call.
+        primary_provider_label = str(
+            affinity.get("primary_provider_label")
+            or llm_route_display_label(provider=provider, model=model)
+        )
+        primary = {
+            "ok": False,
+            "provider": normalize_llm_provider(provider),
+            "provider_label": primary_provider_label,
+            "model": str(model or ""),
+            "base_url": normalize_llm_base_url(str(base_url or "")),
+            "status": affinity.get("primary_status", 0),
+            "error": str(affinity.get("primary_error") or "llm_primary_route_in_failure_affinity"),
+        }
+        primary["failover"] = {
+            "attempted": True,
+            "activated": False,
+            "reason": "fallback_failed",
+            "primary_provider": normalize_llm_provider(provider),
+            "primary_provider_label": primary_provider_label,
+            "primary_status": affinity.get("primary_status", 0),
+            "primary_error": str(affinity.get("primary_error") or ""),
+            "fallback_provider": str(fallback.get("provider") or "").strip(),
+            "fallback_provider_label": str(
+                fallback_result.get("provider_label")
+                or llm_route_display_label(
+                    provider=fallback.get("provider"),
+                    model=fallback_result.get("model") or fallback.get("model"),
+                    request_style=fallback_result.get("request_style"),
+                )
+            ),
+            "fallback_timeout_seconds": max(1, fallback_timeout if fallback_timeout is not None else timeout),
+            "fallback_status": fallback_result.get("status", 0),
+            "fallback_error": str(fallback_result.get("error") or ""),
+        }
+        return primary
+
     primary = call_llm_request_once_with_wall_timeout(
         provider=provider,
         api_key=api_key,
@@ -983,7 +1164,6 @@ def call_llm_request_with_failover(
     if not allow_fallback:
         primary["failover"] = {"attempted": False, "activated": False, "reason": "fallback_disallowed_for_stage"}
         return primary
-    fallback = resolve_llm_fallback_settings(config=config, tier=tier)
     if not fallback.get("enabled"):
         primary["failover"] = {"attempted": False, "activated": False, "reason": "fallback_disabled"}
         return primary
@@ -1005,6 +1185,23 @@ def call_llm_request_with_failover(
     ):
         primary["failover"] = {"attempted": False, "activated": False, "reason": "fallback_same_as_primary"}
         return primary
+    primary_provider_label = str(primary.get("provider_label") or llm_route_display_label(
+        provider=provider,
+        model=primary.get("model") or model,
+        request_style=primary.get("request_style"),
+    ))
+    if primary.get("wall_timeout") is True:
+        # Remember the observed bad primary route before attempting fallback.
+        # If fallback also has one transient miss, the next same-turn call must
+        # still try the alternate route first instead of paying for the known
+        # primary timeout again.
+        _record_llm_failover_affinity(
+            primary_signature,
+            fallback_signature=fallback_signature,
+            primary_status=primary.get("status", 0),
+            primary_error=str(primary.get("error") or ""),
+            primary_provider_label=primary_provider_label,
+        )
     fallback_result = call_llm_request_once_with_wall_timeout(
         provider=fallback_provider,
         api_key=fallback_api_key,
@@ -1025,26 +1222,17 @@ def call_llm_request_with_failover(
         wall_timeout=fallback_wall_timeout if fallback_wall_timeout is not None else fallback_timeout,
     )
     if fallback_result.get("ok"):
-        fallback_result["failover"] = {
-            "attempted": True,
-            "activated": True,
-            "reason": "fallback_success",
-            "primary_provider": normalize_llm_provider(provider),
-            "primary_provider_label": str(primary.get("provider_label") or llm_route_display_label(
-                provider=provider,
-                model=primary.get("model") or model,
-                request_style=primary.get("request_style"),
-            )),
-            "primary_status": primary.get("status", 0),
-            "primary_error": str(primary.get("error") or ""),
-            "fallback_provider": fallback_provider,
-            "fallback_provider_label": str(fallback_result.get("provider_label") or llm_route_display_label(
-                provider=fallback_provider,
-                model=fallback_result.get("model") or fallback_model,
-                request_style=fallback_result.get("request_style"),
-            )),
-            "fallback_timeout_seconds": max(1, fallback_timeout if fallback_timeout is not None else timeout),
-        }
+        fallback_result["failover"] = _successful_failover_audit(
+            provider=provider,
+            model=model,
+            primary_status=primary.get("status", 0),
+            primary_error=str(primary.get("error") or ""),
+            primary_provider_label=primary_provider_label,
+            fallback=fallback,
+            fallback_result=fallback_result,
+            fallback_timeout=fallback_timeout,
+            timeout=timeout,
+        )
         return fallback_result
     primary["failover"] = {
         "attempted": True,
@@ -1069,6 +1257,87 @@ def call_llm_request_with_failover(
         "fallback_error": str(fallback_result.get("error") or ""),
     }
     return primary
+
+
+def _llm_fallback_route_ready(fallback: dict[str, Any]) -> bool:
+    return bool(
+        fallback.get("enabled")
+        and str(fallback.get("provider") or "").strip()
+        and str(fallback.get("api_key") or "").strip()
+        and str(fallback.get("base_url") or "").strip()
+        and str(fallback.get("model") or "").strip()
+    )
+
+
+def _successful_failover_audit(
+    *,
+    provider: Any,
+    model: str,
+    primary_status: Any,
+    primary_error: str,
+    primary_provider_label: str,
+    fallback: dict[str, Any],
+    fallback_result: dict[str, Any],
+    fallback_timeout: int | float | None,
+    timeout: int | float,
+) -> dict[str, Any]:
+    fallback_provider = str(fallback.get("provider") or "").strip()
+    fallback_model = str(fallback.get("model") or "").strip()
+    return {
+        "attempted": True,
+        "activated": True,
+        "reason": "fallback_success",
+        "primary_provider": normalize_llm_provider(provider),
+        "primary_provider_label": primary_provider_label or llm_route_display_label(provider=provider, model=model),
+        "primary_status": primary_status,
+        "primary_error": primary_error,
+        "fallback_provider": fallback_provider,
+        "fallback_provider_label": str(fallback_result.get("provider_label") or llm_route_display_label(
+            provider=fallback_provider,
+            model=fallback_result.get("model") or fallback_model,
+            request_style=fallback_result.get("request_style"),
+        )),
+        "fallback_timeout_seconds": max(1, fallback_timeout if fallback_timeout is not None else timeout),
+    }
+
+
+def _active_llm_failover_affinity(
+    primary_signature: tuple[str, str, str, str],
+    *,
+    fallback_signature: tuple[str, str, str, str],
+) -> dict[str, Any]:
+    now = time.monotonic()
+    with _LLM_FAILOVER_AFFINITY_LOCK:
+        item = _LLM_FAILOVER_AFFINITY.get(primary_signature)
+        if not isinstance(item, dict):
+            return {}
+        if float(item.get("expires_at") or 0.0) <= now or item.get("fallback_signature") != fallback_signature:
+            _LLM_FAILOVER_AFFINITY.pop(primary_signature, None)
+            return {}
+        return dict(item)
+
+
+def _record_llm_failover_affinity(
+    primary_signature: tuple[str, str, str, str],
+    *,
+    fallback_signature: tuple[str, str, str, str],
+    primary_status: Any,
+    primary_error: str,
+    primary_provider_label: str,
+) -> None:
+    with _LLM_FAILOVER_AFFINITY_LOCK:
+        _LLM_FAILOVER_AFFINITY[primary_signature] = {
+            "fallback_signature": fallback_signature,
+            "primary_status": primary_status,
+            "primary_error": primary_error,
+            "primary_provider_label": primary_provider_label,
+            "expires_at": time.monotonic() + _LLM_FAILOVER_AFFINITY_TTL_SECONDS,
+        }
+
+
+def _clear_llm_failover_affinity(primary_signature: tuple[str, str, str, str]) -> None:
+    with _LLM_FAILOVER_AFFINITY_LOCK:
+        _LLM_FAILOVER_AFFINITY.pop(primary_signature, None)
 
 
 def _legacy_provider_for_reader(read_secret_fn: SecretReader) -> str:

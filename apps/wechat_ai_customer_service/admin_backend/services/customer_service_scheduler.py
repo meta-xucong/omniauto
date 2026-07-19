@@ -80,21 +80,26 @@ from apps.wechat_ai_customer_service.internal.scheduler.voice_bridge import (
     voice_transcription_envelope as _voice_transcription_envelope_impl,
 )
 from apps.wechat_ai_customer_service.internal.scheduler.vision_bridge import (
+    build_brain_safe_image_proxy_messages,
+    customer_image_capture_trigger,
     customer_image_proxy_messages as _customer_image_proxy_messages_impl,
     customer_visual_image_sources as _customer_visual_image_sources_impl,
     filter_fresh_customer_visual_sources as _filter_fresh_customer_visual_sources_impl,
+    confirmed_customer_image_placeholder as _confirmed_customer_image_placeholder_impl,
+    image_capture_unavailable_message as _image_capture_unavailable_message_impl,
     image_message_refs as _image_message_refs_impl,
+    is_structural_visual_occurrence as _is_structural_visual_occurrence_impl,
     planner_customer_image_enrichment as _planner_customer_image_enrichment_impl,
+    prepare_scheduler_capture as prepare_vision_scheduler_capture,
+    resolve_pending_visual_occurrence as _resolve_pending_visual_occurrence_impl,
     self_visual_image_sources as _self_visual_image_sources_impl,
     target_state_seen_visual_identity_keys as _target_state_seen_visual_identity_keys_impl,
     visual_bounds_key as _visual_bounds_key_impl,
     visual_image_identity_keys as _visual_image_identity_keys_impl,
     visual_image_side as _visual_image_side_impl,
 )
-from apps.wechat_ai_customer_service.optional_plugins.vision.compatibility import (
-    legacy_build_brain_safe_image_proxy_messages as build_brain_safe_image_proxy_messages,
-    legacy_customer_image_capture_trigger as customer_image_capture_trigger,
-    legacy_image_preview_text as image_preview_text,
+from apps.wechat_ai_customer_service.internal.conversation_context import (
+    merge_conversation_context_patch,
 )
 from apps.wechat_ai_customer_service.workflows.listen_and_reply import TargetConfig as WorkflowTargetConfig
 from apps.wechat_ai_customer_service.wechat_message_normalizer import split_wechat_ocr_speaker_prefix
@@ -118,6 +123,30 @@ def _effective_conversation_type(*values: Any) -> str:
         if clean and clean != "unknown":
             return clean
     return "unknown"
+
+
+def _conversation_type_from_structural_messages(
+    current: str,
+    messages: list[dict[str, Any]],
+) -> str:
+    """Correct a sidebar guess only from chat-pane structural speaker metadata.
+
+    A generic group title can look identical to a private-chat title in the
+    session list.  The OCR sidecar already emits ``group_member`` only after
+    confirming the group header/layout, so this is stronger evidence than the
+    sidebar guess.  Keep the existing opaque session key; changing identity in
+    the middle of a capture would strand the pending session.
+    """
+
+    effective = _effective_conversation_type(current)
+    for item in messages:
+        if not isinstance(item, dict):
+            continue
+        sender_role = str(item.get("sender_role") or "").strip().lower()
+        sender = str(item.get("sender") or "").strip().lower()
+        if sender_role == "group_member" or sender == "group_member":
+            return "group"
+    return effective
 
 
 _RPA_HUMANIZED_SEND_ENV_MAPPING = {
@@ -177,6 +206,78 @@ _CONTEXT_RECOVERY_NOISE_TERMS = (
     "错误码",
 )
 
+_SAFE_PRETRIGGER_SEND_STATES = {
+    "send_rate_limited",
+    "send_guard_blocked",
+    "send_geometry_blocked",
+    "target_not_confirmed",
+    "send_uia_unavailable",
+    "send_input_not_ready",
+    "send_lock_timeout",
+}
+
+
+def _nested_send_dicts(value: Any) -> list[dict[str, Any]]:
+    """Project nested send diagnostics without changing their payload shape."""
+
+    pending = [value]
+    found: list[dict[str, Any]] = []
+    seen: set[int] = set()
+    while pending:
+        current = pending.pop()
+        if not isinstance(current, dict):
+            continue
+        identity = id(current)
+        if identity in seen:
+            continue
+        seen.add(identity)
+        found.append(current)
+        for key in ("send_result", "send", "guard", "click", "uia", "trigger", "send_trigger"):
+            child = current.get(key)
+            if isinstance(child, dict):
+                pending.append(child)
+        segment_results = current.get("segment_results")
+        if isinstance(segment_results, list):
+            pending.extend(item for item in segment_results if isinstance(item, dict))
+    return found
+
+
+def _send_payload_state(value: Any) -> str:
+    for item in _nested_send_dicts(value):
+        state = str(item.get("state") or "").strip()
+        if state in _SAFE_PRETRIGGER_SEND_STATES:
+            return state
+    return ""
+
+
+def _send_payload_sent_segments(value: Any) -> int:
+    sent = 0
+    for item in _nested_send_dicts(value):
+        try:
+            sent = max(sent, int(item.get("sent_segments") or 0))
+        except (TypeError, ValueError):
+            continue
+    return sent
+
+
+def _send_payload_has_trigger_proof(value: Any) -> bool:
+    for item in _nested_send_dicts(value):
+        for key in ("send_trigger", "trigger"):
+            trigger = item.get(key)
+            if not isinstance(trigger, dict) or trigger.get("ok") is not True:
+                continue
+            if str(trigger.get("method") or "").strip() or str(trigger.get("send_trigger_mode") or "").strip():
+                return True
+    return False
+
+
+def _safe_pretrigger_send_failure(value: Any) -> bool:
+    return bool(
+        _send_payload_state(value)
+        and _send_payload_sent_segments(value) <= 0
+        and not _send_payload_has_trigger_proof(value)
+    )
+
 
 def _visual_image_side(message: dict[str, Any]) -> str:
     return _visual_image_side_impl(message)
@@ -203,43 +304,13 @@ def _image_capture_unavailable_message(
     pending_signal: dict[str, Any] | None,
     reason: str,
 ) -> dict[str, Any]:
-    """Create a non-visible evidence record when an image cannot be persisted.
-
-    This is deliberately a capture fact, not a customer-facing fallback.  It
-    gives the Brain a chance to decide whether an image-only turn warrants a
-    clarification or no visible response while retaining the exact failure for
-    audit.  A text turn is never replaced by this record.
-    """
-
-    signal = pending_signal if isinstance(pending_signal, dict) else {}
-    occurred_at = str(
-        signal.get("pending_since")
-        or signal.get("last_detected_at")
-        or signal.get("last_message_time")
-        or ""
+    return _image_capture_unavailable_message_impl(
+        target_name=target_name,
+        session_key=session_key,
+        pending_signal_id=pending_signal_id,
+        pending_signal=pending_signal,
+        reason=reason,
     )
-    stable = stable_id(
-        "image-capture-unavailable",
-        target_name,
-        session_key,
-        pending_signal_id,
-        occurred_at,
-        reason,
-    )
-    return {
-        "id": f"image_capture_unavailable:{stable}",
-        "message_id": f"image_capture_unavailable:{stable}",
-        "type": "text",
-        "sender": "unknown",
-        "sender_role": "unknown",
-        "content": "客户发送了一张图片，但图片内容暂未取得。",
-        "time": occurred_at,
-        "image_capture_unavailable": True,
-        "image_capture_failure_reason": str(reason or "customer_image_save_failed"),
-        "pending_signal_id": str(pending_signal_id or ""),
-        "pending_signal_kind": str(signal.get("pending_signal_kind") or "image_capture"),
-        "quality_flags": ["image_capture_unavailable"],
-    }
 
 
 def _visual_bounds_key(value: Any) -> str:
@@ -297,6 +368,40 @@ def _planner_customer_image_enrichment(
     result: dict[str, Any],
 ) -> dict[str, Any]:
     return _planner_customer_image_enrichment_impl(capture, result)
+
+
+def _is_structural_visual_occurrence(message: dict[str, Any]) -> bool:
+    return _is_structural_visual_occurrence_impl(message)
+
+
+def _resolve_pending_visual_occurrence(
+    messages: list[dict[str, Any]],
+    *,
+    target_state: dict[str, Any],
+    explicit_image_pending: bool,
+    pending_signal_id: str,
+) -> dict[str, Any]:
+    return _resolve_pending_visual_occurrence_impl(
+        messages,
+        target_state=target_state,
+        explicit_image_pending=explicit_image_pending,
+        pending_signal_id=pending_signal_id,
+    )
+
+
+def _confirmed_customer_image_placeholder(
+    resolution: dict[str, Any],
+    *,
+    target_name: str,
+    session_key: str,
+    pending_signal_id: str,
+) -> dict[str, Any]:
+    return _confirmed_customer_image_placeholder_impl(
+        resolution,
+        target_name=target_name,
+        session_key=session_key,
+        pending_signal_id=pending_signal_id,
+    )
 
 
 def _merge_voice_transcription_messages(
@@ -405,32 +510,109 @@ def _merge_result_latency_trace(result: dict[str, Any], extra_trace: dict[str, A
     return result
 
 
+def _planner_task_has_spent_brain_repair(task: dict[str, Any]) -> bool:
+    """Inspect existing audit payloads without adding scheduler state fields."""
+
+    for result_key in ("result", "last_failed_result"):
+        result = task.get(result_key) if isinstance(task.get(result_key), dict) else {}
+        event = result.get("event") if isinstance(result.get("event"), dict) else result
+        brain = event.get("customer_service_brain") if isinstance(event.get("customer_service_brain"), dict) else {}
+        if not brain and isinstance(result.get("decision"), dict):
+            decision = result.get("decision") or {}
+            brain = decision.get("customer_service_brain") if isinstance(decision.get("customer_service_brain"), dict) else {}
+        if not brain:
+            continue
+        llm_status = brain.get("llm_status") if isinstance(brain.get("llm_status"), dict) else {}
+        if llm_status.get("same_capture_retry") or llm_status.get("json_structure_repaired"):
+            return True
+        for key in (
+            "invalid_plan_same_capture_retry",
+            "plan_validation_repair",
+            "quality_repair",
+            "guard_repair",
+            "post_validation_quality_repair",
+            "post_guard_quality_repair",
+        ):
+            audit = brain.get(key) if isinstance(brain.get(key), dict) else {}
+            if not audit:
+                continue
+            if audit.get("attempted") is True or audit.get("ok") is True:
+                return True
+            if str(audit.get("status") or "").strip().lower() not in {"", "skipped"}:
+                return True
+    return False
+
+
+def _planner_task_allows_transient_transport_retry(task: dict[str, Any]) -> bool:
+    """Allow one durable-capture retry only for structured transport failure."""
+
+    for result_key in ("result", "last_failed_result"):
+        result = task.get(result_key) if isinstance(task.get(result_key), dict) else {}
+        event = result.get("event") if isinstance(result.get("event"), dict) else result
+        brain = event.get("customer_service_brain") if isinstance(event.get("customer_service_brain"), dict) else {}
+        if not brain and isinstance(result.get("decision"), dict):
+            decision = result.get("decision") or {}
+            brain = decision.get("customer_service_brain") if isinstance(decision.get("customer_service_brain"), dict) else {}
+        no_visible = brain.get("no_visible_reply") if isinstance(brain.get("no_visible_reply"), dict) else {}
+        failure_class = str(no_visible.get("class") or "").strip().lower()
+        if failure_class == "llm_timeout":
+            return True
+        if failure_class != "guard_repair_failed":
+            continue
+        guard_repair = brain.get("guard_repair") if isinstance(brain.get("guard_repair"), dict) else {}
+        transport_audit = " ".join(
+            str(value or "")
+            for value in (
+                guard_repair.get("error"),
+                guard_repair.get("reason"),
+                (guard_repair.get("failover") or {}).get("primary_error")
+                if isinstance(guard_repair.get("failover"), dict)
+                else "",
+                (guard_repair.get("failover") or {}).get("fallback_error")
+                if isinstance(guard_repair.get("failover"), dict)
+                else "",
+            )
+        ).lower()
+        if any(marker in transport_audit for marker in ("timeout", "timed out", "wall_timeout")):
+            return True
+    return False
+
+
 def polish_failure_retry_instruction(task: dict[str, Any]) -> str:
-    """Build prompt-only feedback for Brain after a final-polish block."""
+    """Build one topic-neutral Brain retry instruction from prior audit data."""
 
     failure = task.get("last_polish_failure") if isinstance(task.get("last_polish_failure"), dict) else {}
+    if not failure:
+        failure = task.get("last_failed_result") if isinstance(task.get("last_failed_result"), dict) else {}
     if not failure:
         return ""
     reason = str(failure.get("reason") or failure.get("error") or "").strip()
     event = failure.get("event") if isinstance(failure.get("event"), dict) else {}
+    if not event and isinstance(failure.get("result"), dict):
+        nested_result = failure.get("result") or {}
+        event = nested_result.get("event") if isinstance(nested_result.get("event"), dict) else nested_result
     final_polish = event.get("final_visible_llm_polish") if isinstance(event.get("final_visible_llm_polish"), dict) else {}
+    brain = event.get("customer_service_brain") if isinstance(event.get("customer_service_brain"), dict) else {}
     guard = final_polish.get("guard") if isinstance(final_polish.get("guard"), dict) else {}
-    guard_reason = str(guard.get("reason") or final_polish.get("reason") or "").strip()
+    if not guard:
+        guard = brain.get("guard") if isinstance(brain.get("guard"), dict) else {}
+    guard_reason = str(
+        guard.get("reason")
+        or final_polish.get("reason")
+        or brain.get("reason")
+        or ""
+    ).strip()
     candidate = final_polish.get("candidate") if isinstance(final_polish.get("candidate"), dict) else {}
+    if not candidate:
+        candidate = guard.get("candidate") if isinstance(guard.get("candidate"), dict) else {}
     candidate_reply = str(candidate.get("reply") or final_polish.get("reply_text") or "").strip()
     parts = [
-        "上一版Brain回复被最终可见审校拦截，本次必须由Brain重新思考并改写，不能沿用原回复。",
-        "审校只提供风险信号，最终客户可见话术仍必须由Brain重新生成。",
+        "上一版BrainPlan未通过发送合同或传输未完成，本次只基于当前消息、允许证据和下列审校结果重新生成。",
+        "审校信息不授权新事实，客户可见话术仍必须全部由Brain生成。",
     ]
     normalized = " ".join(item for item in (reason, guard_reason) if item)
     if normalized:
         parts.append("拦截原因：" + normalized[:180])
-    if "identity_truth_discussion_not_allowed" in normalized:
-        parts.append(
-            "客户在试探是否AI、机器人、自动回复或真人时，不能承认或否认身份，"
-            "不能说被发现了、猜对了、确实是、不是AI或不是机器人；"
-            "请自然回应客户感受，调整沟通节奏，再接住当前问题。"
-        )
     if candidate_reply:
         parts.append("上一版不可发送回复片段：" + candidate_reply[:180])
     return " ".join(parts)[:700]
@@ -769,6 +951,122 @@ def recover_pending_signal_batch_from_monitor(
         synthetic["original_content"] = speaker_meta.get("original_content")
         synthetic["ocr_speaker_prefix"] = speaker_meta
     return [synthetic]
+
+
+def _pending_signal_replays_replied_ledger_input(
+    pending_signal: dict[str, Any] | None,
+    target_state: dict[str, Any] | None,
+    *,
+    target_name: str = "",
+) -> bool:
+    """Identify a sidebar-only replay after chat-pane capture found no new turn.
+
+    This guard is deliberately downstream of a real chat-pane read. It must
+    never suppress monitor dispatch itself: a repeated customer message is
+    still allowed to reach capture and acquire a new occurrence identity.
+    Only an exact (or visibly ellipsized) preview of a ledger customer message
+    followed by a ledger assistant message can consume the empty fallback.
+    """
+
+    if not isinstance(pending_signal, dict) or not isinstance(target_state, dict):
+        return False
+    interaction = (
+        target_state.get("conversation_interaction_state")
+        if isinstance(target_state.get("conversation_interaction_state"), dict)
+        else {}
+    )
+    if interaction.get("unanswered_exists"):
+        return False
+    if not str(interaction.get("last_reply_sent_at") or "").strip():
+        return False
+    raw_preview = str(
+        pending_signal.get("pending_signal_text")
+        or pending_signal.get("preview_content")
+        or ""
+    ).strip()
+    semantic_preview, _speaker_meta = _short_pending_semantic_text(raw_preview, target_name=target_name)
+    compact_preview = normalize_repeatable_probe_text(semantic_preview)
+    if not compact_preview:
+        return False
+    visibly_truncated = bool(re.search(r"(?:\.{2,}|…+)$", raw_preview.rstrip()))
+    pending_time = str(
+        pending_signal.get("last_message_time")
+        or pending_signal.get("time")
+        or ""
+    ).strip()
+    context = (
+        target_state.get("conversation_context")
+        if isinstance(target_state.get("conversation_context"), dict)
+        else {}
+    )
+    recent = context.get("ledger_recent_messages") if isinstance(context.get("ledger_recent_messages"), list) else []
+    reply_time = str(interaction.get("last_reply_sent_at") or "").strip()
+
+    def minute_token(value: str) -> str:
+        matched = re.search(r"(?:^|T|\s)(\d{1,2}):(\d{2})(?::\d{2})?", str(value or ""))
+        if not matched:
+            return ""
+        return f"{int(matched.group(1)):02d}:{matched.group(2)}"
+
+    pending_minute = minute_token(pending_time)
+    reply_minute = minute_token(reply_time)
+    matched_index = -1
+    for index in range(len(recent) - 1, -1, -1):
+        item = recent[index]
+        if not isinstance(item, dict):
+            continue
+        sender = str(item.get("sender") or "").strip().lower()
+        sender_role = str(item.get("sender_role") or "").strip().lower()
+        if sender not in {"customer", "user", "client", "group_member"} and sender_role not in {
+            "customer",
+            "user",
+            "client",
+            "group_member",
+        }:
+            continue
+        compact_inbound = normalize_repeatable_probe_text(item.get("content") or "")
+        if not compact_inbound:
+            continue
+        content_matches = compact_preview == compact_inbound or (
+            visibly_truncated
+            and len(compact_preview) >= 4
+            and compact_inbound.startswith(compact_preview)
+        )
+        if not content_matches:
+            continue
+        item_time = str(item.get("time") or "").strip()
+        if pending_time and item_time and pending_time != item_time:
+            # After a verified send, WeChat can keep the truncated inbound
+            # preview while changing the sidebar clock to the outbound reply's
+            # minute. A real chat-pane read has already found no new message at
+            # this point, so that exact clock pattern is a closed replay. A
+            # genuinely later minute remains eligible and is never suppressed.
+            if not (
+                visibly_truncated
+                and pending_minute
+                and reply_minute
+                and pending_minute == reply_minute
+            ):
+                continue
+        matched_index = index
+        break
+    if matched_index < 0:
+        return False
+    for item in recent[matched_index + 1 :]:
+        if not isinstance(item, dict):
+            continue
+        sender = str(item.get("sender") or "").strip().lower()
+        sender_role = str(item.get("sender_role") or "").strip().lower()
+        if sender in {"self", "assistant", "service", "bot", "agent", "outbound"} or sender_role in {
+            "self",
+            "assistant",
+            "service",
+            "bot",
+            "agent",
+            "outbound",
+        }:
+            return True
+    return False
 
 
 def pending_signal_identity_payload(
@@ -1277,12 +1575,93 @@ class CustomerServiceSchedulerRuntime:
         self._send_future: Future[dict[str, Any]] | None = None
         self._send_reply_id: str = ""
         self._send_reply_snapshot: dict[str, Any] = {}
+        self._send_deferred_reply_ids_this_tick: set[str] = set()
+        # The listener is the sole scheduler writer during a tick. Reusing the
+        # state object while the atomic file mtime is unchanged avoids parsing
+        # a multi-megabyte recovery journal on every poll. An external/admin
+        # write replaces the file and therefore invalidates this cache.
+        self._state_cache: dict[str, Any] | None = None
+        self._state_cache_mtime_ns: int = -1
+        self._state_cache_file_signature: tuple[int, int, int] = (-1, -1, -1)
+        # Planner/polish workers need only session context, never the complete
+        # capture/task journal. Publish a small immutable-by-convention view at
+        # task submission so workers do not reload the full state file.
+        self._session_context_snapshot: dict[str, Any] = {"sessions": {}}
 
     def shutdown(self) -> None:
         self._planner_executor.shutdown(wait=False, cancel_futures=False)
         self._polish_executor.shutdown(wait=False, cancel_futures=False)
         self._media_context_executor.shutdown(wait=False, cancel_futures=False)
         self._send_executor.shutdown(wait=False, cancel_futures=False)
+
+    def _state_file_signature(self) -> tuple[int, int, int]:
+        """Identify atomic replacements even on coarse-mtime Windows volumes."""
+
+        try:
+            stat = self.store.path.stat()
+        except OSError:
+            return (0, 0, 0)
+        return (
+            int(getattr(stat, "st_mtime_ns", 0) or 0),
+            int(getattr(stat, "st_size", 0) or 0),
+            int(getattr(stat, "st_ino", 0) or 0),
+        )
+
+    def _load_state_for_tick(self) -> dict[str, Any]:
+        current_signature = self._state_file_signature()
+        if self._state_cache is not None and current_signature == self._state_cache_file_signature:
+            return self._state_cache
+        state = self.store.load()
+        self._state_cache = state
+        self._state_cache_mtime_ns = current_signature[0]
+        self._state_cache_file_signature = current_signature
+        return state
+
+    def _save_state_after_tick(self, state: dict[str, Any]) -> None:
+        self.store.save(state)
+        self._state_cache = state
+        signature = self._state_file_signature()
+        self._state_cache_mtime_ns = signature[0]
+        self._state_cache_file_signature = signature
+
+    def _adopt_state_cache(self, state: dict[str, Any]) -> None:
+        if not isinstance(state, dict):
+            return
+        self._state_cache = state
+        signature = self._state_file_signature()
+        self._state_cache_mtime_ns = signature[0]
+        self._state_cache_file_signature = signature
+        self._publish_session_context_snapshot(state)
+
+    def _state_view_for_bridge(self) -> dict[str, Any] | None:
+        state = self._state_cache
+        if not isinstance(state, dict):
+            return None
+        # Copy only the top-level maps. Nested task/capture values are treated
+        # as read-only by bridge diagnostics, while the shallow projection
+        # avoids duplicating the multi-megabyte journal.
+        projected = dict(state)
+        for field in (
+            "sessions",
+            "captures",
+            "llm_tasks",
+            "polish_tasks",
+            "media_context_tasks",
+            "ready_replies",
+        ):
+            value = state.get(field)
+            if isinstance(value, dict):
+                projected[field] = dict(value)
+        return projected
+
+    def _publish_session_context_snapshot(self, state: dict[str, Any]) -> None:
+        sessions = state.get("sessions") if isinstance(state, dict) else {}
+        self._session_context_snapshot = {
+            "sessions": copy.deepcopy(sessions) if isinstance(sessions, dict) else {},
+        }
+
+    def _session_context_state_for_workflow(self) -> dict[str, Any]:
+        return self._session_context_snapshot
 
     def _restore_missing_polish_task_from_snapshot(self, state: dict[str, Any], task_id: str) -> bool:
         task = (state.get("polish_tasks", {}) or {}).get(task_id)
@@ -1365,9 +1744,10 @@ class CustomerServiceSchedulerRuntime:
     ) -> dict[str, Any]:
         """Run one non-blocking scheduling tick."""
         started = time.perf_counter()
+        self._send_deferred_reply_ids_this_tick.clear()
         phase_durations: dict[str, float] = {}
         phase_started = started
-        state = self.store.load()
+        state = self._load_state_for_tick()
         events: list[dict[str, Any]] = []
         cleanup_result = cleanup_scheduler_state(state, config=self.config, now=now)
         if int(cleanup_result.get("removed_ready_reply_count") or 0) > 0:
@@ -1377,6 +1757,7 @@ class CustomerServiceSchedulerRuntime:
             session = record_session_signal(state, signal, now=now)
             if session and session.get("pending_capture"):
                 events.append({"event": "signal_pending", "target_name": session.get("target_name")})
+        self._publish_session_context_snapshot(state)
 
         recovered = recover_orphaned_running_llm_tasks(
             state,
@@ -1429,6 +1810,21 @@ class CustomerServiceSchedulerRuntime:
         phase_durations["send_pre_seconds"] = round(max(0.0, time.perf_counter() - phase_started), 4)
         phase_started = time.perf_counter()
         events.extend(pre_sent)
+
+        # Collect completed async work before any new foreground capture. A
+        # Win32/OCR capture can occupy the UI lane for many seconds; postponing
+        # collection until after several captures starves already-authored
+        # replies and makes follow-up messages appear ignored.
+        pre_pipeline_events: list[dict[str, Any]] = []
+        pre_pipeline_events.extend(self._collect_media_context_results(state, now=now))
+        pre_pipeline_events.extend(self._collect_llm_results(state, now=now))
+        if self.polish_reply_fn is not None:
+            pre_pipeline_events.extend(self._submit_polish_tasks(state, now=now))
+            pre_pipeline_events.extend(self._collect_polish_results(state, now=now))
+        events.extend(pre_pipeline_events)
+        pre_ready_sent = self._consume_send_queue(state, allow_send=allow_send, now=now)
+        events.extend(pre_ready_sent)
+        phase_started = time.perf_counter()
 
         send_inflight = self._send_inflight()
         captured = [] if send_inflight else self._capture_pending(state, now=now)
@@ -1484,7 +1880,7 @@ class CustomerServiceSchedulerRuntime:
         phase_started = time.perf_counter()
         events.extend(sent)
 
-        self.store.save(state)
+        self._save_state_after_tick(state)
         phase_durations["state_save_seconds"] = round(max(0.0, time.perf_counter() - phase_started), 4)
         summary = state_summary(state)
         total_seconds = round(max(0.0, time.perf_counter() - started), 4)
@@ -1501,7 +1897,15 @@ class CustomerServiceSchedulerRuntime:
     def _capture_pending(self, state: dict[str, Any], *, now: str | None = None) -> list[dict[str, Any]]:
         events: list[dict[str, Any]] = []
         sessions = select_capture_sessions(state, limit=self.config.capture_max_sessions_per_round)
-        for session in sessions:
+        capture_round_started = time.perf_counter()
+        try:
+            capture_round_budget_seconds = max(
+                0.05,
+                float(os.getenv("WECHAT_CUSTOMER_SERVICE_CAPTURE_ROUND_BUDGET_SECONDS", "6") or 6),
+            )
+        except (TypeError, ValueError):
+            capture_round_budget_seconds = 6.0
+        for index, session in enumerate(sessions):
             target_name = str(session.get("target_name") or "")
             session_key = str(session.get("session_key") or "")
             mark_capture_started(state, target_name, session_key=session_key, now=now)
@@ -1567,6 +1971,17 @@ class CustomerServiceSchedulerRuntime:
                 events.extend(self._submit_llm_tasks(state, now=now))
             else:
                 events.append({"event": "capture_empty", "target_name": target_name, "capture_id": capture["capture_id"]})
+            # Keep the existing fast-capture overlap for healthy sessions, but
+            # stop the foreground round as soon as it becomes slow or an older
+            # planner/polish result is ready to collect. This bounds starvation
+            # without changing the configured/public capture width.
+            if index + 1 < len(sessions):
+                capture_elapsed = time.perf_counter() - capture_round_started
+                completed_async_waiting = any(future.done() for future in self._planner_futures.values()) or any(
+                    future.done() for future in self._polish_futures.values()
+                )
+                if capture_elapsed >= capture_round_budget_seconds or completed_async_waiting:
+                    break
         return events
 
     def _submit_media_context_tasks(self, state: dict[str, Any], *, now: str | None = None) -> list[dict[str, Any]]:
@@ -1692,6 +2107,8 @@ class CustomerServiceSchedulerRuntime:
         ]
         tasks.sort(key=lambda item: str(item.get("created_at") or ""))
         captures = state.get("captures", {}) or {}
+        if tasks[:capacity]:
+            self._publish_session_context_snapshot(state)
         for task in tasks[:capacity]:
             task_id = str(task.get("task_id") or "")
             capture_ids = [str(item) for item in task.get("capture_ids", []) if str(item)]
@@ -1865,7 +2282,22 @@ class CustomerServiceSchedulerRuntime:
         result_payload: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         task = fail_llm_task(state, task_id, reason=reason, now=now, result_payload=result_payload)
-        recovery = requeue_capture_after_recoverable_llm_failure(state, task_id, reason=reason, now=now)
+        # Brain owns semantic repair. Scheduler recovery is limited to one
+        # durable-capture replay for a structured transient transport failure,
+        # or one explicit final-polish feedback pass. It never re-reads WeChat
+        # and never authors local customer-visible wording.
+        recovery_attempts = 0
+        if _planner_task_allows_transient_transport_retry(task):
+            recovery_attempts = 1
+        elif str(reason or "").strip() == "final_visible_llm_polish_failed" and not _planner_task_has_spent_brain_repair(task):
+            recovery_attempts = 1
+        recovery = requeue_capture_after_recoverable_llm_failure(
+            state,
+            task_id,
+            reason=reason,
+            now=now,
+            max_attempts=recovery_attempts,
+        )
         if recovery.get("ok"):
             event_name = str(recovery.get("event") or "llm_task_failed_requeued_capture")
             events.append(
@@ -1932,6 +2364,8 @@ class CustomerServiceSchedulerRuntime:
         ]
         tasks.sort(key=lambda item: str(item.get("created_at") or ""))
         planner_tasks = state.get("llm_tasks", {}) or {}
+        if tasks[:capacity]:
+            self._publish_session_context_snapshot(state)
         for task in tasks[:capacity]:
             task_id = str(task.get("task_id") or "")
             planner_task_id = str(task.get("planner_task_id") or "")
@@ -2049,7 +2483,12 @@ class CustomerServiceSchedulerRuntime:
         events: list[dict[str, Any]] = []
         events.extend(self._collect_send_future(state, now=now))
         events.extend(self._recover_orphaned_sending_replies(state, now=now))
-        if not allow_send or self.send_fn is None or self._send_inflight():
+        if (
+            not allow_send
+            or self.send_fn is None
+            or self._send_inflight()
+            or bool(self._send_deferred_reply_ids_this_tick)
+        ):
             return events
         replies = select_ready_replies(state, limit=1)
         if not replies:
@@ -2068,13 +2507,40 @@ class CustomerServiceSchedulerRuntime:
             reply_id = str(reply.get("reply_id") or "")
             if not reply_id:
                 continue
-            mark_reply_failed(state, reply_id, reason="send_worker_orphaned_after_restart", now=now)
+            reconcile_fn = getattr(self, "_orphan_send_reconcile_fn", None)
+            reconciliation: dict[str, Any] = {}
+            if callable(reconcile_fn):
+                try:
+                    candidate = reconcile_fn(copy.deepcopy(reply))
+                    reconciliation = candidate if isinstance(candidate, dict) else {}
+                except Exception:
+                    reconciliation = {}
+            if str(reconciliation.get("status") or "") == "sent":
+                send_result = reconciliation.get("send_result") if isinstance(reconciliation.get("send_result"), dict) else {}
+                mark_reply_sent(state, reply_id, send_result=send_result, now=now)
+                events.append(
+                    {
+                        "event": "send_completed",
+                        "reply_id": reply_id,
+                        "target_name": reply.get("target_name"),
+                    }
+                )
+                continue
+            mark_reply_stale(state, reply_id, reason="send_worker_orphaned_after_restart", now=now)
+            enqueue_pending_session(
+                state,
+                str(reply.get("target_name") or ""),
+                exact=True,
+                conversation_type=str(reply.get("conversation_type") or "unknown"),
+                session_key=str(reply.get("session_key") or ""),
+                reason="reply_stale_before_send",
+                now=now,
+            )
             events.append(
                 {
-                    "event": "send_failed",
+                    "event": "reply_stale",
                     "reply_id": reply_id,
                     "target_name": reply.get("target_name"),
-                    "session_key": reply.get("session_key"),
                     "reason": "send_worker_orphaned_after_restart",
                 }
             )
@@ -2267,8 +2733,66 @@ class CustomerServiceSchedulerRuntime:
         send_result = result.get("send_result") if isinstance(result.get("send_result"), dict) else {}
         send_observability = self._extract_send_observability(send_result)
         if status == "send_failed" or send_result.get("ok") is False or send_result.get("verified") is False:
-            failure_reason = str(result.get("reason") or send_result.get("reason") or send_result.get("error") or "send_failed")
+            transport_state = _send_payload_state(send_result)
+            failure_reason = str(
+                transport_state
+                or result.get("reason")
+                or send_result.get("reason")
+                or send_result.get("error")
+                or "send_failed"
+            )
+            if _safe_pretrigger_send_failure(send_result) and int(reply.get("send_attempts") or 0) < 2:
+                reply["status"] = "ready"
+                reply["last_send_error"] = failure_reason
+                reply["send_result"] = copy.deepcopy(send_result)
+                session = get_session_by_identity(
+                    state,
+                    str(reply.get("target_name") or ""),
+                    session_key=str(reply.get("session_key") or ""),
+                )
+                if isinstance(session, dict):
+                    session["status"] = "ready"
+                self._send_deferred_reply_ids_this_tick.add(reply_id)
+                append_event(
+                    state,
+                    "scheduler_send_failed",
+                    target_name=reply.get("target_name"),
+                    reply_id=reply_id,
+                    reason=failure_reason,
+                )
+                events.append(
+                    {
+                        "event": "send_blocked",
+                        "reply_id": reply_id,
+                        "target_name": reply.get("target_name"),
+                        "reason": failure_reason,
+                    }
+                )
+                return events
             mark_reply_failed(state, reply_id, reason=failure_reason, send_result=send_result, now=finished_at)
+            sent_segments = _send_payload_sent_segments(send_result)
+            if sent_segments > 0 or _safe_pretrigger_send_failure(send_result):
+                enqueue_pending_session(
+                    state,
+                    str(reply.get("target_name") or ""),
+                    exact=True,
+                    conversation_type=str(reply.get("conversation_type") or "unknown"),
+                    session_key=str(reply.get("session_key") or ""),
+                    reason="reply_stale_before_send",
+                    now=finished_at,
+                )
+            else:
+                session = get_session_by_identity(
+                    state,
+                    str(reply.get("target_name") or ""),
+                    session_key=str(reply.get("session_key") or ""),
+                )
+                if isinstance(session, dict):
+                    session["status"] = "internal_handoff_pending"
+                    risk_state = session.setdefault("risk_state", {})
+                    if isinstance(risk_state, dict):
+                        risk_state["handoff_required"] = True
+                        risk_state["handoff_reason"] = failure_reason
             failed_event = {
                 "event": "send_failed",
                 "reply_id": reply_id,
@@ -2442,15 +2966,19 @@ def mark_session_capture_failed(
     # Exponential backoff avoids tight retry loops that look mechanical in UI.
     backoff_seconds = min(90, max(3, 3 * (2 ** min(fail_count - 1, 4))))
     soft_target_unconfirmed = "target_not_confirmed_for_messages" in reason_lower or "target_title_not_confirmed" in reason_lower
+    soft_target_unconfirmed_exhausted = bool(soft_target_unconfirmed and fail_count >= 5)
     if "lock_timeout" in reason_lower:
         # Lock contention is usually transient; retry sooner to avoid
         # customer-visible long-tail waiting while still preventing tight loops.
         backoff_seconds = min(12, max(2, 2 + fail_count))
     if soft_target_unconfirmed:
         # A failed title confirmation is usually a UI/OCR settle issue, not a
-        # Brain failure. Preserve the pending intent, but cool down briefly so
-        # we do not click the same session row again in a mechanical loop.
-        backoff_seconds = min(7, max(3, 2 + fail_count) + random.uniform(0.4, 1.8))
+        # Brain failure. Retry a small bounded number of times with increasing
+        # spacing. A stale/disappeared/service row must never keep reopening the
+        # foreground forever; a genuinely new observation resets this budget in
+        # record_session_signal.
+        backoff_seconds = min(90, max(3, 3 * (2 ** min(fail_count - 1, 5))))
+        backoff_seconds = min(90, backoff_seconds + random.uniform(0.4, 1.8))
     if "blank_render" in reason_lower:
         backoff_seconds = max(backoff_seconds, 25)
     if (
@@ -2463,23 +2991,32 @@ def mark_session_capture_failed(
         # longer floor so a single bad menu/clipboard state does not look like
         # mechanical repeated right-clicking in the chat window.
         backoff_seconds = max(backoff_seconds, 45)
-    retry_not_before = (now_dt + timedelta(seconds=backoff_seconds)).isoformat(timespec="seconds")
-    session["status"] = "capture_cooldown" if soft_target_unconfirmed else "capture_failed"
-    session["pending_capture"] = bool(soft_target_unconfirmed)
-    if soft_target_unconfirmed:
+    retry_not_before = (
+        ""
+        if soft_target_unconfirmed_exhausted
+        else (now_dt + timedelta(seconds=backoff_seconds)).isoformat(timespec="seconds")
+    )
+    session["status"] = "capture_cooldown" if soft_target_unconfirmed and not soft_target_unconfirmed_exhausted else "capture_failed"
+    session["pending_capture"] = bool(soft_target_unconfirmed and not soft_target_unconfirmed_exhausted)
+    if soft_target_unconfirmed and not soft_target_unconfirmed_exhausted:
         session["pending_reason"] = "target_unconfirmed_retry"
     else:
         session["pending_reason"] = ""
+    if soft_target_unconfirmed_exhausted:
+        session["pending_signal_has_unread_evidence"] = False
     risk_state["last_error"] = reason_text
     risk_state["last_capture_failed_at"] = now_text
-    risk_state["capture_retry_not_before"] = retry_not_before
+    if retry_not_before:
+        risk_state["capture_retry_not_before"] = retry_not_before
+    else:
+        risk_state.pop("capture_retry_not_before", None)
     append_event(
         state,
         "scheduler_capture_failed",
         target_name=session["target_name"],
         reason=reason_text,
         fail_count=fail_count,
-        retry_after_seconds=backoff_seconds,
+        retry_after_seconds=0 if soft_target_unconfirmed_exhausted else backoff_seconds,
         retry_not_before=retry_not_before,
     )
 
@@ -2505,9 +3042,9 @@ def merge_scheduler_conversation_context(
     }
     if not clean_update:
         return
+    merged_context = merge_conversation_context_patch(existing, clean_update)
     session["conversation_context"] = {
-        **existing,
-        **clean_update,
+        **merged_context,
         "updated_at": str(now or datetime.now().isoformat(timespec="seconds")),
     }
     append_event(
@@ -3062,10 +3599,13 @@ class ManagedListenerSchedulerBridge:
             }
         else:
             status = self.connector.require_online()
-        session_signals = self._collect_session_signals()
         runtime = self.runtime
         if runtime is None:
             raise RuntimeError("scheduler runtime is not initialized")
+        # A completed-but-uncollected send future still owns the serialized RPA
+        # lane.  Collect it before session polling can call list_sessions and
+        # contend for the same lock; the next listener tick resumes polling.
+        session_signals = [] if getattr(runtime, "_send_future", None) is not None else self._collect_session_signals()
         result = runtime.tick(
             session_signals=session_signals,
             allow_send=self.allow_send if allow_send is None else bool(allow_send),
@@ -3107,11 +3647,11 @@ class ManagedListenerSchedulerBridge:
             normalized.setdefault("require_preview_signal_with_unread_badge", True)
             normalized["scan_all_whitelist_each_iteration"] = False
             normalized["idle_whitelist_sweep_count"] = 0
-            try:
-                target_batch = int(normalized.get("max_targets_per_iteration") or 0)
-            except (TypeError, ValueError):
-                target_batch = 0
-            normalized["max_targets_per_iteration"] = max(2, min(2, target_batch or 2))
+            # Live safety deliberately caps a static single-target listener at
+            # one physical session.  Do not widen that cap back to two while
+            # normalizing the generic low-risk multi-session controls.
+            single_static_target = not self.respond_all_unread_sessions and len(self.targets) <= 1
+            normalized["max_targets_per_iteration"] = 1 if single_static_target else 2
             normalized["max_scan_targets_per_iteration"] = 0
         delay_enabled = bool(normalized.get("switch_human_delay_enabled", normalized.get("rpa_low_risk_mode") is True))
         normalized["switch_human_delay_enabled"] = delay_enabled
@@ -3240,11 +3780,18 @@ class ManagedListenerSchedulerBridge:
             self.connector = self._workflow["WeChatConnector"]()
 
     def _ensure_session_monitor(self, multi_target_cfg: dict[str, Any]) -> None:
-        if not self.use_multi_target:
+        # ``multi_target.enabled`` controls dispatch breadth, not whether the
+        # RPA is allowed to invent a session identity.  Even a single static
+        # target must be resolved through the physical WeChat session list so
+        # capture/send remain bound to the confirmed session key and type.
+        identity_monitor_required = bool(self.targets or self.respond_all_unread_sessions)
+        if not identity_monitor_required:
             self.session_monitor = None
             return
         whitelist = set() if self.respond_all_unread_sessions else {str(target.name) for target in self.targets}
         max_targets = int(multi_target_cfg.get("max_targets_per_iteration", self.scheduler_config.max_pending_sessions) or self.scheduler_config.max_pending_sessions)
+        if not self.use_multi_target:
+            max_targets = 1
         min_switch = int(multi_target_cfg.get("min_switch_interval_seconds", 2) or 2)
         dispatch_strategy = str(multi_target_cfg.get("dispatch_strategy") or "event_driven").strip().lower()
         sticky_hold = int(multi_target_cfg.get("sticky_target_hold_seconds", 35) or 35)
@@ -3333,7 +3880,83 @@ class ManagedListenerSchedulerBridge:
             media_context_fn=self._run_media_context,
             media_context_done_fn=self._media_context_done,
         )
+        self.runtime._orphan_send_reconcile_fn = self._reconcile_orphaned_send
         self._runtime_signature = signature
+
+    def _reconcile_orphaned_send(self, reply: dict[str, Any]) -> dict[str, Any]:
+        """Read the bound chat once; never resend an orphaned reply blindly."""
+
+        target_name = str(reply.get("target_name") or "").strip()
+        reply_text = str(reply.get("reply_text") or "").strip()
+        if not target_name or not reply_text:
+            return {"status": "unknown"}
+        try:
+            messages = self.connector.get_messages(
+                target_name,
+                exact=True,
+                session_key=str(reply.get("session_key") or ""),
+                conversation_type=str(reply.get("conversation_type") or ""),
+            )
+        except Exception:
+            return {"status": "unknown"}
+        if not isinstance(messages, dict) or messages.get("ok") is not True:
+            return {"status": "unknown"}
+        visible_messages = messages.get("messages") if isinstance(messages.get("messages"), list) else []
+        input_message_ids = {
+            str(item or "").strip()
+            for item in reply.get("input_message_ids") or []
+            if str(item or "").strip()
+        }
+        # An identical older reply must not close the current customer turn.
+        # Reconciliation is allowed only against outbound bubbles observed
+        # after one of this reply's frozen input anchors. If OCR can no longer
+        # expose that anchor, the caller keeps the reply uncertain and enters
+        # the existing stale/capture-reconciliation path.
+        anchor_index = -1
+        if input_message_ids:
+            for index, item in enumerate(visible_messages):
+                if not isinstance(item, dict):
+                    continue
+                message_id = canonical_input_message_id(
+                    item,
+                    target_name=target_name,
+                    conversation_type=str(reply.get("conversation_type") or ""),
+                )
+                if message_id in input_message_ids:
+                    anchor_index = index
+        if anchor_index < 0:
+            return {"status": "unknown"}
+        outbound_after_anchor = [
+            copy.deepcopy(item)
+            for item in visible_messages[anchor_index + 1 :]
+            if isinstance(item, dict)
+            and str(item.get("sender") or "").strip().lower() in _SELF_MESSAGE_SENDERS | {"", "unknown"}
+            and str(item.get("content") or "").strip()
+        ]
+        if not outbound_after_anchor:
+            return {"status": "unknown"}
+        joined_outbound = "".join(str(item.get("content") or "") for item in outbound_after_anchor).strip()
+        verification_messages = list(outbound_after_anchor)
+        if joined_outbound:
+            verification_messages.append({"sender": "self", "content": joined_outbound})
+        verification_payload = {**messages, "messages": verification_messages}
+        try:
+            from apps.wechat_ai_customer_service.adapters.wechat_connector import verify_send_from_messages
+
+            verified = bool(verify_send_from_messages(verification_payload, expected_text=reply_text))
+        except Exception:
+            verified = False
+        if not verified:
+            return {"status": "unknown"}
+        return {
+            "status": "sent",
+            "send_result": {
+                "ok": True,
+                "verified": True,
+                "messages": messages,
+                "verification_mode": "messages",
+            },
+        }
 
     def _planner_done(
         self,
@@ -3344,13 +3967,15 @@ class ManagedListenerSchedulerBridge:
         enrichment = _planner_customer_image_enrichment(capture, result)
         if not enrichment:
             return
-        self.ledger.record_multimodal_enrichment(
+        persisted = self.ledger.record_multimodal_enrichment(
             session_key=str(capture.get("session_key") or ""),
             target_name=str(capture.get("target_name") or ""),
             capture_id=str(capture.get("capture_id") or ""),
             source="customer_image_planner",
             enrichments=[enrichment],
         )
+        if int(persisted.get("updated_count") or 0) <= 0:
+            raise RuntimeError("customer_image_context_ledger_message_not_found")
 
     def _run_media_context(self, task: dict[str, Any]) -> dict[str, Any]:
         return {
@@ -3380,7 +4005,7 @@ class ManagedListenerSchedulerBridge:
 
     def _collect_session_signals(self) -> list[dict[str, Any]]:
         self._last_capture_switch_delay_seconds = 0.0
-        if self.use_multi_target and self.session_monitor is not None:
+        if self.session_monitor is not None:
             self.session_monitor.poll(self.connector)
             if hasattr(self.session_monitor, "select_dispatch_targets"):
                 pending = self.session_monitor.select_dispatch_targets(limit=self.scheduler_config.capture_max_sessions_per_round)
@@ -3390,10 +4015,7 @@ class ManagedListenerSchedulerBridge:
             # different unread session for the next capture tick. This avoids
             # wasting rounds on a busy session and reduces cross-session lag.
             if pending:
-                try:
-                    state = self.store.load()
-                except Exception:  # noqa: BLE001 - keep listener resilient
-                    state = {}
+                state = self._scheduler_state_for_read()
                 expanded_pending = list(pending)
                 if all(
                     has_active_session_work(
@@ -3467,16 +4089,11 @@ class ManagedListenerSchedulerBridge:
                     )
                 )
             ]
-        return [
-            {
-                "name": target.name,
-                "session_key": stable_session_key(target.name, conversation_type="configured"),
-                "exact": target.exact,
-                "unread_detected": True,
-                "conversation_type": "configured",
-            }
-            for target in self.targets
-        ]
+        # Fail closed when the physical session identity cannot be observed.
+        # A configured target name is only a whitelist/selector; fabricating a
+        # session key and an unread edge here creates an unconfirmable shadow
+        # session and can drive an endless foreground capture loop.
+        return []
 
     def _target_for_name(self, name: str, *, exact: bool = True) -> Any:
         target = self.target_by_name.get(str(name))
@@ -3528,8 +4145,11 @@ class ManagedListenerSchedulerBridge:
         if not self.respond_all_unread_sessions:
             return ""
         payload = session if isinstance(session, dict) else {}
+        target_name = str(payload.get("target_name") or payload.get("name") or "").strip()
+        if target_name and target_name in set(getattr(self, "ignored_session_names", set()) or set()):
+            return "ignored_session_name"
         return customer_session_admission_reason(
-            name=payload.get("target_name") or payload.get("name"),
+            name=target_name,
             conversation_type=payload.get("conversation_type"),
             session_key=payload.get("session_key"),
         )
@@ -3543,11 +4163,47 @@ class ManagedListenerSchedulerBridge:
         except Exception:
             return self._merge_scheduler_context_into_workflow_state({"version": 1, "targets": {}})
 
-    def _merge_scheduler_context_into_workflow_state(self, workflow_state: dict[str, Any]) -> dict[str, Any]:
+    def _scheduler_state_for_read(self) -> dict[str, Any]:
+        runtime = getattr(self, "runtime", None)
+        state_view = getattr(runtime, "_state_view_for_bridge", None)
+        if callable(state_view):
+            state = state_view()
+            if isinstance(state, dict):
+                return state
         try:
-            scheduler_state = self.store.load()
+            store = getattr(self, "store", None)
+            state = store.load() if store is not None else {}
         except Exception:
-            return workflow_state
+            return {}
+        adopt = getattr(runtime, "_adopt_state_cache", None)
+        if callable(adopt):
+            adopt(state)
+        return state if isinstance(state, dict) else {}
+
+    def _scheduler_session_context_for_read(self) -> dict[str, Any]:
+        runtime = getattr(self, "runtime", None)
+        snapshot_getter = getattr(runtime, "_session_context_state_for_workflow", None)
+        if callable(snapshot_getter):
+            snapshot = snapshot_getter()
+            sessions = snapshot.get("sessions") if isinstance(snapshot, dict) else None
+            if isinstance(sessions, dict) and sessions:
+                return snapshot
+        state_reader = getattr(self, "_scheduler_state_for_read", None)
+        state = (
+            state_reader()
+            if callable(state_reader)
+            else ManagedListenerSchedulerBridge._scheduler_state_for_read(self)
+        )
+        sessions = state.get("sessions") if isinstance(state, dict) else {}
+        return {"sessions": sessions if isinstance(sessions, dict) else {}}
+
+    def _merge_scheduler_context_into_workflow_state(self, workflow_state: dict[str, Any]) -> dict[str, Any]:
+        context_reader = getattr(self, "_scheduler_session_context_for_read", None)
+        scheduler_state = (
+            context_reader()
+            if callable(context_reader)
+            else ManagedListenerSchedulerBridge._scheduler_session_context_for_read(self)
+        )
         targets = workflow_state.setdefault("targets", {})
         for _state_key, session in (scheduler_state.get("sessions", {}) or {}).items():
             if not isinstance(session, dict):
@@ -3558,6 +4214,13 @@ class ManagedListenerSchedulerBridge:
                 conversation_type=session.get("conversation_type") or "unknown",
             ))
             target_state = self._target_state(workflow_state, target_name, session_key=session_key)
+            merge_alias = getattr(self, "_merge_safe_ledger_alias_context", None)
+            if callable(merge_alias):
+                merge_alias(
+                    session_key=session_key,
+                    target_name=target_name,
+                    conversation_type=str(session.get("conversation_type") or "unknown"),
+                )
             self._merge_session_ledger_summary(target_state, session_key)
             context = session.get("conversation_context") if isinstance(session.get("conversation_context"), dict) else {}
             if context:
@@ -3580,10 +4243,92 @@ class ManagedListenerSchedulerBridge:
                 }
         return workflow_state
 
+    def _merge_safe_ledger_alias_context(
+        self,
+        *,
+        session_key: str,
+        target_name: str,
+        conversation_type: str,
+    ) -> None:
+        """Merge only one unconfirmed historical key into a confirmed session."""
+
+        clean_key = str(session_key or "").strip()
+        clean_name = str(target_name or "").strip()
+        clean_type = str(conversation_type or "").strip().lower()
+        confirmed_types = {"private", "group", "file_transfer", "system"}
+        if not clean_key or not clean_name or clean_type not in confirmed_types:
+            return
+        context_reader = getattr(self, "_scheduler_session_context_for_read", None)
+        scheduler_state = (
+            context_reader()
+            if callable(context_reader)
+            else ManagedListenerSchedulerBridge._scheduler_session_context_for_read(self)
+        )
+        sessions = scheduler_state.get("sessions") if isinstance(scheduler_state, dict) else {}
+        if not isinstance(sessions, dict):
+            return
+        same_name: list[tuple[str, dict[str, Any]]] = []
+        for key, session in sessions.items():
+            if not isinstance(session, dict):
+                continue
+            name = str(session.get("target_name") or session.get("display_name") or "").strip()
+            if name != clean_name:
+                continue
+            candidate_key = str(session.get("session_key") or key or "").strip()
+            if candidate_key:
+                same_name.append((candidate_key, session))
+        confirmed_other = [
+            key
+            for key, session in same_name
+            if key != clean_key and str(session.get("conversation_type") or "").strip().lower() in confirmed_types
+        ]
+        if confirmed_other:
+            return
+        aliases = [
+            key
+            for key, session in same_name
+            if key != clean_key and str(session.get("conversation_type") or "").strip().lower() not in confirmed_types
+        ]
+        if len(set(aliases)) != 1:
+            return
+        alias_key = aliases[0]
+        alias_summary = self.ledger.load_summary(alias_key)
+        alias_name = str(alias_summary.get("target_name") or alias_summary.get("display_name") or "").strip()
+        if alias_name and alias_name != clean_name:
+            return
+        self.ledger.merge_session_alias_context(
+            canonical_session_key=clean_key,
+            alias_session_keys=[alias_key],
+            target_name=clean_name,
+        )
+
     def _merge_session_ledger_summary(self, target_state: dict[str, Any], session_key: str) -> None:
         summary = self.ledger.load_summary(session_key)
         if not summary:
             return
+        recent_source = summary.get("recent_messages") if isinstance(summary.get("recent_messages"), list) else []
+        display_name = str(summary.get("target_name") or summary.get("display_name") or "").strip()
+        normalized_display_name = normalize_repeatable_probe_text(display_name)
+        recent_messages: list[dict[str, Any]] = []
+        for raw in recent_source:
+            if not isinstance(raw, dict):
+                continue
+            item = copy.deepcopy(raw)
+            content = str(item.get("content") or "").strip()
+            sender = str(item.get("sender") or "").strip().lower()
+            if (
+                sender in {"", "unknown"}
+                and normalized_display_name
+                and normalize_repeatable_probe_text(content) == normalized_display_name
+            ):
+                continue
+            recent_messages.append(item)
+        try:
+            from apps.wechat_ai_customer_service.admin_backend.services.customer_service_session_ledger import build_context_summary
+
+            context_summary = build_context_summary(recent_messages)
+        except Exception:
+            context_summary = str(summary.get("context_summary") or "").strip()
         target_state["_session_key"] = session_key
         processed_ids = list(target_state.get("processed_message_ids") or [])
         for item in (
@@ -3613,8 +4358,6 @@ class ManagedListenerSchedulerBridge:
                 **anchor,
                 "source": "session_ledger",
             }
-        context_summary = str(summary.get("context_summary") or "").strip()
-        recent_messages = summary.get("recent_messages") if isinstance(summary.get("recent_messages"), list) else []
         if context_summary:
             context = target_state.get("conversation_context") if isinstance(target_state.get("conversation_context"), dict) else {}
             target_state["conversation_context"] = {
@@ -3841,12 +4584,23 @@ class ManagedListenerSchedulerBridge:
         else:
             payload["voice_transcription"] = voice_transcription
         payload = _merge_voice_transcription_messages(payload, voice_transcription)
+        capture_conversation_type = _conversation_type_from_structural_messages(
+            capture_conversation_type,
+            [item for item in (payload.get("messages") or []) if isinstance(item, dict)],
+        )
         workflow_state = self._workflow_state_snapshot()
         target_state = self._target_state(
             workflow_state,
             target.name,
             session_key=str(getattr(target, "session_key", "") or session.get("session_key") or ""),
         )
+        merge_alias = getattr(self, "_merge_safe_ledger_alias_context", None)
+        if callable(merge_alias):
+            merge_alias(
+                session_key=str(getattr(target, "session_key", "") or session.get("session_key") or ""),
+                target_name=str(target.name or ""),
+                conversation_type=capture_conversation_type,
+            )
         self._merge_session_ledger_summary(
             target_state,
             str(getattr(target, "session_key", "") or session.get("session_key") or ""),
@@ -3882,30 +4636,6 @@ class ManagedListenerSchedulerBridge:
             "context_only": True,
             "reason": "vision_self_image_context_unavailable",
         }
-        self_context_runner = self._workflow.get("maybe_capture_self_image_context")
-        if callable(self_context_runner):
-            try:
-                self_image_context = self_context_runner(
-                    connector=self.connector,
-                    target=target,
-                    config=self.config,
-                    messages=messages,
-                    target_state=target_state,
-                    combined="\n".join(
-                        str(item.get("content") or "")
-                        for item in messages
-                        if isinstance(item, dict) and str(item.get("content") or "")
-                    ).strip(),
-                )
-            except Exception as exc:  # noqa: BLE001 - context-only vision may not block capture/reply.
-                self_image_context = {
-                    "enabled": True,
-                    "applied": False,
-                    "context_only": True,
-                    "reason": "self_image_context_exception",
-                    "error": repr(exc),
-                }
-        payload["self_image_context"] = self_image_context
         history_meta = payload.get("_history_backfill", {}) if isinstance(payload.get("_history_backfill"), dict) else {}
         if isinstance(voice_transcription, dict) and voice_transcription.get("attempted"):
             history_meta = dict(history_meta)
@@ -3924,93 +4654,60 @@ class ManagedListenerSchedulerBridge:
             merge_meta = payload.get("voice_transcription_merge")
             if isinstance(merge_meta, dict) and merge_meta:
                 history_meta["voice_transcription_merge"] = dict(merge_meta)
-        customer_image_assets: dict[str, Any] = {}
-        visual_image_assets: dict[str, Any] = {}
-        visual_capture_trigger: dict[str, Any] = {}
-        pending_signal_consumed = False
-        pending_text = ""
-        pending_speaker_name = ""
         pending_signal_id = ""
         if isinstance(pending_signal, dict):
-            pending_text = str(pending_signal.get("pending_signal_text") or pending_signal.get("preview_content") or "").strip()
-            pending_speaker_name = str(pending_signal.get("speaker_name") or pending_signal.get("group_member_name") or "")
             signal_identity = pending_signal_identity_payload(
                 pending_signal,
                 target_name=target.name,
                 session_key=str(getattr(target, "session_key", "") or session.get("session_key") or ""),
             )
             pending_signal_id = str(signal_identity.get("pending_signal_id") or "").strip()
-        explicit_image_pending = bool(
-            pending_signal_kind in {"image_capture", "media_capture"}
-            or image_preview_text(pending_text)
+        vision_capture = prepare_vision_scheduler_capture(
+            connector=self.connector,
+            target=target,
+            config=self.config,
+            payload=payload,
+            messages=messages,
+            target_state=target_state,
+            pending_signal=(pending_signal if isinstance(pending_signal, dict) else {}),
+            pending_signal_kind=pending_signal_kind,
+            pending_signal_id=pending_signal_id,
+            history_meta=history_meta,
+            self_context_runner=self._workflow.get("maybe_capture_self_image_context"),
         )
-        image_trigger_fn = self._workflow.get("customer_image_capture_trigger")
-        if callable(image_trigger_fn):
-            visual_capture_trigger = image_trigger_fn(
-                payload=payload,
-                pending_signal=pending_signal if isinstance(pending_signal, dict) else {},
-                pending_signal_kind=pending_signal_kind,
-                target_state=target_state,
-            )
-        else:
-            visual_capture_trigger = {
-                "should_run": False,
-                "reason": "customer_image_capture_trigger_unavailable",
-                "pending_signal_kind": pending_signal_kind,
-                "evidence_count": 0,
-            }
+        messages = [
+            item
+            for item in (vision_capture.get("messages") or [])
+            if isinstance(item, dict)
+        ]
+        history_meta = (
+            vision_capture.get("history_meta")
+            if isinstance(vision_capture.get("history_meta"), dict)
+            else history_meta
+        )
+        self_image_context = (
+            vision_capture.get("self_image_context")
+            if isinstance(vision_capture.get("self_image_context"), dict)
+            else self_image_context
+        )
+        customer_image_assets = (
+            vision_capture.get("customer_image_assets")
+            if isinstance(vision_capture.get("customer_image_assets"), dict)
+            else {}
+        )
+        visual_image_assets = (
+            vision_capture.get("visual_image_assets")
+            if isinstance(vision_capture.get("visual_image_assets"), dict)
+            else {}
+        )
+        visual_capture_trigger = (
+            vision_capture.get("visual_capture_trigger")
+            if isinstance(vision_capture.get("visual_capture_trigger"), dict)
+            else {}
+        )
+        pending_signal_consumed = bool(vision_capture.get("pending_signal_consumed"))
         payload["customer_image_capture_trigger"] = visual_capture_trigger
-        visual_image_assets = {
-            "ok": True,
-            "state": "clipboard_vision_deferred",
-            "reason": str(visual_capture_trigger.get("reason") or "no_recent_image_evidence"),
-            "assets": [],
-            "messages": [],
-            "trigger": copy.deepcopy(visual_capture_trigger),
-        }
-        image_signal_already_processed = (
-            str(visual_capture_trigger.get("reason") or "").strip()
-            == "pending_image_signal_already_processed"
-        )
-        if explicit_image_pending and visual_capture_trigger.get("should_run"):
-            # Image bytes are deliberately not acquired during capture.  The
-            # optional vision plugin performs one current-clipboard transaction
-            # later in the same target-bound reply task.  A text-only envelope
-            # gives that task a durable turn without retaining image data.
-            placeholder_id = stable_id(
-                "clipboard-image-pending",
-                target.name,
-                str(getattr(target, "session_key", "") or session.get("session_key") or ""),
-                pending_signal_id,
-            )
-            messages = [
-                *messages,
-                {
-                    "id": f"clipboard_image_pending:{placeholder_id}",
-                    "message_id": f"clipboard_image_pending:{placeholder_id}",
-                    "type": "text",
-                    "sender": "customer",
-                    "sender_role": "customer",
-                    "content": "客户发来了一张图片",
-                    "pending_signal_id": pending_signal_id,
-                    "image_capture_pending": True,
-                    "quality_flags": ["synthetic_visual_turn", "clipboard_current_transaction_required"],
-                },
-            ]
-            customer_image_assets = {
-                "ok": True,
-                "state": "clipboard_vision_pending",
-                "assets": [],
-                "messages": [],
-                "pending_signal_id": pending_signal_id,
-            }
-            history_meta = dict(history_meta)
-            history_meta["visual_image_disposition"] = "clipboard_vision_deferred"
-        elif explicit_image_pending and image_signal_already_processed:
-            pending_signal_consumed = True
-            history_meta = dict(history_meta)
-            history_meta["visual_image_disposition"] = "already_seen_pending_signal_consumed"
-            history_meta["visual_image_capture_trigger"] = copy.deepcopy(visual_capture_trigger)
+        payload["self_image_context"] = self_image_context
         payload["customer_image_assets"] = customer_image_assets
         payload["visual_image_assets"] = visual_image_assets
         payload["messages"] = messages
@@ -4048,7 +4745,12 @@ class ManagedListenerSchedulerBridge:
             history_meta["customer_image_proxy_batch_selected"] = True
             history_meta["customer_image_proxy_batch_count"] = len(image_proxy_batch)
         if not selection.batch:
-            recovered_short_batch = recover_pending_signal_batch_from_monitor(
+            ledger_replay = _pending_signal_replays_replied_ledger_input(
+                pending_signal,
+                target_state,
+                target_name=target.name,
+            )
+            recovered_short_batch = [] if ledger_replay else recover_pending_signal_batch_from_monitor(
                 messages,
                 pending_signal,
                 target_name=target.name,
@@ -4056,6 +4758,12 @@ class ManagedListenerSchedulerBridge:
                 max_batch_messages=min(2, max(1, int(target.max_batch_messages or 1))),
                 now=datetime.now().isoformat(timespec="seconds"),
             )
+            if ledger_replay:
+                # The real chat-pane read found no new occurrence and the
+                # sidebar text is already closed by a later assistant ledger
+                # entry. Consume this one monitor fallback so it cannot be
+                # synthesized back into Brain as a duplicate customer turn.
+                pending_signal_consumed = True
             if recovered_short_batch:
                 selection = replace(
                     selection,
@@ -4130,16 +4838,33 @@ class ManagedListenerSchedulerBridge:
         enrichment = self_image_context.get("enrichment") if isinstance(self_image_context.get("enrichment"), dict) else {}
         if self_image_context.get("applied") and enrichment:
             try:
-                self.ledger.record_multimodal_enrichment(
+                persisted = self.ledger.record_multimodal_enrichment(
                     session_key=str(capture.get("session_key") or session.get("session_key") or ""),
                     target_name=str(capture.get("target_name") or session.get("target_name") or ""),
                     capture_id=str(capture.get("capture_id") or ""),
                     source="self_image_context_clipboard",
                     enrichments=[enrichment],
                 )
-            except Exception:
-                # Context enrichment must never become a reply/send blocker.
-                pass
+                if int(persisted.get("updated_count") or 0) <= 0:
+                    raise RuntimeError("self_image_context_ledger_message_not_found")
+            except Exception as exc:  # noqa: BLE001 - audit and terminate without customer-visible fallback.
+                if self.audit_path is not None:
+                    try:
+                        self._workflow["append_audit"](
+                            self.audit_path,
+                            {
+                                "event": "multimodal_context_enriched",
+                                "ok": False,
+                                "source": "self_image_context_clipboard",
+                                "target_name": str(capture.get("target_name") or session.get("target_name") or ""),
+                                "session_key": str(capture.get("session_key") or session.get("session_key") or ""),
+                                "capture_id": str(capture.get("capture_id") or ""),
+                                "reason": str(self_image_context.get("reason") or "self_image_context_exception"),
+                                "error": repr(exc),
+                            },
+                        )
+                    except Exception:
+                        pass
         if self.session_monitor is None:
             return
         if result.get("ok") is False and result.get("blocked"):
@@ -4233,7 +4958,7 @@ class ManagedListenerSchedulerBridge:
         capture_ids = [str(item) for item in reply.get("capture_ids", []) if str(item)]
         if not capture_ids:
             return None
-        state = self.store.load()
+        state = self._scheduler_state_for_read()
         capture = (state.get("captures", {}) or {}).get(capture_ids[-1])
         return capture if isinstance(capture, dict) else None
 
@@ -4307,8 +5032,17 @@ class ManagedListenerSchedulerBridge:
                 if not isinstance(item, dict):
                     continue
                 if str(item.get("session_key") or "").strip() == clean_key:
-                    return item
-            return None
+                    return {**item, "_source": "session_monitor"}
+            # Session keys can legitimately change when an old configured or
+            # unknown row is promoted to a confirmed private/group identity.
+            # This fallback is read-only freshness evidence: it never changes
+            # the send target, and exact-name ambiguity still fails closed.
+            name_matches = [
+                item
+                for item in sessions
+                if isinstance(item, dict) and str(item.get("name") or "").strip() == target_name
+            ]
+            return {**name_matches[0], "_source": "session_monitor"} if len(name_matches) == 1 else None
         matches: list[dict[str, Any]] = []
         for item in sessions:
             if not isinstance(item, dict):
@@ -4316,7 +5050,7 @@ class ManagedListenerSchedulerBridge:
             if str(item.get("name") or "").strip() != target_name:
                 continue
             matches.append(item)
-        return matches[0] if len(matches) == 1 else None
+        return {**matches[0], "_source": "session_monitor"} if len(matches) == 1 else None
 
     @staticmethod
     def _compact_preview_text(value: Any) -> str:
@@ -4362,6 +5096,13 @@ class ManagedListenerSchedulerBridge:
                 if not self._target_name_matches_preview(target_name, name):
                     continue
             matches.append(item)
+        if clean_session_key and not matches:
+            matches = [
+                item
+                for item in sessions
+                if isinstance(item, dict)
+                and self._target_name_matches_preview(target_name, str(item.get("name") or ""))
+            ]
         if len(matches) != 1:
             return None
         item = matches[0]
@@ -4515,10 +5256,7 @@ class ManagedListenerSchedulerBridge:
                 if self._session_list_preview_matches_capture(reply, preview):
                     return False
                 return True
-            try:
-                scheduler_state = self.store.load()
-            except Exception:
-                scheduler_state = {}
+            scheduler_state = self._scheduler_session_context_for_read()
             session = (
                 get_session_by_identity(scheduler_state, target_name, session_key=str(reply.get("session_key") or ""))
                 if isinstance(scheduler_state, dict)
@@ -4542,10 +5280,7 @@ class ManagedListenerSchedulerBridge:
             )
         if isinstance(preview, dict) and bool(preview.get("unread_detected")):
             return True
-        try:
-            scheduler_state = self.store.load()
-        except Exception:
-            scheduler_state = {}
+        scheduler_state = self._scheduler_session_context_for_read()
         session = (
             get_session_by_identity(scheduler_state, target_name, session_key=str(reply.get("session_key") or ""))
             if isinstance(scheduler_state, dict)
@@ -4597,10 +5332,7 @@ class ManagedListenerSchedulerBridge:
         task_id = str(reply.get("task_id") or "").strip()
         if not task_id:
             return 0.0
-        try:
-            state = self.store.load()
-        except Exception:
-            return 0.0
+        state = self._scheduler_state_for_read()
         task = (state.get("llm_tasks", {}) or {}).get(task_id)
         if isinstance(task, dict):
             return self._task_llm_elapsed_seconds(task)
@@ -4616,6 +5348,16 @@ class ManagedListenerSchedulerBridge:
         return elapsed
 
     def _task_llm_elapsed_seconds(self, task: dict[str, Any]) -> float:
+        result = task.get("result") if isinstance(task.get("result"), dict) else {}
+        trace = result.get("latency_trace") if isinstance(result.get("latency_trace"), dict) else {}
+        worker_duration = 0.0
+        for key in ("planner_worker_duration_seconds", "polish_worker_duration_seconds"):
+            try:
+                worker_duration += max(0.0, float(trace.get(key) or 0.0))
+            except (TypeError, ValueError):
+                continue
+        if worker_duration > 0.0:
+            return worker_duration
         started_ts = self._iso_to_timestamp(str(task.get("started_at") or ""))
         if started_ts is None:
             return 0.0
@@ -4636,10 +5378,7 @@ class ManagedListenerSchedulerBridge:
         if str(settings.get("mode") or "preview_first") == "strict_only":
             return {"applied": False, "reason": "scheduler_freshness_strict_only"}
 
-        try:
-            scheduler_state = self.store.load()
-        except Exception:
-            scheduler_state = {}
+        scheduler_state = self._scheduler_session_context_for_read()
         session = get_session_by_identity(scheduler_state, target_name, session_key=str(reply.get("session_key") or "")) or {}
         session_key = str(reply.get("session_key") or "")
         preview = self._session_monitor_snapshot_for_target(target_name, session_key=session_key)
@@ -4725,6 +5464,31 @@ class ManagedListenerSchedulerBridge:
             and not self._session_list_preview_matches_capture(reply, preview)
         ):
             return {"applied": False, "reason": "session_list_preview_content_mismatch"}
+
+        # The continuously polled session monitor is the authoritative
+        # no-unread observation for an exact/uniquely resolved conversation.
+        # Periodic and long-LLM strict scans must not reopen WeChat after this
+        # stronger observation; doing so adds tens of seconds and can switch or
+        # re-click the active row immediately before send.
+        monitor_last_seen = self._iso_to_timestamp(str(preview.get("last_seen_at") or ""))
+        monitor_observation_recent = bool(
+            monitor_last_seen is not None
+            and 0.0 <= (time.time() - monitor_last_seen) <= 30.0
+        )
+        if str(preview.get("_source") or "") == "session_monitor" and monitor_observation_recent:
+            return {
+                "applied": True,
+                "ok": True,
+                "stale": False,
+                "has_newer_messages": False,
+                "reason": "session_monitor_no_unread_fast_pass",
+                "freshness_mode": "session_preview_fastpath",
+                "preview_snapshot": {
+                    "last_detected_at": str(preview.get("last_detected_at") or ""),
+                    "pending_since": str(preview.get("pending_since") or ""),
+                    "last_message_time": str(preview.get("last_message_time") or ""),
+                },
+            }
 
         strict_interval = int(settings.get("strict_check_interval_seconds") or 0)
         if strict_interval > 0:
@@ -4855,6 +5619,74 @@ class ManagedListenerSchedulerBridge:
         freshness["stale"] = bool(freshness.get("has_newer_messages") or freshness.get("gap_risk"))
         return freshness
 
+    def _record_partial_send_context(self, reply: dict[str, Any], send_result: dict[str, Any]) -> None:
+        """Persist confirmed self segments without closing the customer turn."""
+
+        try:
+            sent_segments = max(0, int(send_result.get("sent_segments") or 0))
+        except (TypeError, ValueError):
+            sent_segments = 0
+        segments = [str(item or "").strip() for item in send_result.get("segments") or [] if str(item or "").strip()]
+        if sent_segments <= 0 or not segments:
+            return
+        sent_text = "\n".join(segments[: min(sent_segments, len(segments))]).strip()
+        session_key = str(reply.get("session_key") or "").strip()
+        target_name = str(reply.get("target_name") or "").strip()
+        reply_id = str(reply.get("reply_id") or "").strip()
+        if not sent_text or not session_key or not reply_id:
+            return
+        try:
+            from apps.wechat_ai_customer_service.admin_backend.services.customer_service_session_ledger import (
+                merge_recent_messages,
+                sanitize_ledger_message,
+                stable_hash,
+                utcnow_iso,
+            )
+
+            partial_reply_id = f"{reply_id}:partial:{sent_segments}"
+            reply_message = sanitize_ledger_message(
+                {
+                    "id": partial_reply_id,
+                    "sender": "assistant",
+                    "type": "text",
+                    "content": sent_text,
+                    "time": utcnow_iso(),
+                }
+            )
+            if not reply_message:
+                return
+            self.ledger.append_event(
+                session_key,
+                "reply_sent",
+                {
+                    "target_name": target_name,
+                    "reply_id": partial_reply_id,
+                    "input_message_ids": [],
+                    "input_content_keys": [],
+                    "reply_message": reply_message,
+                    "reply_digest": stable_hash(sent_text, length=24),
+                    "send_ok": True,
+                },
+            )
+            summary = self.ledger.load_summary(session_key)
+            recent_messages = merge_recent_messages(
+                summary.get("recent_messages") if isinstance(summary.get("recent_messages"), list) else [],
+                [reply_message],
+            )
+            summary.update(
+                {
+                    "display_name": target_name,
+                    "target_name": target_name,
+                    "last_reply_at": utcnow_iso(),
+                    "recent_messages": recent_messages,
+                }
+            )
+            self.ledger.save_summary(session_key, summary)
+        except Exception:
+            # The scheduler still enters capture reconciliation below. A ledger
+            # persistence problem must never trigger a blind resend.
+            return
+
     def _send_reply(self, reply: dict[str, Any]) -> dict[str, Any]:
         send_reply_started_at = time.time()
         send_reply_started_iso = time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(send_reply_started_at))
@@ -4933,6 +5765,7 @@ class ManagedListenerSchedulerBridge:
             config=self.config,
         )
         if not verified.get("verified"):
+            self._record_partial_send_context(reply, verified)
             return _finish({"ok": False, "verified": False, "reason": "send_not_verified", "send_result": verified})
         batch = list(capture.get("batch") or [])
         overflow = list(capture.get("overflow_messages") or [])

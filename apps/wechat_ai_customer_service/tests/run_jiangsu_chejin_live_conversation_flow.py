@@ -75,6 +75,9 @@ def main() -> int:
 
 def run_live_flows(token: str, args: argparse.Namespace) -> dict[str, Any]:
     config = build_live_test_config(token)
+    if args.dry_run:
+        config.setdefault("_local_customer_service_settings", {})["record_messages"] = False
+        config.setdefault("raw_messages", {})["enabled"] = False
     rules = load_rules(resolve_path(config.get("rules_path")))
     connector: Any = DryRunConnector() if args.dry_run else WeChatConnector()
     status = {"my_info": {"display_name": "dry-run"}} if args.dry_run else connector.require_online()
@@ -123,6 +126,7 @@ def build_live_test_config(token: str) -> dict[str, Any]:
         "identity_guard_enabled": True,
         "record_messages": True,
         "auto_learn": False,
+        "operator_alert_enabled": False,
     }
     config.setdefault("customer_service_brain", {})
     config["customer_service_brain"]["enabled"] = True
@@ -136,7 +140,9 @@ def build_live_test_config(token: str) -> dict[str, Any]:
     config["state_path"] = str(root / "state.json")
     config["audit_log_path"] = str(root / "audit.jsonl")
     config.setdefault("operator_alert", {})
+    config["operator_alert"]["enabled"] = False
     config["operator_alert"]["alert_log_path"] = str(root / "operator_alerts.jsonl")
+    config.setdefault("handoff", {})["case_store_enabled"] = False
     config.setdefault("data_capture", {})
     config["data_capture"]["workbook_path"] = str(root / "chejin_live_flow_leads.xlsx")
     config["data_capture"]["write_on_send_only"] = False
@@ -391,10 +397,15 @@ def run_one_flow(
                 rules=rules,
                 state=state,
                 send=True,
+                # The workbook path is redirected into this run's isolated
+                # artifact directory.  Keep the production write-before-send
+                # contract active so PII turns exercise the real safety gate
+                # without touching the tenant's customer store.
                 write_data=True,
                 allow_fallback_send=False,
                 mark_dry_run=False,
             )
+            write_turn_diagnostic(config, flow_id=str(flow.get("id") or "flow"), turn_index=index, event=event)
             turn_summary = summarize_turn(flow["id"], index, turn, event)
             try:
                 assert_turn(flow["id"], index, turn, event)
@@ -422,6 +433,78 @@ def run_one_flow(
         "failures": failures,
         "turn_count": len(outputs),
         "turns": outputs,
+    }
+
+
+def write_turn_diagnostic(config: dict[str, Any], *, flow_id: str, turn_index: int, event: dict[str, Any]) -> None:
+    brain = event.get("customer_service_brain") if isinstance(event.get("customer_service_brain"), dict) else {}
+    plan = brain.get("brain_plan") if isinstance(brain.get("brain_plan"), dict) else {}
+    facts = [item for item in plan.get("facts_claimed", []) or [] if isinstance(item, dict)]
+    polish = event.get("final_visible_llm_polish") if isinstance(event.get("final_visible_llm_polish"), dict) else {}
+    root = Path(str(config.get("state_path") or "")).parent / "turn_diagnostics"
+    root.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "action": event.get("action"),
+        "rule": (event.get("decision") or {}).get("rule_name"),
+        "brain": {
+            "reason": brain.get("reason"),
+            "applied": brain.get("applied"),
+            "adoptable": brain.get("adoptable"),
+            "llm_status": brain.get("llm_status"),
+            "stage_timings": brain.get("stage_timings"),
+            "prompt_estimate": brain.get("prompt_estimate"),
+            "plan_validation": compact_diagnostic_status(brain.get("plan_validation")),
+            "quality_verification": compact_diagnostic_status(brain.get("quality_verification")),
+            "invalid_plan_same_capture_retry": compact_diagnostic_status(brain.get("invalid_plan_same_capture_retry")),
+            "plan_validation_repair": compact_diagnostic_status(brain.get("plan_validation_repair")),
+            "quality_repair": compact_diagnostic_status(brain.get("quality_repair")),
+            "quality_gate_v2": compact_diagnostic_status(brain.get("quality_gate_v2")),
+            "authority_sources": brain.get("authority_sources"),
+            "plan_control": {
+                "can_answer": plan.get("can_answer"),
+                "answer_mode": plan.get("answer_mode"),
+                "recommended_action": plan.get("recommended_action"),
+                "risk": plan.get("risk"),
+                "evidence_used": plan.get("evidence_used"),
+                "fact_sources": [
+                    {
+                        "fact_type": item.get("fact_type"),
+                        "source_level": item.get("source_level"),
+                        "source_id": item.get("source_id"),
+                    }
+                    for item in facts
+                ],
+            },
+        },
+        "final_visible_llm_polish": {
+            "passed": polish.get("passed"),
+            "reason": polish.get("reason"),
+            "duration_seconds": polish.get("duration_seconds"),
+            "llm_status": polish.get("llm_status"),
+        },
+    }
+    path = root / f"{flow_id}_{turn_index}.json"
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
+def compact_diagnostic_status(value: Any) -> dict[str, Any]:
+    item = value if isinstance(value, dict) else {}
+    return {
+        key: item.get(key)
+        for key in (
+            "ok",
+            "status",
+            "invoked",
+            "verdict",
+            "error",
+            "errors",
+            "warnings",
+            "provider",
+            "model",
+            "elapsed_ms",
+            "failover",
+        )
+        if key in item
     }
 
 

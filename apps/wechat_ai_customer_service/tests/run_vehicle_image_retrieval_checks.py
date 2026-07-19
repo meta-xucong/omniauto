@@ -219,9 +219,19 @@ def test_host_adapter_indexes_multi_image_and_enriches_existing_bridge() -> None
 
 
 def test_portable_core_has_no_host_or_image_dependencies() -> None:
-    source = (Path(__file__).resolve().parents[3] / "packages" / "vehicle_image_retrieval" / "service.py").read_text(encoding="utf-8")
+    source = (
+        Path(__file__).resolve().parents[1]
+        / "optional_plugins"
+        / "vision"
+        / "vehicle_retrieval"
+        / "core.py"
+    ).read_text(encoding="utf-8")
     forbidden = ("apps.wechat_ai_customer_service", "PIL", "urllib", "Path(", "open(")
     assert_true(not any(item in source for item in forbidden), "portable core may not depend on host, image IO, or network")
+    legacy_source = (
+        Path(__file__).resolve().parents[3] / "packages" / "vehicle_image_retrieval" / "service.py"
+    ).read_text(encoding="utf-8")
+    assert_true("def " not in legacy_source and "class " not in legacy_source, "legacy package path must be a logic-free compatibility alias")
 
 
 def test_background_index_queue_coalesces_without_blocking_callers() -> None:
@@ -258,10 +268,14 @@ def test_background_index_queue_coalesces_without_blocking_callers() -> None:
 
 
 def test_optional_plugin_isolated_and_internal_api_is_exposed() -> None:
-    plugin_root = Path(__file__).resolve().parents[1] / "optional_plugins" / "vehicle_image_retrieval"
+    plugin_root = Path(__file__).resolve().parents[1] / "optional_plugins" / "vision" / "vehicle_retrieval"
     source = "\n".join(path.read_text(encoding="utf-8") for path in plugin_root.glob("*.py"))
-    forbidden = ("optional_plugins.vision", "customer_image_understanding", "optional_plugins.voice")
-    assert_true(not any(item in source for item in forbidden), "retrieval plugin must not import voice or chat-vision implementation")
+    forbidden = ("customer_image_understanding", "optional_plugins.voice")
+    assert_true(not any(item in source for item in forbidden), "vision retrieval must not import voice or legacy workflow implementations")
+    legacy_root = Path(__file__).resolve().parents[1] / "optional_plugins" / "vehicle_image_retrieval"
+    legacy_source = "\n".join(path.read_text(encoding="utf-8") for path in legacy_root.glob("*.py"))
+    assert_true("def " not in legacy_source and "class " not in legacy_source, "legacy retrieval package must not retain implementation")
+    assert_true("optional_plugins.vision.vehicle_retrieval" in legacy_source, "legacy retrieval imports must delegate to the independent vision module")
     routes = {(str(getattr(route, "path", "")), frozenset(getattr(route, "methods", set()))) for route in product_console_api.router.routes}
     assert_true(("/api/product-console/products/{product_id}/vehicle-image-retrieval", frozenset({"GET"})) in routes, "status API must remain internal and explicit")
     assert_true(("/api/product-console/products/{product_id}/vehicle-image-retrieval/index", frozenset({"POST"})) in routes, "index API must remain internal and explicit")

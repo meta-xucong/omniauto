@@ -1,5 +1,8 @@
 # 微信识图消息身份与发送新鲜度修复方案
 
+> [!WARNING]
+> **文档状态：身份原则保留、实施位置已废止（2026-07-18）。** observation/occurrence/freshness 的概念区分仍有效；图片资产落盘、Sidecar/Connector/Scheduler 图片实现和旧文件清单不得继续采用。现行模块边界见 [完全独立图像识别模块改造方案](customer_service_absolute_independent_vision_module_refactor_plan_20260718.md)。
+
 ## 1. 文档目的
 
 本次修复解决同一张图片被重复观测、同一张图片被客户分时发送、以及 Brain 已经产出回复却被后续重复识图误判为过期的问题。

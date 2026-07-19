@@ -57,7 +57,6 @@ KEY_SIGNATURES = {
         "record_capture_result",
     },
     "wechat_win32_ocr_sidecar": {
-        "execute_wechat_image_save",
         "open_voice_transcribe_context_menu",
         "parse_messages_from_ocr",
         "run_action",
@@ -208,6 +207,27 @@ def check_voice_and_image_legacy_result_shapes() -> None:
         "image trigger result fields changed",
     )
     assert_true(image_trigger.get("should_run") is True, "image signal must keep legacy trigger behavior")
+
+    # The legacy image-call contract remains frozen at its image-owned adapter
+    # path.  It must not be re-exported from the replaceable OCR/RPA Sidecar.
+    image_capture = importlib.import_module(
+        "apps.wechat_ai_customer_service.adapters.wechat_image_save_capture"
+    )
+    assert_equal(
+        safe_signature(image_capture.execute_wechat_image_save),
+        "(*, hwnd: 'int', probe: 'dict[str, Any]', target_name: 'str', "
+        "session_key: 'str' = '', exact: 'bool' = True, "
+        "artifact_dir: 'str | Path | None' = None, tenant_id: 'str' = '', "
+        "source_preview: 'str' = '', speaker_name: 'str' = '', max_images: 'int' = 1, "
+        "side_filter: 'str' = 'customer', capture_mode: 'str' = 'context_menu', "
+        "pending_signal_id: 'str' = '', sidecar_ops: 'Any') -> 'dict[str, Any]'",
+        "legacy image-save adapter signature changed",
+    )
+    sidecar = importlib.import_module(MODULES["wechat_win32_ocr_sidecar"])
+    assert_true(
+        not hasattr(sidecar, "execute_wechat_image_save"),
+        "replaceable OCR/RPA Sidecar must not regain the legacy image facade",
+    )
 
 
 def check_scheduler_state_compact_storage_preserves_semantics() -> None:

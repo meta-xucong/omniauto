@@ -956,9 +956,9 @@ def expand_semantic_terms(text: str, terms: set[str] | list[str] | tuple[str, ..
     base = set(terms or tokenize(text))
     normalized = normalize_search_text(text)
     expanded = set(base)
-    for term in list(base):
-        expanded.update(semantic_equivalents(term))
     configured_equivalents = semantic_equivalents_map()
+    for term in list(base):
+        expanded.update(_semantic_equivalents_from_map(term, configured_equivalents))
     for term, equivalents in configured_equivalents.items():
         if term in normalized:
             expanded.add(term)
@@ -970,8 +970,11 @@ def expand_semantic_terms(text: str, terms: set[str] | list[str] | tuple[str, ..
 
 
 def semantic_equivalents(term: str) -> set[str]:
+    return _semantic_equivalents_from_map(term, semantic_equivalents_map())
+
+
+def _semantic_equivalents_from_map(term: str, configured_equivalents: dict[str, set[str]]) -> set[str]:
     normalized = normalize_search_text(term)
-    configured_equivalents = semantic_equivalents_map()
     equivalents = set(configured_equivalents.get(normalized, ()))
     for key, values in configured_equivalents.items():
         if normalized in values:

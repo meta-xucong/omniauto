@@ -723,6 +723,32 @@ def check_guard_allows_safe_store_visit_advisory_but_blocks_commitment() -> None
     )
     assert_true(safe.get("action") == "send_reply", safe)
 
+    # Brain First guard must not infer business outcomes from local phrase
+    # lists.  Diverse wording follows the same low-risk metadata contract.
+    for proposal_text in (
+        "如果方便，我可以继续协助您。",
+        "Would you like me to help with the next step?",
+        "您点头的话，我再往下跟进。",
+    ):
+        proposal = guard_synthesized_reply(
+            candidate={
+                "can_answer": True,
+                "reply": proposal_text,
+                "confidence": 0.86,
+                "recommended_action": "send_reply",
+                "needs_handoff": False,
+                "used_evidence": ["product:chejin_camry_2021_20g"],
+                "structured_used": True,
+                "rag_used": False,
+            },
+            evidence_pack=evidence_pack,
+            settings={"require_evidence": False, "brain_first_guard": True},
+        )
+        assert_true(
+            proposal.get("action") == "send_reply",
+            f"Brain First guard must not classify low-risk business semantics from wording: {proposal}",
+        )
+
     commitment = guard_synthesized_reply(
         candidate={
             "can_answer": True,
@@ -740,6 +766,26 @@ def check_guard_allows_safe_store_visit_advisory_but_blocks_commitment() -> None
     assert_true(commitment.get("action") == "repair", commitment)
     assert_true(commitment.get("hard_boundary") is True, commitment)
     assert_true(str(commitment.get("reason") or "") == "appointment_or_reservation_commitment_requires_handoff", commitment)
+
+    declared_hard_risk = guard_synthesized_reply(
+        candidate={
+            "can_answer": True,
+            "reply": "我先说明这个边界。",
+            "confidence": 0.86,
+            "recommended_action": "send_reply",
+            "needs_handoff": False,
+            "used_evidence": ["product:chejin_camry_2021_20g"],
+            "structured_used": True,
+            "rag_used": False,
+            "risk_tags": ["policy_violation"],
+        },
+        evidence_pack=evidence_pack,
+        settings={"require_evidence": False, "brain_first_guard": True},
+    )
+    assert_true(
+        declared_hard_risk.get("action") == "repair" and declared_hard_risk.get("hard_boundary") is True,
+        declared_hard_risk,
+    )
 
 
 def check_conflicting_llm_price_falls_back_to_product_master_candidate() -> None:

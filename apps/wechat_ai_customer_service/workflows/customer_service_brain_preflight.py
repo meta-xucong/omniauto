@@ -568,6 +568,7 @@ def maybe_run_customer_service_brain_preflight(
     force_reason: str = "",
 ) -> dict[str, Any]:
     started_at = time.time()
+    single_brain_runtime_cleanup = bool(settings.get("_single_brain_runtime_cleanup"))
     preflight_settings = effective_customer_service_brain_preflight_settings(config=config, settings=settings)
     payload: dict[str, Any] = {
         "enabled": bool(preflight_settings.get("enabled")),
@@ -613,6 +614,14 @@ def maybe_run_customer_service_brain_preflight(
                 },
             }
         )
+        payload["duration_seconds"] = round(time.time() - started_at, 4)
+        return payload
+    if single_brain_runtime_cleanup:
+        # The live Brain First path has one semantic owner.  Keep the existing
+        # preflight projection as a no-op, while preserving the independently
+        # callable compatibility API for external/direct callers.
+        payload["trigger"] = {"enabled": False, "reason": "brain_preflight_not_triggered"}
+        payload["reason"] = "brain_preflight_not_triggered"
         payload["duration_seconds"] = round(time.time() - started_at, 4)
         return payload
     prompt = build_customer_service_brain_preflight_prompt(

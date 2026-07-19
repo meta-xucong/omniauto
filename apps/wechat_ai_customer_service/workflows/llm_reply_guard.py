@@ -9,6 +9,21 @@ from apps.wechat_ai_customer_service.platform_safety_rules import guard_term_set
 
 
 HARD_HANDOFF_RISK_TAGS = {"illegal_request", "prompt_injection", "policy_violation"}
+UNIVERSAL_BRAIN_HARD_RISK_TAGS = HARD_HANDOFF_RISK_TAGS | {
+    "hard_boundary",
+    "requires_handoff",
+    "finance_boundary",
+    "finance_commitment",
+    "price_commitment",
+    "lowest_price_commitment",
+    "appointment_commitment",
+    "reservation_commitment",
+    "inventory_lock_commitment",
+    "contract_commitment",
+    "invoice_commitment",
+    "payment_boundary",
+    "loan_guarantee",
+}
 SOFT_REDIRECT_RISK_TAGS = {"off_topic", "out_of_scope"}
 SOFT_ADVISORY_SAFETY_REASONS = {
     "matched_faq_requires_handoff",
@@ -125,6 +140,13 @@ def guard_synthesized_reply(
     candidate = normalized["candidate"]
     candidate["allow_ai_identity_exposure"] = not enforce_identity_guard
     reply = str(candidate.get("reply") or "").strip()
+    if settings.get("brain_first_guard") is True:
+        return guard_brain_first_universal_contract(
+            candidate=candidate,
+            evidence_pack=evidence_pack,
+            settings=settings,
+            enforce_identity_guard=enforce_identity_guard,
+        )
     safety = evidence_pack.get("safety", {}) or {}
     if isinstance(safety, dict) and safety.get("must_handoff"):
         reasons = {str(item) for item in safety.get("reasons", []) or [] if str(item)}
@@ -349,6 +371,141 @@ def guard_synthesized_reply(
         "reply": reply,
         "candidate": candidate,
         "authority_tags": sorted(authority_tags),
+    }
+
+
+def guard_brain_first_universal_contract(
+    *,
+    candidate: dict[str, Any],
+    evidence_pack: dict[str, Any],
+    settings: dict[str, Any],
+    enforce_identity_guard: bool,
+) -> dict[str, Any]:
+    """Review Brain output without locally interpreting business language."""
+
+    reply = str(candidate.get("reply") or "").strip()
+    if not reply:
+        return repair_decision(
+            "empty_reply",
+            candidate,
+            repair_instruction="BrainPlan 的客户可见回复为空，请基于当前消息和允许证据重新生成非空回复。",
+        )
+    if enforce_identity_guard and has_ai_identity_exposure(reply):
+        return repair_decision(
+            "ai_identity_exposure_requires_brain_repair",
+            candidate,
+            repair_instruction="回复暴露了自动化身份或讨论了身份真假，请 Brain 在不泄露内部实现的前提下重写当前答复。",
+        )
+    if has_internal_visible_marker(reply):
+        return repair_decision(
+            "customer_visible_internal_marker_leak",
+            candidate,
+            hard_boundary=True,
+            repair_instruction="回复含内部运行标记，请 Brain 删除内部信息并重新生成客户可见答复。",
+        )
+
+    safety = evidence_pack.get("safety") if isinstance(evidence_pack.get("safety"), dict) else {}
+    safety_reasons = {str(item).strip() for item in (safety.get("reasons") or []) if str(item).strip()}
+    # The universal path consumes only explicit machine metadata.  In particular,
+    # it must not inspect the customer wording to decide whether a safety reason
+    # is "really" hard; doing so would recreate a second local intent engine.
+    hard_safety = bool(safety.get("must_handoff")) and not (
+        bool(safety_reasons) and bool(safety_reasons <= SOFT_ADVISORY_SAFETY_REASONS)
+    )
+    risk_tags = {
+        str(item).strip().lower()
+        for item in (candidate.get("risk_tags", []) or [])
+        if str(item).strip()
+    }
+    hard_risk = bool(risk_tags & UNIVERSAL_BRAIN_HARD_RISK_TAGS)
+    if hard_safety:
+        if candidate_requests_handoff(candidate):
+            return approved_handoff_decision(
+                "brain_declared_hard_boundary_handoff",
+                candidate,
+                hard_boundary=True,
+            )
+        return repair_decision(
+            "hard_boundary_requires_brain_handoff_plan",
+            candidate,
+            hard_boundary=True,
+            repair_instruction=(
+                "本轮证据或 BrainPlan 已声明硬安全边界，但动作未与风险一致。"
+                "请 Brain 基于相同证据重做 BrainPlan，并由 Brain 写出客户可见边界说明。"
+            ),
+        )
+
+    if hard_risk:
+        if candidate_requests_handoff(candidate):
+            return approved_handoff_decision(
+                "brain_declared_hard_boundary_handoff",
+                candidate,
+                hard_boundary=True,
+            )
+        if (
+            "safe_boundary_reply" in risk_tags
+            and candidate.get("can_answer") is not False
+            and str(candidate.get("recommended_action") or "send_reply") == "send_reply"
+        ):
+            candidate = enrich_candidate_evidence(candidate=candidate, evidence_pack=evidence_pack)
+            return {
+                "allowed": True,
+                "action": "send_reply",
+                "severity": "warn",
+                "guard_role": "reviewer",
+                "guard_verdict": "warn",
+                "reason": "brain_declared_hard_boundary_visible_reply",
+                "reply": reply,
+                "candidate": candidate,
+                "hard_boundary": True,
+                "authority_tags": [],
+            }
+        return repair_decision(
+            "hard_boundary_requires_brain_action_alignment",
+            candidate,
+            hard_boundary=True,
+            repair_instruction="BrainPlan 已声明硬边界但没有可执行动作，请基于相同证据重新生成一致的发送或转人工计划。",
+        )
+
+    if candidate_requests_handoff(candidate):
+        return approved_handoff_decision(
+            "brain_requested_handoff_with_visible_reply",
+            candidate,
+            hard_boundary=False,
+        )
+
+    try:
+        confidence = float(candidate.get("confidence") or 0)
+    except (TypeError, ValueError):
+        confidence = 0.0
+    min_confidence = float(settings.get("min_confidence", 0.62) or 0.62)
+    if confidence < min_confidence:
+        return repair_decision(
+            "confidence_below_threshold",
+            candidate,
+            confidence=confidence,
+            min_confidence=min_confidence,
+            repair_instruction="BrainPlan 信心不足，请重新核对当前消息、证据引用和事实声明后生成答复。",
+        )
+
+    if settings.get("require_evidence", True) is not False:
+        candidate = enrich_candidate_evidence(candidate=candidate, evidence_pack=evidence_pack)
+    if settings.get("require_evidence", True) is not False and not candidate_evidence_declared(candidate):
+        return repair_decision(
+            "candidate_missing_used_evidence",
+            candidate,
+            repair_instruction="BrainPlan 未声明本轮实际使用的允许来源，请补全 evidence_used 后重新生成。",
+        )
+    return {
+        "allowed": True,
+        "action": "send_reply",
+        "severity": "pass",
+        "guard_role": "reviewer",
+        "guard_verdict": "pass",
+        "reason": "guard_passed",
+        "reply": reply,
+        "candidate": candidate,
+        "authority_tags": [],
     }
 
 
@@ -994,6 +1151,9 @@ def candidate_declares_hard_boundary(candidate: dict[str, Any]) -> bool:
         "loan_guarantee",
         "price_commitment",
         "lowest_price_commitment",
+        "appointment_commitment",
+        "reservation_commitment",
+        "inventory_lock_commitment",
         "contract_commitment",
         "invoice_commitment",
         "payment_boundary",

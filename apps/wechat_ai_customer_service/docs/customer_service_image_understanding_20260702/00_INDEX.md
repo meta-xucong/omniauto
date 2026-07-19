@@ -1,3 +1,6 @@
+> [!WARNING]
+> **文档状态：旧架构索引已废止（2026-07-18）。** 本文包关于图片落盘、截图裁切、`image-save`、Sidecar 图片入口以及散落 `customer_image_*` 流水线的实施方案不得继续开发。原始需求和历史证据仅供复盘；现行唯一方案是 [完全独立图像识别模块改造方案](../customer_service_absolute_independent_vision_module_refactor_plan_20260718.md)。
+
 > Customer-service development baseline: [../customer_visible_reply_ownership_baseline.md](../customer_visible_reply_ownership_baseline.md).
 
 # 微信智能客服识图方案索引

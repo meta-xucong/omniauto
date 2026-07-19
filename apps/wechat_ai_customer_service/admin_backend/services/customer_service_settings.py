@@ -9,6 +9,10 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from apps.wechat_ai_customer_service.conversation_admission import (
+    CUSTOMER_CONVERSATION_TYPES,
+    inferred_non_customer_conversation_type,
+)
 from apps.wechat_ai_customer_service.knowledge_paths import tenant_runtime_root
 
 
@@ -306,7 +310,10 @@ class CustomerServiceSettings:
             current = by_name.get(name)
             if current is None:
                 kind = infer_conversation_type(name, raw)
-                default_enabled = respond_all_unread and kind not in {"file_transfer", "system", "group"}
+                # Dynamic all-customer mode means every confirmed customer
+                # conversation, including newly discovered group chats.  Only
+                # WeChat-owned/system/utility surfaces stay excluded.
+                default_enabled = respond_all_unread and kind in CUSTOMER_CONVERSATION_TYPES
                 current = {
                     "name": name,
                     "display_name": name,
@@ -482,6 +489,9 @@ def infer_conversation_type(name: str, session: dict[str, Any] | None = None) ->
         return explicit
     if name in {"文件传输助手", "File Transfer"}:
         return "file_transfer"
+    non_customer_type = inferred_non_customer_conversation_type(name)
+    if non_customer_type:
+        return non_customer_type
     if re.search(r"(群|群聊|chatroom|room)", name, re.IGNORECASE):
         return "group"
     if re.search(r"(微信团队|系统消息|订阅号|服务通知)", name, re.IGNORECASE):

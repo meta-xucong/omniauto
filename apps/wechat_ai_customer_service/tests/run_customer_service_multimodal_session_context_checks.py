@@ -36,6 +36,7 @@ def main() -> int:
         test_ledger_keeps_textual_vision_summary_without_image_path,
         test_customer_image_vision_text_is_bound_and_exposed_to_history_context,
         test_scheduler_self_image_context_callback_persists_without_reply_work,
+        test_scheduler_structural_self_image_is_context_only_and_bound,
         test_legacy_ledger_and_scheduler_state_are_scrubbed_on_read_and_write,
     ]
     for test in checks:
@@ -224,6 +225,137 @@ def test_scheduler_self_image_context_callback_persists_without_reply_work() -> 
     assert_equal(recent[0].get("sender"), "self", "self image stays a self-side history message")
     assert_equal(recent[0].get("vision_summary"), "客服发送了一张车辆外观图", "self image text must persist")
     assert_true("客服发送了一张车辆外观图" in str(summary.get("context_summary") or ""), "future Brain context must retain the self image description")
+
+
+def test_scheduler_structural_self_image_is_context_only_and_bound() -> None:
+    class SelfImageConnector:
+        def get_messages(self, target: str, exact: bool = True, **_kwargs: Any) -> dict[str, Any]:
+            return {
+                "ok": True,
+                "adapter": "win32_ocr",
+                "state": "messages_ocr",
+                "target": target,
+                "exact": exact,
+                "messages": [
+                    {
+                        "id": "visual_self_context_surface_one",
+                        "message_id": "visual_self_context_surface_one",
+                        "type": "image",
+                        "message_type": "image",
+                        "sender": "self",
+                        "sender_role": "self",
+                        "visual_side": "self",
+                        "visual_turn_kind": "self_image",
+                        "is_self_image": True,
+                        "content": "[图片]",
+                        "time": "05:38",
+                        "source_adapter": "win32_ocr_structural_image_observer",
+                    }
+                ],
+            }
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        root = Path(temp_dir)
+        config_path = root / "listener_config.json"
+        config_path.write_text(
+            json.dumps(
+                {
+                    "state_path": str(root / "workflow_state.json"),
+                    "audit_log_path": str(root / "audit.jsonl"),
+                    "targets": [{"name": "Customer A", "enabled": True, "exact": True}],
+                    "history_backfill": {"enabled": False},
+                    "raw_messages": {"enabled": False},
+                    "customer_profiles": {"enabled": False},
+                    "voice_transcription": {"enabled": False},
+                    "concurrency_scheduler": {"enabled": True},
+                },
+                ensure_ascii=False,
+            ),
+            encoding="utf-8",
+        )
+        bridge = ManagedListenerSchedulerBridge(
+            tenant_id="unit_structural_self_context",
+            config_path=config_path,
+            allow_send=False,
+            write_data=False,
+        )
+        bridge.ledger = SessionLedgerStore(tenant_id="unit_structural_self_context", root=root / "ledger")
+        bridge.connector = SelfImageConnector()
+        bridge.session_monitor = SimpleNamespace(
+            all_sessions=lambda: [
+                {
+                    "name": "Customer A",
+                    "session_key": "wx:self-structural",
+                    "pending_signal_id": "self-image-signal-one",
+                    "pending_signal_kind": "image_capture",
+                    "pending_signal_text": "[图片]",
+                    "preview_content": "[图片]",
+                }
+            ]
+        )
+
+        observed: dict[str, Any] = {}
+
+        def fake_self_context(**kwargs: Any) -> dict[str, Any]:
+            observed.update(kwargs)
+            message = (kwargs.get("messages") or [])[0]
+            return {
+                "enabled": True,
+                "applied": True,
+                "context_only": True,
+                "reason": "self_image_context_ready",
+                "enrichment": {
+                    "modality": "image",
+                    "message_refs": [{"message_id": message.get("message_id")}],
+                    "image_understanding": {
+                        "applied": True,
+                        "vision_summary": "客服发送了一张小女孩穿艾莎裙的照片",
+                    },
+                },
+            }
+
+        bridge._workflow["maybe_capture_self_image_context"] = fake_self_context
+        try:
+            result = bridge._capture_session(
+                {
+                    "target_name": "Customer A",
+                    "name": "Customer A",
+                    "exact": True,
+                    "conversation_type": "private",
+                    "session_key": "wx:self-structural",
+                }
+            )
+            assert_equal(result.get("batch"), [], "self image must not enter the customer reply batch")
+            assert_true(result.get("pending_signal_consumed") is True, "self image event must reach a terminal context-only state")
+            assert_true(not any(item.get("is_customer_image_proxy") for item in (result.get("messages") or [])), "self image must not create a customer proxy")
+            observed_message = (observed.get("messages") or [])[0]
+            assert_equal(observed_message.get("sender"), "self", "self vision must receive only the structurally confirmed self occurrence")
+            assert_equal(observed_message.get("pending_signal_id"), "self-image-signal-one", "self occurrence must bind the current pending event")
+
+            bridge.ledger.record_capture(
+                session_key="wx:self-structural",
+                target_name="Customer A",
+                conversation_type="private",
+                capture_id="capture-self-structural",
+                messages=list(result.get("messages") or []),
+                batch=[],
+                history_backfill={},
+                context_version=1,
+            )
+            bridge.session_monitor = None
+            bridge._capture_done(
+                {"session_key": "wx:self-structural", "target_name": "Customer A"},
+                result,
+                {"session_key": "wx:self-structural", "target_name": "Customer A", "capture_id": "capture-self-structural"},
+            )
+            summary = bridge.ledger.load_summary("wx:self-structural")
+        finally:
+            bridge.shutdown()
+    recent = summary.get("recent_messages") or []
+    assert_equal(len(recent), 1, "one self occurrence must produce one durable ledger record")
+    assert_equal(recent[0].get("sender"), "self", "durable direction marker must remain self")
+    assert_equal(recent[0].get("vision_summary"), "客服发送了一张小女孩穿艾莎裙的照片", "durable record must contain only the LLM text understanding")
+    assert_equal(summary.get("processed_visual_pending_signal_ids"), ["self-image-signal-one"], "successful self occurrence must dedupe the same pending signal")
 
 
 def test_legacy_ledger_and_scheduler_state_are_scrubbed_on_read_and_write() -> None:

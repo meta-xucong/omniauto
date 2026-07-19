@@ -37,6 +37,7 @@ def main() -> int:
         check_short_social_text_gap_skips_preflight,
         check_text_product_with_existing_evidence_does_not_need_preflight,
         check_short_text_product_gap_uses_llm_preflight_query,
+        check_normal_text_turn_builds_evidence_once_without_preflight_llm,
         check_visual_fast_preflight_uses_bridge_without_llm,
         check_visual_fast_preflight_does_not_borrow_recent_context_for_new_unclear_image,
         check_visual_turn_preflight_forces_product_master_evidence,
@@ -238,6 +239,8 @@ def base_config(
             "enabled": True,
             "mode": "brain_first",
             "provider": "manual_json",
+            "timeout_seconds": 12,
+            "fallback_timeout_seconds": 10,
             "brain_plan": brain_plan or brain_plan_for_qinplus(),
             "min_confidence": 0.2,
             "require_evidence": True,
@@ -355,8 +358,8 @@ def check_short_social_text_gap_skips_preflight() -> None:
         evidence_pack=None,
         fast_profile={"enabled": True, "reason": "short_low_authority_turn"},
     )
-    assert_true(not social.get("enabled"), f"short social ping must not trigger text-gap preflight: {social}")
-    assert_equal(social.get("reason"), "social_turn_not_text_evidence_gap", "social ping should have explicit skip reason")
+    assert_true(not social.get("enabled"), f"universal Brain path must not trigger text-gap preflight: {social}")
+    assert_equal(social.get("reason"), "brain_first_universal_single_evidence_pipeline", "text gap must be a compatibility no-op")
     product = brain_module.text_evidence_gap_preflight_probe_decision(
         config=config,
         settings=settings,
@@ -366,7 +369,29 @@ def check_short_social_text_gap_skips_preflight() -> None:
         evidence_pack=None,
         fast_profile={"enabled": True, "reason": "short_low_authority_turn"},
     )
-    assert_true(product.get("enabled"), f"short product-like text should still trigger text-gap preflight: {product}")
+    assert_true(not product.get("enabled"), f"product wording must not select a second semantic route: {product}")
+    assert_equal(product.get("reason"), "brain_first_universal_single_evidence_pipeline", "product text must use the same Brain path")
+    trade_in = brain_module.text_evidence_gap_preflight_probe_decision(
+        config=config,
+        settings=settings,
+        combined="2018年朗逸置换怎么估价",
+        batch=[{"id": "m-trade-in", "sender": "许聪", "content": "2018年朗逸置换怎么估价"}],
+        target_state={"conversation_context": {}},
+        evidence_pack={"knowledge": {"evidence": {"products": []}}},
+        fast_profile={"enabled": False},
+    )
+    assert_true(not trade_in.get("enabled"), f"customer-owned trade-in must not trigger an inventory gap probe: {trade_in}")
+    assert_equal(trade_in.get("reason"), "brain_first_universal_single_evidence_pipeline", "all text turns should share one evidence path")
+    trade_in_fast = brain_module.text_evidence_gap_preflight_probe_decision(
+        config=config,
+        settings=settings,
+        combined="你先给我估个准价，能抵多少车款？",
+        batch=[{"id": "m-trade-in-fast", "sender": "许聪", "content": "你先给我估个准价，能抵多少车款？"}],
+        target_state={"conversation_context": {}},
+        fast_profile={"enabled": True, "reason": "short_low_authority_turn"},
+    )
+    assert_true(not trade_in_fast.get("enabled"), f"short trade-in follow-up must not pay an inventory preflight tail: {trade_in_fast}")
+    assert_equal(trade_in_fast.get("reason"), "brain_first_universal_single_evidence_pipeline", "fast profile must not reactivate the old probe")
 
 
 def check_text_product_with_existing_evidence_does_not_need_preflight() -> None:
@@ -380,10 +405,9 @@ def check_text_product_with_existing_evidence_does_not_need_preflight() -> None:
     assert_equal(event.get("rule_name"), "customer_service_brain_reply", f"known text product should reply: {event}")
     assert_true(QINPLUS_ID in product_master_ids(event), f"existing text evidence should retrieve QinPLUS: {product_master_ids(event)}")
     assert_true(not (event.get("brain_preflight") or {}).get("applied"), f"known text evidence should not need preflight: {event.get('brain_preflight')}")
-    assert_equal(
-        (event.get("text_evidence_gap_preflight_probe_after_evidence") or {}).get("reason"),
-        "product_master_already_present",
-        "existing product evidence should skip text-gap preflight",
+    assert_true(
+        "text_evidence_gap_preflight_probe_after_evidence" not in event,
+        "the universal path must not run a second post-evidence semantic probe",
     )
 
 
@@ -396,12 +420,69 @@ def check_short_text_product_gap_uses_llm_preflight_query() -> None:
         preflight_candidate=preflight_plan_for_a4l(),
         brain_plan=brain_plan_for_a4l(),
     )
-    assert_equal(event.get("rule_name"), "customer_service_brain_reply", f"text product gap should recover via preflight: {event}")
-    assert_true((event.get("brain_preflight_text_gap") or {}).get("applied"), f"text gap preflight should apply: {event.get('brain_preflight_text_gap')}")
-    assert_equal((event.get("low_authority_fast_profile") or {}).get("reason"), "brain_preflight_requires_evidence", "text gap should block empty fast evidence")
+    assert_equal(event.get("rule_name"), "customer_service_brain_reply", f"text product gap should resolve through the single Brain/evidence path: {event}")
+    text_gap = event.get("brain_preflight_text_gap") or {}
+    assert_true(not text_gap.get("applied"), f"normal text turns must not add a preflight LLM call: {text_gap}")
+    assert_true(
+        "brain_preflight_text_gap" not in event,
+        f"the universal event must not carry a second text-gap semantic stage: {text_gap}",
+    )
     assert_true(A4L_ID in product_master_ids(event), f"text gap should retrieve A4L product master: {product_master_ids(event)}")
     current = (((event.get("brain_input") or {}).get("current_message") or {}) if isinstance(event.get("brain_input"), dict) else {})
     assert_equal(current.get("clean_text"), "奥迪a四l有吗", "text gap preflight must keep original clean_text")
+
+
+def check_normal_text_turn_builds_evidence_once_without_preflight_llm() -> None:
+    original_builder = brain_module.build_reply_evidence_pack
+    original_fast_builder = brain_module.build_low_authority_fast_evidence_pack
+    original_brain_llm = brain_module.run_brain_llm
+    original_preflight_llm = preflight_module.run_customer_service_brain_preflight_llm
+    calls = {"evidence": 0, "brain_llm": 0, "preflight_llm": 0, "brain_timeout": 0, "fallback_timeout": 0}
+
+    def counted_builder(**kwargs: Any) -> dict[str, Any]:
+        calls["evidence"] += 1
+        return original_builder(**kwargs)
+
+    def counted_fast_builder(**kwargs: Any) -> dict[str, Any]:
+        calls["evidence"] += 1
+        return original_fast_builder(**kwargs)
+
+    def forbidden_preflight_llm(**_kwargs: Any) -> dict[str, Any]:
+        calls["preflight_llm"] += 1
+        raise AssertionError("normal Brain First text turn must not invoke a preflight LLM")
+
+    def counted_brain_llm(**kwargs: Any) -> dict[str, Any]:
+        calls["brain_llm"] += 1
+        call_settings = kwargs.get("settings") if isinstance(kwargs.get("settings"), dict) else {}
+        calls["brain_timeout"] = int(call_settings.get("timeout_seconds") or 0)
+        calls["fallback_timeout"] = int(call_settings.get("fallback_timeout_seconds") or 0)
+        return original_brain_llm(**kwargs)
+
+    try:
+        brain_module.build_reply_evidence_pack = counted_builder
+        brain_module.build_low_authority_fast_evidence_pack = counted_fast_builder
+        brain_module.run_brain_llm = counted_brain_llm
+        preflight_module.run_customer_service_brain_preflight_llm = forbidden_preflight_llm
+        event = run_brain_case(
+            combined="奥迪a四l详细信息发我",
+            batch=[{"id": "m-single-evidence", "sender": "许聪", "content": "奥迪a四l详细信息发我"}],
+            target_state={"conversation_context": {"last_product_id": QINPLUS_ID}},
+            visual_bridge_input={},
+            preflight_candidate=preflight_plan_for_a4l(),
+            brain_plan=brain_plan_for_a4l(),
+        )
+    finally:
+        brain_module.build_reply_evidence_pack = original_builder
+        brain_module.build_low_authority_fast_evidence_pack = original_fast_builder
+        brain_module.run_brain_llm = original_brain_llm
+        preflight_module.run_customer_service_brain_preflight_llm = original_preflight_llm
+
+    assert_equal(event.get("rule_name"), "customer_service_brain_reply", f"single evidence path should remain sendable: {event}")
+    assert_equal(calls["evidence"], 1, "one planner turn must build authoritative evidence exactly once")
+    assert_equal(calls["brain_llm"], 1, "normal text turn must invoke the main Brain exactly once")
+    assert_equal(calls["preflight_llm"], 0, "normal text turn must use zero preflight LLM calls")
+    assert_equal(calls["brain_timeout"], 12, "evidence work must not shrink the configured primary Brain timeout")
+    assert_equal(calls["fallback_timeout"], 10, "evidence work must not shrink the configured fallback Brain timeout")
 
 
 def check_visual_fast_preflight_uses_bridge_without_llm() -> None:
@@ -468,6 +549,7 @@ def check_visual_fast_preflight_does_not_borrow_recent_context_for_new_unclear_i
 
     config = base_config(preflight_candidate=preflight_plan_for_qinplus())
     settings = brain_module.effective_brain_settings(config)
+    settings["_single_brain_runtime_cleanup"] = True
     try:
         preflight_module.run_customer_service_brain_preflight_llm = fake_llm
         preflight = maybe_run_customer_service_brain_preflight(
@@ -485,10 +567,9 @@ def check_visual_fast_preflight_does_not_borrow_recent_context_for_new_unclear_i
     finally:
         preflight_module.run_customer_service_brain_preflight_llm = original_run
 
-    assert_equal(calls["count"], 1, "unclear new image should fall through to LLM preflight")
-    assert_equal(preflight.get("reason"), "brain_preflight_ready", "unclear new image should not use visual fast path")
-    plan = preflight.get("plan") if isinstance(preflight.get("plan"), dict) else {}
-    assert_true(not plan.get("requires_product_master"), f"unclear current image must not borrow recent product query: {plan}")
+    assert_equal(calls["count"], 0, "single-Brain runtime must not add an LLM preflight for an unclear new image")
+    assert_equal(preflight.get("reason"), "brain_preflight_not_triggered", "unclear new image should stay on the main Brain path")
+    assert_true(not preflight.get("applied"), f"unclear current image must not borrow recent product context: {preflight}")
 
 
 def check_visual_turn_preflight_forces_product_master_evidence() -> None:
@@ -500,8 +581,13 @@ def check_visual_turn_preflight_forces_product_master_evidence() -> None:
         preflight_candidate=preflight_plan_for_qinplus(),
     )
     assert_equal(event.get("rule_name"), "customer_service_brain_reply", f"Brain should reply with product evidence: {event}")
-    assert_true((event.get("brain_preflight") or {}).get("applied"), f"preflight should apply: {event.get('brain_preflight')}")
-    assert_equal((event.get("low_authority_fast_profile") or {}).get("reason"), "brain_preflight_requires_evidence", "preflight should block empty fast profile")
+    assert_true(not (event.get("brain_preflight") or {}).get("applied"), f"visual input must stay on the universal Brain path: {event.get('brain_preflight')}")
+    assert_equal(
+        (event.get("brain_preflight") or {}).get("reason"),
+        "brain_first_universal_single_evidence_pipeline",
+        "the image plugin bridge must enrich the one evidence snapshot without a second semantic stage",
+    )
+    assert_equal((event.get("low_authority_fast_profile") or {}).get("reason"), "brain_first_universal_pipeline", "visual text must not select a topic profile")
     assert_true(QINPLUS_ID in product_master_ids(event), f"product master should include QinPLUS: {product_master_ids(event)}")
     current = (((event.get("brain_input") or {}).get("current_message") or {}) if isinstance(event.get("brain_input"), dict) else {})
     assert_equal(current.get("clean_text"), "这款有吗", "preflight must not pollute Brain clean_text")
@@ -524,8 +610,11 @@ def check_recent_visual_followup_reuses_visual_context_for_product_master() -> N
         preflight_candidate=preflight_plan_for_qinplus(uses_recent_visual_context=True),
     )
     assert_equal(event.get("rule_name"), "customer_service_brain_reply", f"follow-up should still reach Brain reply: {event}")
-    preflight_plan = ((event.get("brain_preflight") or {}).get("plan") or {})
-    assert_true((preflight_plan.get("context_resolution") or {}).get("uses_recent_visual_context"), f"preflight should use recent visual context: {preflight_plan}")
+    assert_equal(
+        (event.get("brain_preflight") or {}).get("reason"),
+        "brain_first_universal_single_evidence_pipeline",
+        "recent visual follow-up must not reactivate semantic preflight",
+    )
     assert_true(QINPLUS_ID in product_master_ids(event), f"follow-up should retrieve QinPLUS product master: {product_master_ids(event)}")
     current = (((event.get("brain_input") or {}).get("current_message") or {}) if isinstance(event.get("brain_input"), dict) else {})
     assert_equal(current.get("clean_text"), "型号发我", "recent visual follow-up must keep original clean_text")

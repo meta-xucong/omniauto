@@ -348,11 +348,16 @@ class SessionMonitor:
                 # New session seen for the first time
                 signal_kind = self._signal_kind(content)
                 short_preview_signal = self.short_preview_can_raise_unread and signal_kind == "high_sensitivity_short"
+                # The first passive poll is a historical baseline.  Without a
+                # physical unread badge, no preview type (including a short
+                # message) may be promoted into a new customer event at startup.
                 startup_media_baseline = bool(
                     startup_visual_baseline_active
-                    and signal_kind in MEDIA_CAPTURE_SIGNAL_KINDS
                     and not has_dispatch_badge
-                    and not self.require_unread_badge_for_dispatch
+                    and (
+                        signal_kind in MEDIA_CAPTURE_SIGNAL_KINDS
+                        or not self.initial_preview_can_raise_unread
+                    )
                 )
                 if self.require_unread_badge_for_dispatch:
                     initial_unread = bool(
@@ -470,11 +475,28 @@ class SessionMonitor:
                     # identical post-acknowledgement preview observations
                     # before treating a text-only change as a new event.  A
                     # badge edge or a visible time change remains immediate.
+                    signal_kind = self._signal_kind(content)
+                    recent_outbound_preview = bool(
+                        changed_preview_signal
+                        and not has_dispatch_badge
+                        and signal_kind == "normal"
+                        and self._matches_recent_outbound_preview(existing.session_key or session_key, content)
+                    )
+                    stable_badgeless_preview = bool(
+                        changed_preview_signal
+                        and not has_dispatch_badge
+                        and signal_kind == "normal"
+                        and self.preview_change_can_raise_unread
+                        and not recent_outbound_preview
+                    )
                     defer_preview_confirmation = bool(
-                        badge_epoch_already_acknowledged
-                        and changed_preview_signal
-                        and not changed_by_time
-                        and not changed_by_badge
+                        (
+                            badge_epoch_already_acknowledged
+                            and changed_preview_signal
+                            and not changed_by_time
+                            and not changed_by_badge
+                        )
+                        or stable_badgeless_preview
                     )
                     preview_confirmation_ready = False
                     if defer_preview_confirmation:
@@ -498,7 +520,6 @@ class SessionMonitor:
                     existing.last_observed_unread_badge = has_dispatch_badge
                     existing.conversation_type = conversation_type
                     existing.last_seen_at = now_iso
-                    signal_kind = self._signal_kind(content)
                     media_preview_signal = signal_kind in MEDIA_CAPTURE_SIGNAL_KINDS
                     startup_media_baseline = bool(
                         startup_visual_baseline_active
@@ -527,6 +548,11 @@ class SessionMonitor:
                             existing.preview_change_hits = 0
                         elif not has_dispatch_badge:
                             existing.preview_change_hits = 0
+                    elif recent_outbound_preview:
+                        # Sending changes the sidebar preview too. The ledger is
+                        # authoritative for that outbound text, so baseline it
+                        # without manufacturing another customer turn.
+                        existing.preview_change_hits = 0
                     elif changed_by_badge and unread_badge:
                         should_raise_unread = True
                         existing.preview_change_hits = 0
@@ -1037,6 +1063,29 @@ class SessionMonitor:
             return "high_sensitivity_short"
         return "normal"
 
+    def _matches_recent_outbound_preview(self, session_key: str, content: str) -> bool:
+        preview = _normalized_preview_fragment(content)
+        if not session_key or not preview:
+            return False
+        try:
+            summary = self._ledger.load_summary(session_key)
+        except Exception:
+            return False
+        recent = summary.get("recent_messages") if isinstance(summary, dict) else []
+        if not isinstance(recent, list):
+            return False
+        for raw in reversed(recent[-8:]):
+            if not isinstance(raw, dict):
+                continue
+            sender = str(raw.get("sender") or raw.get("sender_role") or "").strip().lower()
+            if sender not in {"assistant", "self", "bot", "service"}:
+                continue
+            outbound = _normalized_preview_fragment(raw.get("content") or raw.get("content_body"))
+            if not outbound:
+                continue
+            return preview == outbound or outbound.startswith(preview) or preview.startswith(outbound)
+        return False
+
     def _signal_ready_after(self, now_iso: str, content: str) -> str:
         if self._signal_kind(content) != "high_sensitivity_short":
             return ""
@@ -1217,6 +1266,11 @@ def _pending_observation_id(observation_id: str, *, unread_badge_epoch: int) -> 
 
 def _digest(value: str) -> str:
     return hashlib.sha256(str(value).encode("utf-8")).hexdigest()[:32]
+
+
+def _normalized_preview_fragment(value: Any) -> str:
+    text = "".join(str(value or "").strip().split())
+    return text.rstrip(".。…·")
 
 
 def _age_seconds(value: str) -> int:

@@ -1,5 +1,7 @@
 # 微信客服会话切换后不回复复盘与采集身份修复
 
+> **2026-07-19 规则更新：** 本文对 capture→Brain→ready reply→send 身份贯穿、禁止按显示名兜底和防串发的复盘继续有效；其中把 `conversation_type` 冲突作为永久物理身份冲突的处理已被 [PR #28 原样合并与独立 Vision 总方案](customer_service_pr28_immutable_merge_independent_vision_master_plan_20260719.md)取代。类型现作为可校正语义观测，不能单独否定相同 exact session key + exact title。实施时按[问题台账](customer_service_pr28_post_merge_issue_audit_ledger_20260719.md)中的 `SID-001` 至 `SID-008` 逐项验证，不能靠名称 fuzzy 合并。
+
 ## 1. 结论
 
 本次问题不是 Brain 没有产出回复，而是会话切换期间出现了两类身份缺口：

@@ -1,3 +1,6 @@
+> [!WARNING]
+> **文档状态：实施清单已废止（2026-07-18）。** 禁止再按本文向 Sidecar 增加 `image-save`、保存本地图片或把图片实现分散到旧 workflow。本文只保留历史文件清单；现行实施阶段和删除清单见 [完全独立图像识别模块改造方案](../customer_service_absolute_independent_vision_module_refactor_plan_20260718.md)。
+
 > Customer-service development baseline: [../customer_visible_reply_ownership_baseline.md](../customer_visible_reply_ownership_baseline.md).
 
 # 微信智能客服识图预编码文件清单与实施检查表

@@ -213,6 +213,33 @@ def check_experience_reference_index_cache_reuses_built_entries() -> None:
     assert_true(third.get("hits"), "file cache reference search should still return hits")
 
 
+def check_semantic_expansion_does_not_restat_rules_for_every_term() -> None:
+    original_token = rag_layer.platform_understanding_cache_token
+    original_cache = dict(rag_layer._SEMANTIC_EQUIVALENTS_MAP_CACHE)
+    calls = {"count": 0}
+
+    def fixed_token() -> str:
+        calls["count"] += 1
+        return "rag-layer-check-token"
+
+    try:
+        rag_layer.platform_understanding_cache_token = fixed_token
+        rag_layer._SEMANTIC_EQUIVALENTS_MAP_CACHE["key"] = None
+        rag_layer._SEMANTIC_EQUIVALENTS_MAP_CACHE["value"] = None
+        text = " ".join(f"term{index}" for index in range(250))
+        expanded = rag_layer.expand_semantic_terms(text)
+    finally:
+        rag_layer.platform_understanding_cache_token = original_token
+        rag_layer._SEMANTIC_EQUIVALENTS_MAP_CACHE.clear()
+        rag_layer._SEMANTIC_EQUIVALENTS_MAP_CACHE.update(original_cache)
+
+    assert_true(expanded, "semantic expansion should still return terms")
+    assert_true(
+        calls["count"] <= 3,
+        f"semantic expansion should resolve the rule map once, got {calls['count']} cache-token reads",
+    )
+
+
 def cleanup() -> None:
     if TEST_ROOT.exists():
         shutil.rmtree(TEST_ROOT)
@@ -234,6 +261,7 @@ CHECKS = [
     check_delete_source_removes_chunks_and_index,
     check_runtime_evidence_can_include_rag_without_authorization,
     check_experience_reference_index_cache_reuses_built_entries,
+    check_semantic_expansion_does_not_restat_rules_for_every_term,
 ]
 
 

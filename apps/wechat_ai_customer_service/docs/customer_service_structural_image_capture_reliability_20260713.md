@@ -1,5 +1,8 @@
 # 微信图片采集：结构优先可靠性改造（2026-07-13）
 
+> [!WARNING]
+> **文档状态：算法原则保留、代码落点已废止（2026-07-18）。** 结构位置优先、内容特征不得决定图片方向仍是强制规则；实现不得继续保留在 `adapters/wechat_image_save_capture.py` 或共享 RPA 文件，必须迁入 [完全独立图像识别模块改造方案](customer_service_absolute_independent_vision_module_refactor_plan_20260718.md) 规定的 vision capture 子模块。
+
 ## 目的与结论
 
 本改造解决 Windows 微信会话中“以图片颜色、纹理或内容特征判断图片，再猜测发送方”的不可靠路径。图片可以是纯黑截图、纯白文件、低纹理海报或任意未知内容，因此内容特征不能决定消息归属。

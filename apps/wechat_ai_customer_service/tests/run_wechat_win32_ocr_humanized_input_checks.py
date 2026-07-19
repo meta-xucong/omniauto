@@ -109,6 +109,12 @@ def test_humanized_settings_match_sidecar() -> None:
             "WECHAT_WIN32_OCR_HUMANIZED_INTER_CHUNK_DELAY_SCALE": "0.1",
         },
         {
+            "WECHAT_WIN32_OCR_HUMANIZED_INPUT_ENABLED": "1",
+            "WECHAT_WIN32_OCR_HUMANIZED_INPUT_METHOD": "clipboard_once",
+            "WECHAT_WIN32_OCR_ENFORCE_INTERMITTENT_TYPING": "0",
+            "WECHAT_WIN32_OCR_ALLOW_CLIPBOARD_ONCE": "1",
+        },
+        {
             "WECHAT_WIN32_OCR_HUMANIZED_SEND_TRIGGER_DELAY_MIN_MS": "2000",
             "WECHAT_WIN32_OCR_HUMANIZED_SEND_TRIGGER_DELAY_MAX_MS": "1000",
             "WECHAT_WIN32_OCR_HUMANIZED_SEND_AFTER_TRIGGER_DELAY_MIN_MS": "900",
@@ -118,10 +124,13 @@ def test_humanized_settings_match_sidecar() -> None:
     ]
     for env_case in env_cases:
         with patched_env(cleared_env(env_case)):
+            extracted = humanized_input.humanized_input_settings()
             assert_true(
-                humanized_input.humanized_input_settings() == sidecar.humanized_input_settings(),
+                extracted == sidecar.humanized_input_settings(),
                 f"humanized settings mismatch: {env_case}",
             )
+            if env_case.get("WECHAT_WIN32_OCR_ALLOW_CLIPBOARD_ONCE") == "1":
+                assert_true(extracted.get("method") == "clipboard_once", f"single paste should remain enabled: {extracted}")
 
 
 def test_text_and_adaptive_helpers_match_sidecar() -> None:

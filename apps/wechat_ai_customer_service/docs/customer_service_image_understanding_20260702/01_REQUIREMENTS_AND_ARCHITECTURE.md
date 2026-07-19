@@ -1,3 +1,6 @@
+> [!WARNING]
+> **文档状态：架构部分已废止（2026-07-18）。** 业务需求、Brain First 和独立 Provider 原则仍可参考；旧模块落点、图片资产/状态、外置 workflow 及 Sidecar 接入设计不得作为实施依据。现行方案见 [完全独立图像识别模块改造方案](../customer_service_absolute_independent_vision_module_refactor_plan_20260718.md)。
+
 > Customer-service development baseline: [../customer_visible_reply_ownership_baseline.md](../customer_visible_reply_ownership_baseline.md).
 
 # 微信智能客服识图需求与架构

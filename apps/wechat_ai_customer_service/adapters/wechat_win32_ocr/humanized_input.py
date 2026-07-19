@@ -287,9 +287,13 @@ def adapt_humanized_input_settings(settings: dict[str, Any], text: str) -> dict[
         current = int(active.get(key) or 0)
         target = int(profile[key])
         if key.startswith("send_post_input") or key.startswith("send_trigger") or key.startswith("send_after_trigger"):
-            active[key] = target
+            # Adaptive pacing may fill in a missing operational pause, but it
+            # must never make an explicitly conservative caller profile
+            # faster.  The previous assignment silently collapsed live/test
+            # guard windows to the much smaller adaptive target.
+            active[key] = max(current, target)
         else:
-            active[key] = 0 if current <= 0 else min(current, target)
+            active[key] = 0 if current <= 0 else max(current, target)
     active["chunk_min_chars"] = max(int(active.get("chunk_min_chars") or 1), int(profile["chunk_min_chars"]))
     active["chunk_max_chars"] = max(int(active.get("chunk_max_chars") or 1), int(profile["chunk_max_chars"]))
     current_micro_every = int(active.get("micro_pause_every_chars") or 0)
@@ -316,7 +320,7 @@ def adapt_humanized_input_settings(settings: dict[str, Any], text: str) -> dict[
         0.35,
         min(
             1.2,
-            min(current_scale, float(profile["inter_chunk_delay_scale"])),
+            max(current_scale, float(profile["inter_chunk_delay_scale"])),
         ),
     )
     active["adaptive_text_chars"] = text_len

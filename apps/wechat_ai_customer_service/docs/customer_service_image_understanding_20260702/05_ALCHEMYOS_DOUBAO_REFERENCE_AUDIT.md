@@ -1,3 +1,6 @@
+> [!WARNING]
+> **文档状态：仅保留为历史技术参考（2026-07-18）。** Provider、模型配置和多模态调用经验仍可参考，但本文不再授权任何模块落点或生产数据流；实现必须服从 [完全独立图像识别模块改造方案](../customer_service_absolute_independent_vision_module_refactor_plan_20260718.md)。
+
 > Customer-service development baseline: [../customer_visible_reply_ownership_baseline.md](../customer_visible_reply_ownership_baseline.md).
 
 # AlchemyOS 豆包识图参考审计

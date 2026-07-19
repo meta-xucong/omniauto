@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import argparse
 import json
 import sys
 import tempfile
@@ -25,8 +24,10 @@ from apps.wechat_ai_customer_service.adapters.wechat_image_save_capture import (
     find_copy_menu_item,
     save_clipboard_image_to_path,
 )
-from apps.wechat_ai_customer_service.adapters import wechat_win32_ocr_sidecar  # noqa: E402
 from apps.wechat_ai_customer_service.adapters.wechat_win32_ocr.geometry import session_split_x  # noqa: E402
+from apps.wechat_ai_customer_service.optional_plugins.vision.capture.surface import (  # noqa: E402
+    self_visual_image_messages_from_current_surface,
+)
 
 
 def main() -> int:
@@ -37,7 +38,7 @@ def main() -> int:
         check_self_copy_transaction_selects_only_self_side,
         check_current_copy_requires_clipboard_generation_change,
         check_legacy_file_entrypoints_are_rejected,
-        check_legacy_sidecar_action_rejects_before_platform_probe,
+        check_shared_sidecar_has_no_image_action,
     ]
     results: list[dict[str, Any]] = []
     for check in checks:
@@ -70,7 +71,7 @@ def check_structure_locator_excludes_self_image() -> None:
 
 
 def check_self_structural_observation_is_metadata_only() -> None:
-    messages = wechat_win32_ocr_sidecar.self_visual_image_messages_from_current_surface(
+    messages = self_visual_image_messages_from_current_surface(
         _customer_image_surface(),
         [],
         [],
@@ -245,20 +246,13 @@ def check_legacy_file_entrypoints_are_rejected() -> None:
     assert_equal(payload_result.get("state"), "legacy_image_file_capture_rejected", "legacy payload builder is fail-closed")
 
 
-def check_legacy_sidecar_action_rejects_before_platform_probe() -> None:
-    original_probe = wechat_win32_ocr_sidecar.ensure_visible_wechat_window
+def check_shared_sidecar_has_no_image_action() -> None:
+    from apps.wechat_ai_customer_service.adapters import wechat_win32_ocr_sidecar
 
-    def forbidden_probe(*_args: Any, **_kwargs: Any) -> dict[str, Any]:
-        raise AssertionError("legacy image-save must not begin a window probe")
-
-    wechat_win32_ocr_sidecar.ensure_visible_wechat_window = forbidden_probe
-    try:
-        result = wechat_win32_ocr_sidecar.run_action(
-            argparse.Namespace(action="image-save", target="Customer A", session_key="wx:legacy")
-        )
-    finally:
-        wechat_win32_ocr_sidecar.ensure_visible_wechat_window = original_probe
-    assert_equal(result.get("state"), "legacy_image_file_capture_rejected", "legacy sidecar action rejects before platform work")
+    assert_true("image-save" not in wechat_win32_ocr_sidecar.SIDECAR_ACTION_CHOICES, "Sidecar must not expose image-save")
+    assert_true("image-clipboard-copy" not in wechat_win32_ocr_sidecar.SIDECAR_ACTION_CHOICES, "Sidecar must not expose clipboard image copy")
+    assert_true(not hasattr(wechat_win32_ocr_sidecar, "execute_wechat_image_save"), "Sidecar must not retain the legacy image facade")
+    assert_true(not hasattr(wechat_win32_ocr_sidecar, "execute_wechat_clipboard_image_copy"), "Sidecar must not retain clipboard image execution")
 
 
 def assert_true(value: bool, message: str) -> None:

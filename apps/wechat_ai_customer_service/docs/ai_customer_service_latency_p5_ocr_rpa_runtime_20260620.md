@@ -1,5 +1,12 @@
 # P5 OCR/RPA Runtime Latency Plan
 
+> 状态修订（2026-07-19）：本文保留为历史性能证据；其中“固定保持 `clipboard_chunks`”已被 [customer_service_wechat_account_behavior_risk_retrospective_20260719.md](customer_service_wechat_account_behavior_risk_retrospective_20260719.md) 取代。当前 live safety 必须保留既有 input-method 枚举中的显式选择，不能无条件扩张为分块剪贴板动作。
+
+当前开发服从：
+
+- [customer_visible_reply_ownership_baseline.md](customer_visible_reply_ownership_baseline.md)
+- [customer_service_external_contract_and_optional_plugin_baseline.md](customer_service_external_contract_and_optional_plugin_baseline.md)
+
 ## 背景
 
 P0-P4 已完成当前一轮速度优化闭环。最新 P4.2 实盘短问候双会话验证通过，关键数据如下：

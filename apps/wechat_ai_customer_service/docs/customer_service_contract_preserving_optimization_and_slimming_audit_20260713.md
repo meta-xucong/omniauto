@@ -1,5 +1,8 @@
 # 微信客服兼容式优化与减负审计
 
+> [!WARNING]
+> **文档状态：通用兼容原则继续有效，图片拆分路线已被取代（2026-07-18）。** 本文关于 Sidecar 图片 action lazy resolver、Scheduler 图片桥和部分独立实现的建议不得用于新开发；图片能力必须按 [完全独立图像识别模块改造方案](customer_service_absolute_independent_vision_module_refactor_plan_20260718.md) 端到端收束。非图片领域的兼容式优化结论不受影响。
+
 日期：2026-07-13
 
 本文引用并服从：

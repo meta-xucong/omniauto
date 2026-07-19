@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import random
 import re
 import sys
 import tempfile
@@ -27,6 +28,8 @@ ARTIFACT_ROOT = (
     / "two_visible_session_customer_service_live"
 )
 RPA_INPUT_METHODS = {"auto", "sendinput_unicode", "uia_chunks", "clipboard_chunks", "clipboard_once"}
+SELF_QA_PROMPT_REST_FLOOR_SECONDS = 18.0
+SELF_QA_ROUND_REST_FLOOR_SECONDS = 45.0
 PROMPT_SCENARIOS = [
     {
         "新数据测试": "你好，我想看看10万左右的电车或混动，给老婆开，别太大，有合适的吗？",
@@ -246,6 +249,67 @@ def round_prompts(token: str, round_index: int, *, scenario_set: str = "default"
     scenarios = scenario_prompts(scenario_set)
     scenario = scenarios[(max(1, int(round_index)) - 1) % len(scenarios)]
     return {target: str(scenario[target]) for target in TARGETS}
+
+
+def visible_self_qa_prompt(prompt: str) -> str:
+    """Return only the customer-like scenario text for the visible chat.
+
+    Run ids and round ids remain in artifacts and synthetic message ids.  They
+    are diagnostic metadata, not part of a normal WeChat message.
+    """
+
+    return str(prompt or "").strip()
+
+
+def self_qa_rest_seconds(
+    base_seconds: float,
+    text: str,
+    *,
+    previous_turn_seconds: float = 0.0,
+    rng: Any | None = None,
+) -> float:
+    """Choose a conservative bounded rest while preserving the CLI minimum."""
+
+    minimum = max(0.0, float(base_seconds or 0.0))
+    clean_length = len(re.sub(r"\s+", "", str(text or "")))
+    reading_floor = min(12.0, max(1.5, clean_length / 14.0))
+    recovery_floor = min(18.0, max(0.0, float(previous_turn_seconds or 0.0) * 0.12))
+    floor = max(minimum, reading_floor, recovery_floor)
+    jitter_min = max(1.0, min(4.0, floor * 0.08))
+    jitter_max = max(jitter_min, min(12.0, 2.5 + floor * 0.18 + clean_length * 0.02))
+    source = rng if rng is not None else random
+    return round(floor + float(source.uniform(jitter_min, jitter_max)), 3)
+
+
+def wait_for_self_qa_rest(
+    progress_path: Path,
+    *,
+    event: str,
+    base_seconds: float,
+    text: str,
+    round_index: int,
+    target: str = "",
+    previous_turn_seconds: float = 0.0,
+) -> float:
+    rest_seconds = self_qa_rest_seconds(
+        base_seconds,
+        text,
+        previous_turn_seconds=previous_turn_seconds,
+    )
+    append_jsonl(
+        progress_path,
+        {
+            "event": event,
+            "round": round_index,
+            "target": target,
+            "base_seconds": max(0.0, float(base_seconds or 0.0)),
+            "previous_turn_seconds": round(max(0.0, float(previous_turn_seconds or 0.0)), 3),
+            "rest_seconds": rest_seconds,
+            "created_at": now_text(),
+        },
+    )
+    time.sleep(rest_seconds)
+    return rest_seconds
 
 
 def backup_files(paths: list[Path]) -> list[dict[str, Any]]:
@@ -600,9 +664,9 @@ def build_config(run_dir: Path) -> Path:
         }
     )
     base.setdefault("rpa_humanized_send", {})
-    input_method = str(os.getenv("WECHAT_LIVE_TEST_RPA_INPUT_METHOD") or "clipboard_chunks").strip().lower()
+    input_method = str(os.getenv("WECHAT_LIVE_TEST_RPA_INPUT_METHOD") or "clipboard_once").strip().lower()
     if input_method not in RPA_INPUT_METHODS:
-        input_method = "clipboard_chunks"
+        input_method = "clipboard_once"
     base["rpa_humanized_send"].update(
         {
             "enabled": True,
@@ -619,6 +683,9 @@ def build_config(run_dir: Path) -> Path:
             "send_trigger_delay_max_ms": 2100,
             "send_after_trigger_delay_min_ms": 420,
             "send_after_trigger_delay_max_ms": 1250,
+            "send_rate_min_interval_seconds": 12,
+            "send_rate_burst_window_seconds": 600,
+            "send_rate_burst_limit": 8,
             "input_fast_visual_confirm_enabled": True,
         }
     )
@@ -644,6 +711,35 @@ def build_config(run_dir: Path) -> Path:
     path = run_dir / "listener_config.json"
     write_json(path, base)
     return path
+
+
+def bind_config_targets_to_discovered_sessions(
+    config_path: Path,
+    *,
+    session_key_by_target: dict[str, str],
+    conversation_type_by_target: dict[str, str],
+) -> None:
+    """Bind the live harness to the exact rows confirmed by its preflight.
+
+    Without this binding, the scheduler can derive a second ``configured``
+    session key from the display name while the synthetic customer turn uses
+    the real Win32/OCR row key.  That test-only duplicate adds a failed capture
+    beside the valid session and obscures the actual Brain result.
+    """
+
+    config = read_json(config_path)
+    targets = config.get("targets") if isinstance(config.get("targets"), list) else []
+    for item in targets:
+        if not isinstance(item, dict):
+            continue
+        target = str(item.get("name") or "")
+        session_key = str(session_key_by_target.get(target) or "")
+        conversation_type = str(conversation_type_by_target.get(target) or "")
+        if session_key:
+            item["session_key"] = session_key
+        if conversation_type and conversation_type != "unknown":
+            item["conversation_type"] = conversation_type
+    write_json(config_path, config)
 
 
 def prepare_round_state(
@@ -680,7 +776,31 @@ def target_conversation_type(
     return "group" if target == "新数据测试" else "private"
 
 
-def configure_settings(conversation_type_by_target: dict[str, str] | None = None) -> None:
+def managed_session_targets(
+    conversation_type_by_target: dict[str, str] | None = None,
+    session_key_by_target: dict[str, str] | None = None,
+) -> list[dict[str, Any]]:
+    """Build one target list from the exact identities confirmed by preflight."""
+
+    return [
+        {
+            "name": target,
+            "display_name": target,
+            "enabled": True,
+            "exact": True,
+            "archived": False,
+            "conversation_type": target_conversation_type(target, conversation_type_by_target),
+            "session_key": str((session_key_by_target or {}).get(target) or ""),
+            "source": "live_acceptance",
+        }
+        for target in TARGETS
+    ]
+
+
+def configure_settings(
+    conversation_type_by_target: dict[str, str] | None = None,
+    session_key_by_target: dict[str, str] | None = None,
+) -> None:
     CustomerServiceSettings(tenant_id=TENANT_ID).save(
         {
             "enabled": True,
@@ -698,21 +818,10 @@ def configure_settings(conversation_type_by_target: dict[str, str] | None = None
             "customer_service_brain_mode": "brain_first",
             "respond_all_unread_sessions": False,
             "session_targets_managed": True,
-            "session_targets": [
-                {
-                    "name": target,
-                    "display_name": target,
-                    "enabled": True,
-                    "exact": True,
-                    "archived": False,
-                    "conversation_type": target_conversation_type(
-                        target,
-                        conversation_type_by_target,
-                    ),
-                    "source": "live_acceptance",
-                }
-                for target in TARGETS
-            ],
+            "session_targets": managed_session_targets(
+                conversation_type_by_target,
+                session_key_by_target,
+            ),
         }
     )
 
@@ -1230,9 +1339,17 @@ def runtime_idle_probe(progress_path: Path) -> dict[str, Any]:
     return result
 
 
-def ledger_snapshot(target: str) -> dict[str, Any]:
-    conversation_type = "group" if target == "新数据测试" else "private"
-    key = stable_session_key(target, conversation_type=conversation_type)
+def ledger_snapshot(
+    target: str,
+    *,
+    session_key_by_target: dict[str, str] | None = None,
+    conversation_type_by_target: dict[str, str] | None = None,
+) -> dict[str, Any]:
+    conversation_type = target_conversation_type(target, conversation_type_by_target)
+    key = str((session_key_by_target or {}).get(target) or "") or stable_session_key(
+        target,
+        conversation_type=conversation_type,
+    )
     store = SessionLedgerStore(tenant_id=TENANT_ID)
     summary = store.load_summary(key)
     recent = summary.get("recent_messages") if isinstance(summary.get("recent_messages"), list) else []
@@ -1288,6 +1405,11 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
                 "WECHAT_DISABLE_WXAUTO4": "1",
                 "WECHAT_WIN32_OCR_ALLOW_BLIND_FILE_TRANSFER_SEND": "0",
                 "WECHAT_WIN32_OCR_PASSIVE_PROBE": "1",
+                "WECHAT_WIN32_OCR_ALLOW_CLIPBOARD_ONCE": "1",
+                "WECHAT_WIN32_OCR_ENFORCE_INTERMITTENT_TYPING": "0",
+                "WECHAT_WIN32_OCR_SEND_MIN_INTERVAL_SECONDS": "12",
+                "WECHAT_WIN32_OCR_SEND_BURST_WINDOW_SECONDS": "600",
+                "WECHAT_WIN32_OCR_SEND_BURST_LIMIT": "8",
                 "WECHAT_RPA_OPERATOR_GUARD_ENABLED": "1",
                 "WECHAT_RPA_OPERATOR_GUARD_BLOCK_MANUAL_INPUT": "1",
                 "WECHAT_RPA_OPERATOR_GUARD_FLOATING_INDICATOR_ENABLED": "1",
@@ -1337,7 +1459,15 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             result["missing_session_key_targets"] = missing_session_keys
             return finish(result, run_dir)
 
-        configure_settings(conversation_type_by_target)
+        bind_config_targets_to_discovered_sessions(
+            config_path,
+            session_key_by_target=session_key_by_target,
+            conversation_type_by_target=conversation_type_by_target,
+        )
+        configure_settings(
+            conversation_type_by_target,
+            session_key_by_target,
+        )
 
         result["runtime_idle_probe"] = runtime_idle_probe(progress_path)
         if not result["runtime_idle_probe"].get("ok"):
@@ -1360,6 +1490,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         total_ready = 0
         rounds = max(1, int(getattr(args, "rounds", 1) or 1))
         for round_index in range(1, rounds + 1):
+            round_started_monotonic = time.monotonic()
             prompts = round_prompts(token, round_index, scenario_set=result["scenario_set"])
             round_dir = run_dir / f"round_{round_index:02d}"
             round_result: dict[str, Any] = {
@@ -1383,9 +1514,10 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             else:
                 for target in TARGETS:
                     target_artifact_dir = round_dir / "prompt_send" / safe_name(target)
+                    visible_prompt = visible_self_qa_prompt(prompts[target])
                     send = connector.send_text_and_verify(
                         target,
-                        f"【{PROMPT_LABEL}{token}-R{round_index}-{target}】{prompts[target]}",
+                        visible_prompt,
                         exact=True,
                         artifact_dir=str(target_artifact_dir),
                         session_key=session_key_by_target[target],
@@ -1410,7 +1542,19 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
                         all_rounds.append(round_result)
                         result["rounds"] = all_rounds
                         return finish(result, run_dir)
-                    time.sleep(max(0.0, float(getattr(args, "prompt_gap_seconds", 8.0) or 0.0)))
+                    send_timing = send.get("timing") if isinstance(send.get("timing"), dict) else {}
+                    wait_for_self_qa_rest(
+                        progress_path,
+                        event="self_qa_prompt_rest",
+                        base_seconds=max(
+                            SELF_QA_PROMPT_REST_FLOOR_SECONDS,
+                            float(getattr(args, "prompt_gap_seconds", 8.0) or 0.0),
+                        ),
+                        text=visible_prompt,
+                        round_index=round_index,
+                        target=target,
+                        previous_turn_seconds=float(send_timing.get("send_verify_duration_seconds") or 0.0),
+                    )
             round_result["prompt_results"] = prompt_results
 
             synthetic_by_target = {
@@ -1441,7 +1585,14 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
                 session_key_by_target=session_key_by_target,
                 conversation_type_by_target=conversation_type_by_target,
             )
-            round_result["ledger_before"] = [ledger_snapshot(target) for target in TARGETS]
+            round_result["ledger_before"] = [
+                ledger_snapshot(
+                    target,
+                    session_key_by_target=session_key_by_target,
+                    conversation_type_by_target=conversation_type_by_target,
+                )
+                for target in TARGETS
+            ]
             replies = wait_for_replies(
                 bridge,
                 connector,
@@ -1454,7 +1605,14 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             )
             round_result["reply_phase"] = replies
             round_result["sent_replies"] = wrapper.sent
-            round_result["ledger_after"] = [ledger_snapshot(target) for target in TARGETS]
+            round_result["ledger_after"] = [
+                ledger_snapshot(
+                    target,
+                    session_key_by_target=session_key_by_target,
+                    conversation_type_by_target=conversation_type_by_target,
+                )
+                for target in TARGETS
+            ]
             all_sent.extend(wrapper.sent)
             if not replies.get("ok"):
                 apply_reply_failure_result(result, round_result, replies, wrapper.sent)
@@ -1504,7 +1662,17 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             result["rounds"] = all_rounds
             write_json(run_dir / "partial_result.json", result)
             if round_index < rounds:
-                time.sleep(max(0.0, float(getattr(args, "round_gap_seconds", 2.0) or 0.0)))
+                wait_for_self_qa_rest(
+                    progress_path,
+                    event="self_qa_round_rest",
+                    base_seconds=max(
+                        SELF_QA_ROUND_REST_FLOOR_SECONDS,
+                        float(getattr(args, "round_gap_seconds", 2.0) or 0.0),
+                    ),
+                    text=" ".join(prompts.values()),
+                    round_index=round_index,
+                    previous_turn_seconds=time.monotonic() - round_started_monotonic,
+                )
         result["sent_replies"] = all_sent
         if not allow_reply_send:
             result["ready_reply_count"] = total_ready
@@ -1750,6 +1918,20 @@ def run_self_check() -> bool:
         return False
     if scenario_prompts("short_business")[0].get("新数据测试") != "秦PLUS多少钱？":
         return False
+    visible_prompt = visible_self_qa_prompt(" 你好，正常聊两句。 ")
+    if visible_prompt != "你好，正常聊两句。":
+        return False
+    if "unit" in visible_prompt or PROMPT_LABEL in visible_prompt:
+        return False
+    prompt_rest = self_qa_rest_seconds(18.0, visible_prompt, rng=random.Random(20260719))
+    round_rest = self_qa_rest_seconds(
+        45.0,
+        visible_prompt,
+        previous_turn_seconds=120.0,
+        rng=random.Random(20260719),
+    )
+    if prompt_rest < 18.0 or round_rest < 45.0:
+        return False
     with tempfile.TemporaryDirectory() as temp:
         progress_path = Path(temp) / "progress.jsonl"
         ticks = [
@@ -1827,9 +2009,13 @@ def run_self_check() -> bool:
         default_config_path = build_config(config_check_dir)
         default_config = json.loads(default_config_path.read_text(encoding="utf-8"))
         default_rpa = default_config.get("rpa_humanized_send") or {}
-        if default_rpa.get("input_method") != "clipboard_chunks":
+        if default_rpa.get("input_method") != "clipboard_once":
             return False
         if default_rpa.get("typing_typo_probability") != 0.0 or default_rpa.get("typing_typo_max") != 0:
+            return False
+        if default_rpa.get("send_rate_min_interval_seconds") != 12:
+            return False
+        if default_rpa.get("send_rate_burst_limit") != 8:
             return False
         os.environ["WECHAT_LIVE_TEST_RPA_INPUT_METHOD"] = "sendinput_unicode"
         override_config_path = build_config(config_check_dir)
@@ -1839,7 +2025,7 @@ def run_self_check() -> bool:
         os.environ["WECHAT_LIVE_TEST_RPA_INPUT_METHOD"] = "invalid"
         fallback_config_path = build_config(config_check_dir)
         fallback_config = json.loads(fallback_config_path.read_text(encoding="utf-8"))
-        if (fallback_config.get("rpa_humanized_send") or {}).get("input_method") != "clipboard_chunks":
+        if (fallback_config.get("rpa_humanized_send") or {}).get("input_method") != "clipboard_once":
             return False
     finally:
         if previous_input_method is None:
@@ -2008,6 +2194,23 @@ def run_self_check() -> bool:
     payload = wrapper.get_messages("新数据测试")
     messages = payload.get("messages") if isinstance(payload, dict) else []
     if len(messages) != 1 or str(messages[0].get("id") or "") != "synthetic-current":
+        return False
+    with tempfile.TemporaryDirectory(prefix="wechat-live-session-bind-") as temp_dir:
+        config_path = Path(temp_dir) / "listener.json"
+        write_json(config_path, {"targets": [{"name": "新数据测试", "enabled": True}]})
+        bind_config_targets_to_discovered_sessions(
+            config_path,
+            session_key_by_target={"新数据测试": "wx:test:private"},
+            conversation_type_by_target={"新数据测试": "private"},
+        )
+        bound = read_json(config_path).get("targets", [{}])[0]
+        if bound.get("session_key") != "wx:test:private" or bound.get("conversation_type") != "private":
+            return False
+    managed = managed_session_targets(
+        {"新数据测试": "private"},
+        {"新数据测试": "wx:test:private"},
+    )
+    if not managed or managed[0].get("session_key") != "wx:test:private" or managed[0].get("conversation_type") != "private":
         return False
     return True
 

@@ -983,7 +983,11 @@ def guard_polished_reply(
         return {"allowed": False, "reason": "polish_over_explicit_human_identity_claim"}
     if settings.get("identity_guard_enabled", True) is not False and looks_like_identity_denial_reply(polished):
         return {"allowed": False, "reason": "polish_discussed_identity_truth"}
-    if has_explicit_handoff_marker(polished):
+    # Final polish must not introduce a transfer strategy that Brain did not
+    # author.  A transfer-related phrase already present in the Brain draft is
+    # not an error: blocking it here made this surface-only verifier overrule a
+    # guarded refusal solely because of customer-visible wording.
+    if has_explicit_handoff_marker(polished) and not has_explicit_handoff_marker(base):
         return {"allowed": False, "reason": "polish_exposed_handoff_marker"}
 
     new_commitments = [term for term in UNSAFE_COMMITMENT_TERMS if term in polished and term not in base]

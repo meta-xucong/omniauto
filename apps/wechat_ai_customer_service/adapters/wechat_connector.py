@@ -788,102 +788,23 @@ class WeChatConnector:
         side_filter: str = "customer",
         consume_current_clipboard: Callable[[dict[str, Any]], dict[str, Any]] | None = None,
     ) -> dict[str, Any]:
-        """Execute one copy/read transaction while the WeChat RPA lock is held.
+        """Compatibility facade for the vision-owned clipboard transaction."""
 
-        The sidecar only performs the target-validated right-click and Copy
-        action.  A vision-owned callback then reads the freshly changed system
-        clipboard into memory before this lock is released.  No image bytes or
-        files cross this stable connector boundary.
-        """
-        clean_side_filter = str(side_filter or "customer").strip().lower()
-        if clean_side_filter not in {"customer", "self"}:
-            return {
-                "ok": False,
-                "adapter": "win32_ocr",
-                "state": "image_clipboard_copy_side_invalid",
-                "reason": "image_clipboard_side_filter_invalid",
-                "assets": [],
-                "messages": [],
-            }
-        if not target:
-            return {
-                "ok": False,
-                "adapter": "win32_ocr",
-                "state": "image_clipboard_copy_target_missing",
-                "reason": "target_missing",
-                "assets": [],
-                "messages": [],
-            }
-        args = ["image-clipboard-copy", "--target", target]
-        args.extend(["--side-filter", clean_side_filter])
-        clean_session_key = str(session_key or "").strip()
-        if clean_session_key:
-            args.extend(["--session-key", clean_session_key])
-        if exact:
-            args.append("--exact")
-        for value, flag in (
-            (source_preview, "--source-preview"),
-            (speaker_name, "--speaker-name"),
-            (pending_signal_id, "--pending-signal-id"),
-        ):
-            clean = str(value or "").strip()
-            if clean:
-                args.extend([flag, clean])
-        lock_timeout = rpa_lock_timeout_seconds("image_clipboard_transaction", default=45.0)
-        try:
-            with wechat_rpa_lock("image_clipboard_transaction", timeout_seconds=lock_timeout) as lock_meta:
-                primary = self.call_compat_sidecar(args, allow_failure=True)
-                primary.setdefault("adapter", "win32_ocr")
-                primary.setdefault("transport_priority", "rpa_first")
-                attach_rpa_lock_meta(primary, lock_meta)
-                if not primary.get("ok"):
-                    return primary
-                if not callable(consume_current_clipboard):
-                    primary["ok"] = False
-                    primary["state"] = "image_clipboard_consumer_missing"
-                    primary["reason"] = "image_clipboard_consumer_missing"
-                    return primary
-                transaction = primary.get("transaction") if isinstance(primary.get("transaction"), dict) else {}
-                try:
-                    consumed = consume_current_clipboard(dict(transaction))
-                except Exception as exc:  # noqa: BLE001 - normalise optional vision failures.
-                    consumed = {"ok": False, "reason": "clipboard_current_read_failed", "error": repr(exc)}
-                if not isinstance(consumed, dict) or not consumed.get("ok"):
-                    primary["ok"] = False
-                    primary["state"] = "image_clipboard_current_read_failed"
-                    primary["reason"] = str((consumed or {}).get("reason") or "clipboard_current_read_failed")
-                    primary["transaction"] = {
-                        **transaction,
-                        "status": "failed",
-                        "clipboard_content_read": False,
-                    }
-                    return primary
-                # This object is intentionally ephemeral.  The vision router
-                # must consume and remove it before it builds any persisted
-                # capture, ledger, or Brain payload.
-                primary["_ephemeral_clipboard_image"] = consumed.get("image")
-                primary["transaction"] = {
-                    **transaction,
-                    "status": "clipboard_read",
-                    "clipboard_content_read": True,
-                    "clipboard_image_valid": True,
-                }
-                return primary
-        except TimeoutError as exc:
-            return {
-                "ok": False,
-                "online": bool(any_weixin_process()),
-                "adapter": "win32_ocr",
-                "state": "image_clipboard_transaction_lock_timeout",
-                "reason": "image_clipboard_transaction_lock_timeout",
-                "target": target,
-                "exact": exact,
-                "assets": [],
-                "messages": [],
-                "error": repr(exc),
-                "transport_priority": "rpa_first",
-                "rpa_lock": rpa_lock_timeout_payload(exc, action="image_clipboard_transaction", timeout_seconds=lock_timeout),
-            }
+        from apps.wechat_ai_customer_service.optional_plugins.vision.integrations.wechat_current import (
+            run_clipboard_image_transaction,
+        )
+
+        return run_clipboard_image_transaction(
+            self,
+            target,
+            exact=exact,
+            session_key=session_key,
+            source_preview=source_preview,
+            speaker_name=speaker_name,
+            pending_signal_id=pending_signal_id,
+            side_filter=side_filter,
+            consume_current_clipboard=consume_current_clipboard,
+        )
 
     def run_self_clipboard_image_transaction(
         self,
@@ -895,21 +816,19 @@ class WeChatConnector:
         pending_signal_id: str = "",
         consume_current_clipboard: Callable[[dict[str, Any]], dict[str, Any]] | None = None,
     ) -> dict[str, Any]:
-        """Copy only the current self-side image for context-only vision.
+        """Compatibility facade for vision-owned self-image context capture."""
 
-        This additive facade shares the exact locked clipboard transaction with
-        customer image understanding, but selects the right-side/self bubble.
-        It never sends a message or exposes image bytes beyond the supplied
-        in-lock consumer callback.
-        """
+        from apps.wechat_ai_customer_service.optional_plugins.vision.integrations.wechat_current import (
+            run_self_clipboard_image_transaction,
+        )
 
-        return self.run_customer_clipboard_image_transaction(
+        return run_self_clipboard_image_transaction(
+            self,
             target,
             exact=exact,
             session_key=session_key,
             source_preview=source_preview,
             pending_signal_id=pending_signal_id,
-            side_filter="self",
             consume_current_clipboard=consume_current_clipboard,
         )
 
@@ -1081,7 +1000,12 @@ class WeChatConnector:
         messages: dict[str, Any] = {}
         verified = False
         verification_mode = "messages"
-        if env_flag("WECHAT_WIN32_OCR_FAST_SEND_CONFIRMATION", default=False) and guarded_send_confirmation_fallback(
+        # The transport guard proves only that Enter/click was injected while
+        # the intended chat was active and that the composer became empty. It
+        # does not prove that WeChat created an outbound bubble. Keep the fast
+        # path exclusively for the explicit synthetic file-transfer loopback;
+        # every real customer send must be read back from the self-side lane.
+        if loopback_inbound and env_flag("WECHAT_WIN32_OCR_FAST_SEND_CONFIRMATION", default=False) and guarded_send_confirmation_fallback(
             send_result,
             {},
         ):
@@ -1103,12 +1027,12 @@ class WeChatConnector:
             verified = verify_send_from_messages(messages, expected_text=text)
             if verified:
                 break
-            if blind_send_without_ocr(send_result, messages):
+            if loopback_inbound and blind_send_without_ocr(send_result, messages):
                 break
-        if not verified and blind_send_without_ocr(send_result, messages):
+        if not verified and loopback_inbound and blind_send_without_ocr(send_result, messages):
             verified = True
             verification_mode = "blind_send_no_ocr"
-        if not verified and guarded_send_confirmation_fallback(send_result, messages):
+        if not verified and loopback_inbound and guarded_send_confirmation_fallback(send_result, messages):
             verified = True
             verification_mode = "send_guard_confirmed"
         if verified and loopback_inbound:
@@ -1946,32 +1870,6 @@ def _args_to_request(args: list[str]) -> dict[str, Any]:
                 request["exact"] = True
             elif arg == "--artifact-dir" and i + 1 < len(args):
                 request["artifact_dir"] = args[i + 1]
-    elif args[0] in {"image-save", "image-clipboard-copy"}:
-        request["action"] = args[0]
-        for i, arg in enumerate(args):
-            if arg == "--target" and i + 1 < len(args):
-                request["target"] = args[i + 1]
-            elif arg == "--session-key" and i + 1 < len(args):
-                request["session_key"] = args[i + 1]
-            elif arg == "--exact":
-                request["exact"] = True
-            elif arg == "--artifact-dir" and i + 1 < len(args):
-                request["artifact_dir"] = args[i + 1]
-            elif arg == "--source-preview" and i + 1 < len(args):
-                request["source_preview"] = args[i + 1]
-            elif arg == "--speaker-name" and i + 1 < len(args):
-                request["speaker_name"] = args[i + 1]
-            elif arg == "--tenant-id" and i + 1 < len(args):
-                request["tenant_id"] = args[i + 1]
-            elif arg == "--side-filter" and i + 1 < len(args):
-                request["side_filter"] = args[i + 1]
-            elif arg == "--capture-mode" and i + 1 < len(args):
-                request["capture_mode"] = args[i + 1]
-            elif arg == "--max-images" and i + 1 < len(args):
-                try:
-                    request["max_images"] = max(1, min(int(args[i + 1]), 8))
-                except ValueError:
-                    request["max_images"] = 1
     elif args[0] == "send":
         request["action"] = "send"
         for i, arg in enumerate(args):
@@ -2044,12 +1942,6 @@ def compat_args(args: list[str]) -> list[str]:
             "--max-snapshots",
             "--min-delay-ms",
             "--max-delay-ms",
-            "--source-preview",
-            "--speaker-name",
-            "--tenant-id",
-            "--side-filter",
-            "--capture-mode",
-            "--max-images",
         } and index + 1 < len(args):
             converted.append(args[index + 1])
             skip_next = True
@@ -2297,38 +2189,57 @@ def verify_send_from_messages(messages_payload: dict[str, Any], *, expected_text
     if not expected_compact:
         return False
 
-    normalized_messages: list[tuple[str, str]] = []
+    normalized_messages: list[tuple[dict[str, Any], str]] = []
     for item in messages:
         if not isinstance(item, dict):
             continue
-        sender = str(item.get("sender") or "")
         content = str(item.get("content") or "")
         compact = compact_text(content)
         if compact:
-            normalized_messages.append((sender, compact))
+            normalized_messages.append((item, compact))
 
-    # Strict path: exact content from self sender.
-    if any(sender == "self" and content == expected for sender, content in ((str(i.get("sender") or ""), str(i.get("content") or "")) for i in messages if isinstance(i, dict))):
+    def is_confirmed_outbound(item: dict[str, Any]) -> bool:
+        sender = str(item.get("sender") or "").strip().lower()
+        sender_role = str(item.get("sender_role") or "").strip().lower()
+        if sender in {"self", "assistant", "agent", "me", "outbound"}:
+            return True
+        if sender_role in {"self", "assistant", "agent", "outbound"}:
+            return True
+        evidence = {
+            str(value or "").strip().lower()
+            for value in (item.get("sender_role_evidence") or [])
+            if str(value or "").strip()
+        }
+        return bool(
+            evidence
+            & {
+                "right_self_lane_reached",
+                "center_in_self_lane",
+                "compact_right_aligned",
+                "self_continuation_from_previous_line",
+            }
+        ) and "legacy_text_left_hint" not in evidence
+
+    # Only a confirmed self-side/outbound bubble can prove delivery. Matching
+    # customer text must never make a failed send look successful.
+    if any(is_confirmed_outbound(item) and str(item.get("content") or "") == expected for item in messages if isinstance(item, dict)):
         return True
-    if any(sender == "self" and compact == expected_compact for sender, compact in normalized_messages):
+    outbound_messages = [(item, compact) for item, compact in normalized_messages if is_confirmed_outbound(item)]
+    if any(compact == expected_compact for _item, compact in outbound_messages):
         return True
 
-    # Relaxed path for Win32/OCR: sender side may drift to unknown and long
-    # messages may split into multiple bubbles. Keep this scoped by requiring
-    # all non-empty expected lines to be found in recent message contents.
-    if any(compact == expected_compact for _sender, compact in normalized_messages):
-        return True
+    # Relaxed OCR matching is still allowed, but remains constrained to
+    # structurally confirmed outbound bubbles.
     if any(
-        sender in {"self", "unknown", ""}
-        and ocr_tolerant_text_match(expected_compact, compact)
-        for sender, compact in normalized_messages
+        ocr_tolerant_text_match(expected_compact, compact)
+        for _item, compact in outbound_messages
     ):
         return True
     expected_lines = [compact_text(line) for line in expected.splitlines() if compact_text(line)]
     if len(expected_lines) <= 1:
         return False
     for line in expected_lines:
-        if not any(line in compact for _sender, compact in normalized_messages):
+        if not any(line in compact for _item, compact in outbound_messages):
             return False
     return True
 
@@ -2563,7 +2474,12 @@ def guarded_send_confirmation_fallback(send_result: dict[str, Any], messages: di
     post_guard = send_meta.get("post_send_guard")
     if not isinstance(post_guard, dict) or post_guard.get("ok") is not True:
         return False
-    if str(post_guard.get("reason") or "") not in {"target_confirmed", "send_window_readable_after_send"}:
+    # A title that still matches after Enter/click only proves that WeChat did
+    # not switch chats.  Fast confirmation needs an actual send effect.  The
+    # sidecar uses the existing ``send_window_readable_after_send`` result only
+    # when the post-trigger input surface is visibly empty; strict title-only
+    # confirmation must continue through message verification below.
+    if str(post_guard.get("reason") or "") != "send_window_readable_after_send":
         return False
     click_meta = send_meta.get("click")
     if not isinstance(click_meta, dict):

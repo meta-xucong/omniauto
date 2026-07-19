@@ -167,76 +167,6 @@ from apps.wechat_ai_customer_service.adapters.wechat_win32_ocr import window_met
 from apps.wechat_ai_customer_service.adapters.wechat_win32_ocr import windowing as win32_ocr_windowing
 from apps.wechat_ai_customer_service.adapters.wechat_win32_ocr import add_friend_windows as win32_ocr_add_friend_windows
 
-
-def execute_wechat_image_save(
-    *,
-    hwnd: int,
-    probe: dict[str, Any],
-    target_name: str,
-    session_key: str = "",
-    exact: bool = True,
-    artifact_dir: str | Path | None = None,
-    tenant_id: str = "",
-    source_preview: str = "",
-    speaker_name: str = "",
-    max_images: int = 1,
-    side_filter: str = "customer",
-    capture_mode: str = "context_menu",
-    pending_signal_id: str = "",
-    sidecar_ops: Any,
-) -> dict[str, Any]:
-    from apps.wechat_ai_customer_service.adapters.wechat_image_save_capture import (
-        execute_wechat_image_save as execute_image_save,
-    )
-
-    return execute_image_save(
-        hwnd=hwnd,
-        probe=probe,
-        target_name=target_name,
-        session_key=session_key,
-        exact=exact,
-        artifact_dir=artifact_dir,
-        tenant_id=tenant_id,
-        source_preview=source_preview,
-        speaker_name=speaker_name,
-        max_images=max_images,
-        side_filter=side_filter,
-        capture_mode=capture_mode,
-        pending_signal_id=pending_signal_id,
-        sidecar_ops=sidecar_ops,
-    )
-
-
-def execute_wechat_clipboard_image_copy(
-    *,
-    hwnd: int,
-    probe: dict[str, Any],
-    target_name: str,
-    session_key: str = "",
-    exact: bool = True,
-    source_preview: str = "",
-    speaker_name: str = "",
-    pending_signal_id: str = "",
-    side_filter: str = "customer",
-    sidecar_ops: Any,
-) -> dict[str, Any]:
-    from apps.wechat_ai_customer_service.adapters.wechat_image_save_capture import (
-        execute_wechat_clipboard_image_copy as execute_clipboard_copy,
-    )
-
-    return execute_clipboard_copy(
-        hwnd=hwnd,
-        probe=probe,
-        target_name=target_name,
-        session_key=session_key,
-        exact=exact,
-        source_preview=source_preview,
-        speaker_name=speaker_name,
-        pending_signal_id=pending_signal_id,
-        side_filter=side_filter,
-        sidecar_ops=sidecar_ops,
-    )
-
 try:
     from rapidocr_onnxruntime import RapidOCR
     _OCR_IMPORT_ERROR = ""
@@ -259,8 +189,6 @@ SIDECAR_BASE_ACTIONS = (
     "send",
     "recover-render",
     "voice-transcribe",
-    "image-save",
-    "image-clipboard-copy",
 )
 SIDECAR_ACTION_CHOICES = (*SIDECAR_BASE_ACTIONS, *ADD_FRIEND_ROUTES)
 SEND_GUARD_PATH = PROJECT_ROOT / "runtime" / "wechat_win32_ocr_send_guard.json"
@@ -598,13 +526,6 @@ def main() -> int:
     parser.add_argument("--restore-to-latest", dest="restore_to_latest", action="store_true", default=None)
     parser.add_argument("--no-restore-to-latest", dest="restore_to_latest", action="store_false")
     parser.add_argument("--artifact-dir", help="Optional directory for debug screenshots.")
-    parser.add_argument("--source-preview", default="", help="Session-list image preview text for image-save.")
-    parser.add_argument("--speaker-name", default="", help="Group speaker name from image preview.")
-    parser.add_argument("--pending-signal-id", default="", help="Durable scheduler signal id for one visual message turn.")
-    parser.add_argument("--max-images", type=int, default=1, help="Maximum images to save for image-save.")
-    parser.add_argument("--side-filter", default="customer", choices=("customer", "self", "all"), help="Which visual image bubble side to save.")
-    parser.add_argument("--capture-mode", default="context_menu", choices=("context_menu", "crop"), help="How image-save archives image bubbles.")
-    parser.add_argument("--tenant-id", default="", help="Tenant id for image-save asset isolation.")
     args = parser.parse_args()
 
     captured = io.StringIO()
@@ -624,21 +545,6 @@ def main() -> int:
 
 def run_action(args: argparse.Namespace) -> dict[str, Any]:
     action = str(args.action or "").strip().lower()
-    if action == "image-save":
-        # This is a frozen compatibility command only.  Reject it before any
-        # platform import, window probing, OCR, activation, or quick-login
-        # handling so a legacy caller cannot cause incidental RPA activity.
-        return {
-            "ok": False,
-            "online": True,
-            "adapter": "win32_ocr",
-            "state": "legacy_image_file_capture_rejected",
-            "reason": "clipboard_current_transaction_required",
-            "target": str(getattr(args, "target", "") or ""),
-            "session_key": str(getattr(args, "session_key", "") or ""),
-            "assets": [],
-            "messages": [],
-        }
     if action in ADD_FRIEND_ROUTES:
         validation = validate_add_friend_entry_click_contract(
             phone=str(args.phone or ""),
@@ -775,15 +681,15 @@ def run_action(args: argparse.Namespace) -> dict[str, Any]:
                     "reason": str(targeting.get("reason") or ""),
                 }
             else:
-                validation = validate_active_send_target_for_identity(
-                    hwnd,
-                    args.target,
-                    exact=bool(args.exact),
-                    artifact_dir=args.artifact_dir,
-                    session_key=clean_session_key,
-                    conversation_type=clean_conversation_type,
-                )
-                if not validation.get("ok"):
+                # A sidecar command runs in a fresh process, so its in-memory
+                # active-session cache is normally empty. With a session key,
+                # a strict validation would therefore OCR once, fail only on
+                # the cold cache, then ``open_chat`` would OCR the same window
+                # again. Let ``open_chat`` perform the identity resolution
+                # first: it returns without clicking when the exact active chat
+                # maps to one visible row, and validates any real switch before
+                # returning success.
+                if clean_session_key:
                     opened = open_chat_for_identity(
                         hwnd,
                         args.target,
@@ -792,7 +698,26 @@ def run_action(args: argparse.Namespace) -> dict[str, Any]:
                         session_key=clean_session_key,
                         conversation_type=clean_conversation_type,
                     )
-                    humanized_action_sleep(380, 620)
+                    if opened:
+                        validation = {
+                            "ok": True,
+                            "online": True,
+                            "reason": "session_identity_confirmed_by_open_chat",
+                            "state": "target_session_identity_confirmed",
+                            "requested_target": args.target,
+                            "requested_session_key": clean_session_key,
+                            "requested_conversation_type": clean_conversation_type,
+                        }
+                    else:
+                        validation = validate_active_send_target_for_identity(
+                            hwnd,
+                            args.target,
+                            exact=bool(args.exact),
+                            artifact_dir=args.artifact_dir,
+                            session_key=clean_session_key,
+                            conversation_type=clean_conversation_type,
+                        )
+                else:
                     validation = validate_active_send_target_for_identity(
                         hwnd,
                         args.target,
@@ -801,6 +726,24 @@ def run_action(args: argparse.Namespace) -> dict[str, Any]:
                         session_key=clean_session_key,
                         conversation_type=clean_conversation_type,
                     )
+                    if not validation.get("ok"):
+                        opened = open_chat_for_identity(
+                            hwnd,
+                            args.target,
+                            exact=bool(args.exact),
+                            artifact_dir=args.artifact_dir,
+                            session_key=clean_session_key,
+                            conversation_type=clean_conversation_type,
+                        )
+                        humanized_action_sleep(380, 620)
+                        validation = validate_active_send_target_for_identity(
+                            hwnd,
+                            args.target,
+                            exact=bool(args.exact),
+                            artifact_dir=args.artifact_dir,
+                            session_key=clean_session_key,
+                            conversation_type=clean_conversation_type,
+                        )
                 if validation.get("ok") and clean_remark_code:
                     remark_validation = validate_active_send_target(
                         hwnd,
@@ -924,73 +867,6 @@ def run_action(args: argparse.Namespace) -> dict[str, Any]:
             conversation_type=str(args.conversation_type or ""),
             artifact_dir=args.artifact_dir,
         )
-    if action == "image-clipboard-copy":
-        if not args.target:
-            raise ValueError("--target is required for image image action")
-        clean_sidecar_run_id = str(getattr(args, "sidecar_run_id", "") or "").strip()
-        clean_session_key = str(args.session_key or "").strip()
-        clean_conversation_type = normalize_identity_conversation_type(args.conversation_type)
-        validation = validate_active_send_target_for_identity(
-            hwnd,
-            args.target,
-            exact=bool(args.exact),
-            artifact_dir=args.artifact_dir,
-            session_key=clean_session_key,
-            conversation_type=clean_conversation_type,
-        )
-        opened = False
-        if not validation.get("ok"):
-            opened = open_chat_for_identity(
-                hwnd,
-                args.target,
-                exact=bool(args.exact),
-                artifact_dir=args.artifact_dir,
-                session_key=clean_session_key,
-                conversation_type=clean_conversation_type,
-            )
-            humanized_action_sleep(380, 620)
-            validation = validate_active_send_target_for_identity(
-                hwnd,
-                args.target,
-                exact=bool(args.exact),
-                artifact_dir=args.artifact_dir,
-                session_key=clean_session_key,
-                conversation_type=clean_conversation_type,
-            )
-        if not validation.get("ok"):
-            return {
-                "ok": False,
-                "online": bool(validation.get("online", True)),
-                "adapter": "win32_ocr",
-                "state": "target_not_confirmed_for_image_clipboard_copy",
-                "sidecar_run_id": clean_sidecar_run_id,
-                "window_probe": probe,
-                "target": args.target,
-                "opened": bool(opened),
-                "guard": validation,
-                "open_chat_timing": dict(_LAST_OPEN_CHAT_TIMING),
-                "assets": [],
-                "messages": [],
-                "error": "The target chat was not confirmed before image action.",
-            }
-        if scroll_to_latest_before_read_enabled():
-            scroll_chat_to_latest(hwnd)
-        payload = execute_wechat_clipboard_image_copy(
-            hwnd=hwnd,
-            probe=probe,
-            target_name=args.target,
-            session_key=clean_session_key,
-            exact=bool(args.exact),
-            source_preview=str(getattr(args, "source_preview", "") or ""),
-            speaker_name=str(getattr(args, "speaker_name", "") or ""),
-            pending_signal_id=str(getattr(args, "pending_signal_id", "") or ""),
-            side_filter=str(getattr(args, "side_filter", "customer") or "customer"),
-            sidecar_ops=sys.modules[__name__],
-        )
-        payload["sidecar_run_id"] = clean_sidecar_run_id
-        payload.setdefault("target", args.target)
-        payload.setdefault("session_key", clean_session_key)
-        return payload
     if action == "send":
         if not args.target:
             raise ValueError("--target is required for send")
@@ -1959,20 +1835,6 @@ def messages_payload(
             "error": f"WeChat messages view is blocked by: {blocking_reason}",
         }
     messages = merge_message_history_snapshots(snapshots)
-    # OCR has no dependable text token for an image-only outbound bubble.  Add
-    # a minimal structural envelope for the latest self-side image so the
-    # optional vision plugin can copy that *current* image and retain only its
-    # text understanding in conversation history.  This is deliberately
-    # metadata-only: no screenshot, image crop, bounds, path, or image hash is
-    # emitted into the message contract.
-    messages.extend(
-        self_visual_image_messages_from_current_surface(
-            latest_screenshot,
-            ocr_items,
-            messages,
-            target=target,
-        )
-    )
     return {
         "ok": True,
         "online": True,
@@ -1989,90 +1851,6 @@ def messages_payload(
         "voice_transcription_candidate": bool(voice_candidate),
         "voice_transcription_candidate_evidence": voice_candidate_evidence,
     }
-
-
-def self_visual_image_messages_from_current_surface(
-    screenshot: Any,
-    ocr_items: list[dict[str, Any]] | None,
-    existing_messages: list[dict[str, Any]] | None,
-    *,
-    target: str,
-) -> list[dict[str, Any]]:
-    """Expose a current self image as metadata-only context input.
-
-    The visual detector is used only to locate the right-side bubble for the
-    immediate clipboard transaction.  Its coordinates never leave this
-    adapter.  The resulting envelope is not a customer turn and cannot itself
-    initiate a reply; it is consumed solely by the optional context-only
-    vision capability.
-    """
-
-    if screenshot is None:
-        return []
-    try:
-        from apps.wechat_ai_customer_service.adapters.wechat_image_save_capture import (
-            detect_visual_image_bubbles,
-            extract_chat_time_markers,
-        )
-
-        bubbles = detect_visual_image_bubbles(
-            screenshot,
-            messages=list(existing_messages or []),
-            max_images=1,
-            side_filter="self",
-            time_markers=extract_chat_time_markers(
-                list(ocr_items or []),
-                tuple(getattr(screenshot, "size", (0, 0))),
-            ),
-        )
-    except Exception:
-        # Image observation is optional and must not make ordinary OCR capture
-        # unavailable when a display/vision dependency is absent.
-        return []
-    if not bubbles:
-        return []
-
-    bubble = bubbles[0] if isinstance(bubbles[0], dict) else {}
-    # WeChat's displayed time separator is the stable, non-image identity
-    # component.  The local structural anchor is kept inside the adapter only
-    # and is not persisted or exposed as a customer-message field.
-    observed_time = str(bubble.get("wechat_message_time") or "").strip()
-    identity_seed = json.dumps(
-        {
-            "target": str(target or ""),
-            "side": "self",
-            "time": observed_time,
-            "anchor": bubble.get("anchor") or {},
-        },
-        ensure_ascii=False,
-        sort_keys=True,
-    )
-    message_id = f"visual_self_context_{hashlib.sha256(identity_seed.encode('utf-8')).hexdigest()[:20]}"
-    known_ids = {
-        str(item.get("id") or item.get("message_id") or "").strip()
-        for item in (existing_messages or [])
-        if isinstance(item, dict)
-    }
-    if message_id in known_ids:
-        return []
-    return [
-        {
-            "id": message_id,
-            "message_id": message_id,
-            "type": "image",
-            "message_type": "image",
-            "sender": "self",
-            "sender_role": "self",
-            "visual_side": "self",
-            "visual_turn_kind": "self_image",
-            "is_self_image": True,
-            "content": "[图片]",
-            "time": observed_time,
-            "source_adapter": "win32_ocr_structural_image_observer",
-        }
-    ]
-
-
 def voice_transcribe_payload(
     hwnd: int,
     probe: dict[str, Any],
@@ -4779,12 +4557,14 @@ def input_region_soft_blank_noise(state: dict[str, Any]) -> bool:
         and mean >= INPUT_TEXT_SOFT_BLANK_MEAN_MIN
     ):
         return True
-    # Some WeChat builds let one OCR box drift into a visually blank input
-    # panel.  Only treat that as blank when the crop is almost pure white;
-    # real one-character drafts produce a noticeably higher dark-pixel ratio.
+    # OCR boxes from the toolbar, lower chat boundary, or static chrome can
+    # overlap the input rectangle even when the editable surface is empty.
+    # Do not let the *number* of those boxes override stronger pixel evidence:
+    # an almost-pure-white crop cannot contain normally rendered WeChat draft
+    # text.  Real one-character drafts produce a noticeably higher dark-pixel
+    # ratio, so they remain guarded by the visual thresholds below.
     return bool(
-        ocr_hits <= 1
-        and dark_ratio <= INPUT_TEXT_SOFT_BLANK_WEAK_OCR_DARK_RATIO_MAX
+        dark_ratio <= INPUT_TEXT_SOFT_BLANK_WEAK_OCR_DARK_RATIO_MAX
         and mean >= INPUT_TEXT_SOFT_BLANK_WEAK_OCR_MEAN_MIN
     )
 
@@ -6422,15 +6202,21 @@ def activate_session_candidate(
 
 
 def session_matches_key(session: dict[str, Any], session_key: str, conversation_type: str = "") -> bool:
+    """Match one physical sidebar row by its already-issued opaque identity.
+
+    ``conversation_type`` is retained in the frozen call signature as semantic
+    context for older callers.  It must not veto an exact opaque key match:
+    chat-pane structure can correctly refine a generic sidebar row from
+    ``private`` to ``group`` while the physical row (and therefore its key)
+    remains unchanged.  Treating that refinement as a second identity check
+    strands the pending row before it can be captured again.
+    """
+
     expected = str(session_key or "").strip()
     if not expected:
         return False
     actual = str(session.get("session_key") or "").strip()
-    if not actual or actual != expected:
-        return False
-    expected_type = normalize_identity_conversation_type(conversation_type)
-    actual_type = str(session.get("conversation_type") or "").strip().lower()
-    return not expected_type or not actual_type or actual_type == expected_type
+    return bool(actual and actual == expected)
 
 
 def find_session_candidate_by_key(
@@ -8339,7 +8125,11 @@ def open_chat_for_identity(
     normalized_conversation_type = normalize_identity_conversation_type(conversation_type)
     if normalized_conversation_type:
         kwargs["conversation_type"] = normalized_conversation_type
-        kwargs["force_session_row_resolution"] = True
+    # A known conversation type is an identity filter, not permission to click
+    # the sidebar row again. ``open_chat`` already fails closed when an active
+    # title maps to duplicate visible rows; for a unique active row it can bind
+    # the session key without a physical click. Re-clicking the selected row can
+    # collapse/hide the chat pane in current WeChat builds.
     return open_chat(hwnd, target, **kwargs)
 
 
@@ -8805,18 +8595,10 @@ def validate_post_send_target(
     use a fast path first and only fall back to strict OCR confirmation when
     the fast probe is inconclusive.
     """
-    if env_flag(
+    strict_confirm = env_flag(
         "WECHAT_WIN32_OCR_POST_SEND_STRICT_CONFIRM",
         default=DEFAULT_POST_SEND_STRICT_CONFIRM,
-    ):
-        return validate_active_send_target_for_identity(
-            hwnd,
-            target,
-            exact=exact,
-            artifact_dir=artifact_dir,
-            session_key=session_key,
-            conversation_type=conversation_type,
-        )
+    )
 
     geometry = get_window_geometry(hwnd)
     geometry_check = validate_send_geometry(geometry)
@@ -8858,6 +8640,23 @@ def validate_post_send_target(
             "render_probe": blank_render,
             "error": "WeChat render is blank after send.",
         }
+    input_state = input_text_region_state(screenshot, [], geometry=geometry)
+    input_cleared = bool(
+        not input_state.get("has_visible_text")
+        or input_region_soft_blank_noise(input_state)
+    )
+    if strict_confirm or not input_cleared:
+        # Reuse the existing strict target result when the send effect is not
+        # visible.  Connector-level fast confirmation deliberately rejects the
+        # title-only ``target_confirmed`` result and reads messages instead.
+        return validate_active_send_target_for_identity(
+            hwnd,
+            target,
+            exact=exact,
+            artifact_dir=artifact_dir,
+            session_key=session_key,
+            conversation_type=conversation_type,
+        )
     return {
         "ok": True,
         "online": True,
@@ -10008,6 +9807,69 @@ def detect_visual_session_unread_badge(
     }
 
 
+def _active_header_has_structural_group_count(
+    ocr_items: list[dict[str, Any]],
+    image_size: tuple[int, int],
+    *,
+    target: str,
+) -> bool:
+    """Use WeChat's active-title member count as structural group evidence."""
+
+    width, height = image_size
+    normalized_target = normalize_session_name(target)
+    if not normalized_target:
+        return False
+    left_bound = active_chat_title_left_x(width) - 24
+    right_bound = active_chat_title_right_x(width) + 24
+    top_bound = active_chat_title_top_y(height) - 8
+    bottom_bound = active_chat_title_bottom_y(height) + 8
+    for item in ocr_items or []:
+        text = normalize_ocr_text(item.get("text"))
+        count_match = re.search(r"[（(]\s*(\d+)\s*[)）]\s*$", text)
+        if not text or count_match is None or int(count_match.group(1)) < 2:
+            continue
+        center_x = float(item.get("center_x") or 0)
+        center_y = float(item.get("center_y") or 0)
+        if not (left_bound <= center_x <= right_bound and top_bound <= center_y <= bottom_bound):
+            continue
+        if session_name_matches(normalize_chat_title_for_match(text), normalized_target, exact=True):
+            return True
+    return False
+
+
+def _strip_structural_group_speaker_prefix(
+    content: str,
+    group: list[dict[str, Any]],
+    *,
+    side: str,
+    conversation_type: str,
+) -> tuple[str, str]:
+    """Remove a layout-confirmed group member label from message content."""
+
+    if conversation_type != "group" or side == "self" or len(group) < 2:
+        return content, ""
+    first = group[0]
+    second = group[1]
+    first_text = normalize_message_content(str(first.get("text") or ""))
+    if not first_text or "\n" in first_text or len(first_text) > 24:
+        return content, ""
+    if re.search(r"[。！？!?；;：:]", first_text):
+        return content, ""
+    vertical_gap = float(second.get("top") or 0) - float(first.get("bottom") or 0)
+    left_delta = abs(float(second.get("left") or 0) - float(first.get("left") or 0))
+    first_height = max(1.0, float(first.get("bottom") or 0) - float(first.get("top") or 0))
+    second_height = max(1.0, float(second.get("bottom") or 0) - float(second.get("top") or 0))
+    if vertical_gap < -3.0 or vertical_gap > 14.0 or left_delta > 42.0:
+        return content, ""
+    if first_height > max(30.0, second_height * 1.35):
+        return content, ""
+    lines = [line.strip() for line in str(content or "").splitlines() if line.strip()]
+    if len(lines) < 2 or normalize_message_content(lines[0]) != first_text:
+        return content, ""
+    stripped = "\n".join(lines[1:]).strip()
+    return (stripped, first_text) if stripped else (content, "")
+
+
 def parse_messages_from_ocr(
     ocr_items: list[dict[str, Any]],
     image_size: tuple[int, int],
@@ -10019,6 +9881,8 @@ def parse_messages_from_ocr(
     split_x = session_split_x(width)
     header_cutoff = chat_header_cutoff_y(height)
     normalized_conversation_type = str(conversation_type or "").strip().lower() or infer_conversation_type(target)
+    if _active_header_has_structural_group_count(ocr_items, image_size, target=target):
+        normalized_conversation_type = "group"
     geometry = {"left": 0, "top": 0, "right": width, "bottom": height, "width": width, "height": height}
     bottom_exclude_px = bounded_int(
         os.getenv("WECHAT_WIN32_OCR_MESSAGE_BOTTOM_EXCLUDE_PX"),
@@ -10108,6 +9972,16 @@ def parse_messages_from_ocr(
             continue
         if voice_duration_prefix_removed:
             quality_flags.append("voice_duration_prefix_removed")
+        content, structural_speaker_name = _strip_structural_group_speaker_prefix(
+            content,
+            group,
+            side=side,
+            conversation_type=normalized_conversation_type,
+        )
+        if not content:
+            continue
+        if structural_speaker_name:
+            quality_flags.append("speaker_prefix_split_from_ocr_text")
         if len(group) > 1:
             gaps = [
                 max(0.0, float(group[index].get("top") or 0) - float(group[index - 1].get("bottom") or 0))
@@ -10131,6 +10005,8 @@ def parse_messages_from_ocr(
             "sender_role_algorithm": str(group[0].get("sender_role_algorithm") or "wechat_win32_bubble_role_v2"),
             "sender_role_confidence": float(group[0].get("sender_role_confidence") or 0.0),
             "sender_role_evidence": list(group[0].get("sender_role_evidence") or []),
+            "speaker_name": structural_speaker_name,
+            "group_member_name": structural_speaker_name,
             "content": content,
             "content_raw_ocr": raw_content,
             "time": "",
@@ -11327,23 +11203,6 @@ def args_for_daemon_request(request: dict[str, Any]) -> list[str]:
             argv.append("--restore-to-latest")
         elif request.get("restore_to_latest") is False:
             argv.append("--no-restore-to-latest")
-    if action in {"image-save", "image-clipboard-copy"}:
-        for key, flag in (
-            ("source_preview", "--source-preview"),
-            ("speaker_name", "--speaker-name"),
-            ("pending_signal_id", "--pending-signal-id"),
-            ("tenant_id", "--tenant-id"),
-            ("side_filter", "--side-filter"),
-            ("capture_mode", "--capture-mode"),
-        ):
-            value = str(request.get(key) or "").strip()
-            if value:
-                argv.extend([flag, value])
-        if "max_images" in request:
-            try:
-                argv.extend(["--max-images", str(max(1, min(int(request.get("max_images") or 1), 8)))])
-            except (TypeError, ValueError):
-                argv.extend(["--max-images", "1"])
     artifact_dir = str(request.get("artifact_dir") or "").strip()
     if artifact_dir:
         argv.extend(["--artifact-dir", artifact_dir])
@@ -11433,13 +11292,6 @@ def run_sidecar_cli(argv: list[str] | None = None) -> dict[str, Any]:
         default="",
         help="Optional directory for OCR screenshots and diagnostics.",
     )
-    parser.add_argument("--source-preview", default="", help="Session-list image preview text for image-save.")
-    parser.add_argument("--speaker-name", default="", help="Group speaker name from image preview.")
-    parser.add_argument("--pending-signal-id", default="", help="Durable scheduler signal id for one visual message turn.")
-    parser.add_argument("--max-images", type=int, default=1, help="Maximum images to save for image-save.")
-    parser.add_argument("--side-filter", default="customer", choices=("customer", "self", "all"), help="Which visual image bubble side to save.")
-    parser.add_argument("--capture-mode", default="context_menu", choices=("context_menu", "crop"), help="How image-save archives image bubbles.")
-    parser.add_argument("--tenant-id", default="", help="Tenant id for image-save asset isolation.")
     parser.add_argument("--daemon", action="store_true", help="Run as stdin/stdout JSON daemon.")
     args = parser.parse_args(argv)
     if args.daemon:

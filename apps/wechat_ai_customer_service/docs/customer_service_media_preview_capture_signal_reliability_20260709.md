@@ -1,5 +1,8 @@
 # Customer Service Media Preview Capture Signal Reliability - 2026-07-09
 
+> [!WARNING]
+> **Document status: image-handling placement partially superseded (2026-07-18).** Media preview and pending-signal reliability rules remain valid. Any image-specific Sidecar/Scheduler proxy or processing path described here must be replaced by the independent vision module in [customer_service_absolute_independent_vision_module_refactor_plan_20260718.md](customer_service_absolute_independent_vision_module_refactor_plan_20260718.md).
+
 Reference baseline: `apps/wechat_ai_customer_service/docs/customer_visible_reply_ownership_baseline.md`.
 
 ## Scope

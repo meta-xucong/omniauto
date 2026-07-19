@@ -326,7 +326,10 @@ class FinalSegmentVerifyConnector(FakeConnector):
             "adapter": "win32_ocr",
             "state": "send_win32_rpa",
             "skip_send_rate_guard": bool(skip_send_rate_guard),
-            "send_result": {"pre_send_guard": self._send_guard(target)},
+            "send_result": {
+                "pre_send_guard": self._send_guard(target),
+                "post_send_guard": {"ok": True, "reason": "send_window_readable_after_send"},
+            },
         }
 
     def send_text_and_verify(self, target: str, text: str, exact: bool = True, *, skip_send_rate_guard: bool = False, **kwargs: Any) -> dict[str, Any]:
@@ -354,6 +357,36 @@ class FinalSegmentVerifyConnector(FakeConnector):
             "verification_mode": "send_guard_confirmed_fast",
             "skip_send_rate_guard": bool(skip_send_rate_guard),
         }
+
+
+class TitleOnlyIntermediateConnector(FinalSegmentVerifyConnector):
+    def __init__(self, messages: list[dict[str, Any]]) -> None:
+        super().__init__(messages)
+        self.readback_calls = 0
+
+    def send_text(self, target: str, text: str, exact: bool = True, *, skip_send_rate_guard: bool = False, **kwargs: Any) -> dict[str, Any]:
+        self.send_calls += 1
+        self.sent_texts.append(text)
+        self.sent_session_keys.append(str(kwargs.get("session_key") or ""))
+        self.send_rate_guard_skips.append(bool(skip_send_rate_guard))
+        self.continuation_fast_path_contexts.append(same_target_continuation_send_active())
+        self.batch_lock_contexts.append(send_rpa_batch_lock_active())
+        self.continuation_guard_contexts.append(isinstance(kwargs.get("continuation_prevalidated_guard"), dict))
+        self.messages.append({"id": f"self-{self.send_calls}", "sender": "self", "type": "text", "content": text})
+        return {
+            "ok": True,
+            "adapter": "win32_ocr",
+            "state": "send_win32_rpa",
+            "skip_send_rate_guard": bool(skip_send_rate_guard),
+            "send_result": {
+                "pre_send_guard": self._send_guard(target),
+                "post_send_guard": {"ok": True, "reason": "target_confirmed"},
+            },
+        }
+
+    def get_messages(self, *args: Any, **kwargs: Any) -> dict[str, Any]:
+        self.readback_calls += 1
+        return super().get_messages(*args, **kwargs)
 
 
 class ContinuationFallbackConnector(FinalSegmentVerifyConnector):
@@ -461,6 +494,7 @@ def run_checks() -> dict[str, Any]:
         check_transport_send_input_not_ready_defers_without_marking_processed,
         check_auto_reply_disabled_blocks_runtime_send,
         check_customer_service_console_switches_take_effect,
+        check_dynamic_all_session_discovery_enables_only_customer_conversations,
         check_live_safety_guard_enforces_single_allowed_target,
         check_bootstrap_target_records_pending_visible_without_error,
         check_visible_only_bootstrap_does_not_mark_customer_messages_processed,
@@ -473,6 +507,7 @@ def run_checks() -> dict[str, Any]:
         check_reply_multi_bubble_retries_transient_send_failures,
         check_reply_multi_bubble_does_not_retry_input_not_ready,
         check_reply_multi_bubble_verifies_only_final_segment_by_default,
+        check_reply_multi_bubble_title_only_intermediate_reads_back_without_resend,
         check_reply_multi_bubble_can_verify_each_segment_when_enabled,
         check_reply_multi_bubble_uses_same_target_continuation_fast_path,
         check_reply_multi_bubble_fast_path_retry_returns_to_full_path,
@@ -1587,7 +1622,10 @@ def check_multi_target_dynamic_unread_mode_supports_new_sessions() -> None:
     targets = parse_targets(config, allow_empty=True)
     dynamic = build_iteration_targets(
         config_targets=targets,
-        active_targets=[SimpleNamespace(name="新客户A"), SimpleNamespace(name="文件传输助手")],
+        active_targets=[
+            SimpleNamespace(name="新客户A", conversation_type="private", session_key="wx-session-new-a"),
+            SimpleNamespace(name="文件传输助手", conversation_type="file_transfer", session_key="wx-file-transfer"),
+        ],
         multi_target_cfg={"scan_all_whitelist_each_iteration": True, "prioritize_active_sessions": True, "max_targets_per_iteration": 5},
         allow_dynamic_active_targets=True,
         blocked_names={"文件传输助手"},
@@ -1596,6 +1634,17 @@ def check_multi_target_dynamic_unread_mode_supports_new_sessions() -> None:
         [item.name for item in dynamic],
         ["新客户A"],
         "unread-all mode should allow dynamic targets while respecting blocked sessions",
+    )
+    unconfirmed = build_iteration_targets(
+        config_targets=targets,
+        active_targets=[SimpleNamespace(name="未知侧边栏行")],
+        multi_target_cfg={"scan_all_whitelist_each_iteration": True, "prioritize_active_sessions": True, "max_targets_per_iteration": 5},
+        allow_dynamic_active_targets=True,
+    )
+    assert_equal(
+        unconfirmed,
+        [],
+        "dynamic unread mode must reject a row without confirmed customer type and session identity before clicking",
     )
 
 
@@ -2329,6 +2378,38 @@ def check_customer_service_console_switches_take_effect() -> None:
             os.environ["WECHAT_KNOWLEDGE_TENANT"] = old_tenant
 
 
+def check_dynamic_all_session_discovery_enables_only_customer_conversations() -> None:
+    tenant_id = "workflow_dynamic_all_session_discovery"
+    settings_store = CustomerServiceSettings(tenant_id=tenant_id)
+    remove_file(settings_store.settings_path)
+    try:
+        settings_store.save(
+            {
+                "respond_all_unread_sessions": True,
+                "session_targets_managed": True,
+                "session_targets": [],
+            }
+        )
+        result = settings_store.merge_discovered_sessions(
+            [
+                {"name": "新客户A", "conversation_type": "private"},
+                {"name": "南京车友交流群", "conversation_type": "group"},
+                {"name": "文件传输助手", "conversation_type": "file_transfer"},
+                {"name": "服务号"},
+                {"name": "微信团队"},
+            ]
+        )
+        items = {str(item.get("name") or ""): item for item in result.get("all_items", [])}
+        assert_true(bool(items["新客户A"].get("enabled")), "dynamic mode must enable a newly discovered private chat")
+        assert_true(bool(items["南京车友交流群"].get("enabled")), "dynamic mode must enable a newly discovered group chat")
+        assert_true(not bool(items["文件传输助手"].get("enabled")), "file transfer must remain excluded")
+        assert_true(not bool(items["服务号"].get("enabled")), "service-account containers must remain excluded")
+        assert_true(not bool(items["微信团队"].get("enabled")), "system conversations must remain excluded")
+        assert_equal(items["服务号"].get("conversation_type"), "system", "service-account title must not be mislabeled private")
+    finally:
+        remove_file(settings_store.settings_path)
+
+
 def check_live_safety_guard_enforces_single_allowed_target() -> None:
     tenant_id = "workflow_live_guard_probe"
     old_tenant = os.environ.get("WECHAT_KNOWLEDGE_TENANT")
@@ -2415,8 +2496,8 @@ def check_live_safety_guard_enforces_single_allowed_target() -> None:
         )
         assert_equal(
             guarded.get("rpa_humanized_send", {}).get("input_method"),
-            "clipboard_chunks",
-            "live guard should use low-frequency clipboard chunks instead of slow per-character SendInput",
+            "sendinput_unicode",
+            "live guard must preserve an explicitly selected supported input method",
         )
         assert_equal(guarded.get("rpa_humanized_send", {}).get("typing_typo_max"), 0, "live guard should avoid deliberate typo/backspace behavior")
         assert_equal(
@@ -2895,6 +2976,39 @@ def check_reply_multi_bubble_verifies_only_final_segment_by_default() -> None:
         "verify_final_segment_only",
         "result should expose final-segment verification strategy",
     )
+
+
+def check_reply_multi_bubble_title_only_intermediate_reads_back_without_resend() -> None:
+    config = load_smoke_config()
+    target = parse_targets(config)[0]
+    config["reply"]["prefix"] = "[车金实盘] "
+    config["reply_multi_bubble"] = {
+        "enabled": True,
+        "min_split_chars": 28,
+        "max_segments": 3,
+        "preferred_segment_chars": 22,
+        "max_segment_chars": 40,
+        "min_segment_chars": 14,
+        "three_segment_threshold_chars": 120,
+        "inter_segment_delay_min_ms": 0,
+        "inter_segment_delay_max_ms": 0,
+        "verify_each_segment": False,
+    }
+    connector = TitleOnlyIntermediateConnector(messages=[])
+    result = send_reply_with_optional_multi_bubble(
+        connector=connector,  # type: ignore[arg-type]
+        target=target,
+        reply_text=(
+            "[车金实盘] 这台车目前还在，车况、价格和手续信息我可以逐项给您核对；"
+            "如果您准备到店，我再按您的时间把看车顺序安排清楚。"
+        ),
+        config=config,
+    )
+    segment_count = int(result.get("segment_count") or 0)
+    assert_true(bool(result.get("verified")), f"title-only intermediate evidence should be reconciled by one readback: {result}")
+    assert_true(segment_count >= 2, "reply should split before exercising intermediate readback")
+    assert_equal(connector.readback_calls, segment_count - 1, "each uncertain intermediate segment should be read once, never triggered twice")
+    assert_equal(len(connector.sent_texts), segment_count, "readback verification must not emit a duplicate send")
 
 
 def check_reply_multi_bubble_can_verify_each_segment_when_enabled() -> None:
