@@ -190,6 +190,8 @@ def check_universal_brain_output_contract_is_compact() -> dict[str, Any]:
     assert_true("同一商家客服角色" in system, system)
     assert_true("不能另设对客角色" in system, system)
     assert_true("内部执行只约束权限，不得照搬成客户话术" in system, system)
+    assert_true("逐句审计未来动作的主语" in system, system)
+    assert_true("任何人物、团队或岗位" in system, system)
     repair = brain_module.build_brain_repair_prompt_pack(
         settings={"prompt_profile": "lean"},
         brain_input={"evidence": {}, "current_message": {"text": "全新边界输入"}},
@@ -197,8 +199,12 @@ def check_universal_brain_output_contract_is_compact() -> dict[str, Any]:
         quality={"repair_instruction": "通用证据修复"},
     )
     assert_true("不能授权覆盖或降级权威事实" in str(repair.get("system") or ""), str(repair))
+    assert_true("不能只同义改写原草稿" in str(repair.get("system") or ""), str(repair))
+    assert_true("必须从reply_segments删除" in str(repair.get("system") or ""), str(repair))
+    assert_true("不等于扩大当前角色权限" in str(repair.get("system") or ""), str(repair))
     assert_true(
-        "recommended_action" in str(repair.get("system") or "") and "语义一致" in str(repair.get("system") or ""),
+        "recommended_action" in str(repair.get("system") or "")
+        and "只表示内部调度和权限边界" in str(repair.get("system") or ""),
         str(repair),
     )
     plan = normalize_brain_plan(
@@ -260,9 +266,57 @@ def check_universal_semantic_guard_bypasses_legacy_phrase_relaxations() -> dict[
     assert_true("不得提供可直接发送的示例句" in system, system)
     assert_true("同一个连续的商家客服角色" in system, system)
     assert_true("主语改成另一个人物、团队或角色" in system, system)
-    assert_true("计划与可见动作不一致时必须判repair" in system, system)
+    assert_true("只表示内部调度和权限边界" in system, system)
+    assert_true("不要求草稿解释内部流转" in system, system)
+    assert_true("是否守住相同边界" in system, system)
+    _request = reviewer_module.build_quality_review_request(
+        settings={"_single_brain_runtime_cleanup": True},
+        brain_input={},
+        evidence_pack={
+            "knowledge": {
+                "product_master": {
+                    "items": [
+                        {
+                            "id": "vehicle-1",
+                            "name": "测试车辆",
+                            "price": 8.68,
+                            "specs": "2022年上牌，表显3.2万公里。",
+                            "purchase_price": 7.0,
+                            "vin": "RESTRICTED-VIN",
+                        }
+                    ]
+                }
+            },
+            "safety": {"must_handoff": True, "allowed_auto_reply": False, "reasons": ["internal_route"]},
+        },
+        plan=normalize_brain_plan(
+            {
+                "can_answer": True,
+                "recommended_action": "handoff",
+                "reply_segments": ["已说明客户可见边界。"],
+                "evidence_used": {"formal_knowledge_ids": ["formal-boundary-1"]},
+                "facts_claimed": [],
+                "risk": {"risk_level": "medium", "risk_tags": ["safe_boundary_reply"], "needs_handoff": True, "handoff_reason": "internal_route"},
+                "confidence": 0.9,
+            }
+        ),
+        deterministic_quality={},
+    )
+    assert_true("brain_plan_summary.recommended_action" in _request["review_boundaries"]["internal_only_fields"], str(_request))
+    assert_true("内部调度字段" in _request["review_boundaries"]["must_not_require"][0], str(_request))
+    assert_true("recommended_action" not in _request["brain_plan_summary"], str(_request))
+    assert_true("needs_handoff" not in _request["brain_plan_summary"].get("risk", {}), str(_request))
+    assert_true(_request["authority_evidence_summary"].get("safety") == {}, str(_request))
+    product_review_evidence = json.dumps(_request["authority_evidence_summary"].get("product_master_ids"), ensure_ascii=False)
+    assert_true("8.68" in product_review_evidence and "3.2万公里" in product_review_evidence, product_review_evidence)
+    assert_true("RESTRICTED-VIN" not in product_review_evidence and "purchase_price" not in product_review_evidence, product_review_evidence)
     assert_true("人工同事" not in system and "转给同事" not in system, system)
     assert_true("天气" not in system and "温度" not in system, system)
+    role_system, _role_user = reviewer_module.build_quality_reviewer_prompt(
+        {"review_boundaries": {"role_continuity_required": True}}
+    )
+    assert_true("第一步必须单独完成角色连续性审计" in role_system, role_system)
+    assert_true("无论这种分工在业务上是否常见，都必须判repair" in role_system, role_system)
     plan = normalize_brain_plan(
         {
             "can_answer": True,
@@ -377,6 +431,7 @@ def check_universal_semantic_guard_bypasses_legacy_phrase_relaxations() -> dict[
     )
     assert_true(boundary_review.get("invoked") is True and boundary_review.get("verdict") == "repair", str(boundary_review))
     assert_true("内部执行分工和流转不得成为客户可见解释" in str(boundary_review.get("repair_instruction") or ""), str(boundary_review))
+    assert_true("不要求客户话术解释流转" in str(boundary_review.get("repair_instruction") or ""), str(boundary_review))
 
     ordinary_formal_evidence = {
         "knowledge": {
@@ -453,16 +508,36 @@ def check_brain_first_guard_uses_metadata_not_business_wording() -> dict[str, An
         settings={"brain_first_guard": True, "require_evidence": True},
     )
     assert_true(reviewed.get("allowed") is True and reviewed.get("action") == "send_reply" and reviewed.get("hard_boundary") is True, str(reviewed))
+    safety_aligned = guard_synthesized_reply(
+        candidate=risky,
+        evidence_pack={"safety": {"must_handoff": True, "reasons": ["formal_policy_requires_handoff"]}},
+        settings={"brain_first_guard": True, "require_evidence": True},
+    )
+    aligned_candidate = safety_aligned.get("candidate") if isinstance(safety_aligned.get("candidate"), dict) else {}
+    assert_true(
+        safety_aligned.get("allowed") is True
+        and safety_aligned.get("action") == "handoff"
+        and aligned_candidate.get("reply") == risky.get("reply")
+        and aligned_candidate.get("recommended_action") == "handoff"
+        and aligned_candidate.get("needs_handoff") is True,
+        str(safety_aligned),
+    )
     misaligned = dict(risky)
     misaligned["risk_tags"] = ["policy_violation"]
     misaligned.update({"can_answer": False, "recommended_action": "send_reply", "needs_handoff": False})
     repaired = guard_synthesized_reply(
         candidate=misaligned,
-        evidence_pack={"safety": {"must_handoff": False, "reasons": []}},
+        evidence_pack={"safety": {"must_handoff": True, "reasons": ["formal_policy_requires_handoff"]}},
         settings={"brain_first_guard": True, "require_evidence": True},
     )
     assert_true(repaired.get("action") == "repair" and repaired.get("hard_boundary") is True, str(repaired))
-    return {"low_risk": outcomes, "hard_risk_reason": reviewed.get("reason"), "misaligned_reason": repaired.get("reason")}
+    assert_true(repaired.get("reason") == "hard_boundary_requires_brain_handoff_plan", str(repaired))
+    return {
+        "low_risk": outcomes,
+        "hard_risk_reason": reviewed.get("reason"),
+        "safety_alignment_reason": safety_aligned.get("reason"),
+        "misaligned_reason": repaired.get("reason"),
+    }
 
 
 def check_final_polish_preserves_brain_authored_strategy() -> dict[str, Any]:

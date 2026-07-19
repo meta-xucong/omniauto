@@ -126,22 +126,6 @@ INCOMPLETE_VISIBLE_TRAILING_TERMS = (
     "的话",
 )
 INCOMPLETE_VISIBLE_CONDITION_OPENERS = ("如果", "要是", "假如", "若", "但如果")
-HANDOFF_VERIFICATION_TERMS = (
-    "负责人",
-    "负责的人",
-    "同事",
-    "顾问",
-    "专员",
-    "金融专员",
-    "核实",
-    "确认",
-    "请示",
-    "问清楚",
-    "预审",
-    "审核",
-    "跟进",
-    "对接",
-)
 TOPIC_PRESERVATION_GROUPS = (
     (
         "price_finance",
@@ -881,11 +865,21 @@ def build_micro_verify_prompt_pack(
     identity_guard = settings.get("identity_guard_enabled", True) is not False
     channel = normalized_source_channel(source_channel)
     source_label = "客服大脑" if channel == "brain" else "边界/人工核验处理"
+    handoff_role_audit = (
+        "本轮内部升级已由系统在客户可见回复之外处理。必须逐句检查未来动作的主语；"
+        "如果草稿把下一步归给当前商家客服之外的人物、团队或岗位，必须只删去该内部角色或流转说明，"
+        "保留原有事实和风险边界，也不能把受限动作改成当前角色承诺。"
+        if needs_handoff
+        else ""
+    )
     system = (
         f"你是微信客服最终可见校验与微润色器。草稿来自{source_label}，内容决策已经完成。"
+        + handoff_role_audit
+        +
         "你的默认动作是原样返回草稿；只有明显口语不顺、错别字、标点拥挤时才做极小改动。"
         "禁止重新回答问题，禁止重排信息顺序，禁止扩写或删减结论，禁止新增/删除车型、价格、库存、车况、政策、承诺、边界。"
-        "如果草稿包含负责人、专员、顾问、核实、确认、预审、审核等人工核验语义，必须保留。"
+        "必须保留草稿中的事实、权限和风险边界；内部执行角色或流转说明不是客户话术保留项。"
+        "若删除内部执行说明，只能做删减，不能把受限动作改成当前角色承诺。"
         "如果不确定是否该改，必须原样返回。"
         + ("不要讨论AI/机器人/真人身份真假，也不要证明自己是或不是AI/机器人/真人客服。" if identity_guard else "")
         + '只输出裸JSON对象，不要Markdown，不要```json代码块，不要解释。字段为{"reply":字符串,"confidence":0到1,"reason":字符串}。'
@@ -899,11 +893,20 @@ def build_micro_verify_prompt_pack(
         "recent": [clip_text(item, 100) for item in (recent_reply_texts or [])[-2:]],
         "keep_topics": topic_preservation_requirements(draft_reply),
         "rules": [
+            *(
+                [
+                    "内部升级已在客户可见回复之外处理；逐句审计未来动作主语。",
+                    "下一步若归给当前商家客服之外的任何人物、团队或岗位，只删去该内部角色或流转说明。",
+                ]
+                if needs_handoff
+                else []
+            ),
             "优先原样返回。",
             "只允许错别字、标点、非常轻微口语顺滑。",
             "不能改变原草稿的推荐对象、明确结论、风险边界和先后顺序。",
             "不能新增事实、数字、车型、价格、库存、联系方式、政策或承诺。",
-            "不能删掉负责人、专员、顾问、核实、确认、预审、审核等人工核验语义。",
+            "必须保留事实、权限和风险边界；内部执行角色或流转说明不是客户话术保留项。",
+            "删减内部执行说明时不能扩大当前角色权限，也不能新增承诺。",
             "不能把短句扩成长句。",
         ],
     }
@@ -1227,17 +1230,11 @@ def normalized_source_channel(source_channel: str) -> str:
 def guard_handoff_verification_preservation(base_reply: str, polished_reply: str, *, source_channel: str) -> dict[str, Any]:
     if normalized_source_channel(source_channel) != "handoff":
         return {"allowed": True, "reason": "handoff_verification_preservation_not_needed"}
-    base_terms = [term for term in HANDOFF_VERIFICATION_TERMS if term in str(base_reply or "")]
-    if not base_terms:
-        return {"allowed": True, "reason": "handoff_verification_preservation_not_needed"}
-    if any(term in str(polished_reply or "") for term in HANDOFF_VERIFICATION_TERMS):
-        return {"allowed": True, "reason": "handoff_verification_preservation_passed"}
-    return {
-        "allowed": False,
-        "reason": "polish_removed_handoff_verification",
-        "required_any": list(HANDOFF_VERIFICATION_TERMS),
-        "base_terms": base_terms,
-    }
+    # Handoff is internal execution metadata. Customer-visible wording must
+    # preserve the authority/risk boundary, not names of internal actors or the
+    # routing description itself. The generic semantic-preservation guard has
+    # already checked that facts and commitments did not change.
+    return {"allowed": True, "reason": "handoff_internal_routing_not_customer_visible_contract"}
 
 
 def guard_micro_verify_delta(base_reply: str, polished_reply: str, *, settings: dict[str, Any], source_channel: str) -> dict[str, Any]:

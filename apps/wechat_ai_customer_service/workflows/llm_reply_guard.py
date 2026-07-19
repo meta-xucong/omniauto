@@ -425,6 +425,24 @@ def guard_brain_first_universal_contract(
                 candidate,
                 hard_boundary=True,
             )
+        if (
+            "safe_boundary_reply" in risk_tags
+            and candidate.get("can_answer") is not False
+            and str(candidate.get("recommended_action") or "send_reply") == "send_reply"
+        ):
+            # The Brain already authored a safe customer-visible boundary.  The
+            # authoritative safety pack additionally requires internal
+            # escalation, so align only the operational metadata here.  Guard
+            # must not ask the Brain to rewrite correct wording merely to expose
+            # an internal routing decision to the customer.
+            aligned_candidate = dict(candidate)
+            aligned_candidate["recommended_action"] = "handoff"
+            aligned_candidate["needs_handoff"] = True
+            return approved_handoff_decision(
+                "brain_declared_hard_boundary_handoff",
+                aligned_candidate,
+                hard_boundary=True,
+            )
         return repair_decision(
             "hard_boundary_requires_brain_handoff_plan",
             candidate,

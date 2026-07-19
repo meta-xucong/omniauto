@@ -214,6 +214,9 @@ def main() -> int:
         check_repaired_deterministic_quality_soft_pass_requires_missing_context_anchor(),
         check_repaired_quality_soft_pass_allows_explicit_restarted_business_need(),
         check_repaired_deterministic_quality_soft_pass_allows_soft_recommendation_doubts(),
+        check_brain_runner_rechecks_semantics_after_semantic_repair(),
+        check_brain_runner_rechecks_semantic_authority_false_positive(),
+        check_brain_runner_blocks_when_repaired_semantics_still_fail(),
         check_brain_runner_preserves_hard_boundary_handoff_after_validation_repair(),
         check_semantic_reviewer_relaxes_bounded_finance_boundary(),
         check_brain_owned_safe_handoff_reply_reaches_handoff_exit(),
@@ -1453,9 +1456,13 @@ def check_brain_input_includes_delay_followup_interaction_hint() -> CaseResult:
     prompt_hint = prompt_input.get("conversation_interaction_state") or {}
     conversation_hint = ((prompt_input.get("conversation") or {}).get("conversation_interaction_state") or {})
     assert_true(prompt_hint.get("authority") == "non_authoritative_interaction_hint", f"prompt hint must stay non-authoritative: {prompt_hint}")
+    # Lean prompts intentionally keep this hint only at the top level to avoid
+    # paying for a duplicate nested copy.  If the fuller profile retains the
+    # nested projection, both views must still agree.
     assert_true(
-        conversation_hint.get("suggested_reply_posture") == "acknowledge_delay_then_continue",
-        f"conversation hint should also be visible to Brain: {conversation_hint}",
+        not conversation_hint
+        or conversation_hint.get("suggested_reply_posture") == "acknowledge_delay_then_continue",
+        f"nested conversation hint must agree when retained: {conversation_hint}",
     )
     fast_decision = brain_module.low_authority_fast_profile_decision(
         settings=brain_module.effective_brain_settings(base_config(base_plan(), include_product=False)),
@@ -7053,7 +7060,7 @@ def check_semantic_reviewer_relaxes_bounded_finance_boundary() -> CaseResult:
     )
 
 
-def check_brain_runner_soft_passes_repaired_semantic_minor_nits() -> CaseResult:
+def check_brain_runner_rechecks_semantics_after_semantic_repair() -> CaseResult:
     plan = copy.deepcopy(base_plan())
     plan.update(
         {
@@ -7092,7 +7099,41 @@ def check_brain_runner_soft_passes_repaired_semantic_minor_nits() -> CaseResult:
             },
         }
     )
-    with patched_evidence_pack(fake_evidence_pack(include_product=True)), patched_brain_repair(repaired_plan):
+    review_sequence = patched_semantic_review_sequence(
+        [
+            {
+                "ok": False,
+                "status": "ok",
+                "invoked": True,
+                "verdict": "repair",
+                "semantic_errors": ["推荐逻辑还可以更聚焦，倒车影像偏好可表达得更完整。"],
+                "hard_boundary_concerns": [],
+                "errors": ["minor_focus_nit"],
+                "warnings": [],
+                "repair_instruction": "保持商品库事实不变，补齐客户关心但资料未写明的配置边界。",
+                "customer_visible_risk": "low",
+                "reason": "minor_focus_nit",
+            },
+            {
+                "ok": True,
+                "status": "ok",
+                "invoked": True,
+                "verdict": "pass",
+                "semantic_errors": [],
+                "hard_boundary_concerns": [],
+                "errors": [],
+                "warnings": [],
+                "repair_instruction": "",
+                "customer_visible_risk": "low",
+                "reason": "repaired_plan_verified",
+            },
+        ]
+    )
+    with (
+        patched_evidence_pack(fake_evidence_pack(include_product=True)),
+        patched_brain_repair(repaired_plan),
+        review_sequence,
+    ):
         event = brain_module.maybe_run_customer_service_brain(
             config=config,
             target_name="许聪",
@@ -7112,19 +7153,20 @@ def check_brain_runner_soft_passes_repaired_semantic_minor_nits() -> CaseResult:
     assert_true(event.get("applied"), f"repaired actionable Brain reply should apply: {event}")
     assert_true(event.get("rule_name") == "customer_service_brain_reply", f"expected Brain reply: {event}")
     assert_true(
-        event.get("repaired_quality_gate_v2", {}).get("reason") == "single_brain_semantic_review_budget_exhausted",
-        f"the repaired plan must not pay a second semantic-review call: {event}",
+        event.get("repaired_quality_gate_v2", {}).get("verdict") == "pass",
+        f"the repaired plan must pass a fresh semantic verification: {event}",
     )
+    assert_true(review_sequence.call_count == 2, f"expected draft review plus repaired-plan verification: {event}")
     assert_true("秦PLUS" in event.get("reply_text", ""), f"reply should keep actionable product answer: {event}")
     assert_true("马上回复" not in event.get("reply_text", ""), f"reply must not degrade to generic stall: {event}")
     return CaseResult(
-        "brain_runner_soft_passes_repaired_semantic_minor_nits",
+        "brain_runner_rechecks_semantics_after_semantic_repair",
         True,
-        {"reason": event.get("reason"), "soft_pass": event.get("repaired_quality_soft_pass")},
+        {"reason": event.get("reason"), "semantic_review_calls": review_sequence.call_count},
     )
 
 
-def check_brain_runner_soft_passes_repaired_semantic_authority_false_positive() -> CaseResult:
+def check_brain_runner_rechecks_semantic_authority_false_positive() -> CaseResult:
     plan = copy.deepcopy(base_plan())
     plan.update(
         {
@@ -7182,7 +7224,37 @@ def check_brain_runner_soft_passes_repaired_semantic_authority_false_positive() 
     pack["current_batch"] = [{"id": "msg1", "sender": "许聪", "content": message}]
     if isinstance(pack.get("conversation"), dict):
         pack["conversation"]["current_batch_text"] = f"[许聪] {message}"
-    with patched_evidence_pack(pack), patched_brain_repair(repaired_plan):
+    review_sequence = patched_semantic_review_sequence(
+        [
+            {
+                "ok": False,
+                "status": "ok",
+                "invoked": True,
+                "verdict": "repair",
+                "semantic_errors": ["当前草稿的商品事实授权关系需要重新核对。"],
+                "hard_boundary_concerns": [],
+                "errors": ["authority_review_required"],
+                "warnings": [],
+                "repair_instruction": "重新核对本轮权威证据后生成完整回复。",
+                "customer_visible_risk": "medium",
+                "reason": "authority_review_required",
+            },
+            {
+                "ok": True,
+                "status": "ok",
+                "invoked": True,
+                "verdict": "pass",
+                "semantic_errors": [],
+                "hard_boundary_concerns": [],
+                "errors": [],
+                "warnings": [],
+                "repair_instruction": "",
+                "customer_visible_risk": "low",
+                "reason": "authority_repair_verified",
+            },
+        ]
+    )
+    with patched_evidence_pack(pack), patched_brain_repair(repaired_plan), review_sequence:
         event = brain_module.maybe_run_customer_service_brain(
             config=config,
             target_name="许聪",
@@ -7203,15 +7275,74 @@ def check_brain_runner_soft_passes_repaired_semantic_authority_false_positive() 
     assert_true(event.get("rule_name") == "customer_service_brain_reply", f"expected Brain-owned reply: {event}")
     assert_true(event.get("visible_reply_owner") == "brain_repair", f"reply must remain Brain repair authored: {event}")
     assert_true(
-        event.get("repaired_quality_gate_v2", {}).get("reason") == "single_brain_semantic_review_budget_exhausted",
-        f"the repaired plan must be deterministically verified without a second semantic reviewer: {event}",
+        event.get("repaired_quality_gate_v2", {}).get("verdict") == "pass",
+        f"the repaired plan must pass a fresh semantic verification: {event}",
     )
+    assert_true(review_sequence.call_count == 2, f"expected draft review plus repaired-plan verification: {event}")
     assert_true("秦PLUS" in event.get("reply_text", ""), f"reply should keep product-master answer: {event}")
     assert_true(event.get("reason") != "brain_quality_verification_failed", f"quality gate must not hard-veto Brain: {event}")
     return CaseResult(
-        "brain_runner_soft_passes_repaired_semantic_authority_false_positive",
+        "brain_runner_rechecks_semantic_authority_false_positive",
         True,
-        {"reason": event.get("reason"), "review": event.get("repaired_quality_gate_v2")},
+        {"reason": event.get("reason"), "semantic_review_calls": review_sequence.call_count},
+    )
+
+
+def check_brain_runner_blocks_when_repaired_semantics_still_fail() -> CaseResult:
+    plan = copy.deepcopy(base_plan())
+    repaired_plan = copy.deepcopy(plan)
+    repaired_plan["reply_segments"] = ["我会把后续处理交给另一个对客角色，请您等待。"]
+    config = base_config(plan)
+    config["customer_service_brain"].update(
+        {
+            "mode": "brain_first",
+            "semantic_reviewer_mode": "always",
+            "semantic_reviewer_cache_enabled": False,
+        }
+    )
+    rejected = {
+        "ok": False,
+        "status": "ok",
+        "invoked": True,
+        "verdict": "repair",
+        "semantic_errors": ["客户可见回复把后续处理主语改为另一个角色，破坏同一商家客服角色连续性。"],
+        "hard_boundary_concerns": [],
+        "errors": ["customer_visible_role_discontinuity"],
+        "warnings": [],
+        "repair_instruction": "保持同一商家客服角色，由当前角色承接后续确认和回复。",
+        "customer_visible_risk": "medium",
+        "reason": "customer_visible_role_discontinuity",
+    }
+    review_sequence = patched_semantic_review_sequence([rejected, rejected])
+    with (
+        patched_evidence_pack(fake_evidence_pack(include_product=True)),
+        patched_brain_repair(repaired_plan),
+        review_sequence,
+    ):
+        event = brain_module.maybe_run_customer_service_brain(
+            config=config,
+            target_name="许聪",
+            target_state={"conversation_context": {}},
+            batch=[{"id": "msg-role", "sender": "许聪", "content": "这个后续怎么处理？"}],
+            combined="这个后续怎么处理？",
+            decision=ReplyDecision("", "", False, False, ""),
+            reply_text="",
+            intent_assist={},
+            rag_reply={},
+            llm_reply={},
+            product_knowledge={},
+            data_capture={},
+            raw_capture={"conversation": {"conversation_id": "c1", "chat_type": "private"}},
+            customer_profile=None,
+        )
+    assert_true(not event.get("applied"), f"a semantically rejected repaired plan must fail closed: {event}")
+    assert_true(event.get("customer_visible_reply_blocked") is True, f"rejected repair must block visible output: {event}")
+    assert_true(event.get("reason") == "brain_quality_verification_failed", f"unexpected failure reason: {event}")
+    assert_true(review_sequence.call_count == 2, f"repaired plan was not rechecked: {event}")
+    return CaseResult(
+        "brain_runner_blocks_when_repaired_semantics_still_fail",
+        True,
+        {"reason": event.get("reason"), "semantic_review_calls": review_sequence.call_count},
     )
 
 
@@ -10136,6 +10267,27 @@ class patched_brain_repair_failure:
 
     def __exit__(self, exc_type: Any, exc: Any, tb: Any) -> None:
         brain_module.maybe_repair_brain_plan = self.original
+
+
+class patched_semantic_review_sequence:
+    def __init__(self, reviews: list[dict[str, Any]]) -> None:
+        self.reviews = [copy.deepcopy(item) for item in reviews]
+        self.original = None
+        self.call_count = 0
+
+    def __enter__(self) -> "patched_semantic_review_sequence":
+        self.original = brain_module.review_brain_reply_semantics
+
+        def fake_review(**_: Any) -> dict[str, Any]:
+            index = min(self.call_count, len(self.reviews) - 1)
+            self.call_count += 1
+            return copy.deepcopy(self.reviews[index])
+
+        brain_module.review_brain_reply_semantics = fake_review
+        return self
+
+    def __exit__(self, exc_type: Any, exc: Any, tb: Any) -> None:
+        brain_module.review_brain_reply_semantics = self.original
 
 
 class patched_quality_verification:

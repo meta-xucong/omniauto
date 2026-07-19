@@ -548,7 +548,7 @@ def run_checks() -> dict[str, Any]:
         check_final_visible_polish_brain_micro_prompt_is_verify_only,
         check_final_visible_polish_brain_micro_rejects_rewrite_and_uses_draft,
         check_final_visible_polish_brain_micro_rejects_incomplete_tail_and_uses_draft,
-        check_final_visible_polish_handoff_micro_preserves_verification_signal,
+        check_final_visible_polish_handoff_micro_allows_internal_routing_trim,
         check_final_visible_polish_rejects_identity_denial_for_finance_boundary,
         check_final_visible_polish_rejects_over_explicit_human_identity_claim,
         check_final_visible_polish_rejects_ambiguous_identity_admission,
@@ -4264,6 +4264,7 @@ def check_final_visible_polish_brain_micro_prompt_is_verify_only() -> None:
     assert_true("优先原样返回" in system or "优先原样返回" in rules, "Brain micro prompt should prefer no semantic rewrite")
     assert_true("禁止重新回答" in system, "Brain micro prompt must not let final polish re-answer")
     assert_true("不能改变原草稿" in rules, "Brain micro prompt should preserve the original decision")
+    assert_true("内部执行角色或流转说明不是客户话术保留项" in system or "内部执行角色或流转说明不是客户话术保留项" in rules, system)
 
 
 def check_final_visible_polish_brain_micro_rejects_rewrite_and_uses_draft() -> None:
@@ -4377,7 +4378,7 @@ def check_final_visible_polish_brain_micro_rejects_incomplete_tail_and_uses_draf
     )
 
 
-def check_final_visible_polish_handoff_micro_preserves_verification_signal() -> None:
+def check_final_visible_polish_handoff_micro_allows_internal_routing_trim() -> None:
     original_polish = final_polish_module.polish_with_llm
 
     def fake_polish(**kwargs: Any) -> dict[str, Any]:
@@ -4386,9 +4387,9 @@ def check_final_visible_polish_handoff_micro_preserves_verification_signal() -> 
             "provider": "openai",
             "model": "unit-polish-model",
             "candidate": {
-                "reply": "分期这边可以先给您算个大致方向，但审批结果、利率和月供还是要看资方。",
+                "reply": "贷款审批要以资方审核为准，不能提前保证包过；后续我会按正式资料继续核实。",
                 "confidence": 0.99,
-                "reason": "removed handoff verification",
+                "reason": "trimmed internal routing while preserving authority boundary",
             },
         }
 
@@ -4404,7 +4405,17 @@ def check_final_visible_polish_handoff_micro_preserves_verification_signal() -> 
             "brain_micro_guard_fallback_to_draft": True,
         }
     }
-    draft = "贷款这边不能保证包过，审批要以资方审核为准；我建议让金融专员帮您先做预审。"
+    draft = "贷款审批要以资方审核为准，不能提前保证包过；后续我转金融专员继续核实。"
+    prompt = final_polish_module.build_micro_verify_prompt_pack(
+        settings={"identity_guard_enabled": True},
+        customer_message="贷款能保证通过吗",
+        draft_reply=draft,
+        recent_reply_texts=[],
+        source_channel="brain",
+        needs_handoff=True,
+    )
+    assert_true("逐句检查未来动作的主语" in str(prompt.get("system") or ""), f"missing role audit: {prompt}")
+    assert_true("当前商家客服之外的人物、团队或岗位" in str(prompt.get("system") or ""), f"missing universal role boundary: {prompt}")
     try:
         final_polish_module.polish_with_llm = fake_polish
         result = maybe_polish_customer_visible_reply(
@@ -4417,10 +4428,10 @@ def check_final_visible_polish_handoff_micro_preserves_verification_signal() -> 
         )
     finally:
         final_polish_module.polish_with_llm = original_polish
-    assert_true(result.get("passed") is True, f"handoff draft should pass when bad micro rewrite is rejected: {result}")
-    assert_equal(result.get("reply_text"), draft, "handoff micro guard should keep the original verification signal")
-    guard = result.get("guard") if isinstance(result.get("guard"), dict) else {}
-    assert_equal(guard.get("reason"), "brain_micro_candidate_rejected_used_draft", "handoff draft fallback should be audited")
+    assert_true(result.get("passed") is True, f"role-neutral handoff trim should pass: {result}")
+    assert_true(result.get("applied") is True, f"internal routing trim should be applied: {result}")
+    assert_true("金融专员" not in str(result.get("reply_text") or ""), f"internal actor leaked: {result}")
+    assert_true("资方审核" in str(result.get("reply_text") or ""), f"authority boundary was lost: {result}")
 
 
 def check_final_visible_polish_rejects_identity_denial_for_finance_boundary() -> None:
