@@ -7,7 +7,7 @@
 | 项目 | 当前值 |
 | --- | --- |
 | 当前分支 | `codex/pr28-internal-hardening-20260721` |
-| 当前提交 | `daa900a9`（本轮旧图片接口删除后；以当前分支 HEAD 为最终值） |
+| 当前提交 | `64553048` |
 | 上游主线基线 | `60452fa9130e9ac237f466aba3e2e63992a0d570` |
 | 受控 PR/Vision 清理基线 | `e6a53bd012564d05ad009f29c8921e11bc67c812` |
 | 当前草稿 PR | [#30](https://github.com/meta-xucong/omniauto/pull/30) |
