@@ -3896,9 +3896,6 @@ def combined_voice_transcript_anchor_match_evidence(
     if local_exact_candidates:
         selected_pool = local_exact_candidates
         strategy = "unique_duration_and_region"
-    elif len(exact_duration_candidates) == 1:
-        selected_pool = exact_duration_candidates
-        strategy = "unique_duration_after_viewport_shift"
     else:
         selected_pool = local_candidates
         strategy = (

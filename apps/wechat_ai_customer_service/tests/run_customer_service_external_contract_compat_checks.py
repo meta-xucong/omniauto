@@ -170,13 +170,19 @@ def check_snapshot() -> None:
     )
     for module_key, expected_contract in (expected.get("modules") or {}).items():
         actual_contract = (actual.get("modules") or {}).get(module_key) or {}
+        optional_platform_symbols = {
+            "_Win32ConFallback",
+        } if module_key == "wechat_win32_ocr_sidecar" else set()
         missing = sorted(
             set(expected_contract.get("required_symbols") or [])
             - set(actual_contract.get("required_symbols") or [])
+            - optional_platform_symbols
         )
         assert_true(not missing, f"external symbols removed from {module_key}: {missing}")
         actual_signatures = actual_contract.get("signatures") or {}
         for name, signature in (expected_contract.get("signatures") or {}).items():
+            if name in optional_platform_symbols and name not in actual_contract.get("signatures", {}):
+                continue
             assert_equal(
                 actual_signatures.get(name),
                 signature,

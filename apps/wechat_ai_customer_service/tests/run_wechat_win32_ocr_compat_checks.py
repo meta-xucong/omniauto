@@ -1136,6 +1136,37 @@ def test_long_voice_expansion_rejects_ambiguous_same_duration_candidates() -> No
     assert_true(evidence.get("selected_candidate_count") == 2, f"ambiguity evidence missing: {evidence}")
 
 
+def test_long_voice_expansion_rejects_unique_far_same_duration_candidate() -> None:
+    anchor = {
+        "click_bounds": [494, 357, 537, 375],
+        "item": {
+            "voice_duration_text": '23"',
+            "sender_role": "customer",
+            "parser_bubble_rect": [486, 352, 545, 380],
+        },
+    }
+    far_candidate = {
+        "type": "voice",
+        "sender_role": "customer",
+        "content": "A different far-away transcript.",
+        "content_raw_ocr": '23"\nA different far-away transcript.',
+        "content_clean": "A different far-away transcript.",
+        "voice_duration_text": '23"',
+        "bubble_rect": [484, 700, 891, 760],
+        "quality_flags": ["voice_duration_prefix_removed"],
+        "avatar_alignment": {"role": "customer", "customer": {"present": True}},
+    }
+    evidence = sidecar_module.combined_voice_transcript_anchor_match_evidence(
+        far_candidate,
+        anchor,
+        (981, 860),
+        after_messages=[far_candidate],
+    )
+
+    assert_true(evidence.get("accepted") is False, f"far unique duration must remain blocked: {evidence}")
+    assert_true(evidence.get("selected_candidate_count") == 0, f"far candidate must not be selected: {evidence}")
+
+
 def test_equal_duration_voice_anchors_ignore_absolute_vertical_shift() -> None:
     first_frame = [
         {"type": "voice", "sender_role": "customer", "voice_duration": 5, "bubble_rect": {"top": 180, "bottom": 240}, "quality_flags": []},
@@ -8688,6 +8719,7 @@ def main() -> int:
         test_final_message_parse_attaches_parent_anchor_to_visible_transcripts,
         test_long_combined_voice_expansion_binds_when_original_row_is_covered,
         test_long_voice_expansion_rejects_ambiguous_same_duration_candidates,
+        test_long_voice_expansion_rejects_unique_far_same_duration_candidate,
         test_equal_duration_voice_anchors_ignore_absolute_vertical_shift,
         test_voice_anchor_dedupe_ignores_transcript_ocr_drift_but_preserves_state_change,
         test_infer_conversation_type_does_not_promote_test_keyword_to_group,
