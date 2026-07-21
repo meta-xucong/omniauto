@@ -71,7 +71,6 @@ def check_legacy_paths_are_logic_free_aliases() -> None:
         "apps/wechat_ai_customer_service/workflows/customer_image_asset_store.py",
         "apps/wechat_ai_customer_service/workflows/customer_image_turn_router.py",
         "apps/wechat_ai_customer_service/internal/scheduler/vision_bridge.py",
-        "apps/wechat_ai_customer_service/adapters/wechat_image_save_capture.py",
         "apps/wechat_ai_customer_service/vehicle_image_retrieval_integration.py",
         "apps/wechat_ai_customer_service/vehicle_image_retrieval_jobs.py",
         "apps/wechat_ai_customer_service/optional_plugins/vehicle_image_retrieval/plugin.py",
@@ -109,20 +108,12 @@ def check_pr28_blobs_and_legacy_vision_paths_are_quarantined() -> None:
 
     connector = "apps/wechat_ai_customer_service/adapters/wechat_connector.py"
     sidecar = _source("apps/wechat_ai_customer_service/adapters/wechat_win32_ocr_sidecar.py")
-    sidecar_image_facade = ast.get_source_segment(
-        sidecar,
-        _function(
-            "apps/wechat_ai_customer_service/adapters/wechat_win32_ocr_sidecar.py",
-            "self_visual_image_messages_from_current_surface",
-        ),
-    ) or ""
     assert_true(
-        "def self_visual_image_messages_from_current_surface(" in sidecar
+        "def self_visual_image_messages_from_current_surface(" not in sidecar
         and "wechat_image_save_capture" not in sidecar
         and "detect_visual_image_bubbles" not in sidecar
-        and "extract_chat_time_markers" not in sidecar
-        and "return []" in sidecar_image_facade,
-        "Sidecar retains an image implementation or image-module import",
+        and "extract_chat_time_markers" not in sidecar,
+        "Sidecar retains a retired image export or image-module import",
     )
     connector_source = _source(connector)
     assert_true(
@@ -143,9 +134,10 @@ def check_pr28_blobs_and_legacy_vision_paths_are_quarantined() -> None:
         "apps/wechat_ai_customer_service/adapters/wechat_pr28_runtime_adapter.py"
     )
     assert_true(
-        "pr28_legacy_image_entry_quarantined" in runtime_adapter
-        and "vision_owned_transaction_required" in runtime_adapter,
-        "immutable PR legacy image entry is not quarantined by the host adapter",
+        "pr28_legacy_image_entry_quarantined" not in runtime_adapter
+        and "run_customer_clipboard_image_transaction" not in runtime_adapter
+        and "run_self_clipboard_image_transaction" not in runtime_adapter,
+        "retired PR image entry remains in the host adapter",
     )
     capture_method = _function(
         "apps/wechat_ai_customer_service/admin_backend/services/customer_service_scheduler.py",
@@ -190,10 +182,10 @@ def check_retired_file_and_crop_routes_have_no_live_implementation() -> None:
         "build_visual_bubble_archive_payload",
         "execute_wechat_image_save",
     ):
-        node = _function(relative, name)
-        text = ast.get_source_segment(_source(relative), node) or ""
-        forbidden = (".open(", ".save(", ".crop(", ".mkdir(", "capture_wechat(", "grab_clipboard")
-        assert_true(not any(token in text for token in forbidden), f"legacy file/crop implementation remains reachable: {name}")
+        assert_true(
+            f"def {name}(" not in _source(relative),
+            f"retired image export remains reachable: {name}",
+        )
 
 
 def check_dependency_direction_and_single_owner() -> None:

@@ -24,14 +24,14 @@ from apps.wechat_ai_customer_service.admin_backend.services.customer_service_ses
 from apps.wechat_ai_customer_service.admin_backend.services.customer_service_scheduler_state import (  # noqa: E402
     SchedulerStateStore,
 )
-from apps.wechat_ai_customer_service.workflows.customer_image_asset_store import (  # noqa: E402
-    maybe_collect_customer_image_assets,
+from apps.wechat_ai_customer_service.optional_plugins.vision.projection.message import (  # noqa: E402
+    build_brain_safe_image_proxy_message,
 )
 
 
 def main() -> int:
     checks = [
-        test_legacy_asset_collection_is_hard_rejected,
+        test_retired_asset_collection_export_is_absent,
         test_text_only_vision_result_can_be_bound_to_the_current_turn,
         test_ledger_keeps_textual_vision_summary_without_image_path,
         test_customer_image_vision_text_is_bound_and_exposed_to_history_context,
@@ -45,19 +45,17 @@ def main() -> int:
     return 0
 
 
-def test_legacy_asset_collection_is_hard_rejected() -> None:
-    collected = maybe_collect_customer_image_assets(
-        object(),
-        target_name="Customer A",
-        exact=True,
-        session_key="wx:legacy-path",
-        payload={
-            "messages": [{"type": "image", "sender": "customer", "saved_image_path": "C:/old.png"}],
-            "customer_image_assets": {"ok": True, "assets": [{"saved_image_path": "C:/old.png"}]},
-        },
+def test_retired_asset_collection_export_is_absent() -> None:
+    assert_true(
+        not globals().get("maybe_collect_customer_image_assets"),
+        "retired path-based image collector must not be imported",
     )
-    assert_equal(collected.get("reason"), "legacy_image_asset_storage_rejected", "historical asset collector must be fail-closed")
-    assert_equal(collected.get("assets"), [], "historical asset collector must return no image references")
+    proxy = build_brain_safe_image_proxy_message(
+        {"message_id": "clipboard-current", "content": "[图片]"},
+        target_name="Customer A",
+        session_key="wx:current-image",
+    )
+    assert_equal(proxy.get("source"), "clipboard_current_transaction", "current Vision proxy remains available")
 
 
 def test_text_only_vision_result_can_be_bound_to_the_current_turn() -> None:

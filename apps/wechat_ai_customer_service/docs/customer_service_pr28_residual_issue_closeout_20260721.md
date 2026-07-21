@@ -25,9 +25,9 @@
 
 | issue | 当前结论 | 证据 |
 | --- | --- | --- |
-| `PR28-IMG-001` | **CLOSED_LOCAL**：Sidecar 不再实现图片检测或导入旧图片适配器；旧函数仅为同签名空门面。 | `b44b37a3`；绝对 Vision 边界、图片契约通过 |
-| `PR28-IMG-002` | **CLOSED_LOCAL**：旧 `image-save`/图片 action 不再存在于生产 Sidecar 路径；历史入口 fail-closed。 | 图片契约 8/8；OCR/RPA 241/241 |
-| `PR28-IMG-003` | **CLOSED_LOCAL**：Connector 不再持有旧剪贴板图片事务或图片专用身份状态；当前图片事务只由 Vision 捕获桥执行。 | Vision worker、scheduler bridge、PR 适配审计通过 |
+| `PR28-IMG-001` | **CLOSED_LOCAL**：Sidecar 不再导出旧图片观察空门面；图片观察只由独立 Vision 捕获模块负责。 | 2026-07-21 旧符号删除记录；绝对 Vision 边界、图片契约通过 |
+| `PR28-IMG-002` | **CLOSED_LOCAL**：旧 `image-save`、文件读取、裁切、归档和旧图片资产构造入口已删除；当前唯一入口是右键复制后读取当前剪贴板。 | 2026-07-21 旧符号删除记录；图片契约通过 |
+| `PR28-IMG-003` | **CLOSED_LOCAL**：PR 运行时适配器不再导出失效图片事务空门面；当前图片事务仍由 Vision 捕获桥执行，Scheduler 当前桥接方法保持不变。 | Vision worker、scheduler bridge、运行时适配审计通过 |
 | `VIS-BOUND-001/002/003` | **LOCAL_VERIFIED**：核心、Brain、Scheduler 只通过既有中性桥/兼容门面使用 Vision。 | 绝对 Vision 边界 7/7；可选插件矩阵 7/7 |
 | `VIS-RUNTIME-001` | **CLOSED_LOCAL**：生产调用不再穿回 Connector 图片方法。 | Vision worker 3/3；scheduler current-image bridge 2/2 |
 | `VIS-TEST-001` | **CLOSED_LOCAL**：当前门禁同时验证 Vision 单一 owner 和受控 PR blob 基线。 | PR additive audit 4/4；runtime adapter 5/5 |
@@ -91,4 +91,6 @@
 - Vision worker 3/3；scheduler image bridge 2/2；结构触发恢复 12/12；多模态历史 8/8；
 - 本地会话真值 13/13；多会话调度 189/189；会话定位 6/6；发送风险 4/4；RPA 验收 10/10。
 
-未通过真实微信桌面长测前，不得把第 3.1 节的 `OPEN_REAL_ENV` 项改为关闭，也不得删除兼容门面或其契约测试。
+未通过真实微信桌面长测前，不得把第 3.1 节的 `OPEN_REAL_ENV` 项改为关闭。旧图片兼容门面已按所有者明确授权删除；当前 Vision 桥接和独立插件契约仍须保留并继续回归。
+
+本轮删除的完整范围和授权边界见：[customer_service_retired_image_interface_removal_20260721.md](customer_service_retired_image_interface_removal_20260721.md)。

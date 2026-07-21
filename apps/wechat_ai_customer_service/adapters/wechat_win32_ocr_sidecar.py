@@ -2162,27 +2162,6 @@ def messages_payload(
     }
 
 
-def self_visual_image_messages_from_current_surface(
-    screenshot: Any,
-    ocr_items: list[dict[str, Any]] | None,
-    existing_messages: list[dict[str, Any]] | None,
-    *,
-    target: str,
-) -> list[dict[str, Any]]:
-    """Retain the historical callable without owning image behavior.
-
-    Current-surface image observation belongs exclusively to the optional
-    Vision capture package.  The Sidecar symbol remains as a no-op facade so
-    older external imports keep their signature and fail closed instead of
-    silently creating a second detector or importing the retired image
-    adapter.  ``screenshot``, OCR data, existing messages, and ``target`` are
-    intentionally ignored.
-    """
-
-    del screenshot, ocr_items, existing_messages, target
-    return []
-
-
 def voice_transcribe_payload(
     hwnd: int,
     probe: dict[str, Any],

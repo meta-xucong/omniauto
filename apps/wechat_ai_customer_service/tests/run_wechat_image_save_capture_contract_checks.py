@@ -3,7 +3,6 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -16,14 +15,10 @@ for path in (PROJECT_ROOT, APP_ROOT):
     if str(path) not in sys.path:
         sys.path.insert(0, str(path))
 
-from apps.wechat_ai_customer_service.adapters.wechat_image_save_capture import (  # noqa: E402
-    build_image_saved_payload,
-    build_saved_image_asset,
+from apps.wechat_ai_customer_service.optional_plugins.vision.capture.wechat import (  # noqa: E402
     detect_visual_image_bubbles,
     execute_wechat_clipboard_image_copy,
-    execute_wechat_image_save,
     find_copy_menu_item,
-    save_clipboard_image_to_path,
 )
 from apps.wechat_ai_customer_service.adapters import wechat_win32_ocr_sidecar  # noqa: E402
 from apps.wechat_ai_customer_service.adapters.wechat_win32_ocr.geometry import session_split_x  # noqa: E402
@@ -36,11 +31,11 @@ def main() -> int:
     checks = [
         check_structure_locator_excludes_self_image,
         check_self_structural_observation_is_metadata_only,
-        check_sidecar_image_facade_is_logic_free,
+        check_sidecar_has_no_retired_image_export,
         check_current_copy_transaction_has_no_file_artifact,
         check_self_copy_transaction_selects_only_self_side,
         check_current_copy_requires_clipboard_generation_change,
-        check_legacy_file_entrypoints_are_rejected,
+        check_retired_image_exports_are_removed,
         check_legacy_sidecar_action_rejects_before_platform_probe,
     ]
     results: list[dict[str, Any]] = []
@@ -89,20 +84,17 @@ def check_self_structural_observation_is_metadata_only() -> None:
     assert_true(not (forbidden & set(message)), f"image envelope may not expose visual artifact data: {message}")
 
 
-def check_sidecar_image_facade_is_logic_free() -> None:
+def check_sidecar_has_no_retired_image_export() -> None:
     source = Path(wechat_win32_ocr_sidecar.__file__).read_text(encoding="utf-8")
     assert_true(
         "wechat_image_save_capture" not in source
         and "detect_visual_image_bubbles" not in source
         and "extract_chat_time_markers" not in source,
-        "Sidecar must not import or execute the retired image detector",
+        "Sidecar must not import or execute the Vision detector",
     )
-    assert_equal(
-        wechat_win32_ocr_sidecar.self_visual_image_messages_from_current_surface(
-            _customer_image_surface(), [], [], target="Customer A"
-        ),
-        [],
-        "historical Sidecar image symbol must fail closed",
+    assert_true(
+        not hasattr(wechat_win32_ocr_sidecar, "self_visual_image_messages_from_current_surface"),
+        "retired Sidecar image symbol must be removed, not kept as a facade",
     )
 
 
@@ -217,53 +209,28 @@ def check_current_copy_requires_clipboard_generation_change() -> None:
     assert_equal(result.get("reason"), "clipboard_sequence_unchanged_after_copy", "no stale clipboard fallback is allowed")
 
 
-def check_legacy_file_entrypoints_are_rejected() -> None:
-    class OldClipboardOps:
-        def __init__(self) -> None:
-            self.platform_calls = 0
-
-        @staticmethod
-        def grab_clipboard_image() -> Image.Image:
-            return Image.new("RGB", (80, 60), (230, 230, 230))
-
-        def capture_wechat(self, *_args: Any, **_kwargs: Any) -> tuple[Image.Image, str]:
-            self.platform_calls += 1
-            raise AssertionError("legacy image save must not begin capture")
-
-    with tempfile.TemporaryDirectory() as tmp_dir:
-        output = Path(tmp_dir) / "old.png"
-        old_ops = OldClipboardOps()
-        clipboard_result = save_clipboard_image_to_path(old_ops, output)
-        legacy_result = execute_wechat_image_save(
-            hwnd=100,
-            probe={"ok": True},
-            target_name="Customer A",
-            artifact_dir=tmp_dir,
-            sidecar_ops=old_ops,
-        )
-        asset_result = build_saved_image_asset(
-            saved_image_path=output,
-            target_name="Customer A",
-        )
-        payload_result = build_image_saved_payload(
-            saved_path=output,
-            target_name="Customer A",
-            session_key="wx:legacy",
-            source_preview="",
-            speaker_name="",
-            captured_at="2026-07-13T12:00:00",
-            anchor={},
-            screenshot_path=str(Path(tmp_dir) / "screen.png"),
-            save_method="context_menu_save_as",
-            diagnostics={},
-            probe={},
-        )
-        assert_true(not output.exists(), "legacy clipboard save must not write a file")
-    assert_equal(old_ops.platform_calls, 0, "legacy file entry points must not begin platform work")
-    assert_equal(clipboard_result.get("reason"), "legacy_clipboard_file_save_rejected", "old clipboard save is fail-closed")
-    assert_equal(legacy_result.get("state"), "legacy_image_file_capture_rejected", "old image-save action is fail-closed")
-    assert_equal(asset_result.get("reason"), "legacy_image_asset_build_rejected", "legacy asset builder is fail-closed")
-    assert_equal(payload_result.get("state"), "legacy_image_file_capture_rejected", "legacy payload builder is fail-closed")
+def check_retired_image_exports_are_removed() -> None:
+    capture_module = __import__(
+        "apps.wechat_ai_customer_service.optional_plugins.vision.capture.wechat",
+        fromlist=["capture"],
+    )
+    retired = (
+        "file_sha256",
+        "image_dimensions",
+        "wait_for_file_stable",
+        "save_visual_bubble_crop",
+        "save_clipboard_image_to_path",
+        "build_saved_image_asset",
+        "build_image_saved_payload",
+        "build_visual_bubble_archive_payload",
+        "execute_wechat_image_save",
+    )
+    for name in retired:
+        assert_true(not hasattr(capture_module, name), f"retired Vision image export remains: {name}")
+    assert_true(
+        not (APP_ROOT / "adapters" / "wechat_image_save_capture.py").exists(),
+        "retired image adapter module must be removed",
+    )
 
 
 def check_legacy_sidecar_action_rejects_before_platform_probe() -> None:

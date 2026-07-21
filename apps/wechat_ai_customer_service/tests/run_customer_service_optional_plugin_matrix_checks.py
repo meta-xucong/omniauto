@@ -184,7 +184,6 @@ blocked = (
     'apps.wechat_ai_customer_service.optional_plugins.voice.win32_action',
     'apps.wechat_ai_customer_service.optional_plugins.vision.plugin',
     'apps.wechat_ai_customer_service.workflows.customer_image_',
-    'apps.wechat_ai_customer_service.adapters.wechat_image_save_capture',
     'customer_image_',
 )
 

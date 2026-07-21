@@ -44,19 +44,6 @@ def physical_rpa_identity_kwargs(values: dict[str, Any]) -> dict[str, Any]:
     return projected
 
 
-def _legacy_vision_quarantine_payload(target: str, *, exact: bool) -> dict[str, Any]:
-    return {
-        "ok": False,
-        "adapter": "win32_ocr",
-        "state": "pr28_legacy_image_entry_quarantined",
-        "reason": "vision_owned_transaction_required",
-        "target": str(target or ""),
-        "exact": bool(exact),
-        "assets": [],
-        "messages": [],
-    }
-
-
 def _install_sidecar_environment_containment(connector: Any) -> None:
     original = getattr(connector, "call_compat_sidecar", None)
     if not callable(original):
@@ -132,23 +119,6 @@ class WeChatPr28RuntimeAdapter:
             exact=exact,
             **physical_rpa_identity_kwargs(kwargs),
         )
-
-    def run_customer_clipboard_image_transaction(
-        self,
-        target: str,
-        exact: bool = True,
-        **_kwargs: Any,
-    ) -> dict[str, Any]:
-        return _legacy_vision_quarantine_payload(target, exact=exact)
-
-    def run_self_clipboard_image_transaction(
-        self,
-        target: str,
-        exact: bool = True,
-        **_kwargs: Any,
-    ) -> dict[str, Any]:
-        return _legacy_vision_quarantine_payload(target, exact=exact)
-
 
 def adapt_wechat_pr28_connector(connector: Any) -> Any:
     if isinstance(connector, WeChatPr28RuntimeAdapter):

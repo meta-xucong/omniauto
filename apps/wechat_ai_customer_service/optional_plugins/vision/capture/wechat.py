@@ -1,16 +1,13 @@
 from __future__ import annotations
 
-import hashlib
 import json
 import re
 import time
 from datetime import datetime
-from pathlib import Path
 from typing import Any
 
 from PIL import Image, ImageStat
 
-PROJECT_ROOT = Path(__file__).resolve().parents[5]
 DEFAULT_BOTTOM_EXCLUDE_PX = 95
 IMAGE_PREVIEW_TOKENS = ("[图片]", "[照片]", "[Image]", "图片", "照片", "发送了一张图片")
 SAVE_MENU_TOKENS = (
@@ -49,11 +46,6 @@ def chat_header_cutoff_y(height: int) -> int:
 
 def now_iso() -> str:
     return datetime.now().isoformat(timespec="seconds")
-
-
-def safe_path_part(value: Any, *, default: str = "session") -> str:
-    text = re.sub(r"[^\w.-]+", "_", str(value or "").strip(), flags=re.UNICODE).strip("._")
-    return text[:96] or default
 
 
 def image_preview_text(value: Any) -> bool:
@@ -131,134 +123,6 @@ def nearest_chat_time_marker(
     return str(candidates[-1].get("text") or "").strip()
 
 
-def image_asset_runtime_dir(
-    *,
-    tenant_id: str = "",
-    target_name: str = "",
-    session_key: str = "",
-    date_text: str = "",
-) -> Path:
-    tenant = safe_path_part(tenant_id or "default", default="default")
-    session = safe_path_part(session_key or target_name or "target", default="target")
-    day = safe_path_part(date_text or datetime.now().strftime("%Y%m%d"), default="date")
-    return PROJECT_ROOT / "runtime" / "apps" / "wechat_ai_customer_service" / "tenants" / tenant / "customer_service" / "image_assets" / session / day
-
-
-def resolve_artifact_dir(
-    artifact_dir: str | Path | None,
-    *,
-    tenant_id: str = "",
-    target_name: str = "",
-    session_key: str = "",
-) -> Path:
-    if artifact_dir:
-        path = Path(artifact_dir)
-        if not path.is_absolute():
-            path = PROJECT_ROOT / path
-    else:
-        path = image_asset_runtime_dir(tenant_id=tenant_id, target_name=target_name, session_key=session_key)
-    # Frozen path-shape facade only. The clipboard-current pipeline must not
-    # create an image artifact directory.
-    return path
-
-
-def file_sha256(path: Path) -> str:
-    del path
-    raise ValueError("legacy_image_file_read_rejected")
-
-
-def image_dimensions(path: Path) -> tuple[int, int]:
-    del path
-    raise ValueError("legacy_image_file_read_rejected")
-
-
-def wait_for_file_stable(path: Path, *, timeout_seconds: float = 8.0, quiet_period_seconds: float = 0.45) -> dict[str, Any]:
-    del timeout_seconds, quiet_period_seconds
-    return {
-        "ok": False,
-        "path": str(path),
-        "reason": "legacy_image_file_read_rejected",
-        "size_bytes": 0,
-    }
-
-
-def save_asset_metadata(asset: dict[str, Any], meta_path: Path) -> None:
-    # Historical no-op compatibility hook.  Metadata files can carry image
-    # paths and must not be created by the clipboard-only pipeline.
-    del asset, meta_path
-    return None
-
-
-def build_saved_image_asset(
-    *,
-    saved_image_path: str | Path,
-    target_name: str,
-    session_key: str = "",
-    conversation_type: str = "",
-    speaker_name: str = "",
-    source_preview: str = "",
-    save_method: str = "context_menu_save_as",
-    captured_at: str = "",
-    bubble_anchor: dict[str, Any] | None = None,
-    bubble_bounds: list[int] | tuple[int, int, int, int] | None = None,
-    visual_side: str = "customer",
-    sender: str = "",
-    sender_role: str = "",
-    visual_occurrence_id: str = "",
-    pending_signal_id: str = "",
-    wechat_message_time: str = "",
-    visual_index: int = 0,
-    diagnostic_path: str = "",
-    capture_detection: dict[str, Any] | None = None,
-) -> dict[str, Any]:
-    """Frozen legacy facade; image bytes are never persisted by this route."""
-
-    del (
-        saved_image_path,
-        target_name,
-        session_key,
-        conversation_type,
-        speaker_name,
-        source_preview,
-        save_method,
-        captured_at,
-        bubble_anchor,
-        bubble_bounds,
-        visual_side,
-        sender,
-        sender_role,
-        visual_occurrence_id,
-        pending_signal_id,
-        wechat_message_time,
-        visual_index,
-        diagnostic_path,
-        capture_detection,
-    )
-    return {"ok": False, "reason": "legacy_image_asset_build_rejected"}
-
-
-def build_image_message_from_asset(asset: dict[str, Any]) -> dict[str, Any]:
-    message_id = str(asset.get("message_id") or asset.get("asset_id") or "")
-    sender = str(asset.get("sender") or asset.get("sender_role") or "").strip().lower()
-    if sender not in {"customer", "self"}:
-        sender = "self" if str(asset.get("visual_side") or "").strip().lower() == "self" else "customer"
-    return {
-        "id": message_id,
-        "message_id": message_id,
-        "type": "text",
-        "sender": sender,
-        "sender_role": sender,
-        "content": "[图片]",
-        "speaker_name": str(asset.get("speaker_name") or ""),
-        "group_member_name": str(asset.get("speaker_name") or ""),
-        "pending_signal_id": str(asset.get("pending_signal_id") or ""),
-        "source_adapter": "win32_ocr",
-        "captured_at": str(asset.get("captured_at") or ""),
-        "time": str(asset.get("captured_at") or ""),
-        "quality_flags": ["synthetic_visual_turn", "legacy_image_asset_rejected"],
-    }
-
-
 def _chat_bounds(width: int, height: int) -> tuple[int, int, int, int]:
     split = session_split_x(width)
     left = min(width - 1, split + 12)
@@ -325,8 +189,6 @@ def _structural_media_lanes(width: int, height: int) -> dict[str, dict[str, int]
             "bottom": bottom,
         },
     }
-
-
 def _avatar_row_presence(
     image: Image.Image,
     *,
@@ -656,25 +518,6 @@ def clamp_bounds(bounds: list[int] | tuple[int, int, int, int], image_size: tupl
     return left, top, right, bottom
 
 
-def save_visual_bubble_crop(
-    screenshot: Image.Image,
-    *,
-    output_dir: Path,
-    target_name: str,
-    session_key: str = "",
-    bubble: dict[str, Any],
-    index: int = 0,
-) -> dict[str, Any]:
-    """Frozen legacy facade; chat-bubble crops are forbidden."""
-
-    del screenshot, output_dir, target_name, session_key, index
-    return {
-        "ok": False,
-        "reason": "legacy_visual_bubble_crop_rejected",
-        "side": str(bubble.get("side") or "customer"),
-    }
-
-
 def capture_context_menu_image(
     *,
     sidecar_ops: Any,
@@ -694,18 +537,6 @@ def capture_context_menu_image(
             pass
     image, _path = sidecar_ops.capture_wechat(hwnd, artifact_dir=None, label=label)
     return image, "", "window_capture"
-
-
-def save_clipboard_image_to_path(sidecar_ops: Any, saved_path: Path) -> dict[str, Any]:
-    # Frozen compatibility entry point.  Saving files and reading image paths
-    # are deliberately unavailable; the sole live route is the current
-    # right-click Copy transaction consumed in memory by the optional vision
-    # plugin.
-    del sidecar_ops, saved_path
-    return {
-        "ok": False,
-        "reason": "legacy_clipboard_file_save_rejected",
-    }
 
 
 def click_context_menu_item(
@@ -736,56 +567,6 @@ def click_context_menu_item(
     )
 
 
-def build_image_saved_payload(
-    *,
-    saved_path: Path,
-    target_name: str,
-    session_key: str,
-    source_preview: str,
-    speaker_name: str,
-    captured_at: str,
-    anchor: dict[str, Any],
-    screenshot_path: str,
-    save_method: str,
-    diagnostics: dict[str, Any],
-    probe: dict[str, Any],
-    bubble_bounds: list[int] | tuple[int, int, int, int] | None = None,
-    visual_side: str = "customer",
-    pending_signal_id: str = "",
-    wechat_message_time: str = "",
-    visual_index: int = 0,
-    capture_detection: dict[str, Any] | None = None,
-) -> dict[str, Any]:
-    """Frozen legacy facade; clipboard-current transactions have no file payload."""
-
-    del (
-        saved_path,
-        target_name,
-        session_key,
-        source_preview,
-        speaker_name,
-        captured_at,
-        anchor,
-        screenshot_path,
-        save_method,
-        diagnostics,
-        probe,
-        bubble_bounds,
-        visual_side,
-        pending_signal_id,
-        wechat_message_time,
-        visual_index,
-        capture_detection,
-    )
-    return {
-        "ok": False,
-        "state": "legacy_image_file_capture_rejected",
-        "reason": "clipboard_current_transaction_required",
-        "assets": [],
-        "messages": [],
-    }
-
-
 def _latest_visual_bubble(bubbles: list[dict[str, Any]] | None) -> dict[str, Any]:
     """Select the latest visible occurrence by conversation position.
 
@@ -808,46 +589,6 @@ def _latest_visual_bubble(bubbles: list[dict[str, Any]] | None) -> dict[str, Any
         return bottom, top, float(item.get("score") or 0.0)
 
     return dict(max(candidates, key=position))
-
-
-def build_visual_bubble_archive_payload(
-    *,
-    screenshot: Image.Image,
-    screenshot_path: str,
-    output_dir: Path,
-    bubbles: list[dict[str, Any]],
-    target_name: str,
-    session_key: str,
-    source_preview: str,
-    speaker_name: str,
-    captured_at: str,
-    diagnostics: dict[str, Any],
-    probe: dict[str, Any],
-    pending_signal_id: str = "",
-) -> dict[str, Any]:
-    """Frozen legacy facade; visual-bubble archives are forbidden."""
-
-    del (
-        screenshot,
-        screenshot_path,
-        output_dir,
-        bubbles,
-        target_name,
-        session_key,
-        source_preview,
-        speaker_name,
-        captured_at,
-        diagnostics,
-        probe,
-        pending_signal_id,
-    )
-    return {
-        "ok": False,
-        "state": "legacy_visual_bubble_archive_rejected",
-        "reason": "clipboard_current_transaction_required",
-        "assets": [],
-        "messages": [],
-    }
 
 
 def clipboard_sequence_number(sidecar_ops: Any) -> int | None:
@@ -1089,47 +830,3 @@ def execute_wechat_clipboard_image_copy(
     }
 
 
-def execute_wechat_image_save(
-    *,
-    hwnd: int,
-    probe: dict[str, Any],
-    target_name: str,
-    session_key: str = "",
-    exact: bool = True,
-    artifact_dir: str | Path | None = None,
-    tenant_id: str = "",
-    source_preview: str = "",
-    speaker_name: str = "",
-    max_images: int = 1,
-    side_filter: str = "customer",
-    capture_mode: str = "context_menu",
-    pending_signal_id: str = "",
-    sidecar_ops: Any,
-) -> dict[str, Any]:
-    """Frozen legacy facade; the only live capture is right-click Copy."""
-
-    del (
-        hwnd,
-        probe,
-        exact,
-        artifact_dir,
-        tenant_id,
-        source_preview,
-        speaker_name,
-        max_images,
-        side_filter,
-        capture_mode,
-        pending_signal_id,
-        sidecar_ops,
-    )
-    return {
-        "ok": False,
-        "online": True,
-        "adapter": "win32_ocr",
-        "state": "legacy_image_file_capture_rejected",
-        "reason": "clipboard_current_transaction_required",
-        "target": target_name,
-        "session_key": session_key,
-        "assets": [],
-        "messages": [],
-    }

@@ -46,12 +46,6 @@ class FakeConnector:
         self.calls.append({"method": "send_text_and_verify", "target": target, "text": text, "exact": exact, **kwargs})
         return {"ok": True, "verified": True}
 
-    def run_customer_clipboard_image_transaction(self, *_args: Any, **_kwargs: Any) -> dict[str, Any]:
-        raise AssertionError("immutable PR legacy image entry became reachable")
-
-    def run_self_clipboard_image_transaction(self, *_args: Any, **_kwargs: Any) -> dict[str, Any]:
-        raise AssertionError("immutable PR legacy self-image entry became reachable")
-
 
 def check_pr28_blob_manifest_matches_worktree() -> None:
     for relative, expected in PR28_BLOBS.items():
@@ -85,7 +79,7 @@ def check_type_is_preserved_without_opaque_key() -> None:
     assert_true(projected["conversation_type"] == "group", "type-only lookup was weakened")
 
 
-def check_runtime_proxy_preserves_calls_and_quarantines_old_vision() -> None:
+def check_runtime_proxy_preserves_calls_and_has_no_retired_vision_routes() -> None:
     raw = FakeConnector()
     connector = adapt_wechat_pr28_connector(raw)
     assert_true(isinstance(connector, WeChatPr28RuntimeAdapter), "runtime adapter was not installed")
@@ -102,10 +96,11 @@ def check_runtime_proxy_preserves_calls_and_quarantines_old_vision() -> None:
     assert_true(call["conversation_type"] == "", "physical type drift was not contained")
     assert_true(call["history_load_times"] == 2, "existing connector keyword was lost")
 
-    customer = connector.run_customer_clipboard_image_transaction("新数据测试(2)")
-    self_image = connector.run_self_clipboard_image_transaction("新数据测试(2)")
-    assert_true(customer.get("reason") == "vision_owned_transaction_required", f"legacy customer image route leaked: {customer}")
-    assert_true(self_image.get("reason") == "vision_owned_transaction_required", f"legacy self image route leaked: {self_image}")
+    assert_true(
+        not hasattr(connector, "run_customer_clipboard_image_transaction")
+        and not hasattr(connector, "run_self_clipboard_image_transaction"),
+        "retired image transaction routes remain exposed by the runtime adapter",
+    )
 
 
 def check_sidecar_fixed_origin_default_is_injected_without_overriding_owner_choice() -> None:
@@ -137,7 +132,7 @@ def main() -> int:
         check_pr28_blob_manifest_matches_worktree,
         check_exact_session_key_drops_only_physical_type_filter,
         check_type_is_preserved_without_opaque_key,
-        check_runtime_proxy_preserves_calls_and_quarantines_old_vision,
+        check_runtime_proxy_preserves_calls_and_has_no_retired_vision_routes,
         check_sidecar_fixed_origin_default_is_injected_without_overriding_owner_choice,
     ]
     results: list[dict[str, Any]] = []

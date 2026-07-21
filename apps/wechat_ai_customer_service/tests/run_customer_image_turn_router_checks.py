@@ -92,7 +92,7 @@ class ClipboardConnector:
         self.calls: list[dict[str, Any]] = []
         self.image: EphemeralClipboardImage | None = None
 
-    def run_customer_clipboard_image_transaction(self, target: str, **kwargs: Any) -> dict[str, Any]:
+    def run_current_clipboard_image_transaction(self, target: str, **kwargs: Any) -> dict[str, Any]:
         self.calls.append({"target": target, **kwargs})
         transaction = {
             "status": "copied",
@@ -109,33 +109,14 @@ class ClipboardConnector:
 
 
 class SelfClipboardConnector(ClipboardConnector):
-    def run_self_clipboard_image_transaction(self, target: str, **kwargs: Any) -> dict[str, Any]:
-        self.calls.append({"target": target, **kwargs})
-        self.image = _ephemeral_image()
-        return {
-            "ok": True,
-            "transaction": {
-                "status": "copied",
-                "captured_at": "2026-07-13T12:00:00",
-                "right_click_ok": True,
-                "menu_copy_confirmed": True,
-                "clipboard_sequence_changed": True,
-                "clipboard_sequence_after": 74,
-            },
-            "_ephemeral_clipboard_image": self.image,
-        }
+    pass
 
 
 def _test_vision_transaction(**kwargs: Any) -> dict[str, Any]:
     """Inject the Vision-owned transaction seam without reviving production facades."""
 
     connector = kwargs["connector"]
-    method_name = (
-        "run_self_clipboard_image_transaction"
-        if str(kwargs.get("side_filter") or "") == "self"
-        else "run_customer_clipboard_image_transaction"
-    )
-    method = getattr(connector, method_name)
+    method = getattr(connector, "run_current_clipboard_image_transaction")
     return method(
         str(kwargs.get("target") or ""),
         exact=bool(kwargs.get("exact", True)),

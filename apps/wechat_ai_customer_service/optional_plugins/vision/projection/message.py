@@ -1,24 +1,12 @@
-"""Retired image-asset compatibility facade.
-
-Customer-service vision has one supported acquisition route only: the
-target-validated right-click Copy operation followed by an in-memory read of
-the freshly changed Windows clipboard.  This module deliberately contains no
-file, screenshot, crop, thumbnail, archive, or image-save implementation.
-
-The old import paths remain as fail-closed compatibility facades so external
-callers cannot silently revive a historical image-reading route.
-"""
+"""Text-only projection from the independent Vision module into Brain/history."""
 
 from __future__ import annotations
 
 import copy
 from datetime import datetime
-from pathlib import Path
 from typing import Any
 
 
-PROJECT_ROOT = Path(__file__).resolve().parents[5]
-RUNTIME_ROOT = PROJECT_ROOT / "runtime" / "apps" / "wechat_ai_customer_service" / "customer_image_understanding"
 _IMAGE_PREVIEW_MARKERS = ("[图片]", "[image]", "图片", "image")
 
 
@@ -30,12 +18,6 @@ def sanitize_name(value: str) -> str:
     keep = [char if char.isalnum() else "_" for char in str(value or "").strip()]
     compact = "".join(keep).strip("_")
     return compact or "target"
-
-
-def visual_artifact_dir(*, target_name: str, session_key: str = "") -> Path:
-    """Compatibility-only path calculation; callers must not create or use it."""
-
-    return RUNTIME_ROOT / sanitize_name(session_key or target_name)
 
 
 def image_preview_text(value: Any) -> bool:
@@ -170,71 +152,3 @@ def build_brain_safe_image_proxy_messages(
         for source in (sources or [])
         if isinstance(source, dict)
     ]
-
-
-def assets_from_payload_messages(payload: dict[str, Any] | None) -> list[dict[str, Any]]:
-    """Historical asset payloads are intentionally unreadable."""
-
-    del payload
-    return []
-
-
-def customer_scoped_image_asset(asset: dict[str, Any] | None) -> bool:
-    del asset
-    return False
-
-
-def _legacy_image_read_rejected(reason: str = "legacy_image_reading_retired") -> dict[str, Any]:
-    return {
-        "ok": False,
-        "applied": False,
-        "reason": reason,
-        "assets": [],
-        "messages": [],
-        "source": "clipboard_current_transaction_required",
-    }
-
-
-def call_image_save_sidecar(
-    connector: Any,
-    *,
-    target_name: str,
-    exact: bool = True,
-    session_key: str = "",
-    artifact_dir: str | Path | None = None,
-    pending_signal: dict[str, Any] | None = None,
-) -> dict[str, Any]:
-    del connector, target_name, exact, session_key, artifact_dir, pending_signal
-    return _legacy_image_read_rejected("legacy_image_save_retired")
-
-
-def capture_messages_with_artifact(
-    connector: Any,
-    *,
-    target_name: str,
-    exact: bool = True,
-    session_key: str = "",
-    artifact_dir: str | Path | None = None,
-) -> dict[str, Any]:
-    del connector, target_name, exact, session_key, artifact_dir
-    return _legacy_image_read_rejected("legacy_image_capture_retired")
-
-
-def detect_customer_image_region(screenshot_path: str, messages: list[dict[str, Any]] | None) -> dict[str, Any]:
-    del screenshot_path, messages
-    return _legacy_image_read_rejected("legacy_image_crop_detection_rejected")
-
-
-def maybe_collect_customer_image_assets(
-    connector: Any,
-    *,
-    target_name: str,
-    exact: bool = True,
-    session_key: str = "",
-    payload: dict[str, Any] | None = None,
-    target_state: dict[str, Any] | None = None,
-) -> dict[str, Any]:
-    """Hard reject all screenshot/path/archive image collection routes."""
-
-    del connector, target_name, exact, session_key, payload, target_state
-    return _legacy_image_read_rejected("legacy_image_asset_storage_rejected")

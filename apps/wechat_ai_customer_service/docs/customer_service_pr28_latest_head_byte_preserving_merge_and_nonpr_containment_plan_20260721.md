@@ -246,3 +246,4 @@
 
 - `apps/wechat_ai_customer_service/docs/customer_visible_reply_ownership_baseline.md`
 - `apps/wechat_ai_customer_service/docs/customer_service_external_contract_and_optional_plugin_baseline.md`
+> **2026-07-21 后续授权覆盖**：原方案中“PR 七文件字节级不变”和“旧图片入口保留为空门面”的历史结论，仅适用于当时的合并检查点。仓库所有者随后明确授权删除失效旧图片接口；本次删除记录以 [customer_service_retired_image_interface_removal_20260721.md](customer_service_retired_image_interface_removal_20260721.md) 为准。当前 Vision 独立模块和 Scheduler 现行桥接合同不受影响。
