@@ -7,9 +7,9 @@
 | 项目 | 当前值 |
 | --- | --- |
 | 当前分支 | `codex/pr28-internal-hardening-20260721` |
-| 当前提交 | `d27ce1ece0be6b4b5e4866c732ac6d4d0e2cb07a` |
+| 当前提交 | `daa900a9`（本轮旧图片接口删除后；以当前分支 HEAD 为最终值） |
 | 上游主线基线 | `60452fa9130e9ac237f466aba3e2e63992a0d570` |
-| 受控 PR/Vision 清理基线 | `b44b37a3ff635ffec08a807f34a7e3067a66675f` |
+| 受控 PR/Vision 清理基线 | `e6a53bd012564d05ad009f29c8921e11bc67c812` |
 | 当前草稿 PR | [#30](https://github.com/meta-xucong/omniauto/pull/30) |
 | 群聊范围 | 按所有者要求冻结，不进入本轮关闭条件 |
 | 同名 P0 | 按所有者“备注已保证唯一”前提暂不处理 |
@@ -80,7 +80,7 @@
 | `customer_service_vision_missed_trigger_two_phase_repair_20260719.md` | Vision 漏触发阶段方案历史 |
 | `customer_service_pr28_latest_head_byte_preserving_merge_and_nonpr_containment_plan_20260721.md` | 最新合并实施记录；第 11 节已记录本次图片清理授权 |
 
-旧文档中的旧 head（例如 `2120f167`、`8f832dd7`）是当时审计对象，不得拿来覆盖当前 `b44b37a3` 受控清理基线。
+旧文档中的旧 head（例如 `2120f167`、`8f832dd7`）是当时审计对象，不得拿来覆盖当前 `e6a53bd0` 受控清理基线。
 
 ## 5. 本轮验收门槛
 
