@@ -61,6 +61,7 @@ from apps.wechat_ai_customer_service.platform_safety_rules import guard_term_set
 from apps.wechat_ai_customer_service.wechat_message_envelope import (
     apply_message_envelope_to_record,
     build_message_envelope,
+    message_is_capture_metadata_only,
     message_is_visual_or_media_ocr_noise,
 )
 from apps.wechat_ai_customer_service.message_identity import (
@@ -8454,6 +8455,8 @@ def scheduler_authoritative_message_is_reply_candidate(
         return False
     if message_is_visual_or_media_ocr_noise(message):
         return False
+    if message_is_capture_metadata_only(message, target_name=str(message.get("target_name") or "")):
+        return False
     if is_bot_reply_content(content, config):
         return False
     if sender == "self" and not allow_self_for_test:
@@ -8492,6 +8495,8 @@ def message_is_reply_candidate(
     if message.get("type") != "text" or not content:
         return False
     if message_is_visual_or_media_ocr_noise(message):
+        return False
+    if message_is_capture_metadata_only(message, target_name=str(message.get("target_name") or "")):
         return False
     if is_bot_reply_content(content, config):
         return False

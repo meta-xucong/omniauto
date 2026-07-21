@@ -52,6 +52,7 @@ from apps.wechat_ai_customer_service.admin_backend.services.customer_service_sch
     mark_reply_sent,
     mark_reply_stale,
     message_content_digest,
+    message_content_key,
     normalize_repeatable_probe_text,
     recover_orphaned_running_llm_tasks,
     recover_orphaned_running_media_context_tasks,
@@ -5311,6 +5312,35 @@ class ManagedListenerSchedulerBridge:
         capture = self._capture_for_reply(reply)
         if not isinstance(capture, dict):
             return "unknown"
+        # A monitor can advance its pending signal while the same visible OCR
+        # bubble is being re-captured.  Compare the actual captured input set
+        # with the reply's input anchor before treating a signal mismatch as a
+        # newer customer event.  This keeps freshness tied to message content
+        # and identity, not to polling churn.
+        reply_input_ids = {
+            str(item).strip()
+            for item in (reply.get("input_message_ids") or [])
+            if str(item).strip()
+        }
+        capture_input_ids = {
+            canonical_input_message_id(item)
+            for item in (capture.get("batch") or [])
+            if isinstance(item, dict) and canonical_input_message_id(item)
+        }
+        if capture_input_ids and reply_input_ids and capture_input_ids.issubset(reply_input_ids):
+            return "match"
+        reply_content_keys = {
+            str(item).strip()
+            for item in (reply.get("input_content_keys") or [])
+            if str(item).strip()
+        }
+        capture_content_keys = {
+            message_content_key(item)
+            for item in (capture.get("batch") or [])
+            if isinstance(item, dict) and message_content_key(item)
+        }
+        if capture_content_keys and reply_content_keys and capture_content_keys.issubset(reply_content_keys):
+            return "match"
         observed: set[str] = set()
         for item in (capture.get("batch") or []):
             if not isinstance(item, dict):

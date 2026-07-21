@@ -31,8 +31,12 @@ from apps.wechat_ai_customer_service.message_identity import (
     message_has_repeatable_probe_content as canonical_message_has_repeatable_probe_content,
     normalize_repeatable_probe_text as canonical_normalize_repeatable_probe_text,
     occurrence_marker_for_message,
+    REPEATABLE_OCCURRENCE_KEYS,
 )
-from apps.wechat_ai_customer_service.wechat_message_envelope import message_is_visual_or_media_ocr_noise
+from apps.wechat_ai_customer_service.wechat_message_envelope import (
+    message_is_capture_metadata_only,
+    message_is_visual_or_media_ocr_noise,
+)
 
 
 STATE_VERSION = 2
@@ -81,8 +85,10 @@ def pending_signal_kind_for_content(content: str, *, explicit_kind: Any = "") ->
 
 
 def message_content_key(message: dict[str, Any]) -> str:
-    if message_has_repeatable_probe_content(message):
-        return ""
+    # Keep a content key for every text message so the capture/Brain/reply
+    # ledger can close the loop. Repeatable probes are still allowed to recur:
+    # their occurrence-aware message identity is the primary dedupe key, while
+    # this key is audit metadata rather than a blanket suppression rule.
     sender = str(message.get("sender") or "")
     content = " ".join(str(message.get("content") or "").split())
     msg_type = str(message.get("type") or "")
@@ -139,16 +145,7 @@ def message_repeatable_occurrence_identity(message: dict[str, Any]) -> str:
     if base_id and not ocr_like_id:
         return base_id
     occurrence = ""
-    for key in (
-        "pending_signal_id",
-        "pending_since",
-        "last_detected_at",
-        "message_time",
-        "screen_time_text",
-        "time",
-        "captured_at",
-        "created_at",
-    ):
+    for key in REPEATABLE_OCCURRENCE_KEYS:
         occurrence = str(message.get(key) or "").strip()
         if occurrence:
             break
@@ -228,6 +225,12 @@ def message_is_reply_input_candidate(
         sender = str(message.get("sender") or message.get("role") or "").strip().lower()
         return sender not in SELF_MESSAGE_SENDERS
     if message_is_visual_or_media_ocr_noise(message):
+        return False
+    if message_is_capture_metadata_only(
+        message,
+        target_name=target_name,
+        conversation_type=conversation_type,
+    ):
         return False
     sender = str(message.get("sender") or message.get("role") or "").strip().lower()
     if sender in SELF_MESSAGE_SENDERS and not capture_allows_self_messages(

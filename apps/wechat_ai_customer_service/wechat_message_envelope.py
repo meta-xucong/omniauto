@@ -78,6 +78,14 @@ VISUAL_OCR_SOURCE_VALUES = {
     "attachment_ocr",
     "card_ocr",
 }
+CAPTURE_METADATA_ONLY_MARKERS = {
+    "active_title",
+    "active_chat_title",
+    "active_title_region",
+    "chat_title",
+    "header_only",
+    "title_only_shell",
+}
 VISUAL_OCR_SOURCE_KEYS = (
     "source_type",
     "source_kind",
@@ -189,6 +197,89 @@ def ocr_item_has_visual_source_marker(item: dict[str, Any]) -> bool:
 
 def message_is_visual_or_media_ocr_noise(record: dict[str, Any]) -> bool:
     return bool(visual_ocr_noise_reason(record))
+
+
+def message_is_capture_metadata_only(
+    record: dict[str, Any],
+    *,
+    target_name: Any = "",
+    conversation_type: Any = "unknown",
+) -> bool:
+    """Reject OCR rows that describe the active chat chrome, not a bubble.
+
+    This is a source/geometry boundary check. It deliberately does not use
+    product or account-specific words. Explicit capture markers win; otherwise
+    an OCR row is considered title metadata only when its body is exactly the
+    selected conversation name and its small rectangle sits in the title band.
+    A same-text customer message lower in the chat surface remains eligible.
+    """
+
+    if not isinstance(record, dict):
+        return False
+    layers = iter_message_payload_layers(record)
+    source = ""
+    for payload in layers:
+        source = normalize_marker_value(payload.get("source_adapter") or payload.get("source"))
+        if source:
+            break
+    if source and source not in OCR_RPA_ADAPTERS:
+        return False
+
+    marker_values: set[str] = set()
+    for payload in layers:
+        for key in ("capture_role", "surface_role", "region_role", "layout_role", "ocr_role", "role"):
+            value = normalize_marker_value(payload.get(key))
+            if value:
+                marker_values.add(value)
+        for key in ("quality_flags", "sender_role_evidence", "evidence"):
+            for item in normalize_flags(payload.get(key)):
+                marker_values.add(item)
+        items = payload.get("ocr_items")
+        if isinstance(items, list):
+            for item in items:
+                if not isinstance(item, dict):
+                    continue
+                for key in ("capture_role", "surface_role", "region_role", "layout_role", "ocr_role", "role"):
+                    value = normalize_marker_value(item.get(key))
+                    if value:
+                        marker_values.add(value)
+    if marker_values & CAPTURE_METADATA_ONLY_MARKERS:
+        return True
+
+    target = normalize_text_for_speaker_check(target_name)
+    if not target:
+        for payload in layers:
+            target = normalize_text_for_speaker_check(
+                payload.get("target_name")
+                or payload.get("conversation_name")
+                or payload.get("display_name")
+            )
+            if target:
+                break
+    content = normalize_text_for_speaker_check(
+        record.get("content")
+        or record.get("content_body")
+        or record.get("text")
+        or existing_message_envelope(record).get("content_body")
+    )
+    if not target or not content or target != content:
+        return False
+
+    rect: dict[str, int] = {}
+    for payload in layers:
+        candidate = normalize_rect(payload.get("bubble_rect"))
+        if candidate:
+            rect = candidate
+            break
+    if not rect:
+        return False
+    top = int(rect.get("top") or 0)
+    bottom = int(rect.get("bottom") or 0)
+    height = max(0, bottom - top)
+    # WeChat's active title is above the first normal chat row. Keep the band
+    # conservative and require a compact OCR row to avoid swallowing a real
+    # customer bubble that happens to contain their own name.
+    return top <= 150 and bottom <= 185 and 0 < height <= 56
 
 
 def message_quality_flag_set(record: dict[str, Any]) -> set[str]:

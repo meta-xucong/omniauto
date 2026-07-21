@@ -22,12 +22,15 @@ STRONG_OCCURRENCE_KEYS = (
     "last_message_time",
     "screen_time_text",
 )
+# A polling cycle is not a message occurrence. ``pending_signal_id``,
+# ``pending_since`` and ``last_detected_at`` are scheduler observations and
+# can change while the same visible bubble remains on screen. For short
+# repeatable probes, only source-visible message timing may distinguish a
+# later occurrence; the stable OCR id/bubble geometry remains the fallback.
 REPEATABLE_OCCURRENCE_KEYS = (
-    *STRONG_OCCURRENCE_KEYS,
     "message_time",
+    "screen_time_text",
     "time",
-    "captured_at",
-    "created_at",
 )
 
 

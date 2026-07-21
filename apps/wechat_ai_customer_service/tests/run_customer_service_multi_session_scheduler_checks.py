@@ -4367,6 +4367,100 @@ def check_scheduler_capture_allows_new_occurrence_of_same_short_probe() -> None:
     )
 
 
+def check_scheduler_capture_dedupes_same_short_ocr_bubble_when_pending_signal_changes() -> None:
+    state = empty_state()
+    bubble = {
+        "id": "win32_ocr:stable-short-bubble",
+        "type": "text",
+        "sender": "customer",
+        "content": "在吗？",
+        "bubble_rect": {"left": 485, "top": 260, "right": 560, "bottom": 292},
+        "source_adapter": "win32_ocr",
+    }
+    first = {
+        **bubble,
+        "pending_signal_id": "pending-old",
+        "pending_since": "2026-07-21T21:01:00",
+        "last_detected_at": "2026-07-21T21:01:01",
+    }
+    captured = record_capture_result(
+        state,
+        "许聪",
+        messages=[first],
+        batch=[first],
+        conversation_type="private",
+        session_key="wx:rpa:v1:stable-short-bubble",
+        now="2026-07-21T21:01:02",
+    )
+    task = enqueue_llm_task(state, str(captured.get("capture_id") or ""), now="2026-07-21T21:01:03")
+    complete_llm_task(
+        state,
+        str(task.get("task_id") or ""),
+        reply_text="在的，您说。",
+        result_payload={"ok": True, "reply_text": "在的，您说。"},
+        now="2026-07-21T21:01:04",
+    )
+    reply_id = next(iter(state.get("ready_replies") or {}))
+    mark_reply_sent(state, reply_id, send_result={"ok": True, "verified": True}, now="2026-07-21T21:01:05")
+
+    second = {
+        **bubble,
+        "pending_signal_id": "pending-new-from-repoll",
+        "pending_since": "2026-07-21T21:01:06",
+        "last_detected_at": "2026-07-21T21:01:07",
+    }
+    replay = record_capture_result(
+        state,
+        "许聪",
+        messages=[second],
+        batch=[second],
+        conversation_type="private",
+        session_key="wx:rpa:v1:stable-short-bubble",
+        now="2026-07-21T21:01:08",
+    )
+    assert_equal(replay.get("status"), "empty", "a re-poll of the same short OCR bubble must not create a new turn")
+    replay_session = session_by_name(state, "许聪")
+    assert_equal(replay_session.get("pending_message_count"), 0, "same visible bubble must have no pending input")
+    assert_equal(replay_session.get("context_version"), 1, "same visible bubble must not advance context version")
+
+
+def check_scheduler_capture_filters_title_metadata_but_keeps_same_text_body() -> None:
+    state = empty_state()
+    title_row = {
+        "id": "win32_ocr:active-title-row",
+        "type": "text",
+        "sender": "customer",
+        "sender_role": "customer",
+        "content": "许聪",
+        "target_name": "许聪",
+        "source_adapter": "win32_ocr",
+        "bubble_rect": {"left": 430, "top": 112, "right": 476, "bottom": 136},
+    }
+    title_capture = record_capture_result(
+        state,
+        "许聪",
+        messages=[title_row],
+        batch=[title_row],
+        conversation_type="private",
+        session_key="wx:rpa:v1:title-filter",
+        now="2026-07-21T21:02:00",
+    )
+    assert_equal(title_capture.get("status"), "empty", "active chat title must not become a customer turn")
+    assert_equal(title_capture.get("batch"), [], "title metadata must be excluded from the Brain batch")
+
+    real_body = {**title_row, "id": "win32_ocr:real-name-body", "bubble_rect": {"left": 430, "top": 260, "right": 476, "bottom": 292}}
+    body_capture = record_capture_result(
+        state,
+        "许聪",
+        messages=[real_body],
+        batch=[real_body],
+        conversation_type="private",
+        session_key="wx:rpa:v1:title-filter",
+        now="2026-07-21T21:02:01",
+    )
+    assert_equal(body_capture.get("status"), "captured", "same text in a normal chat bubble must remain eligible")
+
+
 def check_scheduler_capture_filters_non_text_messages_for_normal_customer_session() -> None:
     state = empty_state()
     image_message = {
@@ -6002,6 +6096,76 @@ def check_pending_signal_identity_controls_visual_reply_freshness() -> None:
         newer_event.get("reason"),
         "scheduler_pending_signal_mismatch_before_send",
         "new event should use identity mismatch path",
+    )
+
+
+def check_pending_signal_mismatch_for_same_captured_bubble_is_not_stale() -> None:
+    with tempfile.TemporaryDirectory() as temp:
+        root = Path(temp)
+        config_path = root / "listener_config.json"
+        config_path.write_text(
+            json.dumps(
+                {
+                    "state_path": str(root / "workflow_state.json"),
+                    "audit_log_path": str(root / "audit.jsonl"),
+                    "targets": [{"name": "许聪", "enabled": True, "exact": True}],
+                    "history_backfill": {"enabled": False},
+                    "scheduler_freshness": {"enabled": True, "mode": "preview_first"},
+                },
+                ensure_ascii=False,
+            ),
+            encoding="utf-8",
+        )
+        bridge = ManagedListenerSchedulerBridge(
+            tenant_id="unit_same_bubble_signal_drift",
+            config_path=config_path,
+            allow_send=False,
+            write_data=False,
+        )
+        try:
+            state = bridge.store.load()
+            session = scheduler_state_module.ensure_session(
+                state,
+                "许聪",
+                exact=True,
+                conversation_type="private",
+                session_key="wx:rpa:v1:same-bubble-signal-drift",
+                now="2026-07-21T21:03:00",
+            )
+            session.update(
+                {
+                    "pending_capture": True,
+                    "pending_signal_id": "pending-current-poll",
+                    "status": "capture_pending",
+                }
+            )
+            bridge.store.save(state)
+            message = {
+                "id": "win32_ocr:stable-short-bubble-freshness",
+                "type": "text",
+                "sender": "customer",
+                "content": "在吗？",
+                "source_adapter": "win32_ocr",
+                "bubble_rect": {"left": 485, "top": 260, "right": 560, "bottom": 292},
+                "pending_signal_id": "pending-old-capture",
+            }
+            result = bridge._preview_freshness_fastpath(
+                reply={
+                    "target_name": "许聪",
+                    "session_key": "wx:rpa:v1:same-bubble-signal-drift",
+                    "input_message_ids": [message_identity(message)],
+                    "_capture": {"batch": [message]},
+                },
+                target_name="许聪",
+                settings={"enabled": True, "mode": "preview_first", "preview_from_session_list_enabled": False},
+            )
+        finally:
+            bridge.shutdown()
+    assert_true(result.get("stale") is False, f"same captured bubble must not stale on polling id drift: {result}")
+    assert_equal(
+        result.get("reason"),
+        "scheduler_pending_signal_matches_capture_fast_pass",
+        "same captured bubble should use the identity fast path",
     )
 
 
@@ -10464,6 +10628,8 @@ def run_checks() -> dict[str, Any]:
         check_scheduler_image_pending_signal_reaches_read_only_planner,
         check_scheduler_capture_filters_self_only_normal_customer_session,
         check_scheduler_capture_allows_new_occurrence_of_same_short_probe,
+        check_scheduler_capture_dedupes_same_short_ocr_bubble_when_pending_signal_changes,
+        check_scheduler_capture_filters_title_metadata_but_keeps_same_text_body,
         check_scheduler_capture_filters_non_text_messages_for_normal_customer_session,
         check_scheduler_authorizes_customer_image_proxy_only_for_image_capture,
         check_scheduler_capture_filters_visual_ocr_text_without_keyword_blocking,
@@ -10495,6 +10661,7 @@ def run_checks() -> dict[str, Any]:
         check_managed_bridge_pending_capture_same_signal_does_not_stale_ready_reply,
         check_pending_signal_id_is_stable_only_inside_one_pending_window,
         check_pending_signal_identity_controls_visual_reply_freshness,
+        check_pending_signal_mismatch_for_same_captured_bubble_is_not_stale,
         check_managed_bridge_freshness_session_list_preview_fast_pass_without_monitor,
         check_managed_bridge_freshness_session_list_mismatch_falls_back_to_strict_scan,
         check_managed_bridge_freshness_session_list_mismatch_soft_pass_by_default,
