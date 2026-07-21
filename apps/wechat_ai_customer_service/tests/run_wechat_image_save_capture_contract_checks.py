@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import json
 import sys
 import tempfile
@@ -24,10 +25,8 @@ from apps.wechat_ai_customer_service.adapters.wechat_image_save_capture import (
     find_copy_menu_item,
     save_clipboard_image_to_path,
 )
+from apps.wechat_ai_customer_service.adapters import wechat_win32_ocr_sidecar  # noqa: E402
 from apps.wechat_ai_customer_service.adapters.wechat_win32_ocr.geometry import session_split_x  # noqa: E402
-from apps.wechat_ai_customer_service.optional_plugins.vision.capture.surface import (  # noqa: E402
-    self_visual_image_messages_from_current_surface,
-)
 
 
 def main() -> int:
@@ -38,7 +37,7 @@ def main() -> int:
         check_self_copy_transaction_selects_only_self_side,
         check_current_copy_requires_clipboard_generation_change,
         check_legacy_file_entrypoints_are_rejected,
-        check_pr28_sidecar_image_residual_is_runtime_quarantined,
+        check_legacy_sidecar_action_rejects_before_platform_probe,
     ]
     results: list[dict[str, Any]] = []
     for check in checks:
@@ -71,7 +70,7 @@ def check_structure_locator_excludes_self_image() -> None:
 
 
 def check_self_structural_observation_is_metadata_only() -> None:
-    messages = self_visual_image_messages_from_current_surface(
+    messages = wechat_win32_ocr_sidecar.self_visual_image_messages_from_current_surface(
         _customer_image_surface(),
         [],
         [],
@@ -246,29 +245,20 @@ def check_legacy_file_entrypoints_are_rejected() -> None:
     assert_equal(payload_result.get("state"), "legacy_image_file_capture_rejected", "legacy payload builder is fail-closed")
 
 
-def check_pr28_sidecar_image_residual_is_runtime_quarantined() -> None:
-    from apps.wechat_ai_customer_service.adapters import wechat_win32_ocr_sidecar
-    from apps.wechat_ai_customer_service.adapters.wechat_pr28_runtime_adapter import (
-        adapt_wechat_pr28_connector,
-    )
+def check_legacy_sidecar_action_rejects_before_platform_probe() -> None:
+    original_probe = wechat_win32_ocr_sidecar.ensure_visible_wechat_window
 
-    assert_true(hasattr(wechat_win32_ocr_sidecar, "execute_wechat_image_save"), "audited PR image residual changed unexpectedly")
-    assert_true(hasattr(wechat_win32_ocr_sidecar, "execute_wechat_clipboard_image_copy"), "audited PR clipboard residual changed unexpectedly")
+    def forbidden_probe(*_args: Any, **_kwargs: Any) -> dict[str, Any]:
+        raise AssertionError("legacy image-save must not begin a window probe")
 
-    class LegacyTrap:
-        def call_compat_sidecar(self, _args: list[str], **_kwargs: Any) -> dict[str, Any]:
-            return {"ok": True}
-
-        def run_customer_clipboard_image_transaction(self, *_args: Any, **_kwargs: Any) -> dict[str, Any]:
-            raise AssertionError("PR legacy image action became reachable")
-
-        def run_self_clipboard_image_transaction(self, *_args: Any, **_kwargs: Any) -> dict[str, Any]:
-            raise AssertionError("PR legacy self-image action became reachable")
-
-    connector = adapt_wechat_pr28_connector(LegacyTrap())
-    result = connector.run_customer_clipboard_image_transaction("Image Customer")
-    assert_equal(result.get("state"), "pr28_legacy_image_entry_quarantined", "PR residual must be fail-closed")
-    assert_equal(result.get("reason"), "vision_owned_transaction_required", "Vision must remain the only production owner")
+    wechat_win32_ocr_sidecar.ensure_visible_wechat_window = forbidden_probe
+    try:
+        result = wechat_win32_ocr_sidecar.run_action(
+            argparse.Namespace(action="image-save", target="Customer A", session_key="wx:legacy")
+        )
+    finally:
+        wechat_win32_ocr_sidecar.ensure_visible_wechat_window = original_probe
+    assert_equal(result.get("state"), "unsupported_action", "retired sidecar action is absent before platform work")
 
 
 def assert_true(value: bool, message: str) -> None:

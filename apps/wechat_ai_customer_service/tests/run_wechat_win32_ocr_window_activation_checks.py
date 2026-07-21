@@ -135,7 +135,8 @@ class PatchActivation:
         os.environ["WECHAT_WIN32_OCR_AGGRESSIVE_FOCUS"] = "1" if self.aggressive else "0"
         os.environ["WECHAT_WIN32_OCR_ATTACH_THREAD_INPUT"] = "1" if self.attach else "0"
         self.originals = {
-            "windll": sidecar.ctypes.windll,
+            "had_windll": hasattr(sidecar.ctypes, "windll"),
+            "windll": getattr(sidecar.ctypes, "windll", None),
             "win32gui": sidecar.win32gui,
             "win32process": sidecar.win32process,
             "win32api": sidecar.win32api,
@@ -170,7 +171,10 @@ class PatchActivation:
         return self
 
     def __exit__(self, _exc_type, _exc, _tb) -> None:
-        sidecar.ctypes.windll = self.originals["windll"]
+        if self.originals["had_windll"]:
+            sidecar.ctypes.windll = self.originals["windll"]
+        else:
+            delattr(sidecar.ctypes, "windll")
         sidecar.win32gui = self.originals["win32gui"]
         sidecar.win32process = self.originals["win32process"]
         sidecar.win32api = self.originals["win32api"]

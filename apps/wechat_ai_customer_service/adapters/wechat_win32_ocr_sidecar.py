@@ -169,74 +169,6 @@ from apps.wechat_ai_customer_service.adapters.wechat_win32_ocr import windowing 
 from apps.wechat_ai_customer_service.adapters.wechat_win32_ocr import add_friend_windows as win32_ocr_add_friend_windows
 
 
-def execute_wechat_image_save(
-    *,
-    hwnd: int,
-    probe: dict[str, Any],
-    target_name: str,
-    session_key: str = "",
-    exact: bool = True,
-    artifact_dir: str | Path | None = None,
-    tenant_id: str = "",
-    source_preview: str = "",
-    speaker_name: str = "",
-    max_images: int = 1,
-    side_filter: str = "customer",
-    capture_mode: str = "context_menu",
-    pending_signal_id: str = "",
-    sidecar_ops: Any,
-) -> dict[str, Any]:
-    from apps.wechat_ai_customer_service.adapters.wechat_image_save_capture import (
-        execute_wechat_image_save as execute_image_save,
-    )
-
-    return execute_image_save(
-        hwnd=hwnd,
-        probe=probe,
-        target_name=target_name,
-        session_key=session_key,
-        exact=exact,
-        artifact_dir=artifact_dir,
-        tenant_id=tenant_id,
-        source_preview=source_preview,
-        speaker_name=speaker_name,
-        max_images=max_images,
-        side_filter=side_filter,
-        capture_mode=capture_mode,
-        pending_signal_id=pending_signal_id,
-        sidecar_ops=sidecar_ops,
-    )
-
-
-def execute_wechat_clipboard_image_copy(
-    *,
-    hwnd: int,
-    probe: dict[str, Any],
-    target_name: str,
-    session_key: str = "",
-    exact: bool = True,
-    source_preview: str = "",
-    speaker_name: str = "",
-    pending_signal_id: str = "",
-    side_filter: str = "customer",
-    sidecar_ops: Any,
-) -> dict[str, Any]:
-    from apps.wechat_ai_customer_service.adapters.wechat_image_save_capture import (
-        execute_wechat_clipboard_image_copy as execute_clipboard_copy,
-    )
-
-    return execute_clipboard_copy(
-        hwnd=hwnd,
-        probe=probe,
-        target_name=target_name,
-        session_key=session_key,
-        exact=exact,
-        source_preview=source_preview,
-        speaker_name=speaker_name,
-        pending_signal_id=pending_signal_id,
-        side_filter=side_filter,
-        sidecar_ops=sidecar_ops,
-    )
 
 try:
     from rapidocr_onnxruntime import RapidOCR
@@ -591,13 +523,6 @@ def main() -> int:
     parser.add_argument("--restore-to-latest", dest="restore_to_latest", action="store_true", default=None)
     parser.add_argument("--no-restore-to-latest", dest="restore_to_latest", action="store_false")
     parser.add_argument("--artifact-dir", help="Optional directory for debug screenshots.")
-    parser.add_argument("--source-preview", default="", help="Session-list image preview text for image-save.")
-    parser.add_argument("--speaker-name", default="", help="Group speaker name from image preview.")
-    parser.add_argument("--pending-signal-id", default="", help="Durable scheduler signal id for one visual message turn.")
-    parser.add_argument("--max-images", type=int, default=1, help="Maximum images to save for image-save.")
-    parser.add_argument("--side-filter", default="customer", choices=("customer", "self", "all"), help="Which visual image bubble side to save.")
-    parser.add_argument("--capture-mode", default="context_menu", choices=("context_menu", "crop"), help="How image-save archives image bubbles.")
-    parser.add_argument("--tenant-id", default="", help="Tenant id for image-save asset isolation.")
     args = parser.parse_args()
 
     captured = io.StringIO()
@@ -868,21 +793,19 @@ def ensure_session_candidate_click_geometry(candidate: dict[str, Any]) -> dict[s
 
 def run_action(args: argparse.Namespace) -> dict[str, Any]:
     action = str(args.action or "").strip().lower()
-    if action == "image-save":
-        # This is a frozen compatibility command only.  Reject it before any
-        # platform import, window probing, OCR, activation, or quick-login
-        # handling so a legacy caller cannot cause incidental RPA activity.
-        return {
-            "ok": False,
-            "online": True,
-            "adapter": "win32_ocr",
-            "state": "legacy_image_file_capture_rejected",
-            "reason": "clipboard_current_transaction_required",
-            "target": str(getattr(args, "target", "") or ""),
-            "session_key": str(getattr(args, "session_key", "") or ""),
-            "assets": [],
-            "messages": [],
-        }
+    supported_actions = {
+        "status",
+        "capabilities",
+        "recover-render",
+        "sessions",
+        "open-chat",
+        "messages",
+        "voice-transcribe",
+        "send",
+        *ADD_FRIEND_ROUTES,
+    }
+    if action not in supported_actions:
+        return {"ok": False, "online": False, "adapter": "win32_ocr", "state": "unsupported_action"}
     if action in ADD_FRIEND_ROUTES:
         validation = validate_add_friend_entry_click_contract(
             phone=str(args.phone or ""),
@@ -4681,6 +4604,63 @@ def normalized_voice_sender_role(value: Any) -> str:
     return "unknown"
 
 
+def voice_structural_anchor_key(
+    *,
+    role: str,
+    duration: str,
+    ordinal_from_bottom: int,
+) -> str:
+    seed = {
+        "side": normalized_voice_sender_role(role),
+        "duration": str(duration or "").strip(),
+        "ordinal_from_bottom": max(1, int(ordinal_from_bottom or 1)),
+    }
+    return "voice-structural:" + hashlib.sha1(
+        json.dumps(seed, ensure_ascii=False, sort_keys=True).encode("utf-8")
+    ).hexdigest()[:20]
+
+
+def attach_structural_voice_anchor_keys(messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Attach a position-independent parent identity to parsed voice rows."""
+
+    groups: dict[tuple[str, str], list[dict[str, Any]]] = {}
+    for message in messages:
+        if not isinstance(message, dict):
+            continue
+        if str(message.get("type") or message.get("message_type") or "").lower() not in {"voice", "audio"}:
+            continue
+        role = normalized_voice_sender_role(message.get("sender_role") or message.get("sender"))
+        duration = message_voice_duration_number(message)
+        if role not in {"customer", "self"} or not duration:
+            continue
+        groups.setdefault((role, duration), []).append(message)
+
+    def message_center_y(message: dict[str, Any]) -> float:
+        rect = message.get("bubble_rect")
+        if isinstance(rect, dict):
+            return (float(rect.get("top") or 0) + float(rect.get("bottom") or 0)) / 2.0
+        if isinstance(rect, (list, tuple)) and len(rect) >= 4:
+            return (float(rect[1]) + float(rect[3])) / 2.0
+        return 0.0
+
+    for (role, duration), group in groups.items():
+        for ordinal_from_bottom, message in enumerate(
+            sorted(group, key=message_center_y, reverse=True),
+            start=1,
+        ):
+            structural_key = voice_structural_anchor_key(
+                role=role,
+                duration=duration,
+                ordinal_from_bottom=ordinal_from_bottom,
+            )
+            message["voice_anchor_structural_key"] = structural_key
+            message["voice_anchor_key"] = structural_key
+            flags = set(message.get("quality_flags") or [])
+            if "untranscribed_voice_placeholder" not in flags:
+                message["parent_voice_anchor_key"] = structural_key
+    return messages
+
+
 def unified_voice_observation_rect(observation: dict[str, Any]) -> list[float] | None:
     rect = observation.get("bubble_rect")
     if isinstance(rect, dict):
@@ -4917,10 +4897,11 @@ def build_unified_voice_observations_v3(
             sorted(group, key=observation_center_y, reverse=True),
             start=1,
         ):
-            structural_seed = {"side": role, "duration": duration, "ordinal_from_bottom": ordinal_from_bottom}
-            structural_key = "voice-structural:" + hashlib.sha1(
-                json.dumps(structural_seed, ensure_ascii=False, sort_keys=True).encode("utf-8")
-            ).hexdigest()[:20]
+            structural_key = voice_structural_anchor_key(
+                role=role,
+                duration=duration,
+                ordinal_from_bottom=ordinal_from_bottom,
+            )
             observation["voice_anchor_structural_key"] = structural_key
             target = observation.get("action_target")
             if isinstance(target, dict):
@@ -5045,18 +5026,6 @@ def build_message_observations_v3(
             role = "customer"
         if role not in MESSAGE_OBSERVATION_SENDER_ROLES:
             role = "unknown"
-        avatar = message.get("avatar_alignment") if isinstance(message.get("avatar_alignment"), dict) else {}
-        evidence = message.get("sender_role_evidence") if isinstance(message.get("sender_role_evidence"), list) else []
-        if str(avatar.get("role") or "") == role and role in {"customer", "self"}:
-            role_source = "same_row_avatar"
-        elif "voice_transcript_inherits_parent_role" in evidence:
-            role_source = "parent_voice"
-        elif role in {"customer", "self"}:
-            role_source = "lane_geometry"
-        elif role == "system":
-            role_source = "system"
-        else:
-            role_source = "unknown"
         msg_type = str(message.get("type") or message.get("message_type") or "unknown").lower()
         quality_flags = message.get("quality_flags") if isinstance(message.get("quality_flags"), list) else []
         untranscribed = msg_type == "voice" and "untranscribed_voice_placeholder" in quality_flags
@@ -5079,11 +5048,27 @@ def build_message_observations_v3(
             row_kind = "unknown"
             voice_state = "not_voice"
         anchor_key = str(
-            message.get("voice_anchor_stable_key")
+            message.get("parent_voice_anchor_key")
+            or message.get("voice_anchor_structural_key")
+            or message.get("voice_anchor_stable_key")
             or message.get("voice_anchor_key")
             or ((message.get("voice_anchor") or {}).get("anchor_stable_key") if isinstance(message.get("voice_anchor"), dict) else "")
             or ""
         )
+        avatar = message.get("avatar_alignment") if isinstance(message.get("avatar_alignment"), dict) else {}
+        evidence = message.get("sender_role_evidence") if isinstance(message.get("sender_role_evidence"), list) else []
+        if row_kind == "voice_transcript":
+            role_source = "parent_voice" if anchor_key and role in {"customer", "self"} else "unknown"
+        elif str(avatar.get("role") or "") == role and role in {"customer", "self"}:
+            role_source = "same_row_avatar"
+        elif "voice_transcript_inherits_parent_role" in evidence and anchor_key:
+            role_source = "parent_voice"
+        elif role in {"customer", "self"}:
+            role_source = "lane_geometry"
+        elif role == "system":
+            role_source = "system"
+        else:
+            role_source = "unknown"
         observation_id = str(message.get("id") or "").strip() or f"ocr-observation-{index}"
         if observation_id in seen_ids:
             observation_id = f"{observation_id}:{index}"
@@ -6402,6 +6387,17 @@ def message_history_dedupe_base_key(message: dict[str, Any]) -> str:
     content = str(message.get("content") or "")
     compact = re.sub(r"[\s_\-:：，。,.；;\[\]（）()]+", "", content).lower()
     sender = str(message.get("sender") or "")
+    anchor = str(
+        message.get("parent_voice_anchor_key")
+        or message.get("voice_anchor_structural_key")
+        or message.get("voice_anchor_stable_key")
+        or message.get("voice_anchor_key")
+        or ""
+    ).strip()
+    if anchor:
+        flags = set(message.get("quality_flags") or [])
+        state = "untranscribed" if "untranscribed_voice_placeholder" in flags else "transcribed"
+        return f"{sender}:voice:{anchor}:{state}"
     if not compact:
         return ""
     return f"{sender}:{compact}"
@@ -6448,18 +6444,24 @@ def sidecar_message_content_key(message: dict[str, Any]) -> str:
     content = normalize_anchor_message_content(message.get("content"))
     if not content:
         return ""
+    anchor_key = str(
+        message.get("parent_voice_anchor_key")
+        or message.get("voice_anchor_structural_key")
+        or message.get("voice_anchor_stable_key")
+        or message.get("voice_anchor_key")
+        or ""
+    ).strip()
+    if anchor_key:
+        flags = set(message.get("quality_flags") or [])
+        state = "untranscribed" if "untranscribed_voice_placeholder" in flags else "transcribed"
+        return "\x1f".join(
+            [str(message.get("sender") or "").strip(), "voice", anchor_key, state]
+        )
     parts = [
         str(message.get("sender") or "").strip(),
         str(message.get("type") or "").strip(),
         content,
     ]
-    anchor_key = str(
-        message.get("voice_anchor_stable_key")
-        or message.get("voice_anchor_key")
-        or ""
-    ).strip()
-    if anchor_key:
-        parts.append(anchor_key)
     return "\x1f".join(parts)
 
 
@@ -9662,15 +9664,12 @@ def activate_session_candidate(
 
 
 def session_matches_key(session: dict[str, Any], session_key: str, conversation_type: str = "") -> bool:
+    """Match the stable physical key; type is retained as compatibility metadata."""
     expected = str(session_key or "").strip()
     if not expected:
         return False
     actual = str(session.get("session_key") or "").strip()
-    if not actual or actual != expected:
-        return False
-    expected_type = normalize_identity_conversation_type(conversation_type)
-    actual_type = str(session.get("conversation_type") or "").strip().lower()
-    return not expected_type or not actual_type or actual_type == expected_type
+    return bool(actual and actual == expected)
 
 
 def find_session_candidate_by_key(
@@ -11675,11 +11674,6 @@ def open_chat(
         and str(_LAST_RPA_ACTION_STATE.get("active_session_key") or "") == clean_session_key
         and active_matches
         and not force_session_row_resolution
-        and (
-            not clean_conversation_type
-            or not str(_LAST_RPA_ACTION_STATE.get("active_conversation_type") or "").strip()
-            or str(_LAST_RPA_ACTION_STATE.get("active_conversation_type") or "").strip().lower() == clean_conversation_type
-        )
     ):
         return finish(True, "active_session_key_match")
     parse_started = _sidecar_timing_start(timing, "open_chat_parse_sessions")
@@ -11986,7 +11980,6 @@ def open_chat_for_identity(
     normalized_conversation_type = normalize_identity_conversation_type(conversation_type)
     if normalized_conversation_type:
         kwargs["conversation_type"] = normalized_conversation_type
-        kwargs["force_session_row_resolution"] = True
     return open_chat(hwnd, target, **kwargs)
 
 
@@ -13549,14 +13542,47 @@ def parse_sessions_from_ocr(
             continue
         candidates.append(item)
 
-    sessions: list[dict[str, Any]] = []
-    last_y = -999.0
     min_session_row_gap = max(34, int(height * 0.048))
-    name_counts: dict[str, int] = {}
+    candidate_rows: list[list[dict[str, Any]]] = []
     for item in sorted(candidates, key=lambda row: float(row["center_y"])):
         center_y = float(item["center_y"])
-        if center_y - last_y < min_session_row_gap:
+        if not candidate_rows or center_y - float(candidate_rows[-1][0]["center_y"]) >= min_session_row_gap:
+            candidate_rows.append([item])
+        else:
+            candidate_rows[-1].append(item)
+
+    sessions: list[dict[str, Any]] = []
+    name_counts: dict[str, int] = {}
+    for row_candidates in candidate_rows:
+        row_top_y = min(float(row.get("center_y") or 0) for row in row_candidates)
+        title_band_tolerance = max(8.0, min(14.0, height * 0.014))
+        title_band = [
+            row
+            for row in row_candidates
+            if float(row.get("center_y") or 0) <= row_top_y + title_band_tolerance
+        ]
+        item = max(
+            title_band,
+            key=lambda row: (
+                float(row.get("left") or 0),
+                str(row.get("ocr_source") or "") != "sidebar_visible_list_enhanced",
+                float(row.get("confidence") or 0),
+                len(normalize_ocr_text(row.get("text"))),
+            ),
+        )
+        enhanced_title = str(item.get("ocr_source") or "") == "sidebar_visible_list_enhanced"
+        row_evidence_limit = max(28, int(height * 0.04))
+        base_row_evidence = [
+            evidence
+            for evidence in ocr_items
+            if str(evidence.get("ocr_source") or "") != "sidebar_visible_list_enhanced"
+            and min_header_y <= float(evidence.get("center_y") or 0) <= height - 20
+            and float(evidence.get("left") or 0) < right_limit
+            and abs(float(evidence.get("center_y") or 0) - float(item.get("center_y") or 0)) <= row_evidence_limit
+        ]
+        if enhanced_title and not base_row_evidence:
             continue
+        center_y = float(item["center_y"])
         name = normalize_session_name(str(item.get("text") or ""))
         # OCR occasionally glues sidebar timestamps into the session title
         # (e.g. "新数据测试昨天" or "新数据测试昨天19:23"),
@@ -13575,6 +13601,8 @@ def parse_sessions_from_ocr(
                 "name": name,
                 "session_key": rpa_session_key(name, conversation_type=conversation_type, row_fingerprint=row_fingerprint),
                 "conversation_type": conversation_type,
+                "title_candidate_source": str(item.get("ocr_source") or "base_ocr"),
+                "title_candidate_evidence_count": len(base_row_evidence),
                 "row_fingerprint": row_fingerprint,
                 "duplicate_name_index": duplicate_index,
                 "ambiguous_display_name": duplicate_index > 0,
@@ -13587,7 +13615,6 @@ def parse_sessions_from_ocr(
                 "source_adapter": "win32_ocr",
             }
         )
-        last_y = center_y
     enrich_sessions_with_sidebar_signals(
         sessions,
         ocr_items,
@@ -13606,9 +13633,13 @@ def parse_sessions_from_ocr(
 
 
 def rpa_session_key(name: str, *, conversation_type: str = "unknown", row_fingerprint: dict[str, Any] | None = None) -> str:
+    """Build a physical session key; conversation_type is compatibility metadata."""
+
     fingerprint = row_fingerprint if isinstance(row_fingerprint, dict) else {}
     duplicate = str(fingerprint.get("duplicate_discriminator") or "").strip()
-    seed = json.dumps([str(conversation_type or "unknown"), str(name or ""), duplicate], ensure_ascii=False, sort_keys=True)
+    # Keep the historical private namespace so existing private-chat keys stay
+    # stable while a later private/group correction cannot replace the key.
+    seed = json.dumps(["private", str(name or ""), duplicate], ensure_ascii=False, sort_keys=True)
     return "wx:rpa:v1:" + hashlib.sha256(seed.encode("utf-8")).hexdigest()[:20]
 
 
@@ -13800,6 +13831,69 @@ def call_event_text_like(text: str) -> bool:
     )
 
 
+def _active_header_has_structural_group_count(
+    ocr_items: list[dict[str, Any]],
+    image_size: tuple[int, int],
+    *,
+    target: str,
+) -> bool:
+    """Treat an active-title member count as structural group evidence."""
+
+    width, height = image_size
+    normalized_target = normalize_session_name(target)
+    if not normalized_target:
+        return False
+    left_bound = active_chat_title_left_x(width) - 24
+    right_bound = active_chat_title_right_x(width) + 24
+    top_bound = active_chat_title_top_y(height) - 8
+    bottom_bound = active_chat_title_bottom_y(height) + 8
+    for item in ocr_items or []:
+        text = normalize_ocr_text(item.get("text"))
+        count_match = re.search(r"[（(]\s*(\d+)\s*[)）]\s*$", text)
+        if not text or count_match is None or int(count_match.group(1)) < 2:
+            continue
+        center_x = float(item.get("center_x") or 0)
+        center_y = float(item.get("center_y") or 0)
+        if not (left_bound <= center_x <= right_bound and top_bound <= center_y <= bottom_bound):
+            continue
+        if session_name_matches(normalize_chat_title_for_match(text), normalized_target, exact=True):
+            return True
+    return False
+
+
+def _strip_structural_group_speaker_prefix(
+    content: str,
+    group: list[dict[str, Any]],
+    *,
+    side: str,
+    conversation_type: str,
+) -> tuple[str, str]:
+    """Split a layout-confirmed group speaker label from message content."""
+
+    if conversation_type != "group" or side == "self" or len(group) < 2:
+        return content, ""
+    first = group[0]
+    second = group[1]
+    first_text = normalize_message_content(str(first.get("text") or ""))
+    if not first_text or "\n" in first_text or len(first_text) > 24:
+        return content, ""
+    if re.search(r"[。！？!?；;：:]", first_text):
+        return content, ""
+    vertical_gap = float(second.get("top") or 0) - float(first.get("bottom") or 0)
+    left_delta = abs(float(second.get("left") or 0) - float(first.get("left") or 0))
+    first_height = max(1.0, float(first.get("bottom") or 0) - float(first.get("top") or 0))
+    second_height = max(1.0, float(second.get("bottom") or 0) - float(second.get("top") or 0))
+    if vertical_gap < -3.0 or vertical_gap > 14.0 or left_delta > 42.0:
+        return content, ""
+    if first_height > max(30.0, second_height * 1.35):
+        return content, ""
+    lines = [line.strip() for line in str(content or "").splitlines() if line.strip()]
+    if len(lines) < 2 or normalize_message_content(lines[0]) != first_text:
+        return content, ""
+    stripped = "\n".join(lines[1:]).strip()
+    return (stripped, first_text) if stripped else (content, "")
+
+
 def parse_messages_from_ocr(
     ocr_items: list[dict[str, Any]],
     image_size: tuple[int, int],
@@ -13813,6 +13907,8 @@ def parse_messages_from_ocr(
     split_x = session_split_x(width)
     header_cutoff = chat_header_cutoff_y(height)
     normalized_conversation_type = str(conversation_type or "").strip().lower() or infer_conversation_type(target)
+    if _active_header_has_structural_group_count(ocr_items, image_size, target=target):
+        normalized_conversation_type = "group"
     geometry = {"left": 0, "top": 0, "right": width, "bottom": height, "width": width, "height": height}
     bottom_exclude_px = bounded_int(
         os.getenv("WECHAT_WIN32_OCR_MESSAGE_BOTTOM_EXCLUDE_PX"),
@@ -13977,6 +14073,16 @@ def parse_messages_from_ocr(
         if voice_duration_prefix_removed:
             quality_flags.append("voice_duration_prefix_removed")
             is_voice_transcript = True
+        content, structural_speaker_name = _strip_structural_group_speaker_prefix(
+            content,
+            group,
+            side=side,
+            conversation_type=normalized_conversation_type,
+        )
+        if not content:
+            continue
+        if structural_speaker_name:
+            quality_flags.append("speaker_prefix_split_from_ocr_text")
         if is_untranscribed_voice:
             quality_flags.append("untranscribed_voice_placeholder")
         is_call_event = call_event_text_like(content)
@@ -13992,7 +14098,11 @@ def parse_messages_from_ocr(
                 quality_flags.append("multi_bubble_possible_merge")
         ocr_confidence = min(float(item.get("confidence") or 0) for item in group)
         digest = hashlib.sha1(f"{target}|{side}|{round(y)}|{content}".encode("utf-8")).hexdigest()[:16]
-        sender, sender_role = sender_fields_for_message_side(side, target=target)
+        sender, sender_role = sender_fields_for_message_side(
+            side,
+            target=target,
+            conversation_type=normalized_conversation_type,
+        )
         avatar_alignment = next(
             (
                 item.get("avatar_alignment")
@@ -14011,6 +14121,8 @@ def parse_messages_from_ocr(
             "sender_role_algorithm": str(group[0].get("sender_role_algorithm") or "wechat_win32_bubble_role_v2"),
             "sender_role_confidence": float(group[0].get("sender_role_confidence") or 0.0),
             "sender_role_evidence": list(group[0].get("sender_role_evidence") or []),
+            "speaker_name": structural_speaker_name,
+            "group_member_name": structural_speaker_name,
             "content": content,
             "content_raw_ocr": raw_content,
             "time": "",
@@ -14036,7 +14148,7 @@ def parse_messages_from_ocr(
         message = apply_message_envelope_to_record(record, envelope)
         if str(message.get("content") or "").strip():
             messages.append(message)
-    return messages
+    return attach_structural_voice_anchor_keys(messages)
 
 
 def classify_message_side(item: dict[str, Any], *, width: int) -> str:
@@ -15036,7 +15148,7 @@ def normalize_wechat_window(hwnd: int) -> dict[str, Any]:
         return {"ok": True, "enabled": False, "applied": False, "before": before}
 
     enforce_recommended = env_flag("WECHAT_WIN32_OCR_ENFORCE_RECOMMENDED_WINDOW", default=True)
-    fixed_origin = env_flag("WECHAT_WIN32_OCR_WINDOW_FIXED_ORIGIN", default=False)
+    fixed_origin = env_flag("WECHAT_WIN32_OCR_WINDOW_FIXED_ORIGIN", default=True)
     try:
         user32 = ctypes.windll.user32
         screen_width = int(user32.GetSystemMetrics(0) or 0)
@@ -15242,23 +15354,6 @@ def args_for_daemon_request(request: dict[str, Any]) -> list[str]:
             argv.append("--restore-to-latest")
         elif request.get("restore_to_latest") is False:
             argv.append("--no-restore-to-latest")
-    if action in {"image-save", "image-clipboard-copy"}:
-        for key, flag in (
-            ("source_preview", "--source-preview"),
-            ("speaker_name", "--speaker-name"),
-            ("pending_signal_id", "--pending-signal-id"),
-            ("tenant_id", "--tenant-id"),
-            ("side_filter", "--side-filter"),
-            ("capture_mode", "--capture-mode"),
-        ):
-            value = str(request.get(key) or "").strip()
-            if value:
-                argv.extend([flag, value])
-        if "max_images" in request:
-            try:
-                argv.extend(["--max-images", str(max(1, min(int(request.get("max_images") or 1), 8)))])
-            except (TypeError, ValueError):
-                argv.extend(["--max-images", "1"])
     artifact_dir = str(request.get("artifact_dir") or "").strip()
     if artifact_dir:
         argv.extend(["--artifact-dir", artifact_dir])
@@ -15349,13 +15444,6 @@ def run_sidecar_cli(argv: list[str] | None = None) -> dict[str, Any]:
         default="",
         help="Optional directory for OCR screenshots and diagnostics.",
     )
-    parser.add_argument("--source-preview", default="", help="Session-list image preview text for image-save.")
-    parser.add_argument("--speaker-name", default="", help="Group speaker name from image preview.")
-    parser.add_argument("--pending-signal-id", default="", help="Durable scheduler signal id for one visual message turn.")
-    parser.add_argument("--max-images", type=int, default=1, help="Maximum images to save for image-save.")
-    parser.add_argument("--side-filter", default="customer", choices=("customer", "self", "all"), help="Which visual image bubble side to save.")
-    parser.add_argument("--capture-mode", default="context_menu", choices=("context_menu", "crop"), help="How image-save archives image bubbles.")
-    parser.add_argument("--tenant-id", default="", help="Tenant id for image-save asset isolation.")
     parser.add_argument("--daemon", action="store_true", help="Run as stdin/stdout JSON daemon.")
     args = parser.parse_args(argv)
     if args.daemon:

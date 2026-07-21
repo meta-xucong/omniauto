@@ -777,6 +777,13 @@ def build_image_saved_payload(
         visual_index,
         capture_detection,
     )
+    return {
+        "ok": False,
+        "state": "legacy_image_file_capture_rejected",
+        "reason": "clipboard_current_transaction_required",
+        "assets": [],
+        "messages": [],
+    }
 
 
 def _latest_visual_bubble(bubbles: list[dict[str, Any]] | None) -> dict[str, Any]:
@@ -801,13 +808,6 @@ def _latest_visual_bubble(bubbles: list[dict[str, Any]] | None) -> dict[str, Any
         return bottom, top, float(item.get("score") or 0.0)
 
     return dict(max(candidates, key=position))
-    return {
-        "ok": False,
-        "state": "legacy_image_file_capture_rejected",
-        "reason": "clipboard_current_transaction_required",
-        "assets": [],
-        "messages": [],
-    }
 
 
 def build_visual_bubble_archive_payload(

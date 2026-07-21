@@ -282,7 +282,8 @@ def test_try_image_grab_matches_sidecar_for_small_rect_success_and_failure() -> 
 def run_sidecar_capture_window_image_with_fixture(fixture: PrintWindowFixture, image_factory: FakeImageFactory):
     original_win32gui = sidecar.win32gui
     original_win32ui = sidecar.win32ui
-    original_windll = sidecar.ctypes.windll
+    had_windll = hasattr(sidecar.ctypes, "windll")
+    original_windll = getattr(sidecar.ctypes, "windll", None)
     original_frombuffer = sidecar.Image.frombuffer
     try:
         sidecar.win32gui = fixture.win32gui
@@ -293,7 +294,10 @@ def run_sidecar_capture_window_image_with_fixture(fixture: PrintWindowFixture, i
     finally:
         sidecar.win32gui = original_win32gui
         sidecar.win32ui = original_win32ui
-        sidecar.ctypes.windll = original_windll
+        if had_windll:
+            sidecar.ctypes.windll = original_windll
+        else:
+            delattr(sidecar.ctypes, "windll")
         sidecar.Image.frombuffer = original_frombuffer
 
 

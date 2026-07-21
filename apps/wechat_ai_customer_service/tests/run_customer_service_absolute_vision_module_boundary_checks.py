@@ -110,7 +110,8 @@ def check_pr28_blobs_and_legacy_vision_paths_are_quarantined() -> None:
     connector = "apps/wechat_ai_customer_service/adapters/wechat_connector.py"
     sidecar = _source("apps/wechat_ai_customer_service/adapters/wechat_win32_ocr_sidecar.py")
     assert_true(
-        "image-clipboard-copy" in sidecar and '"image-save"' in sidecar,
+        "def self_visual_image_messages_from_current_surface(" in sidecar
+        and "from apps.wechat_ai_customer_service.adapters.wechat_image_save_capture import" in sidecar,
         "audited PR residual unexpectedly changed; re-audit the PR head instead of hiding it",
     )
     integration = _source(
