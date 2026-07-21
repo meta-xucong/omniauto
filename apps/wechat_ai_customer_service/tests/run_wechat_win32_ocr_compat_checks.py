@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import ast
+import inspect
 import json
 import os
 from pathlib import Path
@@ -331,6 +332,70 @@ def test_sidecar_facade_exports_contract_surface() -> None:
         assert_true(callable(exported), f"sidecar facade should keep callable export {name}")
 
 
+def test_sidecar_additive_callable_defaults_are_frozen() -> None:
+    expected_defaults = {
+        "capture_message_history_snapshots": {
+            "conversation_type": "",
+            "include_untranscribed_voice_placeholders": False,
+        },
+        "capture_message_history_snapshots_until_anchor": {
+            "include_untranscribed_voice_placeholders": False,
+        },
+        "consume_recent_target_switch_validation": {
+            "ttl_seconds": None,
+            "minimum_cached_at": None,
+            "require_session_key_match": False,
+        },
+        "dismiss_voice_transcribe_context_menu": {
+            "artifact_dir": None,
+            "label": "voice_transcribe_context_menu_dismissed",
+            "menu_bounds": None,
+        },
+        "messages_payload": {
+            "confirm_target": "",
+            "confirm_exact": False,
+            "include_untranscribed_voice_placeholders": False,
+        },
+        "open_chat": {
+            "session_key": "",
+            "conversation_type": "",
+            "force_session_row_resolution": False,
+            "semantic_target": "",
+        },
+        "parse_messages_from_ocr": {
+            "conversation_type": "",
+            "screenshot": None,
+            "include_untranscribed_voice_placeholders": False,
+        },
+        "validate_active_send_target": {
+            "session_key": "",
+            "conversation_type": "",
+            "screenshot": None,
+            "ocr_items": None,
+            "screenshot_path": "",
+        },
+        "voice_transcribe_payload": {
+            "conversation_type": "",
+            "max_duration_seconds": 240,
+            "confirm_target": "",
+            "confirm_exact": False,
+        },
+    }
+    for callable_name, defaults in expected_defaults.items():
+        signature = inspect.signature(getattr(sidecar_module, callable_name))
+        for parameter_name, expected_default in defaults.items():
+            parameter = signature.parameters.get(parameter_name)
+            assert_true(parameter is not None, f"{callable_name} missing contract parameter {parameter_name}")
+            assert_true(
+                parameter.kind is inspect.Parameter.KEYWORD_ONLY,
+                f"{callable_name}.{parameter_name} must remain keyword-only: {signature}",
+            )
+            assert_true(
+                parameter.default == expected_default,
+                f"{callable_name}.{parameter_name} default changed: {signature}",
+            )
+
+
 def test_run_sidecar_cli_accepts_visible_session_candidate() -> None:
     import apps.wechat_ai_customer_service.adapters.wechat_win32_ocr_sidecar as sidecar_module
 
@@ -431,6 +496,8 @@ def test_sidebar_visible_list_enhanced_ocr_recovers_pinned_gray_sessions() -> No
         ]
 
     full_ocr_items = [
+        {"text": "10:20", "confidence": 0.99, "left": 280, "right": 322, "top": 96, "bottom": 116, "center_x": 301, "center_y": 106},
+        {"text": "[图片]", "confidence": 0.96, "left": 154, "right": 200, "top": 174, "bottom": 196, "center_x": 177, "center_y": 185},
         {"text": "★钢岚、奶哥1群", "confidence": 0.99, "left": 154, "right": 300, "top": 274, "bottom": 298, "center_x": 227, "center_y": 286},
     ]
     enhanced = sidebar_visible_list_enhanced_ocr_items(image, (980, 860), ocr_runner=fake_ocr_runner)
@@ -438,6 +505,44 @@ def test_sidebar_visible_list_enhanced_ocr_recovers_pinned_gray_sessions() -> No
     names = [item["name"] for item in sessions]
     assert_true(names[:2] == ["CJR8S5K3虾丸子大..", "CJTOP02第二个置顶"], f"enhanced OCR should recover all pinned gray rows: {names}")
     assert_true(enhanced and enhanced[0].get("ocr_source") == "sidebar_visible_list_enhanced", f"enhanced OCR source should be marked: {enhanced}")
+
+
+def test_parse_sessions_rejects_unanchored_enhanced_candidates() -> None:
+    enhanced_only = [
+        {"text": "7", "confidence": 0.99, "left": 118, "right": 132, "top": 112, "bottom": 132, "center_x": 125, "center_y": 122, "ocr_source": "sidebar_visible_list_enhanced"},
+        {"text": "伪会话", "confidence": 0.98, "left": 154, "right": 220, "top": 198, "bottom": 222, "center_x": 187, "center_y": 210, "ocr_source": "sidebar_visible_list_enhanced"},
+    ]
+    assert_true(
+        parse_sessions_from_ocr(enhanced_only, (980, 860)) == [],
+        "enhanced OCR without same-row base evidence must never create clickable sessions",
+    )
+
+
+def test_parse_sessions_prefers_structural_title_over_same_row_badge() -> None:
+    items = [
+        {"text": "7", "confidence": 0.999, "left": 118, "right": 132, "top": 116, "bottom": 136, "center_x": 125, "center_y": 126, "ocr_source": "sidebar_visible_list_enhanced"},
+        {"text": "真实会话", "confidence": 0.97, "left": 154, "right": 228, "top": 114, "bottom": 140, "center_x": 191, "center_y": 127},
+    ]
+    sessions = parse_sessions_from_ocr(items, (980, 860))
+    assert_true([item["name"] for item in sessions] == ["真实会话"], f"same-row badge must not replace the title: {sessions}")
+    assert_true(sessions[0].get("title_candidate_source") == "base_ocr", f"title source should remain auditable: {sessions}")
+
+
+def test_parse_sessions_keeps_title_above_longer_preview_text() -> None:
+    items = [
+        {"text": "真实会话", "confidence": 0.97, "left": 154, "right": 228, "top": 114, "bottom": 138, "center_x": 191, "center_y": 126},
+        {"text": "这是一段更长并且更靠右的消息预览", "confidence": 0.99, "left": 160, "right": 326, "top": 143, "bottom": 165, "center_x": 243, "center_y": 154},
+    ]
+    sessions = parse_sessions_from_ocr(items, (980, 860))
+    assert_true([item["name"] for item in sessions] == ["真实会话"], f"preview must not replace the title above it: {sessions}")
+    assert_true(sessions[0].get("preview") == items[1]["text"], f"preview should remain attached to the title row: {sessions}")
+
+
+def test_rpa_session_key_ignores_conversation_type_drift() -> None:
+    fingerprint = {"duplicate_discriminator": ""}
+    private_key = sidecar_module.rpa_session_key("同一会话", conversation_type="private", row_fingerprint=fingerprint)
+    group_key = sidecar_module.rpa_session_key("同一会话", conversation_type="group", row_fingerprint=fingerprint)
+    assert_true(private_key == group_key, "semantic private/group correction must not replace the physical key")
 
 
 def test_parse_sessions_detects_visual_unread_red_dot() -> None:
@@ -921,6 +1026,81 @@ def test_parse_messages_strips_voice_duration_prefix_after_transcription() -> No
     assert_true("voice_duration_prefix_removed" in light_messages[0]["quality_flags"], f"cleanup should be auditable: {light_messages}")
 
 
+def test_final_message_parse_attaches_parent_anchor_to_visible_transcripts() -> None:
+    image = Image.new("RGB", (981, 860), (247, 247, 247))
+    items = [
+        make_ocr_item('23"', 486, 172, 545, 200),
+        make_ocr_item("The first voice transcript continues here", 485, 225, 790, 248),
+        make_ocr_item('5"', 487, 458, 534, 484),
+        make_ocr_item("The second voice transcript", 486, 512, 740, 536),
+    ]
+
+    def avatar_role(_image, bounds, _image_size):
+        top = int(bounds[1])
+        if top in {172, 458}:
+            return {"role": "customer", "side": "left", "confidence": 0.99}
+        return {"role": "", "side": "", "confidence": 0.0}
+
+    with patch.object(sidecar_module, "message_row_avatar_role_details", side_effect=avatar_role):
+        messages = parse_messages_from_ocr(items, image.size, target="DEMO1234 Contact", screenshot=image)
+
+    assert_true([message.get("voice_duration") for message in messages] == [23, 5], f"unexpected parsed voices: {messages}")
+    parent_keys = [str(message.get("parent_voice_anchor_key") or "") for message in messages]
+    assert_true(all(key.startswith("voice-structural:") for key in parent_keys), f"parent anchors missing: {messages}")
+    assert_true(len(set(parent_keys)) == 2, f"distinct voices need distinct parent anchors: {messages}")
+    observations = build_message_observations_v3(messages)
+    assert_true(
+        [item.get("sender_role_source") for item in observations] == ["parent_voice", "parent_voice"],
+        f"transcript roles must inherit the parent voice: {observations}",
+    )
+
+
+def test_equal_duration_voice_anchors_ignore_absolute_vertical_shift() -> None:
+    first_frame = [
+        {"type": "voice", "sender_role": "customer", "voice_duration": 5, "bubble_rect": {"top": 180, "bottom": 240}, "quality_flags": []},
+        {"type": "voice", "sender_role": "customer", "voice_duration": 5, "bubble_rect": {"top": 420, "bottom": 480}, "quality_flags": []},
+    ]
+    shifted_frame = [
+        {"type": "voice", "sender_role": "customer", "voice_duration": 5, "bubble_rect": {"top": 80, "bottom": 140}, "quality_flags": []},
+        {"type": "voice", "sender_role": "customer", "voice_duration": 5, "bubble_rect": {"top": 320, "bottom": 380}, "quality_flags": []},
+    ]
+
+    sidecar_module.attach_structural_voice_anchor_keys(first_frame)
+    sidecar_module.attach_structural_voice_anchor_keys(shifted_frame)
+
+    first_keys = [item.get("parent_voice_anchor_key") for item in first_frame]
+    shifted_keys = [item.get("parent_voice_anchor_key") for item in shifted_frame]
+    assert_true(first_keys == shifted_keys, f"absolute vertical shift must not replace voice identity: {first_keys} != {shifted_keys}")
+    assert_true(first_keys[0] != first_keys[1], f"same-side equal-duration voices must remain distinct: {first_keys}")
+
+
+def test_voice_anchor_dedupe_ignores_transcript_ocr_drift_but_preserves_state_change() -> None:
+    base = {
+        "sender": "customer",
+        "type": "voice",
+        "voice_duration": 5,
+        "voice_anchor_key": "voice-structural:stable",
+        "quality_flags": [],
+    }
+    first = {**base, "content": "turn left at the next crossing"}
+    ocr_drift = {**base, "content": "turn left at the next crosslng"}
+    pending = {
+        **base,
+        "content": '[语音] 5"',
+        "quality_flags": ["untranscribed_voice_placeholder"],
+    }
+    assert_true(
+        sidecar_message_content_key(first) == sidecar_message_content_key(ocr_drift),
+        "one transcribed voice must keep its key across harmless OCR text drift",
+    )
+    assert_true(
+        sidecar_message_content_key(first) != sidecar_message_content_key(pending),
+        "pending-to-transcribed is a real state change and must remain observable",
+    )
+    merged = merge_message_history_snapshots([{"messages": [first]}, {"messages": [ocr_drift]}])
+    assert_true(len(merged) == 1, f"history merge should collapse OCR drift for the same voice anchor: {merged}")
+
+
 def test_infer_conversation_type_does_not_promote_test_keyword_to_group() -> None:
     assert_true(infer_conversation_type("新数据测试") == "private", "test contact names should not be inferred as group chats")
     assert_true(infer_conversation_type("实验跟进群") == "group", "explicit 群 should still infer group")
@@ -941,6 +1121,23 @@ def test_parse_messages_respects_explicit_private_conversation_type_for_test_con
     assert_true(messages, f"private test contact message should be captured: {messages}")
     assert_true(messages[0]["sender"] == "customer", f"private test contact should be customer-owned: {messages}")
     assert_true(messages[0]["sender_role"] == "customer", f"private test contact role should be customer: {messages}")
+
+
+def test_parse_messages_uses_structural_group_header_and_strips_member_label() -> None:
+    items = [
+        {"text": "新数据测试(2)", "confidence": 0.99, "left": 350, "right": 478, "top": 51, "bottom": 80, "center_x": 414, "center_y": 65.5},
+        {"text": "许聪", "confidence": 0.99, "left": 422, "right": 468, "top": 414, "bottom": 435, "center_x": 445, "center_y": 424.5},
+        {"text": "中午好", "confidence": 0.99, "left": 423, "right": 492, "top": 442, "bottom": 468, "center_x": 457.5, "center_y": 455},
+    ]
+    messages = parse_messages_from_ocr(items, (980, 860), target="新数据测试", conversation_type="private")
+    assert_true(len(messages) == 1, f"structural group message should remain one customer turn: {messages}")
+    assert_true(messages[0]["sender_role"] == "group_member", f"member-count title should override stale private typing: {messages}")
+    assert_true(messages[0]["content"] == "中午好", f"group member label must not enter message content: {messages}")
+    assert_true(messages[0]["speaker_name"] == "许聪", f"group member label should remain metadata: {messages}")
+    assert_true(
+        "speaker_prefix_split_from_ocr_text" in messages[0]["quality_flags"],
+        f"speaker metadata split should stay auditable: {messages}",
+    )
 
 
 def test_parse_messages_skips_file_card_footer_noise() -> None:
@@ -1541,33 +1738,17 @@ def test_connector_helpers() -> None:
     identity_request = wechat_connector_module._args_to_request(identity_args)
     assert_true(identity_request.get("session_key") == "wx:rpa:v1:duplicate-group", f"send session key should be preserved: {identity_request}")
     assert_true(identity_request.get("conversation_type") == "group", f"send conversation type should be preserved: {identity_request}")
-    image_save_args = compat_args(
-        [
-            "image-save",
-            "--target",
-            "新数据测试",
-            "--exact",
-            "--session-key",
-            "wx:1",
-            "--source-preview",
-            "许聪:[图片]",
-            "--speaker-name",
-            "许聪",
-            "--tenant-id",
-            "chejin",
-            "--max-images",
-            "1",
-        ]
+    retired_image_request = wechat_connector_module._args_to_request(
+        ["image-save", "--target", "新数据测试", "--source-preview", "许聪:[图片]"]
     )
-    assert_true(image_save_args[0] == "image-save", f"image-save action should be preserved: {image_save_args}")
-    assert_true("--source-preview" in image_save_args and "许聪:[图片]" in image_save_args, f"image preview should be preserved: {image_save_args}")
-    request = wechat_connector_module._args_to_request(image_save_args)
-    assert_true(request.get("action") == "image-save", f"image-save request action should be parsed: {request}")
-    assert_true(request.get("target") == "新数据测试", f"image-save target should be parsed: {request}")
-    assert_true(request.get("source_preview") == "许聪:[图片]", f"image-save source preview should be parsed: {request}")
-    assert_true(request.get("speaker_name") == "许聪", f"image-save speaker should be parsed: {request}")
-    assert_true(request.get("tenant_id") == "chejin", f"image-save tenant should be parsed: {request}")
-    assert_true(request.get("max_images") == 1, f"image-save max_images should be parsed: {request}")
+    assert_true(
+        not retired_image_request.get("action"),
+        f"shared connector must not parse the retired image action: {retired_image_request}",
+    )
+    assert_true(
+        not hasattr(wechat_connector_module.WeChatConnector, "run_customer_clipboard_image_transaction"),
+        "retired clipboard image transaction must not remain on the connector surface",
+    )
 
 
 def test_send_geometry_guard() -> None:
@@ -3268,7 +3449,7 @@ def test_session_match_and_click_x() -> None:
     assert_true(session_name_matches("文件传输站", "文件传输助手", exact=True) is False, "unrelated exact mismatch should fail")
 
 
-def test_session_key_candidate_respects_conversation_type() -> None:
+def test_session_key_candidate_treats_conversation_type_as_mutable_metadata() -> None:
     private = {
         "name": "同名会话",
         "session_key": "wx:rpa:v1:duplicate-private",
@@ -3284,14 +3465,17 @@ def test_session_key_candidate_respects_conversation_type() -> None:
         session_matches_key(private, private["session_key"], "unknown"),
         "unknown conversation type should not reject a confirmed session key",
     )
-    assert_true(not session_matches_key(private, private["session_key"], "group"), "conversation type mismatch must fail")
     assert_true(
-        find_session_candidate_by_key([private, group], group["session_key"], "group") is group,
-        "same-name group must resolve by session key and type",
+        session_matches_key(private, private["session_key"], "group"),
+        "conversation type drift must not replace a confirmed physical session key",
     )
     assert_true(
-        find_session_candidate_by_key([private, group], group["session_key"], "private") is None,
-        "same-name wrong type must not resolve a row",
+        find_session_candidate_by_key([private, group], group["session_key"], "group") is group,
+        "same-name group must resolve by its exact physical session key",
+    )
+    assert_true(
+        find_session_candidate_by_key([private, group], group["session_key"], "private") is group,
+        "semantic type drift must not reject the row selected by an exact physical key",
     )
 
 
@@ -3327,8 +3511,8 @@ def test_identity_wrapper_treats_unknown_type_as_missing() -> None:
             "known type should preserve the open result",
         )
         assert_true(
-            calls[-1].get("conversation_type") == "private" and calls[-1].get("force_session_row_resolution") is True,
-            f"known type should force row resolution: {calls}",
+            calls[-1].get("conversation_type") == "private" and "force_session_row_resolution" not in calls[-1],
+            f"known type should remain metadata and must not force a second UI action: {calls}",
         )
     finally:
         sidecar_module.open_chat = original_open_chat  # type: ignore[assignment]
@@ -4489,14 +4673,13 @@ def test_auxiliary_wechat_shell_is_blocked() -> None:
 
 def test_normalize_wechat_window_clamps_offscreen_when_size_is_already_safe() -> None:
     sidecar_mod = sys.modules["apps.wechat_ai_customer_service.adapters.wechat_win32_ocr_sidecar"]
-    if not hasattr(sidecar_mod.ctypes, "windll"):
-        return
     original_get_window_geometry = sidecar_mod.get_window_geometry
     original_win32gui = sidecar_mod.win32gui
     if sidecar_mod.win32gui is None:
         sidecar_mod.win32gui = types.SimpleNamespace(MoveWindow=lambda *_args, **_kwargs: None)
     original_move_window = sidecar_mod.win32gui.MoveWindow
-    original_windll = sidecar_mod.ctypes.windll
+    had_windll = hasattr(sidecar_mod.ctypes, "windll")
+    original_windll = getattr(sidecar_mod.ctypes, "windll", None)
     previous_fixed_origin = os.environ.get("WECHAT_WIN32_OCR_WINDOW_FIXED_ORIGIN")
     geometry_state = {"left": -180, "top": 80, "right": 800, "bottom": 940, "width": 980, "height": 860}
     calls: list[tuple[int, int, int, int]] = []
@@ -4536,6 +4719,13 @@ def test_normalize_wechat_window_clamps_offscreen_when_size_is_already_safe() ->
         assert_true(calls == [(0, 0, 980, 860)], f"unexpected move call: {calls}")
         assert_true((result.get("after") or {}).get("left") == 0, f"window should be clamped on-screen: {result}")
         assert_true((result.get("after") or {}).get("top") == 0, f"window should use fixed top origin: {result}")
+
+        calls.clear()
+        geometry_state.update({"left": -180, "top": 80, "right": 800, "bottom": 940, "width": 980, "height": 860})
+        os.environ["WECHAT_WIN32_OCR_WINDOW_FIXED_ORIGIN"] = "false"
+        result = normalize_wechat_window(1001)
+        assert_true(calls == [(0, 80, 980, 860)], f"explicit false should preserve the visible top coordinate: {calls}")
+        assert_true(result.get("fixed_origin") is False, f"explicit false should be reported: {result}")
     finally:
         if previous_fixed_origin is None:
             os.environ.pop("WECHAT_WIN32_OCR_WINDOW_FIXED_ORIGIN", None)
@@ -4544,7 +4734,10 @@ def test_normalize_wechat_window_clamps_offscreen_when_size_is_already_safe() ->
         sidecar_mod.get_window_geometry = original_get_window_geometry
         sidecar_mod.win32gui.MoveWindow = original_move_window
         sidecar_mod.win32gui = original_win32gui
-        sidecar_mod.ctypes.windll = original_windll
+        if had_windll:
+            sidecar_mod.ctypes.windll = original_windll
+        else:
+            delattr(sidecar_mod.ctypes, "windll")
 
 
 def test_capabilities_success_exposes_top_level_geometry() -> None:
@@ -8380,10 +8573,15 @@ def main() -> int:
         test_sidecar_help_exposes_stable_actions_and_flags,
         test_sidecar_contract_validation_failure_is_json_without_window_probe,
         test_sidecar_facade_exports_contract_surface,
+        test_sidecar_additive_callable_defaults_are_frozen,
         test_run_sidecar_cli_accepts_visible_session_candidate,
         test_visible_session_candidate_click_geometry_uses_title_bbox,
         test_parse_sessions_from_ocr,
         test_sidebar_visible_list_enhanced_ocr_recovers_pinned_gray_sessions,
+        test_parse_sessions_rejects_unanchored_enhanced_candidates,
+        test_parse_sessions_prefers_structural_title_over_same_row_badge,
+        test_parse_sessions_keeps_title_above_longer_preview_text,
+        test_rpa_session_key_ignores_conversation_type_drift,
         test_parse_sessions_detects_visual_unread_red_dot,
         test_parse_sessions_normalizes_truncated_file_transfer,
         test_parse_sessions_normalizes_file_transfer_with_mixed_ellipsis_time,
@@ -8406,8 +8604,12 @@ def main() -> int:
         test_message_probe_tokens_prefer_semantic_body_after_live_marker,
         test_parse_messages_from_ocr,
         test_parse_messages_strips_voice_duration_prefix_after_transcription,
+        test_final_message_parse_attaches_parent_anchor_to_visible_transcripts,
+        test_equal_duration_voice_anchors_ignore_absolute_vertical_shift,
+        test_voice_anchor_dedupe_ignores_transcript_ocr_drift_but_preserves_state_change,
         test_infer_conversation_type_does_not_promote_test_keyword_to_group,
         test_parse_messages_respects_explicit_private_conversation_type_for_test_contact,
+        test_parse_messages_uses_structural_group_header_and_strips_member_label,
         test_parse_messages_skips_file_card_footer_noise,
         test_parse_messages_marks_unconverted_voice_as_voice_placeholder,
         test_parse_messages_labels_private_left_side_as_customer,
@@ -8469,7 +8671,7 @@ def main() -> int:
         test_preflight_uses_interactive_status_probe,
         test_adaptive_window_points,
         test_session_match_and_click_x,
-        test_session_key_candidate_respects_conversation_type,
+        test_session_key_candidate_treats_conversation_type_as_mutable_metadata,
         test_identity_wrapper_treats_unknown_type_as_missing,
         test_session_click_candidate_points_spread_across_row,
         test_active_chat_matches_file_transfer_alias,

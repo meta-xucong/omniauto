@@ -57,7 +57,6 @@ KEY_SIGNATURES = {
         "record_capture_result",
     },
     "wechat_win32_ocr_sidecar": {
-        "execute_wechat_image_save",
         "open_voice_transcribe_context_menu",
         "parse_messages_from_ocr",
         "run_action",
