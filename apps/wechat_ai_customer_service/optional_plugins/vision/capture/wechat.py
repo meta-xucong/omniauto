@@ -828,5 +828,3 @@ def execute_wechat_clipboard_image_copy(
             "visual_side": visual_side,
         },
     }
-
-
