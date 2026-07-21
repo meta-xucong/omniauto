@@ -1055,6 +1055,87 @@ def test_final_message_parse_attaches_parent_anchor_to_visible_transcripts() -> 
     )
 
 
+def test_long_combined_voice_expansion_binds_when_original_row_is_covered() -> None:
+    anchor = {
+        "source": "parser_voice_message_context_menu_anchor",
+        "click_bounds": [494, 357, 537, 375],
+        "item": {
+            "text": '23"',
+            "voice_duration_text": '23"',
+            "sender_role": "customer",
+            "parser_bubble_rect": [486, 352, 545, 380],
+        },
+    }
+    expanded_voice = {
+        "type": "voice",
+        "sender": "customer",
+        "sender_role": "customer",
+        "content": "The expanded voice transcript spans multiple lines.",
+        "content_raw_ocr": '23"\nThe expanded voice transcript spans multiple lines.',
+        "content_clean": "The expanded voice transcript spans multiple lines.",
+        "voice_duration_text": '23"',
+        "bubble_rect": [484, 188, 891, 384],
+        "quality_flags": ["voice_duration_prefix_removed"],
+        "avatar_alignment": {"role": "customer", "customer": {"present": True}},
+    }
+
+    evidence = sidecar_module.combined_voice_transcript_anchor_match_evidence(
+        dict(expanded_voice),
+        anchor,
+        (981, 860),
+        after_messages=[expanded_voice],
+    )
+
+    assert_true(evidence.get("accepted") is True, f"expanded long voice should bind: {evidence}")
+    assert_true(evidence.get("strategy") == "unique_duration_and_region", f"unexpected strategy: {evidence}")
+    assert_true(evidence.get("vertical_overlap") == 28.0, f"unexpected overlap evidence: {evidence}")
+    assert_true(
+        sidecar_module.message_is_plausible_voice_transcript_for_anchor(
+            expanded_voice,
+            anchor,
+            (981, 860),
+            after_messages=[expanded_voice],
+        ),
+        "expanded long voice should remain a plausible transcript for its clicked anchor",
+    )
+
+
+def test_long_voice_expansion_rejects_ambiguous_same_duration_candidates() -> None:
+    anchor = {
+        "click_bounds": [494, 357, 537, 375],
+        "item": {
+            "voice_duration_text": '23"',
+            "sender_role": "customer",
+            "parser_bubble_rect": [486, 352, 545, 380],
+        },
+    }
+
+    def candidate(content: str, rect: list[int]) -> dict[str, object]:
+        return {
+            "type": "voice",
+            "sender_role": "customer",
+            "content": content,
+            "content_raw_ocr": f'23"\n{content}',
+            "content_clean": content,
+            "voice_duration_text": '23"',
+            "bubble_rect": rect,
+            "quality_flags": ["voice_duration_prefix_removed"],
+            "avatar_alignment": {"role": "customer", "customer": {"present": True}},
+        }
+
+    first = candidate("First possible transcript", [484, 188, 891, 384])
+    second = candidate("Second possible transcript", [486, 200, 890, 390])
+    evidence = sidecar_module.combined_voice_transcript_anchor_match_evidence(
+        first,
+        anchor,
+        (981, 860),
+        after_messages=[first, second],
+    )
+
+    assert_true(evidence.get("accepted") is False, f"ambiguous voices must remain blocked: {evidence}")
+    assert_true(evidence.get("selected_candidate_count") == 2, f"ambiguity evidence missing: {evidence}")
+
+
 def test_equal_duration_voice_anchors_ignore_absolute_vertical_shift() -> None:
     first_frame = [
         {"type": "voice", "sender_role": "customer", "voice_duration": 5, "bubble_rect": {"top": 180, "bottom": 240}, "quality_flags": []},
@@ -8605,6 +8686,8 @@ def main() -> int:
         test_parse_messages_from_ocr,
         test_parse_messages_strips_voice_duration_prefix_after_transcription,
         test_final_message_parse_attaches_parent_anchor_to_visible_transcripts,
+        test_long_combined_voice_expansion_binds_when_original_row_is_covered,
+        test_long_voice_expansion_rejects_ambiguous_same_duration_candidates,
         test_equal_duration_voice_anchors_ignore_absolute_vertical_shift,
         test_voice_anchor_dedupe_ignores_transcript_ocr_drift_but_preserves_state_change,
         test_infer_conversation_type_does_not_promote_test_keyword_to_group,
