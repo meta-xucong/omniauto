@@ -16,7 +16,7 @@ from dataclasses import dataclass
 from typing import Any
 
 
-PR28_HEAD = "81d2ca19eb91394901870dbbd40f579a53d61c32"
+PR28_HEAD = "b44b37a3ff635ffec08a807f34a7e3067a66675f"
 PR28_BLOBS = {
     "apps/wechat_ai_customer_service/adapters/wechat_connector.py": "f25d605ee6baff4b935f4339a6183d5446d97c33",
     "apps/wechat_ai_customer_service/adapters/wechat_win32_ocr/text_normalization.py": "7a09c6ddd2d218ee941686f4985cc2f184f03a4d",

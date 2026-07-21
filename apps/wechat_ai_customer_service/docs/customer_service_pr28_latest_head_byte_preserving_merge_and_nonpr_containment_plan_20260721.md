@@ -238,6 +238,7 @@
 - `wechat_connector.py` 删除唯一仓内无调用的 `target_not_confirmed_for_image_save` 状态；通用目标确认失败状态和错误码仍保留。
 - 图片契约测试改为直接覆盖 Vision surface 实现，并增加 Sidecar 无逻辑门面及 Connector 无死状态断言。
 - `wechat_pr28_runtime_adapter.py` 的受控文件哈希同步到本次清理后的基线；该哈希代表“合并后受控清理基线”，不再声称清理后的文件与上游 PR head 字节一致。
+- 本轮清理提交：`b44b37a3`；运行时适配器的 `PR28_HEAD` 指向该提交，确保“受控清理基线”可重复审计。
 
 本轮没有修改 Vision 的剪贴板复制、结构定位、历史消息投影、图片识别或失败语义，也没有增加字段、变量名、模块或对外接口。架构约束继续以以下两份基线为准：
 
