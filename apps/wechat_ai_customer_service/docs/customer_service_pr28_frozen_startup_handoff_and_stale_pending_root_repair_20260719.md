@@ -1,5 +1,7 @@
 # PR #28 冻结条件下的启动消息交接与遗留待办根因修复开发文档
 
+> **当前状态（2026-07-21）：历史实施文档。** 原始冻结 head 和阶段结论仅作证据；当前状态以 [PR #28 / Vision 残留问题收口索引](customer_service_pr28_residual_issue_closeout_20260721.md) 为准。
+
 状态：本地适配层离线验收完成，PR 冻结基线自相矛盾项已隔离记录，待仓库所有者实机手测  
 日期：2026-07-19  
 适用范围：`apps/wechat_ai_customer_service` 的非 PR 启动 bootstrap、SessionMonitor、Scheduler 内部协调  

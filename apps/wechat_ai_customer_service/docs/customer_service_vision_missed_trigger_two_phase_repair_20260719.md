@@ -1,5 +1,7 @@
 # 微信图片漏触发两阶段修复开发文档
 
+> **当前状态（2026-07-21）：历史阶段方案。** 阶段结论和测试证据继续保留；当前 Vision 残留问题状态以 [PR #28 / Vision 残留问题收口索引](customer_service_pr28_residual_issue_closeout_20260721.md) 为准。
+
 状态：阶段一已授权实施；阶段二仅设计、未授权、不得实施  
 日期：2026-07-19  
 适用范围：`apps/wechat_ai_customer_service` 独立 Vision 可选模块

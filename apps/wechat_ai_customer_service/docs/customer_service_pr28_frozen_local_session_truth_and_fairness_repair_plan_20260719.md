@@ -1,5 +1,7 @@
 # PR #28 冻结条件下的本地会话真值与调度隔离修复开发文档
 
+> **当前状态（2026-07-21）：历史实施文档。** 当前残留问题和实机验证门槛以 [PR #28 / Vision 残留问题收口索引](customer_service_pr28_residual_issue_closeout_20260721.md) 为准。
+
 状态：第一阶段离线验收完成；启动交接与旧 pending 闭环已由 [customer_service_pr28_frozen_startup_handoff_and_stale_pending_root_repair_20260719.md](customer_service_pr28_frozen_startup_handoff_and_stale_pending_root_repair_20260719.md) 完成修正与最终验收；本文不能单独作为手测通过依据  
 日期：2026-07-19  
 适用范围：`apps/wechat_ai_customer_service` 的非 PR 会话监听、调度、捕获闭环  

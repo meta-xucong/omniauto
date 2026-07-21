@@ -1,5 +1,7 @@
 # 微信客服“完全独立图像识别模块”改造方案（2026-07-18）
 
+> **当前状态（2026-07-21）：历史设计文档。** 当前残留问题和关闭状态以 [PR #28 / Vision 残留问题收口索引](customer_service_pr28_residual_issue_closeout_20260721.md) 为准。
+
 > **2026-07-19 优先级说明：** 本文的独立性目标、当前剪贴板原则和单一图片能力所有者要求继续有效；但“已经完全收口/完成”的结论已被 [PR #28 原样合并与独立 Vision 总方案](customer_service_pr28_immutable_merge_independent_vision_master_plan_20260719.md) 重新限定。严格审计仍发现核心层对具体 Vision compatibility 的直接依赖、Vision 到 Connector 图片方法的接缝，以及 PR #28 原样树中的旧图片残留。实施和验收以新总方案及其[问题台账](customer_service_pr28_post_merge_issue_audit_ledger_20260719.md)为准，本文保留为历史设计与需求记录。
 
 ## 0. 文档状态与决策记录

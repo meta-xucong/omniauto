@@ -1,5 +1,7 @@
 # PR #28 上游问题总结与修复对照单
 
+> **当前状态（2026-07-21）：历史上游反馈包。** 本文针对旧 PR head 的逐项证据仍有效，但不代表当前分支源码状态；当前状态以 [PR #28 / Vision 残留问题收口索引](customer_service_pr28_residual_issue_closeout_20260721.md) 为准。
+
 **文档状态：** 待交给 PR 作者修复的上游问题包
 **整理日期：** 2026-07-20
 **适用 PR：** `Improve WeChat C2 OCR monitoring`

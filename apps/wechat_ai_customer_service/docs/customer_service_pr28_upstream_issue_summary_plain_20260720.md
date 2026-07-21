@@ -1,5 +1,7 @@
 # PR #28 问题概括版
 
+> **当前状态（2026-07-21）：历史简明反馈。** 本文只用于回顾旧 PR head；当前残留问题和关闭状态以 [PR #28 / Vision 残留问题收口索引](customer_service_pr28_residual_issue_closeout_20260721.md) 为准。
+
 给 PR 作者的简明说明。
 PR：`Improve WeChat C2 OCR monitoring`
 PR head：`2120f16744aebe3d8edbdf9c3f407375bfeed279`
