@@ -2038,7 +2038,6 @@ def rpa_identity_guard_should_stop(payload: dict[str, Any]) -> bool:
         "target_not_confirmed",
         "target_not_confirmed_for_messages",
         "target_not_confirmed_for_voice_transcribe",
-        "target_not_confirmed_for_image_save",
     }:
         return True
     if error_code.startswith("TARGET_NOT_CONFIRMED"):

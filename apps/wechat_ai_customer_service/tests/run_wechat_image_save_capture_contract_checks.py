@@ -27,12 +27,16 @@ from apps.wechat_ai_customer_service.adapters.wechat_image_save_capture import (
 )
 from apps.wechat_ai_customer_service.adapters import wechat_win32_ocr_sidecar  # noqa: E402
 from apps.wechat_ai_customer_service.adapters.wechat_win32_ocr.geometry import session_split_x  # noqa: E402
+from apps.wechat_ai_customer_service.optional_plugins.vision.capture.surface import (  # noqa: E402
+    self_visual_image_messages_from_current_surface,
+)
 
 
 def main() -> int:
     checks = [
         check_structure_locator_excludes_self_image,
         check_self_structural_observation_is_metadata_only,
+        check_sidecar_image_facade_is_logic_free,
         check_current_copy_transaction_has_no_file_artifact,
         check_self_copy_transaction_selects_only_self_side,
         check_current_copy_requires_clipboard_generation_change,
@@ -70,7 +74,7 @@ def check_structure_locator_excludes_self_image() -> None:
 
 
 def check_self_structural_observation_is_metadata_only() -> None:
-    messages = wechat_win32_ocr_sidecar.self_visual_image_messages_from_current_surface(
+    messages = self_visual_image_messages_from_current_surface(
         _customer_image_surface(),
         [],
         [],
@@ -83,6 +87,23 @@ def check_self_structural_observation_is_metadata_only() -> None:
     assert_true(bool(message.get("is_self_image")), "structural image must be explicit for the context-only route")
     forbidden = {"bounds", "anchor", "path", "image", "screenshot", "sha256", "bytes"}
     assert_true(not (forbidden & set(message)), f"image envelope may not expose visual artifact data: {message}")
+
+
+def check_sidecar_image_facade_is_logic_free() -> None:
+    source = Path(wechat_win32_ocr_sidecar.__file__).read_text(encoding="utf-8")
+    assert_true(
+        "wechat_image_save_capture" not in source
+        and "detect_visual_image_bubbles" not in source
+        and "extract_chat_time_markers" not in source,
+        "Sidecar must not import or execute the retired image detector",
+    )
+    assert_equal(
+        wechat_win32_ocr_sidecar.self_visual_image_messages_from_current_surface(
+            _customer_image_surface(), [], [], target="Customer A"
+        ),
+        [],
+        "historical Sidecar image symbol must fail closed",
+    )
 
 
 class _Win32Con:

@@ -18,9 +18,9 @@ from typing import Any
 
 PR28_HEAD = "81d2ca19eb91394901870dbbd40f579a53d61c32"
 PR28_BLOBS = {
-    "apps/wechat_ai_customer_service/adapters/wechat_connector.py": "bf185664fe5e6dff48549dad5e6f6fa0d85cc8ad",
+    "apps/wechat_ai_customer_service/adapters/wechat_connector.py": "f25d605ee6baff4b935f4339a6183d5446d97c33",
     "apps/wechat_ai_customer_service/adapters/wechat_win32_ocr/text_normalization.py": "7a09c6ddd2d218ee941686f4985cc2f184f03a4d",
-    "apps/wechat_ai_customer_service/adapters/wechat_win32_ocr_sidecar.py": "9dc3161c9d813926844d0fa9fb4902ed85cac715",
+    "apps/wechat_ai_customer_service/adapters/wechat_win32_ocr_sidecar.py": "4c51cdb5c30dbd4d7de5e17b7cca4d90e28f8c4a",
     "apps/wechat_ai_customer_service/tests/run_wechat_win32_ocr_compat_checks.py": "9102127fc307d3e57b1b4e0478427e24082fcae9",
     "apps/wechat_ai_customer_service/tests/run_wechat_win32_ocr_sender_role_screenshot_replay.py": "0832a0be250093ef3c8384d6c0296b50f9d2b4c8",
     "apps/wechat_ai_customer_service/tests/run_wechat_win32_ocr_window_action_planning_checks.py": "a0efe8031f79165654b97185e0ed94d84919033b",

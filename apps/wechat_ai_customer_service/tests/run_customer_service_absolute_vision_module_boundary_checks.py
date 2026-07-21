@@ -104,15 +104,30 @@ def check_pr28_blobs_and_legacy_vision_paths_are_quarantined() -> None:
         )
         assert_true(
             completed.stdout.strip() == expected,
-            f"PR #28 byte-immutable file changed: {relative}",
+            f"controlled PR #28 baseline file changed: {relative}",
         )
 
     connector = "apps/wechat_ai_customer_service/adapters/wechat_connector.py"
     sidecar = _source("apps/wechat_ai_customer_service/adapters/wechat_win32_ocr_sidecar.py")
+    sidecar_image_facade = ast.get_source_segment(
+        sidecar,
+        _function(
+            "apps/wechat_ai_customer_service/adapters/wechat_win32_ocr_sidecar.py",
+            "self_visual_image_messages_from_current_surface",
+        ),
+    ) or ""
     assert_true(
         "def self_visual_image_messages_from_current_surface(" in sidecar
-        and "from apps.wechat_ai_customer_service.adapters.wechat_image_save_capture import" in sidecar,
-        "audited PR residual unexpectedly changed; re-audit the PR head instead of hiding it",
+        and "wechat_image_save_capture" not in sidecar
+        and "detect_visual_image_bubbles" not in sidecar
+        and "extract_chat_time_markers" not in sidecar
+        and "return []" in sidecar_image_facade,
+        "Sidecar retains an image implementation or image-module import",
+    )
+    connector_source = _source(connector)
+    assert_true(
+        "target_not_confirmed_for_image_save" not in connector_source,
+        "Connector retains the retired image-only identity state",
     )
     integration = _source(
         "apps/wechat_ai_customer_service/optional_plugins/vision/integrations/wechat_current.py"

@@ -2169,79 +2169,18 @@ def self_visual_image_messages_from_current_surface(
     *,
     target: str,
 ) -> list[dict[str, Any]]:
-    """Expose a current self image as metadata-only context input.
+    """Retain the historical callable without owning image behavior.
 
-    The visual detector is used only to locate the right-side bubble for the
-    immediate clipboard transaction.  Its coordinates never leave this
-    adapter.  The resulting envelope is not a customer turn and cannot itself
-    initiate a reply; it is consumed solely by the optional context-only
-    vision capability.
+    Current-surface image observation belongs exclusively to the optional
+    Vision capture package.  The Sidecar symbol remains as a no-op facade so
+    older external imports keep their signature and fail closed instead of
+    silently creating a second detector or importing the retired image
+    adapter.  ``screenshot``, OCR data, existing messages, and ``target`` are
+    intentionally ignored.
     """
 
-    if screenshot is None:
-        return []
-    try:
-        from apps.wechat_ai_customer_service.adapters.wechat_image_save_capture import (
-            detect_visual_image_bubbles,
-            extract_chat_time_markers,
-        )
-
-        bubbles = detect_visual_image_bubbles(
-            screenshot,
-            messages=list(existing_messages or []),
-            max_images=1,
-            side_filter="self",
-            time_markers=extract_chat_time_markers(
-                list(ocr_items or []),
-                tuple(getattr(screenshot, "size", (0, 0))),
-            ),
-        )
-    except Exception:
-        # Image observation is optional and must not make ordinary OCR capture
-        # unavailable when a display/vision dependency is absent.
-        return []
-    if not bubbles:
-        return []
-
-    bubble = bubbles[0] if isinstance(bubbles[0], dict) else {}
-    # WeChat's displayed time separator is the stable, non-image identity
-    # component.  The local structural anchor is kept inside the adapter only
-    # and is not persisted or exposed as a customer-message field.
-    observed_time = str(bubble.get("wechat_message_time") or "").strip()
-    identity_seed = json.dumps(
-        {
-            "target": str(target or ""),
-            "side": "self",
-            "time": observed_time,
-            "anchor": bubble.get("anchor") or {},
-        },
-        ensure_ascii=False,
-        sort_keys=True,
-    )
-    message_id = f"visual_self_context_{hashlib.sha256(identity_seed.encode('utf-8')).hexdigest()[:20]}"
-    known_ids = {
-        str(item.get("id") or item.get("message_id") or "").strip()
-        for item in (existing_messages or [])
-        if isinstance(item, dict)
-    }
-    if message_id in known_ids:
-        return []
-    return [
-        {
-            "id": message_id,
-            "message_id": message_id,
-            "type": "image",
-            "message_type": "image",
-            "sender": "self",
-            "sender_role": "self",
-            "visual_side": "self",
-            "visual_turn_kind": "self_image",
-            "is_self_image": True,
-            "content": "[图片]",
-            "time": observed_time,
-            "source_adapter": "win32_ocr_structural_image_observer",
-        }
-    ]
+    del screenshot, ocr_items, existing_messages, target
+    return []
 
 
 def voice_transcribe_payload(

@@ -229,3 +229,17 @@
 - 新增“唯一但远距离同 duration 候选必须拒绝”的回归测试。
 - 外部契约快照将 `_Win32ConFallback` 视为平台可选符号，解决 `win32con` 正常导入时的跨平台误报，不改变 Sidecar 运行时导出。
 - 后续硬化提交：`81d2ca19`；runtime adapter 的锁定值已更新为该受控硬化 head，原始上游 head `8f832dd7` 仍保留在本文件和历史记录中。
+
+## 11. 独立 Vision 清理追加记录（2026-07-21）
+
+本追加记录覆盖本轮“清理图片残留”的明确授权，历史章节仍保留原始审计证据，不回写旧结论。为满足 Vision 绝对独立要求，本轮允许修改此前锁定的两个 PR-owned 文件中的已确认死代码；这不是重新引入第二套图片实现：
+
+- `wechat_win32_ocr_sidecar.py` 保留历史函数签名作为兼容门面，但不再导入 `wechat_image_save_capture`、调用图片检测器或生成图片消息；真实当前界面观察统一由 `optional_plugins/vision/capture/surface.py` 提供。
+- `wechat_connector.py` 删除唯一仓内无调用的 `target_not_confirmed_for_image_save` 状态；通用目标确认失败状态和错误码仍保留。
+- 图片契约测试改为直接覆盖 Vision surface 实现，并增加 Sidecar 无逻辑门面及 Connector 无死状态断言。
+- `wechat_pr28_runtime_adapter.py` 的受控文件哈希同步到本次清理后的基线；该哈希代表“合并后受控清理基线”，不再声称清理后的文件与上游 PR head 字节一致。
+
+本轮没有修改 Vision 的剪贴板复制、结构定位、历史消息投影、图片识别或失败语义，也没有增加字段、变量名、模块或对外接口。架构约束继续以以下两份基线为准：
+
+- `apps/wechat_ai_customer_service/docs/customer_visible_reply_ownership_baseline.md`
+- `apps/wechat_ai_customer_service/docs/customer_service_external_contract_and_optional_plugin_baseline.md`
