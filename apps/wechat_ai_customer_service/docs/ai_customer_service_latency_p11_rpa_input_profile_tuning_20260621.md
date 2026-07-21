@@ -2,6 +2,13 @@
 
 Date: 2026-06-21
 
+> Superseded clause (2026-07-19): this document remains historical latency evidence, but its requirement to force every live send through `clipboard_chunks` is no longer current. See [customer_service_wechat_account_behavior_risk_retrospective_20260719.md](customer_service_wechat_account_behavior_risk_retrospective_20260719.md). Live safety now preserves an explicitly selected existing input method and keeps the same target, focus, confirmation, trigger, and post-send guards.
+
+Current development also follows:
+
+- [customer_visible_reply_ownership_baseline.md](customer_visible_reply_ownership_baseline.md)
+- [customer_service_external_contract_and_optional_plugin_baseline.md](customer_service_external_contract_and_optional_plugin_baseline.md)
+
 ## Goal
 
 P11 continues the latency optimization work after P9/P10. P9 removed scheduler blocking during slow RPA sends, and P10 avoided duplicate target-ready work for same-target follow-up segments. The remaining measured live cost is mostly inside the actual Win32/OCR send payload:

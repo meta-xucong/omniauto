@@ -152,6 +152,7 @@ class SessionMonitor:
         self._sticky_until_ts: float = 0.0
         self._sticky_dispatch_rounds: int = 0
         self._sessions: dict[str, SessionState] = {}
+        self._restored_session_keys_at_startup: set[str] = set()
         self._startup_visual_baseline_active = True
         self._ledger = SessionLedgerStore(tenant_id=self.tenant_id)
         self._load_state()
@@ -213,6 +214,7 @@ class SessionMonitor:
                 candidate_preview_hits=int(data.get("candidate_preview_hits", 0) or 0),
             )
         self._sessions = restored
+        self._restored_session_keys_at_startup = set(restored)
 
     def _save_state(self) -> None:
         self.state_path.parent.mkdir(parents=True, exist_ok=True)
@@ -312,7 +314,7 @@ class SessionMonitor:
             content = str(raw.get("content") or "").strip()
             msg_time = str(raw.get("time") or "").strip()
             unread_badge = str(raw.get("unread_badge") or raw.get("unread") or "").strip()
-            digest = _digest(content) if content else ""
+            digest = _digest(_normalized_preview_fragment(content)) if content else ""
             if name in unsafe_duplicate_display_names:
                 self._block_ambiguous_display_name(name, now_iso=now_iso, session_key=session_key)
                 continue
@@ -348,11 +350,16 @@ class SessionMonitor:
                 # New session seen for the first time
                 signal_kind = self._signal_kind(content)
                 short_preview_signal = self.short_preview_can_raise_unread and signal_kind == "high_sensitivity_short"
+                # The first passive poll is a historical baseline.  Without a
+                # physical unread badge, no preview type (including a short
+                # message) may be promoted into a new customer event at startup.
                 startup_media_baseline = bool(
                     startup_visual_baseline_active
-                    and signal_kind in MEDIA_CAPTURE_SIGNAL_KINDS
                     and not has_dispatch_badge
-                    and not self.require_unread_badge_for_dispatch
+                    and (
+                        signal_kind in MEDIA_CAPTURE_SIGNAL_KINDS
+                        or not self.initial_preview_can_raise_unread
+                    )
                 )
                 if self.require_unread_badge_for_dispatch:
                     initial_unread = bool(
@@ -372,7 +379,13 @@ class SessionMonitor:
                     initial_unread = False
                 unread_badge_epoch = 1 if has_dispatch_badge else 0
                 pending_observation_id = _pending_observation_id(
-                    observation_id,
+                    _pending_event_source_id(
+                        raw,
+                        session_key=session_key,
+                        observation_id=observation_id,
+                        message_time=msg_time,
+                        has_dispatch_badge=has_dispatch_badge,
+                    ),
                     unread_badge_epoch=unread_badge_epoch,
                 )
                 self._sessions[state_key] = SessionState(
@@ -419,13 +432,26 @@ class SessionMonitor:
                 existing.session_key = session_key or existing.session_key
                 previous_observation_id = str(existing.last_observation_id or "")
                 previous_badge_present = bool(existing.last_observed_unread_badge)
+                startup_without_current_badge = bool(
+                    startup_visual_baseline_active
+                    and state_key in self._restored_session_keys_at_startup
+                    and not has_dispatch_badge
+                )
+                if startup_without_current_badge and existing.unread_detected:
+                    self._baseline_old_pending_for_new_runtime(existing, now_iso=now_iso)
                 if has_dispatch_badge and not previous_badge_present:
                     existing.unread_badge_epoch = max(0, int(existing.unread_badge_epoch or 0)) + 1
                 elif has_dispatch_badge and int(existing.unread_badge_epoch or 0) <= 0:
                     # Migration from state written before observation identities.
                     existing.unread_badge_epoch = 1
                 pending_observation_id = _pending_observation_id(
-                    observation_id,
+                    _pending_event_source_id(
+                        raw,
+                        session_key=session_key,
+                        observation_id=observation_id,
+                        message_time=msg_time,
+                        has_dispatch_badge=has_dispatch_badge,
+                    ),
                     unread_badge_epoch=int(existing.unread_badge_epoch or 0),
                 )
                 if existing.unread_detected and not str(existing.pending_observation_id or ""):
@@ -470,11 +496,28 @@ class SessionMonitor:
                     # identical post-acknowledgement preview observations
                     # before treating a text-only change as a new event.  A
                     # badge edge or a visible time change remains immediate.
+                    signal_kind = self._signal_kind(content)
+                    recent_outbound_preview = bool(
+                        changed_preview_signal
+                        and not has_dispatch_badge
+                        and signal_kind == "normal"
+                        and self._matches_recent_outbound_preview(existing.session_key or session_key, content)
+                    )
+                    stable_badgeless_preview = bool(
+                        changed_preview_signal
+                        and not has_dispatch_badge
+                        and signal_kind == "normal"
+                        and self.preview_change_can_raise_unread
+                        and not recent_outbound_preview
+                    )
                     defer_preview_confirmation = bool(
-                        badge_epoch_already_acknowledged
-                        and changed_preview_signal
-                        and not changed_by_time
-                        and not changed_by_badge
+                        (
+                            badge_epoch_already_acknowledged
+                            and changed_preview_signal
+                            and not changed_by_time
+                            and not changed_by_badge
+                        )
+                        or stable_badgeless_preview
                     )
                     preview_confirmation_ready = False
                     if defer_preview_confirmation:
@@ -498,7 +541,6 @@ class SessionMonitor:
                     existing.last_observed_unread_badge = has_dispatch_badge
                     existing.conversation_type = conversation_type
                     existing.last_seen_at = now_iso
-                    signal_kind = self._signal_kind(content)
                     media_preview_signal = signal_kind in MEDIA_CAPTURE_SIGNAL_KINDS
                     startup_media_baseline = bool(
                         startup_visual_baseline_active
@@ -527,6 +569,11 @@ class SessionMonitor:
                             existing.preview_change_hits = 0
                         elif not has_dispatch_badge:
                             existing.preview_change_hits = 0
+                    elif recent_outbound_preview:
+                        # Sending changes the sidebar preview too. The ledger is
+                        # authoritative for that outbound text, so baseline it
+                        # without manufacturing another customer turn.
+                        existing.preview_change_hits = 0
                     elif changed_by_badge and unread_badge:
                         should_raise_unread = True
                         existing.preview_change_hits = 0
@@ -546,6 +593,13 @@ class SessionMonitor:
                             # visible unread signal.
                             existing.preview_change_hits = 0
                     if defer_preview_confirmation and not preview_confirmation_ready:
+                        should_raise_unread = False
+                    if startup_without_current_badge:
+                        # The first passive poll authenticates persisted state
+                        # against the current WeChat surface. A preview level
+                        # without a physical unread edge is only a baseline;
+                        # verified bootstrap captures are handed to Scheduler
+                        # separately and therefore do not need a blind click.
                         should_raise_unread = False
                     if should_raise_unread and not observation_already_acknowledged:
                         self._mark_pending_signal(
@@ -869,10 +923,11 @@ class SessionMonitor:
             return False
         if not session.unread_detected:
             return False
-        if session.pending_signal_kind == "high_sensitivity_short":
-            return True
-        if session.pending_signal_kind in MEDIA_CAPTURE_SIGNAL_KINDS:
-            return int(session.empty_capture_retries or 0) < 3
+        # A sidebar preview is only a wake-up hint.  No preview kind may keep
+        # an empty chat-pane capture alive forever: that would let one false or
+        # stale observation monopolize the bounded multi-session queue.  Use a
+        # single content-agnostic retry budget; a genuinely new observation
+        # receives a fresh budget in ``_mark_pending_signal``.
         if int(session.empty_capture_retries or 0) >= 2:
             return False
         return bool(
@@ -880,6 +935,42 @@ class SessionMonitor:
             or str(session.last_unread_badge or "").strip()
             or str(session.pending_since or "").strip()
         )
+
+    def _defer_pending_until(self, name: str, *, retry_not_before: str) -> None:
+        """Apply Scheduler cooldown to the same Monitor observation.
+
+        This is a private in-process coordination seam.  It reuses the
+        existing monitor state shape and deliberately does not acknowledge or
+        re-identify the observation.
+        """
+
+        session = self._session_by_identifier(name)
+        if not isinstance(session, SessionState) or not session.unread_detected:
+            return
+        session.retry_not_before = str(retry_not_before or "").strip()
+        session.last_dispatched_at = datetime.now().isoformat(timespec="seconds")
+        self._save_state()
+
+    def _baseline_old_pending_for_new_runtime(self, session: SessionState, *, now_iso: str) -> None:
+        """Retire a persisted logical pending level with no current badge."""
+
+        if session.pending_observation_id:
+            session.acknowledged_observation_id = session.pending_observation_id
+        session.unread_detected = False
+        session.priority_score = 0
+        session.pending_since = ""
+        session.last_detected_at = ""
+        session.last_unread_badge = ""
+        session.pending_signal_text = ""
+        session.pending_signal_kind = ""
+        session.pending_observation_id = ""
+        session.candidate_observation_id = ""
+        session.candidate_preview_hits = 0
+        session.preview_change_hits = 0
+        session.signal_ready_after = ""
+        session.retry_not_before = ""
+        session.empty_capture_retries = 0
+        session.last_dispatched_at = now_iso
 
     def _dynamic_customer_admission_reason(
         self,
@@ -941,7 +1032,7 @@ class SessionMonitor:
         return None
 
     def _reuse_unique_display_name_session_key(self, name: str, *, candidate_session_key: str) -> str:
-        """Repair inferred type drift without weakening duplicate-name isolation."""
+        """Reuse only a unique historical key; never guess across aliases."""
 
         generated_matches = [
             (key, state)
@@ -954,59 +1045,13 @@ class SessionMonitor:
             return candidate_session_key
         if len(generated_matches) == 1:
             return str(generated_matches[0][0])
-
-        scored: list[tuple[tuple[int, int, int], str, SessionState]] = []
-        for key, state in generated_matches:
-            ledger_summary = self._ledger.load_summary(str(key))
-            recent_count = len(ledger_summary.get("recent_messages") or []) if isinstance(ledger_summary, dict) else 0
-            try:
-                context_version = int((ledger_summary or {}).get("context_version") or 0)
-            except (TypeError, ValueError):
-                context_version = 0
-            candidate_bonus = 1 if str(key) == str(candidate_session_key) else 0
-            scored.append(((recent_count, context_version, candidate_bonus), str(key), state))
-        scored.sort(key=lambda item: (item[0], item[1]), reverse=True)
-        canonical_key = scored[0][1]
-        canonical_state = scored[0][2]
-        alias_keys = [key for _score, key, _state in scored[1:]]
-        try:
-            self._ledger.merge_session_alias_context(
-                canonical_session_key=canonical_key,
-                alias_session_keys=alias_keys,
-                target_name=name,
-            )
-        except Exception:
-            # Monitor identity repair must not block capture; the alias ledger
-            # remains available for a later retry/audit if persistence fails.
-            pass
-        for _score, key, state in scored[1:]:
-            canonical_state.unread_detected = bool(canonical_state.unread_detected or state.unread_detected)
-            canonical_state.priority_score = max(int(canonical_state.priority_score or 0), int(state.priority_score or 0))
-            canonical_state.preview_change_hits = max(
-                int(canonical_state.preview_change_hits or 0),
-                int(state.preview_change_hits or 0),
-            )
-            canonical_state.empty_capture_retries = max(
-                int(canonical_state.empty_capture_retries or 0),
-                int(state.empty_capture_retries or 0),
-            )
-            for field_name in (
-                "first_seen_at",
-                "pending_since",
-                "last_detected_at",
-                "last_dispatched_at",
-                "pending_signal_text",
-                "pending_signal_kind",
-                "signal_ready_after",
-                "retry_not_before",
-            ):
-                if not getattr(canonical_state, field_name) and getattr(state, field_name):
-                    setattr(canonical_state, field_name, getattr(state, field_name))
-            self._sessions.pop(key, None)
-        canonical_state.session_key = canonical_key
-        canonical_state.name = name
-        self._sessions[canonical_key] = canonical_state
-        return canonical_key
+        candidate = str(candidate_session_key or "").strip()
+        if any(str(key) == candidate for key, _state in generated_matches):
+            return candidate
+        # More than one historical key means display-name identity is
+        # ambiguous. Keep the connector-derived candidate isolated; do not
+        # merge ledgers or pending state based on message count.
+        return candidate_session_key
 
     def _mark_pending_signal(
         self,
@@ -1036,6 +1081,29 @@ class SessionMonitor:
         if _is_high_sensitivity_short_signal(content, max_chars=self.high_sensitivity_short_max_chars):
             return "high_sensitivity_short"
         return "normal"
+
+    def _matches_recent_outbound_preview(self, session_key: str, content: str) -> bool:
+        preview = _normalized_preview_fragment(content)
+        if not session_key or not preview:
+            return False
+        try:
+            summary = self._ledger.load_summary(session_key)
+        except Exception:
+            return False
+        recent = summary.get("recent_messages") if isinstance(summary, dict) else []
+        if not isinstance(recent, list):
+            return False
+        for raw in reversed(recent[-8:]):
+            if not isinstance(raw, dict):
+                continue
+            sender = str(raw.get("sender") or raw.get("sender_role") or "").strip().lower()
+            if sender not in {"assistant", "self", "bot", "service"}:
+                continue
+            outbound = _normalized_preview_fragment(raw.get("content") or raw.get("content_body"))
+            if not outbound:
+                continue
+            return preview == outbound or outbound.startswith(preview) or preview.startswith(outbound)
+        return False
 
     def _signal_ready_after(self, now_iso: str, content: str) -> str:
         if self._signal_kind(content) != "high_sensitivity_short":
@@ -1192,7 +1260,7 @@ def _session_observation_id(
     row = raw.get("row_fingerprint") if isinstance(raw.get("row_fingerprint"), dict) else {}
     seed = {
         "session_key": str(session_key or ""),
-        "content": " ".join(str(content or "").split()),
+        "content": _normalized_preview_fragment(content),
         "time": str(message_time or "").strip(),
         "unread_badge": str(unread_badge or "").strip(),
         "badge_box": box,
@@ -1215,8 +1283,44 @@ def _pending_observation_id(observation_id: str, *, unread_badge_epoch: int) -> 
     return "pending-observation:" + hashlib.sha256(seed.encode("utf-8")).hexdigest()[:32]
 
 
+def _pending_event_source_id(
+    raw: dict[str, Any],
+    *,
+    session_key: str,
+    observation_id: str,
+    message_time: str,
+    has_dispatch_badge: bool,
+) -> str:
+    """Return a physical-event seed that ignores red-dot OCR wording drift."""
+
+    if not has_dispatch_badge:
+        return str(observation_id or "").strip()
+    row = raw.get("row_fingerprint") if isinstance(raw.get("row_fingerprint"), dict) else {}
+    seed = {
+        "session_key": str(session_key or "").strip(),
+        "message_time": str(message_time or "").strip(),
+        "row_y_bucket": row.get("row_y_bucket"),
+        "duplicate_discriminator": row.get("duplicate_discriminator"),
+    }
+    encoded = json.dumps(seed, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    return "sidebar-physical-event:" + hashlib.sha256(encoded.encode("utf-8")).hexdigest()[:32]
+
+
 def _digest(value: str) -> str:
     return hashlib.sha256(str(value).encode("utf-8")).hexdigest()[:32]
+
+
+def _normalized_preview_fragment(value: Any) -> str:
+    text = "".join(str(value or "").strip().split()).rstrip(".。…·")
+    if len(text) < 8:
+        return text
+    punctuation = ".。…·，,；;：:！!？?"
+    for split in range(4, len(text) - 3):
+        left = text[:split].rstrip(punctuation)
+        right = text[split:].lstrip(punctuation).rstrip(punctuation)
+        if len(left) >= 4 and left == right:
+            return left
+    return text
 
 
 def _age_seconds(value: str) -> int:

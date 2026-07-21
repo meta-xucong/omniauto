@@ -77,6 +77,7 @@ def main() -> int:
         check_normalize_and_candidate(),
         check_rejects_style_only_price_fact(),
         check_requires_fact_claims_for_factual_modes(),
+        check_information_collection_with_advisory_evidence_does_not_require_fact_claims(),
         check_accepts_common_sense_compare_without_fact_claims(),
         check_drops_non_authoritative_advice_boundary_fact_claims(),
         check_drops_chinese_style_only_process_notes_without_authorizing_facts(),
@@ -131,8 +132,8 @@ def main() -> int:
         check_brain_json_structure_repair_recovers_plan(),
         check_brain_same_capture_retry_recovers_empty_response(),
         check_brain_same_capture_retry_recovers_unavailable_response(),
-        check_brain_unavailable_retry_recovers_after_non_json_retry_response(),
         check_brain_invalid_plan_retry_recovers_empty_reply_segments(),
+        check_brain_invalid_plan_transport_exhaustion_does_not_nest_retries(),
         check_brain_repair_retries_parseable_empty_reply_segments(),
         check_brain_repair_empty_retry_exhaustion_is_explicit(),
         check_brain_json_structure_repair_failure_classified(),
@@ -200,6 +201,8 @@ def main() -> int:
         check_brain_prompt_compacts_large_context_under_timeout_budget(),
         check_brain_prompt_projection_excludes_unbounded_runtime_payloads(),
         check_brain_timeout_budget_scales_with_prompt_pressure(),
+        check_same_capture_retry_defaults_keep_stage_timeout_budgets(),
+        check_formal_prompt_projection_preserves_citable_source_ids(),
         check_repair_prompt_preserves_authority_boundaries(),
         check_shadow_non_blocking_defers_without_llm(),
         check_shadow_brain_runner_passes_guard(),
@@ -211,12 +214,9 @@ def main() -> int:
         check_repaired_deterministic_quality_soft_pass_requires_missing_context_anchor(),
         check_repaired_quality_soft_pass_allows_explicit_restarted_business_need(),
         check_repaired_deterministic_quality_soft_pass_allows_soft_recommendation_doubts(),
-        check_brain_runner_soft_passes_original_brain_after_quality_repair_failure(),
-        check_brain_runner_soft_passes_repaired_deterministic_quality_doubts(),
-        check_brain_runner_soft_passes_repaired_appointment_schedule_boundary(),
-        check_brain_runner_repairs_quality_after_plan_validation_repair(),
-        check_brain_runner_soft_passes_repaired_semantic_minor_nits(),
-        check_brain_runner_soft_passes_repaired_semantic_authority_false_positive(),
+        check_brain_runner_rechecks_semantics_after_semantic_repair(),
+        check_brain_runner_rechecks_semantic_authority_false_positive(),
+        check_brain_runner_blocks_when_repaired_semantics_still_fail(),
         check_brain_runner_preserves_hard_boundary_handoff_after_validation_repair(),
         check_semantic_reviewer_relaxes_bounded_finance_boundary(),
         check_brain_owned_safe_handoff_reply_reaches_handoff_exit(),
@@ -268,6 +268,9 @@ def main() -> int:
         check_visible_reply_product_mentions_update_recent_context(),
         check_visible_reply_preference_marker_updates_primary_context(),
         check_identity_probe_detector_ignores_test_tokens(),
+        check_trade_in_owned_vehicle_does_not_pollute_inventory_evidence(),
+        check_trade_in_target_vehicle_keeps_inventory_evidence(),
+        check_trade_in_quote_followup_retrieves_formal_policy(),
         check_context_need_catalog_candidates_prefer_recent_mpv_need(),
         check_catalog_list_request_prioritizes_explicit_preference(),
         check_followup_preference_context_preserves_previous_budget(),
@@ -385,6 +388,25 @@ def check_requires_fact_claims_for_factual_modes() -> CaseResult:
     assert_true(not validation["ok"], "factual BrainPlan should declare facts_claimed")
     assert_true("missing_fact_claims" in validation["errors"], "expected missing_fact_claims")
     return CaseResult("requires_fact_claims_for_factual_modes", True, {"errors": validation["errors"]})
+
+
+def check_information_collection_with_advisory_evidence_does_not_require_fact_claims() -> CaseResult:
+    plan = copy.deepcopy(base_plan())
+    plan.update(
+        {
+            "can_answer": False,
+            "answer_mode": "collect_customer_info",
+            "evidence_used": {"formal_knowledge_ids": ["chejin_acquisition_policy"]},
+            "facts_claimed": [],
+            "reply_segments": ["可以，您哪天方便到店？我按您的时间登记。"],
+        }
+    )
+    validation = validate_brain_plan(normalize_brain_plan(plan), require_fact_claims=True)
+    assert_true(
+        validation["ok"],
+        f"a pure Brain-authored information question must not require an invented fact claim: {validation}",
+    )
+    return CaseResult("information_collection_with_advisory_evidence_does_not_require_fact_claims", True, {})
 
 
 def check_accepts_common_sense_compare_without_fact_claims() -> CaseResult:
@@ -1089,7 +1111,28 @@ def check_formal_policy_source_id_prefixes_validate_against_evidence() -> CaseRe
     )
     validation = brain_module.validate_plan_against_evidence(normalize_brain_plan(plan), pack)
     assert_true(validation["ok"], f"formal source ids with common prefixes should validate: {validation}")
-    return CaseResult("formal_policy_source_id_prefixes_validate_against_evidence", True, {"validation": validation})
+    custom_fact = copy.deepcopy(plan)
+    custom_fact["facts_claimed"] = [
+        {
+            "fact_type": "trade_in_process",
+            "value": "置换先初估，再验车确认",
+            "source_level": "formal_knowledge",
+            "source_id": "chejin_loan_policy",
+        }
+    ]
+    custom_validation = brain_module.validate_plan_against_evidence(normalize_brain_plan(custom_fact), pack)
+    assert_true(custom_validation["ok"], f"provider-specific formal fact types should retain exact source validation: {custom_validation}")
+    custom_fact["facts_claimed"][0]["source_id"] = "invented_policy_alias"
+    invented_validation = brain_module.validate_plan_against_evidence(normalize_brain_plan(custom_fact), pack)
+    assert_true(
+        "formal_fact_source_not_in_evidence:invented_policy_alias" in invented_validation.get("errors", []),
+        f"unknown fact types must not bypass formal source validation: {invented_validation}",
+    )
+    return CaseResult(
+        "formal_policy_source_id_prefixes_validate_against_evidence",
+        True,
+        {"validation": validation, "custom_validation": custom_validation, "invented_validation": invented_validation},
+    )
 
 
 def check_semantic_reviewer_authority_summary_reads_evidence_formal_ids() -> CaseResult:
@@ -1219,7 +1262,10 @@ def check_brain_runtime_sends_mixed_summon_with_turn_semantics() -> CaseResult:
     quality = event.get("quality_verification") if isinstance(event.get("quality_verification"), dict) else {}
     assert_true(event.get("applied") is True and event.get("adoptable") is True, f"mixed summon must be sent by Brain: {event}")
     assert_true(event.get("rule_name") == "customer_service_brain_reply", f"must not become a no-visible-reply: {event}")
-    assert_true(quality.get("turn_semantics", {}).get("kind") == "business", f"turn semantics should reach runtime audit: {quality}")
+    assert_true(
+        quality.get("turn_semantics") == {},
+        f"Brain First quality audit must not expose a second local turn-semantics decision: {quality}",
+    )
     return CaseResult("brain_runtime_sends_mixed_summon_with_turn_semantics", True, {"quality": quality})
 
 
@@ -1410,9 +1456,13 @@ def check_brain_input_includes_delay_followup_interaction_hint() -> CaseResult:
     prompt_hint = prompt_input.get("conversation_interaction_state") or {}
     conversation_hint = ((prompt_input.get("conversation") or {}).get("conversation_interaction_state") or {})
     assert_true(prompt_hint.get("authority") == "non_authoritative_interaction_hint", f"prompt hint must stay non-authoritative: {prompt_hint}")
+    # Lean prompts intentionally keep this hint only at the top level to avoid
+    # paying for a duplicate nested copy.  If the fuller profile retains the
+    # nested projection, both views must still agree.
     assert_true(
-        conversation_hint.get("suggested_reply_posture") == "acknowledge_delay_then_continue",
-        f"conversation hint should also be visible to Brain: {conversation_hint}",
+        not conversation_hint
+        or conversation_hint.get("suggested_reply_posture") == "acknowledge_delay_then_continue",
+        f"nested conversation hint must agree when retained: {conversation_hint}",
     )
     fast_decision = brain_module.low_authority_fast_profile_decision(
         settings=brain_module.effective_brain_settings(base_config(base_plan(), include_product=False)),
@@ -1516,8 +1566,8 @@ def check_brain_input_marks_social_turn_context_priority() -> CaseResult:
     policy = str(current.get("context_priority_policy") or "")
     assert_true(obligation.get("must_reply") is True, f"social greeting should carry reply obligation: {brain_input}")
     assert_true(
-        policy.startswith("current_social_turn_first"),
-        f"social greeting should tell Brain to answer current social intent before old context: {policy}",
+        policy.startswith("current_message_first_semantic_context"),
+        f"all turns should use the same current-message-first semantic policy: {policy}",
     )
     prompt_pack, _user_content, _estimate = brain_module.build_sized_brain_prompt(
         settings=brain_module.effective_brain_settings(base_config(base_plan(), include_product=False)),
@@ -1526,7 +1576,7 @@ def check_brain_input_marks_social_turn_context_priority() -> CaseResult:
     prompt_current = (((prompt_pack.get("user") or {}).get("brain_input") or {}).get("current_message") or {})
     prompt_policy = str(prompt_current.get("context_priority_policy") or "")
     assert_true(
-        prompt_policy.startswith("current_social_turn_first"),
+        prompt_policy.startswith("current_message_first_semantic_context"),
         f"social context priority should reach prompt: {prompt_policy}",
     )
     return CaseResult("brain_input_marks_social_turn_context_priority", True, {"policy": prompt_policy})
@@ -1592,13 +1642,17 @@ def check_brain_input_context_recovery_prunes_old_history() -> CaseResult:
     current = brain_input.get("current_message") if isinstance(brain_input.get("current_message"), dict) else {}
     conversation = brain_input.get("conversation") if isinstance(brain_input.get("conversation"), dict) else {}
     context = conversation.get("context") if isinstance(conversation.get("context"), dict) else {}
-    assert_equal(current.get("clean_text"), "客户发来了一张图片", "current text should be reduced to latest actionable turn")
-    assert_equal(current.get("message_ids"), ["visual_proxy:current-car"], "current message ids should use latest turn only")
+    assert_equal(
+        current.get("clean_text"),
+        "Codex 503 token Service Unavailable\n客户发来了一张图片",
+        "context recovery metadata must not silently delete captured natural-language content",
+    )
+    assert_equal(current.get("message_ids"), ["old-log", "visual_proxy:current-car"], "recovery metadata must not delete captured message identities")
     assert_true(current.get("context_recovery", {}).get("applied") is True, f"context recovery should be carried: {brain_input}")
-    assert_true("old_audi_a4l" not in json.dumps(context, ensure_ascii=False), f"old product context should be prompt-pruned: {context}")
-    assert_equal(conversation.get("history_text"), "", "old history_text should be pruned in recovery mode")
-    assert_equal(conversation.get("summary"), "", "old summary should be pruned in recovery mode")
-    assert_true(context.get("old_context_pruned") is True, f"recovery policy should be explicit: {context}")
+    assert_true("old_audi_a4l" in json.dumps(context, ensure_ascii=False), f"context recovery must remain an audit hint, not erase ledger context: {context}")
+    assert_true("旧历史" in str(conversation.get("history_text") or ""), "recovery mode must retain bounded natural-language history")
+    assert_true("旧摘要" in str(conversation.get("summary") or ""), "recovery mode must retain the existing summary as non-authoritative background")
+    assert_true(context.get("old_context_pruned") is not True, f"code must not make a semantic pruning decision: {context}")
 
     prompt_pack, _user_content, _estimate = brain_module.build_sized_brain_prompt(settings=settings, brain_input=brain_input)
     slim = (prompt_pack.get("user") or {}).get("brain_input") or {}
@@ -1606,7 +1660,7 @@ def check_brain_input_context_recovery_prunes_old_history() -> CaseResult:
     prompt_conversation = slim.get("conversation") if isinstance(slim.get("conversation"), dict) else {}
     prompt_products = (((slim.get("content_basis") or {}).get("product_master") or {}).get("items") or [])
     assert_true(prompt_current.get("context_recovery", {}).get("applied") is True, f"recovery metadata should reach prompt: {prompt_current}")
-    assert_equal(prompt_conversation.get("history_text"), "", "slim prompt should not reintroduce old history")
+    assert_true("旧历史" in str(prompt_conversation.get("history_text") or ""), "slim prompt should retain a bounded recent history window")
     assert_true(bool(prompt_products), "product master evidence must still be available after context pruning")
     return CaseResult(
         "brain_input_context_recovery_prunes_old_history",
@@ -2167,6 +2221,11 @@ def check_low_authority_fast_profile_compacts_social_turn_without_bypassing_brai
         "model" not in fast_settings or str(fast_settings.get("model") or "").strip() != str(settings.get("model") or "").strip(),
         f"low-authority fast profile must not pin the original pro model when switching tiers: {fast_settings}",
     )
+    assert_true(
+        int(fast_settings.get("large_prompt_timeout_seconds") or 0) <= int(fast_settings.get("timeout_seconds") or 0)
+        and int(fast_settings.get("very_large_prompt_timeout_seconds") or 0) <= int(fast_settings.get("timeout_seconds") or 0),
+        f"large-prompt scaling must not silently break the low-authority fast timeout contract: {fast_settings}",
+    )
     assert_true(not product_items, f"low-authority greeting must not drag product master into Brain prompt: {product_items}")
     assert_true(not formal_items, f"low-authority greeting must not drag formal FAQ into Brain prompt: {formal_items}")
     assert_true(
@@ -2206,6 +2265,16 @@ def check_low_authority_fast_profile_rejects_authority_or_context_turns() -> Cas
         target_state={"conversation_context": {"last_product_id": "chejin_qinplus_2022_dmi55"}},
     )
     assert_true(not ambiguous_decision.get("enabled"), f"ambiguous short business follow-up must keep context-rich path: {ambiguous_decision}")
+    pronoun_inventory_decision = brain_module.low_authority_fast_profile_decision(
+        settings=settings,
+        combined="这个车有吗",
+        batch=[{"id": "msg-pronoun-inventory", "sender": "许聪", "content": "这个车有吗"}],
+        target_state={"conversation_context": {"last_product_id": "chejin_audi_a4l_2018_40tfsi"}},
+    )
+    assert_true(
+        not pronoun_inventory_decision.get("enabled") and pronoun_inventory_decision.get("reason") == "authority_data_signal",
+        f"pronoun product follow-up with active business context must retain product-master evidence: {pronoun_inventory_decision}",
+    )
     casual_car_word_decision = brain_module.low_authority_fast_profile_decision(
         settings=settings,
         combined="今天路上堵车了",
@@ -2226,6 +2295,16 @@ def check_low_authority_fast_profile_rejects_authority_or_context_turns() -> Cas
         not generic_vehicle_intent_decision.get("enabled"),
         f"generic product inventory intent should use full authority path: {generic_vehicle_intent_decision}",
     )
+    trade_in_quote_decision = brain_module.low_authority_fast_profile_decision(
+        settings=settings,
+        combined="你先给我估个准价，能抵多少车款？",
+        batch=[{"id": "msg-trade-in-quote", "sender": "许聪", "content": "你先给我估个准价，能抵多少车款？"}],
+        target_state={"conversation_context": {"last_customer_need_text": "2018年朗逸置换"}},
+    )
+    assert_true(
+        not trade_in_quote_decision.get("enabled") and trade_in_quote_decision.get("reason") == "authority_data_signal",
+        f"short trade-in quote follow-up must keep the context-rich authority path: {trade_in_quote_decision}",
+    )
     direct_choice_decision = brain_module.low_authority_fast_profile_decision(
         settings=settings,
         combined="我不太懂车，你别让我选太多，直接帮我挑最稳的。",
@@ -2243,8 +2322,10 @@ def check_low_authority_fast_profile_rejects_authority_or_context_turns() -> Cas
             "product": product_decision,
             "car_price": car_price_decision,
             "ambiguous": ambiguous_decision,
+            "pronoun_inventory": pronoun_inventory_decision,
             "casual_car_word": casual_car_word_decision,
             "generic_vehicle_intent": generic_vehicle_intent_decision,
+            "trade_in_quote": trade_in_quote_decision,
             "direct_choice": direct_choice_decision,
         },
     )
@@ -2348,6 +2429,21 @@ def check_routine_product_fast_profile_compacts_grounded_product_turn() -> CaseR
         evidence_pack=pack,
     )
     assert_true(decision.get("enabled"), f"grounded product question should use routine product Brain profile: {decision}")
+    universal_a = brain_module.apply_universal_brain_runtime_settings(
+        settings,
+        evidence_pack=pack,
+        combined="alpha beta gamma",
+    )
+    universal_b = brain_module.apply_universal_brain_runtime_settings(
+        settings,
+        evidence_pack=pack,
+        combined="完全不同的自然表达",
+    )
+    assert_true(
+        universal_a.get("prompt_profile") == universal_b.get("prompt_profile") == "lean"
+        and universal_a.get("history_char_budget") == universal_b.get("history_char_budget"),
+        f"universal prompt load must be based on payload size, not business wording: {universal_a} / {universal_b}",
+    )
     fast_settings = brain_module.apply_routine_product_fast_brain_settings(settings, decision)
     brain_input = brain_module.build_brain_input(
         settings=fast_settings,
@@ -2366,10 +2462,23 @@ def check_routine_product_fast_profile_compacts_grounded_product_turn() -> CaseR
     assert_true("chejin_qinplus_2022_dmi55" in prompt_text, "routine profile must still carry product-master id")
     assert_true("8.68" in prompt_text, "routine profile must still carry product-master price")
     assert_true(int(estimate.get("prompt_chars") or 99999) < 6200, f"routine prompt should be smaller than default lean prompt: {estimate}")
+    assert_true(
+        fast_settings.get("same_capture_brain_invalid_plan_retry_full_prompt") is False,
+        f"routine empty-plan correction should retain the compact prompt unless explicitly overridden: {fast_settings}",
+    )
+    assert_true(
+        fast_settings.get("same_capture_brain_invalid_plan_retry_max_tokens") == fast_settings.get("max_tokens"),
+        f"routine empty-plan correction should not silently expand its output budget: {fast_settings}",
+    )
+    assert_true(
+        int(fast_settings.get("large_prompt_timeout_seconds") or 0) <= int(fast_settings.get("timeout_seconds") or 0)
+        and int(fast_settings.get("very_large_prompt_timeout_seconds") or 0) <= int(fast_settings.get("timeout_seconds") or 0),
+        f"large-prompt scaling must not silently break the routine-product fast timeout contract: {fast_settings}",
+    )
     return CaseResult(
         "routine_product_fast_profile_compacts_grounded_product_turn",
         True,
-        {"decision": decision, "prompt_chars": estimate.get("prompt_chars")},
+        {"decision": decision, "universal_profile": universal_a.get("prompt_profile"), "prompt_chars": estimate.get("prompt_chars")},
     )
 
 
@@ -2695,15 +2804,16 @@ def check_brain_same_capture_retry_recovers_unavailable_response() -> CaseResult
     finally:
         brain_module.call_llm_request_with_failover = original_call
     status = event.get("llm_status") if isinstance(event.get("llm_status"), dict) else {}
-    previous = status.get("previous_llm_status") if isinstance(status.get("previous_llm_status"), dict) else {}
-    assert_true(event.get("applied"), f"transient Brain unavailability retry should recover a Brain reply: {event}")
-    assert_true(status.get("same_capture_retry") is True, f"retry audit should be visible on recovered status: {status}")
-    assert_true(previous.get("error"), f"previous failed Brain status should be retained: {status}")
-    assert_true(len(calls) == 2, f"expected one same-capture retry call, got {len(calls)}")
+    assert_true(not event.get("applied"), f"failed provider pair must return control for scheduler requeue: {event}")
+    assert_true(
+        (status.get("same_capture_retry") or {}).get("error") == "same_capture_brain_unavailable_retry_disabled",
+        f"unavailable retry should remain explicitly auditable: {status}",
+    )
+    assert_true(len(calls) == 1, f"provider failover already owns the transport attempt; expected one call, got {len(calls)}")
     return CaseResult(
-        "brain_same_capture_retry_recovers_unavailable_response",
+        "brain_unavailable_returns_for_scheduler_requeue_without_duplicate_call",
         True,
-        {"calls": len(calls), "previous_error": previous.get("error"), "reason": event.get("reason")},
+        {"calls": len(calls), "same_capture_retry": status.get("same_capture_retry"), "reason": event.get("reason")},
     )
 
 
@@ -2777,16 +2887,14 @@ def check_brain_unavailable_retry_recovers_after_non_json_retry_response() -> Ca
     finally:
         brain_module.call_llm_request_with_failover = original_call
     status = event.get("llm_status") if isinstance(event.get("llm_status"), dict) else {}
-    previous = status.get("previous_llm_status") if isinstance(status.get("previous_llm_status"), dict) else {}
-    assert_true(event.get("applied"), f"unavailable retry non-JSON response should recover through Brain parse retry: {event}")
-    assert_true(status.get("same_capture_retry") is True, f"recovered status should keep same-capture audit: {status}")
-    assert_true(status.get("retry_reason") == "brain_llm_unavailable_parse_retry", f"retry reason should show parse retry recovery: {status}")
-    assert_true(previous.get("error"), f"previous failed status should be retained: {status}")
-    assert_true(len(calls) == 4, f"expected primary, unavailable retry, structure repair, parse retry; got {len(calls)}")
+    assert_true(not event.get("applied"), f"a non-JSON transport retry must still fail closed: {event}")
+    retry = status.get("same_capture_retry") if isinstance(status.get("same_capture_retry"), dict) else {}
+    assert_true(retry.get("attempted") is True, f"the single transport retry should remain auditable: {status}")
+    assert_true(len(calls) == 2, f"single-Brain cleanup must stop after one non-JSON transport retry, got {len(calls)}")
     return CaseResult(
         "brain_unavailable_retry_recovers_after_non_json_retry_response",
         True,
-        {"calls": len(calls), "reason": event.get("reason"), "retry_reason": status.get("retry_reason")},
+        {"calls": len(calls), "reason": event.get("reason"), "error": status.get("error")},
     )
 
 
@@ -2839,6 +2947,79 @@ def check_brain_invalid_plan_retry_recovers_empty_reply_segments() -> CaseResult
     assert_true(retry.get("same_capture_invalid_plan_retry") is True, f"retry audit should be visible: {event}")
     assert_true(len(calls) == 2, f"expected one invalid-plan retry call, got {len(calls)}")
     return CaseResult("brain_invalid_plan_retry_recovers_empty_reply_segments", True, {"calls": len(calls), "reason": event.get("reason")})
+
+
+def check_brain_invalid_plan_transport_exhaustion_does_not_nest_retries() -> CaseResult:
+    config = base_config(base_plan())
+    config["customer_service_brain"].update({"provider": "openai", "mode": "brain_first"})
+    original_call = brain_module.call_llm_request_with_failover
+    calls: list[dict[str, Any]] = []
+    empty_plan = {
+        **base_plan(),
+        "reply_segments": [],
+        "facts_claimed": [],
+        "evidence_used": {"product_ids": ["chejin_qinplus_2022_dmi55"]},
+        "recommended_action": "send_reply",
+    }
+
+    def fake_call(**kwargs: Any) -> dict[str, Any]:
+        calls.append(copy.deepcopy(kwargs))
+        if len(calls) == 1:
+            return {
+                "ok": True,
+                "provider": "deepseek",
+                "model": "unit",
+                "status": 200,
+                "response_text": json.dumps(empty_plan, ensure_ascii=False),
+            }
+        return {
+            "ok": False,
+            "provider": "openai",
+            "model": "unit",
+            "status": 0,
+            "error": "llm_wall_timeout_after_8.0s",
+            "wall_timeout": True,
+            "failover": {
+                "attempted": True,
+                "activated": False,
+                "reason": "fallback_failed",
+                "fallback_error": "llm_wall_timeout_after_8.0s",
+            },
+        }
+
+    try:
+        brain_module.call_llm_request_with_failover = fake_call
+        with patched_evidence_pack(fake_evidence_pack(include_product=True)):
+            event = brain_module.maybe_run_customer_service_brain(
+                config=config,
+                target_name="许聪",
+                target_state={"conversation_context": {}},
+                batch=[{"id": "msg-invalid-transport", "sender": "许聪", "content": "秦PLUS多少钱"}],
+                combined="秦PLUS多少钱",
+                decision=ReplyDecision("", "", False, False, ""),
+                reply_text="",
+                intent_assist={},
+                rag_reply={},
+                llm_reply={},
+                product_knowledge={},
+                data_capture={},
+                raw_capture={"conversation": {"conversation_id": "c1", "chat_type": "private"}},
+                customer_profile=None,
+            )
+    finally:
+        brain_module.call_llm_request_with_failover = original_call
+    repair = event.get("plan_validation_repair") if isinstance(event.get("plan_validation_repair"), dict) else {}
+    assert_true(not event.get("applied"), f"transport exhaustion must block without local wording: {event}")
+    assert_true(len(calls) == 2, f"invalid-plan correction must not nest unavailable retry or immediate repair calls: {calls}")
+    assert_true(
+        repair.get("error") == "invalid_plan_retry_transport_exhausted",
+        f"transport exhaustion should be explicit and skip repeated repair routes: {event}",
+    )
+    return CaseResult(
+        "brain_invalid_plan_transport_exhaustion_does_not_nest_retries",
+        True,
+        {"calls": len(calls), "reason": event.get("reason"), "repair": repair.get("error")},
+    )
 
 
 def check_brain_repair_retries_parseable_empty_reply_segments() -> CaseResult:
@@ -3029,9 +3210,10 @@ def check_brain_failure_does_not_use_local_product_candidate_fallback() -> CaseR
             customer_profile=None,
         )
     reply = str(event.get("reply_text") or event.get("raw_reply_text") or "")
-    assert_true(event.get("rule_name") == "customer_service_brain_no_visible_reply", f"expected no-visible-reply block: {event}")
-    assert_true(not reply.strip(), f"quality repair failure must not use local product candidate fallback: {event}")
-    assert_true(event.get("customer_visible_reply_blocked") is True, f"failure should block visible reply: {event}")
+    assert_true(event.get("rule_name") == "customer_service_brain_reply", f"generic Brain contract should preserve the Brain-owned draft: {event}")
+    assert_true(reply == plan["reply_segments"][0], f"runtime must not synthesize a local product fallback: {event}")
+    assert_true("马自达" not in reply and "凯美瑞" not in reply, f"local candidates must not replace Brain wording: {event}")
+    assert_true(event.get("visible_reply_source") == "brain_plan.reply_segments", f"visible ownership must stay with Brain: {event}")
     return CaseResult("brain_failure_does_not_use_local_product_candidate_fallback", True, {"reason": event.get("reason")})
 
 
@@ -3456,12 +3638,12 @@ def check_quality_gate_rejects_relative_context_product_drift() -> CaseResult:
         evidence_pack=pack,
         settings={},
     )
-    assert_true(not quality["ok"], f"relative product drift should be rejected: {quality}")
+    assert_true(quality["ok"], f"context drift must remain advisory so the Brain can own current-message semantics: {quality}")
     assert_true(
-        "relative_context_product_drift" in quality["errors"],
-        f"expected relative context drift error: {quality}",
+        "context_advisory:relative_context_product_drift" in quality["warnings"],
+        f"expected non-blocking relative context advisory: {quality}",
     )
-    return CaseResult("quality_gate_rejects_relative_context_product_drift", True, {"errors": quality["errors"]})
+    return CaseResult("quality_gate_rejects_relative_context_product_drift", True, {"warnings": quality["warnings"]})
 
 
 def check_quality_gate_accepts_visible_history_recent_product_context() -> CaseResult:
@@ -4192,9 +4374,12 @@ def check_quality_gate_rejects_ambiguous_followup_product_drift() -> CaseResult:
         evidence_pack=pack,
         settings={},
     )
-    assert_true(not quality["ok"], f"ambiguous follow-up should reject backup-product drift: {quality}")
-    assert_true("ambiguous_followup_product_drift" in quality["errors"], f"expected drift error: {quality}")
-    return CaseResult("quality_gate_rejects_ambiguous_followup_product_drift", True, {"errors": quality["errors"]})
+    assert_true(quality["ok"], f"ambiguous context must not become a local blocking verdict: {quality}")
+    assert_true(
+        "context_advisory:ambiguous_followup_product_drift" in quality["warnings"],
+        f"expected non-blocking ambiguity advisory: {quality}",
+    )
+    return CaseResult("quality_gate_rejects_ambiguous_followup_product_drift", True, {"warnings": quality["warnings"]})
 
 
 def check_quality_gate_allows_anchored_backup_on_ambiguous_followup() -> CaseResult:
@@ -5108,7 +5293,7 @@ def check_semantic_reviewer_suspicious_detector() -> CaseResult:
         settings=settings,
     )
     assert_true(should_skip_simple_price is False, "simple price question should avoid extra reviewer latency")
-    assert_true(should_review_followup_price is True, "complaint/follow-up price question should enter semantic review")
+    assert_true(should_review_followup_price is False, "complaint/follow-up wording alone must not add a second dialogue LLM")
     assert_true(should_skip_greeting is False, "plain greeting should not pay semantic reviewer latency")
     assert_true(should_skip_short_split is False, "two concise complete segments should not pay semantic reviewer latency by default")
     return CaseResult(
@@ -5163,6 +5348,17 @@ def check_semantic_reviewer_skips_grounded_recommendation_tail_call() -> CaseRes
     assert_true(review.get("ok"), f"grounded recommendation should pass review gate: {review}")
     assert_true(not review.get("invoked"), f"grounded low-risk recommendation should not call semantic reviewer LLM: {review}")
     assert_equal(review.get("reason"), "not_suspicious", f"expected low-tail skip reason: {review}")
+    soft_length_warning_needs_review = reviewer_module.should_invoke_semantic_reviewer(
+        plan=normalize_brain_plan(plan),
+        current_message="十万以内通勤省油，你推荐哪台？",
+        evidence_pack=fake_evidence_pack(include_product=True),
+        deterministic_quality={"ok": True, "errors": [], "warnings": ["split_reply_over_soft_total_limit"]},
+        settings={},
+    )
+    assert_true(
+        soft_length_warning_needs_review is False,
+        "a soft combined-length warning must not by itself add an LLM reviewer tail to a grounded low-risk recommendation",
+    )
     quote_plan = copy.deepcopy(base_plan())
     quote_plan["reply_segments"] = [
         "秦PLUS DM-i这台2022年上牌，报价8.68万。",
@@ -5200,10 +5396,56 @@ def check_semantic_reviewer_skips_grounded_recommendation_tail_call() -> CaseRes
         settings={},
     )
     assert_true(common_sense_needs_review is False, "bounded common-sense reply with caveat should not pay reviewer tail latency")
+    formal_plan = copy.deepcopy(base_plan())
+    formal_plan.update(
+        {
+            "answer_mode": "direct_answer",
+            "evidence_used": {
+                "formal_knowledge_ids": ["chejin_acquisition_policy", "company_profile"],
+            },
+            "facts_claimed": [
+                {
+                    "fact_type": "trade_in",
+                    "value": "先初估，再验车核实车况，最后确认收购价",
+                    "source_level": "formal_knowledge",
+                    "source_id": "chejin_acquisition_policy",
+                }
+            ],
+            "reply_segments": [
+                "可以，置换一般先按车型、年份、里程和车况做初估。",
+                "再约时间验车核实，最终价格按实际车况确认。",
+                "您方便的话把大概车况发我，我先登记。",
+            ],
+            "risk": {"risk_level": "low", "risk_tags": ["trade_in_process"], "needs_handoff": False},
+            "recommended_action": "send_reply",
+        }
+    )
+    formal_needs_review = reviewer_module.should_invoke_semantic_reviewer(
+        plan=normalize_brain_plan(formal_plan),
+        current_message="我有一台2018年的朗逸想置换，大概流程怎么走？",
+        evidence_pack=fake_evidence_pack(include_product=False),
+        deterministic_quality={"ok": True, "errors": [], "warnings": []},
+        settings={},
+    )
+    assert_true(formal_needs_review is False, "short low-risk formal-knowledge process answer should not pay reviewer tail latency")
+    formal_complaint_needs_review = reviewer_module.should_invoke_semantic_reviewer(
+        plan=normalize_brain_plan(formal_plan),
+        current_message="你刚才没回答，我问的是置换流程怎么走？",
+        evidence_pack=fake_evidence_pack(include_product=False),
+        deterministic_quality={"ok": True, "errors": [], "warnings": []},
+        settings={},
+    )
+    assert_true(formal_complaint_needs_review is False, "a complaint phrase alone must not invoke the fact/risk reviewer")
     return CaseResult(
         "semantic_reviewer_skips_grounded_recommendation_tail_call",
         True,
-        {"review": review, "quote_needs_review": quote_needs_review, "common_sense_needs_review": common_sense_needs_review},
+        {
+            "review": review,
+            "quote_needs_review": quote_needs_review,
+            "common_sense_needs_review": common_sense_needs_review,
+            "formal_needs_review": formal_needs_review,
+            "formal_complaint_needs_review": formal_complaint_needs_review,
+        },
     )
 
 
@@ -5216,7 +5458,7 @@ def check_semantic_reviewer_keeps_risky_recommendations_suspicious() -> CaseResu
         deterministic_quality={"ok": True, "errors": [], "warnings": []},
         settings={},
     )
-    assert_true(complaint_needs_review, "customer complaint/context drift must still invoke semantic review")
+    assert_true(not complaint_needs_review, "customer complaint/context drift is owned by the Brain, not the exceptional fact/risk reviewer")
 
     ungrounded_plan = copy.deepcopy(base_plan())
     ungrounded_plan.update(
@@ -5269,6 +5511,21 @@ def check_semantic_reviewer_unavailable_soft_passes_normal_low_risk() -> CaseRes
     assert_true(
         reviewer_module.plan_allows_unavailable_soft_pass(medium_plan, deterministic_quality=deterministic_quality),
         "reviewer outage should not block deterministic-pass normal medium-risk plans without hard risk tags",
+    )
+    collect_plan = copy.deepcopy(medium_plan)
+    collect_plan["can_answer"] = False
+    collect_plan["answer_mode"] = "collect_customer_info"
+    collect_plan["reply_segments"] = [
+        "现在没法直接报置换准价，您把车况和手续发我，我先做初估。",
+        "最终能抵多少要按门店验车核实后确认。",
+    ]
+    assert_true(
+        reviewer_module.plan_allows_unavailable_soft_pass(collect_plan, deterministic_quality=deterministic_quality),
+        "reviewer outage must not turn a safe Brain-authored information request into no-reply",
+    )
+    assert_true(
+        brain_plan_to_guard_candidate(collect_plan).get("can_answer") is True,
+        "safe collect-customer-info plan must remain eligible for downstream guard verification",
     )
     risky_plan = copy.deepcopy(plan)
     risky_plan["risk"] = {"risk_level": "normal", "risk_tags": ["finance_commitment"], "needs_handoff": False}
@@ -5448,7 +5705,10 @@ def check_semantic_reviewer_shadow_does_not_block_brain_reply() -> CaseResult:
         )
     review = event.get("quality_gate_v2") or {}
     assert_true(event.get("rule_name") == "customer_service_brain_reply", f"shadow review must not block reply: {event}")
-    assert_true(review.get("shadow_verdict") == "repair", f"shadow verdict should be audited: {review}")
+    assert_true(
+        review.get("status") == "skipped" and review.get("reason") == "not_suspicious",
+        f"ordinary Brain First replies must not pay for a second semantic review: {review}",
+    )
     assert_true(review.get("enforced") is False, f"shadow review should not be enforced: {review}")
     return CaseResult("semantic_reviewer_shadow_does_not_block_brain_reply", True, {"review": review})
 
@@ -5534,12 +5794,15 @@ def check_semantic_reviewer_handoff_suggest_preserves_brain_handoff_reply() -> C
     assert_true(event.get("visible_reply_source") == "brain_plan.reply_segments", f"visible reply must come from Brain: {event}")
     assert_true("包过承诺" in event.get("reply_text", ""), f"specific Brain boundary reply should be visible: {event}")
     assert_true("quality_repair" not in event, f"handoff suggestion should not trigger repair when Brain already chose handoff: {event}")
-    soft_pass = event.get("quality_handoff_soft_pass") or {}
-    assert_true(soft_pass.get("ok"), f"soft pass should be audited: {event}")
+    review = event.get("quality_gate_v2") or {}
+    assert_true(
+        review.get("status") == "skipped" and review.get("reason") == "not_suspicious",
+        f"evidence-grounded Brain First handoff must not pay for a second semantic reviewer: {event}",
+    )
     return CaseResult(
         "semantic_reviewer_handoff_suggest_preserves_brain_handoff_reply",
         True,
-        {"rule": event.get("rule_name"), "reply": event.get("reply_text"), "soft_pass": soft_pass},
+        {"rule": event.get("rule_name"), "reply": event.get("reply_text"), "review": review},
     )
 
 
@@ -5622,7 +5885,10 @@ def check_semantic_reviewer_block_preserves_brain_handoff_reply() -> CaseResult:
     assert_true(event.get("rule_name") == "customer_service_brain_handoff", f"Brain-authored hard-boundary handoff should survive reviewer block: {event}")
     assert_true(event.get("visible_reply_source") == "brain_plan.reply_segments", f"visible reply must remain Brain-authored: {event}")
     assert_true("包过" in event.get("reply_text", ""), f"Brain boundary explanation should remain visible: {event}")
-    assert_true(event.get("quality_handoff_soft_pass", {}).get("semantic_verdict") == "block", f"block soft-pass must be audited: {event}")
+    assert_true(
+        event.get("quality_gate_v2", {}).get("reason") == "not_suspicious",
+        f"evidence-grounded handoff must not reintroduce a second Brain First reviewer: {event}",
+    )
     return CaseResult(
         "semantic_reviewer_block_preserves_brain_handoff_reply",
         True,
@@ -5667,10 +5933,9 @@ def check_semantic_reviewer_repair_blocks_when_repair_disabled() -> CaseResult:
         )
     review = event.get("quality_gate_v2") or {}
     repair = event.get("quality_repair") or {}
-    assert_true(event.get("rule_name") == "customer_service_brain_no_visible_reply", f"semantic repair failure should block visible reply: {event}")
-    assert_true(event.get("customer_visible_reply_blocked") is True, f"semantic repair failure must not emit local visible text: {event}")
-    assert_true(review.get("verdict") == "repair" and review.get("enforced") is True, f"review should be enforced: {review}")
-    assert_true(repair.get("error") == "quality_repair_disabled", f"repair should be skipped by config: {repair}")
+    assert_true(event.get("rule_name") == "customer_service_brain_reply", f"disabled legacy reviewer must not block a valid Brain reply: {event}")
+    assert_true(review.get("status") == "skipped" and review.get("enforced") is False, f"review should be skipped: {review}")
+    assert_true(not repair, f"legacy semantic repair must not run: {repair}")
     return CaseResult(
         "semantic_reviewer_repair_blocks_when_repair_disabled",
         True,
@@ -5771,8 +6036,11 @@ def check_brain_prompt_includes_runtime_principles_without_authorizing_facts() -
     )
     identity_rule = str((principles.get("identity_guard") or {}).get("customer_visible_rule") or "")
     assert_true(
-        "不讨论身份真假" in identity_rule and "不证明真人/AI" in identity_rule and "内部信息" in identity_rule,
-        f"Brain should receive the identity-boundary rule without denial wording: {identity_rule}",
+        "不讨论身份真假" in identity_rule
+        and "不证明真人/AI" in identity_rule
+        and "同一商家客服角色连续" in identity_rule
+        and "内部执行分工和流转" in identity_rule,
+        f"Brain should receive the general role-continuity boundary without phrase-specific denial logic: {identity_rule}",
     )
     assert_true(
         any("product_master" in item for item in principles.get("authority_boundary", []) or []),
@@ -6009,7 +6277,7 @@ def check_brain_timeout_budget_scales_with_prompt_pressure() -> CaseResult:
     assert_true(large_timeout == 60, f"large Brain prompt should use 60s budget, got {large_timeout}")
     assert_true(very_large_timeout == 90, f"very large or pre-compression-heavy Brain prompt should use 90s budget, got {very_large_timeout}")
     assert_true(repair_short_timeout == 12, f"short repair prompt should keep repair budget, got {repair_short_timeout}")
-    assert_true(repair_large_timeout == 60, f"large repair prompt should inherit large budget, got {repair_large_timeout}")
+    assert_true(repair_large_timeout == 12, f"repair prompt must keep its independent repair budget, got {repair_large_timeout}")
     assert_true(fallback_timeout == 45, f"fallback should have independent shorter budget, got {fallback_timeout}")
     return CaseResult(
         "brain_timeout_budget_scales_with_prompt_pressure",
@@ -6022,6 +6290,130 @@ def check_brain_timeout_budget_scales_with_prompt_pressure() -> CaseResult:
             "repair_large_timeout": repair_large_timeout,
             "fallback_timeout": fallback_timeout,
         },
+    )
+
+
+def check_same_capture_retry_defaults_keep_stage_timeout_budgets() -> CaseResult:
+    settings = brain_module.effective_brain_settings(
+        {
+            "customer_service_brain": {
+                "timeout_seconds": 12,
+                "large_prompt_timeout_seconds": 15,
+                "very_large_prompt_timeout_seconds": 20,
+                "fallback_timeout_seconds": 12,
+                "quality_repair_timeout_seconds": 8,
+            }
+        }
+    )
+    captured_main: list[dict[str, Any]] = []
+    captured_repair: list[dict[str, Any]] = []
+    original_run_brain_llm = brain_module.run_brain_llm
+    original_run_brain_repair_llm = brain_module.run_brain_repair_llm
+
+    def fake_run_brain_llm(*, settings: dict[str, Any], brain_input: dict[str, Any]) -> dict[str, Any]:
+        captured_main.append(dict(settings))
+        return {"ok": False, "error": "probe"}
+
+    def fake_run_brain_repair_llm(
+        *,
+        settings: dict[str, Any],
+        brain_input: dict[str, Any],
+        plan: dict[str, Any],
+        quality: dict[str, Any],
+    ) -> dict[str, Any]:
+        captured_repair.append(dict(settings))
+        return {"ok": False, "error": "probe"}
+
+    try:
+        brain_module.run_brain_llm = fake_run_brain_llm
+        brain_module.maybe_retry_brain_after_invalid_plan(
+            settings=settings,
+            brain_input={"current_message": {}},
+            previous_plan={},
+            validation={"ok": False, "errors": ["missing_reply_segments"]},
+            combined="测试",
+        )
+        brain_module.run_brain_repair_llm = fake_run_brain_repair_llm
+        brain_module.maybe_retry_brain_repair_after_empty_plan(
+            settings=settings,
+            brain_input={},
+            plan={},
+            quality={"repair_instruction": "测试"},
+            previous_response={},
+            previous_plan={},
+        )
+        brain_module.maybe_retry_brain_repair_after_unparseable_response(
+            settings=settings,
+            brain_input={},
+            plan={},
+            quality={"repair_instruction": "测试"},
+            previous_response={},
+            previous_repair={},
+        )
+    finally:
+        brain_module.run_brain_llm = original_run_brain_llm
+        brain_module.run_brain_repair_llm = original_run_brain_repair_llm
+
+    assert_true(len(captured_main) == 1, f"invalid-plan retry was not captured: {captured_main}")
+    assert_true(len(captured_repair) == 2, f"repair retries were not captured: {captured_repair}")
+    invalid_retry = captured_main[0]
+    assert_true(invalid_retry.get("timeout_seconds") == 12, f"invalid retry expanded main timeout: {invalid_retry}")
+    assert_true(invalid_retry.get("large_prompt_timeout_seconds") == 12, f"invalid retry expanded large timeout: {invalid_retry}")
+    assert_true(invalid_retry.get("very_large_prompt_timeout_seconds") == 12, f"invalid retry expanded very-large timeout: {invalid_retry}")
+    assert_true(invalid_retry.get("fallback_timeout_seconds") == 12, f"invalid retry expanded fallback timeout: {invalid_retry}")
+    for repair_retry in captured_repair:
+        assert_true(repair_retry.get("quality_repair_timeout_seconds") == 8, f"repair retry expanded repair timeout: {repair_retry}")
+        assert_true(repair_retry.get("fallback_timeout_seconds") == 12, f"repair retry expanded fallback timeout: {repair_retry}")
+    return CaseResult(
+        "same_capture_retry_defaults_keep_stage_timeout_budgets",
+        True,
+        {
+            "invalid_retry": {
+                "timeout_seconds": invalid_retry.get("timeout_seconds"),
+                "fallback_timeout_seconds": invalid_retry.get("fallback_timeout_seconds"),
+            },
+            "repair_retries": [
+                {
+                    "quality_repair_timeout_seconds": item.get("quality_repair_timeout_seconds"),
+                    "fallback_timeout_seconds": item.get("fallback_timeout_seconds"),
+                }
+                for item in captured_repair
+            ],
+        },
+    )
+
+
+def check_formal_prompt_projection_preserves_citable_source_ids() -> CaseResult:
+    compact = brain_module.compact_formal_knowledge_for_prompt(
+        {
+            "authority_level": "formal_knowledge",
+            "faq": [
+                {
+                    "intent": "chejin_acquisition_policy",
+                    "answer": "置换先初估，再验车并核实手续后确认最终价格。",
+                    "authority_level": "formal_knowledge",
+                }
+            ],
+            "policies": {"company_profile": "置换流程以门店核实为准。"},
+        },
+        max_items=3,
+        max_text_chars=220,
+    )
+    faq = compact.get("faq") if isinstance(compact.get("faq"), list) else []
+    assert_true(bool(faq), f"formal FAQ disappeared from prompt projection: {compact}")
+    assert_equal(
+        faq[0].get("intent"),
+        "chejin_acquisition_policy",
+        "formal prompt must retain the exact citable intent id",
+    )
+    assert_true(
+        "禁止自造语义别名" in brain_module.BRAIN_RESPONSE_SCHEMA_PROMPT,
+        "Brain schema prompt must forbid invented formal evidence aliases",
+    )
+    return CaseResult(
+        "formal_prompt_projection_preserves_citable_source_ids",
+        True,
+        {"intent": faq[0].get("intent"), "policy_ids": list((compact.get("policies") or {}).keys())},
     )
 
 
@@ -6126,10 +6518,10 @@ def check_brain_runner_rejects_quality_failed_plan() -> CaseResult:
     plan["reply_segments"] = ["我先帮您看看，稍等。"]
     with patched_evidence_pack(fake_evidence_pack(include_product=True)):
         event = run_brain(plan)
-    assert_true(not event.get("applied"), f"quality-failed BrainPlan must not apply: {event}")
-    assert_true(event.get("reason") == "brain_quality_verification_failed", f"expected quality failure: {event}")
+    assert_true(event.get("applied"), f"generic Brain contract must not run a local topic-answering engine: {event}")
+    assert_true(event.get("visible_reply_source") == "brain_plan.reply_segments", f"draft ownership must remain with Brain: {event}")
     errors = (event.get("quality_verification") or {}).get("errors", [])
-    assert_true("missing_direct_price_response" in errors, f"expected quality errors in audit: {event}")
+    assert_true("missing_direct_price_response" not in errors, f"local price-question semantics must be absent: {event}")
     return CaseResult("brain_runner_rejects_quality_failed_plan", True, {"reason": event.get("reason"), "errors": errors})
 
 
@@ -6597,19 +6989,16 @@ def check_brain_runner_repairs_quality_after_plan_validation_repair() -> CaseRes
             )
     finally:
         brain_module.maybe_repair_brain_plan = original
-    assert_true(event.get("applied"), f"post-validation quality repair should produce Brain reply: {event}")
-    assert_true(event.get("visible_reply_owner") == "brain_repair", f"reply must remain Brain-authored: {event}")
-    assert_true(len(calls) == 2, f"expected plan repair then quality repair: calls={calls}, event={event}")
+    assert_true(not event.get("applied"), f"one failed repair must fail closed instead of starting a second Brain repair: {event}")
+    assert_true(len(calls) == 1, f"validation, quality and guard must share one repair quota: calls={calls}, event={event}")
     assert_true(
         calls[0]["quality"].get("source") == "plan_authority_validation",
         f"first repair should be validation feedback: {calls}",
     )
     assert_true(
-        "appointment_commitment_without_confirmation_boundary" in calls[1]["quality"].get("errors", []),
-        f"second repair should receive quality boundary feedback: {calls}",
+        event.get("post_validation_quality_repair", {}).get("error") == "single_brain_repair_budget_exhausted",
+        f"the compatibility audit field should show the shared repair quota instead of a second call: {event}",
     )
-    assert_true("确认下车源状态和门店排期" in event.get("reply_text", ""), f"final reply should be repaired Brain text: {event}")
-    assert_true(event.get("post_validation_quality_repair", {}).get("ok"), f"audit should record post-validation quality repair: {event}")
     return CaseResult(
         "brain_runner_repairs_quality_after_plan_validation_repair",
         True,
@@ -6671,7 +7060,7 @@ def check_semantic_reviewer_relaxes_bounded_finance_boundary() -> CaseResult:
     )
 
 
-def check_brain_runner_soft_passes_repaired_semantic_minor_nits() -> CaseResult:
+def check_brain_runner_rechecks_semantics_after_semantic_repair() -> CaseResult:
     plan = copy.deepcopy(base_plan())
     plan.update(
         {
@@ -6710,7 +7099,41 @@ def check_brain_runner_soft_passes_repaired_semantic_minor_nits() -> CaseResult:
             },
         }
     )
-    with patched_evidence_pack(fake_evidence_pack(include_product=True)), patched_brain_repair(repaired_plan):
+    review_sequence = patched_semantic_review_sequence(
+        [
+            {
+                "ok": False,
+                "status": "ok",
+                "invoked": True,
+                "verdict": "repair",
+                "semantic_errors": ["推荐逻辑还可以更聚焦，倒车影像偏好可表达得更完整。"],
+                "hard_boundary_concerns": [],
+                "errors": ["minor_focus_nit"],
+                "warnings": [],
+                "repair_instruction": "保持商品库事实不变，补齐客户关心但资料未写明的配置边界。",
+                "customer_visible_risk": "low",
+                "reason": "minor_focus_nit",
+            },
+            {
+                "ok": True,
+                "status": "ok",
+                "invoked": True,
+                "verdict": "pass",
+                "semantic_errors": [],
+                "hard_boundary_concerns": [],
+                "errors": [],
+                "warnings": [],
+                "repair_instruction": "",
+                "customer_visible_risk": "low",
+                "reason": "repaired_plan_verified",
+            },
+        ]
+    )
+    with (
+        patched_evidence_pack(fake_evidence_pack(include_product=True)),
+        patched_brain_repair(repaired_plan),
+        review_sequence,
+    ):
         event = brain_module.maybe_run_customer_service_brain(
             config=config,
             target_name="许聪",
@@ -6729,17 +7152,21 @@ def check_brain_runner_soft_passes_repaired_semantic_minor_nits() -> CaseResult:
         )
     assert_true(event.get("applied"), f"repaired actionable Brain reply should apply: {event}")
     assert_true(event.get("rule_name") == "customer_service_brain_reply", f"expected Brain reply: {event}")
-    assert_true(event.get("repaired_quality_soft_pass", {}).get("ok"), f"expected post-repair soft pass audit: {event}")
+    assert_true(
+        event.get("repaired_quality_gate_v2", {}).get("verdict") == "pass",
+        f"the repaired plan must pass a fresh semantic verification: {event}",
+    )
+    assert_true(review_sequence.call_count == 2, f"expected draft review plus repaired-plan verification: {event}")
     assert_true("秦PLUS" in event.get("reply_text", ""), f"reply should keep actionable product answer: {event}")
     assert_true("马上回复" not in event.get("reply_text", ""), f"reply must not degrade to generic stall: {event}")
     return CaseResult(
-        "brain_runner_soft_passes_repaired_semantic_minor_nits",
+        "brain_runner_rechecks_semantics_after_semantic_repair",
         True,
-        {"reason": event.get("reason"), "soft_pass": event.get("repaired_quality_soft_pass")},
+        {"reason": event.get("reason"), "semantic_review_calls": review_sequence.call_count},
     )
 
 
-def check_brain_runner_soft_passes_repaired_semantic_authority_false_positive() -> CaseResult:
+def check_brain_runner_rechecks_semantic_authority_false_positive() -> CaseResult:
     plan = copy.deepcopy(base_plan())
     plan.update(
         {
@@ -6797,7 +7224,37 @@ def check_brain_runner_soft_passes_repaired_semantic_authority_false_positive() 
     pack["current_batch"] = [{"id": "msg1", "sender": "许聪", "content": message}]
     if isinstance(pack.get("conversation"), dict):
         pack["conversation"]["current_batch_text"] = f"[许聪] {message}"
-    with patched_evidence_pack(pack), patched_brain_repair(repaired_plan):
+    review_sequence = patched_semantic_review_sequence(
+        [
+            {
+                "ok": False,
+                "status": "ok",
+                "invoked": True,
+                "verdict": "repair",
+                "semantic_errors": ["当前草稿的商品事实授权关系需要重新核对。"],
+                "hard_boundary_concerns": [],
+                "errors": ["authority_review_required"],
+                "warnings": [],
+                "repair_instruction": "重新核对本轮权威证据后生成完整回复。",
+                "customer_visible_risk": "medium",
+                "reason": "authority_review_required",
+            },
+            {
+                "ok": True,
+                "status": "ok",
+                "invoked": True,
+                "verdict": "pass",
+                "semantic_errors": [],
+                "hard_boundary_concerns": [],
+                "errors": [],
+                "warnings": [],
+                "repair_instruction": "",
+                "customer_visible_risk": "low",
+                "reason": "authority_repair_verified",
+            },
+        ]
+    )
+    with patched_evidence_pack(pack), patched_brain_repair(repaired_plan), review_sequence:
         event = brain_module.maybe_run_customer_service_brain(
             config=config,
             target_name="许聪",
@@ -6814,22 +7271,78 @@ def check_brain_runner_soft_passes_repaired_semantic_authority_false_positive() 
             raw_capture={"conversation": {"conversation_id": "c1", "chat_type": "private"}},
             customer_profile=None,
         )
-    soft_pass = event.get("repaired_quality_soft_pass") or {}
-    warnings = [str(item) for item in soft_pass.get("warnings", []) or []]
     assert_true(event.get("applied"), f"contract-verified authority false positive should not block Brain: {event}")
     assert_true(event.get("rule_name") == "customer_service_brain_reply", f"expected Brain-owned reply: {event}")
     assert_true(event.get("visible_reply_owner") == "brain_repair", f"reply must remain Brain repair authored: {event}")
-    assert_true(soft_pass.get("ok"), f"expected semantic authority false-positive soft-pass audit: {event}")
     assert_true(
-        any("semantic_authority_false_positive_soft_pass" in item for item in warnings),
-        f"soft-pass should audit semantic authority false positive: {soft_pass}",
+        event.get("repaired_quality_gate_v2", {}).get("verdict") == "pass",
+        f"the repaired plan must pass a fresh semantic verification: {event}",
     )
+    assert_true(review_sequence.call_count == 2, f"expected draft review plus repaired-plan verification: {event}")
     assert_true("秦PLUS" in event.get("reply_text", ""), f"reply should keep product-master answer: {event}")
     assert_true(event.get("reason") != "brain_quality_verification_failed", f"quality gate must not hard-veto Brain: {event}")
     return CaseResult(
-        "brain_runner_soft_passes_repaired_semantic_authority_false_positive",
+        "brain_runner_rechecks_semantic_authority_false_positive",
         True,
-        {"reason": event.get("reason"), "soft_pass": soft_pass},
+        {"reason": event.get("reason"), "semantic_review_calls": review_sequence.call_count},
+    )
+
+
+def check_brain_runner_blocks_when_repaired_semantics_still_fail() -> CaseResult:
+    plan = copy.deepcopy(base_plan())
+    repaired_plan = copy.deepcopy(plan)
+    repaired_plan["reply_segments"] = ["我会把后续处理交给另一个对客角色，请您等待。"]
+    config = base_config(plan)
+    config["customer_service_brain"].update(
+        {
+            "mode": "brain_first",
+            "semantic_reviewer_mode": "always",
+            "semantic_reviewer_cache_enabled": False,
+        }
+    )
+    rejected = {
+        "ok": False,
+        "status": "ok",
+        "invoked": True,
+        "verdict": "repair",
+        "semantic_errors": ["客户可见回复把后续处理主语改为另一个角色，破坏同一商家客服角色连续性。"],
+        "hard_boundary_concerns": [],
+        "errors": ["customer_visible_role_discontinuity"],
+        "warnings": [],
+        "repair_instruction": "保持同一商家客服角色，由当前角色承接后续确认和回复。",
+        "customer_visible_risk": "medium",
+        "reason": "customer_visible_role_discontinuity",
+    }
+    review_sequence = patched_semantic_review_sequence([rejected, rejected])
+    with (
+        patched_evidence_pack(fake_evidence_pack(include_product=True)),
+        patched_brain_repair(repaired_plan),
+        review_sequence,
+    ):
+        event = brain_module.maybe_run_customer_service_brain(
+            config=config,
+            target_name="许聪",
+            target_state={"conversation_context": {}},
+            batch=[{"id": "msg-role", "sender": "许聪", "content": "这个后续怎么处理？"}],
+            combined="这个后续怎么处理？",
+            decision=ReplyDecision("", "", False, False, ""),
+            reply_text="",
+            intent_assist={},
+            rag_reply={},
+            llm_reply={},
+            product_knowledge={},
+            data_capture={},
+            raw_capture={"conversation": {"conversation_id": "c1", "chat_type": "private"}},
+            customer_profile=None,
+        )
+    assert_true(not event.get("applied"), f"a semantically rejected repaired plan must fail closed: {event}")
+    assert_true(event.get("customer_visible_reply_blocked") is True, f"rejected repair must block visible output: {event}")
+    assert_true(event.get("reason") == "brain_quality_verification_failed", f"unexpected failure reason: {event}")
+    assert_true(review_sequence.call_count == 2, f"repaired plan was not rechecked: {event}")
+    return CaseResult(
+        "brain_runner_blocks_when_repaired_semantics_still_fail",
+        True,
+        {"reason": event.get("reason"), "semantic_review_calls": review_sequence.call_count},
     )
 
 
@@ -6925,14 +7438,18 @@ def check_brain_runner_preserves_hard_boundary_handoff_after_validation_repair()
     assert_true(event.get("rule_name") == "customer_service_brain_handoff", f"expected Brain-owned handoff exit: {event}")
     assert_true(event.get("visible_reply_source") == "brain_plan.reply_segments", f"visible reply must stay Brain-owned: {event}")
     assert_true("调表" in event.get("reply_text", ""), f"specific refusal should remain visible: {event}")
-    assert_true(event.get("repaired_quality_handoff_soft_pass", {}).get("ok"), f"expected validation-repair handoff soft-pass: {event}")
+    assert_true(
+        event.get("quality_gate_v2", {}).get("reason") == "not_suspicious"
+        and event.get("guard", {}).get("hard_boundary") is True,
+        f"hard boundary must be decided by metadata guard without semantic soft-pass machinery: {event}",
+    )
     return CaseResult(
         "brain_runner_preserves_hard_boundary_handoff_after_validation_repair",
         True,
         {
             "reason": event.get("reason"),
             "rule_name": event.get("rule_name"),
-            "soft_pass": event.get("repaired_quality_handoff_soft_pass"),
+            "guard": event.get("guard"),
         },
     )
 
@@ -7641,7 +8158,7 @@ def check_guard_clears_soft_safety_with_safe_trade_in_valuation_boundary() -> Ca
         "needs_handoff": False,
         "used_evidence": ["common_sense:二手车置换需验车评估"],
         "structured_used": False,
-        "risk_tags": ["price_commitment"],
+        "risk_tags": ["valuation_uncertainty"],
     }
     guard = guard_synthesized_reply(
         candidate=candidate,
@@ -7655,6 +8172,7 @@ def check_guard_clears_soft_safety_with_safe_trade_in_valuation_boundary() -> Ca
 
     risky = dict(candidate)
     risky["reply"] = "可以，您这台旧车最终能抵6万车款，今天就按这个价算。"
+    risky["risk_tags"] = ["price_commitment"]
     risky_guard = guard_synthesized_reply(
         candidate=risky,
         evidence_pack=pack,
@@ -7691,7 +8209,7 @@ def check_guard_clears_soft_safety_with_natural_trade_in_valuation_boundary() ->
         "needs_handoff": False,
         "used_evidence": ["common_sense:二手车置换需验车评估"],
         "structured_used": False,
-        "risk_tags": ["price_commitment"],
+        "risk_tags": ["valuation_uncertainty"],
     }
     guard = guard_synthesized_reply(
         candidate=candidate,
@@ -7878,18 +8396,21 @@ def check_guard_allows_safe_appointment_followup_coordination() -> CaseResult:
 
     explicit_handoff = dict(candidate)
     explicit_handoff["reply"] = "好的王先生，我这边转人工客服，稍后让同事联系您。"
+    explicit_handoff["recommended_action"] = "handoff"
+    explicit_handoff["needs_handoff"] = True
     explicit_guard = guard_synthesized_reply(
         candidate=explicit_handoff,
         evidence_pack=pack,
         settings={"require_evidence": True, "brain_first_guard": True},
     )
     assert_true(
-        not explicit_guard.get("allowed"),
-        f"explicit customer-visible handoff marker must still be rejected: {explicit_guard}",
+        explicit_guard.get("allowed") and explicit_guard.get("action") == "handoff",
+        f"Brain-owned handoff must be decided by plan metadata, not a visible phrase matcher: {explicit_guard}",
     )
 
     overcommit = dict(candidate)
     overcommit["reply"] = "好的王先生，周六下午两点直接过来就行，我已经给您安排好了。"
+    overcommit["risk_tags"] = ["appointment_commitment"]
     overcommit_guard = guard_synthesized_reply(
         candidate=overcommit,
         evidence_pack=pack,
@@ -7963,7 +8484,7 @@ def check_guard_rejects_finance_lowest_down_payment_commitment() -> CaseResult:
         "needs_handoff": False,
         "used_evidence": ["faq:chejin_loan_policy"],
         "structured_used": True,
-        "risk_tags": ["finance"],
+        "risk_tags": ["finance_commitment"],
     }
     guard = guard_synthesized_reply(candidate=candidate, evidence_pack=pack, settings={"require_evidence": True, "brain_first_guard": True})
     assert_true(not guard.get("allowed"), f"concrete lowest-down-payment commitment must be blocked: {guard}")
@@ -7995,10 +8516,16 @@ def check_guard_allows_contract_invoice_human_coordination_boundary_reply() -> C
     )
     risky = dict(candidate)
     risky["reply"] = "我让财务直接开票，今天一定给您开好。"
+    risky["recommended_action"] = "send_reply"
+    risky["needs_handoff"] = False
+    risky["risk_tags"] = ["invoice_commitment"]
     risky_guard = guard_synthesized_reply(candidate=risky, evidence_pack=pack, settings={"require_evidence": True, "brain_first_guard": True})
     assert_true(not risky_guard.get("allowed"), f"direct invoice commitment must still be blocked: {risky_guard}")
     price_lock = dict(candidate)
     price_lock["reply"] = "我让专人联系您对接，价格直接按最低价锁定。"
+    price_lock["recommended_action"] = "send_reply"
+    price_lock["needs_handoff"] = False
+    price_lock["risk_tags"] = ["price_commitment"]
     price_lock_guard = guard_synthesized_reply(
         candidate=price_lock,
         evidence_pack=pack,
@@ -8122,10 +8649,10 @@ def check_guard_v2_soft_evidence_handoff_requires_brain_repair() -> CaseResult:
         "risk_tags": [],
     }
     guard = guard_synthesized_reply(candidate=candidate, evidence_pack=pack, settings={"require_evidence": True, "brain_first_guard": True})
-    assert_true(not guard.get("allowed") and guard.get("action") == "repair", f"soft evidence handoff must go back to Brain: {guard}")
+    assert_true(guard.get("allowed") and guard.get("action") == "handoff", f"Guard must not second-guess Brain's soft handoff strategy: {guard}")
     assert_true(guard.get("hard_boundary") is False, f"soft evidence should not become hard boundary: {guard}")
-    assert_true("软审稿意见" in str(guard.get("repair_instruction") or ""), f"repair should explain soft advisory handoff: {guard}")
-    return CaseResult("guard_v2_soft_evidence_handoff_requires_brain_repair", True, {"guard": guard})
+    assert_true(guard.get("customer_visible_reply_source") == "brain_plan.reply_segments", f"visible handoff wording must stay Brain-owned: {guard}")
+    return CaseResult("guard_v2_soft_evidence_handoff_preserves_brain_strategy", True, {"guard": guard})
 
 
 def check_guard_v2_approves_authoritative_brain_hard_boundary_reply() -> CaseResult:
@@ -8161,7 +8688,9 @@ def check_guard_v2_approves_authoritative_brain_hard_boundary_reply() -> CaseRes
     combo_candidate = {
         **candidate,
         "reply": "贷款能不能过要看征信和资方审核，我不能保证包过；最低价也得结合车况和付款方式确认。",
-        "risk_tags": ["承诺贷款包过", "最低价需要金融专员确认"],
+        # The universal guard consumes exact machine risk codes only.  It must
+        # not mine free-form Chinese tags as a second intent classifier.
+        "risk_tags": ["finance_commitment", "lowest_price_commitment"],
     }
     combo_guard = guard_synthesized_reply(
         candidate=combo_candidate,
@@ -8385,8 +8914,14 @@ def check_guard_v2_rejects_explicit_visible_handoff_marker() -> CaseResult:
         evidence_pack=pack,
         settings={"brain_first_guard": True, "identity_guard_enabled": True},
     )
-    assert_true(not guard.get("allowed"), f"explicit transfer wording must not be approved as visible handoff: {guard}")
-    assert_true(guard.get("action") == "repair", f"Brain should rewrite handoff without explicit transfer wording: {guard}")
+    assert_true(
+        guard.get("allowed") and guard.get("action") == "handoff",
+        f"Brain First must honor hard-boundary plan metadata instead of a visible handoff phrase list: {guard}",
+    )
+    assert_true(
+        guard.get("customer_visible_reply_source") == "brain_plan.reply_segments",
+        f"approved handoff wording must remain Brain-authored: {guard}",
+    )
     return CaseResult("guard_v2_rejects_explicit_visible_handoff_marker", True, {"guard": guard})
 
 
@@ -8585,10 +9120,9 @@ def check_brain_repair_retry_recovers_guard_repair_non_json() -> CaseResult:
         brain_module.call_llm_request_with_failover = original_call
         brain_module.review_brain_reply_semantics = original_review
     repair = event.get("quality_repair") or event.get("guard_repair") or {}
-    assert_true(event.get("applied"), f"repair parse retry should recover a Brain-visible reply: {event}")
-    assert_true("真人客服" not in str(event.get("reply_text") or ""), f"identity overclaim must be repaired: {event}")
-    assert_true(repair.get("same_capture_repair_retry") is True, f"repair retry audit should be visible: {event}")
-    assert_true(len(calls) >= 4, f"expected initial Brain, failed repair, failed structure repair, repair retry calls: {len(calls)}")
+    assert_true(not event.get("applied"), f"a malformed repair must fail closed instead of nesting structure and parse retries: {event}")
+    assert_true(repair.get("error") == "brain_repair_response_was_not_json_object", f"repair failure should remain explicit: {event}")
+    assert_true(len(calls) == 2, f"expected one main Brain and one shared repair call only: {len(calls)}")
     return CaseResult("brain_repair_retry_recovers_guard_repair_non_json", True, {"calls": len(calls), "reason": event.get("reason")})
 
 
@@ -8784,6 +9318,52 @@ def check_identity_probe_detector_ignores_test_tokens() -> CaseResult:
         "guard identity probe should still detect explicit AI-auto-reply probes",
     )
     return CaseResult("identity_probe_detector_ignores_test_tokens", True, {})
+
+
+def check_trade_in_owned_vehicle_does_not_pollute_inventory_evidence() -> CaseResult:
+    question = "我的2018款朗逸想置换，先帮我估个价"
+    with tenant_context("chejin"):
+        candidates = catalog_product_candidates(question, limit=5, context={})
+        raw_pack = workflow_module.build_evidence_pack(question, context={})
+        compact = compact_knowledge_pack(
+            question,
+            raw_pack,
+            max_rag_hits=5,
+            max_rag_text_chars=900,
+            max_catalog_candidates=5,
+        )
+    evidence = compact.get("evidence") if isinstance(compact.get("evidence"), dict) else {}
+    products = evidence.get("products") if isinstance(evidence.get("products"), list) else []
+    catalog = evidence.get("catalog_candidates") if isinstance(evidence.get("catalog_candidates"), list) else []
+    assert_true(not candidates, f"customer-owned trade-in must not be matched as local inventory: {candidates}")
+    assert_true(not products and not catalog, f"trade-in-only evidence must not contain unrelated inventory: {evidence}")
+    return CaseResult("trade_in_owned_vehicle_does_not_pollute_inventory_evidence", True, {})
+
+
+def check_trade_in_target_vehicle_keeps_inventory_evidence() -> CaseResult:
+    question = "我想把旧朗逸置换成奥迪A4L，A4L多少钱"
+    with tenant_context("chejin"):
+        candidates = catalog_product_candidates(question, limit=5, context={})
+    ids = [str(item.get("id") or "") for item in candidates]
+    assert_true(
+        "chejin_audi_a4l_2018_40tfsi" in ids,
+        f"an explicitly requested replacement vehicle must retain product-master evidence: {candidates}",
+    )
+    return CaseResult("trade_in_target_vehicle_keeps_inventory_evidence", True, {"candidate_ids": ids})
+
+
+def check_trade_in_quote_followup_retrieves_formal_policy() -> CaseResult:
+    question = "你先给我估个准价，能抵多少车款？"
+    with tenant_context("chejin"):
+        pack = workflow_module.build_evidence_pack(question, context={"last_customer_need_text": "2018年朗逸置换"})
+    evidence = pack.get("evidence") if isinstance(pack.get("evidence"), dict) else {}
+    faq = evidence.get("faq") if isinstance(evidence.get("faq"), list) else []
+    ids = [str(item.get("intent") or item.get("id") or "") for item in faq if isinstance(item, dict)]
+    assert_true(
+        "chejin_acquisition_policy" in ids,
+        f"a trade-in valuation follow-up must retain formal policy authority instead of falling back to common sense: {ids}",
+    )
+    return CaseResult("trade_in_quote_followup_retrieves_formal_policy", True, {"formal_ids": ids})
 
 
 def check_context_need_catalog_candidates_prefer_recent_mpv_need() -> CaseResult:
@@ -9356,6 +9936,7 @@ def check_process_target_brain_first_uses_operational_intent_route_only() -> Cas
     config["intent_router"] = {"llm": {"enabled": True, "provider": "openai"}}
     original_route = workflow_module.route_intent
     original_evidence_builder = workflow_module.build_evidence_pack
+    original_send_reply = workflow_module.send_reply_with_optional_multi_bubble
     route_configs: list[dict[str, Any]] = []
 
     def fake_route(*, combined: str, config: dict[str, Any], evidence_pack: dict[str, Any], target_state: dict[str, Any]) -> Any:
@@ -9373,6 +9954,7 @@ def check_process_target_brain_first_uses_operational_intent_route_only() -> Cas
 
     workflow_module.route_intent = fake_route
     workflow_module.build_evidence_pack = unexpected_evidence_builder
+    workflow_module.send_reply_with_optional_multi_bubble = lambda **_kwargs: {"ok": True, "verified": True, "adapter": "unit", "state": "verified"}
     try:
         with patched_workflow_brain(mode="brain_first"):
             event = process_target(
@@ -9386,12 +9968,33 @@ def check_process_target_brain_first_uses_operational_intent_route_only() -> Cas
                 allow_fallback_send=True,
                 mark_dry_run=True,
             )
+        with patched_workflow_brain(mode="brain_first"):
+            send_event = process_target(
+                connector=FakeConnector([{"id": "p-operational-route-send", "type": "text", "sender": "customer", "content": "全新未分类消息"}]),
+                target=TargetConfig("test_customer", True, True, False, 3),
+                config=config,
+                rules={"default_reply": "legacy", "rules": []},
+                state={"targets": {}},
+                send=True,
+                write_data=False,
+                allow_fallback_send=True,
+                mark_dry_run=False,
+            )
     finally:
         workflow_module.route_intent = original_route
         workflow_module.build_evidence_pack = original_evidence_builder
+        workflow_module.send_reply_with_optional_multi_bubble = original_send_reply
     routed_llm = ((route_configs[0].get("intent_router") or {}).get("llm") or {}) if route_configs else {}
-    assert_true(route_configs, "Brain First must retain an operational intent route for data bookkeeping")
-    assert_true(routed_llm.get("enabled") is False, f"operational route must disable duplicate intent LLM: {route_configs}")
+    assert_true(not route_configs, f"Brain First must not run a second local/LLM intent router: {route_configs}")
+    assert_true(
+        event.get("intent_result", {}).get("source") == "brain_first_semantics_owned_by_brain",
+        f"compatibility intent audit must remain neutral: {event}",
+    )
+    assert_true(
+        send_event.get("intent_result", {}).get("source") == "brain_first_semantics_owned_by_brain",
+        f"direct-send Brain First path must also bypass the local intent router: {send_event}",
+    )
+    assert_true(send_event.get("action") in {"sent", "handoff_sent"}, f"direct-send path should remain operational: {send_event}")
     assert_true(
         ((config.get("intent_router") or {}).get("llm") or {}).get("enabled") is True,
         "private route projection must not mutate the caller configuration",
@@ -9400,7 +10003,7 @@ def check_process_target_brain_first_uses_operational_intent_route_only() -> Cas
     return CaseResult(
         "process_target_brain_first_uses_operational_intent_route_only",
         True,
-        {"intent_route_llm_enabled": routed_llm.get("enabled")},
+        {"intent_route_called": bool(route_configs), "intent_route_llm_enabled": routed_llm.get("enabled"), "direct_send_action": send_event.get("action")},
     )
 
 
@@ -9430,8 +10033,11 @@ def check_process_target_brain_first_low_authority_fast_precheck_skips_legacy_pr
         intent_assist.get("reason") == "skipped_for_brain_first_low_authority_fast_precheck",
         f"legacy intent assist should be skipped for pure greeting fast precheck: {event}",
     )
-    assert_true("rag_reply" not in event, f"legacy RAG should not run in low-authority Brain precheck path: {event}")
-    assert_true("llm_reply_synthesis" not in event, f"legacy synthesis should not run in low-authority Brain precheck path: {event}")
+    assert_true(event.get("rag_reply", {}).get("reason") == "rag_response_disabled", f"legacy RAG compatibility field must stay disabled: {event}")
+    assert_true(
+        event.get("llm_reply_synthesis", {}).get("reason") == "llm_reply_synthesis_disabled",
+        f"legacy synthesis compatibility field must stay disabled: {event}",
+    )
     return CaseResult("process_target_brain_first_low_authority_fast_precheck_skips_legacy_prework", True, {"precheck": precheck})
 
 
@@ -9451,8 +10057,9 @@ def check_process_target_brain_first_low_authority_fast_precheck_rejects_busines
             mark_dry_run=True,
         )
     assert_true(
-        "brain_first_low_authority_fast_precheck" not in event,
-        f"business short turn must keep normal evidence/routing path: {event}",
+        event.get("brain_first_low_authority_fast_precheck", {}).get("profile", {}).get("reason")
+        == "brain_first_universal_pipeline",
+        f"all Brain First wording must use the same universal path: {event}",
     )
     runtime_route = event.get("runtime_route") if isinstance(event.get("runtime_route"), dict) else {}
     assert_true(runtime_route.get("reason") == "realtime_reply_disabled", f"normal Brain path should still reach legacy-disabled audit fields: {event}")
@@ -9660,6 +10267,27 @@ class patched_brain_repair_failure:
 
     def __exit__(self, exc_type: Any, exc: Any, tb: Any) -> None:
         brain_module.maybe_repair_brain_plan = self.original
+
+
+class patched_semantic_review_sequence:
+    def __init__(self, reviews: list[dict[str, Any]]) -> None:
+        self.reviews = [copy.deepcopy(item) for item in reviews]
+        self.original = None
+        self.call_count = 0
+
+    def __enter__(self) -> "patched_semantic_review_sequence":
+        self.original = brain_module.review_brain_reply_semantics
+
+        def fake_review(**_: Any) -> dict[str, Any]:
+            index = min(self.call_count, len(self.reviews) - 1)
+            self.call_count += 1
+            return copy.deepcopy(self.reviews[index])
+
+        brain_module.review_brain_reply_semantics = fake_review
+        return self
+
+    def __exit__(self, exc_type: Any, exc: Any, tb: Any) -> None:
+        brain_module.review_brain_reply_semantics = self.original
 
 
 class patched_quality_verification:

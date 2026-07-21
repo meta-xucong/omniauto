@@ -1,5 +1,8 @@
 # 车源图片检索独立模块设计（2026-07-16）
 
+> [!WARNING]
+> **文档状态：算法与数据边界保留、独立生产拓扑已废止（2026-07-18）。** 商品图片所有权、描述/指纹、阈值匹配和失败降级仍有效；`vehicle_image_retrieval` 不再作为 vision 之外的第二个图片能力域，其实现应收束为 [完全独立图像识别模块改造方案](customer_service_absolute_independent_vision_module_refactor_plan_20260718.md) 中的 `vision/vehicle_retrieval` 子模块，旧路径只保留兼容门面。
+
 ## 0. 约束与目标
 
 本文服从并引用：

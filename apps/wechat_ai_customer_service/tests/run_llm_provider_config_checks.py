@@ -114,11 +114,16 @@ def run_checks() -> dict[str, Any]:
             check_stage_can_disallow_fallback(calls)
             check_failover_preserves_actual_fallback_route(calls)
             check_wall_timeout_primary_activates_fallback()
+            check_wall_timeout_affinity_survives_initial_fallback_timeout()
+            check_wall_timeout_bounds_slow_response_headers()
+            check_failed_affinity_probe_does_not_repeat_same_fallback()
+            check_response_body_read_respects_total_deadline()
+            check_empty_json_response_is_failoverable()
             check_llm_config_permissions_allow_all_authenticated_users()
         finally:
             llm_config_module.urllib.request.urlopen = old_urlopen
             llm_config_module._LLM_CONFIG_PATH = old_path
-    return {"ok": True, "checks": 11}
+    return {"ok": True, "checks": 16}
 
 
 def check_legacy_deepseek_defaults() -> None:
@@ -458,6 +463,13 @@ def check_failover_preserves_actual_fallback_route(calls: list[dict[str, Any]]) 
 def check_wall_timeout_primary_activates_fallback() -> None:
     old_urlopen = llm_config_module.urllib.request.urlopen
     calls: list[dict[str, Any]] = []
+    primary_signature = llm_config_module.llm_route_signature(
+        provider="openai",
+        api_key="sk-primary",
+        base_url="https://slow-primary.invalid/v1",
+        model="gpt-5.4",
+    )
+    llm_config_module._clear_llm_failover_affinity(primary_signature)
 
     def fake_urlopen(request: Any, timeout: int = 0, **kwargs: Any) -> FakeResponse:
         headers = {str(key).lower(): value for key, value in request.header_items()}
@@ -479,32 +491,274 @@ def check_wall_timeout_primary_activates_fallback() -> None:
     llm_config_module.urllib.request.urlopen = fake_urlopen
     started = time.time()
     try:
-        result = llm_config_module.call_llm_request_with_failover(
-            provider="openai",
-            api_key="sk-primary",
-            base_url="https://slow-primary.invalid/v1",
-            model="gpt-5.4",
-            messages=[{"role": "user", "content": "ping"}],
-            timeout=30,
-            wall_timeout=0.2,
-            max_tokens=8,
-            fallback_timeout=30,
-            fallback_wall_timeout=1,
-            config={
+        request = {
+            "provider": "openai",
+            "api_key": "sk-primary",
+            "base_url": "https://slow-primary.invalid/v1",
+            "model": "gpt-5.4",
+            "messages": [{"role": "user", "content": "ping"}],
+            "timeout": 30,
+            "wall_timeout": 0.2,
+            "max_tokens": 8,
+            "fallback_timeout": 30,
+            "fallback_wall_timeout": 1,
+            "config": {
                 "LLM_FALLBACK_ENABLED": "1",
                 "LLM_FALLBACK_PROVIDER": "deepseek",
                 "LLM_FALLBACK_BASE_URL": "https://aiself.vip/v1",
                 "LLM_FALLBACK_FLASH_MODEL": "deepseek-v4-flash",
                 "LLM_FALLBACK_API_KEY": "sk-fallback-deepseek",
             },
-        )
+        }
+        result = llm_config_module.call_llm_request_with_failover(**request)
+        first_call_count = len(calls)
+        first_expiry = llm_config_module._LLM_FAILOVER_AFFINITY[primary_signature]["expires_at"]
+        second = llm_config_module.call_llm_request_with_failover(**request)
+        second_expiry = llm_config_module._LLM_FAILOVER_AFFINITY[primary_signature]["expires_at"]
     finally:
         llm_config_module.urllib.request.urlopen = old_urlopen
+        llm_config_module._clear_llm_failover_affinity(primary_signature)
     elapsed = time.time() - started
     assert_true(result.get("ok"), f"fallback should recover wall-timeout primary: {result}")
     assert_equal(result.get("provider"), "deepseek", "fallback result should report DeepSeek after wall timeout")
     assert_true(elapsed < 1.5, f"wall timeout should use the bounded transport deadline, elapsed={elapsed:.3f}")
-    assert_true(len(calls) >= 2, f"primary and fallback calls should both be attempted: {calls}")
+    assert_equal(first_call_count, 2, f"first timeout should call primary and fallback once: {calls}")
+    assert_equal(len(calls), 3, f"the next call should reuse the proven fallback without re-waiting on primary: {calls}")
+    assert_true(second.get("ok"), f"sticky fallback should remain usable: {second}")
+    assert_equal((second.get("failover") or {}).get("reason"), "fallback_success", "sticky fallback must preserve failover contract")
+    assert_equal(second_expiry, first_expiry, "fallback affinity must expire on a fixed deadline so primary is eventually reprobed")
+
+
+def check_wall_timeout_affinity_survives_initial_fallback_timeout() -> None:
+    old_call_once = llm_config_module.call_llm_request_once_with_wall_timeout
+    calls: list[str] = []
+    fallback_calls = 0
+    primary_signature = llm_config_module.llm_route_signature(
+        provider="openai",
+        api_key="sk-primary-first-failure",
+        base_url="https://primary-first-failure.invalid/v1",
+        model="gpt-5.4",
+    )
+    llm_config_module._clear_llm_failover_affinity(primary_signature)
+
+    def fake_call_once(**kwargs: Any) -> dict[str, Any]:
+        nonlocal fallback_calls
+        provider = str(kwargs.get("provider") or "")
+        calls.append(provider)
+        if provider == "openai":
+            return {
+                "ok": False,
+                "status": 0,
+                "provider": provider,
+                "model": "gpt-5.4",
+                "error": "llm_wall_timeout_after_1.0s",
+                "wall_timeout": True,
+            }
+        fallback_calls += 1
+        if fallback_calls == 1:
+            return {
+                "ok": False,
+                "status": 0,
+                "provider": provider,
+                "model": "deepseek-v4-flash",
+                "error": "llm_wall_timeout_after_1.0s",
+                "wall_timeout": True,
+            }
+        return {"ok": True, "status": 200, "provider": provider, "model": "deepseek-v4-flash", "response_text": "{}"}
+
+    request = {
+        "provider": "openai",
+        "api_key": "sk-primary-first-failure",
+        "base_url": "https://primary-first-failure.invalid/v1",
+        "model": "gpt-5.4",
+        "messages": [{"role": "user", "content": "ping"}],
+        "timeout": 1,
+        "wall_timeout": 1,
+        "max_tokens": 8,
+        "fallback_timeout": 1,
+        "fallback_wall_timeout": 1,
+        "json_mode": True,
+        "config": {
+            "LLM_FALLBACK_ENABLED": "1",
+            "LLM_FALLBACK_PROVIDER": "deepseek",
+            "LLM_FALLBACK_BASE_URL": "https://fallback-first-failure.invalid/v1",
+            "LLM_FALLBACK_FLASH_MODEL": "deepseek-v4-flash",
+            "LLM_FALLBACK_API_KEY": "sk-fallback-first-failure",
+        },
+    }
+    llm_config_module.call_llm_request_once_with_wall_timeout = fake_call_once
+    try:
+        first = llm_config_module.call_llm_request_with_failover(**request)
+        second = llm_config_module.call_llm_request_with_failover(**request)
+    finally:
+        llm_config_module.call_llm_request_once_with_wall_timeout = old_call_once
+        llm_config_module._clear_llm_failover_affinity(primary_signature)
+    assert_true(not first.get("ok"), f"first request should preserve the dual-timeout failure: {first}")
+    assert_true(second.get("ok"), f"next request should recover on the alternate route: {second}")
+    assert_equal(
+        calls,
+        ["openai", "deepseek", "deepseek"],
+        f"known timed-out primary must not be paid again before retrying fallback: {calls}",
+    )
+
+
+def check_wall_timeout_bounds_slow_response_headers() -> None:
+    old_urlopen = llm_config_module.urllib.request.urlopen
+
+    def slow_urlopen(*_args: Any, **_kwargs: Any) -> FakeResponse:
+        time.sleep(2.0)
+        return FakeResponse()
+
+    llm_config_module.urllib.request.urlopen = slow_urlopen
+    started = time.monotonic()
+    try:
+        result = llm_config_module.call_llm_request_once_with_wall_timeout(
+            provider="openai",
+            api_key="sk-slow-headers",
+            base_url="https://slow-headers.invalid/v1",
+            model="gpt-5.4",
+            messages=[{"role": "user", "content": "ping"}],
+            timeout=30,
+            wall_timeout=1,
+            max_tokens=8,
+        )
+    finally:
+        llm_config_module.urllib.request.urlopen = old_urlopen
+    elapsed = time.monotonic() - started
+    assert_true(not result.get("ok"), f"slow response headers must hit the total wall deadline: {result}")
+    assert_true(result.get("wall_timeout") is True, f"slow response headers must preserve wall-timeout marker: {result}")
+    assert_equal(result.get("provider"), "openai", f"hard wall timeout must preserve provider diagnostics: {result}")
+    assert_equal(result.get("model"), "gpt-5.4", f"hard wall timeout must preserve model diagnostics: {result}")
+    assert_equal(result.get("base_url"), "https://slow-headers.invalid/v1", f"hard wall timeout must preserve route diagnostics: {result}")
+    assert_true(elapsed < 1.5, f"wall timeout must bound DNS/TLS/header wait, elapsed={elapsed:.3f}")
+
+
+def check_failed_affinity_probe_does_not_repeat_same_fallback() -> None:
+    old_call_once = llm_config_module.call_llm_request_once_with_wall_timeout
+    calls: list[str] = []
+    primary_signature = llm_config_module.llm_route_signature(
+        provider="openai",
+        api_key="sk-primary-affinity-failure",
+        base_url="https://primary-affinity-failure.invalid/v1",
+        model="gpt-5.4",
+    )
+    fallback_signature = llm_config_module.llm_route_signature(
+        provider="deepseek",
+        api_key="sk-fallback-affinity-failure",
+        base_url="https://fallback-affinity-failure.invalid/v1",
+        model="deepseek-v4-flash",
+    )
+
+    def fake_call_once(**kwargs: Any) -> dict[str, Any]:
+        provider = str(kwargs.get("provider") or "")
+        calls.append(provider)
+        if provider == "deepseek":
+            return {"ok": False, "status": 200, "provider": provider, "error": "upstream_error: llm_empty_json_response"}
+        return {"ok": False, "status": 0, "provider": provider, "error": "llm_wall_timeout_after_1.0s", "wall_timeout": True}
+
+    llm_config_module._record_llm_failover_affinity(
+        primary_signature,
+        fallback_signature=fallback_signature,
+        primary_status=0,
+        primary_error="llm_wall_timeout_after_1.0s",
+        primary_provider_label="OpenAI / ChatGPT",
+    )
+    llm_config_module.call_llm_request_once_with_wall_timeout = fake_call_once
+    try:
+        result = llm_config_module.call_llm_request_with_failover(
+            provider="openai",
+            api_key="sk-primary-affinity-failure",
+            base_url="https://primary-affinity-failure.invalid/v1",
+            model="gpt-5.4",
+            messages=[{"role": "user", "content": "ping"}],
+            timeout=1,
+            wall_timeout=1,
+            max_tokens=8,
+            fallback_timeout=1,
+            fallback_wall_timeout=1,
+            json_mode=True,
+            config={
+                "LLM_FALLBACK_ENABLED": "1",
+                "LLM_FALLBACK_PROVIDER": "deepseek",
+                "LLM_FALLBACK_BASE_URL": "https://fallback-affinity-failure.invalid/v1",
+                "LLM_FALLBACK_FLASH_MODEL": "deepseek-v4-flash",
+                "LLM_FALLBACK_API_KEY": "sk-fallback-affinity-failure",
+            },
+        )
+    finally:
+        llm_config_module.call_llm_request_once_with_wall_timeout = old_call_once
+        llm_config_module._clear_llm_failover_affinity(primary_signature)
+    assert_equal(
+        calls,
+        ["deepseek"],
+        f"an active affinity must not probe the already timed-out primary again in the same request: {calls}",
+    )
+    assert_equal(result.get("provider"), "openai", "cached primary diagnostics must preserve the existing top-level route shape")
+    assert_true("llm_wall_timeout" in str(result.get("error") or ""), f"cached primary failure should remain visible: {result}")
+    assert_equal((result.get("failover") or {}).get("reason"), "fallback_failed", "failure audit contract must be preserved")
+
+
+def check_response_body_read_respects_total_deadline() -> None:
+    old_urlopen = llm_config_module.urllib.request.urlopen
+
+    class SlowChunkedResponse:
+        status = 200
+
+        def __enter__(self) -> "SlowChunkedResponse":
+            return self
+
+        def __exit__(self, exc_type: Any, exc: Any, tb: Any) -> None:
+            return None
+
+        def read(self, size: int = -1) -> bytes:
+            _ = size
+            time.sleep(0.22)
+            return b"x"
+
+    llm_config_module.urllib.request.urlopen = lambda *args, **kwargs: SlowChunkedResponse()
+    started = time.monotonic()
+    try:
+        result = llm_config_module.call_llm_request_once_with_wall_timeout(
+            provider="openai",
+            api_key="sk-deadline",
+            base_url="https://slow-body.invalid/v1",
+            model="gpt-5.4",
+            messages=[{"role": "user", "content": "ping"}],
+            timeout=30,
+            wall_timeout=1,
+            max_tokens=8,
+        )
+    finally:
+        llm_config_module.urllib.request.urlopen = old_urlopen
+    elapsed = time.monotonic() - started
+    assert_true(not result.get("ok"), f"an endless chunked body must time out: {result}")
+    assert_true(result.get("wall_timeout") is True, f"deadline failure must preserve wall-timeout marker: {result}")
+    assert_true(elapsed < 1.5, f"response-body deadline must be total, not per chunk: elapsed={elapsed:.3f}")
+
+
+def check_empty_json_response_is_failoverable() -> None:
+    old_urlopen = llm_config_module.urllib.request.urlopen
+    llm_config_module.urllib.request.urlopen = lambda *args, **kwargs: FakeResponse(
+        {"choices": [{"message": {"content": ""}}]}
+    )
+    try:
+        result = llm_config_module.call_llm_request_once(
+            provider="openai",
+            api_key="sk-empty-json",
+            base_url="https://empty-json.invalid/v1",
+            model="gpt-5.4",
+            messages=[{"role": "user", "content": "ping"}],
+            timeout=2,
+            max_tokens=8,
+            json_mode=True,
+        )
+    finally:
+        llm_config_module.urllib.request.urlopen = old_urlopen
+    assert_true(not result.get("ok"), f"empty structured response must not be treated as usable success: {result}")
+    assert_true(
+        llm_config_module.is_failoverable_llm_failure(result),
+        f"empty structured response should let the configured fallback recover: {result}",
+    )
 
 
 def check_llm_config_permissions_allow_all_authenticated_users() -> None:

@@ -7,6 +7,9 @@ from typing import Any
 from fastapi import APIRouter, Query, Request
 
 from apps.wechat_ai_customer_service.adapters.wechat_connector import WeChatConnector, WeChatConnectorError
+from apps.wechat_ai_customer_service.adapters.wechat_pr28_runtime_adapter import (
+    adapt_wechat_pr28_connector,
+)
 from ..services.customer_service_settings import CustomerServiceSettings
 from ..services.customer_service_runtime import CustomerServiceRuntime
 from ..services.session_monitor import SessionMonitor
@@ -69,7 +72,7 @@ def list_sessions(tenant_id: str | None = Query(default=None)) -> dict[str, Any]
 def discover_sessions(tenant_id: str | None = Query(default=None)) -> dict[str, Any]:
     settings_service = CustomerServiceSettings(tenant_id=tenant_id)
     try:
-        source = WeChatConnector().list_sessions(fresh=True)
+        source = adapt_wechat_pr28_connector(WeChatConnector()).list_sessions(fresh=True)
     except WeChatConnectorError as exc:
         message = str(exc) or "未能连接微信主窗口。"
         return {

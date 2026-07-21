@@ -307,7 +307,15 @@ def apply_customer_service_live_safety_rpa_send_defaults(config: dict[str, Any])
 
     rpa_send = dict(merged.get("rpa_humanized_send", {}) or {})
     rpa_send.setdefault("enabled", True)
-    rpa_send["input_method"] = "clipboard_chunks"
+    # Input-method selection is an existing adapter contract.  Live safety may
+    # disable typos and enforce target/send guards, but it must not silently
+    # replace an explicitly selected method with many clipboard operations.
+    # Method-specific normalization (including clipboard_once opt-in) remains
+    # in the Win32/OCR input adapter.
+    input_method = str(rpa_send.get("input_method") or "sendinput_unicode").strip().lower()
+    if input_method not in {"auto", "sendinput_unicode", "uia_chunks", "clipboard_chunks", "clipboard_once"}:
+        input_method = "sendinput_unicode"
+    rpa_send["input_method"] = input_method
     rpa_send["adaptive_speed_enabled"] = True
     rpa_send["typing_typo_probability"] = 0.0
     rpa_send["typing_typo_max"] = 0
@@ -401,7 +409,12 @@ def apply_customer_service_live_safety_guard(
         if not dynamic_all_sessions and allowed_target_count <= 1:
             multi_target.update(
                 {
-                    "enabled": False,
+                    # A single allowed target still needs the session monitor
+                    # to resolve WeChat's physical session key and confirmed
+                    # conversation type.  Bound dispatch to one target without
+                    # disabling identity discovery; otherwise the scheduler
+                    # falls back to an unconfirmable ``configured`` identity.
+                    "enabled": True,
                     "rpa_low_risk_mode": True,
                     "scan_all_whitelist_each_iteration": False,
                     "max_scan_targets_per_iteration": 0,
@@ -440,10 +453,13 @@ def apply_customer_service_live_safety_guard(
                     "sticky_target_hold_seconds": max(int(multi_target.get("sticky_target_hold_seconds") or 0), 30),
                     "preview_change_confirmations": max(int(multi_target.get("preview_change_confirmations") or 0), 2),
                     "initial_preview_can_raise_unread": False,
-                    "preview_change_can_raise_unread": False,
+                    # An open chat can receive a real customer follow-up without
+                    # painting an unread badge. Require a stable preview change
+                    # instead of making the badge the only admissible signal.
+                    "preview_change_can_raise_unread": bool(dynamic_all_sessions),
                     "short_preview_can_raise_unread": True,
-                    "require_unread_badge_for_dispatch": True,
-                    "require_preview_signal_with_unread_badge": True,
+                    "require_unread_badge_for_dispatch": not dynamic_all_sessions,
+                    "require_preview_signal_with_unread_badge": not dynamic_all_sessions,
                     "change_warmup_enabled": False,
                     "change_warmup_min_seconds": 0.0,
                     "change_warmup_max_seconds": 0.0,

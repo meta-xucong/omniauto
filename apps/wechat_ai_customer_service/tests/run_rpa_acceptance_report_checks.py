@@ -136,8 +136,8 @@ def check_report_uses_live_safety_effective_rpa_send_config() -> None:
         assert_true(report["status"] == "pass", f"effective live-safety config should pass: {report}")
         send_config = report["snapshots"]["listener_config"]["rpa_humanized_send"]
         assert_true(
-            send_config.get("input_method") == "clipboard_chunks",
-            f"report should show effective live-safety input method: {send_config}",
+            send_config.get("input_method") == "sendinput_unicode",
+            f"report should preserve the explicitly selected live input method: {send_config}",
         )
         assert_true(send_config.get("typing_typo_probability") == 0.0, f"report should show typo disabled: {send_config}")
         assert_true(send_config.get("typing_typo_max") == 0, f"report should show typo budget disabled: {send_config}")
@@ -165,7 +165,7 @@ def check_report_tolerates_invalid_live_safety_rpa_numbers() -> None:
         report = collect_rpa_acceptance_report(runtime_root=root, tenant_id="unit", env={}, wechat_probe="none")
         assert_true(report["status"] == "pass", f"invalid old RPA numbers should not break report: {report}")
         send_config = report["snapshots"]["listener_config"]["rpa_humanized_send"]
-        assert_true(send_config.get("input_method") == "clipboard_chunks", f"effective config mismatch: {send_config}")
+        assert_true(send_config.get("input_method") == "sendinput_unicode", f"effective config mismatch: {send_config}")
         assert_true(int(send_config.get("typing_chunk_max_chars") or 0) >= 4, f"chunk max should be normalized: {send_config}")
         assert_true(int(send_config.get("send_pre_delay_min_ms") or 0) >= 250, f"delay should be normalized: {send_config}")
         assert_true(int(send_config.get("send_rate_burst_limit") or 0) >= 20, f"burst limit should be normalized: {send_config}")

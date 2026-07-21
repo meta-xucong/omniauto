@@ -400,6 +400,12 @@ def build_context_summary(messages: list[dict[str, Any]] | None) -> str:
             if vision_summary:
                 image_marker = content if content and content not in {"[图片]", "图片"} else "[图片]"
                 content = f"{image_marker} 识图: {vision_summary}".strip()
+            else:
+                # A structural/pending image envelope is not semantic history
+                # until current-clipboard vision has produced text. Keep the
+                # immutable ledger record, but exclude the unresolved placeholder
+                # from the compact summary consumed by later Brain turns.
+                continue
         if content:
             lines.append(f"{label}: {content}")
     return "\n".join(lines[-MAX_LEDGER_CONTEXT_LINES:])
@@ -449,12 +455,21 @@ class SessionLedgerStore:
             data = json.loads(path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError):
             return {}
-        return scrub_legacy_image_storage(data) if isinstance(data, dict) else {}
+        result = scrub_legacy_image_storage(data) if isinstance(data, dict) else {}
+        recent_messages = result.get("recent_messages") if isinstance(result.get("recent_messages"), list) else []
+        # Rebuild the derived projection on every read so legacy synthetic
+        # image placeholders cannot keep polluting Brain context after the
+        # immutable event history is retained. This deliberately clears a stale
+        # summary when the compatible recent-message list is empty as well.
+        result["context_summary"] = build_context_summary(recent_messages)
+        return result
 
     def save_summary(self, session_key: str, summary: dict[str, Any]) -> None:
         path = self.summary_path(session_key)
         path.parent.mkdir(parents=True, exist_ok=True)
         payload = scrub_legacy_image_storage(dict(summary))
+        recent_messages = payload.get("recent_messages") if isinstance(payload.get("recent_messages"), list) else []
+        payload["context_summary"] = build_context_summary(recent_messages)
         payload["session_key"] = session_key
         payload["updated_at"] = utcnow_iso()
         temp = path.with_suffix(path.suffix + ".tmp")
@@ -704,6 +719,15 @@ class SessionLedgerStore:
         if not canonical_session_key or not aliases:
             return {"ok": True, "merged_alias_count": 0, "recent_message_count": 0}
         canonical = self.load_summary(canonical_session_key)
+        already_merged = {
+            str(item or "").strip()
+            for item in canonical.get("merged_session_aliases") or []
+            if str(item or "").strip()
+        }
+        aliases = [item for item in aliases if item not in already_merged]
+        if not aliases:
+            recent = canonical.get("recent_messages") if isinstance(canonical.get("recent_messages"), list) else []
+            return {"ok": True, "merged_alias_count": 0, "recent_message_count": len(recent)}
         recent = canonical.get("recent_messages") if isinstance(canonical.get("recent_messages"), list) else []
         alias_summaries: list[tuple[str, dict[str, Any]]] = []
         for alias_key in aliases:

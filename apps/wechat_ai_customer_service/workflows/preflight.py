@@ -23,6 +23,7 @@ for path in (WORKFLOWS_ROOT, APP_ROOT, ADAPTERS_ROOT):
 from customer_service_review_queue import build_review_queue
 from listen_and_reply import CONFIG_PATH, load_config, parse_targets, resolve_path
 from wechat_connector import WeChatConnector
+from apps.wechat_ai_customer_service.adapters.wechat_pr28_runtime_adapter import adapt_wechat_pr28_connector
 
 
 def main() -> int:
@@ -68,7 +69,7 @@ def run_preflight(config_path: Path, extra_targets: list[str], skip_wechat: bool
     if queue_counts.get("handoff", 0) or queue_counts.get("audit_attention", 0):
         warnings.append("There are handoff or audit-attention records to review before expanding targets.")
 
-    connector = WeChatConnector()
+    connector = adapt_wechat_pr28_connector(WeChatConnector())
     wechat: dict[str, Any] = {
         "skipped": bool(skip_wechat),
         "wxauto4_reserve_enabled": connector.wxauto4_reserve_enabled(),

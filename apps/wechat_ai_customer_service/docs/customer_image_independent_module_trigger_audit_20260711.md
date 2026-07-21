@@ -1,5 +1,8 @@
 # Customer Image Independent Module Trigger Audit
 
+> [!CAUTION]
+> **Document status: superseded implementation (2026-07-18).** Historical trigger and failure evidence remains useful, but passive crop/archive, Scheduler-owned image transitions, image proxy creation, and scattered routing are no longer approved. The current implementation authority is [customer_service_absolute_independent_vision_module_refactor_plan_20260718.md](customer_service_absolute_independent_vision_module_refactor_plan_20260718.md).
+
 ## Scope
 
 This change keeps customer-visible reply ownership unchanged. Normal customer-facing wording remains owned by `customer_service_brain`; the scheduler only captures evidence, selects the session batch, and forwards the image proxy to the existing Brain pipeline. See `apps/wechat_ai_customer_service/docs/customer_visible_reply_ownership_baseline.md`.

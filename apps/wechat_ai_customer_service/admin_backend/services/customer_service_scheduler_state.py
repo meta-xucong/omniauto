@@ -282,26 +282,30 @@ class SchedulerConfig:
             return max(minimum, min(maximum, value))
 
         legacy_llm_concurrency = bounded_int("llm_max_concurrency", 2, 1, 10)
-        brain_primary_budget = max(
-            config_int(brain, "timeout_seconds", 35, 1, 180),
-            config_int(brain, "large_prompt_timeout_seconds", 60, 1, 180),
-            config_int(brain, "very_large_prompt_timeout_seconds", 90, 1, 240),
-        )
+        brain_primary_budget = config_int(brain, "timeout_seconds", 35, 1, 180)
         brain_fallback_budget = config_int(brain, "fallback_timeout_seconds", 45, 0, 180)
-        brain_repair_budget = max(
-            config_int(brain, "quality_repair_timeout_seconds", 12, 0, 120),
-            config_int(brain, "json_structure_repair_timeout_seconds", 8, 0, 120),
-            config_int(brain, "semantic_reviewer_timeout_seconds", 8, 0, 120),
-        )
+        brain_quality_repair_budget = config_int(brain, "quality_repair_timeout_seconds", 12, 0, 120)
+        brain_semantic_reviewer_budget = config_int(brain, "semantic_reviewer_timeout_seconds", 8, 0, 120)
+        brain_retry_reserve = max(brain_primary_budget, brain_fallback_budget)
         fast_primary_budget = config_int(brain, "low_authority_fast_timeout_seconds", 12, 1, 120)
         fast_fallback_budget = config_int(brain, "low_authority_fast_fallback_timeout_seconds", 10, 0, 120)
         fast_repair_budget = config_int(brain, "low_authority_fast_repair_timeout_seconds", 6, 0, 120)
+        fast_retry_reserve = max(fast_primary_budget, fast_fallback_budget)
         # The scheduler timeout wraps the whole Brain pipeline, not just one
-        # provider read. Cover primary + fallback + repair/reviewer budgets so
-        # long but valid Brain calls are not killed and requeued as "read but no reply".
+        # provider read. Mirror the Brain turn-deadline formula exactly, then
+        # add scheduler overhead below. Otherwise the scheduler can kill a
+        # valid same-capture recovery a few seconds before Brain's own bound.
         brain_pipeline_budget = max(
-            brain_primary_budget + brain_fallback_budget + brain_repair_budget,
-            fast_primary_budget + fast_fallback_budget + fast_repair_budget,
+            brain_primary_budget
+            + brain_fallback_budget
+            + brain_retry_reserve
+            + brain_quality_repair_budget
+            + brain_semantic_reviewer_budget,
+            fast_primary_budget
+            + fast_fallback_budget
+            + fast_retry_reserve
+            + fast_repair_budget
+            + brain_semantic_reviewer_budget,
         )
         planner_timeout = bounded_int(
             "planner_task_timeout_seconds",
@@ -617,6 +621,38 @@ def _task_age_seconds(task: dict[str, Any], *, now: str | None = None) -> float:
     return seconds_since(task.get("created_at") or task.get("started_at"), now=now)
 
 
+def _preserve_unreplied_after_stale_work(
+    session: dict[str, Any],
+    work: dict[str, Any],
+    *,
+    reason: str,
+    now: str,
+) -> bool:
+    """Keep stale-work input visible to operators without sending stale text."""
+
+    pending_count = max(0, int(session.get("pending_message_count") or 0))
+    input_message_ids = [str(item) for item in work.get("input_message_ids") or [] if str(item)]
+    capture_ids = [str(item) for item in work.get("capture_ids") or [] if str(item)]
+    oldest = str(session.get("oldest_unreplied_at") or "").strip()
+    has_unreplied_evidence = bool(pending_count > 0 or oldest or input_message_ids or capture_ids)
+    if not has_unreplied_evidence:
+        return False
+    session["pending_message_count"] = max(1, pending_count, len(input_message_ids))
+    session["oldest_unreplied_at"] = oldest or str(
+        work.get("created_at")
+        or work.get("queued_at")
+        or work.get("started_at")
+        or now
+    )
+    if not bool(session.get("pending_capture")):
+        session["status"] = "internal_handoff_pending"
+    risk_state = session.setdefault("risk_state", {})
+    if isinstance(risk_state, dict):
+        risk_state["handoff_required"] = True
+        risk_state["handoff_reason"] = reason
+    return True
+
+
 def _expire_scheduler_task(
     state: dict[str, Any],
     *,
@@ -638,7 +674,13 @@ def _expire_scheduler_task(
     inflight_field = "polish_inflight_task_id" if task_kind == "polish" else "llm_inflight_task_id"
     if session.get(inflight_field) == normalized_task_id:
         session[inflight_field] = ""
-    if not bool(session.get("pending_capture")):
+    preserved_unreplied = _preserve_unreplied_after_stale_work(
+        session,
+        task,
+        reason=reason,
+        now=now,
+    )
+    if not bool(session.get("pending_capture")) and not preserved_unreplied:
         session["status"] = "idle"
         session["pending_message_count"] = 0
         session["oldest_unreplied_at"] = ""
@@ -723,6 +765,18 @@ def _expire_stale_queued_scheduler_work(
                 reason="ready_reply_ttl_exceeded_before_send",
                 now=now,
             )
+            session = ensure_session(
+                state,
+                str(reply.get("target_name") or ""),
+                session_key=str(reply.get("session_key") or ""),
+                now=now,
+            )
+            _preserve_unreplied_after_stale_work(
+                session,
+                reply,
+                reason="ready_reply_ttl_exceeded_before_send",
+                now=now,
+            )
             expired_ready += 1
     return {
         "expired_queued_llm_task_count": expired_llm,
@@ -747,6 +801,7 @@ def cleanup_scheduler_state(
 
     cfg = config or SchedulerConfig()
     migrated_legacy_sessions = 0
+    migrated_session_keys: set[str] = set()
     cleared_stale_recoverable_recaptures = 0
     expired_work = _expire_stale_queued_scheduler_work(state, config=cfg, now=now)
     sessions = state.setdefault("sessions", {})
@@ -810,6 +865,7 @@ def cleanup_scheduler_state(
             elif value and not canonical.get(field):
                 canonical[field] = value
         sessions.pop(key, None)
+        migrated_session_keys.add(str(canonical.get("session_key") or session_key or ""))
         migrated_legacy_sessions += 1
 
     replies = state.setdefault("ready_replies", {})
@@ -847,6 +903,54 @@ def cleanup_scheduler_state(
                 session["oldest_unreplied_at"] = ""
                 session["status"] = "idle"
                 cleared_stale_recoverable_recaptures += 1
+        if session.get("pending_capture"):
+            pending_age = seconds_since(
+                session.get("pending_since") or session.get("last_detected_at"),
+                now=now,
+            )
+            active_reply = any(
+                isinstance(replies.get(str(reply_id)), dict)
+                and str(replies[str(reply_id)].get("status") or "") in {"ready", "sending"}
+                for reply_id in session.get("ready_reply_ids") or []
+                if str(reply_id)
+            )
+            active_task = bool(
+                str(session.get("llm_inflight_task_id") or "").strip()
+                or str(session.get("polish_inflight_task_id") or "").strip()
+                or str(session.get("media_context_inflight_task_id") or "").strip()
+                or active_reply
+            )
+            pending_ttl = max(
+                1,
+                int(getattr(cfg, "pending_session_ttl_seconds", DEFAULT_PENDING_SESSION_TTL_SECONDS) or DEFAULT_PENDING_SESSION_TTL_SECONDS),
+            )
+            current_session_key = str(session.get("session_key") or "").strip()
+            if pending_age >= pending_ttl and not active_task and current_session_key not in migrated_session_keys:
+                pending_reason = str(session.get("pending_reason") or "").strip()
+                try:
+                    pending_message_count = max(0, int(session.get("pending_message_count") or 0))
+                except (TypeError, ValueError):
+                    pending_message_count = 0
+                has_unreplied_evidence = bool(
+                    session.get("pending_signal_has_unread_evidence")
+                    or pending_message_count > 0
+                    or str(session.get("oldest_unreplied_at") or "").strip()
+                )
+                session["pending_capture"] = False
+                session["pending_reason"] = ""
+                session["pending_recapture_kind"] = ""
+                session["pending_signal_has_unread_evidence"] = False
+                if has_unreplied_evidence:
+                    session["status"] = "internal_handoff_pending"
+                    risk_state = session.setdefault("risk_state", {})
+                    if isinstance(risk_state, dict):
+                        risk_state["handoff_required"] = True
+                        if pending_reason:
+                            risk_state["handoff_reason"] = pending_reason
+                else:
+                    session["status"] = "idle"
+                    session["pending_message_count"] = 0
+                    session["oldest_unreplied_at"] = ""
         ids = [str(item) for item in (session.get("ready_reply_ids") or []) if str(item)]
         active_ids = [
             reply_id
@@ -1201,22 +1305,7 @@ def record_session_signal(
     exhausted_until = str(risk_state.get("llm_failure_exhausted_until") or "").strip()
     exhausted_digest = str(risk_state.get("llm_failure_exhausted_content_digest") or "").strip()
     exhausted_time = str(risk_state.get("llm_failure_exhausted_message_time") or "").strip()
-    retry_not_before = str((risk_state or {}).get("capture_retry_not_before") or "")
-    if retry_not_before:
-        now_ts = _iso_to_ts(now)
-        retry_ts = _iso_to_ts(retry_not_before)
-        if retry_ts > 0 and now_ts > 0 and now_ts < retry_ts:
-            session["last_detected_at"] = now
-            session["status"] = "capture_cooldown"
-            return session
-    previous_digest = str(session.get("last_content_digest") or "")
-    previous_time = str(session.get("last_message_time") or "")
-    previous_badge = str(session.get("last_unread_badge") or "")
     previous_observation_id = str(session.get("last_session_observation_id") or "")
-    digest = hashlib.sha256(content.encode("utf-8")).hexdigest()[:32] if content else ""
-    unread_detected = bool(session_payload.get("unread_detected") or session_payload.get("pending"))
-    has_unread_badge = bool(unread_badge)
-    has_active_work = has_active_session_work(state, name, session_key=session_key)
     observation_id = str(
         session_payload.get("pending_observation_id")
         or session_payload.get("session_observation_id")
@@ -1225,6 +1314,35 @@ def record_session_signal(
     explicit_new_observation = bool(session_payload.get("session_observation_is_new"))
     observation_changed = bool(observation_id and observation_id != previous_observation_id)
     new_observation = bool(observation_id and (explicit_new_observation or observation_changed))
+    retry_not_before = str((risk_state or {}).get("capture_retry_not_before") or "")
+    if retry_not_before and not new_observation:
+        now_ts = _iso_to_ts(now)
+        retry_ts = _iso_to_ts(retry_not_before)
+        if retry_ts > 0 and now_ts > 0 and now_ts < retry_ts:
+            session["last_detected_at"] = now
+            session["status"] = "capture_cooldown"
+            return session
+    if new_observation and risk_state:
+        # A genuinely new sidebar observation is a new customer event, not the
+        # stale target-confirmation failure being cooled down. Give it a fresh
+        # bounded capture budget without changing the persisted state shape.
+        risk_state.pop("capture_fail_count", None)
+        risk_state.pop("capture_retry_not_before", None)
+        risk_state.pop("last_capture_failed_at", None)
+        for key in (
+            "llm_failure_exhausted_until",
+            "llm_failure_exhausted_content_digest",
+            "llm_failure_exhausted_message_time",
+            "llm_failure_exhausted_message_digest",
+        ):
+            risk_state.pop(key, None)
+    previous_digest = str(session.get("last_content_digest") or "")
+    previous_time = str(session.get("last_message_time") or "")
+    previous_badge = str(session.get("last_unread_badge") or "")
+    digest = hashlib.sha256(content.encode("utf-8")).hexdigest()[:32] if content else ""
+    unread_detected = bool(session_payload.get("unread_detected") or session_payload.get("pending"))
+    has_unread_badge = bool(unread_badge)
+    has_active_work = has_active_session_work(state, name, session_key=session_key)
     if observation_id:
         # Persist before deciding whether to enqueue, so the same level signal
         # remains deduplicated even after capture clears pending_capture.
@@ -1239,6 +1357,7 @@ def record_session_signal(
     )
     if (
         unread_detected
+        and not new_observation
         and exhausted_until
         and exhausted_digest
         and digest == exhausted_digest
@@ -1529,9 +1648,11 @@ def capture_has_repeatable_customer_probe(capture: dict[str, Any] | None) -> boo
 def quality_failure_retry_limit(task: dict[str, Any], normalized_reason: str, default: int) -> int:
     """Return retry budget for failures that already reached Brain validation.
 
-    Transient provider/JSON/runtime failures can benefit from one more Brain
-    pass.  Quality/authority validation failures usually mean the same capture
-    needs internal review or fresher evidence, not an immediate same-input loop.
+    A quality/authority rejection may be caused by transient model drift even
+    when the durable capture and authority evidence are sound.  Permit exactly
+    one more Brain pass over that same capture; never re-read WeChat and never
+    author a local fallback.  A second rejection still fails closed to internal
+    handoff, preventing an unbounded same-input loop.
     """
 
     result = task.get("result") if isinstance(task.get("result"), dict) else {}
@@ -1555,8 +1676,8 @@ def quality_failure_retry_limit(task: dict[str, Any], normalized_reason: str, de
         or str(decision.get("reason") or "").strip() in terminal_validation_markers
         or str(brain.get("reason") or "").strip() in terminal_validation_markers
     ):
-        return 0
-    return max(1, int(default or 1))
+        return min(1, max(0, int(default or 0)))
+    return max(0, int(default or 0))
 
 
 def requeue_capture_after_recoverable_llm_failure(
@@ -2759,6 +2880,23 @@ def mark_reply_sent(state: dict[str, Any], reply_id: str, *, send_result: dict[s
     reply["send_result"] = send_result or {}
     target_name = str(reply.get("target_name") or "")
     session = ensure_session(state, target_name, session_key=str(reply.get("session_key") or ""), now=now)
+    risk_state = session.get("risk_state") if isinstance(session.get("risk_state"), dict) else {}
+    for key in (
+        "llm_failure_exhausted_until",
+        "llm_failure_exhausted_content_digest",
+        "llm_failure_exhausted_message_time",
+        "llm_failure_exhausted_message_digest",
+        "last_llm_failure_at",
+        "last_llm_failure_requeued_at",
+    ):
+        risk_state.pop(key, None)
+    if str(risk_state.get("handoff_reason") or "") in {
+        "llm_recovery_exhausted_without_visible_reply",
+        "recoverable_llm_failure_without_visible_reply",
+    }:
+        risk_state.pop("handoff_required", None)
+        risk_state.pop("handoff_reason", None)
+        risk_state.pop("last_error", None)
     pending_after_send = bool(session.get("pending_capture"))
     if pending_after_send:
         # Preserve queued follow-up signals that arrived while this reply was in flight.

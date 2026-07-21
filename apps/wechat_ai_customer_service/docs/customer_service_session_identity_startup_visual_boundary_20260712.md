@@ -1,5 +1,7 @@
 # 微信客服会话身份与启动视觉基线修复
 
+> **2026-07-19 规则更新：** 本文关于 `session_key` 贯穿 capture/Brain/reply/send、exact title、候选唯一性和防串发的要求继续有效；把 `conversation_type` 当成不可变永久身份、类型不一致即否定同一会话的结论已被 [PR #28 原样合并与独立 Vision 总方案](customer_service_pr28_immutable_merge_independent_vision_master_plan_20260719.md)取代。新规则以已签发 exact session key + exact title 作为物理身份，conversation type 是可被更可靠结构证据校正的语义属性；key/title 不匹配或候选歧义仍必须 fail-closed。逐项迁移见[问题台账](customer_service_pr28_post_merge_issue_audit_ledger_20260719.md)。
+
 ## 1. 目标与边界
 
 本次修复针对双会话并发实测中出现的“回复看起来串号”和“重启后历史图片再次触发”风险，只改代码机制层：会话身份传递、RPA 发送前守卫、监听器启动首轮视觉预览基线和审计字段。

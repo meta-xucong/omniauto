@@ -15,7 +15,7 @@ from typing import Any, Callable
 
 from PIL import Image, ImageOps
 
-from apps.wechat_ai_customer_service.workflows.customer_image_understanding_provider import (
+from .understanding.provider import (
     MAX_IMAGE_PAYLOAD_BYTES,
     MAX_IMAGE_PIXELS,
 )
@@ -323,6 +323,39 @@ def _encode_ephemeral_png(image: Image.Image) -> EphemeralClipboardImage | None:
         width=int(width),
         height=int(height),
     )
+
+
+def ephemeral_image_from_memory(
+    value: Any,
+    *,
+    mime_type: str = "image/png",
+    width: int = 0,
+    height: int = 0,
+) -> EphemeralClipboardImage | None:
+    """Normalize a host-port bitmap result into the module-owned payload."""
+
+    if isinstance(value, EphemeralClipboardImage):
+        return None if value.released else value
+    raw = value.get("image") if isinstance(value, dict) and value.get("ok") else value
+    if isinstance(raw, EphemeralClipboardImage):
+        return None if raw.released else raw
+    if isinstance(raw, (bytes, bytearray, memoryview)):
+        content = bytes(raw)
+        if not content or len(content) > MAX_IMAGE_PAYLOAD_BYTES:
+            return None
+        return EphemeralClipboardImage(
+            image_bytes=bytearray(content),
+            mime_type=str(mime_type or "image/png"),
+            width=max(0, int(width or 0)),
+            height=max(0, int(height or 0)),
+        )
+    image = _clipboard_image(raw)
+    if image is None:
+        return None
+    try:
+        return _encode_ephemeral_png(image)
+    finally:
+        image.close()
 
 
 def read_current_clipboard_image(

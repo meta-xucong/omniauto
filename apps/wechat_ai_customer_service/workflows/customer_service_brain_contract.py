@@ -896,6 +896,13 @@ def normalize_fact_claims(value: Any) -> list[dict[str, Any]]:
             or ""
         ).strip()
         value_text = str(item.get("value") or item.get("claim") or item.get("text") or "").strip()
+        # A provider truncated at its output budget may leave a trailing
+        # placeholder such as {"fact_type": "price"} with no value, source or
+        # identity.  It cannot assert or authorize anything, so it is parser
+        # noise rather than a customer-visible fact.  Claims carrying any
+        # substantive value/source remain intact for strict validation.
+        if not value_text and not source_level and not source_id:
+            continue
         if source_level in STYLE_ONLY_LEVELS and style_only_fact_claim_is_non_authoritative_note(
             fact_type=fact_type,
             value_text=value_text,
@@ -1187,6 +1194,8 @@ def verify_brain_reply_quality(
     action = str(plan.get("recommended_action") or "send_reply")
     if action != "send_reply":
         return {"ok": True, "errors": [], "warnings": [], "repair_instruction": ""}
+    if cfg.get("_single_brain_runtime_cleanup"):
+        return verify_universal_brain_reply_contract(plan, settings=cfg)
 
     question = normalize_space(strip_nonsemantic_runtime_markers(current_message))
     reply = join_reply_segments(plan.get("reply_segments", []) or [])
@@ -1231,15 +1240,11 @@ def verify_brain_reply_quality(
     delay_followup_posture = str(delay_followup_state.get("suggested_reply_posture") or "") == "acknowledge_delay_then_continue"
 
     if is_social_only_message(question):
-        # A local social-text heuristic is intentionally only a review trigger.
-        # The Brain owns the meaning of a mixed/current customer turn through
-        # ``understanding.turn_semantics``.  Even without that optional field,
-        # a relevance doubt must never turn a valid Brain reply into a silent
-        # no-reply.  Facts, commitments, leakage, and session safety remain
-        # hard checks elsewhere in this verifier/guard pipeline.
-        brain_declares_current_business = turn_semantics["kind"] in {"business", "mixed"} and turn_semantics[
-            "basis"
-        ] == "current_message"
+        # This local heuristic only emits advisory warnings.  It must not ask
+        # the Brain for, or depend on, a structured intent/continuity field;
+        # current-message semantics stay inside the Brain's natural-language
+        # reasoning.  Hard facts, leakage and safety remain checked elsewhere.
+        brain_declares_current_business = False
         if not brain_declares_current_business:
             if contains_any(clean_reply, UNSUPPORTED_INFO_COLLECTION_TERMS):
                 delay_followup_check = check_delay_followup_context_continuity(
@@ -1327,7 +1332,7 @@ def verify_brain_reply_quality(
             errors.append("missing_context_product_recommendation")
         relative_context_check = check_relative_context_product_binding(clean_reply, evidence_pack or {})
         if relative_context_check.get("error"):
-            errors.append(str(relative_context_check["error"]))
+            warnings.append(f"context_advisory:{relative_context_check['error']}")
 
     if (
         direct_decision_question
@@ -1367,7 +1372,7 @@ def verify_brain_reply_quality(
     if has_product_evidence and is_ambiguous_product_followup(question, evidence_pack or {}):
         ambiguous_followup_check = check_ambiguous_followup_product_binding(clean_reply, evidence_pack or {})
         if ambiguous_followup_check.get("error"):
-            errors.append(str(ambiguous_followup_check["error"]))
+            warnings.append(f"context_advisory:{ambiguous_followup_check['error']}")
 
     if contains_any(question, INSURANCE_TOPIC_TERMS) and not contains_any(clean_reply, INSURANCE_REPLY_TERMS):
         errors.append("missing_insurance_common_sense_topic")
@@ -1424,6 +1429,39 @@ def verify_brain_reply_quality(
     }
 
 
+def verify_universal_brain_reply_contract(
+    plan: dict[str, Any],
+    *,
+    settings: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Validate reply shape without becoming a local semantic reviewer."""
+
+    cfg = settings if isinstance(settings, dict) else {}
+    segments = [str(item).strip() for item in (plan.get("reply_segments") or []) if str(item).strip()]
+    errors: list[str] = []
+    warnings: list[str] = []
+    if not segments:
+        errors.append("empty_visible_reply")
+    total_chars = visible_content_char_count("\n".join(segments))
+    total_limit = int(cfg.get("quality_reply_max_chars") or DEFAULT_QUALITY_REPLY_MAX_CHARS)
+    if total_limit > 0 and total_chars > total_limit:
+        warnings.append("reply_over_soft_length_budget")
+    segment_limit = int(cfg.get("quality_segment_soft_max_chars") or 96)
+    if segment_limit > 0 and any(visible_content_char_count(item) > segment_limit for item in segments):
+        warnings.append("reply_segment_over_soft_length_budget")
+    return {
+        "ok": not errors,
+        "errors": errors,
+        "warnings": warnings,
+        "repair_instruction": (
+            "BrainPlan 的客户可见回复为空，请基于当前消息和允许证据重新生成非空 reply_segments。"
+            if errors
+            else ""
+        ),
+        "turn_semantics": {},
+    }
+
+
 def extract_brain_turn_semantics(plan: dict[str, Any]) -> dict[str, str]:
     """Read optional Brain-owned turn semantics without creating a local intent engine.
 
@@ -1455,15 +1493,16 @@ def plan_requires_fact_claims(plan: dict[str, Any]) -> bool:
     if plan_is_common_sense_only_advice(plan):
         return False
     answer_mode = str(plan.get("answer_mode") or "")
-    if answer_mode in {"recommend_from_catalog", "quote_product_fact"}:
+    # Fact-declaration requirements are based on the BrainPlan protocol, never
+    # on words found in the customer-visible reply.
+    if answer_mode in {"ask_clarifying_question", "collect_customer_info", "soft_social_reply", "soft_redirect_to_business"}:
+        return False
+    if answer_mode in {"recommend_from_catalog", "quote_product_fact", "compare_options"}:
         return True
     evidence = plan.get("evidence_used") if isinstance(plan.get("evidence_used"), dict) else {}
     if evidence.get("product_ids") or evidence.get("formal_knowledge_ids"):
         return True
-    reply = join_reply_segments(plan.get("reply_segments", []) or [])
-    if answer_mode == "compare_options":
-        return reply_has_authority_fact_hint(reply)
-    return reply_has_authority_fact_hint(reply)
+    return False
 
 
 def is_mixed_topic_customer_message(text: str) -> bool:
@@ -3765,10 +3804,10 @@ def build_quality_repair_instruction(*, errors: list[str], warnings: list[str], 
         "如果失败项包含thin_social_or_common_sense_reply，说明低风险闲聊/常识回复太薄；请先自然回答当前问题，再根据会话上下文轻承接，不要机械拉业务，不要编造事实；"
         "如果失败项包含social_turn_revived_unsupported_business_context，说明客户当前只是问候/召唤/感谢/告别，回复却主动复活了旧业务或无权威来源的实体；请只简短回应当前社交消息，除非客户本轮明确说继续刚才话题；"
         "如果失败项包含social_turn_revived_supported_prior_business_context，说明客户当前只是纯问候/召唤/感谢/告别，即使历史上下文或商品库里有旧业务实体，也不能主动说“您之前问过/继续确认”；请只回应当前社交消息，除非客户本轮明确要求继续上文；"
-        "如果客户使用“刚才/前面/这两台/直接挑”等指代表达，必须结合conversation.context、history_text和product_master候选延续上一轮需求，不能只回复“确认/稍等”；"
+        "Brain应按自然语言判断当前消息是否承接上文：当前明确的新对象优先，只有指代清楚且语义相关时才结合conversation.context、history_text和product_master；"
         "如果失败项包含direct_decision_request_asked_new_need_instead_of_choice，说明客户已经要求你基于现有上下文直接做选择；请用product_master候选和会话上下文给出明确主推/备选及一句理由，不能继续泛泛反问预算、用途或车型偏好；"
-        "如果失败项包含relative_context_product_drift或missing_relative_context_product_reference，必须只围绕recent_product_ids/上一轮可见推荐商品回答，不能换成新的商品候选；"
-        "如果失败项包含ambiguous_followup_product_drift，说明客户在问“车况/油耗/保养/这台”等模糊追问，必须默认指向conversation.context里的last_product_id，不能切到备选商品；"
+        "上下文相关警告只用于提醒Brain重新理解自然语言：当前明确的新对象优先，历史仅在自然相关且指代清楚时使用；"
+        "不得因为last_product_id存在就强行把当前消息绑定到旧商品；确有多个同等可能指代时，只问一个最小澄清问题；"
         "如果失败项包含missing_cargo_space_topic，必须正面回应客户的后备厢/装载/空间约束，推荐理由里要解释哪台更贴合这个使用场景；"
         "如果失败项包含missing_available_cargo_fit_candidate或contradicts_available_cargo_fit_candidate，说明product_master里已有预算内装载/空间更贴合的非轿车候选，必须点名这些候选，不能说现有都是轿车，也不能只泛泛说以后再筛SUV；"
         "如果失败项包含known_budget_fit_product_marked_price_uncertain，说明商品库已有预算内价格，必须直接按product_master价格表达，不能说还要看报价能否压进预算；"
@@ -3830,7 +3869,13 @@ def plan_allows_safe_uncertain_send(plan: dict[str, Any], *, action: str, needs_
     if not join_reply_segments(plan.get("reply_segments", []) or []):
         return False
     answer_mode = str(plan.get("answer_mode") or "")
-    if answer_mode not in {"ask_clarifying_question", "soft_social_reply", "soft_redirect_to_business", "direct_answer"}:
+    if answer_mode not in {
+        "ask_clarifying_question",
+        "collect_customer_info",
+        "soft_social_reply",
+        "soft_redirect_to_business",
+        "direct_answer",
+    }:
         return False
     risk = plan.get("risk") if isinstance(plan.get("risk"), dict) else {}
     if str(risk.get("risk_level") or "low").lower() in {"high", "critical"}:

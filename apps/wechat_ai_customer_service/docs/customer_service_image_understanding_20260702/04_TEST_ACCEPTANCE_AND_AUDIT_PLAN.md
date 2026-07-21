@@ -1,3 +1,6 @@
+> [!WARNING]
+> **文档状态：旧实施验收已废止（2026-07-18）。** Brain First、多会话和商品匹配目标仍有效；要求 `image-save`、图片资产落盘或 Sidecar 图片入口的测试不得继续作为通过标准。现行验收矩阵见 [完全独立图像识别模块改造方案](../customer_service_absolute_independent_vision_module_refactor_plan_20260718.md)。
+
 > Customer-service development baseline: [../customer_visible_reply_ownership_baseline.md](../customer_visible_reply_ownership_baseline.md).
 
 # 微信智能客服识图测试、验收与审计计划

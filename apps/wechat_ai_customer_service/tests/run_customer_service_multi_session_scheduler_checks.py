@@ -5,6 +5,7 @@ from __future__ import annotations
 import copy
 import json
 import os
+import re
 import sys
 import tempfile
 import threading
@@ -60,9 +61,13 @@ from apps.wechat_ai_customer_service.admin_backend.services.customer_service_sch
     ready_reply_brain_quality_review,
     ready_reply_session_envelope_failure,
 )
-from apps.wechat_ai_customer_service.admin_backend.services.customer_service_session_ledger import SessionLedgerStore  # noqa: E402
+from apps.wechat_ai_customer_service.admin_backend.services.customer_service_session_ledger import (  # noqa: E402
+    SessionLedgerStore,
+    stable_session_key,
+)
 import apps.wechat_ai_customer_service.admin_backend.services.customer_service_scheduler as scheduler_module  # noqa: E402
 import apps.wechat_ai_customer_service.admin_backend.services.customer_service_scheduler_state as scheduler_state_module  # noqa: E402
+import apps.wechat_ai_customer_service.optional_plugins.vision.scheduler_capture as vision_scheduler_capture_module  # noqa: E402
 from apps.wechat_ai_customer_service.admin_backend.services.customer_profile_store import CustomerProfileStore  # noqa: E402
 from apps.wechat_ai_customer_service.admin_backend.services.session_monitor import SessionMonitor, SessionState  # noqa: E402
 from apps.wechat_ai_customer_service.customer_service_live_safety import apply_customer_service_live_safety_guard  # noqa: E402
@@ -496,6 +501,53 @@ def check_session_monitor_persistent_badge_is_acknowledged_once() -> None:
         )
 
 
+def check_session_monitor_changed_preview_still_reaches_reconciliation_capture() -> None:
+    """OCR correction alone must not recreate an acknowledged badge event."""
+
+    with tempfile.TemporaryDirectory() as temp:
+        monitor = SessionMonitor(
+            state_path=Path(temp) / "session_monitor.json",
+            max_targets_per_iteration=2,
+            preview_change_confirmations=2,
+            require_unread_badge_for_dispatch=True,
+            require_preview_signal_with_unread_badge=True,
+        )
+        session_key = "wx:rpa:v1:handled-preview-replay"
+        first_row = {
+            "name": "客户A",
+            "session_key": session_key,
+            "content": "看不看你都看不到我微信",
+            "time": "10:00",
+            "unread_badge": "visual_red_dot",
+            "conversation_type": "group",
+        }
+        first = monitor.poll(FakeSessionConnector([first_row]))
+        assert_equal(len(first), 1, "the original unread customer turn must dispatch")
+        monitor.reset_unread(session_key)
+        corrected_preview = {
+            **first_row,
+            "content": "许聪：看不看你都看不到我微...",
+        }
+        assert_equal(
+            monitor.poll(FakeSessionConnector([corrected_preview])),
+            [],
+            "the first OCR-corrected handled preview observation must stay acknowledged",
+        )
+        assert_equal(
+            monitor.poll(FakeSessionConnector([corrected_preview])),
+            [],
+            "a stable OCR correction with the same badge epoch/time must remain the handled event",
+        )
+        new_row = {
+            **corrected_preview,
+            "content": "许聪：这是新的追问",
+            "time": "10:01",
+        }
+        next_event = monitor.poll(FakeSessionConnector([new_row]))
+        assert_equal(len(next_event), 1, "a genuinely newer message time must still dispatch")
+        assert_equal(next_event[0].pending_signal_text, "许聪：这是新的追问", "the new turn must remain intact")
+
+
 def check_scheduler_observation_identity_dedupes_persistent_unread_after_capture() -> None:
     """Replay the incident: stable sidebar input must not stale its own reply."""
 
@@ -547,6 +599,68 @@ def check_scheduler_observation_identity_dedupes_persistent_unread_after_capture
     assert_true(
         str(session.get("pending_signal_id") or "") != first_signal_id,
         "a genuine follow-up must replace the old event id and stale only old work",
+    )
+
+
+def check_new_observation_bypasses_old_llm_exhaustion_for_same_preview() -> None:
+    """A repeated short preview may be a new customer event, not the failed one."""
+
+    state = empty_state()
+    signal = {
+        "name": "许聪",
+        "session_key": "wx:rpa:v1:new-after-llm-exhaustion",
+        "conversation_type": "private",
+        "content": "这车有吗",
+        "time": "00:12",
+        "unread_badge": "visual_red_dot",
+        "unread_detected": True,
+        "session_observation_id": "pending-observation:failed-turn",
+    }
+    record_session_signal(state, signal, now="2026-07-19T00:12:02")
+    session = session_by_name(state, "许聪")
+    session["pending_capture"] = False
+    session["pending_message_count"] = 1
+    session["status"] = "internal_handoff_pending"
+    risk_state = session.setdefault("risk_state", {})
+    risk_state.update(
+        {
+            "llm_failure_exhausted_until": "2026-07-19T00:17:02",
+            "llm_failure_exhausted_content_digest": str(session.get("last_content_digest") or ""),
+            "llm_failure_exhausted_message_time": "00:12",
+            "llm_failure_exhausted_message_digest": "failed-message-digest",
+            "handoff_required": True,
+            "handoff_reason": "llm_recovery_exhausted_without_visible_reply",
+        }
+    )
+    record_session_signal(state, signal, now="2026-07-19T00:12:20")
+    session = session_by_name(state, "许聪")
+    assert_true(not session.get("pending_capture"), f"the exact failed source observation must remain deduplicated: {session}")
+    suppressed_before_followup = [
+        item
+        for item in state.get("events", [])
+        if item.get("event") == "scheduler_session_signal_suppressed_after_llm_exhaustion"
+    ]
+    assert_equal(len(suppressed_before_followup), 1, "the old failed observation should be suppressed exactly once in this replay")
+    record_session_signal(
+        state,
+        {**signal, "session_observation_id": "pending-observation:genuine-followup"},
+        now="2026-07-19T00:12:40",
+    )
+    session = session_by_name(state, "许聪")
+    assert_true(session.get("pending_capture"), f"new observation must enqueue even when preview text/time repeat: {session}")
+    assert_true(
+        not (session.get("risk_state") or {}).get("llm_failure_exhausted_until"),
+        f"new observation must clear only the old LLM exhaustion gate: {session}",
+    )
+    suppressed = [
+        item
+        for item in state.get("events", [])
+        if item.get("event") == "scheduler_session_signal_suppressed_after_llm_exhaustion"
+    ]
+    assert_equal(
+        len(suppressed),
+        1,
+        f"genuine follow-up must not add another suppression event after the old observation was deduped: {suppressed}",
     )
 
 
@@ -777,6 +891,57 @@ def check_session_monitor_low_disturbance_ignores_normal_preview_without_badge(t
     assert_equal([item.name for item in badge], ["客户A"], "visual unread badge must still trigger capture")
 
 
+def check_session_monitor_active_chat_preview_change_dispatches_once_and_ignores_recent_outbound(tmp_dir: Path | None = None) -> None:
+    state_path = (tmp_dir or (PROJECT_ROOT / "runtime" / "apps" / "wechat_ai_customer_service" / "test_artifacts")) / "session_monitor_active_preview_unit.json"
+    try:
+        state_path.unlink()
+    except FileNotFoundError:
+        pass
+    monitor = SessionMonitor(
+        state_path=state_path,
+        max_targets_per_iteration=2,
+        initial_preview_can_raise_unread=False,
+        preview_change_can_raise_unread=True,
+        preview_change_confirmations=2,
+        require_unread_badge_for_dispatch=False,
+    )
+    session_key = "wx:rpa:v1:active-preview-a"
+    baseline = monitor.poll(
+        FakeSessionConnector(
+            [{"name": "客户A", "session_key": session_key, "content": "之前的消息", "time": "10:00", "conversation_type": "private"}]
+        )
+    )
+    assert_equal(baseline, [], "startup preview must be baselined without replying to history")
+    first = monitor.poll(
+        FakeSessionConnector(
+            [{"name": "客户A", "session_key": session_key, "content": "客户在当前聊天继续追问", "time": "10:01", "conversation_type": "private"}]
+        )
+    )
+    assert_equal(first, [], "badge-less normal text must wait for a stable second observation")
+    confirmed = monitor.poll(
+        FakeSessionConnector(
+            [{"name": "客户A", "session_key": session_key, "content": "客户在当前聊天继续追问", "time": "10:01", "conversation_type": "private"}]
+        )
+    )
+    assert_equal([item.session_key for item in confirmed], [session_key], "stable active-chat follow-up must dispatch without a badge")
+    monitor.reset_unread(session_key)
+    monitor._ledger = SimpleNamespace(
+        load_summary=lambda _key: {"recent_messages": [{"sender": "assistant", "content": "这是客服刚刚发送的回复内容"}]}
+    )
+    outbound = monitor.poll(
+        FakeSessionConnector(
+            [{"name": "客户A", "session_key": session_key, "content": "这是客服刚刚发送的回复...", "time": "10:02", "conversation_type": "private"}]
+        )
+    )
+    assert_equal(outbound, [], "recent outbound preview must be baselined rather than re-dispatched")
+    repeated = monitor.poll(
+        FakeSessionConnector(
+            [{"name": "客户A", "session_key": session_key, "content": "这是客服刚刚发送的回复...", "time": "10:02", "conversation_type": "private"}]
+        )
+    )
+    assert_equal(repeated, [], "outbound preview must remain acknowledged on later polls")
+
+
 def check_session_monitor_startup_visual_baseline_requires_new_unread_evidence(tmp_dir: Path | None = None) -> None:
     state_path = (tmp_dir or (PROJECT_ROOT / "runtime" / "apps" / "wechat_ai_customer_service" / "test_artifacts")) / "session_monitor_startup_visual_baseline_unit.json"
     try:
@@ -821,6 +986,12 @@ def check_session_monitor_low_disturbance_keeps_short_preview_signal(tmp_dir: Pa
         short_preview_can_raise_unread=True,
         high_sensitivity_short_merge_window_seconds=0.0,
     )
+    baseline = monitor.poll(
+        FakeSessionConnector(
+            [{"name": "客户A", "content": "此前内容", "time": "09:59", "conversation_type": "private"}]
+        )
+    )
+    assert_equal(baseline, [], "startup short-message monitor must first baseline visible history")
     short_signal = monitor.poll(
         FakeSessionConnector(
             [{"name": "客户A", "content": "在吗", "time": "10:00", "conversation_type": "private"}]
@@ -1016,6 +1187,59 @@ def check_image_capture_failure_uses_long_ui_backoff() -> None:
     )
 
 
+def check_target_unconfirmed_retry_is_bounded_and_new_observation_rearms() -> None:
+    state = empty_state()
+    session_key = "wx:rpa:v1:stale-target"
+    signal = {
+        "name": "丰巢",
+        "session_key": session_key,
+        "content": "[8条]物流通知",
+        "time": "11:54",
+        "unread_badge": "visual_red_dot",
+        "unread_detected": True,
+        "conversation_type": "private",
+        "session_observation_id": "observation-old",
+    }
+    record_session_signal(state, signal, now="2026-07-18T18:00:00")
+    for index in range(5):
+        mark_session_capture_failed(
+            state,
+            "丰巢",
+            "target_not_confirmed_for_messages",
+            session_key=session_key,
+            now=f"2026-07-18T18:0{index}:00",
+        )
+    session = state["sessions"][session_key]
+    assert_true(not session.get("pending_capture"), f"stale target must be quarantined after bounded attempts: {session}")
+    assert_equal(session.get("status"), "capture_failed", "bounded target confirmation failures should stop foreground retries")
+    assert_true(
+        not (session.get("risk_state") or {}).get("capture_retry_not_before"),
+        "quarantined target should not retain an automatic foreground retry timer",
+    )
+    assert_equal(select_capture_sessions(state, limit=1), [], "quarantined stale target must not keep occupying RPA")
+
+    record_session_signal(state, signal, now="2026-07-18T18:06:00")
+    assert_true(
+        not state["sessions"][session_key].get("pending_capture"),
+        "the same persistent unread observation must not revive a quarantined stale row",
+    )
+    new_signal = {**signal, "content": "新的物流通知", "time": "12:01", "session_observation_id": "observation-new"}
+    record_session_signal(state, new_signal, now="2026-07-18T18:07:00")
+    session = state["sessions"][session_key]
+    assert_true(session.get("pending_capture"), "a genuinely new observation should receive a fresh bounded capture budget")
+    assert_true(not (session.get("risk_state") or {}).get("capture_fail_count"), "new observation should clear stale fail count")
+    mark_session_capture_failed(
+        state,
+        "丰巢",
+        "target_not_confirmed_for_messages",
+        session_key=session_key,
+        now="2026-07-18T18:07:01",
+    )
+    session = state["sessions"][session_key]
+    assert_equal((session.get("risk_state") or {}).get("capture_fail_count"), 1, "new observation should restart at attempt one")
+    assert_true(session.get("pending_capture"), "first failure for a new observation should remain retryable")
+
+
 def check_distinct_customer_image_assets_are_not_deduped_by_proxy_text() -> None:
     state = empty_state()
     first = {
@@ -1193,6 +1417,296 @@ def check_runtime_submits_planner_after_each_capture() -> None:
             runtime.shutdown()
 
 
+def check_runtime_slow_capture_yields_before_starving_other_reply_work() -> None:
+    with tempfile.TemporaryDirectory() as temp:
+        path = Path(temp) / "scheduler_state.json"
+        store = SchedulerStateStore(tenant_id="unit_capture_budget", path=path)
+        captured_targets: list[str] = []
+
+        def capture_fn(session: dict[str, Any]) -> dict[str, Any]:
+            target = str(session.get("target_name") or "")
+            captured_targets.append(target)
+            if len(captured_targets) == 1:
+                time.sleep(0.07)
+            return {"messages": [message(target, 1)], "batch": [message(target, 1)]}
+
+        runtime = CustomerServiceSchedulerRuntime(
+            store=store,
+            config=SchedulerConfig(enabled=True, capture_max_sessions_per_round=3, planner_max_concurrency=2),
+            capture_fn=capture_fn,
+            plan_reply_fn=lambda capture, _task: {
+                "ok": True,
+                "reply_text": f"回复 {capture.get('target_name')}",
+                "decision": {"rule_name": "unit_capture_budget"},
+            },
+        )
+        previous_budget = os.environ.get("WECHAT_CUSTOMER_SERVICE_CAPTURE_ROUND_BUDGET_SECONDS")
+        try:
+            os.environ["WECHAT_CUSTOMER_SERVICE_CAPTURE_ROUND_BUDGET_SECONDS"] = "0.05"
+            first = runtime.tick(
+                session_signals=[
+                    {"name": "客户A", "content": "A", "unread_detected": True, "unread_badge": "visual_red_dot"},
+                    {"name": "客户B", "content": "B", "unread_detected": True, "unread_badge": "visual_red_dot"},
+                    {"name": "客户C", "content": "C", "unread_detected": True, "unread_badge": "visual_red_dot"},
+                ],
+                allow_send=False,
+                now="2026-07-19T11:00:00",
+            )
+            assert_equal(captured_targets, ["客户A"], "one slow foreground capture must yield the round")
+            assert_equal(first["summary"]["pending_sessions"], 2, "uncaptured sessions must remain durably pending")
+            time.sleep(0.03)
+            runtime.tick(allow_send=False, now="2026-07-19T11:00:01")
+            assert_true("客户B" in captured_targets, f"next pending session should progress on the following tick: {captured_targets}")
+        finally:
+            if previous_budget is None:
+                os.environ.pop("WECHAT_CUSTOMER_SERVICE_CAPTURE_ROUND_BUDGET_SECONDS", None)
+            else:
+                os.environ["WECHAT_CUSTOMER_SERVICE_CAPTURE_ROUND_BUDGET_SECONDS"] = previous_budget
+            runtime.shutdown()
+
+
+def check_runtime_collects_completed_reply_before_next_slow_capture() -> None:
+    """A completed Brain future must not wait behind the next foreground OCR."""
+
+    with tempfile.TemporaryDirectory() as temp:
+        store = SchedulerStateStore(tenant_id="unit_precollect", path=Path(temp) / "scheduler_state.json")
+        release_planner = threading.Event()
+
+        def capture_fn(session: dict[str, Any]) -> dict[str, Any]:
+            target = str(session.get("target_name") or "")
+            if target == "客户B":
+                time.sleep(0.07)
+            item = message(target, 1, content=f"{target}消息")
+            return {"messages": [item], "batch": [item]}
+
+        def planner(capture: dict[str, Any], _task: dict[str, Any]) -> dict[str, Any]:
+            if str(capture.get("target_name") or "") == "客户A":
+                release_planner.wait(timeout=1.0)
+            return {
+                "ok": True,
+                "reply_text": f"回复 {capture.get('target_name')}",
+                "decision": {"rule_name": "unit_precollect"},
+            }
+
+        runtime = CustomerServiceSchedulerRuntime(
+            store=store,
+            config=SchedulerConfig(enabled=True, capture_max_sessions_per_round=1, planner_max_concurrency=2),
+            capture_fn=capture_fn,
+            plan_reply_fn=planner,
+        )
+        try:
+            first = runtime.tick(
+                session_signals=[
+                    {"name": "客户A", "content": "A", "unread_detected": True, "unread_badge": "visual_red_dot"}
+                ],
+                allow_send=False,
+                now="2026-07-19T11:10:00",
+            )
+            assert_true(
+                any(item.get("event") == "llm_task_submitted" for item in first.get("events") or []),
+                f"first planner should be running asynchronously: {first}",
+            )
+            release_planner.set()
+            deadline = time.time() + 1.0
+            while not any(future.done() for future in runtime._planner_futures.values()) and time.time() < deadline:
+                time.sleep(0.005)
+
+            second = runtime.tick(
+                session_signals=[
+                    {"name": "客户B", "content": "B", "unread_detected": True, "unread_badge": "visual_red_dot"}
+                ],
+                allow_send=False,
+                now="2026-07-19T11:10:01",
+            )
+            events = [(item.get("event"), item.get("target_name")) for item in second.get("events") or []]
+            event_names = [item[0] for item in events]
+            assert_true(
+                "llm_task_completed" in event_names and ("capture_completed", "客户B") in events,
+                f"second tick should both collect A and capture B: {events}",
+            )
+            assert_true(
+                event_names.index("llm_task_completed") < events.index(("capture_completed", "客户B")),
+                f"completed reply work must be collected before slow foreground capture: {events}",
+            )
+        finally:
+            release_planner.set()
+            runtime.shutdown()
+
+
+def check_runtime_reuses_state_cache_and_invalidates_external_write() -> None:
+    """Manual runtime must not repeatedly parse its multi-megabyte journal."""
+
+    class CountingStore(SchedulerStateStore):
+        def __init__(self, **kwargs: Any) -> None:
+            super().__init__(**kwargs)
+            self.load_calls = 0
+
+        def load(self) -> dict[str, Any]:
+            self.load_calls += 1
+            return super().load()
+
+    with tempfile.TemporaryDirectory() as temp:
+        path = Path(temp) / "scheduler_state.json"
+        store = CountingStore(tenant_id="unit_state_cache", path=path)
+        runtime = CustomerServiceSchedulerRuntime(
+            store=store,
+            config=SchedulerConfig(enabled=True),
+            capture_fn=lambda _session: {"messages": [], "batch": []},
+            plan_reply_fn=lambda _capture, _task: {"ok": False},
+        )
+        try:
+            runtime.tick(allow_send=False, now="2026-07-19T11:20:00")
+            runtime.tick(allow_send=False, now="2026-07-19T11:20:01")
+            assert_equal(store.load_calls, 1, "unchanged runtime state should be parsed only once")
+
+            external_store = SchedulerStateStore(tenant_id="unit_state_cache", path=path)
+            external_state = external_store.load()
+            external_state["external_write_probe"] = "changed"
+            external_store.save(external_state)
+            runtime.tick(allow_send=False, now="2026-07-19T11:20:02")
+            assert_equal(store.load_calls, 2, "an external atomic state replacement must invalidate the cache")
+            assert_equal(
+                runtime._state_cache.get("external_write_probe") if isinstance(runtime._state_cache, dict) else None,
+                "changed",
+                "cache invalidation must retain the external update",
+            )
+        finally:
+            runtime.shutdown()
+
+
+def check_runtime_manual_like_two_sessions_and_followup_all_send() -> None:
+    """Exercise the real async state machine used by manual multi-chat tests."""
+
+    with tempfile.TemporaryDirectory() as temp:
+        store = SchedulerStateStore(tenant_id="unit_manual_like", path=Path(temp) / "scheduler_state.json")
+        capture_counts = {"客户A": 0, "客户B": 0}
+        capture_texts = {
+            "客户A": ["A第一条", "A紧接着追问"],
+            "客户B": ["B第一条"],
+        }
+        sent: list[tuple[str, str, str]] = []
+
+        def capture_fn(session: dict[str, Any]) -> dict[str, Any]:
+            target = str(session.get("target_name") or "")
+            index = capture_counts[target]
+            capture_counts[target] = index + 1
+            text_value = capture_texts[target][index]
+            item = message(target, index + 1, content=text_value)
+            return {
+                "session_key": str(session.get("session_key") or ""),
+                "target_name": target,
+                "conversation_type": "private",
+                "messages": [item],
+                "batch": [item],
+            }
+
+        def planner(capture: dict[str, Any], _task: dict[str, Any]) -> dict[str, Any]:
+            target = str(capture.get("target_name") or "")
+            time.sleep(0.08 if target == "客户B" else 0.02)
+            content = str(((capture.get("batch") or [{}])[-1]).get("content") or "")
+            return {"ok": True, "reply_text": f"回复：{content}", "decision": {"rule_name": "unit_manual_like"}}
+
+        def polish(planner_task: dict[str, Any], _task: dict[str, Any]) -> dict[str, Any]:
+            time.sleep(0.01)
+            planner_result = planner_task.get("result") if isinstance(planner_task.get("result"), dict) else {}
+            return {
+                "ok": True,
+                "reply_text": str(planner_result.get("reply_text") or planner_task.get("reply_text") or ""),
+                "decision": dict(planner_result.get("decision") or planner_task.get("decision") or {}),
+            }
+
+        def send(reply: dict[str, Any]) -> dict[str, Any]:
+            sent.append(
+                (
+                    str(reply.get("target_name") or ""),
+                    str(reply.get("session_key") or ""),
+                    str(reply.get("reply_text") or ""),
+                )
+            )
+            return {"ok": True, "verified": True, "state": "sent_and_verified"}
+
+        runtime = CustomerServiceSchedulerRuntime(
+            store=store,
+            config=SchedulerConfig(
+                enabled=True,
+                capture_max_sessions_per_round=2,
+                planner_max_concurrency=2,
+                polish_max_concurrency=2,
+                send_max_replies_per_round=1,
+            ),
+            capture_fn=capture_fn,
+            plan_reply_fn=planner,
+            polish_reply_fn=polish,
+            send_fn=send,
+        )
+        try:
+            runtime.tick(
+                session_signals=[
+                    {
+                        "name": "客户A",
+                        "session_key": "wx:rpa:v1:manual-like-a",
+                        "conversation_type": "private",
+                        "content": "A第一条",
+                        "time": "10:00",
+                        "unread_detected": True,
+                        "unread_badge": "visual_red_dot",
+                    },
+                    {
+                        "name": "客户B",
+                        "session_key": "wx:rpa:v1:manual-like-b",
+                        "conversation_type": "private",
+                        "content": "B第一条",
+                        "time": "10:00",
+                        "unread_detected": True,
+                        "unread_badge": "visual_red_dot",
+                    },
+                ],
+                allow_send=True,
+                now="2026-07-19T10:00:00",
+            )
+            runtime.tick(
+                session_signals=[
+                    {
+                        "name": "客户A",
+                        "session_key": "wx:rpa:v1:manual-like-a",
+                        "conversation_type": "private",
+                        "content": "A紧接着追问",
+                        "time": "10:01",
+                        "unread_detected": True,
+                        "unread_badge": "visual_red_dot",
+                    }
+                ],
+                allow_send=True,
+                now="2026-07-19T10:00:01",
+            )
+            deadline = time.time() + 3.0
+            tick_index = 2
+            while len(sent) < 3 and time.time() < deadline:
+                runtime.tick(
+                    allow_send=True,
+                    now=f"2026-07-19T10:00:{tick_index:02d}",
+                )
+                tick_index += 1
+                time.sleep(0.02)
+            assert_equal(capture_counts, {"客户A": 2, "客户B": 1}, "both sessions and the follow-up must each capture once")
+            assert_equal(len(sent), 3, f"every captured customer turn must reach verified send: {sent}")
+            assert_equal(
+                {item[2] for item in sent},
+                {"回复：A第一条", "回复：A紧接着追问", "回复：B第一条"},
+                f"no session or follow-up reply may be lost: {sent}",
+            )
+            assert_true(
+                all(
+                    (target == "客户A" and session_key == "wx:rpa:v1:manual-like-a")
+                    or (target == "客户B" and session_key == "wx:rpa:v1:manual-like-b")
+                    for target, session_key, _text in sent
+                ),
+                f"manual-like sends must remain bound to their session keys: {sent}",
+            )
+        finally:
+            runtime.shutdown()
+
+
 def check_runtime_retries_same_capture_for_monitor_only_short_pending_after_brain_no_visible_reply() -> None:
     with tempfile.TemporaryDirectory() as temp:
         path = Path(temp) / "scheduler_state.json"
@@ -1243,18 +1757,18 @@ def check_runtime_retries_same_capture_for_monitor_only_short_pending_after_brai
             result = runtime.tick(now="2026-06-08T00:36:03")
             events = result.get("events") or []
             assert_true(
-                any(item.get("event") == "llm_task_failed_requeued_planner" for item in events),
-                f"monitor-only short pending Brain failure should retry the same capture in the background: {events}",
+                not any(item.get("event") == "llm_task_failed_requeued_planner" for item in events),
+                f"scheduler must not own a second semantic Brain pass: {events}",
             )
             session = session_by_name(store.load(), "许聪")
             assert_true(not bool(session.get("pending_capture")), f"session must not reopen WeChat after short Brain failure: {session}")
-            assert_equal(session.get("status"), "llm_queued", "recoverable short preview failure should stay queued for Brain retry")
-            queued_task = next(
+            assert_equal(session.get("status"), "internal_handoff_pending", "failed Brain turn should fail closed after its internal repair budget")
+            failed_task = next(
                 task
                 for task in (store.load().get("llm_tasks") or {}).values()
-                if isinstance(task, dict) and task.get("status") == "queued"
+                if isinstance(task, dict) and task.get("status") == "failed"
             )
-            assert_true(int(queued_task.get("recoverable_retry_count") or 0) >= 1, f"retry count should be tracked: {queued_task}")
+            assert_equal(int(failed_task.get("recoverable_retry_count") or 0), 0, "scheduler must not spend a second repair quota")
         finally:
             runtime.shutdown()
 
@@ -1331,22 +1845,18 @@ def check_runtime_retries_same_capture_for_real_ocr_short_probe_after_brain_no_v
                 f"real OCR short Brain failure must not trigger RPA recapture loop: {events}",
             )
             assert_true(
-                any(item.get("event") == "llm_task_failed_requeued_planner" for item in events),
-                f"real OCR short Brain failure should retry the same captured message through Brain: {events}",
+                not any(item.get("event") == "llm_task_failed_requeued_planner" for item in events),
+                f"real OCR capture must not be sent through a second scheduler-owned Brain pass: {events}",
             )
             session = session_by_name(store.load(), "许聪")
             assert_true(not bool(session.get("pending_capture")), f"real OCR failure must not re-open the chat pane: {session}")
-            assert_equal(session.get("status"), "llm_queued", "real OCR Brain failure should keep the same capture queued for Brain")
-            queued_task = next(
+            assert_equal(session.get("status"), "internal_handoff_pending", "real OCR Brain failure should fail closed after Brain-owned repair")
+            failed_task = next(
                 task
                 for task in (store.load().get("llm_tasks") or {}).values()
-                if isinstance(task, dict) and task.get("status") == "queued"
+                if isinstance(task, dict) and task.get("status") == "failed"
             )
-            assert_true(
-                int(queued_task.get("recoverable_retry_count") or 0) >= 1,
-                f"same-capture Brain retry count should be tracked: {queued_task}",
-            )
-            assert_true(str(queued_task.get("retry_not_before") or ""), f"same-capture retry should be paced: {queued_task}")
+            assert_equal(int(failed_task.get("recoverable_retry_count") or 0), 0, "scheduler must not add a retry")
         finally:
             runtime.shutdown()
 
@@ -1426,18 +1936,18 @@ def check_runtime_retries_same_capture_for_full_customer_capture_after_brain_no_
             ]
             assert_true(not requeued, f"normal business Brain failure must not requeue RPA capture repeatedly: {events}")
             assert_true(
-                any(item.get("event") == "llm_task_failed_requeued_planner" for item in events),
-                f"normal business Brain failure should retry the same durable capture through Brain: {events}",
+                not any(item.get("event") == "llm_task_failed_requeued_planner" for item in events),
+                f"normal business failure must not start a scheduler-owned second Brain pass: {events}",
             )
             session = session_by_name(store.load(), "新数据测试")
             assert_true(not bool(session.get("pending_capture")), f"business session should not keep switching chats after Brain failure: {session}")
-            assert_equal(session.get("status"), "llm_queued", "business Brain failure should stay queued for same-capture Brain retry")
+            assert_equal(session.get("status"), "internal_handoff_pending", "business Brain failure should fail closed after Brain-owned repair")
             failed_task = next(
                 task
                 for task in (store.load().get("llm_tasks") or {}).values()
-                if isinstance(task, dict) and task.get("status") == "queued"
+                if isinstance(task, dict) and task.get("status") == "failed"
             )
-            stored_result = failed_task.get("last_failed_result") if isinstance(failed_task.get("last_failed_result"), dict) else {}
+            stored_result = failed_task.get("result") if isinstance(failed_task.get("result"), dict) else {}
             stored_event = stored_result.get("event") if isinstance(stored_result.get("event"), dict) else {}
             stored_brain = stored_event.get("customer_service_brain") if isinstance(stored_event.get("customer_service_brain"), dict) else {}
             assert_equal(stored_result.get("reason"), "customer_service_brain_no_visible_reply", "failed planner result should keep reason")
@@ -1590,19 +2100,19 @@ def check_runtime_retries_same_capture_for_brain_schema_failure() -> None:
                 if any(item.get("event") == "llm_task_failed_requeued_planner" for item in events):
                     break
             assert_true(
-                any(item.get("event") == "llm_task_failed_requeued_planner" for item in events),
-                f"Brain schema parse failure should retry the same durable capture: {events}",
+                not any(item.get("event") == "llm_task_failed_requeued_planner" for item in events),
+                f"Brain schema failure already consumed its Brain correction path and must not be re-run by scheduler: {events}",
             )
             session = session_by_name(store.load(), "许聪")
             assert_true(not bool(session.get("pending_capture")), f"schema failure must not reopen WeChat RPA capture: {session}")
-            assert_equal(session.get("status"), "llm_queued", "schema failure should stay queued for Brain retry")
-            queued_task = next(
+            assert_equal(session.get("status"), "internal_handoff_pending", "schema failure should fail closed without a second planner pass")
+            failed_task = next(
                 task
                 for task in (store.load().get("llm_tasks") or {}).values()
-                if isinstance(task, dict) and task.get("status") == "queued"
+                if isinstance(task, dict) and task.get("status") == "failed"
             )
-            assert_equal(queued_task.get("error"), None, "requeued task error should be cleared")
-            assert_true(int(queued_task.get("recoverable_retry_count") or 0) >= 1, f"retry count should be tracked: {queued_task}")
+            assert_equal(failed_task.get("error"), "brain_response_json_repair_failed", "terminal schema error should stay auditable")
+            assert_equal(int(failed_task.get("recoverable_retry_count") or 0), 0, "scheduler must not add a retry")
         finally:
             runtime.shutdown()
 
@@ -1637,11 +2147,12 @@ def check_runtime_same_capture_retry_can_recover_without_rpa_recapture() -> None
             if len(planner_calls) == 1:
                 return {
                     "ok": False,
-                    "reason": "customer_service_brain_llm_unavailable",
+                    "reason": "customer_service_brain_no_visible_reply",
                     "event": {
                         "customer_service_brain": {
-                            "rule_name": "customer_service_brain_llm_unavailable",
+                            "rule_name": "customer_service_brain_no_visible_reply",
                             "reason": "customer_service_brain_llm_unavailable",
+                            "no_visible_reply": {"class": "llm_timeout", "retryable": True},
                         }
                     },
                 }
@@ -1677,20 +2188,16 @@ def check_runtime_same_capture_retry_can_recover_without_rpa_recapture() -> None
             )
             for _ in range(20):
                 time.sleep(0.03)
-                runtime.tick(now="2026-06-11T00:01:18")
+                runtime.tick(now="2026-06-11T00:01:22")
                 state = store.load()
                 if any(isinstance(reply, dict) and reply.get("status") == "ready" for reply in (state.get("ready_replies") or {}).values()):
                     break
             state = store.load()
-            ready = [
-                reply
-                for reply in (state.get("ready_replies") or {}).values()
-                if isinstance(reply, dict) and reply.get("status") == "ready"
-            ]
+            ready = [reply for reply in (state.get("ready_replies") or {}).values() if isinstance(reply, dict) and reply.get("status") == "ready"]
             assert_equal(len(capture_calls), 1, "same-capture retry must not perform a second RPA capture")
-            assert_true(len(planner_calls) >= 2, f"Brain should be retried on the same capture: {planner_calls}")
-            assert_true(bool(ready), f"same-capture retry should eventually produce a ready reply: {state}")
-            assert_equal(ready[-1].get("reply_text"), "晚上好，您说。", "ready reply should be authored by Brain retry")
+            assert_equal(len(planner_calls), 2, f"structured transport timeout should receive exactly one durable-capture retry: {planner_calls}")
+            assert_equal(len(ready), 1, f"second Brain pass should recover without a local fallback or RPA recapture: {state}")
+            assert_equal(ready[0].get("reply_text"), "晚上好，您说。", "recovered wording must still come from the Brain planner")
         finally:
             runtime.shutdown()
 
@@ -2325,12 +2832,32 @@ def check_scheduler_config_derives_planner_timeout_from_brain_budget() -> None:
         }
     )
     assert_true(
-        int(config.planner_task_timeout_seconds) >= 82,
-        f"planner task timeout should cover Brain main + repair budget, not default to 30s: {config}",
+        int(config.planner_task_timeout_seconds) >= 160,
+        f"planner task timeout should cover Brain primary + fallback + retry + sequential correction budget: {config}",
     )
     assert_true(
         int(config.polish_task_timeout_seconds) >= 16,
         f"polish task timeout should cover final-polish request budget plus scheduler overhead: {config}",
+    )
+    live_budget = SchedulerConfig.from_config(
+        {
+            "concurrency_scheduler": {"enabled": True},
+            "customer_service_brain": {
+                "timeout_seconds": 15,
+                "large_prompt_timeout_seconds": 18,
+                "very_large_prompt_timeout_seconds": 20,
+                "fallback_timeout_seconds": 12,
+                "quality_repair_timeout_seconds": 8,
+                "semantic_reviewer_timeout_seconds": 8,
+                "low_authority_fast_timeout_seconds": 8,
+                "low_authority_fast_fallback_timeout_seconds": 6,
+                "low_authority_fast_repair_timeout_seconds": 6,
+            },
+        }
+    )
+    assert_true(
+        int(live_budget.planner_task_timeout_seconds) >= 73,
+        f"chejin-like settings must not give the scheduler less time than Brain's 58s bound plus overhead: {live_budget}",
     )
 
 
@@ -2380,7 +2907,7 @@ def check_runtime_brain_budget_prevents_premature_scheduler_timeout() -> None:
             state = store.load()
             queued = next(task for task in (state.get("llm_tasks") or {}).values() if isinstance(task, dict))
             assert_true(
-                int(queued.get("timeout_seconds") or 0) >= 82,
+                int(queued.get("timeout_seconds") or 0) >= 160,
                 f"queued planner task should inherit Brain-derived timeout: {queued}",
             )
             runtime.tick(allow_send=False, now="2026-06-11T10:00:40")
@@ -2544,11 +3071,29 @@ def check_reply_sent_preserves_followup_pending_signal() -> None:
     reply = completion.get("reply") if isinstance(completion.get("reply"), dict) else {}
     reply_id = str(reply.get("reply_id") or "")
     assert_true(bool(reply_id), "completion should generate one ready reply")
+    risk_state = session_by_name(state, "客户A").setdefault("risk_state", {})
+    risk_state.update(
+        {
+            "llm_failure_exhausted_until": "2026-05-25T10:05:00",
+            "llm_failure_exhausted_content_digest": "old-content",
+            "llm_failure_exhausted_message_time": "10:00",
+            "llm_failure_exhausted_message_digest": "old-message",
+            "last_llm_failure_at": "2026-05-25T10:00:04",
+            "handoff_required": True,
+            "handoff_reason": "llm_recovery_exhausted_without_visible_reply",
+            "last_error": "customer_service_brain_no_visible_reply",
+        }
+    )
     mark_reply_sending(state, reply_id, now="2026-05-25T10:00:07")
     mark_reply_sent(state, reply_id, send_result={"ok": True, "verified": True}, now="2026-05-25T10:00:08")
 
     session = session_by_name(state, "客户A")
     assert_true(bool(session.get("pending_capture")), "follow-up signal must survive first send completion")
+    assert_true(
+        not (session.get("risk_state") or {}).get("llm_failure_exhausted_until")
+        and not (session.get("risk_state") or {}).get("handoff_required"),
+        f"successful Brain send must clear stale LLM-only lock and handoff flags: {session}",
+    )
     next_capture = select_capture_sessions(state, limit=1)
     assert_equal([item.get("target_name") for item in next_capture], ["客户A"], "follow-up should stay queued for next capture")
 
@@ -2918,6 +3463,9 @@ def check_runtime_expires_stale_queued_llm_task_after_restart() -> None:
             assert_equal(restored["llm_tasks"][task["task_id"]]["status"], "stale", "stale queued LLM task should be expired")
             assert_equal(result["summary"].get("llm_running"), 0, "expired queued LLM task must not run")
             assert_equal(result["summary"].get("reply_ready"), 0, "expired queued LLM task must not create reply")
+            restored_session = session_by_name(restored, "客户A")
+            assert_equal(restored_session.get("status"), "internal_handoff_pending", "expired queued input must remain visible for handoff")
+            assert_true(int(restored_session.get("pending_message_count") or 0) >= 1, "expired queued input must not be erased")
         finally:
             runtime.shutdown()
 
@@ -2965,6 +3513,9 @@ def check_runtime_expires_stale_orphaned_running_llm_task_after_restart() -> Non
             restored = store.load()
             assert_equal(restored["llm_tasks"][task["task_id"]]["status"], "stale", "stale orphaned LLM task should be expired")
             assert_equal(result["summary"].get("llm_running"), 0, "expired orphaned LLM task must not run")
+            restored_session = session_by_name(restored, "客户A")
+            assert_equal(restored_session.get("status"), "internal_handoff_pending", "orphan expiry must preserve the unreplied customer turn")
+            assert_true(int(restored_session.get("pending_message_count") or 0) >= 1, "orphan expiry must not zero pending evidence")
         finally:
             runtime.shutdown()
 
@@ -3072,6 +3623,62 @@ def check_runtime_recovers_orphaned_running_polish_task_after_restart() -> None:
             runtime.shutdown()
 
 
+def check_runtime_expires_stale_orphaned_polish_without_erasing_customer_turn() -> None:
+    with tempfile.TemporaryDirectory() as temp:
+        path = Path(temp) / "scheduler_state.json"
+        store = SchedulerStateStore(tenant_id="unit", path=path)
+        state = store.load()
+        capture = record_capture_result(
+            state,
+            "客户A",
+            messages=[message("A", 1)],
+            batch=[message("A", 1)],
+            now="2026-06-02T18:10:00",
+        )
+        planner_task = enqueue_llm_task(state, capture["capture_id"], now="2026-06-02T18:10:01")
+        complete_llm_task(
+            state,
+            planner_task["task_id"],
+            reply_text="待润色草稿",
+            decision={"rule_name": "unit"},
+            create_ready_reply=False,
+            now="2026-06-02T18:10:02",
+        )
+        polish_task = enqueue_polish_task(state, planner_task["task_id"], now="2026-06-02T18:10:03")
+        mark_polish_started(state, polish_task["task_id"], now="2026-06-02T18:10:04")
+        store.save(state)
+
+        runtime = CustomerServiceSchedulerRuntime(
+            store=store,
+            config=SchedulerConfig(
+                enabled=True,
+                capture_max_sessions_per_round=1,
+                planner_max_concurrency=1,
+                polish_max_concurrency=1,
+                pending_session_ttl_seconds=60,
+            ),
+            capture_fn=lambda _session: {"messages": [], "batch": []},
+            plan_reply_fn=lambda _capture, _task: {"ok": True, "reply_text": "不会被调用"},
+            polish_reply_fn=lambda _planner, _task: (_ for _ in ()).throw(
+                AssertionError("stale orphaned polish must not be submitted")
+            ),
+        )
+        try:
+            result = runtime.tick(allow_send=False, now="2026-06-02T18:15:00")
+            assert_true(
+                any(item.get("event") == "polish_task_orphan_expired" for item in result.get("events") or []),
+                f"stale orphaned polish should expire: {result}",
+            )
+            restored = store.load()
+            assert_equal(restored["polish_tasks"][polish_task["task_id"]]["status"], "stale", "orphaned polish must be stale")
+            restored_session = session_by_name(restored, "客户A")
+            assert_equal(restored_session.get("status"), "internal_handoff_pending", "orphan expiry must preserve the customer turn")
+            assert_true(int(restored_session.get("pending_message_count") or 0) >= 1, "orphan expiry must retain pending input evidence")
+            assert_true((restored_session.get("risk_state") or {}).get("handoff_required") is True, "preserved input must be operator-visible")
+        finally:
+            runtime.shutdown()
+
+
 def check_runtime_expires_stale_queued_polish_task_after_restart() -> None:
     with tempfile.TemporaryDirectory() as temp:
         path = Path(temp) / "scheduler_state.json"
@@ -3129,6 +3736,9 @@ def check_runtime_expires_stale_queued_polish_task_after_restart() -> None:
             assert_equal(restored["polish_tasks"][polish_task["task_id"]]["status"], "stale", "stale queued polish task should expire")
             assert_equal(result["summary"].get("polish_running"), 0, "expired queued polish task must not run")
             assert_equal(result["summary"].get("reply_ready"), 0, "expired queued polish task must not create reply")
+            restored_session = session_by_name(restored, "客户A")
+            assert_equal(restored_session.get("status"), "internal_handoff_pending", "expired polish input must remain visible for handoff")
+            assert_true(int(restored_session.get("pending_message_count") or 0) >= 1, "expired polish input must not be erased")
         finally:
             runtime.shutdown()
 
@@ -3189,6 +3799,9 @@ def check_runtime_expires_stale_ready_reply_before_send_after_restart() -> None:
             assert_equal(restored["ready_replies"][reply_id]["stale_reason"], "ready_reply_ttl_exceeded_before_send", "stale reason should be explicit")
             assert_equal(len(sent), 0, "stale ready reply must not call send_fn")
             assert_equal(result["summary"].get("reply_sending"), 0, "stale ready reply must not enter sending")
+            restored_session = session_by_name(restored, "客户A")
+            assert_equal(restored_session.get("status"), "internal_handoff_pending", "expired ready input must remain visible for handoff")
+            assert_true(int(restored_session.get("pending_message_count") or 0) >= 1, "expired ready input must not be erased")
         finally:
             runtime.shutdown()
 
@@ -3478,12 +4091,48 @@ def check_runtime_final_polish_block_requeues_brain_with_feedback() -> None:
             assert_equal(len(queued), 1, f"planner task should be requeued once: {state}")
             retry_instruction = scheduler_module.polish_failure_retry_instruction(queued[0])
             assert_true(
-                "不能承认或否认身份" in retry_instruction,
-                f"Brain retry should carry final-polish identity feedback: {retry_instruction}",
+                "final_visible_llm_polish_failed" in retry_instruction
+                and "identity_truth_discussion_not_allowed" in retry_instruction
+                and "全部由Brain生成" in retry_instruction,
+                f"Brain retry should carry topic-neutral final-polish feedback: {retry_instruction}",
             )
+            assert_true("不能承认或否认身份" not in retry_instruction, f"scheduler must not author topic-specific repair wording: {retry_instruction}")
             assert_equal((queued[0].get("last_polish_failure") or {}).get("reason"), "final_visible_llm_polish_failed", "polish failure audit should be retained")
         finally:
             runtime.shutdown()
+
+
+def check_final_polish_retry_budget_detects_prior_brain_repair() -> None:
+    clean_task = {
+        "result": {
+            "event": {
+                "customer_service_brain": {
+                    "llm_status": {"status": 200},
+                    "quality_repair": {"attempted": False, "status": "skipped"},
+                }
+            }
+        }
+    }
+    repaired_task = copy.deepcopy(clean_task)
+    repaired_task["result"]["event"]["customer_service_brain"]["quality_repair"] = {
+        "attempted": True,
+        "ok": True,
+        "status": 200,
+    }
+    parse_retried_task = copy.deepcopy(clean_task)
+    parse_retried_task["result"]["event"]["customer_service_brain"]["llm_status"]["same_capture_retry"] = True
+    assert_true(
+        not scheduler_module._planner_task_has_spent_brain_repair(clean_task),
+        "a clean single Brain call must retain the one final-polish retry exception",
+    )
+    assert_true(
+        scheduler_module._planner_task_has_spent_brain_repair(repaired_task),
+        "a Brain quality repair must consume the shared semantic retry budget",
+    )
+    assert_true(
+        scheduler_module._planner_task_has_spent_brain_repair(parse_retried_task),
+        "a same-capture parse correction must consume the shared semantic retry budget",
+    )
 
 
 def check_captured_messages_connector_accepts_history_kwargs() -> None:
@@ -4489,6 +5138,15 @@ def check_live_safety_applies_backend_scheduler_defaults() -> None:
     assert_equal(scheduler.get("llm_max_concurrency"), 4, "scheduler should use high-concurrency LLM default")
     assert_equal(scheduler.get("planner_max_concurrency"), 4, "planner concurrency should default to the high-concurrency standard value")
     assert_equal(scheduler.get("polish_max_concurrency"), 4, "polish concurrency should default to the high-concurrency standard value")
+    assert_true(
+        multi_target.get("enabled") is True,
+        "single-target live safety must retain the session identity monitor instead of fabricating a configured session key",
+    )
+    assert_equal(
+        int(multi_target.get("max_targets_per_iteration") or 0),
+        1,
+        "single-target live safety should bound dispatch without disabling identity discovery",
+    )
     assert_true(multi_target.get("initial_preview_can_raise_unread") is False, "live safety should baseline first-seen previews")
     assert_true(multi_target.get("preview_change_can_raise_unread") is False, "live safety should ignore ordinary preview drift")
     assert_true(multi_target.get("short_preview_can_raise_unread") is True, "live safety should keep short-message fallback")
@@ -4525,6 +5183,8 @@ def check_live_safety_preserves_explicit_dynamic_all_session_monitoring() -> Non
     assert_true("文件传输助手" in set(routing.get("ignored_names") or []), "self-message File Transfer Assistant must remain excluded")
     assert_true(multi_target.get("enabled") is True, "dynamic all-session monitoring must keep multi-target dispatch enabled")
     assert_equal(int(multi_target.get("max_targets_per_iteration") or 0), 2, "dynamic all-session monitoring should retain the bounded multi-session dispatch limit")
+    assert_true(multi_target.get("preview_change_can_raise_unread") is True, "dynamic monitoring must detect active-chat follow-ups without a red badge")
+    assert_true(multi_target.get("require_unread_badge_for_dispatch") is False, "a red badge must not be the only dynamic customer-message signal")
 
 
 def check_live_safety_file_transfer_defaults_to_self_test_target() -> None:
@@ -4609,8 +5269,8 @@ def check_listener_rpa_send_settings_apply_live_safety_effective_defaults() -> N
         settings = load_rpa_humanized_send_settings(path)
         assert_equal(
             settings.get("input_method"),
-            "clipboard_chunks",
-            "listener env settings should use effective live-safety input method",
+            "sendinput_unicode",
+            "listener live safety must preserve the explicitly configured input method",
         )
         assert_equal(
             settings.get("typing_typo_probability"),
@@ -4622,6 +5282,52 @@ def check_listener_rpa_send_settings_apply_live_safety_effective_defaults() -> N
             0,
             "listener env settings should disable typo/backspace budget",
         )
+
+
+def check_listener_live_safety_preserves_allowed_clipboard_once() -> None:
+    env_names = (
+        "WECHAT_WIN32_OCR_ENFORCE_INTERMITTENT_TYPING",
+        "WECHAT_WIN32_OCR_ALLOW_CLIPBOARD_ONCE",
+        "WECHAT_WIN32_OCR_HUMANIZED_INPUT_METHOD",
+    )
+    previous = {name: os.environ.get(name) for name in env_names}
+    try:
+        os.environ["WECHAT_WIN32_OCR_ENFORCE_INTERMITTENT_TYPING"] = "0"
+        os.environ["WECHAT_WIN32_OCR_ALLOW_CLIPBOARD_ONCE"] = "1"
+        os.environ.pop("WECHAT_WIN32_OCR_HUMANIZED_INPUT_METHOD", None)
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / "listener_config.json"
+            path.write_text(
+                json.dumps(
+                    {
+                        "targets": [{"name": "客户A", "enabled": True, "exact": True}],
+                        "live_safety_guard": {
+                            "enabled": True,
+                            "allowed_targets": ["客户A"],
+                            "require_recent_bootstrap": False,
+                        },
+                        "rpa_humanized_send": {
+                            "enabled": True,
+                            "input_method": "clipboard_once",
+                        },
+                    },
+                    ensure_ascii=False,
+                    indent=2,
+                ),
+                encoding="utf-8",
+            )
+            settings = load_rpa_humanized_send_settings(path)
+        assert_equal(
+            settings.get("input_method"),
+            "clipboard_once",
+            "live safety must not expand an explicitly allowed single paste into clipboard chunks",
+        )
+    finally:
+        for name, value in previous.items():
+            if value is None:
+                os.environ.pop(name, None)
+            else:
+                os.environ[name] = value
         assert_equal(
             settings.get("send_input_confirm_attempts"),
             1,
@@ -5848,6 +6554,151 @@ def check_managed_bridge_collect_signals_skips_busy_sticky_target() -> None:
             bridge.shutdown()
 
 
+def check_managed_bridge_single_target_uses_confirmed_session_identity() -> None:
+    with tempfile.TemporaryDirectory() as temp:
+        root = Path(temp)
+        config_path = root / "listener_config.json"
+        tenant_id = f"unit_single_target_identity_{uuid.uuid4().hex[:10]}"
+        config_path.write_text(
+            json.dumps(
+                {
+                    "state_path": str(root / "workflow_state.json"),
+                    "audit_log_path": str(root / "audit.jsonl"),
+                    "targets": [{"name": "客户A", "enabled": True, "exact": True}],
+                    "multi_target": {"enabled": True, "rpa_low_risk_mode": True},
+                    "live_safety_guard": {
+                        "enabled": True,
+                        "allowed_targets": ["客户A"],
+                        "require_recent_bootstrap": False,
+                        "low_risk_single_target_scan": True,
+                    },
+                    "history_backfill": {"enabled": False},
+                    "raw_messages": {"enabled": False},
+                    "customer_profiles": {"enabled": False},
+                    "concurrency_scheduler": {"enabled": True, "capture_max_sessions_per_round": 1},
+                },
+                ensure_ascii=False,
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
+        bridge = ManagedListenerSchedulerBridge(
+            tenant_id=tenant_id,
+            config_path=config_path,
+            allow_send=False,
+            write_data=False,
+        )
+        try:
+            assert_true(bridge.use_multi_target, "normal single-target startup must keep identity discovery enabled")
+            assert_true(bridge.session_monitor is not None, "normal single-target startup must construct a session monitor")
+            assert_equal(
+                bridge.session_monitor.max_targets_per_iteration,
+                1,
+                "normalization must preserve the live-safety single-target dispatch cap",
+            )
+            bridge.session_monitor.state_path = root / "session_monitor_state.json"
+            bridge.session_monitor._sessions = {}
+            bridge.session_monitor._startup_visual_baseline_active = True
+            bridge.connector = FakeSessionConnector(
+                [
+                    {
+                        "name": "客户A",
+                        "session_key": "wx:rpa:v1:confirmed-private-a",
+                        "conversation_type": "private",
+                        "content": "我想咨询一下这台车的价格",
+                        "time": "10:10",
+                        "unread_badge": "visual_red_dot",
+                    }
+                ]
+            )
+            signals = bridge._collect_session_signals()
+            assert_equal(len(signals), 1, f"confirmed unread session should produce one capture signal: {signals}")
+            assert_equal(
+                signals[0].get("session_key"),
+                "wx:rpa:v1:confirmed-private-a",
+                "capture must remain bound to the real OCR session key",
+            )
+            assert_equal(signals[0].get("conversation_type"), "private", "capture must retain the confirmed conversation type")
+            assert_true(
+                signals[0].get("session_key") != stable_session_key("客户A", conversation_type="configured"),
+                "normal startup must never substitute a configured shadow identity",
+            )
+        finally:
+            bridge.shutdown()
+
+
+def check_managed_bridge_single_target_identity_monitor_survives_disabled_multi_dispatch() -> None:
+    with tempfile.TemporaryDirectory() as temp:
+        root = Path(temp)
+        config_path = root / "listener_config.json"
+        tenant_id = f"unit_single_identity_only_{uuid.uuid4().hex[:10]}"
+        config_path.write_text(
+            json.dumps(
+                {
+                    "state_path": str(root / "workflow_state.json"),
+                    "audit_log_path": str(root / "audit.jsonl"),
+                    "targets": [{"name": "客户A", "enabled": True, "exact": True}],
+                    "multi_target": {"enabled": False},
+                    "history_backfill": {"enabled": False},
+                    "raw_messages": {"enabled": False},
+                    "customer_profiles": {"enabled": False},
+                    "concurrency_scheduler": {"enabled": True, "capture_max_sessions_per_round": 1},
+                },
+                ensure_ascii=False,
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
+        bridge = ManagedListenerSchedulerBridge(
+            tenant_id=tenant_id,
+            config_path=config_path,
+            allow_send=False,
+            write_data=False,
+        )
+        try:
+            assert_true(not bridge.use_multi_target, "explicit single-target dispatch mode should preserve its existing config value")
+            assert_true(
+                bridge.session_monitor is not None,
+                "single-target dispatch still needs a monitor to resolve the physical WeChat session identity",
+            )
+            assert_equal(
+                bridge.session_monitor.max_targets_per_iteration,
+                1,
+                "explicit single-target dispatch must keep the identity monitor bounded to one session",
+            )
+            bridge.session_monitor.state_path = root / "session_monitor_state.json"
+            bridge.session_monitor._sessions = {}
+            bridge.session_monitor._startup_visual_baseline_active = True
+            bridge.connector = FakeSessionConnector(
+                [
+                    {
+                        "name": "客户A",
+                        "session_key": "wx:rpa:v1:confirmed-single-a",
+                        "conversation_type": "private",
+                        "content": "我想详细看看这台车的信息",
+                        "time": "10:12",
+                        "unread_badge": "visual_red_dot",
+                    }
+                ]
+            )
+            signals = bridge._collect_session_signals()
+            assert_equal(len(signals), 1, f"single-target identity monitor should emit the real unread signal: {signals}")
+            assert_equal(signals[0].get("session_key"), "wx:rpa:v1:confirmed-single-a", "single-target mode must use the real key")
+        finally:
+            bridge.shutdown()
+
+
+def check_managed_bridge_never_fabricates_configured_unread_without_monitor() -> None:
+    bridge = SimpleNamespace(
+        _last_capture_switch_delay_seconds=0.0,
+        use_multi_target=False,
+        session_monitor=None,
+        targets=[SimpleNamespace(name="客户A", exact=True)],
+    )
+    signals = ManagedListenerSchedulerBridge._collect_session_signals(bridge)
+    assert_equal(signals, [], "missing identity monitor must fail closed instead of generating a configured unread session")
+
+
 def check_managed_bridge_collect_signals_does_not_dispatch_when_all_pending_busy() -> None:
     class FakeAllBusyMonitor:
         def poll(self, connector: Any) -> list[Any]:
@@ -6749,6 +7600,19 @@ def check_dynamic_customer_monitor_excludes_service_system_and_unconfirmed_sessi
         str(stale_capture.get("reason") or "").startswith("dynamic_non_customer_session_excluded:"),
         "persisted service-account task must carry an auditable no-click reason",
     )
+    bridge.ignored_session_names = {"丰巢"}
+    ignored_capture = bridge._capture_session(
+        {
+            "target_name": "丰巢",
+            "session_key": "wx:rpa:v1:legacy-service-child",
+            "conversation_type": "private",
+        }
+    )
+    assert_true(ignored_capture.get("blocked") is True, "persisted ignored-name work must be blocked before capture")
+    assert_true(
+        str(ignored_capture.get("reason") or "").endswith("ignored_session_name"),
+        "ignored-name admission should explain why no foreground RPA was allowed",
+    )
 
 
 def check_scheduler_same_display_name_sessions_are_isolated_by_session_key() -> None:
@@ -7161,6 +8025,96 @@ def check_normal_pending_signal_synthesizes_monitor_only_group_preview() -> None
     assert_equal(capture.get("message_ids"), [recovered[0]["id"]], "normal preview synthetic id should become the durable reply envelope anchor")
 
 
+def check_replied_ledger_preview_replay_requires_empty_capture_reconciliation() -> None:
+    target_state = {
+        "conversation_interaction_state": {
+            "last_reply_sent_at": "2026-07-19T10:00:05",
+            "unanswered_exists": False,
+        },
+        "conversation_context": {
+            "ledger_recent_messages": [
+                {
+                    "sender": "group_member",
+                    "sender_role": "group_member",
+                    "content": "看不看你都看不到我微信",
+                    "time": "10:00",
+                },
+                {"sender": "assistant", "content": "我能看到你刚发的内容。", "time": "10:00"},
+            ],
+        },
+    }
+    replay = scheduler_module._pending_signal_replays_replied_ledger_input(
+        {
+            "pending_signal_text": "许聪：看不看你都看不到我微...",
+            "last_message_time": "10:00",
+        },
+        target_state,
+        target_name="新数据测试",
+    )
+    assert_true(replay is True, "an ellipsized sidebar copy already closed by a later assistant turn is a replay")
+    newer = scheduler_module._pending_signal_replays_replied_ledger_input(
+        {
+            "pending_signal_text": "许聪：看不看你都看不到我微...",
+            "last_message_time": "10:01",
+        },
+        target_state,
+        target_name="新数据测试",
+    )
+    assert_true(newer is False, "a newer visible message time must never be consumed as an old replay")
+    outbound_clock_replay = scheduler_module._pending_signal_replays_replied_ledger_input(
+        {
+            "pending_signal_text": "看不看你都看不到我微..",
+            "last_message_time": "10:48",
+        },
+        {
+            "conversation_interaction_state": {
+                "last_reply_sent_at": "2026-07-19T10:48:53",
+                "unanswered_exists": False,
+            },
+            "conversation_context": {
+                "ledger_recent_messages": [
+                    {
+                        "sender": "customer",
+                        "sender_role": "customer",
+                        "content": "看不看你都看不到我微信",
+                        "time": "2026-07-19T10:46:23",
+                    },
+                    {
+                        "sender": "assistant",
+                        "content": "我能看到你刚发的内容。",
+                        "time": "2026-07-19T10:48:53",
+                    },
+                ],
+            },
+        },
+        target_name="杨潇Eve",
+    )
+    assert_true(
+        outbound_clock_replay is True,
+        "two-dot truncated inbound preview stamped with the verified outbound minute must close as replay after an empty pane read",
+    )
+    unanswered_state = copy.deepcopy(target_state)
+    unanswered_state["conversation_interaction_state"]["unanswered_exists"] = True
+    unanswered = scheduler_module._pending_signal_replays_replied_ledger_input(
+        {
+            "pending_signal_text": "许聪：看不看你都看不到我微...",
+            "last_message_time": "10:00",
+        },
+        unanswered_state,
+        target_name="新数据测试",
+    )
+    assert_true(unanswered is False, "unanswered ledger evidence must always remain eligible for capture/reply")
+    changed_content = scheduler_module._pending_signal_replays_replied_ledger_input(
+        {
+            "pending_signal_text": "许聪：这是新的追问",
+            "last_message_time": "10:00",
+        },
+        target_state,
+        target_name="新数据测试",
+    )
+    assert_true(changed_content is False, "similarity must not suppress different customer wording")
+
+
 def check_stale_short_pending_signal_does_not_recover() -> None:
     recovered = scheduler_module.recover_high_sensitivity_short_pending_batch(
         [],
@@ -7239,6 +8193,13 @@ def check_managed_bridge_preserves_brain_turn_when_image_save_fails() -> None:
             allow_send=False,
             write_data=False,
         )
+        original_observer = vision_scheduler_capture_module.legacy_observe_current_surface
+        vision_scheduler_capture_module.legacy_observe_current_surface = lambda **_kwargs: {
+            "ok": True,
+            "state": "vision_current_surface_observed",
+            "assets": [],
+            "messages": [],
+        }
         try:
             bridge.connector = FakeImageFailureConnector()
             bridge.session_monitor = SimpleNamespace(
@@ -7263,12 +8224,18 @@ def check_managed_bridge_preserves_brain_turn_when_image_save_fails() -> None:
                 }
             )
         finally:
+            vision_scheduler_capture_module.legacy_observe_current_surface = original_observer
             bridge.shutdown()
     assert_true(result.get("ok") is True and result.get("blocked") is not True, f"image save failure must not block capture: {result}")
-    assert_equal((result.get("customer_image_assets") or {}).get("state"), "clipboard_vision_pending", "scheduler must defer image bytes to the clipboard transaction")
+    assert_equal(result.get("customer_image_assets") or {}, {}, "sidebar image activity without a structural occurrence must not authorize customer")
     assert_true(
-        any(item.get("image_capture_pending") for item in (result.get("batch") or [])),
-        f"image-only turn should still enter Brain through a text-only pending envelope: {result}",
+        not any(item.get("image_capture_pending") for item in (result.get("batch") or [])),
+        f"directionless media must not enter Brain through a synthetic customer envelope: {result}",
+    )
+    assert_equal(
+        (result.get("history_backfill") or {}).get("visual_image_disposition"),
+        "no_candidate",
+        "directionless image activity must remain a bounded structural retry",
     )
     assert_true(not hasattr(FakeImageFailureConnector, "capture_visual_images"), "capture phase must not revive screenshot crop collection")
 
@@ -7364,6 +8331,26 @@ def check_managed_bridge_visual_scan_records_both_sides_without_preview() -> Non
             write_data=False,
         )
         connector = FakeVisualConnector()
+        original_observer = vision_scheduler_capture_module.legacy_observe_current_surface
+        vision_scheduler_capture_module.legacy_observe_current_surface = lambda **_kwargs: {
+            "ok": True,
+            "state": "vision_current_surface_observed",
+            "assets": [],
+            "messages": [
+                {
+                    "id": customer_image["id"],
+                    "message_id": customer_image["message_id"],
+                    "type": "image",
+                    "message_type": "image",
+                    "sender": "customer",
+                    "sender_role": "customer",
+                    "content": "[图片]",
+                    "visual_side": "customer",
+                    "visual_turn_kind": "customer_image",
+                    "source_adapter": "win32_ocr_structural_image_observer",
+                }
+            ],
+        }
         try:
             bridge.connector = connector
             bridge.session_monitor = SimpleNamespace(
@@ -7387,6 +8374,7 @@ def check_managed_bridge_visual_scan_records_both_sides_without_preview() -> Non
                 }
             )
         finally:
+            vision_scheduler_capture_module.legacy_observe_current_surface = original_observer
             bridge.shutdown()
         ledger = SessionLedgerStore(tenant_id="unit_visual_scan_records_both_sides", root=root / "ledger")
         ledger.record_capture(
@@ -7411,8 +8399,9 @@ def check_managed_bridge_visual_scan_records_both_sides_without_preview() -> Non
     messages = [item for item in (result.get("messages") or []) if isinstance(item, dict)]
     raw_images = [item for item in messages if str(item.get("type") or "") == "image"]
     proxies = [item for item in messages if item.get("is_customer_image_proxy")]
-    assert_equal(raw_images, [], "no raw/cropped image message may enter the capture envelope")
-    assert_equal(proxies, [], "scheduler may not create file-backed image proxies")
+    assert_equal(len(raw_images), 1, "confirmed customer image must retain one metadata-only direction record")
+    assert_equal(len(proxies), 1, "confirmed customer image may create exactly one text-only clipboard proxy")
+    assert_true(all("saved_image_path" not in item and "bubble_bounds" not in item for item in messages), "metadata-only image records may not retain files or geometry")
     batch = [item for item in (result.get("batch") or []) if isinstance(item, dict)]
     assert_true(any(item.get("image_capture_pending") for item in batch), "Brain receives a text-only pending image envelope")
     recent = summary.get("recent_messages") or []
@@ -7510,6 +8499,86 @@ def check_managed_bridge_normal_text_does_not_call_independent_image_module() ->
     )
 
 
+def check_managed_bridge_structural_group_message_corrects_sidebar_type_without_rekey() -> None:
+    class FakeGroupConnector:
+        def get_messages(self, target: str, exact: bool = True, **kwargs: Any) -> dict[str, Any]:
+            return {
+                "ok": True,
+                "adapter": "win32_ocr",
+                "state": "messages_ocr",
+                "target": target,
+                "exact": exact,
+                "messages": [
+                    {
+                        "id": "structural-group-1",
+                        "message_id": "structural-group-1",
+                        "type": "text",
+                        "sender": "许聪",
+                        "sender_role": "group_member",
+                        "content": "这台车还有吗",
+                    }
+                ],
+            }
+
+    with tempfile.TemporaryDirectory() as temp:
+        root = Path(temp)
+        config_path = root / "listener_config.json"
+        config_path.write_text(
+            json.dumps(
+                {
+                    "state_path": str(root / "workflow_state.json"),
+                    "audit_log_path": str(root / "audit.jsonl"),
+                    "targets": [{"name": "新数据测试", "enabled": True, "exact": True}],
+                    "history_backfill": {"enabled": False},
+                    "raw_messages": {"enabled": False},
+                    "customer_profiles": {"enabled": False},
+                    "voice_transcription": {"enabled": False},
+                    "concurrency_scheduler": {"enabled": True},
+                },
+                ensure_ascii=False,
+            ),
+            encoding="utf-8",
+        )
+        bridge = ManagedListenerSchedulerBridge(
+            tenant_id="unit_structural_group_type",
+            config_path=config_path,
+            allow_send=False,
+            write_data=False,
+        )
+        try:
+            bridge.connector = FakeGroupConnector()
+            bridge.session_monitor = SimpleNamespace(
+                all_sessions=lambda: [
+                    {
+                        "name": "新数据测试",
+                        "session_key": "wx:rpa:v1:sidebar-private-guess",
+                        "conversation_type": "private",
+                        "pending_signal_kind": "normal",
+                        "pending_signal_text": "许聪：这台车还有吗",
+                        "preview_content": "许聪：这台车还有吗",
+                    }
+                ]
+            )
+            result = bridge._capture_session(
+                {
+                    "target_name": "新数据测试",
+                    "name": "新数据测试",
+                    "exact": True,
+                    "conversation_type": "private",
+                    "session_key": "wx:rpa:v1:sidebar-private-guess",
+                }
+            )
+        finally:
+            bridge.shutdown()
+    assert_true(result.get("ok") is True, f"structural group capture must remain usable: {result}")
+    assert_equal(result.get("conversation_type"), "group", "chat-pane group-member evidence must correct sidebar type")
+    assert_equal(
+        result.get("session_key"),
+        "wx:rpa:v1:sidebar-private-guess",
+        "conversation type correction must not change the active opaque session identity mid-capture",
+    )
+
+
 def check_managed_bridge_new_image_signal_overrides_old_visual_identity_once() -> None:
     old_image = {
         "id": "visual_msg_wx_same_image",
@@ -7548,7 +8617,20 @@ def check_managed_bridge_new_image_signal_overrides_old_visual_identity_once() -
                 "state": "messages_ocr",
                 "target": target,
                 "exact": exact,
-                "messages": [],
+                "messages": [
+                    {
+                        "id": old_image["id"],
+                        "message_id": old_image["message_id"],
+                        "type": "image",
+                        "message_type": "image",
+                        "sender": "customer",
+                        "sender_role": "customer",
+                        "content": "[图片]",
+                        "visual_side": "customer",
+                        "visual_turn_kind": "customer_image",
+                        "source_adapter": "win32_ocr_structural_image_observer",
+                    }
+                ],
             }
 
         def capture_visual_images(self, target: str, **kwargs: Any) -> dict[str, Any]:
@@ -8065,8 +9147,33 @@ def check_quality_validation_failure_goes_internal_without_same_capture_retry() 
         now="2026-07-08T10:00:31",
     )
     session = state["sessions"]["wx:quality"]
-    assert_true(recovery.get("ok") is False, f"quality validation failure should not retry same capture: {recovery}")
-    assert_equal(recovery.get("max_attempts"), 0, "quality validation failure should have zero same-capture retry budget")
+    assert_true(recovery.get("ok") is True, f"quality validation failure should get one bounded same-capture Brain retry: {recovery}")
+    assert_equal(recovery.get("attempts"), 1, "quality validation failure should consume its only same-capture retry")
+    assert_equal(session.get("status"), "llm_queued", "same durable capture should return to the Brain queue")
+    assert_equal(session.get("llm_inflight_task_id"), task["task_id"], "retry must remain bound to the same task and session")
+    scheduler_state_module.fail_llm_task(
+        state,
+        task["task_id"],
+        reason="customer_service_brain_no_visible_reply",
+        now="2026-07-08T10:00:50",
+        result_payload={
+            "ok": False,
+            "reason": "customer_service_brain_no_visible_reply",
+            "decision": {"rule_name": "customer_service_brain_no_visible_reply", "reason": "brain_quality_verification_failed"},
+            "event": {
+                "reason": "brain_quality_verification_failed",
+                "customer_service_brain": {"reason": "brain_quality_verification_failed"},
+            },
+        },
+    )
+    exhausted = scheduler_state_module.requeue_capture_after_recoverable_llm_failure(
+        state,
+        task["task_id"],
+        reason="customer_service_brain_no_visible_reply",
+        now="2026-07-08T10:00:51",
+    )
+    assert_true(exhausted.get("ok") is False, f"second quality rejection must fail closed: {exhausted}")
+    assert_equal(exhausted.get("max_attempts"), 1, "quality validation retry budget must remain bounded to one")
     assert_equal(session.get("status"), "internal_handoff_pending", "message should be preserved for internal handoff")
     assert_true(not session.get("llm_inflight_task_id"), "failed quality task should release the session LLM lock")
 
@@ -8124,6 +9231,27 @@ def check_scheduler_conversation_context_update_does_not_advance_context_version
     assert_equal(context.get("last_product_id"), "chejin_qinplus_2022_dmi55", "scheduler should persist product context per session")
     assert_equal(context.get("last_unit_price"), 8.68, "scheduler should persist product price context")
     assert_equal(int(updated.get("context_version") or 0), original_version, "product context update should not stale current LLM task")
+    merge_scheduler_conversation_context(
+        state,
+        "新数据测试",
+        {
+            "last_product_id": "chejin_hengyi_2019_es6",
+            "last_product_name": "2019款蔚来ES6",
+            "recent_product_ids": ["chejin_hengyi_2019_es6"],
+            "vehicle_image_match": {"product_id": "chejin_hengyi_2019_es6", "similarity": 1.0},
+        },
+        now="2026-06-03T13:00:02",
+    )
+    switched = session_by_name(state, "新数据测试").get("conversation_context", {})
+    assert_equal(switched.get("last_product_id"), "chejin_hengyi_2019_es6", "image product switch must replace the prior product binding")
+    assert_true("last_unit_price" not in switched, "new product binding must not inherit the previous product price")
+    assert_true("last_product_source" not in switched, "new product binding must not inherit the previous product authority label")
+    assert_equal(
+        (switched.get("vehicle_image_match") or {}).get("product_id"),
+        "chejin_hengyi_2019_es6",
+        "new image-match audit must remain attached to the newly bound product",
+    )
+    assert_equal(int(updated.get("context_version") or 0), original_version, "product switch context update should not stale current LLM task")
 
 
 def check_managed_bridge_plan_reply_uses_session_key_context() -> None:
@@ -8721,6 +9849,530 @@ def check_anchor_missing_after_light_backfill_uses_overflow_batch() -> None:
     assert_equal([item.get("id") for item in selection.batch], ["new-1"], "visible overflow message should remain reply-eligible")
 
 
+def _prepared_ready_reply_state(*, target_name: str = "客户A", session_key: str = "wx:rpa:v1:send-unit") -> tuple[dict[str, Any], str]:
+    state = empty_state()
+    capture = record_capture_result(
+        state,
+        target_name,
+        messages=[message("R", 1, content="还在吗")],
+        batch=[message("R", 1, content="还在吗")],
+        conversation_type="private",
+        session_key=session_key,
+        now="2026-07-18T20:00:00",
+    )
+    task = enqueue_llm_task(state, capture["capture_id"], now="2026-07-18T20:00:01")
+    mark_llm_started(state, task["task_id"], now="2026-07-18T20:00:02")
+    completed = complete_llm_task(
+        state,
+        task["task_id"],
+        reply_text="在的，这台车目前还在。",
+        decision={"rule_name": "unit"},
+        now="2026-07-18T20:00:03",
+    )
+    return state, str(completed["reply"]["reply_id"])
+
+
+def check_runtime_defers_pretrigger_send_failure_without_same_tick_redispatch() -> None:
+    with tempfile.TemporaryDirectory() as temp:
+        store = SchedulerStateStore(tenant_id="unit", path=Path(temp) / "state.json")
+        state, reply_id = _prepared_ready_reply_state()
+        store.save(state)
+        calls: list[int] = []
+
+        def sender(_reply: dict[str, Any]) -> dict[str, Any]:
+            calls.append(len(calls) + 1)
+            if len(calls) == 1:
+                return {
+                    "ok": False,
+                    "verified": False,
+                    "reason": "send_not_verified",
+                    "send_result": {
+                        "ok": False,
+                        "verified": False,
+                        "send": {"ok": False, "state": "send_input_not_ready"},
+                    },
+                }
+            return {"ok": True, "verified": True}
+
+        runtime = CustomerServiceSchedulerRuntime(
+            store=store,
+            config=SchedulerConfig(enabled=True, capture_max_sessions_per_round=1, send_max_replies_per_round=1),
+            capture_fn=lambda _session: {"messages": [], "batch": []},
+            plan_reply_fn=lambda _capture, _task: {},
+            send_fn=sender,
+        )
+        try:
+            first = runtime.tick(allow_send=True, now="2026-07-18T20:00:04")
+            first_state = store.load()
+            assert_equal(calls, [1], "a safe pre-trigger failure must not be dispatched twice inside one scheduler tick")
+            assert_equal(first_state["ready_replies"][reply_id]["status"], "ready", "first safe failure should restore the same Brain reply")
+            assert_true(
+                any(item.get("event") == "send_blocked" for item in first.get("events") or []),
+                f"deferred send should reuse the existing scheduler blocked event: {first}",
+            )
+
+            second = runtime.tick(allow_send=True, now="2026-07-18T20:00:05")
+            time.sleep(0.03)
+            second = runtime.tick(allow_send=True, now="2026-07-18T20:00:06")
+            second_state = store.load()
+            assert_equal(calls, [1, 2], "the next scheduler tick may retry the unchanged reply after proven no-trigger failure")
+            assert_equal(second_state["ready_replies"][reply_id]["status"], "sent", "the deferred reply should complete normally")
+            assert_true(any(item.get("event") == "send_completed" for item in second.get("events") or []), "retry success should use the existing completion event")
+        finally:
+            runtime.shutdown()
+
+
+def check_runtime_bounds_safe_retry_and_never_retries_after_trigger_proof() -> None:
+    state, reply_id = _prepared_ready_reply_state(session_key="wx:rpa:v1:send-bounded")
+    reply = state["ready_replies"][reply_id]
+    mark_reply_sending(state, reply_id, now="2026-07-18T20:00:04")
+    reply["send_attempts"] = 2
+    runtime = CustomerServiceSchedulerRuntime(
+        store=SchedulerStateStore(tenant_id="unit", path=Path(tempfile.gettempdir()) / "send-bounded-unused.json"),
+        config=SchedulerConfig(enabled=True),
+        capture_fn=lambda _session: {"messages": [], "batch": []},
+        plan_reply_fn=lambda _capture, _task: {},
+    )
+    try:
+        safe_result = {
+            "reply_id": reply_id,
+            "status": "send_failed",
+            "send_result": {
+                "ok": False,
+                "verified": False,
+                "send_result": {"send": {"ok": False, "state": "send_input_not_ready"}},
+            },
+        }
+        runtime._apply_send_future_result(
+            state,
+            copy.deepcopy(reply),
+            safe_result,
+            now="2026-07-18T20:00:05",
+        )
+        assert_equal(state["ready_replies"][reply_id]["status"], "send_failed", "safe retry must stop after the existing bounded attempt count")
+        assert_true(session_by_name(state, "客户A").get("pending_capture") is True, "an exhausted no-trigger failure should re-enter capture reconciliation")
+    finally:
+        runtime.shutdown()
+
+    state, reply_id = _prepared_ready_reply_state(session_key="wx:rpa:v1:send-triggered")
+    reply = state["ready_replies"][reply_id]
+    mark_reply_sending(state, reply_id, now="2026-07-18T20:00:04")
+    runtime = CustomerServiceSchedulerRuntime(
+        store=SchedulerStateStore(tenant_id="unit", path=Path(tempfile.gettempdir()) / "send-triggered-unused.json"),
+        config=SchedulerConfig(enabled=True),
+        capture_fn=lambda _session: {"messages": [], "batch": []},
+        plan_reply_fn=lambda _capture, _task: {},
+    )
+    try:
+        triggered_result = {
+            "reply_id": reply_id,
+            "status": "send_failed",
+            "send_result": {
+                "ok": False,
+                "verified": False,
+                "send_result": {
+                    "send": {
+                        "ok": False,
+                        "state": "send_input_not_ready",
+                        "send_trigger": {"ok": True, "method": "enter_key"},
+                    }
+                },
+            },
+        }
+        runtime._apply_send_future_result(
+            state,
+            copy.deepcopy(reply),
+            triggered_result,
+            now="2026-07-18T20:00:05",
+        )
+        session = session_by_name(state, "客户A")
+        assert_equal(state["ready_replies"][reply_id]["status"], "send_failed", "triggered uncertainty must never restore the reply to ready")
+        assert_true(session.get("pending_capture") is not True, "triggered uncertainty must not enter an automatic whole-reply resend path")
+        assert_equal(session.get("status"), "internal_handoff_pending", "triggered uncertainty should fail closed for internal reconciliation")
+    finally:
+        runtime.shutdown()
+
+
+def check_runtime_orphaned_send_reconciles_or_stales_without_blind_retry() -> None:
+    state, reply_id = _prepared_ready_reply_state(session_key="wx:rpa:v1:orphan-sent")
+    mark_reply_sending(state, reply_id, now="2026-07-18T20:00:04")
+    with tempfile.TemporaryDirectory() as temp:
+        store = SchedulerStateStore(tenant_id="unit", path=Path(temp) / "sent.json")
+        store.save(state)
+        runtime = CustomerServiceSchedulerRuntime(
+            store=store,
+            config=SchedulerConfig(enabled=True),
+            capture_fn=lambda _session: {"messages": [], "batch": []},
+            plan_reply_fn=lambda _capture, _task: {},
+        )
+        runtime._orphan_send_reconcile_fn = lambda _reply: {
+            "status": "sent",
+            "send_result": {"ok": True, "verified": True, "verification_mode": "messages"},
+        }
+        try:
+            current = store.load()
+            events = runtime._recover_orphaned_sending_replies(current, now="2026-07-18T20:01:00")
+            assert_equal(current["ready_replies"][reply_id]["status"], "sent", "a matching self bubble should reconcile the orphan as sent")
+            assert_true(any(item.get("event") == "send_completed" for item in events), "reconciled send should use the existing completion event")
+        finally:
+            runtime.shutdown()
+
+
+def check_bridge_orphan_reconciliation_requires_current_input_anchor() -> None:
+    old_duplicate = {
+        "ok": True,
+        "messages": [
+            {"id": "old-self", "sender": "self", "type": "text", "content": "在的，这台车目前还在。"},
+            {"id": "input-1", "sender": "customer", "type": "text", "content": "这台还在吗"},
+        ],
+    }
+    bridge = SimpleNamespace(connector=SimpleNamespace(get_messages=lambda *_args, **_kwargs: copy.deepcopy(old_duplicate)))
+    reply = {
+        "target_name": "客户A",
+        "session_key": "wx:rpa:v1:orphan-anchor",
+        "conversation_type": "private",
+        "input_message_ids": ["input-1"],
+        "reply_text": "在的，这台车目前还在。",
+    }
+    unknown = ManagedListenerSchedulerBridge._reconcile_orphaned_send(bridge, reply)
+    assert_equal(unknown.get("status"), "unknown", "an identical older self bubble must not be mistaken for the current reply")
+
+    current_reply = copy.deepcopy(old_duplicate)
+    current_reply["messages"].extend(
+        [
+            {"id": "self-1", "sender": "self", "type": "text", "content": "在的，这台车"},
+            {"id": "self-2", "sender": "self", "type": "text", "content": "目前还在。"},
+        ]
+    )
+    bridge.connector.get_messages = lambda *_args, **_kwargs: copy.deepcopy(current_reply)
+    reconciled = ManagedListenerSchedulerBridge._reconcile_orphaned_send(bridge, reply)
+    assert_equal(reconciled.get("status"), "sent", "current post-anchor bubbles may reconcile a restart-interrupted multi-bubble reply")
+    assert_true((reconciled.get("send_result") or {}).get("verified") is True, "reconciled send should keep the existing verified result shape")
+
+    no_anchor = copy.deepcopy(current_reply)
+    no_anchor["messages"] = [item for item in no_anchor["messages"] if item.get("id") != "input-1"]
+    bridge.connector.get_messages = lambda *_args, **_kwargs: copy.deepcopy(no_anchor)
+    uncertain = ManagedListenerSchedulerBridge._reconcile_orphaned_send(bridge, reply)
+    assert_equal(uncertain.get("status"), "unknown", "missing frozen input identity must fail closed instead of matching arbitrary recent text")
+
+
+def check_partial_multi_bubble_send_enters_history_without_processing_customer_turn() -> None:
+    with tempfile.TemporaryDirectory() as temp:
+        ledger = SessionLedgerStore(tenant_id="unit", root=Path(temp) / "ledger")
+        session_key = "wx:rpa:v1:partial-send"
+        ledger.record_capture(
+            session_key=session_key,
+            target_name="客户A",
+            conversation_type="private",
+            capture_id="capture-partial",
+            messages=[{"id": "customer-1", "sender": "customer", "type": "text", "content": "这车还在吗", "time": "20:00"}],
+            batch=[{"id": "customer-1", "sender": "customer", "type": "text", "content": "这车还在吗", "time": "20:00"}],
+            history_backfill={},
+            context_version=1,
+        )
+        bridge = SimpleNamespace(ledger=ledger)
+        reply = {
+            "reply_id": "reply-partial",
+            "session_key": session_key,
+            "target_name": "客户A",
+            "input_message_ids": ["customer-1"],
+            "input_content_keys": ["customer-key-1"],
+        }
+        result = {
+            "verified": False,
+            "segments": ["第一段已经发出。", "第二段没有发出。"],
+            "sent_segments": 1,
+        }
+        ManagedListenerSchedulerBridge._record_partial_send_context(bridge, reply, result)
+        summary = ledger.load_summary(session_key)
+        recent = summary.get("recent_messages") or []
+        self_texts = [
+            str(item.get("content") or "")
+            for item in recent
+            if isinstance(item, dict) and str(item.get("sender") or "") == "assistant"
+        ]
+        assert_equal(self_texts, ["第一段已经发出。"], "only physically confirmed segments should enter self history")
+        assert_equal(summary.get("last_unreplied_message_ids"), ["customer-1"], "a partial reply must not mark the customer turn processed")
+        assert_true(not summary.get("last_processed_message_id"), "partial history must not advance the processed anchor")
+
+        state, reply_id = _prepared_ready_reply_state(session_key=session_key)
+        mark_reply_sending(state, reply_id, now="2026-07-18T20:00:04")
+        runtime = CustomerServiceSchedulerRuntime(
+            store=SchedulerStateStore(tenant_id="unit", path=Path(temp) / "state.json"),
+            config=SchedulerConfig(enabled=True),
+            capture_fn=lambda _session: {"messages": [], "batch": []},
+            plan_reply_fn=lambda _capture, _task: {},
+        )
+        try:
+            events = runtime._apply_send_future_result(
+                state,
+                copy.deepcopy(state["ready_replies"][reply_id]),
+                {
+                    "reply_id": reply_id,
+                    "status": "send_failed",
+                    "send_result": {
+                        "ok": False,
+                        "verified": False,
+                        "send_result": {
+                            "sent_segments": 1,
+                            "segments": ["第一段已经发出。", "第二段没有发出。"],
+                            "send": {"state": "send_input_not_ready"},
+                        },
+                    },
+                },
+                now="2026-07-18T20:00:05",
+            )
+            assert_equal(state["ready_replies"][reply_id]["status"], "send_failed", "a partial reply must never restore the whole reply for blind resend")
+            assert_true(session_by_name(state, "客户A").get("pending_capture") is True, "partial send should use existing capture reconciliation")
+            assert_true(any(item.get("event") == "send_failed" for item in events), "partial send keeps the existing terminal send event")
+        finally:
+            runtime.shutdown()
+
+    state, reply_id = _prepared_ready_reply_state(session_key="wx:rpa:v1:orphan-unknown")
+    mark_reply_sending(state, reply_id, now="2026-07-18T20:00:04")
+    with tempfile.TemporaryDirectory() as temp:
+        store = SchedulerStateStore(tenant_id="unit", path=Path(temp) / "unknown.json")
+        store.save(state)
+        runtime = CustomerServiceSchedulerRuntime(
+            store=store,
+            config=SchedulerConfig(enabled=True),
+            capture_fn=lambda _session: {"messages": [], "batch": []},
+            plan_reply_fn=lambda _capture, _task: {},
+        )
+        runtime._orphan_send_reconcile_fn = lambda _reply: {"status": "unknown"}
+        try:
+            current = store.load()
+            events = runtime._recover_orphaned_sending_replies(current, now="2026-07-18T20:01:00")
+            assert_equal(current["ready_replies"][reply_id]["status"], "stale", "an uncertain orphan must not be failed or blindly resent")
+            session = session_by_name(current, "客户A")
+            assert_true(session.get("pending_capture") is True, "an uncertain orphan should enter existing capture reconciliation")
+            assert_true(any(item.get("event") == "reply_stale" for item in events), "uncertain orphan should use the existing stale event")
+        finally:
+            runtime.shutdown()
+
+
+def check_bridge_collects_send_future_before_polling_sessions() -> None:
+    calls = {"poll": 0, "tick": 0}
+
+    class FakeRuntime:
+        def __init__(self) -> None:
+            self._send_future = object()
+
+        def tick(self, **kwargs: Any) -> dict[str, Any]:
+            calls["tick"] += 1
+            assert_equal(kwargs.get("session_signals"), [], "bridge must not poll or inject session signals while a send future awaits collection")
+            return {"ok": True, "events": [], "summary": {}}
+
+    bridge = SimpleNamespace(
+        reload=lambda: None,
+        enabled=True,
+        _workflow={"listener_skip_pre_status_check": lambda: True},
+        connector=SimpleNamespace(require_online=lambda: {"ok": True}),
+        _collect_session_signals=lambda: calls.__setitem__("poll", calls["poll"] + 1) or [],
+        runtime=FakeRuntime(),
+        allow_send=True,
+        targets=[],
+        _last_capture_switch_delay_seconds=0.0,
+    )
+    result = ManagedListenerSchedulerBridge.tick(bridge, allow_send=True, now="2026-07-18T20:00:00")
+    assert_true(result.get("ok") is True, f"bridge tick should still collect runtime work: {result}")
+    assert_equal(calls["poll"], 0, "session polling must not contend with an existing send future")
+    assert_equal(calls["tick"], 1, "runtime should still run to collect the future")
+
+
+def check_scheduler_cleanup_expires_stale_pending_without_losing_unreplied_evidence() -> None:
+    state = empty_state()
+    enqueue_pending_session(state, "客户A", session_key="wx:rpa:v1:pending-evidence", reason="unit_pending", now="2026-07-18T19:00:00")
+    session = session_by_name(state, "客户A")
+    session["pending_signal_has_unread_evidence"] = True
+    session["pending_message_count"] = 1
+    session["oldest_unreplied_at"] = "2026-07-18T19:00:00"
+    cleanup_scheduler_state(
+        state,
+        config=SchedulerConfig(pending_session_ttl_seconds=60),
+        now="2026-07-18T20:00:00",
+    )
+    session = session_by_name(state, "客户A")
+    assert_true(session.get("pending_capture") is False, "expired RPA capture work should stop consuming scheduler rounds")
+    assert_equal(session.get("status"), "internal_handoff_pending", "unreplied evidence must remain visible for internal handling")
+    assert_equal(session.get("pending_message_count"), 1, "unreplied evidence count must not be erased")
+
+    state = empty_state()
+    enqueue_pending_session(state, "客户B", session_key="wx:rpa:v1:pending-no-evidence", reason="unit_pending", now="2026-07-18T19:00:00")
+    session = session_by_name(state, "客户B")
+    session["pending_signal_has_unread_evidence"] = False
+    session["pending_message_count"] = 0
+    session["oldest_unreplied_at"] = ""
+    cleanup_scheduler_state(
+        state,
+        config=SchedulerConfig(pending_session_ttl_seconds=60),
+        now="2026-07-18T20:00:00",
+    )
+    session = session_by_name(state, "客户B")
+    assert_true(session.get("pending_capture") is False, "expired synthetic pending work without evidence should be cleared")
+    assert_equal(session.get("status"), "idle", "no-evidence pending work may return to idle")
+
+    state = empty_state()
+    enqueue_pending_session(state, "客户C", session_key="wx:rpa:v1:pending-active", reason="unit_pending", now="2026-07-18T19:00:00")
+    session = session_by_name(state, "客户C")
+    session["llm_inflight_task_id"] = "task-active"
+    cleanup_scheduler_state(
+        state,
+        config=SchedulerConfig(pending_session_ttl_seconds=60),
+        now="2026-07-18T20:00:00",
+    )
+    assert_true(session_by_name(state, "客户C").get("pending_capture") is True, "pending work tied to an active task must not expire")
+
+    state = empty_state()
+    enqueue_pending_session(state, "客户D", session_key="wx:rpa:v1:pending-corrupt-count", reason="unit_pending", now="2026-07-18T19:00:00")
+    session_by_name(state, "客户D")["pending_message_count"] = "invalid-legacy-count"
+    cleanup_scheduler_state(
+        state,
+        config=SchedulerConfig(pending_session_ttl_seconds=60),
+        now="2026-07-18T20:00:00",
+    )
+    assert_equal(session_by_name(state, "客户D").get("status"), "idle", "a malformed legacy count must not crash cleanup or manufacture unread evidence")
+
+
+def check_safe_ledger_alias_merge_and_read_projection() -> None:
+    with tempfile.TemporaryDirectory() as temp:
+        ledger = SessionLedgerStore(tenant_id="unit", root=Path(temp) / "ledger")
+        old_key = "wx:rpa:v1:xucong-configured"
+        current_key = "wx:rpa:v1:xucong-private"
+        ledger.record_capture(
+            session_key=old_key,
+            target_name="许聪",
+            conversation_type="unknown",
+            capture_id="old-capture",
+            messages=[
+                {"id": "old-label", "sender": "unknown", "type": "text", "content": "许聪", "time": "18:00"},
+                {"id": "old-msg", "sender": "customer", "type": "text", "content": "之前问过A4L", "time": "18:01"},
+            ],
+            batch=[],
+            history_backfill={},
+            context_version=1,
+        )
+        ledger.record_capture(
+            session_key=current_key,
+            target_name="许聪",
+            conversation_type="private",
+            capture_id="new-capture",
+            messages=[{"id": "new-msg", "sender": "customer", "type": "text", "content": "现在还在吗", "time": "20:00"}],
+            batch=[],
+            history_backfill={},
+            context_version=2,
+        )
+        state = empty_state()
+        state["sessions"] = {
+            old_key: {"session_key": old_key, "target_name": "许聪", "conversation_type": "unknown"},
+            current_key: {"session_key": current_key, "target_name": "许聪", "conversation_type": "private"},
+        }
+        bridge = SimpleNamespace(ledger=ledger, store=SimpleNamespace(load=lambda: copy.deepcopy(state)))
+        ManagedListenerSchedulerBridge._merge_safe_ledger_alias_context(
+            bridge,
+            session_key=current_key,
+            target_name="许聪",
+            conversation_type="private",
+        )
+        ManagedListenerSchedulerBridge._merge_safe_ledger_alias_context(
+            bridge,
+            session_key=current_key,
+            target_name="许聪",
+            conversation_type="private",
+        )
+        target_state: dict[str, Any] = {}
+        ManagedListenerSchedulerBridge._merge_session_ledger_summary(bridge, target_state, current_key)
+        recent = (target_state.get("conversation_context") or {}).get("ledger_recent_messages") or []
+        contents = [str(item.get("content") or "") for item in recent if isinstance(item, dict)]
+        assert_true("之前问过A4L" in contents and "现在还在吗" in contents, f"safe configured alias context should be readable: {contents}")
+        assert_true("许聪" not in contents, f"standalone OCR speaker/title chrome should be removed only from the read projection: {contents}")
+
+        conflicting = copy.deepcopy(state)
+        conflicting["sessions"][old_key]["conversation_type"] = "group"
+        isolated_key = "wx:rpa:v1:xucong-private-isolated"
+        ledger.record_capture(
+            session_key=isolated_key,
+            target_name="许聪",
+            conversation_type="private",
+            capture_id="isolated-capture",
+            messages=[{"id": "isolated", "sender": "customer", "type": "text", "content": "独立会话", "time": "20:10"}],
+            batch=[],
+            history_backfill={},
+            context_version=1,
+        )
+        conflicting["sessions"][isolated_key] = {"session_key": isolated_key, "target_name": "许聪", "conversation_type": "private"}
+        isolated_bridge = SimpleNamespace(ledger=ledger, store=SimpleNamespace(load=lambda: copy.deepcopy(conflicting)))
+        ManagedListenerSchedulerBridge._merge_safe_ledger_alias_context(
+            isolated_bridge,
+            session_key=isolated_key,
+            target_name="许聪",
+            conversation_type="private",
+        )
+        isolated_summary = ledger.load_summary(isolated_key)
+        isolated_contents = [str(item.get("content") or "") for item in isolated_summary.get("recent_messages") or [] if isinstance(item, dict)]
+        assert_true("之前问过A4L" not in isolated_contents, "confirmed group/private or multiple confirmed keys must never merge by display name")
+
+
+def check_freshness_monitor_uses_unique_name_only_for_read_only_key_drift() -> None:
+    unique_bridge = SimpleNamespace(
+        session_monitor=FakePreviewSessionMonitor([
+            {"name": "许聪", "session_key": "wx:rpa:v1:new-key", "conversation_type": "private", "unread_detected": False}
+        ])
+    )
+    unique = ManagedListenerSchedulerBridge._session_monitor_snapshot_for_target(
+        unique_bridge,
+        "许聪",
+        session_key="wx:rpa:v1:old-key",
+    )
+    assert_equal(unique.get("session_key") if isinstance(unique, dict) else "", "wx:rpa:v1:new-key", "freshness may read the unique exact-name monitor row after safe key drift")
+
+    ambiguous_bridge = SimpleNamespace(
+        session_monitor=FakePreviewSessionMonitor([
+            {"name": "同名", "session_key": "wx:rpa:v1:a", "conversation_type": "private"},
+            {"name": "同名", "session_key": "wx:rpa:v1:b", "conversation_type": "group"},
+        ])
+    )
+    ambiguous = ManagedListenerSchedulerBridge._session_monitor_snapshot_for_target(
+        ambiguous_bridge,
+        "同名",
+        session_key="wx:rpa:v1:old-key",
+    )
+    assert_true(ambiguous is None, "freshness name fallback must fail closed when the display name is ambiguous")
+
+    unique_preview_bridge = SimpleNamespace(
+        _freshness_session_list_preview_cache={},
+        _target_name_matches_preview=lambda left, right: re.sub(r"\s+", "", str(left)).lower() == re.sub(r"\s+", "", str(right)).lower(),
+        connector=SimpleNamespace(
+            list_sessions=lambda: {
+                "ok": True,
+                "sessions": [{"name": "许聪", "session_key": "wx:rpa:v1:new-key", "preview": "好的", "unread_detected": False}],
+            }
+        ),
+    )
+    preview = ManagedListenerSchedulerBridge._session_list_preview_for_target(
+        unique_preview_bridge,
+        "许聪",
+        cache_seconds=0,
+        session_key="wx:rpa:v1:old-key",
+    )
+    assert_equal(preview.get("session_key") if isinstance(preview, dict) else "", "wx:rpa:v1:new-key", "session-list freshness may use the same unique read-only key-drift fallback")
+
+    unique_preview_bridge.connector.list_sessions = lambda: {
+        "ok": True,
+        "sessions": [
+            {"name": "同名", "session_key": "wx:rpa:v1:a", "preview": "一"},
+            {"name": "同名", "session_key": "wx:rpa:v1:b", "preview": "二"},
+        ],
+    }
+    preview = ManagedListenerSchedulerBridge._session_list_preview_for_target(
+        unique_preview_bridge,
+        "同名",
+        cache_seconds=0,
+        session_key="wx:rpa:v1:old-key",
+    )
+    assert_true(preview is None, "session-list key drift must fail closed when two rows share the exact display name")
+
+
 def run_checks() -> dict[str, Any]:
     checks = [
         check_pending_sessions_survive_round_limit,
@@ -8734,7 +10386,9 @@ def run_checks() -> dict[str, Any]:
         check_session_monitor_empty_preview_does_not_clear_pending,
         check_session_monitor_visual_unread_badge_retriggers_after_reset,
         check_session_monitor_persistent_badge_is_acknowledged_once,
+        check_session_monitor_changed_preview_still_reaches_reconciliation_capture,
         check_scheduler_observation_identity_dedupes_persistent_unread_after_capture,
+        check_new_observation_bypasses_old_llm_exhaustion_for_same_preview,
         check_scheduler_legacy_pending_adopts_first_observation_identity,
         check_session_monitor_legacy_pending_binds_observation_before_reset,
         check_passive_probe_defers_when_monitor_has_unread_signal,
@@ -8742,6 +10396,7 @@ def run_checks() -> dict[str, Any]:
         check_session_monitor_preserves_high_sensitivity_pending_after_empty_capture,
         check_session_monitor_preserves_normal_pending_after_empty_capture_briefly,
         check_session_monitor_low_disturbance_ignores_normal_preview_without_badge,
+        check_session_monitor_active_chat_preview_change_dispatches_once_and_ignores_recent_outbound,
         check_session_monitor_startup_visual_baseline_requires_new_unread_evidence,
         check_session_monitor_low_disturbance_keeps_short_preview_signal,
         check_session_monitor_low_risk_requires_badge_and_preview_signal,
@@ -8749,9 +10404,14 @@ def run_checks() -> dict[str, Any]:
         check_session_monitor_event_driven_dispatch_rotates_under_hot_target,
         check_capture_failed_backoff_blocks_immediate_requeue,
         check_image_capture_failure_uses_long_ui_backoff,
+        check_target_unconfirmed_retry_is_bounded_and_new_observation_rearms,
         check_distinct_customer_image_assets_are_not_deduped_by_proxy_text,
         check_runtime_tick_does_not_wait_for_slow_llm,
         check_runtime_submits_planner_after_each_capture,
+        check_runtime_slow_capture_yields_before_starving_other_reply_work,
+        check_runtime_collects_completed_reply_before_next_slow_capture,
+        check_runtime_reuses_state_cache_and_invalidates_external_write,
+        check_runtime_manual_like_two_sessions_and_followup_all_send,
         check_runtime_retries_same_capture_for_monitor_only_short_pending_after_brain_no_visible_reply,
         check_runtime_retries_same_capture_for_real_ocr_short_probe_after_brain_no_visible_reply,
         check_runtime_retries_same_capture_for_full_customer_capture_after_brain_no_visible_reply,
@@ -8773,6 +10433,11 @@ def run_checks() -> dict[str, Any]:
         check_runtime_same_tick_fast_llm_send_has_capture_snapshot,
         check_runtime_send_runner_fifo,
         check_runtime_send_event_includes_observability,
+        check_runtime_defers_pretrigger_send_failure_without_same_tick_redispatch,
+        check_runtime_bounds_safe_retry_and_never_retries_after_trigger_proof,
+        check_runtime_orphaned_send_reconciles_or_stales_without_blind_retry,
+        check_bridge_orphan_reconciliation_requires_current_input_anchor,
+        check_partial_multi_bubble_send_enters_history_without_processing_customer_turn,
         check_runtime_prioritizes_ready_send_before_new_capture,
         check_runtime_collects_llm_while_send_worker_blocks_capture,
         check_runtime_recovers_orphaned_running_llm_task_after_restart,
@@ -8782,12 +10447,14 @@ def run_checks() -> dict[str, Any]:
         check_runtime_keeps_running_polish_task_owned_until_worker_exits,
         check_runtime_restores_missing_llm_task_from_in_memory_snapshot,
         check_runtime_recovers_orphaned_running_polish_task_after_restart,
+        check_runtime_expires_stale_orphaned_polish_without_erasing_customer_turn,
         check_runtime_expires_stale_queued_polish_task_after_restart,
         check_runtime_expires_stale_ready_reply_before_send_after_restart,
         check_runtime_restores_missing_polish_task_from_in_memory_snapshot,
         check_runtime_degraded_polish_reply_still_sends,
         check_runtime_polish_failure_result_is_json_safe,
         check_runtime_final_polish_block_requeues_brain_with_feedback,
+        check_final_polish_retry_budget_detects_prior_brain_repair,
         check_scheduler_config_derives_planner_timeout_from_brain_budget,
         check_runtime_brain_budget_prevents_premature_scheduler_timeout,
         check_preview_change_during_active_work_defers_capture_without_hopping,
@@ -8818,6 +10485,7 @@ def run_checks() -> dict[str, Any]:
         check_live_safety_file_transfer_defaults_to_self_test_target,
         check_listener_rpa_send_rate_zero_is_preserved,
         check_listener_rpa_send_settings_apply_live_safety_effective_defaults,
+        check_listener_live_safety_preserves_allowed_clipboard_once,
         check_managed_bridge_applies_rpa_fast_send_confirmation_env,
         check_managed_bridge_capture_send_marks_workflow_state,
         check_managed_bridge_freshness_preview_fast_pass_without_strict_scan,
@@ -8835,6 +10503,10 @@ def run_checks() -> dict[str, Any]:
         check_managed_bridge_soft_passes_unconfirmed_short_ocr_strict_freshness,
         check_managed_bridge_freshness_long_llm_uses_task_runtime_not_queue_age,
         check_managed_bridge_collect_signals_skips_busy_sticky_target,
+        check_managed_bridge_single_target_uses_confirmed_session_identity,
+        check_managed_bridge_single_target_identity_monitor_survives_disabled_multi_dispatch,
+        check_managed_bridge_never_fabricates_configured_unread_without_monitor,
+        check_bridge_collects_send_future_before_polling_sessions,
         check_managed_bridge_collect_signals_does_not_dispatch_when_all_pending_busy,
         check_managed_bridge_retains_busy_unread_signal_for_scheduler,
         check_scheduler_preserves_unread_signal_during_active_session_work,
@@ -8845,6 +10517,7 @@ def run_checks() -> dict[str, Any]:
         check_managed_bridge_collect_signals_carries_voice_preview_metadata,
         check_voice_capture_signal_does_not_synthesize_preview_text,
         check_scheduler_cleanup_merges_legacy_name_bucket_into_session_key_bucket,
+        check_scheduler_cleanup_expires_stale_pending_without_losing_unreplied_evidence,
         check_session_monitor_blocks_ambiguous_duplicate_display_names,
         check_session_monitor_allows_duplicate_display_names_when_session_keys_are_distinct,
         check_session_monitor_reload_keeps_display_name_for_session_key_pending,
@@ -8861,11 +10534,13 @@ def run_checks() -> dict[str, Any]:
         check_short_pending_signal_recovers_anchor_empty_batch,
         check_short_pending_signal_synthesizes_monitor_only_group_preview,
         check_normal_pending_signal_synthesizes_monitor_only_group_preview,
+        check_replied_ledger_preview_replay_requires_empty_capture_reconciliation,
         check_stale_short_pending_signal_does_not_recover,
         check_short_pending_signal_does_not_synthesize_media_preview,
         check_managed_bridge_preserves_brain_turn_when_image_save_fails,
         check_managed_bridge_visual_scan_records_both_sides_without_preview,
         check_managed_bridge_normal_text_does_not_call_independent_image_module,
+        check_managed_bridge_structural_group_message_corrects_sidebar_type_without_rekey,
         check_managed_bridge_new_image_signal_overrides_old_visual_identity_once,
         check_managed_bridge_capture_transcribes_voice_after_evidence_capture,
         check_managed_bridge_image_signal_does_not_run_voice_rpa,
@@ -8886,6 +10561,8 @@ def run_checks() -> dict[str, Any]:
         check_session_ledger_keeps_self_visible_messages_even_without_reply_batch,
         check_scheduler_consults_ledger_before_temp_state,
         check_scheduler_ledger_injects_unanswered_interaction_state,
+        check_safe_ledger_alias_merge_and_read_projection,
+        check_freshness_monitor_uses_unique_name_only_for_read_only_key_drift,
         check_anchor_missing_after_light_backfill_uses_overflow_batch,
     ]
     results = []

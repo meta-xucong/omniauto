@@ -8,67 +8,40 @@ class BuiltinVisionPlugin:
     capability = "vision"
 
     def available(self) -> bool:
-        return True
+        from .service import create_vision_service
+
+        return create_vision_service().available()
 
     def should_run(self, context: dict[str, Any]) -> dict[str, Any]:
-        from .trigger import (
-            customer_image_capture_trigger,
-        )
+        from .service import create_vision_service
 
-        return customer_image_capture_trigger(
-            payload=context.get("payload"),
-            pending_signal=(
-                context.get("pending_signal")
-                if isinstance(context.get("pending_signal"), dict)
-                else None
-            ),
-            pending_signal_kind=str(context.get("pending_signal_kind") or ""),
-            target_state=(
-                context.get("target_state")
-                if isinstance(context.get("target_state"), dict)
-                else None
-            ),
-            recent_message_limit=int(context.get("recent_message_limit") or 6),
-        )
+        return create_vision_service().should_run(context)
 
     def run(self, context: dict[str, Any]) -> dict[str, Any]:
-        from apps.wechat_ai_customer_service.workflows.customer_image_turn_router import (
-            maybe_route_customer_image_turn,
-        )
+        from .service import create_vision_service
 
-        return maybe_route_customer_image_turn(
-            connector=context.get("connector"),
-            target=context.get("target"),
-            config=context.get("config") if isinstance(context.get("config"), dict) else {},
-            payload=context.get("payload") if isinstance(context.get("payload"), dict) else {},
-            target_state=(
-                context.get("target_state")
-                if isinstance(context.get("target_state"), dict)
-                else {}
-            ),
-            batch=[item for item in (context.get("batch") or []) if isinstance(item, dict)],
-            combined=str(context.get("combined") or ""),
-        )
+        return create_vision_service().inspect_current_conversation(context)
+
+    def observe_current_surface(self, context: dict[str, Any]) -> dict[str, Any]:
+        """Return structural message envelopes without understanding pixels."""
+
+        from .service import create_vision_service
+
+        return create_vision_service().observe_current_surface(context)
 
     def capture_self_context(self, context: dict[str, Any]) -> dict[str, Any]:
         """Return a text-only self-image context result; never a reply plan."""
 
-        from apps.wechat_ai_customer_service.workflows.customer_image_turn_router import (
-            maybe_capture_self_image_context,
-        )
+        from .service import create_vision_service
 
-        return maybe_capture_self_image_context(
-            connector=context.get("connector"),
-            target=context.get("target"),
-            config=context.get("config") if isinstance(context.get("config"), dict) else {},
-            messages=[item for item in (context.get("messages") or []) if isinstance(item, dict)],
-            target_state=(
-                context.get("target_state")
-                if isinstance(context.get("target_state"), dict)
-                else {}
-            ),
-            combined=str(context.get("combined") or ""),
-        )
+        return create_vision_service().inspect_self_context(context)
+
+    def invoke(self, operation: str, context: dict[str, Any]) -> Any:
+        """Dispatch implementation-owned supplemental operations lazily."""
+
+        from .operations import invoke_vision_operation
+
+        return invoke_vision_operation(operation, context)
 
 
 def create_default_vision_plugin() -> BuiltinVisionPlugin:

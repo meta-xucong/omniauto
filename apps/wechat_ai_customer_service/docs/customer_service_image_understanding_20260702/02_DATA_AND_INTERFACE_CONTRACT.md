@@ -1,3 +1,6 @@
+> [!WARNING]
+> **文档状态：部分废止（2026-07-18）。** 历史字段和示例只用于兼容审计；旧图片资产、sidecar payload/state、跨模块图片字段所有权及落盘合同不得用于新实现。现行模块合同和兼容边界见 [完全独立图像识别模块改造方案](../customer_service_absolute_independent_vision_module_refactor_plan_20260718.md)。
+
 > Customer-service development baseline: [../customer_visible_reply_ownership_baseline.md](../customer_visible_reply_ownership_baseline.md).
 
 # 微信智能客服识图数据与接口契约

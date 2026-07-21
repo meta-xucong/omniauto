@@ -34,13 +34,18 @@ def main() -> int:
         check_self_image_context_is_text_only_and_never_reply_adoptable,
     ]
     results: list[dict[str, Any]] = []
-    for check in checks:
-        try:
-            check()
-            results.append({"name": check.__name__, "ok": True})
-        except Exception as exc:  # pragma: no cover - test harness
-            results.append({"name": check.__name__, "ok": False, "error": repr(exc)})
-            break
+    original_transaction = router_module._run_current_clipboard_image_transaction
+    router_module._run_current_clipboard_image_transaction = _test_vision_transaction
+    try:
+        for check in checks:
+            try:
+                check()
+                results.append({"name": check.__name__, "ok": True})
+            except Exception as exc:  # pragma: no cover - test harness
+                results.append({"name": check.__name__, "ok": False, "error": repr(exc)})
+                break
+    finally:
+        router_module._run_current_clipboard_image_transaction = original_transaction
     failures = [item for item in results if not item.get("ok")]
     print(json.dumps({"ok": not failures, "count": len(results), "failures": failures, "results": results}, ensure_ascii=False, indent=2))
     return 1 if failures else 0
@@ -63,7 +68,21 @@ def _pending_payload(signal_id: str = "image-signal-1") -> dict[str, Any]:
             "pending_signal_kind": "image_capture",
             "pending_signal_text": "[图片]",
         },
-        "messages": [],
+        "messages": [
+            {
+                "id": f"visual-customer:{signal_id}",
+                "message_id": f"visual-customer:{signal_id}",
+                "type": "image",
+                "message_type": "image",
+                "sender": "customer",
+                "sender_role": "customer",
+                "visual_side": "customer",
+                "visual_turn_kind": "customer_image",
+                "pending_signal_id": signal_id,
+                "content": "[图片]",
+                "source_adapter": "win32_ocr_structural_image_observer",
+            }
+        ],
     }
 
 
@@ -107,6 +126,27 @@ class SelfClipboardConnector(ClipboardConnector):
         }
 
 
+def _test_vision_transaction(**kwargs: Any) -> dict[str, Any]:
+    """Inject the Vision-owned transaction seam without reviving production facades."""
+
+    connector = kwargs["connector"]
+    method_name = (
+        "run_self_clipboard_image_transaction"
+        if str(kwargs.get("side_filter") or "") == "self"
+        else "run_customer_clipboard_image_transaction"
+    )
+    method = getattr(connector, method_name)
+    return method(
+        str(kwargs.get("target") or ""),
+        exact=bool(kwargs.get("exact", True)),
+        session_key=str(kwargs.get("session_key") or ""),
+        source_preview=str(kwargs.get("source_preview") or ""),
+        speaker_name=str(kwargs.get("speaker_name") or ""),
+        pending_signal_id=str(kwargs.get("pending_signal_id") or ""),
+        consume_current_clipboard=router_module.read_current_clipboard_image,
+    )
+
+
 def check_trigger_requires_current_pending_signal() -> None:
     historical = router_module.customer_image_capture_trigger(
         payload={"messages": [{"type": "image", "saved_image_path": "C:/old.png"}]},
@@ -146,14 +186,26 @@ def check_router_uses_one_ephemeral_clipboard_transaction() -> None:
         router_module.build_customer_image_catalog_assist = lambda **_kwargs: {
             "applied": True,
             "normalized_vehicle_query": "Audi A4L",
-            "conversation_context_patch": {"last_customer_need_text": "Audi A4L"},
+            "conversation_context_patch": {
+                "last_customer_need_text": "Audi A4L",
+                "last_product_id": "new-audi-a4l",
+                "last_product_name": "Audi A4L",
+            },
         }
         result = router_module.maybe_route_customer_image_turn(
             connector=connector,
             target=_target(),
             config={},
             payload=_pending_payload(),
-            target_state={},
+            target_state={
+                "conversation_context": {
+                    "last_product_id": "old-product",
+                    "last_product_name": "Old Product",
+                    "last_unit_price": 25.8,
+                    "last_product_source": "product_master",
+                    "last_shipping_city": "南京",
+                }
+            },
             batch=[],
             combined="",
         )
@@ -167,6 +219,11 @@ def check_router_uses_one_ephemeral_clipboard_transaction() -> None:
     assert_equal(observed.get("ephemeral_clipboard"), True, "router must declare ephemeral clipboard mode")
     assert_equal(observed.get("image_paths"), None, "router may not send local image paths")
     assert_true(connector.image is not None and connector.image.released, "clipboard image bytes must be released before routing returns")
+    brain_context = (result.get("target_state_for_brain") or {}).get("conversation_context") or {}
+    assert_equal(brain_context.get("last_product_id"), "new-audi-a4l", "current image product must replace the prior product binding before Brain runs")
+    assert_true("last_unit_price" not in brain_context, "current image turn must not carry the prior product price into Brain")
+    assert_true("last_product_source" not in brain_context, "current image turn must not carry the prior product authority into Brain")
+    assert_equal(brain_context.get("last_shipping_city"), "南京", "stable customer preferences must survive a product switch")
     assert_no_path_or_bytes(result)
     transaction = result.get("clipboard_transaction") or {}
     assert_equal(transaction.get("clipboard_sequence_changed"), True, "public audit keeps copy proof only")

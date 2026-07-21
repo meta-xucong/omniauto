@@ -1,5 +1,8 @@
 # 微信客服识图模块：剪贴板瞬时理解重构开发文档（2026-07-13）
 
+> [!WARNING]
+> **文档状态：安全规则保留、模块落点已废止（2026-07-18）。** “只认本次右键复制后的当前剪贴板、不落盘、不裁切、不回退”仍是强制规则；Connector/Sidecar 图片事务、外部 workflow 所有权和散落调用方式不得继续扩展。端到端实现必须收束到 [完全独立图像识别模块改造方案](customer_service_absolute_independent_vision_module_refactor_plan_20260718.md) 规定的 vision 模块。
+
 ## 0. 文档地位与必须遵守的基线
 
 本文是 `apps/wechat_ai_customer_service` 图片理解能力的重构规格，适用于 Chejin 及任何使用 Windows 微信 RPA 的租户。

@@ -30,7 +30,7 @@ from contextlib import contextmanager
 from contextvars import ContextVar
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 import psutil
 
@@ -681,6 +681,14 @@ class WeChatConnector:
                     current_new = [item for item in primary.get("new_messages") or [] if isinstance(item, dict)]
                     transcribed_messages.extend(current_transcribed)
                     new_messages.extend(current_new)
+                    if state in {
+                        "voice_transcribe_completed",
+                        "voice_transcribe_partial",
+                        "voice_transcribe_no_new_text",
+                        "voice_transcribe_no_visible_voice",
+                    }:
+                        primary["connector_attempts"] = attempts
+                        return primary
                     if not current_transcribed:
                         if state in retriable_states and attempt_index + 1 < attempts_limit:
                             time.sleep(0.35)
@@ -719,199 +727,6 @@ class WeChatConnector:
                 "transport_priority": "rpa_first",
                 "rpa_lock": rpa_lock_timeout_payload(exc, action="voice_transcribe", timeout_seconds=lock_timeout),
             }
-
-    def save_customer_image(
-        self,
-        target: str,
-        exact: bool = True,
-        *,
-        session_key: str = "",
-        artifact_dir: str | None = None,
-        source_preview: str = "",
-        speaker_name: str = "",
-        pending_signal_id: str = "",
-        tenant_id: str = "",
-        max_images: int = 1,
-        side_filter: str = "customer",
-        capture_mode: str = "context_menu",
-    ) -> dict[str, Any]:
-        """Frozen facade for the retired file-backed image capture API."""
-        if not target:
-            return {"ok": False, "adapter": "win32_ocr", "state": "image_save_target_missing", "assets": [], "messages": []}
-        return {
-            "ok": False,
-            "online": bool(any_weixin_process()),
-            "adapter": "win32_ocr",
-            "state": "legacy_image_file_capture_rejected",
-            "reason": "clipboard_current_transaction_required",
-            "target": target,
-            "exact": exact,
-            "assets": [],
-            "messages": [],
-        }
-
-    def capture_visual_images(
-        self,
-        target: str,
-        exact: bool = True,
-        *,
-        session_key: str = "",
-        artifact_dir: str | None = None,
-        source_preview: str = "",
-        speaker_name: str = "",
-        pending_signal_id: str = "",
-        tenant_id: str = "",
-        max_images: int = 6,
-    ) -> dict[str, Any]:
-        """Compatibility facade for the removed screenshot-crop image path."""
-        return {
-            "ok": False,
-            "online": bool(any_weixin_process()),
-            "adapter": "win32_ocr",
-            "state": "image_capture_legacy_crop_rejected",
-            "reason": "clipboard_current_transaction_required",
-            "target": target,
-            "session_key": session_key,
-            "assets": [],
-            "messages": [],
-        }
-
-    def run_customer_clipboard_image_transaction(
-        self,
-        target: str,
-        exact: bool = True,
-        *,
-        session_key: str = "",
-        source_preview: str = "",
-        speaker_name: str = "",
-        pending_signal_id: str = "",
-        side_filter: str = "customer",
-        consume_current_clipboard: Callable[[dict[str, Any]], dict[str, Any]] | None = None,
-    ) -> dict[str, Any]:
-        """Execute one copy/read transaction while the WeChat RPA lock is held.
-
-        The sidecar only performs the target-validated right-click and Copy
-        action.  A vision-owned callback then reads the freshly changed system
-        clipboard into memory before this lock is released.  No image bytes or
-        files cross this stable connector boundary.
-        """
-        clean_side_filter = str(side_filter or "customer").strip().lower()
-        if clean_side_filter not in {"customer", "self"}:
-            return {
-                "ok": False,
-                "adapter": "win32_ocr",
-                "state": "image_clipboard_copy_side_invalid",
-                "reason": "image_clipboard_side_filter_invalid",
-                "assets": [],
-                "messages": [],
-            }
-        if not target:
-            return {
-                "ok": False,
-                "adapter": "win32_ocr",
-                "state": "image_clipboard_copy_target_missing",
-                "reason": "target_missing",
-                "assets": [],
-                "messages": [],
-            }
-        args = ["image-clipboard-copy", "--target", target]
-        args.extend(["--side-filter", clean_side_filter])
-        clean_session_key = str(session_key or "").strip()
-        if clean_session_key:
-            args.extend(["--session-key", clean_session_key])
-        if exact:
-            args.append("--exact")
-        for value, flag in (
-            (source_preview, "--source-preview"),
-            (speaker_name, "--speaker-name"),
-            (pending_signal_id, "--pending-signal-id"),
-        ):
-            clean = str(value or "").strip()
-            if clean:
-                args.extend([flag, clean])
-        lock_timeout = rpa_lock_timeout_seconds("image_clipboard_transaction", default=45.0)
-        try:
-            with wechat_rpa_lock("image_clipboard_transaction", timeout_seconds=lock_timeout) as lock_meta:
-                primary = self.call_compat_sidecar(args, allow_failure=True)
-                primary.setdefault("adapter", "win32_ocr")
-                primary.setdefault("transport_priority", "rpa_first")
-                attach_rpa_lock_meta(primary, lock_meta)
-                if not primary.get("ok"):
-                    return primary
-                if not callable(consume_current_clipboard):
-                    primary["ok"] = False
-                    primary["state"] = "image_clipboard_consumer_missing"
-                    primary["reason"] = "image_clipboard_consumer_missing"
-                    return primary
-                transaction = primary.get("transaction") if isinstance(primary.get("transaction"), dict) else {}
-                try:
-                    consumed = consume_current_clipboard(dict(transaction))
-                except Exception as exc:  # noqa: BLE001 - normalise optional vision failures.
-                    consumed = {"ok": False, "reason": "clipboard_current_read_failed", "error": repr(exc)}
-                if not isinstance(consumed, dict) or not consumed.get("ok"):
-                    primary["ok"] = False
-                    primary["state"] = "image_clipboard_current_read_failed"
-                    primary["reason"] = str((consumed or {}).get("reason") or "clipboard_current_read_failed")
-                    primary["transaction"] = {
-                        **transaction,
-                        "status": "failed",
-                        "clipboard_content_read": False,
-                    }
-                    return primary
-                # This object is intentionally ephemeral.  The vision router
-                # must consume and remove it before it builds any persisted
-                # capture, ledger, or Brain payload.
-                primary["_ephemeral_clipboard_image"] = consumed.get("image")
-                primary["transaction"] = {
-                    **transaction,
-                    "status": "clipboard_read",
-                    "clipboard_content_read": True,
-                    "clipboard_image_valid": True,
-                }
-                return primary
-        except TimeoutError as exc:
-            return {
-                "ok": False,
-                "online": bool(any_weixin_process()),
-                "adapter": "win32_ocr",
-                "state": "image_clipboard_transaction_lock_timeout",
-                "reason": "image_clipboard_transaction_lock_timeout",
-                "target": target,
-                "exact": exact,
-                "assets": [],
-                "messages": [],
-                "error": repr(exc),
-                "transport_priority": "rpa_first",
-                "rpa_lock": rpa_lock_timeout_payload(exc, action="image_clipboard_transaction", timeout_seconds=lock_timeout),
-            }
-
-    def run_self_clipboard_image_transaction(
-        self,
-        target: str,
-        exact: bool = True,
-        *,
-        session_key: str = "",
-        source_preview: str = "",
-        pending_signal_id: str = "",
-        consume_current_clipboard: Callable[[dict[str, Any]], dict[str, Any]] | None = None,
-    ) -> dict[str, Any]:
-        """Copy only the current self-side image for context-only vision.
-
-        This additive facade shares the exact locked clipboard transaction with
-        customer image understanding, but selects the right-side/self bubble.
-        It never sends a message or exposes image bytes beyond the supplied
-        in-lock consumer callback.
-        """
-
-        return self.run_customer_clipboard_image_transaction(
-            target,
-            exact=exact,
-            session_key=session_key,
-            source_preview=source_preview,
-            pending_signal_id=pending_signal_id,
-            side_filter="self",
-            consume_current_clipboard=consume_current_clipboard,
-        )
 
     def send_text(
         self,
@@ -1946,32 +1761,6 @@ def _args_to_request(args: list[str]) -> dict[str, Any]:
                 request["exact"] = True
             elif arg == "--artifact-dir" and i + 1 < len(args):
                 request["artifact_dir"] = args[i + 1]
-    elif args[0] in {"image-save", "image-clipboard-copy"}:
-        request["action"] = args[0]
-        for i, arg in enumerate(args):
-            if arg == "--target" and i + 1 < len(args):
-                request["target"] = args[i + 1]
-            elif arg == "--session-key" and i + 1 < len(args):
-                request["session_key"] = args[i + 1]
-            elif arg == "--exact":
-                request["exact"] = True
-            elif arg == "--artifact-dir" and i + 1 < len(args):
-                request["artifact_dir"] = args[i + 1]
-            elif arg == "--source-preview" and i + 1 < len(args):
-                request["source_preview"] = args[i + 1]
-            elif arg == "--speaker-name" and i + 1 < len(args):
-                request["speaker_name"] = args[i + 1]
-            elif arg == "--tenant-id" and i + 1 < len(args):
-                request["tenant_id"] = args[i + 1]
-            elif arg == "--side-filter" and i + 1 < len(args):
-                request["side_filter"] = args[i + 1]
-            elif arg == "--capture-mode" and i + 1 < len(args):
-                request["capture_mode"] = args[i + 1]
-            elif arg == "--max-images" and i + 1 < len(args):
-                try:
-                    request["max_images"] = max(1, min(int(args[i + 1]), 8))
-                except ValueError:
-                    request["max_images"] = 1
     elif args[0] == "send":
         request["action"] = "send"
         for i, arg in enumerate(args):

@@ -1,3 +1,6 @@
+> [!CAUTION]
+> **文档状态：生产方案已完全废止（2026-07-18）。** 图片落盘、`image_assets`、`saved_image_path`、截图裁切、另存为回退、Sidecar `image-save` 及其重试链路均禁止恢复。本文只保留现场故障证据；现行唯一取图规则和模块架构见 [完全独立图像识别模块改造方案](../customer_service_absolute_independent_vision_module_refactor_plan_20260718.md)。
+
 > Customer-service development baseline: [../customer_visible_reply_ownership_baseline.md](../customer_visible_reply_ownership_baseline.md).
 
 # 微信图片保存闭环开发设计

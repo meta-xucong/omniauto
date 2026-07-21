@@ -5,10 +5,13 @@ from __future__ import annotations
 from typing import Any
 
 from apps.wechat_ai_customer_service.adapters.wechat_connector import WeChatConnector
+from apps.wechat_ai_customer_service.adapters.wechat_pr28_runtime_adapter import (
+    adapt_wechat_pr28_connector,
+)
 
 
 def run_wechat_startup_self_check(*, require_send: bool, module_name: str) -> dict[str, Any]:
-    capability = WeChatConnector().capabilities(interactive=True)
+    capability = adapt_wechat_pr28_connector(WeChatConnector()).capabilities(interactive=True)
     decision = evaluate_wechat_capability(
         capability,
         require_send=require_send,

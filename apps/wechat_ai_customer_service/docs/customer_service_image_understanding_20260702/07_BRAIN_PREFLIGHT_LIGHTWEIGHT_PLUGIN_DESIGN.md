@@ -1,3 +1,6 @@
+> [!WARNING]
+> **文档状态：部分废止（2026-07-18）。** Brain 只消费受控文字证据、插件不得创作客户回复等原则继续有效；旧插件边界、调用位置和图片桥接实现由 [完全独立图像识别模块改造方案](../customer_service_absolute_independent_vision_module_refactor_plan_20260718.md) 取代。
+
 > Customer-service development baseline: [../customer_visible_reply_ownership_baseline.md](../customer_visible_reply_ownership_baseline.md).
 
 # Brain Preflight 轻量外挂增强设计

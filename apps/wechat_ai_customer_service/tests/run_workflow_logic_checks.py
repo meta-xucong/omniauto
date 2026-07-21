@@ -33,6 +33,7 @@ os.environ.setdefault("WECHAT_CLOUD_STRICT_ONLINE", "0")
 import customer_intent_assist as customer_intent_assist_module  # noqa: E402
 import customer_service_brain as customer_service_brain_module  # noqa: E402
 import final_visible_llm_polish as final_polish_module  # noqa: E402
+import listen_and_reply as listen_and_reply_module  # noqa: E402
 import llm_reply_synthesis as synthesis_module  # noqa: E402
 import reply_style_adapter as reply_style_adapter_module  # noqa: E402
 from customer_intent_assist import IntentAssistResult, call_deepseek_advisory  # noqa: E402
@@ -326,7 +327,10 @@ class FinalSegmentVerifyConnector(FakeConnector):
             "adapter": "win32_ocr",
             "state": "send_win32_rpa",
             "skip_send_rate_guard": bool(skip_send_rate_guard),
-            "send_result": {"pre_send_guard": self._send_guard(target)},
+            "send_result": {
+                "pre_send_guard": self._send_guard(target),
+                "post_send_guard": {"ok": True, "reason": "send_window_readable_after_send"},
+            },
         }
 
     def send_text_and_verify(self, target: str, text: str, exact: bool = True, *, skip_send_rate_guard: bool = False, **kwargs: Any) -> dict[str, Any]:
@@ -354,6 +358,36 @@ class FinalSegmentVerifyConnector(FakeConnector):
             "verification_mode": "send_guard_confirmed_fast",
             "skip_send_rate_guard": bool(skip_send_rate_guard),
         }
+
+
+class TitleOnlyIntermediateConnector(FinalSegmentVerifyConnector):
+    def __init__(self, messages: list[dict[str, Any]]) -> None:
+        super().__init__(messages)
+        self.readback_calls = 0
+
+    def send_text(self, target: str, text: str, exact: bool = True, *, skip_send_rate_guard: bool = False, **kwargs: Any) -> dict[str, Any]:
+        self.send_calls += 1
+        self.sent_texts.append(text)
+        self.sent_session_keys.append(str(kwargs.get("session_key") or ""))
+        self.send_rate_guard_skips.append(bool(skip_send_rate_guard))
+        self.continuation_fast_path_contexts.append(same_target_continuation_send_active())
+        self.batch_lock_contexts.append(send_rpa_batch_lock_active())
+        self.continuation_guard_contexts.append(isinstance(kwargs.get("continuation_prevalidated_guard"), dict))
+        self.messages.append({"id": f"self-{self.send_calls}", "sender": "self", "type": "text", "content": text})
+        return {
+            "ok": True,
+            "adapter": "win32_ocr",
+            "state": "send_win32_rpa",
+            "skip_send_rate_guard": bool(skip_send_rate_guard),
+            "send_result": {
+                "pre_send_guard": self._send_guard(target),
+                "post_send_guard": {"ok": True, "reason": "target_confirmed"},
+            },
+        }
+
+    def get_messages(self, *args: Any, **kwargs: Any) -> dict[str, Any]:
+        self.readback_calls += 1
+        return super().get_messages(*args, **kwargs)
 
 
 class ContinuationFallbackConnector(FinalSegmentVerifyConnector):
@@ -461,9 +495,11 @@ def run_checks() -> dict[str, Any]:
         check_transport_send_input_not_ready_defers_without_marking_processed,
         check_auto_reply_disabled_blocks_runtime_send,
         check_customer_service_console_switches_take_effect,
+        check_dynamic_all_session_discovery_enables_only_customer_conversations,
         check_live_safety_guard_enforces_single_allowed_target,
         check_bootstrap_target_records_pending_visible_without_error,
         check_visible_only_bootstrap_does_not_mark_customer_messages_processed,
+        check_visible_only_bootstrap_queues_verified_customer_without_badge,
         check_live_safety_guard_multi_allowed_targets_do_not_starve_secondary_sessions,
         check_rpa_safety_allows_standalone_greeting_by_default,
         check_rpa_safety_defers_standalone_greeting_when_explicitly_enabled,
@@ -473,6 +509,7 @@ def run_checks() -> dict[str, Any]:
         check_reply_multi_bubble_retries_transient_send_failures,
         check_reply_multi_bubble_does_not_retry_input_not_ready,
         check_reply_multi_bubble_verifies_only_final_segment_by_default,
+        check_reply_multi_bubble_title_only_intermediate_reads_back_without_resend,
         check_reply_multi_bubble_can_verify_each_segment_when_enabled,
         check_reply_multi_bubble_uses_same_target_continuation_fast_path,
         check_reply_multi_bubble_fast_path_retry_returns_to_full_path,
@@ -512,7 +549,7 @@ def run_checks() -> dict[str, Any]:
         check_final_visible_polish_brain_micro_prompt_is_verify_only,
         check_final_visible_polish_brain_micro_rejects_rewrite_and_uses_draft,
         check_final_visible_polish_brain_micro_rejects_incomplete_tail_and_uses_draft,
-        check_final_visible_polish_handoff_micro_preserves_verification_signal,
+        check_final_visible_polish_handoff_micro_allows_internal_routing_trim,
         check_final_visible_polish_rejects_identity_denial_for_finance_boundary,
         check_final_visible_polish_rejects_over_explicit_human_identity_claim,
         check_final_visible_polish_rejects_ambiguous_identity_admission,
@@ -1587,7 +1624,10 @@ def check_multi_target_dynamic_unread_mode_supports_new_sessions() -> None:
     targets = parse_targets(config, allow_empty=True)
     dynamic = build_iteration_targets(
         config_targets=targets,
-        active_targets=[SimpleNamespace(name="新客户A"), SimpleNamespace(name="文件传输助手")],
+        active_targets=[
+            SimpleNamespace(name="新客户A", conversation_type="private", session_key="wx-session-new-a"),
+            SimpleNamespace(name="文件传输助手", conversation_type="file_transfer", session_key="wx-file-transfer"),
+        ],
         multi_target_cfg={"scan_all_whitelist_each_iteration": True, "prioritize_active_sessions": True, "max_targets_per_iteration": 5},
         allow_dynamic_active_targets=True,
         blocked_names={"文件传输助手"},
@@ -1596,6 +1636,17 @@ def check_multi_target_dynamic_unread_mode_supports_new_sessions() -> None:
         [item.name for item in dynamic],
         ["新客户A"],
         "unread-all mode should allow dynamic targets while respecting blocked sessions",
+    )
+    unconfirmed = build_iteration_targets(
+        config_targets=targets,
+        active_targets=[SimpleNamespace(name="未知侧边栏行")],
+        multi_target_cfg={"scan_all_whitelist_each_iteration": True, "prioritize_active_sessions": True, "max_targets_per_iteration": 5},
+        allow_dynamic_active_targets=True,
+    )
+    assert_equal(
+        unconfirmed,
+        [],
+        "dynamic unread mode must reject a row without confirmed customer type and session identity before clicking",
     )
 
 
@@ -2268,18 +2319,56 @@ def check_customer_service_console_switches_take_effect() -> None:
             }
         )
         no_handoff_config = apply_local_customer_service_settings(load_smoke_config())
+        # This sub-check owns only the console handoff switch.  Inject a
+        # deterministic, Brain-owned handoff decision so a live model cannot
+        # turn the fixture into a safe direct reply and make the switch check
+        # nondeterministic.  Final polish is orthogonal here because the
+        # expected outcome is a blocked outbound send.
+        no_handoff_config["final_visible_llm_polish"]["enabled"] = False
         no_handoff_connector = FakeConnector([{"id": "risk-1", "type": "text", "content": "买10台冰箱能按20台价格吗？", "sender": "self"}])
-        no_handoff_event = process_target(
-            connector=no_handoff_connector,  # type: ignore[arg-type]
-            target=parse_targets(no_handoff_config)[0],
-            config=no_handoff_config,
-            rules=load_rules(resolve_path(no_handoff_config.get("rules_path"))),
-            state={"version": 1, "targets": {}},
-            send=True,
-            write_data=False,
-            allow_fallback_send=False,
-            mark_dry_run=False,
-        )
+        original_brain_runner = listen_and_reply_module.maybe_run_customer_service_brain
+
+        def deterministic_handoff_brain(**_kwargs: Any) -> dict[str, Any]:
+            reply_text = "这个价格需要进一步核实，确认后再回复您。"
+            return {
+                "enabled": True,
+                "mode": "brain_first",
+                "applied": True,
+                "adoptable": True,
+                "rule_name": "customer_service_brain_handoff",
+                "reason": "approval_required",
+                "needs_handoff": True,
+                "raw_reply_text": reply_text,
+                "reply_text": reply_text,
+                "visible_reply_owner": "brain",
+                "visible_reply_source": "brain_plan.reply_segments",
+                "brain_plan": {
+                    "reply_segments": [reply_text],
+                    "risk": {
+                        "risk_level": "high",
+                        "risk_tags": ["approval_required"],
+                        "needs_handoff": True,
+                        "handoff_reason": "approval_required",
+                    },
+                },
+                "brain_quality_review": {"passed": True, "reason": "deterministic_test_fixture"},
+            }
+
+        try:
+            listen_and_reply_module.maybe_run_customer_service_brain = deterministic_handoff_brain
+            no_handoff_event = process_target(
+                connector=no_handoff_connector,  # type: ignore[arg-type]
+                target=parse_targets(no_handoff_config)[0],
+                config=no_handoff_config,
+                rules=load_rules(resolve_path(no_handoff_config.get("rules_path"))),
+                state={"version": 1, "targets": {}},
+                send=True,
+                write_data=False,
+                allow_fallback_send=False,
+                mark_dry_run=False,
+            )
+        finally:
+            listen_and_reply_module.maybe_run_customer_service_brain = original_brain_runner
         assert_true(
             no_handoff_event.get("reason") in {"operator_handoff_disabled", "customer_service_brain_no_visible_reply"},
             f"handoff-off switch should block outbound send without legacy visible text: {no_handoff_event.get('reason')}",
@@ -2327,6 +2416,38 @@ def check_customer_service_console_switches_take_effect() -> None:
             os.environ.pop("WECHAT_KNOWLEDGE_TENANT", None)
         else:
             os.environ["WECHAT_KNOWLEDGE_TENANT"] = old_tenant
+
+
+def check_dynamic_all_session_discovery_enables_only_customer_conversations() -> None:
+    tenant_id = "workflow_dynamic_all_session_discovery"
+    settings_store = CustomerServiceSettings(tenant_id=tenant_id)
+    remove_file(settings_store.settings_path)
+    try:
+        settings_store.save(
+            {
+                "respond_all_unread_sessions": True,
+                "session_targets_managed": True,
+                "session_targets": [],
+            }
+        )
+        result = settings_store.merge_discovered_sessions(
+            [
+                {"name": "新客户A", "conversation_type": "private"},
+                {"name": "南京车友交流群", "conversation_type": "group"},
+                {"name": "文件传输助手", "conversation_type": "file_transfer"},
+                {"name": "服务号"},
+                {"name": "微信团队"},
+            ]
+        )
+        items = {str(item.get("name") or ""): item for item in result.get("all_items", [])}
+        assert_true(bool(items["新客户A"].get("enabled")), "dynamic mode must enable a newly discovered private chat")
+        assert_true(bool(items["南京车友交流群"].get("enabled")), "dynamic mode must enable a newly discovered group chat")
+        assert_true(not bool(items["文件传输助手"].get("enabled")), "file transfer must remain excluded")
+        assert_true(not bool(items["服务号"].get("enabled")), "service-account containers must remain excluded")
+        assert_true(not bool(items["微信团队"].get("enabled")), "system conversations must remain excluded")
+        assert_equal(items["服务号"].get("conversation_type"), "system", "service-account title must not be mislabeled private")
+    finally:
+        remove_file(settings_store.settings_path)
 
 
 def check_live_safety_guard_enforces_single_allowed_target() -> None:
@@ -2415,8 +2536,8 @@ def check_live_safety_guard_enforces_single_allowed_target() -> None:
         )
         assert_equal(
             guarded.get("rpa_humanized_send", {}).get("input_method"),
-            "clipboard_chunks",
-            "live guard should use low-frequency clipboard chunks instead of slow per-character SendInput",
+            "sendinput_unicode",
+            "live guard must preserve an explicitly selected supported input method",
         )
         assert_equal(guarded.get("rpa_humanized_send", {}).get("typing_typo_max"), 0, "live guard should avoid deliberate typo/backspace behavior")
         assert_equal(
@@ -2569,6 +2690,66 @@ def check_visible_only_bootstrap_does_not_mark_customer_messages_processed() -> 
     assert_true("m-self-1" in processed_ids, "visible-only bootstrap may mark self messages as processed")
     assert_equal(event.get("deferred_customer_count"), 1, "deferred customer message should be auditable")
     assert_equal(event.get("mark_customer_messages_processed"), False, "visible-only bootstrap should default to customer-safe mode")
+
+
+def check_visible_only_bootstrap_queues_verified_customer_without_badge() -> None:
+    class VisibleConnector:
+        def list_sessions(self) -> dict[str, Any]:
+            return {
+                "ok": True,
+                "sessions": [
+                    {
+                        "name": "客户A",
+                        "session_key": "wx:rpa:v1:customer-a",
+                        "conversation_type": "private",
+                        "unread_badge": "",
+                        "unread_signal": False,
+                    }
+                ],
+            }
+
+        def get_messages(self, target: str, exact: bool = True, history_load_times: int = 0, **kwargs: Any) -> dict[str, Any]:
+            return {
+                "ok": True,
+                "target": target,
+                "messages": [
+                    {
+                        "id": "chat-pane-customer-1",
+                        "type": "text",
+                        "sender": "customer",
+                        "content": "打开窗口后红点已经消失",
+                        "time": "22:10",
+                    }
+                ],
+                "history_load": {"requested_load_times": history_load_times},
+            }
+
+    from apps.wechat_ai_customer_service.admin_backend.services import customer_service_scheduler_state as scheduler_state_module
+
+    target = TargetConfig(
+        name="客户A",
+        enabled=True,
+        exact=True,
+        allow_self_for_test=False,
+        max_batch_messages=2,
+    )
+    config = load_smoke_config()
+    config["bootstrap"] = {"visible_only_target_confirmation": True, "history_load_times": 0}
+    state: dict[str, Any] = {"targets": {}}
+    original_store = scheduler_state_module.SchedulerStateStore
+    with tempfile.TemporaryDirectory() as temp:
+        store = original_store(tenant_id="workflow_badgeless_bootstrap_probe", path=Path(temp) / "scheduler.json")
+        scheduler_state_module.SchedulerStateStore = lambda *args, **kwargs: store  # type: ignore[assignment]
+        try:
+            event = bootstrap_target(VisibleConnector(), target, state, config)  # type: ignore[arg-type]
+        finally:
+            scheduler_state_module.SchedulerStateStore = original_store
+        scheduler_state = store.load()
+
+    assert_equal(event.get("action"), "bootstrapped", f"verified badgeless customer batch should bootstrap: {event}")
+    assert_equal(len(scheduler_state.get("llm_tasks") or {}), 1, "verified badgeless customer batch should queue one Brain task")
+    task = next(iter((scheduler_state.get("llm_tasks") or {}).values()))
+    assert_equal(task.get("session_key"), "wx:rpa:v1:customer-a", "bootstrap task must retain the exact current session key")
 
 
 def check_live_safety_guard_multi_allowed_targets_do_not_starve_secondary_sessions() -> None:
@@ -2895,6 +3076,39 @@ def check_reply_multi_bubble_verifies_only_final_segment_by_default() -> None:
         "verify_final_segment_only",
         "result should expose final-segment verification strategy",
     )
+
+
+def check_reply_multi_bubble_title_only_intermediate_reads_back_without_resend() -> None:
+    config = load_smoke_config()
+    target = parse_targets(config)[0]
+    config["reply"]["prefix"] = "[车金实盘] "
+    config["reply_multi_bubble"] = {
+        "enabled": True,
+        "min_split_chars": 28,
+        "max_segments": 3,
+        "preferred_segment_chars": 22,
+        "max_segment_chars": 40,
+        "min_segment_chars": 14,
+        "three_segment_threshold_chars": 120,
+        "inter_segment_delay_min_ms": 0,
+        "inter_segment_delay_max_ms": 0,
+        "verify_each_segment": False,
+    }
+    connector = TitleOnlyIntermediateConnector(messages=[])
+    result = send_reply_with_optional_multi_bubble(
+        connector=connector,  # type: ignore[arg-type]
+        target=target,
+        reply_text=(
+            "[车金实盘] 这台车目前还在，车况、价格和手续信息我可以逐项给您核对；"
+            "如果您准备到店，我再按您的时间把看车顺序安排清楚。"
+        ),
+        config=config,
+    )
+    segment_count = int(result.get("segment_count") or 0)
+    assert_true(bool(result.get("verified")), f"title-only intermediate evidence should be reconciled by one readback: {result}")
+    assert_true(segment_count >= 2, "reply should split before exercising intermediate readback")
+    assert_equal(connector.readback_calls, segment_count - 1, "each uncertain intermediate segment should be read once, never triggered twice")
+    assert_equal(len(connector.sent_texts), segment_count, "readback verification must not emit a duplicate send")
 
 
 def check_reply_multi_bubble_can_verify_each_segment_when_enabled() -> None:
@@ -4111,6 +4325,7 @@ def check_final_visible_polish_brain_micro_prompt_is_verify_only() -> None:
     assert_true("优先原样返回" in system or "优先原样返回" in rules, "Brain micro prompt should prefer no semantic rewrite")
     assert_true("禁止重新回答" in system, "Brain micro prompt must not let final polish re-answer")
     assert_true("不能改变原草稿" in rules, "Brain micro prompt should preserve the original decision")
+    assert_true("内部执行角色或流转说明不是客户话术保留项" in system or "内部执行角色或流转说明不是客户话术保留项" in rules, system)
 
 
 def check_final_visible_polish_brain_micro_rejects_rewrite_and_uses_draft() -> None:
@@ -4224,7 +4439,7 @@ def check_final_visible_polish_brain_micro_rejects_incomplete_tail_and_uses_draf
     )
 
 
-def check_final_visible_polish_handoff_micro_preserves_verification_signal() -> None:
+def check_final_visible_polish_handoff_micro_allows_internal_routing_trim() -> None:
     original_polish = final_polish_module.polish_with_llm
 
     def fake_polish(**kwargs: Any) -> dict[str, Any]:
@@ -4233,9 +4448,9 @@ def check_final_visible_polish_handoff_micro_preserves_verification_signal() -> 
             "provider": "openai",
             "model": "unit-polish-model",
             "candidate": {
-                "reply": "分期这边可以先给您算个大致方向，但审批结果、利率和月供还是要看资方。",
+                "reply": "贷款审批要以资方审核为准，不能提前保证包过；后续我会按正式资料继续核实。",
                 "confidence": 0.99,
-                "reason": "removed handoff verification",
+                "reason": "trimmed internal routing while preserving authority boundary",
             },
         }
 
@@ -4251,7 +4466,17 @@ def check_final_visible_polish_handoff_micro_preserves_verification_signal() -> 
             "brain_micro_guard_fallback_to_draft": True,
         }
     }
-    draft = "贷款这边不能保证包过，审批要以资方审核为准；我建议让金融专员帮您先做预审。"
+    draft = "贷款审批要以资方审核为准，不能提前保证包过；后续我转金融专员继续核实。"
+    prompt = final_polish_module.build_micro_verify_prompt_pack(
+        settings={"identity_guard_enabled": True},
+        customer_message="贷款能保证通过吗",
+        draft_reply=draft,
+        recent_reply_texts=[],
+        source_channel="brain",
+        needs_handoff=True,
+    )
+    assert_true("逐句检查未来动作的主语" in str(prompt.get("system") or ""), f"missing role audit: {prompt}")
+    assert_true("当前商家客服之外的人物、团队或岗位" in str(prompt.get("system") or ""), f"missing universal role boundary: {prompt}")
     try:
         final_polish_module.polish_with_llm = fake_polish
         result = maybe_polish_customer_visible_reply(
@@ -4264,10 +4489,10 @@ def check_final_visible_polish_handoff_micro_preserves_verification_signal() -> 
         )
     finally:
         final_polish_module.polish_with_llm = original_polish
-    assert_true(result.get("passed") is True, f"handoff draft should pass when bad micro rewrite is rejected: {result}")
-    assert_equal(result.get("reply_text"), draft, "handoff micro guard should keep the original verification signal")
-    guard = result.get("guard") if isinstance(result.get("guard"), dict) else {}
-    assert_equal(guard.get("reason"), "brain_micro_candidate_rejected_used_draft", "handoff draft fallback should be audited")
+    assert_true(result.get("passed") is True, f"role-neutral handoff trim should pass: {result}")
+    assert_true(result.get("applied") is True, f"internal routing trim should be applied: {result}")
+    assert_true("金融专员" not in str(result.get("reply_text") or ""), f"internal actor leaked: {result}")
+    assert_true("资方审核" in str(result.get("reply_text") or ""), f"authority boundary was lost: {result}")
 
 
 def check_final_visible_polish_rejects_identity_denial_for_finance_boundary() -> None:

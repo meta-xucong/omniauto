@@ -25,6 +25,10 @@ for _path in (APP_ROOT / "workflows", APP_ROOT / "adapters"):
 from apps.wechat_ai_customer_service.platform_understanding_rules import intent_group
 from admin_backend.services.raw_message_store import RawMessageStore
 from apps.wechat_ai_customer_service.admin_backend.services.conversation_history import assemble_conversation_history
+from apps.wechat_ai_customer_service.internal.conversation_context import (
+    trusted_recent_multimodal_history_text,
+    trusted_recent_multimodal_messages,
+)
 from knowledge_loader import build_evidence_pack
 from knowledge_runtime import KnowledgeRuntime
 from evidence_authority import (
@@ -317,6 +321,50 @@ CATALOG_RECOMMENDATION_QUERY_TERMS = (
     "自动挡",
 )
 
+CUSTOMER_OWNED_TRADE_IN_TERMS = (
+    "置换",
+    "旧车",
+    "卖车",
+    "收车",
+    "收购",
+    "回收",
+    "估价",
+    "估个价",
+    "评估",
+    "抵车款",
+    "抵多少",
+)
+
+TRADE_IN_TARGET_INVENTORY_TERMS = (
+    "想买",
+    "要买",
+    "准备买",
+    "购买",
+    "入手",
+    "推荐",
+    "挑一台",
+    "挑辆",
+    "选一台",
+    "选辆",
+    "有什么车",
+    "有哪些车",
+    "车源",
+    "库存",
+    "现车",
+    "在售",
+    "换台",
+    "换一台",
+    "换一辆",
+    "换个",
+    "置换成",
+    "置换一台",
+    "置换一辆",
+    "你们这儿",
+    "你们这边",
+    "你们家",
+    "你们有",
+)
+
 CATALOG_RECOMMENDATION_HARD_BOUNDARY_TERMS = (
     "最低",
     "底价",
@@ -483,6 +531,28 @@ def build_reply_evidence_pack(
         max_messages=int(settings.get("max_history_messages", DEFAULT_MAX_HISTORY_MESSAGES) or DEFAULT_MAX_HISTORY_MESSAGES),
         char_budget=int(settings.get("history_char_budget", DEFAULT_HISTORY_CHAR_BUDGET) or DEFAULT_HISTORY_CHAR_BUDGET),
     )
+    ledger_multimodal_history = trusted_recent_multimodal_messages(target_state)
+    if ledger_multimodal_history:
+        history_ids = {
+            str(item.get("id") or "").strip()
+            for item in history
+            if isinstance(item, dict) and str(item.get("id") or "").strip()
+        }
+        history = trim_history(
+            [
+                *history,
+                *[
+                    item
+                    for item in ledger_multimodal_history
+                    if not str(item.get("id") or "").strip()
+                    or str(item.get("id") or "").strip() not in history_ids
+                ],
+            ][-int(settings.get("max_history_messages", DEFAULT_MAX_HISTORY_MESSAGES) or DEFAULT_MAX_HISTORY_MESSAGES) :],
+            char_budget=max(
+                500,
+                int(settings.get("history_char_budget", DEFAULT_HISTORY_CHAR_BUDGET) or DEFAULT_HISTORY_CHAR_BUDGET),
+            ),
+        )
 
     history_text_pack = assemble_conversation_history(
         target_name=target_name,
@@ -490,6 +560,14 @@ def build_reply_evidence_pack(
         current_batch=batch,
         config=config,
     )
+    ledger_multimodal_text = trusted_recent_multimodal_history_text(target_state)
+    if ledger_multimodal_text:
+        history_text_pack = dict(history_text_pack)
+        existing_history_text = str(history_text_pack.get("history_text") or "").strip()
+        if ledger_multimodal_text not in existing_history_text:
+            history_text_pack["history_text"] = "\n".join(
+                item for item in (existing_history_text, ledger_multimodal_text) if item
+            )
     if settings.get("foreground_realtime"):
         history_text_pack = dict(history_text_pack)
         history_limit = max(300, int(settings.get("history_char_budget", DEFAULT_HISTORY_CHAR_BUDGET) or DEFAULT_HISTORY_CHAR_BUDGET))
@@ -641,12 +719,15 @@ def compact_knowledge_pack(
         context = context_override
     else:
         context = pack.get("conversation_context") if isinstance(pack.get("conversation_context"), dict) else {}
-    catalog_candidates = catalog_product_candidates(text, limit=max_catalog_candidates, context=context)
+    trade_in_only = is_customer_owned_trade_in_only_query(text)
+    catalog_candidates = [] if trade_in_only else catalog_product_candidates(text, limit=max_catalog_candidates, context=context)
     item_limit = max(1, max_catalog_candidates)
-    products = [
-        annotate_authority(compact_mapping(item, max_text_chars=420), category_id=PRODUCT_MASTER_CATEGORY_ID)
-        for item in (evidence.get("products", []) or [])[:item_limit]
-    ]
+    products = []
+    if not trade_in_only:
+        products = [
+            annotate_authority(compact_mapping(item, max_text_chars=420), category_id=PRODUCT_MASTER_CATEGORY_ID)
+            for item in (evidence.get("products", []) or [])[:item_limit]
+        ]
     catalog_candidates = [
         annotate_authority(item, category_id=PRODUCT_MASTER_CATEGORY_ID)
         for item in catalog_candidates
@@ -1278,6 +1359,8 @@ def product_has_price_or_stock(item: dict[str, Any]) -> bool:
 
 def catalog_product_candidates(text: str, *, limit: int, context: dict[str, Any] | None = None) -> list[dict[str, Any]]:
     context = context if isinstance(context, dict) else {}
+    if is_customer_owned_trade_in_only_query(text):
+        return []
     try:
         runtime = KnowledgeRuntime()
         items = runtime.list_customer_evidence_items("products", shop_code=customer_evidence_shop_code(context))
@@ -1368,6 +1451,25 @@ def catalog_product_candidates(text: str, *, limit: int, context: dict[str, Any]
         if should_focus_context_product(semantic_text):
             ranked = ranked[: max(1, min(limit, len(context_products)))]
     return ranked[: max(0, limit)]
+
+
+def is_customer_owned_trade_in_only_query(text: str) -> bool:
+    """Keep a customer's own trade-in vehicle out of inventory evidence.
+
+    A year/model in a valuation request describes the customer's vehicle, not
+    necessarily a product in the local mirror.  Only retain inventory lookup
+    when the turn explicitly asks for a replacement vehicle or refers back to
+    an already selected inventory item.
+    """
+
+    compact = compact_match_text(semantic_text_for_catalog_matching(text))
+    if not compact:
+        return False
+    if not any(compact_match_text(term) in compact for term in CUSTOMER_OWNED_TRADE_IN_TERMS):
+        return False
+    if has_relative_context_product_reference(compact):
+        return False
+    return not any(compact_match_text(term) in compact for term in TRADE_IN_TARGET_INVENTORY_TERMS)
 
 
 def authoritative_catalog_alias_matches(

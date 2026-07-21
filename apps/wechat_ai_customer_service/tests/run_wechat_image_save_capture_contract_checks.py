@@ -258,7 +258,7 @@ def check_legacy_sidecar_action_rejects_before_platform_probe() -> None:
         )
     finally:
         wechat_win32_ocr_sidecar.ensure_visible_wechat_window = original_probe
-    assert_equal(result.get("state"), "legacy_image_file_capture_rejected", "legacy sidecar action rejects before platform work")
+    assert_equal(result.get("state"), "unsupported_action", "retired sidecar action is absent before platform work")
 
 
 def assert_true(value: bool, message: str) -> None:

@@ -1,5 +1,8 @@
 # Customer Image Robustness Hardening (2026-07-13)
 
+> [!WARNING]
+> **Document status: partially superseded (2026-07-18).** Fail-closed behavior, bounded in-memory payloads, and Brain ownership remain valid. References to the existing scattered `customer_image_*` implementation and its production placement are historical; all image-specific implementation now belongs under the module defined by [customer_service_absolute_independent_vision_module_refactor_plan_20260718.md](customer_service_absolute_independent_vision_module_refactor_plan_20260718.md).
+
 > Scope: this change is limited to the independent vision/image-understanding domain. It must not alter Brain reply ownership, scheduler behavior, voice behavior, public field names, plugin protocol, or configuration contracts.
 
 This hardening work follows [customer_visible_reply_ownership_baseline.md](customer_visible_reply_ownership_baseline.md) and [customer_service_external_contract_and_optional_plugin_baseline.md](customer_service_external_contract_and_optional_plugin_baseline.md).

@@ -1,5 +1,8 @@
 # WeChat AI Customer Service Unified Multimodal Session Context
 
+> [!WARNING]
+> **Document status: context requirements retained, image implementation superseded (2026-07-18).** Bidirectional text/voice/image continuity remains required. Scheduler-owned self-image tasks and image-specific logic distributed across Sidecar, Ledger, Workflow, and Brain are no longer approved; use [customer_service_absolute_independent_vision_module_refactor_plan_20260718.md](customer_service_absolute_independent_vision_module_refactor_plan_20260718.md).
+
 Date: 2026-07-10
 
 Related baseline: [customer_visible_reply_ownership_baseline.md](customer_visible_reply_ownership_baseline.md)

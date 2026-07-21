@@ -74,6 +74,43 @@ def legacy_maybe_route_customer_image_turn(
     )
 
 
+def legacy_observe_current_surface(
+    *,
+    connector: Any,
+    target: Any,
+    side_filter: str = "all",
+    max_images: int = 8,
+) -> dict[str, Any]:
+    """Absence-safe bridge to the vision-owned WeChat surface observer."""
+
+    plugin = resolve_optional_capability("vision")
+    observer = getattr(plugin, "observe_current_surface", None) if plugin is not None else None
+    if not callable(observer):
+        return {
+            "ok": False,
+            "state": "vision_current_surface_observer_unavailable",
+            "reason": "vision_current_surface_observer_unavailable",
+            "assets": [],
+            "messages": [],
+        }
+    return observer(
+        {
+            "connector": connector,
+            "target": target,
+            "side_filter": side_filter,
+            "max_images": max_images,
+        }
+    )
+
+
+def legacy_prepare_scheduler_capture(**kwargs: Any) -> dict[str, Any]:
+    """Compatibility bridge to the vision-owned scheduler projection."""
+
+    from .scheduler_capture import prepare_scheduler_capture
+
+    return prepare_scheduler_capture(**kwargs)
+
+
 def legacy_maybe_capture_self_image_context(
     *,
     connector: Any,
@@ -107,9 +144,7 @@ def legacy_maybe_capture_self_image_context(
 
 
 def legacy_build_brain_safe_image_proxy_messages(*args: Any, **kwargs: Any) -> list[dict[str, Any]]:
-    from apps.wechat_ai_customer_service.workflows.customer_image_asset_store import (
-        build_brain_safe_image_proxy_messages,
-    )
+    from .projection.message import build_brain_safe_image_proxy_messages
 
     return build_brain_safe_image_proxy_messages(*args, **kwargs)
 
@@ -119,9 +154,7 @@ def legacy_augment_text_with_visual_query(
     visual_bridge_input: dict[str, Any] | None,
 ) -> str:
     try:
-        from apps.wechat_ai_customer_service.workflows.customer_image_brain_bridge import (
-            augment_text_with_visual_query,
-        )
+        from .projection.brain import augment_text_with_visual_query
     except ImportError:
         return str(combined or "")
     return augment_text_with_visual_query(combined, visual_bridge_input)
@@ -131,9 +164,7 @@ def legacy_compact_customer_image_brain_bridge(
     value: dict[str, Any] | None,
 ) -> dict[str, Any]:
     try:
-        from apps.wechat_ai_customer_service.workflows.customer_image_brain_bridge import (
-            compact_customer_image_brain_bridge,
-        )
+        from .projection.brain import compact_customer_image_brain_bridge
     except ImportError:
         return {}
     return compact_customer_image_brain_bridge(value)
@@ -144,9 +175,7 @@ def legacy_resolve_visual_brain_turn_text(
     visual_bridge_input: dict[str, Any] | None,
 ) -> str:
     try:
-        from apps.wechat_ai_customer_service.workflows.customer_image_brain_bridge import (
-            resolve_visual_brain_turn_text,
-        )
+        from .projection.brain import resolve_visual_brain_turn_text
     except ImportError:
         return str(combined or "")
     return resolve_visual_brain_turn_text(combined, visual_bridge_input)
