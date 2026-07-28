@@ -161,11 +161,20 @@ def _observe_current_surface(
     host_ops: Any,
 ) -> dict[str, Any]:
     from apps.wechat_ai_customer_service.optional_plugins.vision.capture.surface import (
-        visual_image_messages_from_current_surface,
+        visual_image_envelopes_from_bubbles,
+    )
+    from apps.wechat_ai_customer_service.optional_plugins.vision.capture.visual_anchor import (
+        visual_candidates_from_bubbles,
+    )
+    from apps.wechat_ai_customer_service.optional_plugins.vision.capture.wechat import (
+        detect_visual_image_bubbles,
+        extract_chat_time_markers,
     )
 
     hwnd = int(prepared.get("hwnd") or 0)
     target = str(prepared.get("target") or "")
+    session_key = str(prepared.get("session_key") or "")
+    conversation_type = str(prepared.get("conversation_type") or "")
     try:
         screenshot, _unused_path = host_ops.capture_wechat(
             hwnd,
@@ -186,22 +195,54 @@ def _observe_current_surface(
                 str(blocking_reason),
                 online=False if blocking_reason == "login_or_qr" else True,
                 target=target,
-                session_key=str(prepared.get("session_key") or ""),
+                session_key=session_key,
             )
-        messages = visual_image_messages_from_current_surface(
+        side_filter = str(getattr(args, "side_filter", "all") or "all")
+        max_images = max(1, min(int(getattr(args, "max_images", 8) or 8), 8))
+        bubbles = detect_visual_image_bubbles(
             screenshot,
-            ocr_items,
-            text_messages,
-            target=target,
-            side_filter=str(getattr(args, "side_filter", "all") or "all"),
-            max_images=max(1, min(int(getattr(args, "max_images", 8) or 8), 8)),
+            messages=text_messages,
+            max_images=max_images,
+            side_filter=side_filter,
+            time_markers=extract_chat_time_markers(ocr_items, image_size),
         )
+        messages = visual_image_envelopes_from_bubbles(bubbles, text_messages, target=target)
+        pending_signal_id = str(getattr(args, "pending_signal_id", "") or "").strip()
+        pending_observation_id = str(getattr(args, "pending_observation_id", "") or "").strip()
+        if pending_signal_id or pending_observation_id:
+            try:
+                from apps.wechat_ai_customer_service.optional_plugins.vision.occurrence_store import (
+                    default_occurrence_store,
+                )
+
+                candidates = visual_candidates_from_bubbles(
+                    bubbles,
+                    text_messages,
+                    target=target,
+                    session_key=session_key,
+                    conversation_type=conversation_type,
+                )
+                default_occurrence_store().record_occurrences(
+                    candidates,
+                    {
+                        "session_key": session_key,
+                        "target_identity": target,
+                        "target_name": target,
+                        "conversation_type": conversation_type,
+                        "pending_signal_id": pending_signal_id,
+                        "pending_observation_id": pending_observation_id,
+                        "side_filter": side_filter,
+                        "source_preview": str(getattr(args, "source_preview", "") or ""),
+                    },
+                )
+            except Exception:
+                pass
     except Exception as exc:  # noqa: BLE001 - worker returns a closed failure envelope.
         return _failure(
             "vision_current_surface_observation_failed",
             "vision_current_surface_observation_failed",
             target=target,
-            session_key=str(prepared.get("session_key") or ""),
+            session_key=session_key,
             error=repr(exc),
         )
     return {
@@ -210,7 +251,7 @@ def _observe_current_surface(
         "adapter": "win32_ocr",
         "state": "vision_current_surface_observed",
         "target": target,
-        "session_key": str(prepared.get("session_key") or ""),
+        "session_key": session_key,
         "assets": [],
         "messages": messages,
     }
@@ -230,10 +271,12 @@ def _copy_current_image(
         probe=prepared.get("probe") if isinstance(prepared.get("probe"), dict) else {},
         target_name=str(prepared.get("target") or ""),
         session_key=str(prepared.get("session_key") or ""),
+        conversation_type=str(prepared.get("conversation_type") or ""),
         exact=bool(getattr(args, "exact", False)),
         source_preview=str(getattr(args, "source_preview", "") or ""),
         speaker_name=str(getattr(args, "speaker_name", "") or ""),
         pending_signal_id=str(getattr(args, "pending_signal_id", "") or ""),
+        pending_observation_id=str(getattr(args, "pending_observation_id", "") or ""),
         side_filter=str(getattr(args, "side_filter", "customer") or "customer"),
         sidecar_ops=host_ops,
     )
@@ -265,6 +308,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--source-preview", default="")
     parser.add_argument("--speaker-name", default="")
     parser.add_argument("--pending-signal-id", default="")
+    parser.add_argument("--pending-observation-id", default="")
     parser.add_argument("--side-filter", default="customer", choices=("customer", "self", "all"))
     parser.add_argument("--max-images", type=int, default=8)
     return parser

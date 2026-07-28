@@ -4,17 +4,47 @@ import re
 from typing import Any
 
 
-IMAGE_PREVIEW_TOKENS = ("[图片]", "[照片]", "[Image]", "图片", "照片", "发送了一张图片")
+IMAGE_PREVIEW_TOKENS = ("[图片]", "[照片]", "【图片】", "【照片】", "[Image]", "[Photo]", "[Picture]", "发送了一张图片")
 IMAGE_MESSAGE_TYPES = {"image", "picture", "photo"}
 IMAGE_CAPTURE_SIGNAL_KINDS = {"image_capture", "media_capture"}
+_IMAGE_PREVIEW_EXACT_TOKENS = {
+    "[图片]",
+    "[照片]",
+    "【图片】",
+    "【照片】",
+    "[image]",
+    "[photo]",
+    "[picture]",
+}
+_IMAGE_PREVIEW_PHRASES = {
+    "发送了一张图片",
+    "发来了一张图片",
+    "发了一张图片",
+    "发送了一张照片",
+    "发来了一张照片",
+    "发了一张照片",
+}
+
+
+def _preview_body(value: Any) -> str:
+    compact = re.sub(r"\s+", "", str(value or "").strip()).lower()
+    if not compact:
+        return ""
+    for separator in (":", "："):
+        if separator in compact:
+            _speaker, body = compact.rsplit(separator, 1)
+            if body:
+                return body
+    return compact
 
 
 def image_preview_text(value: Any) -> bool:
-    text = str(value or "").strip()
-    if not text:
+    compact = _preview_body(value)
+    if not compact:
         return False
-    compact = re.sub(r"\s+", "", text).lower()
-    return any(re.sub(r"\s+", "", token).lower() in compact for token in IMAGE_PREVIEW_TOKENS)
+    if compact in _IMAGE_PREVIEW_EXACT_TOKENS:
+        return True
+    return compact in _IMAGE_PREVIEW_PHRASES
 
 
 def pending_image_signal_was_processed(

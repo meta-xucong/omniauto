@@ -279,6 +279,115 @@ def check_text_preview_recovers_self_image_without_consuming_customer_text() -> 
     assert_equal(result.get("customer_image_assets"), {}, "self image must never become a customer image reply turn")
 
 
+def check_plain_text_does_not_recover_old_self_image_context() -> None:
+    runner_calls: list[dict[str, Any]] = []
+
+    def self_runner(**kwargs: Any) -> dict[str, Any]:
+        runner_calls.append(kwargs)
+        return {
+            "enabled": True,
+            "applied": True,
+            "context_only": True,
+            "reason": "self_image_context_ready",
+        }
+
+    current_text = _text(
+        "customer-plain-1",
+        "晚上好",
+        top=500,
+        bottom=550,
+        signal_id="signal-current",
+    )
+    result, calls = _prepare(
+        messages=[current_text],
+        observed=[
+            _surface_occurrence(
+                side="self",
+                message_id="visual-old-self-plain",
+                following_text_id="customer-plain-1",
+            )
+        ],
+        signal_text="晚上好",
+        self_runner=self_runner,
+    )
+    assert_equal(calls, 1, "plain text may still perform one customer-side structural probe")
+    assert_equal(runner_calls, [], "plain text must not trigger old self-image context")
+    assert_equal(result.get("customer_image_assets"), {}, "plain text must not become a customer image route")
+    assert_true(result.get("pending_signal_consumed") is False, "plain text must remain available for normal reply")
+    assert_true(
+        not any(item.get("visual_side") == "self" for item in result.get("messages") or []),
+        "old self image must not be returned as current vision evidence",
+    )
+
+
+def check_plain_photo_question_does_not_become_image_event() -> None:
+    runner_calls: list[dict[str, Any]] = []
+
+    def self_runner(**kwargs: Any) -> dict[str, Any]:
+        runner_calls.append(kwargs)
+        return {
+            "enabled": True,
+            "applied": True,
+            "context_only": True,
+            "reason": "self_image_context_ready",
+        }
+
+    current_text = _text(
+        "customer-photo-question-1",
+        "置换需要发照片吗",
+        top=500,
+        bottom=550,
+        signal_id="signal-current",
+    )
+    result, calls = _prepare(
+        messages=[current_text],
+        observed=[
+            _surface_occurrence(
+                side="self",
+                message_id="visual-old-self-photo-question",
+                following_text_id="customer-photo-question-1",
+            )
+        ],
+        signal_text="置换需要发照片吗",
+        self_runner=self_runner,
+    )
+    assert_equal(calls, 1, "plain photo question may still do one customer-side structural probe")
+    assert_equal(runner_calls, [], "plain photo question must not trigger self-image context")
+    assert_true((result.get("visual_capture_trigger") or {}).get("should_run") is False, "plain photo question must stay text-only")
+    assert_equal(result.get("customer_image_assets"), {}, "plain photo question must not enter clipboard acquisition")
+    assert_true(result.get("pending_signal_consumed") is False, "plain photo question must not be consumed by vision")
+
+
+def check_image_event_does_not_consume_visible_old_self_image() -> None:
+    runner_calls: list[dict[str, Any]] = []
+
+    def self_runner(**kwargs: Any) -> dict[str, Any]:
+        runner_calls.append(kwargs)
+        return {
+            "enabled": True,
+            "applied": True,
+            "context_only": True,
+            "reason": "self_image_context_ready",
+        }
+
+    result, calls = _prepare(
+        messages=[],
+        observed=[
+            _surface_occurrence(
+                side="self",
+                message_id="visual-old-self-image-event",
+            )
+        ],
+        signal_kind="image_capture",
+        signal_text="[图片]",
+        self_runner=self_runner,
+    )
+    assert_equal(calls, 1, "image event may do one customer-side observation")
+    assert_equal(runner_calls, [], "customer image event must not be satisfied by visible old self image")
+    assert_equal(result.get("customer_image_assets"), {}, "old self image must not become customer clipboard acquisition")
+    assert_true(result.get("pending_signal_consumed") is False, "customer image event must remain pending when only old self image is visible")
+
+
 def check_text_only_capture_has_no_clipboard_or_llm_route() -> None:
     current_text = _text(
         "customer-question-4",
@@ -492,6 +601,9 @@ def main() -> int:
         check_text_preview_recovers_adjacent_customer_image_once,
         check_old_visible_image_does_not_reactivate_on_new_text,
         check_text_preview_recovers_self_image_without_consuming_customer_text,
+        check_plain_text_does_not_recover_old_self_image_context,
+        check_plain_photo_question_does_not_become_image_event,
+        check_image_event_does_not_consume_visible_old_self_image,
         check_text_only_capture_has_no_clipboard_or_llm_route,
         check_custom_connector_without_pr_host_does_not_start_desktop_observer,
         check_runtime_accepts_structurally_bound_normal_pending_signal,

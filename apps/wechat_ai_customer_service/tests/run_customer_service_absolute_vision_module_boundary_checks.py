@@ -129,7 +129,11 @@ def check_pr28_blobs_and_legacy_vision_paths_are_quarantined() -> None:
         "apps/wechat_ai_customer_service/optional_plugins/vision/integrations/wechat_worker.py"
     )
     assert_true("execute_wechat_clipboard_image_copy" in worker, "vision worker does not own clipboard copy")
-    assert_true("visual_image_messages_from_current_surface" in worker, "vision worker does not own surface observation")
+    assert_true(
+        "visual_image_envelopes_from_bubbles" in worker
+        and "detect_visual_image_bubbles" in worker,
+        "vision worker does not own surface observation",
+    )
     runtime_adapter = _source(
         "apps/wechat_ai_customer_service/adapters/wechat_pr28_runtime_adapter.py"
     )

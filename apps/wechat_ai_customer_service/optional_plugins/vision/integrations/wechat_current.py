@@ -111,6 +111,9 @@ def observe_current_surface(
     *,
     session_key: str = "",
     conversation_type: str = "",
+    pending_signal_id: str = "",
+    pending_observation_id: str = "",
+    source_preview: str = "",
     side_filter: str = "all",
     max_images: int = 8,
 ) -> dict[str, Any]:
@@ -164,6 +167,9 @@ def observe_current_surface(
     for value, flag in (
         (session_key, "--session-key"),
         (physical_identity.get("conversation_type"), "--conversation-type"),
+        (pending_signal_id, "--pending-signal-id"),
+        (pending_observation_id, "--pending-observation-id"),
+        (source_preview, "--source-preview"),
     ):
         clean = str(value or "").strip()
         if clean:
@@ -205,9 +211,11 @@ def run_clipboard_image_transaction(
     exact: bool = True,
     *,
     session_key: str = "",
+    conversation_type: str = "",
     source_preview: str = "",
     speaker_name: str = "",
     pending_signal_id: str = "",
+    pending_observation_id: str = "",
     side_filter: str = "customer",
     consume_current_clipboard: Callable[[dict[str, Any]], dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
@@ -242,12 +250,23 @@ def run_clipboard_image_transaction(
     clean_session_key = str(session_key or "").strip()
     if clean_session_key:
         args.extend(["--session-key", clean_session_key])
+    from apps.wechat_ai_customer_service.adapters.wechat_pr28_runtime_adapter import (
+        physical_rpa_identity_kwargs,
+    )
+
+    physical_identity = physical_rpa_identity_kwargs(
+        {"session_key": session_key, "conversation_type": conversation_type}
+    )
+    clean_conversation_type = str(physical_identity.get("conversation_type") or "").strip()
+    if clean_conversation_type:
+        args.extend(["--conversation-type", clean_conversation_type])
     if exact:
         args.append("--exact")
     for value, flag in (
         (source_preview, "--source-preview"),
         (speaker_name, "--speaker-name"),
         (pending_signal_id, "--pending-signal-id"),
+        (pending_observation_id, "--pending-observation-id"),
     ):
         clean = str(value or "").strip()
         if clean:
@@ -316,8 +335,10 @@ def run_self_clipboard_image_transaction(
     exact: bool = True,
     *,
     session_key: str = "",
+    conversation_type: str = "",
     source_preview: str = "",
     pending_signal_id: str = "",
+    pending_observation_id: str = "",
     consume_current_clipboard: Callable[[dict[str, Any]], dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     return run_clipboard_image_transaction(
@@ -325,8 +346,10 @@ def run_self_clipboard_image_transaction(
         target,
         exact=exact,
         session_key=session_key,
+        conversation_type=conversation_type,
         source_preview=source_preview,
         pending_signal_id=pending_signal_id,
+        pending_observation_id=pending_observation_id,
         side_filter="self",
         consume_current_clipboard=consume_current_clipboard,
     )

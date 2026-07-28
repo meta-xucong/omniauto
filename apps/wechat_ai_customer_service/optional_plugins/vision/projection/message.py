@@ -3,11 +3,28 @@
 from __future__ import annotations
 
 import copy
+import re
 from datetime import datetime
 from typing import Any
 
 
-_IMAGE_PREVIEW_MARKERS = ("[图片]", "[image]", "图片", "image")
+_IMAGE_PREVIEW_EXACT_MARKERS = {
+    "[图片]",
+    "[照片]",
+    "【图片】",
+    "【照片】",
+    "[image]",
+    "[photo]",
+    "[picture]",
+}
+_IMAGE_PREVIEW_PHRASES = {
+    "发送了一张图片",
+    "发来了一张图片",
+    "发了一张图片",
+    "发送了一张照片",
+    "发来了一张照片",
+    "发了一张照片",
+}
 
 
 def now_iso() -> str:
@@ -21,8 +38,18 @@ def sanitize_name(value: str) -> str:
 
 
 def image_preview_text(value: Any) -> bool:
-    text = str(value or "").strip().lower()
-    return bool(text and any(marker in text for marker in _IMAGE_PREVIEW_MARKERS))
+    compact = re.sub(r"\s+", "", str(value or "").strip()).lower()
+    if not compact:
+        return False
+    for separator in (":", "："):
+        if separator in compact:
+            _speaker, body = compact.rsplit(separator, 1)
+            if body:
+                compact = body
+            break
+    if compact in _IMAGE_PREVIEW_EXACT_MARKERS:
+        return True
+    return compact in _IMAGE_PREVIEW_PHRASES
 
 
 def parse_preview_speaker(source_preview: str, explicit_speaker: str = "") -> str:
