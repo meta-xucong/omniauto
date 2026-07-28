@@ -1,4 +1,4 @@
-"""Dafengche Open Platform read-only client and request-signing contract."""
+"""Dafengche Open Platform client and request-signing contract."""
 
 from __future__ import annotations
 
@@ -10,11 +10,9 @@ import time
 from dataclasses import dataclass
 from typing import Any, Callable, Mapping, Protocol
 
+from .contract import CAR_DETAIL_API, CAR_IDS_API, CAR_PICTURES_API, CAR_UPDATE_API, SHOP_API
 
-SHOP_API = "com.souche.danube.portal.dubbo.open.api.ShopOpenService#getByCode"
-CAR_IDS_API = "com.souche.danube.portal.dubbo.open.api.CarOpenService#listCarIdsByShopCodeAndOperationPhase"
-CAR_DETAIL_API = "com.souche.danube.portal.dubbo.open.api.CarOpenService#getById"
-CAR_PICTURES_API = "com.souche.danube.portal.dubbo.open.api.CarPictureOpenService#findByCarId"
+
 PRODUCTION_ENDPOINT = "https://openapi.souche.com/v3"
 
 
@@ -113,3 +111,17 @@ class DafengcheReadOnlyClient:
 
     def get_car_pictures(self, *, app_id: str, car_id: str) -> Any:
         return self.call(CAR_PICTURES_API, {"appId": app_id, "carId": car_id})
+
+
+class DafengcheOpenPlatformClient(DafengcheReadOnlyClient):
+    """Additive client for explicitly authorized Dafengche write operations.
+
+    The mirror sync service still depends on :class:`DafengcheReadOnlyClient`
+    and never calls this method.  Hosts must wire this class only inside an
+    operator-confirmed writeback workflow.
+    """
+
+    def update_car(self, *, update_param: Mapping[str, Any]) -> Any:
+        if not isinstance(update_param, Mapping):
+            raise ValueError("Dafengche update_car requires update_param to be a mapping")
+        return self.call(CAR_UPDATE_API, {"updateParam": copy.deepcopy(dict(update_param))})

@@ -50,7 +50,7 @@ admin_backend/static/index.html + app.js + styles.css
 - `capabilities`：当前来源是否允许编辑车辆事实；
 - `raw_source_payloads`：仅详情路由按管理员用途返回，默认折叠显示，绝不进入 Brain 证据。
 
-列表只使用摘要和授权的常用字段；详情展示车辆信息、来源/绑定/观察时间、客服注释、图片和专属知识。原始载荷保留完整性，但不会被复制成第二套业务字段。
+列表只使用摘要和授权的常用字段；`/api/product-console/catalog` 对 V2 车辆返回脱敏壳，不携带顶层 `source_payloads` 或内部 `extensions` 快照，避免车主手机号、身份证、银行卡、VIN、车牌和内部价格随列表响应外溢。详情展示车辆信息、来源/绑定/观察时间、客服注释、图片和专属知识；只有详情的 `include_raw=True` 审计视图保留完整原始载荷。原始载荷保留完整性，但不会被复制成第二套业务字段。
 
 ## 4. 写入语义
 
@@ -97,6 +97,7 @@ admin_backend/static/index.html + app.js + styles.css
 ## 6. 安全与合同审计
 
 - `source_payloads` 的 VIN、车牌、内部价格等字段即使对管理员审计可见，也不得进入 `project_customer_evidence`、Brain、日志中的客户消息或 RPA。
+- 商品列表响应不得携带 V2 原始镜像或车主信息；需要完整字段时必须打开详情审计视图。
 - `display`、`data`、`counts` 等历史输出不删除。V2 情况下 `data` 是输出时生成的安全兼容视图，不是数据库中的商品事实。
 - `admin_view`、`vehicle_counts` 和 V2 写入路由均为新增、可选合同；忽略它们的旧调用方继续工作。
 - 同步按钮不在本次伪造。当前未配置生产同步调度时，页面只展示来源/观察状态，不会声称已经访问大风车。

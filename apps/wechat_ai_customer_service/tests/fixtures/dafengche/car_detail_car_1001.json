@@ -1,32 +1,116 @@
 {
   "carId": "CAR-1001",
+  "orgId": "ORG-001",
   "shopCode": "SHOP-001",
+  "owner": "TEST-OWNER-ID-MUST-NOT-LEAK",
+  "creator": "TEST-CREATOR-ID-MUST-NOT-LEAK",
   "operationPhase": "sale",
   "baseCarInfo": {
-    "name": "2021款 丰田 凯美瑞 2.0G 豪华版",
-    "brandName": "丰田",
-    "seriesName": "凯美瑞",
-    "modelName": "2.0G 豪华版",
-    "firstLicensePlateDate": "2021-05",
-    "vehicleCondition": "良好",
-    "mileage": 3.6,
-    "exteriorColor": "白色",
-    "interiorColor": "黑色",
     "vinNumber": "TEST-VIN-MUST-NOT-LEAK",
-    "plateNumber": "TEST-PLATE-MUST-NOT-LEAK"
+    "name": {
+      "brandCode": "TOYOTA",
+      "brandName": "丰田",
+      "seriesCode": "CAMRY",
+      "seriesName": "凯美瑞",
+      "modelCode": "20G-LUXURY",
+      "modelName": "2.0G 豪华版",
+      "displayValue": "2021款 丰田 凯美瑞 2.0G 豪华版"
+    },
+    "firstLicensePlateDate": "2021-05",
+    "area": {
+      "cityCode": "330100",
+      "cityName": "杭州",
+      "provinceCode": "330000",
+      "provinceName": "浙江",
+      "displayValue": "浙江杭州"
+    },
+    "registerArea": {
+      "cityCode": "330100",
+      "cityName": "杭州",
+      "provinceCode": "330000",
+      "provinceName": "浙江",
+      "displayValue": "浙江杭州"
+    },
+    "stockStatus": "in_stock",
+    "contractSignDate": "2026-07-01",
+    "vehicleCondition": "良好",
+    "carDetailForDisplay": "一手精品车，车况整洁。",
+    "color": "白色",
+    "innerColor": "黑色",
+    "productionDate": "2021-03",
+    "annualExpiresDate": "2027-05",
+    "outStockDate": null,
+    "inStock": "2026-07-02",
+    "reserveTime": null,
+    "payTime": null,
+    "mileage": 3.6,
+    "outStockReason": null,
+    "outStockReasonRemarks": null,
+    "salesperson": "TEST-SALESPERSON-ID-MUST-NOT-LEAK",
+    "useType": "非营运",
+    "plateNumber": "TEST-PLATE-MUST-NOT-LEAK",
+    "carRemark": "TEST-INTERNAL-REMARK-MUST-NOT-LEAK",
+    "vehicleNumber": "CHEJIN-1001",
+    "purchaseType": "直采",
+    "assessmentPhotoList": [
+      "https://example.invalid/vehicles/CAR-1001/assessment.jpg"
+    ],
+    "video": [
+      {
+        "coverPictureUrl": "https://example.invalid/vehicles/CAR-1001/video-cover.jpg",
+        "url": "https://example.invalid/vehicles/CAR-1001/video.mp4"
+      }
+    ],
+    "weidianIsUpshelf": "Y",
+    "upShelfDate": "2026-07-03",
+    "downShelfDate": null,
+    "detectReportPdf": {
+      "url": "https://example.invalid/vehicles/CAR-1001/detect-report.pdf",
+      "name": "第三方检测报告"
+    }
   },
-  "carModelParam": {
-    "gearbox": "自动",
-    "displacement": "2.0L"
+  "carOwnerInfo": {
+    "payee": "TEST-PAYEE-MUST-NOT-LEAK",
+    "address": "TEST-OWNER-ADDRESS-MUST-NOT-LEAK",
+    "bankId": "TEST-BANK-ID-MUST-NOT-LEAK",
+    "identify": "TEST-ID-CARD-MUST-NOT-LEAK",
+    "phoneNumber": "TEST-OWNER-PHONE-MUST-NOT-LEAK",
+    "purchaseTax": 2940,
+    "customerName": "TEST-OWNER-NAME-MUST-NOT-LEAK",
+    "customerType": "10",
+    "otherAccount": "TEST-OTHER-ACCOUNT-MUST-NOT-LEAK",
+    "purchaseSource": "other",
+    "openAccountBank": "TEST-BANK-NAME-MUST-NOT-LEAK"
   },
   "carPriceInfo": {
-    "salePrice": 15.28,
     "purchasePrice": 10.01,
+    "newPrice": 19.98,
+    "dealPrice": 14.5,
+    "exhibitionPrice": 15.88,
     "salesPrice": 14.5,
+    "salePrice": 15.28,
+    "wholesalePrice": 13.9,
     "managerPrice": 14.2,
-    "wholesalePrice": 13.9
+    "retrofitPrice": 0.3
+  },
+  "carModelParam": {
+    "highlightsConfiguration": [
+      "无钥匙进入",
+      "倒车影像"
+    ],
+    "engineNumber": "TEST-ENGINE-NUMBER-MUST-NOT-LEAK",
+    "carBody": "三厢车",
+    "gearBoxType": "自动",
+    "seatNumber": 5,
+    "engineVolumeLiter": "2.0L",
+    "emissionStandard": "国六",
+    "fuelType": "汽油"
   },
   "carLicenseInfo": {
-    "licenseStatus": "normal"
+    "xiancheshangyexianjine": 3500,
+    "xiancheshangyexiandaoqiri": "2027-05-01",
+    "jiaoqiangdaoqiri": "2027-05-01",
+    "keysCount": 2,
+    "transferTotal": 0
   }
 }

@@ -7,27 +7,26 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Iterable
 
+from .contract import VEHICLE_CUSTOMER_VISIBLE_FIELD_PATHS
+
 
 DETAIL_ROOT = "source_payloads.vehicle_detail.payload"
 PICTURES_ROOT = "source_payloads.vehicle_pictures.payload"
 DEFAULT_CUSTOMER_VISIBLE_PATHS = frozenset(
-    {
-        f"{DETAIL_ROOT}.operationPhase",
-        f"{DETAIL_ROOT}.baseCarInfo.name",
+    {f"{DETAIL_ROOT}.{path}" for path in VEHICLE_CUSTOMER_VISIBLE_FIELD_PATHS}
+    | {
+        # Historical manual records used these compatibility paths before the
+        # official contract audit.  Keep reading them without turning them into
+        # new canonical storage fields.
         f"{DETAIL_ROOT}.baseCarInfo.carName",
         f"{DETAIL_ROOT}.baseCarInfo.brandName",
         f"{DETAIL_ROOT}.baseCarInfo.seriesName",
         f"{DETAIL_ROOT}.baseCarInfo.modelName",
-        f"{DETAIL_ROOT}.baseCarInfo.firstLicensePlateDate",
-        f"{DETAIL_ROOT}.baseCarInfo.mileage",
-        f"{DETAIL_ROOT}.baseCarInfo.vehicleCondition",
         f"{DETAIL_ROOT}.baseCarInfo.exteriorColor",
         f"{DETAIL_ROOT}.baseCarInfo.interiorColor",
-        f"{DETAIL_ROOT}.baseCarInfo.color",
         f"{DETAIL_ROOT}.carModelParam.gearbox",
         f"{DETAIL_ROOT}.carModelParam.gearBox",
         f"{DETAIL_ROOT}.carModelParam.displacement",
-        f"{DETAIL_ROOT}.carPriceInfo.salePrice",
         PICTURES_ROOT,
     }
 )
@@ -105,12 +104,30 @@ def project_customer_evidence(
     name = _first_allowed_text(
         record,
         policy,
-        f"{DETAIL_ROOT}.baseCarInfo.name",
+        f"{DETAIL_ROOT}.baseCarInfo.name.displayValue",
         f"{DETAIL_ROOT}.baseCarInfo.carName",
     )
-    brand = _allowed_value(record, f"{DETAIL_ROOT}.baseCarInfo.brandName", policy)
-    series = _allowed_value(record, f"{DETAIL_ROOT}.baseCarInfo.seriesName", policy)
-    model_name = _allowed_value(record, f"{DETAIL_ROOT}.baseCarInfo.modelName", policy)
+    raw_name = _allowed_value(record, f"{DETAIL_ROOT}.baseCarInfo.name", policy)
+    if not name and isinstance(raw_name, str):
+        name = raw_name.strip()
+    brand = _first_allowed_value(
+        record,
+        policy,
+        f"{DETAIL_ROOT}.baseCarInfo.name.brandName",
+        f"{DETAIL_ROOT}.baseCarInfo.brandName",
+    )
+    series = _first_allowed_value(
+        record,
+        policy,
+        f"{DETAIL_ROOT}.baseCarInfo.name.seriesName",
+        f"{DETAIL_ROOT}.baseCarInfo.seriesName",
+    )
+    model_name = _first_allowed_value(
+        record,
+        policy,
+        f"{DETAIL_ROOT}.baseCarInfo.name.modelName",
+        f"{DETAIL_ROOT}.baseCarInfo.modelName",
+    )
     if not name:
         name = " ".join(str(value).strip() for value in (brand, series, model_name) if str(value or "").strip())
     if not name:
@@ -119,27 +136,67 @@ def project_customer_evidence(
     year = _allowed_value(record, f"{DETAIL_ROOT}.baseCarInfo.firstLicensePlateDate", policy)
     mileage = _allowed_value(record, f"{DETAIL_ROOT}.baseCarInfo.mileage", policy)
     condition = _allowed_value(record, f"{DETAIL_ROOT}.baseCarInfo.vehicleCondition", policy)
+    display_description = _allowed_value(record, f"{DETAIL_ROOT}.baseCarInfo.carDetailForDisplay", policy)
+    stock_status = _allowed_value(record, f"{DETAIL_ROOT}.baseCarInfo.stockStatus", policy)
     exterior_color = _first_allowed_value(
         record,
         policy,
         f"{DETAIL_ROOT}.baseCarInfo.exteriorColor",
         f"{DETAIL_ROOT}.baseCarInfo.color",
     )
-    interior_color = _allowed_value(record, f"{DETAIL_ROOT}.baseCarInfo.interiorColor", policy)
+    interior_color = _first_allowed_value(
+        record,
+        policy,
+        f"{DETAIL_ROOT}.baseCarInfo.interiorColor",
+        f"{DETAIL_ROOT}.baseCarInfo.innerColor",
+    )
     transmission = _first_allowed_value(
         record,
         policy,
         f"{DETAIL_ROOT}.carModelParam.gearbox",
         f"{DETAIL_ROOT}.carModelParam.gearBox",
+        f"{DETAIL_ROOT}.carModelParam.gearBoxType",
     )
-    displacement = _allowed_value(record, f"{DETAIL_ROOT}.carModelParam.displacement", policy)
+    displacement = _first_allowed_value(
+        record,
+        policy,
+        f"{DETAIL_ROOT}.carModelParam.displacement",
+        f"{DETAIL_ROOT}.carModelParam.engineVolumeLiter",
+    )
+    car_body = _allowed_value(record, f"{DETAIL_ROOT}.carModelParam.carBody", policy)
+    seat_number = _allowed_value(record, f"{DETAIL_ROOT}.carModelParam.seatNumber", policy)
+    emission_standard = _allowed_value(record, f"{DETAIL_ROOT}.carModelParam.emissionStandard", policy)
+    fuel_type = _allowed_value(record, f"{DETAIL_ROOT}.carModelParam.fuelType", policy)
+    highlights = _allowed_value(record, f"{DETAIL_ROOT}.carModelParam.highlightsConfiguration", policy)
+    keys_count = _allowed_value(record, f"{DETAIL_ROOT}.carLicenseInfo.keysCount", policy)
+    transfer_total = _allowed_value(record, f"{DETAIL_ROOT}.carLicenseInfo.transferTotal", policy)
+    location = _allowed_value(record, f"{DETAIL_ROOT}.baseCarInfo.area.displayValue", policy)
     sale_price = _allowed_value(record, f"{DETAIL_ROOT}.carPriceInfo.salePrice", policy)
     annotations = _customer_visible_annotations(record)
 
     specs_parts = []
-    for label, value in (("车况", condition), ("外观颜色", exterior_color), ("内饰颜色", interior_color), ("变速箱", transmission), ("排量", displacement)):
+    for label, value in (
+        ("车况", condition),
+        ("外观颜色", exterior_color),
+        ("内饰颜色", interior_color),
+        ("变速箱", transmission),
+        ("排量", displacement),
+        ("燃料", fuel_type),
+        ("排放", emission_standard),
+        ("车身结构", car_body),
+        ("座位数", seat_number),
+        ("钥匙数", keys_count),
+        ("过户次数", transfer_total),
+        ("所在地", location),
+    ):
         if value not in (None, ""):
             specs_parts.append(f"{label}:{value}")
+    if isinstance(highlights, list) and highlights:
+        specs_parts.append("亮点配置:" + "、".join(str(item).strip() for item in highlights if str(item or "").strip()))
+    elif highlights not in (None, "", [], {}):
+        specs_parts.append(f"亮点配置:{highlights}")
+    if display_description not in (None, ""):
+        specs_parts.append(f"车辆描述:{display_description}")
     aliases = _unique_texts((name, brand, series, model_name, *(annotations.get("aliases") or [])))
     evidence = {
         "id": record.get("id"),
@@ -156,6 +213,8 @@ def project_customer_evidence(
         "transmission": transmission,
         "price": sale_price,
         "availability": operation_phase,
+        "stock_status": stock_status,
+        "operation_phase": operation_phase,
         "specs": annotations.get("specs") or "；".join(specs_parts),
         "source_type": source_type,
         "source_updated_at": _detail_pulled_at(record),
@@ -300,7 +359,7 @@ def _customer_picture_urls(record: dict[str, Any], policy: CustomerEvidencePolic
     for picture in pictures:
         if not isinstance(picture, dict):
             continue
-        for key in ("bigPictureUrl", "bigPictureLink", "pictureUrl", "pictureLink", "url"):
+        for key in ("pictureBig", "bigPictureUrl", "bigPictureLink", "pictureUrl", "pictureLink", "url"):
             value = str(picture.get(key) or "").strip()
             if value.startswith(("https://", "http://")):
                 urls.append(value)
