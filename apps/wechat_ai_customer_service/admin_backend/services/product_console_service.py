@@ -954,6 +954,14 @@ class ProductConsoleService:
         v2_vehicle = is_v2_vehicle_record(item)
         admin_view = build_admin_vehicle_view(item, include_raw=include_admin_raw)
         data = build_legacy_data_projection(item) if v2_vehicle else (item.get("data") if isinstance(item.get("data"), dict) else {})
+        output_item = dict(item)
+        if v2_vehicle and not include_admin_raw:
+            # Catalog/list responses are navigation surfaces, not raw audit
+            # exports.  Keep the stable shell plus derived compatibility data
+            # and admin_view, but do not ship source payloads that can contain
+            # owner phone numbers, ID cards, bank accounts, VINs or plates.
+            output_item.pop("source_payloads", None)
+            output_item.pop("extensions", None)
         product_id = str(item.get("id") or "")
         scoped = scoped if scoped is not None else None
         if scoped_counts is None:
@@ -967,7 +975,7 @@ class ProductConsoleService:
         is_unread = bool(review_state.get("is_new"))
         runtime_usable = str(item.get("status") or "active") != "archived" and not is_unread
         return {
-            **item,
+            **output_item,
             # Output-only compatibility facade.  V2 persistence never uses it.
             "data": data,
             "is_unread": is_unread,

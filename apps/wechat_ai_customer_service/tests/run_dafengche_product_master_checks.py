@@ -32,14 +32,26 @@ from packages.dafengche_product_master import (  # noqa: E402
     CAR_DETAIL_API,
     CAR_IDS_API,
     CAR_PICTURES_API,
+    CAR_UPDATE_API,
+    CUSTOMER_DETAIL_FIELD_PATHS,
+    CUSTOMER_RESTRICTED_FIELD_PATHS,
+    CUSTOMER_UPDATE_PARAM_FIELD_PATHS,
+    OFFICIAL_CUSTOMER_API_NAME_STATUS,
     SHOP_API,
+    VEHICLE_CUSTOMER_VISIBLE_FIELD_PATHS,
+    VEHICLE_DETAIL_FIELD_PATHS,
+    VEHICLE_PICTURE_FIELD_PATHS,
+    VEHICLE_RESTRICTED_FIELD_PATHS,
+    VEHICLE_UPDATE_PARAM_FIELD_PATHS,
     CustomerEvidencePolicy,
     DafengcheCredentials,
+    DafengcheOpenPlatformClient,
     DafengcheProductMaster,
     DafengcheReadOnlyClient,
     DafengcheSyncScope,
     InMemoryMirrorRepository,
     build_signature,
+    build_admin_vehicle_view,
     create_manual_vehicle,
     project_legacy_record,
 )
@@ -67,6 +79,7 @@ class FixtureTransport:
 def main() -> int:
     results = [
         check_portable_sync_and_raw_payload_retention(),
+        check_official_contract_surface_and_write_intent_isolation(),
         check_customer_evidence_policy_and_cross_shop_isolation(),
         check_manual_vehicle_and_host_storage_adapter(),
         check_legacy_facade_and_brain_input_contract(),
@@ -102,6 +115,8 @@ def check_portable_sync_and_raw_payload_retention() -> dict[str, Any]:
     raw_detail = record["source_payloads"]["vehicle_detail"]["payload"]
     assert_equal(raw_detail, detail, "vehicle-detail payload must be retained unchanged")
     assert_equal(raw_detail["futureVendorExtension"]["nested"][0], None, "unknown null field must remain intact")
+    assert_equal(raw_detail["carOwnerInfo"]["phoneNumber"], "TEST-OWNER-PHONE-MUST-NOT-LEAK", "vehicle owner info must remain in the internal mirror")
+    assert_equal(raw_detail["baseCarInfo"]["detectReportPdf"]["url"], "https://example.invalid/vehicles/CAR-1001/detect-report.pdf", "inspection report must remain in the internal mirror")
     assert_equal(repository.audit_events[0]["shop_payload"], load_fixture("shop.json"), "shop payload must remain auditable")
     assert_equal(repository.audit_events[0]["car_id_list_payloads"][0]["payload"], load_fixture("car_ids_sale.json"), "car-id list payload must remain auditable")
     assert_equal(record["source"]["marker"]["ingest_channel"], "dafengche_api", "API mirror must keep its source marker")
@@ -112,6 +127,99 @@ def check_portable_sync_and_raw_payload_retention() -> dict[str, Any]:
     return {"name": "portable_sync_and_raw_payload_retention", "ok": True, "record_id": record["id"]}
 
 
+def check_official_contract_surface_and_write_intent_isolation() -> dict[str, Any]:
+    required_vehicle_paths = {
+        "baseCarInfo.name.brandName",
+        "baseCarInfo.name.seriesName",
+        "baseCarInfo.name.modelName",
+        "baseCarInfo.name.displayValue",
+        "baseCarInfo.area.displayValue",
+        "baseCarInfo.registerArea.displayValue",
+        "baseCarInfo.stockStatus",
+        "baseCarInfo.carDetailForDisplay",
+        "baseCarInfo.innerColor",
+        "baseCarInfo.detectReportPdf.url",
+        "carOwnerInfo.phoneNumber",
+        "carOwnerInfo.identify",
+        "carOwnerInfo.bankId",
+        "carPriceInfo.newPrice",
+        "carPriceInfo.exhibitionPrice",
+        "carPriceInfo.retrofitPrice",
+        "carModelParam.gearBoxType",
+        "carModelParam.engineVolumeLiter",
+        "carModelParam.fuelType",
+        "carLicenseInfo.keysCount",
+        "carLicenseInfo.transferTotal",
+    }
+    assert_true(required_vehicle_paths.issubset(VEHICLE_DETAIL_FIELD_PATHS), "vehicle detail contract must include every audited official path")
+    assert_true({"pictureName", "pictureNumber", "pictureDescription", "pictureBig", "businessType"}.issubset(VEHICLE_PICTURE_FIELD_PATHS), "vehicle picture contract must use official picture fields")
+    assert_true(
+        {
+            "updateParam.baseCarInfo.name.brandCode",
+            "updateParam.carOwnerInfo.phoneNumber",
+            "updateParam.carPriceInfo.salePrice",
+            "updateParam.carModelParam.gearBoxType",
+            "updateParam.carLicenseInfo.transferTotal",
+        }.issubset(VEHICLE_UPDATE_PARAM_FIELD_PATHS),
+        "vehicle update contract must include official writeback fields",
+    )
+    assert_true({"phone", "weichat", "identityCard", "budgetUp", "sellBrandSeries.brandName", "location.displayValue"}.issubset(CUSTOMER_DETAIL_FIELD_PATHS), "customer field contract must be recorded separately")
+    assert_true(
+        {"updateParam.phone", "updateParam.weichat", "updateParam.identityCard", "updateParam.sellBrandSeries.brandName", "updateParam.location.displayValue", "updateParam.recordId"}.issubset(CUSTOMER_UPDATE_PARAM_FIELD_PATHS),
+        "customer updateParam field contract must be recorded separately",
+    )
+    assert_equal(
+        OFFICIAL_CUSTOMER_API_NAME_STATUS["customer_detail"],
+        "document_section_present_but_api_name_missing",
+        "customer query section must not invent an API name",
+    )
+    assert_true("carOwnerInfo.phoneNumber" in VEHICLE_RESTRICTED_FIELD_PATHS, "vehicle owner phone must be restricted")
+    assert_true("identityCard" in CUSTOMER_RESTRICTED_FIELD_PATHS, "customer identity card must be restricted")
+    assert_true("baseCarInfo.name.displayValue" in VEHICLE_CUSTOMER_VISIBLE_FIELD_PATHS, "official display name may be customer visible")
+
+    transport = FixtureTransport({CAR_UPDATE_API: "CAR-1001"})
+    client = DafengcheOpenPlatformClient(
+        credentials=DafengcheCredentials(app_key="test-app-key", app_secret="test-app-secret"),
+        transport=transport,
+        now_seconds=lambda: 1_784_000_000,
+    )
+    update_result = client.update_car(
+        update_param={
+            "appId": "app-001",
+            "carId": "CAR-1001",
+            "operator": "operator-001",
+            "baseCarInfo": {"name": {"brandCode": "TOYOTA", "brandName": "丰田"}},
+            "carOwnerInfo": {"phoneNumber": "TEST-OWNER-PHONE-MUST-NOT-LEAK"},
+            "carPriceInfo": {"salePrice": 15.28},
+            "carModelParam": {"gearBoxType": "自动"},
+            "carLicenseInfo": {"transferTotal": 0},
+        }
+    )
+    assert_equal(update_result, "CAR-1001", "explicit write client must return upstream update result")
+    request_data = json.loads(transport.requests[0]["data"])
+    assert_equal(transport.requests[0]["api"], CAR_UPDATE_API, "explicit write client must use the documented vehicle update API")
+    assert_equal(request_data["updateParam"]["carOwnerInfo"]["phoneNumber"], "TEST-OWNER-PHONE-MUST-NOT-LEAK", "write payload must preserve official updateParam shape")
+
+    repository, _service = synced_service()
+    view = build_admin_vehicle_view(repository.list_records()[0], include_raw=False)
+    list_text = json.dumps(view, ensure_ascii=False)
+    for restricted in ("carOwnerInfo", "TEST-OWNER-PHONE-MUST-NOT-LEAK", "TEST-ID-CARD-MUST-NOT-LEAK", "TEST-BANK-ID-MUST-NOT-LEAK"):
+        assert_true(restricted not in list_text, f"default admin/list view leaked restricted owner field: {restricted}")
+    audit_view = build_admin_vehicle_view(repository.list_records()[0], include_raw=True)
+    audit_text = json.dumps(audit_view, ensure_ascii=False)
+    assert_true("TEST-OWNER-PHONE-MUST-NOT-LEAK" in audit_text, "authorized raw audit view must retain owner info")
+    audit_paths = {
+        str(field.get("path") or "")
+        for group in audit_view["dafengche_field_groups"]
+        for field in group["fields"]
+        if isinstance(field, dict)
+    }
+    assert_true(VEHICLE_DETAIL_FIELD_PATHS.issubset(audit_paths), "admin audit field groups must expose every documented vehicle-detail path")
+    sync_apis = [request["api"] for request in _service.client.transport.requests] if _service.client else []
+    assert_true(CAR_UPDATE_API not in sync_apis, "mirror sync must remain read-only and never call vehicle update")
+    return {"name": "official_contract_surface_and_write_intent_isolation", "ok": True}
+
+
 def check_customer_evidence_policy_and_cross_shop_isolation() -> dict[str, Any]:
     repository, service = synced_service()
     evidence = service.list_customer_evidence(shop_code="SHOP-001")
@@ -120,7 +228,27 @@ def check_customer_evidence_policy_and_cross_shop_isolation() -> dict[str, Any]:
     assert_equal(item["name"], "2021款 丰田 凯美瑞 2.0G 豪华版", "customer evidence name")
     assert_equal(item["price"], 15.28, "only public salePrice should project")
     evidence_text = json.dumps(item, ensure_ascii=False)
-    for restricted in ("TEST-VIN-MUST-NOT-LEAK", "TEST-PLATE-MUST-NOT-LEAK", "10.01", "14.5", "14.2", "13.9"):
+    for restricted in (
+        "TEST-VIN-MUST-NOT-LEAK",
+        "TEST-PLATE-MUST-NOT-LEAK",
+        "TEST-OWNER-ID-MUST-NOT-LEAK",
+        "TEST-CREATOR-ID-MUST-NOT-LEAK",
+        "TEST-SALESPERSON-ID-MUST-NOT-LEAK",
+        "TEST-INTERNAL-REMARK-MUST-NOT-LEAK",
+        "TEST-PAYEE-MUST-NOT-LEAK",
+        "TEST-OWNER-ADDRESS-MUST-NOT-LEAK",
+        "TEST-BANK-ID-MUST-NOT-LEAK",
+        "TEST-ID-CARD-MUST-NOT-LEAK",
+        "TEST-OWNER-PHONE-MUST-NOT-LEAK",
+        "TEST-OWNER-NAME-MUST-NOT-LEAK",
+        "TEST-OTHER-ACCOUNT-MUST-NOT-LEAK",
+        "TEST-BANK-NAME-MUST-NOT-LEAK",
+        "TEST-ENGINE-NUMBER-MUST-NOT-LEAK",
+        "10.01",
+        "14.5",
+        "14.2",
+        "13.9",
+    ):
         assert_true(restricted not in evidence_text, f"restricted source field leaked: {restricted}")
     assert_equal(service.list_customer_evidence(shop_code="SHOP-OTHER"), [], "cross-shop evidence must be denied")
     assert_equal(service.list_customer_evidence(shop_code=None), [], "bound Dafengche vehicle requires explicit shop scope")

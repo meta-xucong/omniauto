@@ -11,6 +11,7 @@ import copy
 from datetime import datetime, timezone
 from typing import Any
 
+from .contract import FieldSpec, VEHICLE_DETAIL_FIELD_GROUP_SPECS
 from .service import content_hash
 
 
@@ -32,66 +33,19 @@ MANUAL_ANNOTATION_FIELDS = frozenset({"sku", "unit", "inventory", "price_tiers",
 # deliberately retained as ``None`` when absent so an operator can distinguish
 # an incomplete mirror from a field the UI merely chose not to render.
 CARD_FIELD_SPECS = (
-    ("baseCarInfo.firstLicensePlateDate", "上牌时间"),
-    ("baseCarInfo.mileage", "表显里程"),
-    ("carModelParam.gearbox", "变速箱"),
-    ("carModelParam.displacement", "排量"),
-    ("baseCarInfo.vehicleCondition", "车况"),
-    ("baseCarInfo.exteriorColor", "外观颜色"),
+    FieldSpec("baseCarInfo.firstLicensePlateDate", "上牌时间"),
+    FieldSpec("baseCarInfo.mileage", "表显里程"),
+    FieldSpec("carModelParam.gearBoxType", "变速箱"),
+    FieldSpec("carModelParam.engineVolumeLiter", "排量"),
+    FieldSpec("baseCarInfo.vehicleCondition", "车况"),
+    FieldSpec("baseCarInfo.color", "外观颜色"),
 )
-DETAIL_FIELD_GROUP_SPECS = (
-    (
-        "vehicle_identity",
-        "车源识别",
-        (
-            ("carId", "大风车车源 ID"),
-            ("shopCode", "大风车店铺编码"),
-            ("operationPhase", "业务阶段"),
-        ),
-    ),
-    (
-        "base_car_info",
-        "基础车辆信息",
-        (
-            ("baseCarInfo.name", "车辆标题"),
-            ("baseCarInfo.carName", "车辆名称"),
-            ("baseCarInfo.brandName", "品牌"),
-            ("baseCarInfo.seriesName", "车系"),
-            ("baseCarInfo.modelName", "车型"),
-            ("baseCarInfo.firstLicensePlateDate", "上牌时间"),
-            ("baseCarInfo.mileage", "表显里程"),
-            ("baseCarInfo.vehicleCondition", "车况"),
-            ("baseCarInfo.exteriorColor", "外观颜色"),
-            ("baseCarInfo.color", "车身颜色"),
-            ("baseCarInfo.interiorColor", "内饰颜色"),
-        ),
-    ),
-    (
-        "model_parameters",
-        "车型参数",
-        (
-            ("carModelParam.gearbox", "变速箱"),
-            ("carModelParam.gearBox", "变速箱（备用字段）"),
-            ("carModelParam.displacement", "排量"),
-        ),
-    ),
-    (
-        "price_information",
-        "价格信息",
-        (
-            ("carPriceInfo.salePrice", "公开售价"),
-            ("carPriceInfo.purchasePrice", "收购价"),
-            ("carPriceInfo.salesPrice", "成交价"),
-            ("carPriceInfo.managerPrice", "经理价"),
-            ("carPriceInfo.wholesalePrice", "批发价"),
-        ),
-    ),
-    (
-        "license_information",
-        "手续信息",
-        (("carLicenseInfo.licenseStatus", "手续状态"),),
-    ),
-)
+CARD_FIELD_COMPATIBILITY_ALIASES = {
+    "carModelParam.gearBoxType": ("carModelParam.gearBox", "carModelParam.gearbox"),
+    "carModelParam.engineVolumeLiter": ("carModelParam.displacement",),
+    "baseCarInfo.color": ("baseCarInfo.exteriorColor",),
+}
+DETAIL_FIELD_GROUP_SPECS = VEHICLE_DETAIL_FIELD_GROUP_SPECS
 
 
 def is_v2_vehicle_record(record: Any) -> bool:
@@ -123,10 +77,14 @@ def build_admin_vehicle_view(record: dict[str, Any], *, include_raw: bool = Fals
     model = _mapping(detail.get("carModelParam"))
     pricing = _mapping(detail.get("carPriceInfo"))
     license_info = _mapping(detail.get("carLicenseInfo"))
+    name_payload = _mapping(base.get("name"))
     source_type = str(source.get("type") or "")
     ingest_channel = str(marker.get("ingest_channel") or "")
     operation_phase = detail.get("operationPhase")
-    name = _first_text(base.get("name"), base.get("carName"), _joined_text(base.get("brandName"), base.get("seriesName"), base.get("modelName")))
+    name = _base_vehicle_name(base)
+    brand_name = _first_value(name_payload.get("brandName"), base.get("brandName"))
+    series_name = _first_value(name_payload.get("seriesName"), base.get("seriesName"))
+    model_name = _first_value(name_payload.get("modelName"), base.get("modelName"))
     photos = _picture_urls(pictures_snapshot.get("payload"))
     photo_entries = _picture_entries(pictures_snapshot.get("payload"))
     metadata = _mapping(record.get("metadata"))
@@ -146,34 +104,67 @@ def build_admin_vehicle_view(record: dict[str, Any], *, include_raw: bool = Fals
         },
         "vehicle": {
             "operationPhase": operation_phase,
-            "title": base.get("name"),
+            "title": name,
             "baseCarInfo": {
-                "name": base.get("name") or base.get("carName"),
+                "name": name,
+                "nameObject": copy.deepcopy(base.get("name")) if isinstance(base.get("name"), dict) else {},
                 "carName": base.get("carName"),
-                "brandName": base.get("brandName"),
-                "seriesName": base.get("seriesName"),
-                "modelName": base.get("modelName"),
+                "brandName": brand_name,
+                "seriesName": series_name,
+                "modelName": model_name,
+                "brandCode": name_payload.get("brandCode"),
+                "seriesCode": name_payload.get("seriesCode"),
+                "modelCode": name_payload.get("modelCode"),
                 "firstLicensePlateDate": base.get("firstLicensePlateDate"),
                 "mileage": base.get("mileage"),
                 "vehicleCondition": base.get("vehicleCondition"),
+                "carDetailForDisplay": base.get("carDetailForDisplay"),
+                "stockStatus": base.get("stockStatus"),
                 "exteriorColor": _first_value(base.get("exteriorColor"), base.get("color")),
                 "color": base.get("color"),
-                "interiorColor": base.get("interiorColor"),
+                "interiorColor": _first_value(base.get("interiorColor"), base.get("innerColor")),
+                "innerColor": base.get("innerColor"),
+                "productionDate": base.get("productionDate"),
+                "annualExpiresDate": base.get("annualExpiresDate"),
+                "inStock": base.get("inStock"),
+                "reserveTime": base.get("reserveTime"),
+                "payTime": base.get("payTime"),
+                "outStockDate": base.get("outStockDate"),
+                "weidianIsUpshelf": base.get("weidianIsUpshelf"),
+                "detectReportPdf": copy.deepcopy(base.get("detectReportPdf")) if isinstance(base.get("detectReportPdf"), dict) else {},
             },
             "carModelParam": {
-                "gearbox": _first_value(model.get("gearbox"), model.get("gearBox")),
+                "gearbox": _first_value(model.get("gearbox"), model.get("gearBox"), model.get("gearBoxType")),
                 "gearBox": model.get("gearBox"),
-                "displacement": model.get("displacement"),
+                "gearBoxType": model.get("gearBoxType"),
+                "displacement": _first_value(model.get("displacement"), model.get("engineVolumeLiter")),
+                "engineVolumeLiter": model.get("engineVolumeLiter"),
+                "highlightsConfiguration": copy.deepcopy(model.get("highlightsConfiguration")) if isinstance(model.get("highlightsConfiguration"), list) else model.get("highlightsConfiguration"),
+                "carBody": model.get("carBody"),
+                "seatNumber": model.get("seatNumber"),
+                "emissionStandard": model.get("emissionStandard"),
+                "fuelType": model.get("fuelType"),
             },
-            "carLicenseInfo": {"licenseStatus": license_info.get("licenseStatus")},
+            "carLicenseInfo": {
+                "licenseStatus": license_info.get("licenseStatus"),
+                "xiancheshangyexianjine": license_info.get("xiancheshangyexianjine"),
+                "xiancheshangyexiandaoqiri": license_info.get("xiancheshangyexiandaoqiri"),
+                "jiaoqiangdaoqiri": license_info.get("jiaoqiangdaoqiri"),
+                "keysCount": license_info.get("keysCount"),
+                "transferTotal": license_info.get("transferTotal"),
+            },
             "carPriceInfo": {
                 "salePrice": pricing.get("salePrice"),
                 "purchasePrice": pricing.get("purchasePrice"),
+                "newPrice": pricing.get("newPrice"),
+                "dealPrice": pricing.get("dealPrice"),
+                "exhibitionPrice": pricing.get("exhibitionPrice"),
                 "salesPrice": pricing.get("salesPrice"),
                 "managerPrice": pricing.get("managerPrice"),
                 "wholesalePrice": pricing.get("wholesalePrice"),
+                "retrofitPrice": pricing.get("retrofitPrice"),
             },
-            "card_fields": _field_rows(detail, CARD_FIELD_SPECS),
+            "card_fields": _field_rows(detail, CARD_FIELD_SPECS, compatibility_aliases=CARD_FIELD_COMPATIBILITY_ALIASES),
             "photos": photos,
             # Additive admin projection: existing consumers keep ``photos``;
             # the V2 editor receives stable local picture identifiers needed
@@ -416,7 +407,7 @@ def _picture_urls(value: Any) -> list[str]:
     for item in value:
         if not isinstance(item, dict):
             continue
-        for key in ("bigPictureUrl", "bigPictureLink", "pictureUrl", "pictureLink", "url"):
+        for key in ("pictureBig", "bigPictureUrl", "bigPictureLink", "pictureUrl", "pictureLink", "url"):
             url = str(item.get(key) or "").strip()
             if _is_admin_picture_url(url):
                 if url not in urls:
@@ -438,7 +429,7 @@ def _picture_entries(value: Any) -> list[dict[str, Any]]:
         url = next(
             (
                 str(item.get(key) or "").strip()
-                for key in ("bigPictureUrl", "bigPictureLink", "pictureUrl", "pictureLink", "url")
+                for key in ("pictureBig", "bigPictureUrl", "bigPictureLink", "pictureUrl", "pictureLink", "url")
                 if _is_admin_picture_url(str(item.get(key) or "").strip())
             ),
             "",
@@ -451,6 +442,9 @@ def _picture_entries(value: Any) -> list[dict[str, Any]]:
                 "url": url,
                 "picture_id": str(item.get("pictureId") or ""),
                 "picture_number": item.get("pictureNumber"),
+                "picture_name": str(item.get("pictureName") or ""),
+                "picture_description": str(item.get("pictureDescription") or item.get("description") or ""),
+                "business_type": str(item.get("businessType") or ""),
                 "filename": str(item.get("filename") or ""),
                 "mime_type": str(item.get("mimeType") or ""),
             }
@@ -466,18 +460,39 @@ def _is_admin_picture_url(value: str) -> bool:
     return value.startswith(("https://", "http://", "/api/product-console/products/"))
 
 
-def _field_rows(detail: dict[str, Any], specs: tuple[tuple[str, str], ...]) -> list[dict[str, Any]]:
+def _field_rows(
+    detail: dict[str, Any],
+    specs: tuple[FieldSpec, ...] | tuple[tuple[str, str], ...],
+    *,
+    compatibility_aliases: dict[str, tuple[str, ...]] | None = None,
+) -> list[dict[str, Any]]:
     return [
-        {"path": path, "label": label, "value": copy.deepcopy(_value_at(detail, path))}
-        for path, label in specs
+        _field_row(detail, path, label, compatibility_aliases=compatibility_aliases or {})
+        for path, label in (_spec_path_label(spec) for spec in specs)
     ]
+
+
+def _field_row(detail: dict[str, Any], path: str, label: str, *, compatibility_aliases: dict[str, tuple[str, ...]]) -> dict[str, Any]:
+    value = _value_at(detail, path)
+    source_path = path
+    if value in (None, ""):
+        for alias in compatibility_aliases.get(path, ()):
+            alias_value = _value_at(detail, alias)
+            if alias_value not in (None, ""):
+                value = alias_value
+                source_path = alias
+                break
+    row = {"path": path, "label": label, "value": copy.deepcopy(value)}
+    if source_path != path:
+        row["source_path"] = source_path
+    return row
 
 
 def _dafengche_field_groups(detail: dict[str, Any]) -> list[dict[str, Any]]:
     known_paths: set[str] = set()
     groups: list[dict[str, Any]] = []
     for group_id, label, specs in DETAIL_FIELD_GROUP_SPECS:
-        known_paths.update(path for path, _ in specs)
+        known_paths.update(spec.path for spec in specs)
         groups.append(
             {
                 "id": group_id,
@@ -502,6 +517,12 @@ def _value_at(value: Any, path: str) -> Any:
             return None
         current = current[key]
     return current
+
+
+def _spec_path_label(spec: FieldSpec | tuple[str, str]) -> tuple[str, str]:
+    if isinstance(spec, FieldSpec):
+        return spec.path, spec.label
+    return spec
 
 
 def _flatten_payload(value: Any, prefix: str = "") -> list[tuple[str, Any]]:
@@ -529,6 +550,22 @@ def _first_text(*values: Any) -> str:
 
 def _joined_text(*values: Any) -> str:
     return " ".join(str(value).strip() for value in values if str(value or "").strip())
+
+
+def _base_vehicle_name(base: dict[str, Any]) -> str:
+    raw = base.get("name")
+    if isinstance(raw, dict):
+        display = _first_text(
+            raw.get("displayValue"),
+            _joined_text(raw.get("brandName"), raw.get("seriesName"), raw.get("modelName")),
+        )
+    else:
+        display = _first_text(raw)
+    return _first_text(
+        display,
+        base.get("carName"),
+        _joined_text(base.get("brandName"), base.get("seriesName"), base.get("modelName")),
+    )
 
 
 def _set_if_present(target: dict[str, Any], key: str, value: Any) -> None:

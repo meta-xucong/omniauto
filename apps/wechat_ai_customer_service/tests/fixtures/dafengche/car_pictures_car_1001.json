@@ -3,8 +3,8 @@
     "carId": "CAR-1001",
     "pictureName": "front",
     "pictureNumber": 1,
-    "description": "front view",
-    "bigPictureUrl": "https://example.invalid/vehicles/CAR-1001/front.jpg",
+    "pictureDescription": "front view",
+    "pictureBig": "https://example.invalid/vehicles/CAR-1001/front.jpg",
     "businessType": "display"
   }
 ]

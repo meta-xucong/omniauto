@@ -89,6 +89,11 @@ def v2_vehicle(*, source_type: str = "manual") -> dict:
                         "mileage": "4.2万公里",
                         "vinNumber": "DO-NOT-EXPOSE-TO-BRAIN",
                     },
+                    "carOwnerInfo": {
+                        "phoneNumber": "OWNER-PHONE-DO-NOT-LIST",
+                        "identify": "OWNER-ID-CARD-DO-NOT-LIST",
+                        "bankId": "OWNER-BANK-ID-DO-NOT-LIST",
+                    },
                     "carModelParam": {"gearbox": "自动", "displacement": "2.0L"},
                     "carLicenseInfo": {"licenseStatus": "手续正常"},
                     "carPriceInfo": {"salePrice": 13.98, "purchasePrice": 9.8},
@@ -350,9 +355,16 @@ def check_product_console_v2_write_and_compatibility_output() -> None:
     assert_equal(displayed["display"]["name"], "凯美瑞 2.0G", "legacy display must receive V2-derived value")
     assert_equal(displayed["data"]["price"], 13.98, "legacy output data must be a derived facade")
     assert_equal(catalog["vehicle_counts"]["manual"], 1, "V2 vehicle metrics must be additive")
+    assert_true("source_payloads" not in displayed, "catalog must not expose raw V2 source payloads at top level")
+    assert_true("extensions" not in displayed, "catalog must not expose internal V2 extension snapshots at top level")
     assert_true("raw_source_payloads" not in displayed["admin_view"], "catalog must not expose raw admin payloads")
+    displayed_text = str(displayed)
+    assert_true("carOwnerInfo" not in displayed_text, "catalog admin view must not expose the owner-info object")
+    for restricted in ("OWNER-PHONE-DO-NOT-LIST", "OWNER-ID-CARD-DO-NOT-LIST", "OWNER-BANK-ID-DO-NOT-LIST"):
+        assert_true(restricted not in displayed_text, f"catalog admin view leaked owner field: {restricted}")
     detail = service.detail(record["id"])
     assert_true("raw_source_payloads" in detail["item"]["admin_view"], "detail must retain raw payloads for authenticated audit")
+    assert_true("OWNER-PHONE-DO-NOT-LIST" in str(detail["item"]["admin_view"]["raw_source_payloads"]), "detail raw audit view must retain owner info")
     result = service.update_admin_view(record["id"], {"vehicle_detail_patch": {"baseCarInfo": {"name": "凯美瑞 2.5G"}}})
     assert_equal(result["operation"], "update_admin_view", "must use V2 operation")
     assert_true(saved and "data" not in saved[-1], "V2 console save must not persist generic data")
