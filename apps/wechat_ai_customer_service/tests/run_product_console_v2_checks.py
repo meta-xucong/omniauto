@@ -427,6 +427,22 @@ def check_frontend_uses_v2_console_contract() -> None:
     assert_true("选中后立即上传并显示" in app_js and "vehicle-image-uploading-label" in app_js, "manual V2 image editor must render immediate upload feedback")
     assert_true("productDetailRequestId" in app_js and "state.selectedProduct?.id !== productId" in app_js, "stale vehicle-image responses must not reopen an old selected car")
     assert_true("productDetailModalOpenRequested" in app_js and "state.productDetailRequestId += 1" in app_js, "closing the vehicle detail must invalidate pending automatic reopen actions")
+    assert_true(
+        "await loadProductDetail(item?.id, {open: true});" in app_js,
+        "clicking a vehicle card must explicitly request the detail modal to open",
+    )
+    shell_render_index = app_js.find("renderProductDetailOpeningShell(item);")
+    immediate_open_index = app_js.find("openProductDetailModal();")
+    detail_fetch_index = app_js.find("await loadProductDetail(item?.id, {open: true});")
+    assert_true(
+        shell_render_index >= 0 and immediate_open_index >= 0 and detail_fetch_index >= 0 and shell_render_index < immediate_open_index < detail_fetch_index,
+        "clicking a vehicle card must render a lightweight opening shell and open the modal before waiting for the detail fetch",
+    )
+    assert_true("function renderProductDetailOpeningShell" in app_js and "正在加载完整车辆资料" in app_js, "vehicle detail opening shell must remain lightweight and user-visible")
+    assert_true(
+        "if (shouldOpenModal) openProductDetailModal();" in app_js,
+        "current detail loads must honor the captured open intent after the stale-request guard passes",
+    )
     assert_true("product-catalog-source-filter" in index_html, "frontend must expose source filtering")
 
 
