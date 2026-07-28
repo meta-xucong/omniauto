@@ -3025,7 +3025,12 @@ function renderProductCatalogList() {
       state.productDetailModalOpenRequested = Boolean(item?.id);
       state.productDetailMode = "view";
       state.productScopedEditor = null;
-      await loadProductDetail(item?.id);
+      state.productDetailScopedKnowledge = {};
+      if (item?.id) {
+        renderProductDetailOpeningShell(item);
+        openProductDetailModal();
+      }
+      await loadProductDetail(item?.id, {open: true});
     });
   });
   hydrateAuthorizedVehicleImages(list);
@@ -3061,7 +3066,7 @@ async function loadProductDetail(productId, options = {}) {
     return;
   }
   if (options.open === true) state.productDetailModalOpenRequested = true;
-  const shouldOpenModal = options.open !== false && state.productDetailModalOpenRequested;
+  const shouldOpenModal = options.open === true || (options.open !== false && state.productDetailModalOpenRequested);
   const requestId = ++state.productDetailRequestId;
   const payload = await apiGet(`/api/product-console/products/${encodeURIComponent(productId)}`);
   // A slower response for a previously selected car must never put the UI
@@ -3071,7 +3076,32 @@ async function loadProductDetail(productId, options = {}) {
   state.productDetailScopedKnowledge = payload.scoped_knowledge || {};
   renderProductCatalogList();
   renderProductCatalogDetail();
-  if (shouldOpenModal && state.productDetailModalOpenRequested) openProductDetailModal();
+  // Closing the modal increments productDetailRequestId, so a close that happens
+  // while this request is in flight is already handled by the stale-request guard
+  // above. Once the request is still current, honor the open intent captured at
+  // request start instead of re-reading a mutable flag that may be cleared by
+  // unrelated UI work.
+  if (shouldOpenModal) openProductDetailModal();
+}
+
+function renderProductDetailOpeningShell(item) {
+  const detail = document.getElementById("product-catalog-detail");
+  if (!detail || !item) return;
+  const view = productAdminView(item);
+  const name = view.vehicle?.title || view.summary?.name || item.id || "车辆详情";
+  const price = view.vehicle?.carPriceInfo?.salePrice ?? view.summary?.price;
+  detail.innerHTML = `
+    <div class="product-detail-loading">
+      <div class="section-heading">
+        <div>
+          <span>大风车车辆资料（V2）</span>
+          <strong>${escapeHtml(String(name || "车辆详情"))}</strong>
+        </div>
+      </div>
+      <p class="muted-text">正在加载完整车辆资料…</p>
+      ${price === undefined || price === null || price === "" ? "" : `<p class="muted-text">公开售价：${escapeHtml(String(price))}</p>`}
+    </div>
+  `;
 }
 
 function renderProductCatalogDetail(scopedKnowledge = null) {
