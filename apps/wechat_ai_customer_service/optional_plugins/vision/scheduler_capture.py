@@ -57,6 +57,109 @@ def legacy_observe_current_surface(
     )
 
 
+def legacy_locate_current_visual_group(
+    *,
+    connector: Any,
+    target: Any,
+    explicit_image_pending: bool = False,
+    anchor_text_key: str = "",
+    anchor_message_id: str = "",
+    max_images: int = 1,
+    max_scroll_steps: int | None = None,
+    max_snapshots: int | None = None,
+    max_seconds: float | None = None,
+) -> dict[str, Any]:
+    """Vision-private locate seam used only for strict image pending events."""
+
+    if not callable(getattr(connector, "call_compat_sidecar", None)):
+        return {
+            "ok": False,
+            "state": "vision_visual_group_host_unavailable",
+            "reason": "vision_current_surface_host_unavailable",
+            "assets": [],
+            "messages": [],
+        }
+
+    from .integrations.wechat_current import locate_current_visual_group
+
+    return locate_current_visual_group(
+        connector,
+        str(getattr(target, "name", "") or ""),
+        exact=bool(getattr(target, "exact", True)),
+        session_key=str(getattr(target, "session_key", "") or ""),
+        conversation_type=str(getattr(target, "conversation_type", "") or ""),
+        explicit_image_pending=explicit_image_pending,
+        anchor_text_key=anchor_text_key,
+        anchor_message_id=anchor_message_id,
+        max_images=max_images,
+        max_scroll_steps=max_scroll_steps,
+        max_snapshots=max_snapshots,
+        max_seconds=max_seconds,
+    )
+
+
+def _clean_text(value: Any) -> str:
+    return "".join(str(value or "").strip().split()).lower()
+
+
+def _message_identity(message: dict[str, Any]) -> str:
+    for key in ("message_id", "id", "legacy_message_id", "original_message_id", "canonical_input_id"):
+        value = str(message.get(key) or "").strip()
+        if value:
+            return value
+    return ""
+
+
+def _message_side(message: dict[str, Any]) -> str:
+    side = str(message.get("sender_role") or message.get("sender") or "").strip().lower()
+    if side in {"self", "assistant", "service", "bot"}:
+        return "self"
+    return side
+
+
+def _current_turn_customer_text_anchor(
+    messages: list[dict[str, Any]],
+    target_state: dict[str, Any],
+) -> dict[str, Any]:
+    state = target_state if isinstance(target_state, dict) else {}
+    excluded_ids = {
+        str(item or "").strip()
+        for key in ("processed_message_ids", "handoff_message_ids")
+        for item in (state.get(key) or [])
+        if str(item or "").strip()
+    }
+    last_self_index = -1
+    for index, message in enumerate(messages):
+        if isinstance(message, dict) and _message_side(message) == "self":
+            last_self_index = index
+    current_turn: list[dict[str, Any]] = []
+    for message in messages[last_self_index + 1 :]:
+        if not isinstance(message, dict):
+            continue
+        if str(message.get("type") or "text").strip().lower() != "text":
+            continue
+        if _message_side(message) != "customer":
+            continue
+        identity = _message_identity(message)
+        if identity and identity in excluded_ids:
+            continue
+        if not str(message.get("content") or "").strip():
+            continue
+        current_turn.append(message)
+    if not current_turn:
+        return {}
+    first = current_turn[0]
+    key = _clean_text(first.get("content"))
+    if not key:
+        return {}
+    if sum(1 for item in current_turn if _clean_text(item.get("content")) == key) != 1:
+        return {}
+    identity = _message_identity(first)
+    if not identity:
+        return {}
+    return {"message_id": identity, "text_key": key, "count": len(current_turn)}
+
+
 def prepare_scheduler_capture(
     *,
     connector: Any,
@@ -123,18 +226,45 @@ def prepare_scheduler_capture(
     should_observe_current_surface = bool(
         signal and (pending_signal_id or explicit_image_pending)
     )
+    current_text_anchor = _current_turn_customer_text_anchor(
+        current_messages,
+        target_state,
+    )
+    normal_multi_text_anchor = bool(
+        not explicit_image_pending
+        and pending_signal_id
+        and current_text_anchor
+        and int(current_text_anchor.get("count") or 0) >= 2
+    )
+    use_bounded_visual_locate = bool(
+        visual_capture_trigger.get("should_run")
+        or normal_multi_text_anchor
+    )
     if (
         should_observe_current_surface
         and not image_signal_already_processed
         and not any(is_structural_visual_occurrence(item) for item in current_messages)
     ):
         try:
-            surface_observation = legacy_observe_current_surface(
-                connector=connector,
-                target=target,
-                side_filter="all",
-                max_images=8,
-            )
+            if use_bounded_visual_locate:
+                surface_observation = legacy_locate_current_visual_group(
+                    connector=connector,
+                    target=target,
+                    explicit_image_pending=explicit_image_pending,
+                    anchor_text_key=str(current_text_anchor.get("text_key") or ""),
+                    anchor_message_id=str(current_text_anchor.get("message_id") or ""),
+                    max_images=3,
+                    max_scroll_steps=None if explicit_image_pending else 2,
+                    max_snapshots=None if explicit_image_pending else 3,
+                    max_seconds=None if explicit_image_pending else 6.0,
+                )
+            else:
+                surface_observation = legacy_observe_current_surface(
+                    connector=connector,
+                    target=target,
+                    side_filter="all",
+                    max_images=8,
+                )
         except Exception as exc:  # noqa: BLE001 - optional vision fails closed.
             surface_observation = {
                 "ok": False,
@@ -168,6 +298,11 @@ def prepare_scheduler_capture(
             target_state=target_state,
             explicit_image_pending=bool(explicit_image_pending),
             pending_signal_id=pending_signal_id,
+            pending_anchor_message_ids={
+                str(current_text_anchor.get("message_id") or "")
+            }
+            if current_text_anchor
+            else None,
         )
     )
     current_messages = [

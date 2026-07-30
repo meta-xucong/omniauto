@@ -73,6 +73,7 @@ def _surface_occurrence(
     side: str,
     message_id: str,
     following_text_id: str = "",
+    private_ordinal: bool = False,
 ) -> dict[str, Any]:
     message = {
         "id": message_id,
@@ -88,6 +89,9 @@ def _surface_occurrence(
     }
     if following_text_id:
         message["_vision_following_text_id"] = following_text_id
+    if private_ordinal:
+        message["_vision_occurrence_ordinal"] = 0
+        message["_vision_transaction_ordinal"] = "0"
     return message
 
 
@@ -103,13 +107,18 @@ def _prepare(
 ) -> tuple[dict[str, Any], int]:
     calls = 0
     original = scheduler_capture.legacy_observe_current_surface
+    original_locate = scheduler_capture.legacy_locate_current_visual_group
 
     def observe(**_kwargs: Any) -> dict[str, Any]:
         nonlocal calls
         calls += 1
         return {"ok": True, "state": "observed", "messages": list(observed)}
 
+    def locate(**_kwargs: Any) -> dict[str, Any]:
+        return {"ok": True, "state": "vision_visual_group_located", "messages": list(observed)}
+
     scheduler_capture.legacy_observe_current_surface = observe
+    scheduler_capture.legacy_locate_current_visual_group = locate
     target = SimpleNamespace(
         name="Customer A",
         exact=True,
@@ -140,6 +149,133 @@ def _prepare(
         )
     finally:
         scheduler_capture.legacy_observe_current_surface = original
+        scheduler_capture.legacy_locate_current_visual_group = original_locate
+    return result, calls
+
+
+def _prepare_with_locate(
+    *,
+    messages: list[dict[str, Any]],
+    located: list[dict[str, Any]],
+) -> tuple[dict[str, Any], dict[str, int]]:
+    calls = {"observe": 0, "locate": 0}
+    original_observe = scheduler_capture.legacy_observe_current_surface
+    original_locate = scheduler_capture.legacy_locate_current_visual_group
+
+    def observe(**_kwargs: Any) -> dict[str, Any]:
+        calls["observe"] += 1
+        return {"ok": True, "state": "observed", "messages": []}
+
+    def locate(**kwargs: Any) -> dict[str, Any]:
+        calls["locate"] += 1
+        assert_true("source_preview" not in kwargs, "private locate must not carry dead source preview args")
+        assert_true("pending_signal_id" not in kwargs, "private locate must not carry dead signal args")
+        return {
+            "ok": True,
+            "state": "vision_visual_group_located",
+            "reason": "visual_group_selected",
+            "messages": list(located),
+            "locate": {"scroll_steps": 1, "snapshot_count": 2, "restored_to_latest": True},
+        }
+
+    scheduler_capture.legacy_observe_current_surface = observe
+    scheduler_capture.legacy_locate_current_visual_group = locate
+    target = SimpleNamespace(
+        name="Customer A",
+        exact=True,
+        session_key="wx:customer-a",
+        conversation_type="private",
+    )
+    signal = {
+        "pending_signal_id": "signal-current",
+        "pending_signal_kind": "image_capture",
+        "pending_signal_text": "[图片]",
+        "preview_content": "[图片]",
+        "pending": True,
+        "unread_detected": True,
+    }
+    try:
+        result = scheduler_capture.prepare_scheduler_capture(
+            connector=SimpleNamespace(call_compat_sidecar=lambda *_args, **_kwargs: {}),
+            target=target,
+            config={},
+            payload={"messages": list(messages), "pending_signal": dict(signal)},
+            messages=list(messages),
+            target_state={},
+            pending_signal=signal,
+            pending_signal_kind="image_capture",
+            pending_signal_id="signal-current",
+            history_meta={},
+            self_context_runner=None,
+        )
+    finally:
+        scheduler_capture.legacy_observe_current_surface = original_observe
+        scheduler_capture.legacy_locate_current_visual_group = original_locate
+    return result, calls
+
+
+def _prepare_normal_with_locate(
+    *,
+    messages: list[dict[str, Any]],
+    located: list[dict[str, Any]],
+    target_state: dict[str, Any] | None = None,
+) -> tuple[dict[str, Any], dict[str, int]]:
+    calls = {"observe": 0, "locate": 0}
+    original_observe = scheduler_capture.legacy_observe_current_surface
+    original_locate = scheduler_capture.legacy_locate_current_visual_group
+
+    def observe(**_kwargs: Any) -> dict[str, Any]:
+        calls["observe"] += 1
+        return {"ok": True, "state": "observed", "messages": []}
+
+    def locate(**kwargs: Any) -> dict[str, Any]:
+        calls["locate"] += 1
+        assert_equal(kwargs.get("anchor_message_id"), "customer-question-anchor", "normal locate must use the scheduler body anchor id")
+        assert_equal(kwargs.get("anchor_text_key"), "现在想换这台", "normal locate must use the scheduler body anchor key")
+        assert_equal(kwargs.get("max_scroll_steps"), 2, "normal locate must use the short scroll cap")
+        assert_equal(kwargs.get("max_snapshots"), 3, "normal locate must use the short snapshot cap")
+        assert_equal(kwargs.get("max_seconds"), 6.0, "normal locate must use the short time cap")
+        return {
+            "ok": True,
+            "state": "vision_visual_group_located",
+            "reason": "visual_group_selected",
+            "messages": list(located),
+            "locate": {"scroll_steps": 1, "snapshot_count": 2, "restored_to_latest": True},
+        }
+
+    scheduler_capture.legacy_observe_current_surface = observe
+    scheduler_capture.legacy_locate_current_visual_group = locate
+    target = SimpleNamespace(
+        name="Customer A",
+        exact=True,
+        session_key="wx:customer-a",
+        conversation_type="private",
+    )
+    signal = {
+        "pending_signal_id": "signal-current",
+        "pending_signal_kind": "normal",
+        "pending_signal_text": "后续文字",
+        "preview_content": "后续文字",
+        "pending": True,
+        "unread_detected": True,
+    }
+    try:
+        result = scheduler_capture.prepare_scheduler_capture(
+            connector=SimpleNamespace(call_compat_sidecar=lambda *_args, **_kwargs: {}),
+            target=target,
+            config={},
+            payload={"messages": list(messages), "pending_signal": dict(signal)},
+            messages=list(messages),
+            target_state=dict(target_state or {}),
+            pending_signal=signal,
+            pending_signal_kind="normal",
+            pending_signal_id="signal-current",
+            history_meta={},
+            self_context_runner=None,
+        )
+    finally:
+        scheduler_capture.legacy_observe_current_surface = original_observe
+        scheduler_capture.legacy_locate_current_visual_group = original_locate
     return result, calls
 
 
@@ -216,6 +352,226 @@ def check_text_preview_recovers_adjacent_customer_image_once() -> None:
     assert_equal(len(proxies), 1, "exactly one customer image proxy must be emitted")
     assert_equal(structural[0].get("pending_signal_id"), "signal-current", "image must reuse the scheduler capture identity")
     assert_true(not any(str(key).startswith("_vision_") for key in structural[0]), "private anchor metadata must be stripped before returning to Core")
+
+
+def check_explicit_image_pending_uses_bounded_locate_and_existing_proxy_shape() -> None:
+    result, calls = _prepare_with_locate(
+        messages=[],
+        located=[
+            _surface_occurrence(
+                side="customer",
+                message_id="visual-located-1",
+                private_ordinal=True,
+            )
+        ],
+    )
+    assert_equal(calls, {"observe": 0, "locate": 1}, "explicit image pending must use the bounded locate seam")
+    structural = [item for item in result.get("messages") or [] if item.get("type") == "image"]
+    proxies = [item for item in result.get("messages") or [] if item.get("is_customer_image_proxy")]
+    assert_equal(len(structural), 1, "located structural occurrence must be projected unchanged")
+    assert_equal(len(proxies), 1, "located customer image must emit the existing clipboard proxy")
+    assert_equal(proxies[0].get("pending_signal_id"), "signal-current", "proxy must keep the existing pending signal id")
+    assert_true(not any(str(key).startswith("_vision_") for key in structural[0]), "located structural occurrence must not leak private locator fields")
+    serialized = json.dumps(result, ensure_ascii=False).lower()
+    assert_true(
+        "_vision_occurrence_ordinal" not in serialized
+        and "_vision_transaction_ordinal" not in serialized,
+        "scheduler proxy result must not leak transaction-local ordinal fields",
+    )
+
+
+def check_normal_pending_uses_body_anchor_bounded_locate_for_offscreen_image() -> None:
+    current_texts = [
+        _text("customer-question-anchor", "现在想换这台", top=410, bottom=450),
+        _text("customer-question-2", "预算便宜点", top=460, bottom=500),
+        _text("customer-question-3", "最好日系", top=510, bottom=550),
+        _text("customer-question-4", "车况好点", top=560, bottom=600),
+        _text("customer-question-5", "尽快回复", top=610, bottom=650, signal_id="signal-current"),
+    ]
+    result, calls = _prepare_normal_with_locate(
+        messages=current_texts,
+        located=[
+            _surface_occurrence(
+                side="customer",
+                message_id="visual-normal-located-1",
+                following_text_id="customer-question-anchor",
+            )
+        ],
+    )
+    assert_equal(calls, {"observe": 0, "locate": 1}, "normal multi-text pending must use one private locate worker")
+    proxies = [item for item in result.get("messages") or [] if item.get("is_customer_image_proxy")]
+    assert_equal(len(proxies), 1, "normal pending offscreen image must produce the existing image proxy")
+    assert_equal(proxies[0].get("pending_signal_id"), "signal-current", "proxy must stay bound to the current scheduler signal")
+
+
+def check_normal_single_text_keeps_legacy_observe_without_backsearch() -> None:
+    calls = {"observe": 0, "locate": 0}
+    original_observe = scheduler_capture.legacy_observe_current_surface
+    original_locate = scheduler_capture.legacy_locate_current_visual_group
+
+    def observe(**_kwargs: Any) -> dict[str, Any]:
+        calls["observe"] += 1
+        return {"ok": True, "state": "observed", "messages": []}
+
+    def locate(**_kwargs: Any) -> dict[str, Any]:
+        calls["locate"] += 1
+        return {"ok": True, "messages": [_surface_occurrence(side="customer", message_id="visual-single-text-1")]}
+
+    scheduler_capture.legacy_observe_current_surface = observe
+    scheduler_capture.legacy_locate_current_visual_group = locate
+    signal = {
+        "pending_signal_id": "signal-current",
+        "pending_signal_kind": "normal",
+        "pending_signal_text": "普通咨询",
+        "preview_content": "普通咨询",
+    }
+    try:
+        result = scheduler_capture.prepare_scheduler_capture(
+            connector=SimpleNamespace(call_compat_sidecar=lambda *_args, **_kwargs: {}),
+            target=SimpleNamespace(
+                name="Customer A",
+                exact=True,
+                session_key="wx:customer-a",
+                conversation_type="private",
+            ),
+            config={},
+            payload={"messages": [], "pending_signal": dict(signal)},
+            messages=[
+                _text("single-normal", "普通咨询", top=410, bottom=450, signal_id="signal-current"),
+            ],
+            target_state={},
+            pending_signal=signal,
+            pending_signal_kind="normal",
+            pending_signal_id="signal-current",
+            history_meta={},
+            self_context_runner=None,
+        )
+    finally:
+        scheduler_capture.legacy_observe_current_surface = original_observe
+        scheduler_capture.legacy_locate_current_visual_group = original_locate
+    assert_equal(calls, {"observe": 1, "locate": 0}, "normal single text must not start bounded locate")
+    assert_true(not any(item.get("is_customer_image_proxy") for item in result.get("messages") or []), "normal single text must not create a proxy from history")
+
+
+def check_processed_history_texts_do_not_trigger_normal_backsearch() -> None:
+    calls = {"observe": 0, "locate": 0}
+    original_observe = scheduler_capture.legacy_observe_current_surface
+    original_locate = scheduler_capture.legacy_locate_current_visual_group
+
+    def observe(**_kwargs: Any) -> dict[str, Any]:
+        calls["observe"] += 1
+        return {"ok": True, "state": "observed", "messages": []}
+
+    def locate(**_kwargs: Any) -> dict[str, Any]:
+        calls["locate"] += 1
+        return {"ok": True, "messages": [_surface_occurrence(side="customer", message_id="visual-history-1")]}
+
+    scheduler_capture.legacy_observe_current_surface = observe
+    scheduler_capture.legacy_locate_current_visual_group = locate
+    signal = {
+        "pending_signal_id": "signal-current",
+        "pending_signal_kind": "normal",
+        "pending_signal_text": "本次单条文字",
+        "preview_content": "本次单条文字",
+    }
+    try:
+        result = scheduler_capture.prepare_scheduler_capture(
+            connector=SimpleNamespace(call_compat_sidecar=lambda *_args, **_kwargs: {}),
+            target=SimpleNamespace(
+                name="Customer A",
+                exact=True,
+                session_key="wx:customer-a",
+                conversation_type="private",
+            ),
+            config={},
+            payload={"messages": [], "pending_signal": dict(signal)},
+            messages=[
+                _text("old-processed-1", "旧问题一", top=310, bottom=350),
+                _text("old-processed-2", "旧问题二", top=360, bottom=400),
+                _text("fresh-single", "本次单条文字", top=410, bottom=450, signal_id="signal-current"),
+            ],
+            target_state={"processed_message_ids": ["old-processed-1"], "handoff_message_ids": ["old-processed-2"]},
+            pending_signal=signal,
+            pending_signal_kind="normal",
+            pending_signal_id="signal-current",
+            history_meta={},
+            self_context_runner=None,
+        )
+    finally:
+        scheduler_capture.legacy_observe_current_surface = original_observe
+        scheduler_capture.legacy_locate_current_visual_group = original_locate
+    assert_equal(calls, {"observe": 1, "locate": 0}, "processed/handoff history must not inflate normal text count")
+    assert_true(not any(item.get("is_customer_image_proxy") for item in result.get("messages") or []), "processed history must not create image proxy")
+
+
+def check_processed_history_is_skipped_and_first_fresh_text_becomes_anchor() -> None:
+    result, calls = _prepare_normal_with_locate(
+        messages=[
+            _text("old-processed-1", "旧问题", top=300, bottom=340),
+            _text("customer-question-anchor", "现在想换这台", top=410, bottom=450),
+            _text("fresh-second", "预算便宜点", top=460, bottom=500, signal_id="signal-current"),
+        ],
+        located=[
+            _surface_occurrence(
+                side="customer",
+                message_id="visual-normal-located-2",
+                following_text_id="customer-question-anchor",
+            )
+        ],
+        target_state={"processed_message_ids": ["old-processed-1"]},
+    )
+    assert_equal(calls, {"observe": 0, "locate": 1}, "two fresh texts after processed history must still use bounded locate")
+    assert_true(any(item.get("is_customer_image_proxy") for item in result.get("messages") or []), "fresh anchor must still produce proxy")
+
+
+def check_normal_pending_duplicate_body_anchor_does_not_backsearch_or_proxy() -> None:
+    calls = {"observe": 0, "locate": 0}
+    original_observe = scheduler_capture.legacy_observe_current_surface
+    original_locate = scheduler_capture.legacy_locate_current_visual_group
+
+    def observe(**_kwargs: Any) -> dict[str, Any]:
+        calls["observe"] += 1
+        return {"ok": True, "state": "observed", "messages": []}
+
+    def locate(**_kwargs: Any) -> dict[str, Any]:
+        calls["locate"] += 1
+        return {"ok": True, "messages": [_surface_occurrence(side="customer", message_id="visual-duplicate-1")]}
+
+    scheduler_capture.legacy_observe_current_surface = observe
+    scheduler_capture.legacy_locate_current_visual_group = locate
+    signal = {
+        "pending_signal_id": "signal-current",
+        "pending_signal_kind": "normal",
+        "pending_signal_text": "现在想换这台",
+        "preview_content": "现在想换这台",
+    }
+    try:
+        result = scheduler_capture.prepare_scheduler_capture(
+            connector=SimpleNamespace(call_compat_sidecar=lambda *_args, **_kwargs: {}),
+            target=SimpleNamespace(
+                name="Customer A",
+                exact=True,
+                session_key="wx:customer-a",
+                conversation_type="private",
+            ),
+            config={},
+            payload={"messages": [], "pending_signal": dict(signal)},
+            messages=[
+                _text("dup-1", "现在想换这台", top=410, bottom=450),
+                _text("dup-2", "现在想换这台", top=460, bottom=500, signal_id="signal-current"),
+            ],
+            target_state={},
+            pending_signal=signal,
+            pending_signal_kind="normal",
+            pending_signal_id="signal-current",
+            history_meta={},
+            self_context_runner=None,
+        )
+    finally:
+        scheduler_capture.legacy_observe_current_surface = original_observe
+        scheduler_capture.legacy_locate_current_visual_group = original_locate
+    assert_equal(calls, {"observe": 1, "locate": 0}, "duplicated body anchor must not enter bounded locate")
+    assert_true(not any(item.get("is_customer_image_proxy") for item in result.get("messages") or []), "duplicated body anchor must not create a proxy")
 
 
 def check_old_visible_image_does_not_reactivate_on_new_text() -> None:
@@ -348,7 +704,7 @@ def check_runtime_accepts_structurally_bound_normal_pending_signal() -> None:
     assert_equal(resolved.get("pending_signal_kind"), "normal", "runtime must not rewrite the host pending-signal contract")
 
 
-def check_structurally_recovered_customer_image_runs_one_current_clipboard_transaction() -> None:
+def check_structurally_recovered_customer_image_runs_one_current_visual_group_acquire() -> None:
     calls: list[dict[str, Any]] = []
 
     class EphemeralImage:
@@ -359,10 +715,10 @@ def check_structurally_recovered_customer_image_runs_one_current_clipboard_trans
             self.released = True
 
     ephemeral = EphemeralImage()
-    original_transaction = runtime._run_current_clipboard_image_transaction
+    original_acquire = runtime._run_current_visual_group_acquire
     original_understanding = runtime.maybe_run_customer_image_understanding
 
-    def transaction(**kwargs: Any) -> dict[str, Any]:
+    def acquire(**kwargs: Any) -> dict[str, Any]:
         calls.append(kwargs)
         return {
             "ok": True,
@@ -375,10 +731,11 @@ def check_structurally_recovered_customer_image_runs_one_current_clipboard_trans
                 "clipboard_content_read": True,
                 "clipboard_image_valid": True,
             },
-            "_ephemeral_clipboard_image": ephemeral,
+            "messages": [{"message_id": "visual-runtime-2", "type": "image", "sender": "customer"}],
+            "_ephemeral_clipboard_images": [ephemeral],
         }
 
-    runtime._run_current_clipboard_image_transaction = transaction
+    runtime._run_current_visual_group_acquire = acquire
     runtime.maybe_run_customer_image_understanding = lambda **_kwargs: {
         "applied": True,
         "adoptable": True,
@@ -416,6 +773,7 @@ def check_structurally_recovered_customer_image_runs_one_current_clipboard_trans
                 name="Customer A",
                 exact=True,
                 session_key="wx:customer-a",
+                conversation_type="private",
             ),
             config={"vehicle_image_retrieval": {"enabled": False}},
             payload={"pending_signal": signal, "messages": [structural, proxy]},
@@ -424,12 +782,13 @@ def check_structurally_recovered_customer_image_runs_one_current_clipboard_trans
             combined="这是什么车？",
         )
     finally:
-        runtime._run_current_clipboard_image_transaction = original_transaction
+        runtime._run_current_visual_group_acquire = original_acquire
         runtime.maybe_run_customer_image_understanding = original_understanding
     assert_true(result.get("applied") is True and result.get("adoptable") is True, f"recovered image turn must reach Brain evidence: {result}")
-    assert_equal(len(calls), 1, "one recovered occurrence must execute exactly one current clipboard transaction")
-    assert_equal(calls[0].get("pending_signal_id"), "signal-current", "clipboard transaction must keep the capture identity")
-    assert_equal(calls[0].get("side_filter"), "customer", "customer occurrence must copy only the customer-side image")
+    assert_equal(len(calls), 1, "one recovered occurrence must execute exactly one current visual group acquire")
+    assert_equal(calls[0].get("session_key"), "wx:customer-a", "group acquire must keep the session identity")
+    assert_equal(calls[0].get("conversation_type"), "private", "group acquire must keep the conversation type")
+    assert_equal(calls[0].get("max_images"), 3, "strict customer image route must acquire a bounded 1-3 image group")
     assert_true(ephemeral.released, "ephemeral clipboard image must be released after understanding")
 
 
@@ -490,12 +849,18 @@ def main() -> int:
         check_surface_identity_uses_neighbor_anchors_without_geometry_leak,
         check_following_text_arrival_does_not_manufacture_a_new_image_occurrence,
         check_text_preview_recovers_adjacent_customer_image_once,
+        check_explicit_image_pending_uses_bounded_locate_and_existing_proxy_shape,
+        check_normal_pending_uses_body_anchor_bounded_locate_for_offscreen_image,
+        check_normal_single_text_keeps_legacy_observe_without_backsearch,
+        check_processed_history_texts_do_not_trigger_normal_backsearch,
+        check_processed_history_is_skipped_and_first_fresh_text_becomes_anchor,
+        check_normal_pending_duplicate_body_anchor_does_not_backsearch_or_proxy,
         check_old_visible_image_does_not_reactivate_on_new_text,
         check_text_preview_recovers_self_image_without_consuming_customer_text,
         check_text_only_capture_has_no_clipboard_or_llm_route,
         check_custom_connector_without_pr_host_does_not_start_desktop_observer,
         check_runtime_accepts_structurally_bound_normal_pending_signal,
-        check_structurally_recovered_customer_image_runs_one_current_clipboard_transaction,
+        check_structurally_recovered_customer_image_runs_one_current_visual_group_acquire,
         check_unanchored_normal_text_cannot_activate_visible_media,
         check_same_content_new_occurrence_remains_eligible,
         check_clipboard_target_prefers_latest_position_over_large_old_image,
