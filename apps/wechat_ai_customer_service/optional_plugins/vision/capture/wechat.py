@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import logging
 import re
 import time
 from datetime import datetime
@@ -9,34 +8,8 @@ from typing import Any
 
 from PIL import Image, ImageStat
 
-from .visual_anchor import (
-    select_pending_visual_candidate,
-    visual_candidates_from_bubbles,
-    visual_exclusion_keys,
-)
-
-_LOGGER = logging.getLogger(__name__)
-_LOGGER.addHandler(logging.NullHandler())
-
 DEFAULT_BOTTOM_EXCLUDE_PX = 95
-IMAGE_PREVIEW_TOKENS = ("[图片]", "[照片]", "【图片】", "【照片】", "[Image]", "[Photo]", "[Picture]", "发送了一张图片")
-_IMAGE_PREVIEW_EXACT_TOKENS = {
-    "[图片]",
-    "[照片]",
-    "【图片】",
-    "【照片】",
-    "[image]",
-    "[photo]",
-    "[picture]",
-}
-_IMAGE_PREVIEW_PHRASES = {
-    "发送了一张图片",
-    "发来了一张图片",
-    "发了一张图片",
-    "发送了一张照片",
-    "发来了一张照片",
-    "发了一张照片",
-}
+IMAGE_PREVIEW_TOKENS = ("[图片]", "[照片]", "[Image]", "图片", "照片", "发送了一张图片")
 SAVE_MENU_TOKENS = (
     "另存为",
     "保存图片",
@@ -57,10 +30,6 @@ COPY_IMAGE_MENU_TOKENS = (
 CHAT_TIME_RE = re.compile(
     r"^(?:(?:昨天|前天|星期[一二三四五六日天])\s*)?(?:[01]?\d|2[0-3]):[0-5]\d$"
 )
-VISION_PENDING_MAX_BACKSEARCH_STEPS = 3
-VISION_PENDING_MAX_BACKSEARCH_SCREENSHOTS = 5
-VISION_PENDING_MAX_BACKSEARCH_SECONDS = 8.0
-VISION_PENDING_MAX_COPY_ATTEMPTS = 2
 
 
 def session_split_x(width: int) -> int:
@@ -80,18 +49,11 @@ def now_iso() -> str:
 
 
 def image_preview_text(value: Any) -> bool:
-    compact = re.sub(r"\s+", "", str(value or "").strip()).lower()
-    if not compact:
+    text = str(value or "").strip()
+    if not text:
         return False
-    for separator in (":", "："):
-        if separator in compact:
-            _speaker, body = compact.rsplit(separator, 1)
-            if body:
-                compact = body
-            break
-    if compact in _IMAGE_PREVIEW_EXACT_TOKENS:
-        return True
-    return compact in _IMAGE_PREVIEW_PHRASES
+    compact = re.sub(r"\s+", "", text).lower()
+    return any(re.sub(r"\s+", "", token).lower() in compact for token in IMAGE_PREVIEW_TOKENS)
 
 
 def parse_preview_speaker(source_preview: Any, explicit_speaker: Any = "") -> str:
@@ -645,92 +607,72 @@ def clipboard_sequence_number(sidecar_ops: Any) -> int | None:
         return None
 
 
-def _failure_payload(
+def execute_wechat_clipboard_image_copy(
     *,
-    captured_at: str,
-    reason: str,
-    target_name: str,
-    session_key: str,
-    online: bool = True,
-    state: str = "image_clipboard_copy_failed",
-    transaction: dict[str, Any] | None = None,
-) -> dict[str, Any]:
-    return {
-        "ok": False,
-        "online": bool(online),
-        "adapter": "win32_ocr",
-        "state": state,
-        "reason": reason,
-        "target": target_name,
-        "session_key": session_key,
-        "assets": [],
-        "messages": [],
-        "transaction": {"status": "failed", "captured_at": captured_at, **dict(transaction or {})},
-    }
-
-
-def _validate_visual_target(
-    *,
-    sidecar_ops: Any,
     hwnd: int,
+    probe: dict[str, Any],
     target_name: str,
-    exact: bool,
-    session_key: str,
-    conversation_type: str,
+    session_key: str = "",
+    exact: bool = True,
+    source_preview: str = "",
+    speaker_name: str = "",
+    pending_signal_id: str = "",
+    side_filter: str = "customer",
+    sidecar_ops: Any,
 ) -> dict[str, Any]:
-    validator = getattr(sidecar_ops, "validate_active_send_target_for_identity", None)
-    if not callable(validator):
-        return {"ok": True}
-    try:
-        validation = validator(
-            hwnd,
-            target_name,
-            exact=bool(exact),
-            artifact_dir=None,
-            session_key=session_key,
-            conversation_type=conversation_type,
-        )
-    except Exception as exc:  # noqa: BLE001 - target guard fails closed.
+    """Copy one current customer image to the Windows clipboard without saving it.
+
+    Screenshots are only transient geometry input.  This function deliberately
+    returns no image, file path, crop, bounds, hash, or asset metadata: a
+    caller in the same RPA lock must read the changed clipboard into memory.
+    """
+    captured_at = now_iso()
+    visual_side = str(side_filter or "customer").strip().lower()
+    if visual_side not in {"customer", "self"}:
         return {
             "ok": False,
-            "reason": "vision_target_changed_during_image_backsearch",
-            "error": repr(exc),
+            "online": True,
+            "adapter": "win32_ocr",
+            "state": "image_clipboard_copy_failed",
+            "reason": "image_clipboard_side_filter_invalid",
+            "target": target_name,
+            "session_key": session_key,
+            "assets": [],
+            "messages": [],
+            "transaction": {"status": "failed", "captured_at": captured_at},
         }
-    if isinstance(validation, dict) and validation.get("ok"):
-        return {"ok": True, "guard": validation}
-    return {
-        "ok": False,
-        "reason": "vision_target_changed_during_image_backsearch",
-        "guard": validation if isinstance(validation, dict) else {},
-    }
-
-
-def _capture_visual_frame(
-    *,
-    sidecar_ops: Any,
-    hwnd: int,
-    target_name: str,
-    session_key: str,
-    conversation_type: str,
-    visual_side: str,
-    label: str,
-) -> dict[str, Any]:
-    screenshot, _ = sidecar_ops.capture_wechat(hwnd, artifact_dir=None, label=label)
-    ocr_items = sidecar_ops.run_ocr(screenshot)
+    try:
+        screenshot, _ = sidecar_ops.capture_wechat(hwnd, artifact_dir=None, label="image_clipboard_copy_before")
+        ocr_items = sidecar_ops.run_ocr(screenshot)
+    except Exception as exc:
+        return {
+            "ok": False,
+            "online": True,
+            "adapter": "win32_ocr",
+            "state": "image_clipboard_copy_failed",
+            "reason": "image_clipboard_capture_surface_failed",
+            "target": target_name,
+            "session_key": session_key,
+            "assets": [],
+            "messages": [],
+            "transaction": {"status": "failed", "captured_at": captured_at, "error": repr(exc)},
+        }
     geometry = sidecar_ops.get_window_geometry(hwnd)
-    image_size = getattr(
-        screenshot,
-        "size",
-        (int(geometry.get("width") or 0), int(geometry.get("height") or 0)),
-    )
+    image_size = getattr(screenshot, "size", (int(geometry.get("width") or 0), int(geometry.get("height") or 0)))
     messages = sidecar_ops.parse_messages_from_ocr(ocr_items, image_size, target=target_name)
     blocking_reason = sidecar_ops.blocking_screen_reason(ocr_items)
     if blocking_reason:
         return {
             "ok": False,
-            "reason": blocking_reason,
             "online": False if blocking_reason == "login_or_qr" else True,
-            "image_size": image_size,
+            "adapter": "win32_ocr",
+            "state": "image_clipboard_copy_blocked",
+            "reason": blocking_reason,
+            "target": target_name,
+            "session_key": session_key,
+            "assets": [],
+            "messages": [],
+            "transaction": {"status": "blocked", "captured_at": captured_at},
         }
     bubbles = detect_visual_image_bubbles(
         screenshot,
@@ -739,236 +681,36 @@ def _capture_visual_frame(
         side_filter=visual_side,
         time_markers=extract_chat_time_markers(ocr_items, image_size),
     )
-    candidates = visual_candidates_from_bubbles(
-        bubbles,
-        messages,
-        target=target_name,
-        session_key=session_key,
-        conversation_type=conversation_type,
-    )
-    return {
-        "ok": True,
-        "image_size": image_size,
-        "messages": messages,
-        "bubbles": bubbles,
-        "candidates": candidates,
-    }
-
-
-def _pending_visual_request(
-    *,
-    target_name: str,
-    session_key: str,
-    conversation_type: str,
-    pending_signal_id: str,
-    pending_observation_id: str,
-    visual_side: str,
-    source_preview: str,
-) -> dict[str, Any]:
-    return {
-        "session_key": str(session_key or "").strip(),
-        "target_identity": str(target_name or "").strip(),
-        "target_name": str(target_name or "").strip(),
-        "conversation_type": str(conversation_type or "").strip().lower(),
-        "pending_signal_id": str(pending_signal_id or "").strip(),
-        "pending_observation_id": str(pending_observation_id or "").strip(),
-        "side_filter": visual_side,
-        "source_preview": str(source_preview or "").strip(),
-    }
-
-
-def _new_pending_backsearch_budget() -> dict[str, Any]:
-    return {
-        "started_monotonic": time.monotonic(),
-        "max_seconds": float(VISION_PENDING_MAX_BACKSEARCH_SECONDS),
-        "max_screenshots": int(VISION_PENDING_MAX_BACKSEARCH_SCREENSHOTS),
-        "screenshots": 0,
-    }
-
-
-def _pending_backsearch_budget_reason(budget: dict[str, Any]) -> str:
-    started = float(budget.get("started_monotonic") or time.monotonic())
-    max_seconds = max(0.0, float(budget.get("max_seconds") or 0.0))
-    if max_seconds <= 0.0 or time.monotonic() - started > max_seconds:
-        return "vision_image_backsearch_budget_exhausted"
-    max_screenshots = max(1, int(budget.get("max_screenshots") or 1))
-    if int(budget.get("screenshots") or 0) >= max_screenshots:
-        return "vision_image_backsearch_budget_exhausted"
-    return ""
-
-
-def _consume_pending_backsearch_screenshot_budget(budget: dict[str, Any]) -> str:
-    reason = _pending_backsearch_budget_reason(budget)
-    if reason:
-        return reason
-    budget["screenshots"] = int(budget.get("screenshots") or 0) + 1
-    return ""
-
-
-def _select_pending_visual_candidate_with_backsearch(
-    *,
-    sidecar_ops: Any,
-    hwnd: int,
-    target_name: str,
-    session_key: str,
-    conversation_type: str,
-    exact: bool,
-    visual_side: str,
-    request: dict[str, Any],
-    reference_records: list[dict[str, Any]],
-    excluded_keys: set[str],
-    max_backsearch_steps: int,
-    budget: dict[str, Any],
-) -> dict[str, Any]:
-    scroll_steps = max(0, min(int(max_backsearch_steps or 0), 6))
-    scrolled = False
-    last_selector_reason = ""
-    validation = _validate_visual_target(
-        sidecar_ops=sidecar_ops,
-        hwnd=hwnd,
-        target_name=target_name,
-        exact=exact,
-        session_key=session_key,
-        conversation_type=conversation_type,
-    )
-    if not validation.get("ok"):
-        return {"ok": False, "reason": validation.get("reason"), "scrolled": scrolled}
-    for step in range(scroll_steps + 1):
-        budget_reason = _pending_backsearch_budget_reason(budget)
-        if budget_reason:
-            return {"ok": False, "reason": budget_reason, "scrolled": scrolled}
-        if step > 0:
-            validation = _validate_visual_target(
-                sidecar_ops=sidecar_ops,
-                hwnd=hwnd,
-                target_name=target_name,
-                exact=exact,
-                session_key=session_key,
-                conversation_type=conversation_type,
-            )
-            if not validation.get("ok"):
-                return {"ok": False, "reason": validation.get("reason"), "scrolled": scrolled}
-            scroller = getattr(sidecar_ops, "scroll_chat_history", None)
-            if not callable(scroller):
-                break
-            try:
-                scroller(hwnd, 1, wheel_units=5, delay_seconds=0.12)
-                scrolled = True
-                sleeper = getattr(sidecar_ops, "humanized_action_sleep", None)
-                if callable(sleeper):
-                    sleeper(120, 220)
-            except Exception as exc:  # noqa: BLE001
-                return {
-                    "ok": False,
-                    "reason": "vision_image_backsearch_scroll_failed",
-                    "scrolled": scrolled,
-                    "error": repr(exc),
-                }
-            validation = _validate_visual_target(
-                sidecar_ops=sidecar_ops,
-                hwnd=hwnd,
-                target_name=target_name,
-                exact=exact,
-                session_key=session_key,
-                conversation_type=conversation_type,
-            )
-            if not validation.get("ok"):
-                return {"ok": False, "reason": validation.get("reason"), "scrolled": scrolled}
-        budget_reason = _consume_pending_backsearch_screenshot_budget(budget)
-        if budget_reason:
-            return {"ok": False, "reason": budget_reason, "scrolled": scrolled}
-        try:
-            frame = _capture_visual_frame(
-                sidecar_ops=sidecar_ops,
-                hwnd=hwnd,
-                target_name=target_name,
-                session_key=session_key,
-                conversation_type=conversation_type,
-                visual_side=visual_side,
-                label=f"image_clipboard_pending_backsearch_{step}",
-            )
-        except Exception as exc:  # noqa: BLE001
-            return {
-                "ok": False,
-                "reason": "image_clipboard_capture_surface_failed",
-                "scrolled": scrolled,
-                "error": repr(exc),
-            }
-        if not frame.get("ok"):
-            return {
-                "ok": False,
-                "reason": str(frame.get("reason") or "image_clipboard_capture_surface_failed"),
-                "online": bool(frame.get("online", True)),
-                "scrolled": scrolled,
-            }
-        selection = select_pending_visual_candidate(
-            [item for item in (frame.get("candidates") or []) if isinstance(item, dict)],
-            request,
-            excluded_keys=excluded_keys,
-            reference_records=reference_records,
-            allow_unbound_current_candidate=True,
-            minimum_score=70.0,
-            minimum_margin=16.0,
-        )
-        last_selector_reason = str(selection.get("reason") or "")
-        if selection.get("ok"):
-            validation = _validate_visual_target(
-                sidecar_ops=sidecar_ops,
-                hwnd=hwnd,
-                target_name=target_name,
-                exact=exact,
-                session_key=session_key,
-                conversation_type=conversation_type,
-            )
-            if not validation.get("ok"):
-                return {"ok": False, "reason": validation.get("reason"), "scrolled": scrolled}
-            return {
-                "ok": True,
-                "candidate": dict(selection.get("candidate") or {}),
-                "image_size": frame.get("image_size"),
-                "scrolled": scrolled,
-                "selector_reason": last_selector_reason,
-            }
-    return {
-        "ok": False,
-        "reason": "visual_pending_image_candidate_not_found",
-        "selector_reason": last_selector_reason,
-        "scrolled": scrolled,
-    }
-
-
-def _attempt_copy_visual_candidate(
-    *,
-    sidecar_ops: Any,
-    hwnd: int,
-    candidate: dict[str, Any],
-    image_size: tuple[int, int],
-    sequence_before: int,
-    target_name: str,
-    session_key: str,
-    conversation_type: str,
-    exact: bool,
-) -> dict[str, Any]:
-    validation = _validate_visual_target(
-        sidecar_ops=sidecar_ops,
-        hwnd=hwnd,
-        target_name=target_name,
-        exact=exact,
-        session_key=session_key,
-        conversation_type=conversation_type,
-    )
-    if not validation.get("ok"):
+    if not bubbles:
         return {
             "ok": False,
-            "reason": str(validation.get("reason") or "vision_target_changed_during_image_backsearch"),
-            "retryable": False,
-            "transaction": {
-                "right_click_ok": False,
-                "menu_copy_confirmed": False,
-            },
+            "online": True,
+            "adapter": "win32_ocr",
+            "state": "image_clipboard_copy_failed",
+            "reason": f"{visual_side}_image_target_not_found",
+            "target": target_name,
+            "session_key": session_key,
+            "assets": [],
+            "messages": [],
+            "transaction": {"status": "failed", "captured_at": captured_at},
         }
-    anchor = dict(candidate.get("anchor") or {})
-    bounds = [int(value) for value in (candidate.get("bounds") or [])[:4]]
+    sequence_before = clipboard_sequence_number(sidecar_ops)
+    if sequence_before is None:
+        return {
+            "ok": False,
+            "online": True,
+            "adapter": "win32_ocr",
+            "state": "image_clipboard_copy_failed",
+            "reason": "clipboard_sequence_unavailable",
+            "target": target_name,
+            "session_key": session_key,
+            "assets": [],
+            "messages": [],
+            "transaction": {"status": "failed", "captured_at": captured_at},
+        }
+    bubble = _latest_visual_bubble(bubbles)
+    anchor = dict(bubble.get("anchor") or {})
+    bounds = [int(value) for value in (bubble.get("bounds") or [])[:4]]
     right_click = sidecar_ops.human_window_image_right_click_in_bounds(
         hwnd,
         int(anchor.get("x") or 0),
@@ -996,32 +738,18 @@ def _attempt_copy_visual_candidate(
             pass
         return {
             "ok": False,
+            "online": True,
+            "adapter": "win32_ocr",
+            "state": "image_clipboard_copy_failed",
             "reason": "image_context_menu_copy_item_missing",
-            "retryable": True,
+            "target": target_name,
+            "session_key": session_key,
+            "assets": [],
+            "messages": [],
             "transaction": {
+                "status": "failed",
+                "captured_at": captured_at,
                 "right_click_ok": bool(right_click.get("ok")),
-                "menu_copy_confirmed": False,
-            },
-        }
-    validation = _validate_visual_target(
-        sidecar_ops=sidecar_ops,
-        hwnd=hwnd,
-        target_name=target_name,
-        exact=exact,
-        session_key=session_key,
-        conversation_type=conversation_type,
-    )
-    if not validation.get("ok"):
-        try:
-            sidecar_ops.key_press(sidecar_ops.win32con.VK_ESCAPE)
-        except Exception:
-            pass
-        return {
-            "ok": False,
-            "reason": str(validation.get("reason") or "vision_target_changed_during_image_backsearch"),
-            "retryable": False,
-            "transaction": {
-                "right_click_ok": True,
                 "menu_copy_confirmed": False,
             },
         }
@@ -1038,329 +766,47 @@ def _attempt_copy_visual_candidate(
             pass
         return {
             "ok": False,
+            "online": True,
+            "adapter": "win32_ocr",
+            "state": "image_clipboard_copy_failed",
             "reason": "image_context_menu_copy_click_failed",
-            "retryable": True,
-            "transaction": {"right_click_ok": True, "menu_copy_confirmed": False},
+            "target": target_name,
+            "session_key": session_key,
+            "assets": [],
+            "messages": [],
+            "transaction": {
+                "status": "failed",
+                "captured_at": captured_at,
+                "right_click_ok": True,
+                "menu_copy_confirmed": False,
+            },
         }
     sequence_after: int | None = None
     for _ in range(6):
         sidecar_ops.humanized_action_sleep(80, 140)
-        value = clipboard_sequence_number(sidecar_ops)
-        if value is not None and value != sequence_before:
-            sequence_after = value
+        candidate = clipboard_sequence_number(sidecar_ops)
+        if candidate is not None and candidate != sequence_before:
+            sequence_after = candidate
             break
     if sequence_after is None:
-        return {
-            "ok": False,
-            "reason": "clipboard_sequence_unchanged_after_copy",
-            "retryable": False,
-            "transaction": {
-                "right_click_ok": True,
-                "menu_copy_confirmed": True,
-                "clipboard_sequence_changed": False,
-            },
-        }
-    return {
-        "ok": True,
-        "sequence_after": sequence_after,
-        "transaction": {
-            "right_click_ok": True,
-            "menu_copy_confirmed": True,
-            "clipboard_sequence_changed": True,
-            "clipboard_sequence_after": sequence_after,
-        },
-    }
-
-
-def _restore_latest_after_backsearch(*, sidecar_ops: Any, hwnd: int) -> dict[str, Any]:
-    restorer = getattr(sidecar_ops, "scroll_chat_to_latest", None)
-    if not callable(restorer):
-        return {"ok": False, "reason": "vision_restore_latest_unavailable"}
-    try:
-        restorer(hwnd, attempts=12)
-        return {"ok": True}
-    except TypeError:
-        try:
-            restorer(hwnd)
-            return {"ok": True}
-        except Exception:
-            return {"ok": False, "reason": "vision_restore_latest_failed"}
-    except Exception:
-        return {"ok": False, "reason": "vision_restore_latest_failed"}
-
-
-def execute_wechat_clipboard_image_copy(
-    *,
-    hwnd: int,
-    probe: dict[str, Any],
-    target_name: str,
-    session_key: str = "",
-    conversation_type: str = "",
-    exact: bool = True,
-    source_preview: str = "",
-    speaker_name: str = "",
-    pending_signal_id: str = "",
-    pending_observation_id: str = "",
-    side_filter: str = "customer",
-    sidecar_ops: Any,
-) -> dict[str, Any]:
-    """Copy one current customer image to the Windows clipboard without saving it.
-
-    Screenshots are only transient geometry input.  This function deliberately
-    returns no image, file path, crop, bounds, hash, or asset metadata: a
-    caller in the same RPA lock must read the changed clipboard into memory.
-    """
-    captured_at = now_iso()
-    visual_side = str(side_filter or "customer").strip().lower()
-    if visual_side not in {"customer", "self"}:
         return {
             "ok": False,
             "online": True,
             "adapter": "win32_ocr",
             "state": "image_clipboard_copy_failed",
-            "reason": "image_clipboard_side_filter_invalid",
+            "reason": "clipboard_sequence_unchanged_after_copy",
             "target": target_name,
             "session_key": session_key,
             "assets": [],
             "messages": [],
-            "transaction": {"status": "failed", "captured_at": captured_at},
+            "transaction": {
+                "status": "failed",
+                "captured_at": captured_at,
+                "right_click_ok": True,
+                "menu_copy_confirmed": True,
+                "clipboard_sequence_changed": False,
+            },
         }
-    clean_observation_id = str(pending_observation_id or "").strip()
-    clean_signal_id = str(pending_signal_id or "").strip()
-    clean_conversation_type = str(conversation_type or "").strip().lower()
-    if clean_observation_id:
-        request = _pending_visual_request(
-            target_name=target_name,
-            session_key=session_key,
-            conversation_type=clean_conversation_type,
-            pending_signal_id=clean_signal_id,
-            pending_observation_id=clean_observation_id,
-            visual_side=visual_side,
-            source_preview=source_preview,
-        )
-        store = None
-        claim_result: dict[str, Any] = {}
-        reference_records: list[dict[str, Any]] = []
-        try:
-            from apps.wechat_ai_customer_service.optional_plugins.vision.occurrence_store import (
-                default_occurrence_store,
-            )
-
-            store = default_occurrence_store()
-            claim_result = store.claim_best_match(request)
-            if claim_result.get("ok") and isinstance(claim_result.get("record"), dict):
-                reference_records = [dict(claim_result.get("record") or {})]
-        except Exception:
-            store = None
-            claim_result = {}
-            reference_records = []
-        excluded_keys: set[str] = set()
-        scrolled_any = False
-        pending_success_ready = False
-        pending_result: dict[str, Any] = {}
-        budget = _new_pending_backsearch_budget()
-        try:
-            for _attempt_index in range(max(1, int(VISION_PENDING_MAX_COPY_ATTEMPTS))):
-                selection = _select_pending_visual_candidate_with_backsearch(
-                    sidecar_ops=sidecar_ops,
-                    hwnd=hwnd,
-                    target_name=target_name,
-                    session_key=session_key,
-                    conversation_type=clean_conversation_type,
-                    exact=exact,
-                    visual_side=visual_side,
-                    request=request,
-                    reference_records=reference_records,
-                    excluded_keys=excluded_keys,
-                    max_backsearch_steps=VISION_PENDING_MAX_BACKSEARCH_STEPS,
-                    budget=budget,
-                )
-                scrolled_any = scrolled_any or bool(selection.get("scrolled"))
-                if not selection.get("ok"):
-                    reason = str(selection.get("reason") or "visual_pending_image_candidate_not_found")
-                    pending_result = _failure_payload(
-                        captured_at=captured_at,
-                        reason=reason,
-                        target_name=target_name,
-                        session_key=session_key,
-                    )
-                    break
-                sequence_before = clipboard_sequence_number(sidecar_ops)
-                if sequence_before is None:
-                    pending_result = _failure_payload(
-                        captured_at=captured_at,
-                        reason="clipboard_sequence_unavailable",
-                        target_name=target_name,
-                        session_key=session_key,
-                    )
-                    break
-                attempt = _attempt_copy_visual_candidate(
-                    sidecar_ops=sidecar_ops,
-                    hwnd=hwnd,
-                    candidate=dict(selection.get("candidate") or {}),
-                    image_size=tuple(selection.get("image_size") or (0, 0)),
-                    sequence_before=sequence_before,
-                    target_name=target_name,
-                    session_key=session_key,
-                    conversation_type=clean_conversation_type,
-                    exact=exact,
-                )
-                if attempt.get("ok"):
-                    transaction = dict(attempt.get("transaction") or {})
-                    pending_success_ready = True
-                    pending_result = {
-                        "ok": True,
-                        "online": True,
-                        "adapter": "win32_ocr",
-                        "state": "image_clipboard_copied",
-                        "target": target_name,
-                        "session_key": session_key,
-                        "assets": [],
-                        "messages": [],
-                        "transaction": {
-                            "status": "copied",
-                            "captured_at": captured_at,
-                            **transaction,
-                            "pending_signal_id": clean_signal_id,
-                            "source": "clipboard_current_transaction",
-                            "visual_side": visual_side,
-                        },
-                    }
-                    break
-                excluded_keys.update(visual_exclusion_keys(dict(selection.get("candidate") or {})))
-                pending_result = _failure_payload(
-                    captured_at=captured_at,
-                    reason=str(attempt.get("reason") or "image_clipboard_copy_failed"),
-                    target_name=target_name,
-                    session_key=session_key,
-                    transaction=dict(attempt.get("transaction") or {}),
-                )
-                if not attempt.get("retryable"):
-                    break
-            if not pending_result:
-                pending_result = _failure_payload(
-                    captured_at=captured_at,
-                    reason="image_clipboard_copy_failed",
-                    target_name=target_name,
-                    session_key=session_key,
-                )
-        except Exception:
-            pending_success_ready = False
-            pending_result = _failure_payload(
-                captured_at=captured_at,
-                reason="image_clipboard_copy_failed",
-                target_name=target_name,
-                session_key=session_key,
-            )
-        finally:
-            restore_gate_ok = True
-            if scrolled_any:
-                restore_result = _restore_latest_after_backsearch(sidecar_ops=sidecar_ops, hwnd=hwnd)
-                restore_gate_ok = bool(restore_result.get("ok"))
-                if not restore_gate_ok:
-                    _LOGGER.warning(
-                        "vision_pending_backsearch_restore_failed reason=%s",
-                        str(restore_result.get("reason") or "vision_restore_latest_failed"),
-                    )
-                if restore_gate_ok:
-                    validation = _validate_visual_target(
-                        sidecar_ops=sidecar_ops,
-                        hwnd=hwnd,
-                        target_name=target_name,
-                        exact=exact,
-                        session_key=session_key,
-                        conversation_type=clean_conversation_type,
-                    )
-                    restore_gate_ok = bool(validation.get("ok"))
-                    if not restore_gate_ok:
-                        _LOGGER.warning(
-                            "vision_pending_backsearch_post_restore_target_validation_failed reason=%s",
-                            str(validation.get("reason") or "vision_target_changed_during_image_backsearch"),
-                        )
-            if pending_success_ready and not restore_gate_ok:
-                pending_success_ready = False
-                pending_result = _failure_payload(
-                    captured_at=captured_at,
-                    reason="image_clipboard_copy_failed",
-                    target_name=target_name,
-                    session_key=session_key,
-                )
-            if store is not None and claim_result.get("ok"):
-                try:
-                    store.consume_claim(
-                        str((claim_result.get("record") or {}).get("record_id") or ""),
-                        str(claim_result.get("claim_id") or ""),
-                        success=bool(pending_success_ready and restore_gate_ok),
-                    )
-                except Exception:
-                    pass
-        return pending_result
-
-    try:
-        frame = _capture_visual_frame(
-            sidecar_ops=sidecar_ops,
-            hwnd=hwnd,
-            target_name=target_name,
-            session_key=session_key,
-            conversation_type=clean_conversation_type,
-            visual_side=visual_side,
-            label="image_clipboard_copy_before",
-        )
-    except Exception as exc:
-        return _failure_payload(
-            captured_at=captured_at,
-            reason="image_clipboard_capture_surface_failed",
-            target_name=target_name,
-            session_key=session_key,
-            transaction={"error": repr(exc)},
-        )
-    if not frame.get("ok"):
-        reason = str(frame.get("reason") or "image_clipboard_capture_surface_failed")
-        return _failure_payload(
-            captured_at=captured_at,
-            reason=reason,
-            target_name=target_name,
-            session_key=session_key,
-            online=bool(frame.get("online", True)),
-            state="image_clipboard_copy_blocked" if reason else "image_clipboard_copy_failed",
-            transaction={"status": "blocked"} if reason == "login_or_qr" else {},
-        )
-    bubbles = [item for item in (frame.get("bubbles") or []) if isinstance(item, dict)]
-    if not bubbles:
-        return _failure_payload(
-            captured_at=captured_at,
-            reason=f"{visual_side}_image_target_not_found",
-            target_name=target_name,
-            session_key=session_key,
-        )
-    sequence_before = clipboard_sequence_number(sidecar_ops)
-    if sequence_before is None:
-        return _failure_payload(
-            captured_at=captured_at,
-            reason="clipboard_sequence_unavailable",
-            target_name=target_name,
-            session_key=session_key,
-        )
-    attempt = _attempt_copy_visual_candidate(
-        sidecar_ops=sidecar_ops,
-        hwnd=hwnd,
-        candidate=_latest_visual_bubble(bubbles),
-        image_size=tuple(frame.get("image_size") or (0, 0)),
-        sequence_before=sequence_before,
-        target_name=target_name,
-        session_key=session_key,
-        conversation_type=clean_conversation_type,
-        exact=exact,
-    )
-    if not attempt.get("ok"):
-        return _failure_payload(
-            captured_at=captured_at,
-            reason=str(attempt.get("reason") or "image_clipboard_copy_failed"),
-            target_name=target_name,
-            session_key=session_key,
-            transaction=dict(attempt.get("transaction") or {}),
-        )
-    transaction = dict(attempt.get("transaction") or {})
     return {
         "ok": True,
         "online": True,
@@ -1373,8 +819,11 @@ def execute_wechat_clipboard_image_copy(
         "transaction": {
             "status": "copied",
             "captured_at": captured_at,
-            **transaction,
-            "pending_signal_id": clean_signal_id,
+            "right_click_ok": True,
+            "menu_copy_confirmed": True,
+            "clipboard_sequence_changed": True,
+            "clipboard_sequence_after": sequence_after,
+            "pending_signal_id": str(pending_signal_id or ""),
             "source": "clipboard_current_transaction",
             "visual_side": visual_side,
         },

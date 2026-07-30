@@ -324,11 +324,36 @@ def test_scheduler_structural_self_image_is_context_only_and_bound() -> None:
                 }
             )
             assert_equal(result.get("batch"), [], "self image must not enter the customer reply batch")
-            assert_true(result.get("pending_signal_consumed") is False, "customer image event must not be consumed by a visible old self image")
+            assert_true(result.get("pending_signal_consumed") is True, "self image event must reach a terminal context-only state")
             assert_true(not any(item.get("is_customer_image_proxy") for item in (result.get("messages") or [])), "self image must not create a customer proxy")
-            assert_true(not observed, "self context must not run unless the customer explicitly asks about a self image")
+            observed_message = (observed.get("messages") or [])[0]
+            assert_equal(observed_message.get("sender"), "self", "self vision must receive only the structurally confirmed self occurrence")
+            assert_equal(observed_message.get("pending_signal_id"), "self-image-signal-one", "self occurrence must bind the current pending event")
+
+            bridge.ledger.record_capture(
+                session_key="wx:self-structural",
+                target_name="Customer A",
+                conversation_type="private",
+                capture_id="capture-self-structural",
+                messages=list(result.get("messages") or []),
+                batch=[],
+                history_backfill={},
+                context_version=1,
+            )
+            bridge.session_monitor = None
+            bridge._capture_done(
+                {"session_key": "wx:self-structural", "target_name": "Customer A"},
+                result,
+                {"session_key": "wx:self-structural", "target_name": "Customer A", "capture_id": "capture-self-structural"},
+            )
+            summary = bridge.ledger.load_summary("wx:self-structural")
         finally:
             bridge.shutdown()
+    recent = summary.get("recent_messages") or []
+    assert_equal(len(recent), 1, "one self occurrence must produce one durable ledger record")
+    assert_equal(recent[0].get("sender"), "self", "durable direction marker must remain self")
+    assert_equal(recent[0].get("vision_summary"), "客服发送了一张小女孩穿艾莎裙的照片", "durable record must contain only the LLM text understanding")
+    assert_equal(summary.get("processed_visual_pending_signal_ids"), ["self-image-signal-one"], "successful self occurrence must dedupe the same pending signal")
 
 
 def test_legacy_ledger_and_scheduler_state_are_scrubbed_on_read_and_write() -> None:

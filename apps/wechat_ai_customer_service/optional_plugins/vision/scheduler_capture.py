@@ -11,7 +11,6 @@ No scheduler state is retained here and no customer-visible reply is authored.
 from __future__ import annotations
 
 import copy
-import re
 from typing import Any, Callable
 
 from .occurrence import (
@@ -22,73 +21,10 @@ from .occurrence import (
 from .trigger import customer_image_capture_trigger, image_preview_text
 
 
-_SELF_VISUAL_CONTEXT_PATTERNS = (
-    "你发",
-    "你刚发",
-    "刚才你发",
-    "刚发",
-    "上一张",
-    "上面那张",
-    "前面那张",
-    "你那张",
-    "你这个图",
-    "你这张图",
-    "你这个图片",
-    "你这张图片",
-    "你这张照片",
-    "刚才那张图",
-    "刚才那张图片",
-    "刚才那张照片",
-)
-
-
-def _text_requests_self_visual_context(value: Any) -> bool:
-    text = str(value or "").strip()
-    if not text:
-        return False
-    compact = re.sub(r"\s+", "", text).lower()
-    if not compact:
-        return False
-    if any(re.sub(r"\s+", "", token).lower() in compact for token in _SELF_VISUAL_CONTEXT_PATTERNS):
-        return True
-    return bool(
-        ("你" in compact or "客服" in compact)
-        and any(token in compact for token in ("图", "图片", "照片"))
-        and any(token in compact for token in ("什么", "哪", "这个", "这张", "刚才", "上面", "前面"))
-    )
-
-
-def _current_messages_request_self_visual_context(
-    messages: list[dict[str, Any]],
-    *,
-    pending_signal_id: str,
-) -> bool:
-    clean_signal_id = str(pending_signal_id or "").strip()
-    for message in messages or []:
-        if not isinstance(message, dict):
-            continue
-        message_type = str(message.get("type") or message.get("message_type") or "text").strip().lower() or "text"
-        if message_type != "text":
-            continue
-        sender = str(message.get("sender_role") or message.get("sender") or "").strip().lower()
-        if sender and sender != "customer":
-            continue
-        message_signal_id = str(message.get("pending_signal_id") or "").strip()
-        if clean_signal_id and message_signal_id and message_signal_id != clean_signal_id:
-            continue
-        text = str(message.get("content_body") or message.get("content") or message.get("text") or "").strip()
-        if _text_requests_self_visual_context(text):
-            return True
-    return False
-
-
 def legacy_observe_current_surface(
     *,
     connector: Any,
     target: Any,
-    pending_signal_id: str = "",
-    pending_observation_id: str = "",
-    source_preview: str = "",
     side_filter: str = "all",
     max_images: int = 8,
 ) -> dict[str, Any]:
@@ -116,9 +52,6 @@ def legacy_observe_current_surface(
         exact=bool(getattr(target, "exact", True)),
         session_key=str(getattr(target, "session_key", "") or ""),
         conversation_type=str(getattr(target, "conversation_type", "") or ""),
-        pending_signal_id=pending_signal_id,
-        pending_observation_id=pending_observation_id,
-        source_preview=source_preview,
         side_filter=side_filter,
         max_images=max_images,
     )
@@ -148,18 +81,10 @@ def prepare_scheduler_capture(
         or signal.get("preview_content")
         or ""
     ).strip()
-    pending_observation_id = str(signal.get("pending_observation_id") or "").strip()
     explicit_image_pending = bool(
         str(pending_signal_kind or "").strip().lower()
         in {"image_capture", "media_capture"}
         or image_preview_text(pending_text)
-    )
-    self_visual_context_allowed = bool(
-        _text_requests_self_visual_context(pending_text)
-        or _current_messages_request_self_visual_context(
-            current_messages,
-            pending_signal_id=pending_signal_id,
-        )
     )
     visual_capture_trigger = customer_image_capture_trigger(
         payload=payload,
@@ -207,10 +132,7 @@ def prepare_scheduler_capture(
             surface_observation = legacy_observe_current_surface(
                 connector=connector,
                 target=target,
-                pending_signal_id=pending_signal_id,
-                pending_observation_id=pending_observation_id,
-                source_preview=pending_text,
-                side_filter="all" if self_visual_context_allowed else "customer",
+                side_filter="all",
                 max_images=8,
             )
         except Exception as exc:  # noqa: BLE001 - optional vision fails closed.
@@ -258,12 +180,6 @@ def prepare_scheduler_capture(
         if isinstance(visual_resolution.get("occurrence"), dict)
         else {}
     )
-    if (
-        str(visual_resolution.get("state") or "") == "self_confirmed"
-        and not self_visual_context_allowed
-    ):
-        visual_resolution = {"state": "sidebar_signal_only", "direction": "", "occurrence": {}}
-        resolved_occurrence = {}
     if resolved_occurrence:
         current_messages.append(resolved_occurrence)
 

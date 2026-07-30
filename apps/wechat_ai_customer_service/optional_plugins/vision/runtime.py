@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import copy
-import re
 from typing import Any
 
 from .projection.context import merge_conversation_context_patch
@@ -29,11 +28,9 @@ def _run_current_clipboard_image_transaction(
     target: str,
     exact: bool,
     session_key: str,
-    conversation_type: str = "",
     source_preview: str,
     speaker_name: str = "",
     pending_signal_id: str = "",
-    pending_observation_id: str = "",
     side_filter: str,
 ) -> dict[str, Any]:
     """Call the Vision-owned WeChat binding, never a Connector image facade."""
@@ -45,11 +42,9 @@ def _run_current_clipboard_image_transaction(
         target,
         exact=exact,
         session_key=session_key,
-        conversation_type=conversation_type,
         source_preview=source_preview,
         speaker_name=speaker_name,
         pending_signal_id=pending_signal_id,
-        pending_observation_id=pending_observation_id,
         side_filter=side_filter,
         consume_current_clipboard=read_current_clipboard_image,
     )
@@ -150,128 +145,6 @@ def _public_clipboard_transaction(value: dict[str, Any] | None) -> dict[str, Any
         "clipboard_content_read": bool(transaction.get("clipboard_content_read", False)),
         "clipboard_image_valid": bool(transaction.get("clipboard_image_valid", False)),
     }
-
-
-def _visual_anchor_text_key(value: Any) -> str:
-    return re.sub(r"\s+", "", str(value or "").strip()).lower()
-
-
-def _usable_customer_visual_anchor_text(value: Any) -> str:
-    text = str(value or "").strip()
-    if not text:
-        return ""
-    compact = _visual_anchor_text_key(text)
-    if compact in {"[图片]", "[照片]", "[image]", "图片", "照片", "发送了一张图片"}:
-        return ""
-    if "图片内容暂未取得" in text or "客户发送了一张图片" in text:
-        return ""
-    if compact in {"客户发来了一张图片", "客户发送了一张图片图片内容暂未取得"}:
-        return ""
-    return text
-
-
-def _message_customer_side(message: dict[str, Any]) -> bool:
-    side = str(
-        message.get("visual_side")
-        or message.get("sender_role")
-        or message.get("sender")
-        or ""
-    ).strip().lower()
-    return side == "customer"
-
-
-def _message_text_content(message: dict[str, Any]) -> str:
-    return str(
-        message.get("content_body")
-        or message.get("content")
-        or message.get("text")
-        or ""
-    ).strip()
-
-
-def _message_is_real_customer_text(message: dict[str, Any]) -> bool:
-    if not isinstance(message, dict):
-        return False
-    if not _message_customer_side(message):
-        return False
-    message_type = str(message.get("type") or message.get("message_type") or "text").strip().lower() or "text"
-    if message_type != "text":
-        return False
-    if message.get("is_customer_image_proxy"):
-        return False
-    flags = {str(flag or "").strip() for flag in (message.get("quality_flags") or [])}
-    if "synthetic_visual_turn" in flags or "clipboard_current_transaction_required" in flags:
-        return False
-    return bool(_usable_customer_visual_anchor_text(_message_text_content(message)))
-
-
-def _iter_capture_messages_for_visual_anchor(
-    payload: dict[str, Any] | None,
-    batch: list[dict[str, Any]] | None,
-) -> list[dict[str, Any]]:
-    seen: set[int] = set()
-    messages: list[dict[str, Any]] = []
-    for container in (
-        payload.get("messages") if isinstance(payload, dict) else None,
-        payload.get("batch") if isinstance(payload, dict) else None,
-        batch,
-    ):
-        if not isinstance(container, list):
-            continue
-        for item in container:
-            if not isinstance(item, dict):
-                continue
-            marker = id(item)
-            if marker in seen:
-                continue
-            seen.add(marker)
-            messages.append(item)
-    return messages
-
-
-def _customer_image_selection_source_preview(
-    *,
-    payload: dict[str, Any] | None,
-    batch: list[dict[str, Any]] | None,
-    pending_signal: dict[str, Any] | None,
-    pending_signal_id: str,
-    pending_observation_id: str,
-    confirmed_occurrence: dict[str, Any] | None = None,
-) -> str:
-    """Return a Vision-private selector anchor, preferring bound chat text.
-
-    Sidebar preview text is useful for wakeup, but it can be duplicated by OCR
-    overlays.  For image selection we prefer the actual customer text bubble
-    captured in the current conversation, while keeping the public pending
-    signal shape unchanged.
-    """
-
-    signal = pending_signal if isinstance(pending_signal, dict) else {}
-    fallback = str(signal.get("pending_signal_text") or signal.get("preview_content") or "").strip()
-    clean_signal_id = str(pending_signal_id or "").strip()
-    clean_observation_id = str(pending_observation_id or "").strip()
-
-    for message in reversed(_iter_capture_messages_for_visual_anchor(payload, batch)):
-        if not _message_is_real_customer_text(message):
-            continue
-        message_signal_id = str(message.get("pending_signal_id") or "").strip()
-        message_observation_id = str(message.get("pending_observation_id") or "").strip()
-        if clean_signal_id:
-            if message_signal_id != clean_signal_id:
-                continue
-        elif clean_observation_id:
-            if message_observation_id != clean_observation_id:
-                continue
-        else:
-            continue
-        return _usable_customer_visual_anchor_text(_message_text_content(message))
-
-    occurrence = confirmed_occurrence if isinstance(confirmed_occurrence, dict) else {}
-    for key in ("following_text", "_vision_following_text", "preceding_text", "_vision_preceding_text"):
-        text = _usable_customer_visual_anchor_text(occurrence.get(key))
-        if text:
-            return text
-    return fallback
 
 
 def _confirmed_customer_image_occurrence(
@@ -376,7 +249,6 @@ def maybe_capture_self_image_context(
         target=str(target.name or ""),
         exact=bool(target.exact),
         session_key=str(getattr(target, "session_key", "") or ""),
-        conversation_type=str(getattr(target, "conversation_type", "") or ""),
         source_preview=str(candidate.get("content") or ""),
         pending_signal_id=source_message_id,
         side_filter="self",
@@ -442,14 +314,6 @@ def maybe_route_customer_image_turn(
             "reason": "current_image_pending_signal_missing",
         }
     pending_signal_id = str(image_pending_signal.get("pending_signal_id") or "").strip()
-    pending_observation_id = str(image_pending_signal.get("pending_observation_id") or "").strip()
-    selection_source_preview = _customer_image_selection_source_preview(
-        payload=payload,
-        batch=batch,
-        pending_signal=image_pending_signal,
-        pending_signal_id=pending_signal_id,
-        pending_observation_id=pending_observation_id,
-    )
     confirmed_occurrence = _confirmed_customer_image_occurrence(payload, pending_signal_id)
     if not confirmed_occurrence:
         try:
@@ -462,9 +326,6 @@ def maybe_route_customer_image_turn(
                 exact=bool(target.exact),
                 session_key=str(getattr(target, "session_key", "") or ""),
                 conversation_type=str(getattr(target, "conversation_type", "") or ""),
-                pending_signal_id=pending_signal_id,
-                pending_observation_id=pending_observation_id,
-                source_preview=selection_source_preview,
                 side_filter="all",
                 max_images=8,
             )
@@ -504,24 +365,14 @@ def maybe_route_customer_image_turn(
             "adoptable": False,
             "reason": "pending_image_signal_already_processed",
         }
-    selection_source_preview = _customer_image_selection_source_preview(
-        payload=payload,
-        batch=batch,
-        pending_signal=image_pending_signal,
-        pending_signal_id=pending_signal_id,
-        pending_observation_id=pending_observation_id,
-        confirmed_occurrence=confirmed_occurrence,
-    )
     transaction_result = _run_current_clipboard_image_transaction(
         connector=connector,
         target=str(target.name or ""),
         exact=bool(target.exact),
         session_key=str(getattr(target, "session_key", "") or ""),
-        conversation_type=str(getattr(target, "conversation_type", "") or ""),
-        source_preview=selection_source_preview,
+        source_preview=str(image_pending_signal.get("pending_signal_text") or image_pending_signal.get("preview_content") or ""),
         speaker_name=str(image_pending_signal.get("speaker_name") or image_pending_signal.get("group_member_name") or ""),
         pending_signal_id=pending_signal_id,
-        pending_observation_id=pending_observation_id,
         side_filter="customer",
     )
     transaction_result = transaction_result if isinstance(transaction_result, dict) else {}
