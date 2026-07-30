@@ -259,6 +259,7 @@ def resolve_pending_visual_occurrence(
     target_state: dict[str, Any],
     explicit_image_pending: bool,
     pending_signal_id: str,
+    pending_anchor_message_ids: set[str] | None = None,
 ) -> dict[str, Any]:
     """Bind the current media signal to one direction-confirmed occurrence."""
 
@@ -272,7 +273,11 @@ def resolve_pending_visual_occurrence(
         return {"state": "completed", "direction": "", "occurrence": {}}
     candidates = [dict(item) for item in messages if is_structural_visual_occurrence(item)]
     if not explicit_image_pending:
-        pending_message_ids: set[str] = set()
+        pending_message_ids: set[str] = {
+            str(item or "").strip()
+            for item in (pending_anchor_message_ids or set())
+            if str(item or "").strip()
+        }
         for item in messages:
             if not isinstance(item, dict) or is_structural_visual_occurrence(item):
                 continue

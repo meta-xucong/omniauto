@@ -14,6 +14,7 @@ def visual_image_envelopes_from_bubbles(
     existing_messages: list[dict[str, Any]] | None,
     *,
     target: str,
+    include_private_details: bool = False,
 ) -> list[dict[str, Any]]:
     """Project structural media occurrences into the frozen message contract."""
 
@@ -43,7 +44,11 @@ def visual_image_envelopes_from_bubbles(
             return None
         return top, bottom
 
-    text_rows: list[tuple[int, int, str]] = []
+    def message_side(item: dict[str, Any]) -> str:
+        side = str(item.get("sender_role") or item.get("sender") or "").strip().lower()
+        return "self" if side in {"self", "assistant", "service", "bot"} else side
+
+    text_rows: list[tuple[int, int, str, str]] = []
     for message in existing_messages or []:
         if not isinstance(message, dict):
             continue
@@ -54,7 +59,7 @@ def visual_image_envelopes_from_bubbles(
         vertical = message_vertical_bounds(message)
         if not identity or vertical is None:
             continue
-        text_rows.append((vertical[0], vertical[1], identity))
+        text_rows.append((vertical[0], vertical[1], identity, message_side(message)))
     text_rows.sort(key=lambda item: (item[0], item[1], item[2]))
 
     def bubble_top(item: dict[str, Any]) -> int:
@@ -97,6 +102,10 @@ def visual_image_envelopes_from_bubbles(
         following_rows = [item for item in text_rows if item[0] >= bubble_bottom_value - 6]
         preceding_text_id = preceding_rows[-1][2] if preceding_rows else ""
         following_text_id = following_rows[0][2] if following_rows else ""
+        has_self_message_after = any(
+            row_side == "self" and row_top >= bubble_bottom_value - 6
+            for row_top, _row_bottom, _identity, row_side in text_rows
+        )
         # Keep the established occurrence-id contract byte-for-byte stable.
         # Neighbor ids are private current-turn binding evidence only; adding
         # them to the persisted id seed would reinterpret already-recorded
@@ -141,6 +150,14 @@ def visual_image_envelopes_from_bubbles(
                 **(
                     {"_vision_following_text_id": following_text_id}
                     if following_text_id
+                    else {}
+                ),
+                **(
+                    {
+                        "_vision_bounds": [int(value) for value in list(bounds or [])[:4]],
+                        "_vision_has_self_message_after": bool(has_self_message_after),
+                    }
+                    if include_private_details
                     else {}
                 ),
             }
