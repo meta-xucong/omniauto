@@ -9,7 +9,7 @@ from typing import Any
 from uuid import uuid4
 
 from fastapi import APIRouter, File, Form, HTTPException, Query, UploadFile
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 
 from apps.wechat_ai_customer_service.knowledge_paths import runtime_app_root
 
@@ -26,6 +26,51 @@ def service() -> ProductConsoleService:
 @router.get("/catalog")
 def catalog(include_archived: bool = Query(False)) -> dict[str, Any]:
     return service().catalog(include_archived=include_archived)
+
+
+@router.get("/local-vehicle-excel-template")
+def local_vehicle_excel_template() -> Response:
+    content = service().local_vehicle_excel_template()
+    return Response(
+        content=content,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": 'attachment; filename="local_manual_vehicle_v2_template.xlsx"'},
+    )
+
+
+@router.get("/local-vehicle-draft")
+def local_vehicle_draft() -> dict[str, Any]:
+    return service().local_vehicle_draft()
+
+
+@router.post("/products")
+def create_local_vehicle(payload: dict[str, Any]) -> dict[str, Any]:
+    try:
+        return service().create_local_vehicle(payload or {})
+    except (TypeError, ValueError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@router.post("/local-vehicle-excel-import/preview")
+async def preview_local_vehicle_excel_import(file: UploadFile = File(...)) -> dict[str, Any]:
+    try:
+        content = await file.read()
+        return service().preview_local_vehicle_excel_import(
+            filename=file.filename or "local_manual_vehicle_v2.xlsx",
+            content=content,
+        )
+    except (OSError, TypeError, ValueError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@router.post("/local-vehicle-excel-import/confirm")
+def confirm_local_vehicle_excel_import(payload: dict[str, Any]) -> dict[str, Any]:
+    try:
+        return service().confirm_local_vehicle_excel_import(preview_id=str((payload or {}).get("preview_id") or ""))
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail="Excel import preview not found") from exc
+    except (OSError, TypeError, ValueError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @router.get("/products/{product_id}")

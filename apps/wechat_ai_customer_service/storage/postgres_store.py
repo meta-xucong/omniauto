@@ -146,6 +146,63 @@ class PostgresJsonStore:
             [tenant_id, layer, category_id, product_id, item_id, status, search_text(item), self.jsonb(item)],
         )
 
+    def upsert_knowledge_items_atomic(
+        self,
+        tenant_id: str,
+        layer: str,
+        category_id: str,
+        items: list[dict[str, Any]],
+        *,
+        product_id: str = "",
+    ) -> None:
+        """Upsert a batch of knowledge items in one PostgreSQL transaction."""
+
+        if not items:
+            return
+        with self.connect() as conn:
+            original_autocommit = getattr(conn, "autocommit", None)
+            conn.autocommit = False
+            try:
+                with conn.cursor() as cur:
+                    for item in items:
+                        item_id = str(item.get("id") or "")
+                        if not item_id:
+                            raise ValueError("item id is required")
+                        status = str(item.get("status") or "active")
+                        resolved_product_id = product_id or str(
+                            ((item.get("data") or {}) if isinstance(item.get("data"), dict) else {}).get("product_id") or ""
+                        )
+                        cur.execute(
+                            f"""
+                            INSERT INTO {self.schema}.knowledge_items
+                              (tenant_id, layer, category_id, product_id, item_id, status, search_text, payload, updated_at)
+                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, now())
+                            ON CONFLICT (tenant_id, layer, category_id, product_id, item_id)
+                            DO UPDATE SET
+                              status = EXCLUDED.status,
+                              search_text = EXCLUDED.search_text,
+                              payload = EXCLUDED.payload,
+                              updated_at = now()
+                            """,
+                            [
+                                tenant_id,
+                                layer,
+                                category_id,
+                                resolved_product_id,
+                                item_id,
+                                status,
+                                search_text(item),
+                                self.jsonb(item),
+                            ],
+                        )
+                conn.commit()
+            except Exception:
+                conn.rollback()
+                raise
+            finally:
+                if original_autocommit is not None:
+                    conn.autocommit = original_autocommit
+
     def list_knowledge_items(
         self,
         tenant_id: str,

@@ -149,9 +149,15 @@ def category_items(
             page = items[offset : offset + limit]
         else:
             page = items
+        output_items = page
+        if category_id == PRODUCT_MASTER_CATEGORY_ID:
+            output_items = [
+                base_store.product_master.get_compatibility_item(str(item.get("id") or ""), include_archived=include_archived) or item
+                for item in page
+            ]
         return {
             "ok": True,
-            "items": [enrich_knowledge_item(item) for item in page],
+            "items": [enrich_knowledge_item(item) for item in output_items],
             "total": total,
             "unfiltered_total": unfiltered_total,
             "offset": offset,
@@ -184,6 +190,8 @@ def category_item_detail(category_id: str, item_id: str) -> dict[str, Any]:
         raise HTTPException(status_code=404, detail=f"item not found: {category_id}/{item_id}") from exc
     if not item:
         raise HTTPException(status_code=404, detail=f"item not found: {category_id}/{item_id}")
+    if category_id == PRODUCT_MASTER_CATEGORY_ID:
+        item = base_store.product_master.get_compatibility_item(item_id, include_archived=False) or item
     return {"ok": True, "item": enrich_knowledge_item(item)}
 
 

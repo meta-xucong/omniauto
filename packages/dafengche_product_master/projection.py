@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import copy
+import re
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Iterable
@@ -100,6 +101,10 @@ def project_customer_evidence(
     operation_phase = _allowed_value(record, f"{DETAIL_ROOT}.operationPhase", policy)
     if policy.allowed_operation_phases and str(operation_phase or "") not in policy.allowed_operation_phases:
         return None
+    operation_phase_label = _customer_operation_phase_label(
+        operation_phase,
+        untrusted=_current_state_field_is_untrusted(record, f"{DETAIL_ROOT}.operationPhase"),
+    )
 
     name = _first_allowed_text(
         record,
@@ -134,10 +139,14 @@ def project_customer_evidence(
         return None
 
     year = _allowed_value(record, f"{DETAIL_ROOT}.baseCarInfo.firstLicensePlateDate", policy)
-    mileage = _allowed_value(record, f"{DETAIL_ROOT}.baseCarInfo.mileage", policy)
+    mileage = _numeric_text_value(_allowed_value(record, f"{DETAIL_ROOT}.baseCarInfo.mileage", policy))
     condition = _allowed_value(record, f"{DETAIL_ROOT}.baseCarInfo.vehicleCondition", policy)
     display_description = _allowed_value(record, f"{DETAIL_ROOT}.baseCarInfo.carDetailForDisplay", policy)
     stock_status = _allowed_value(record, f"{DETAIL_ROOT}.baseCarInfo.stockStatus", policy)
+    stock_status_label = _customer_stock_status_label(
+        stock_status,
+        untrusted=_current_state_field_is_untrusted(record, f"{DETAIL_ROOT}.baseCarInfo.stockStatus"),
+    )
     exterior_color = _first_allowed_value(
         record,
         policy,
@@ -170,7 +179,12 @@ def project_customer_evidence(
     highlights = _allowed_value(record, f"{DETAIL_ROOT}.carModelParam.highlightsConfiguration", policy)
     keys_count = _allowed_value(record, f"{DETAIL_ROOT}.carLicenseInfo.keysCount", policy)
     transfer_total = _allowed_value(record, f"{DETAIL_ROOT}.carLicenseInfo.transferTotal", policy)
-    location = _allowed_value(record, f"{DETAIL_ROOT}.baseCarInfo.area.displayValue", policy)
+    location = _customer_location_value(record, policy)
+    production_date = _allowed_value(record, f"{DETAIL_ROOT}.baseCarInfo.productionDate", policy)
+    use_type = _allowed_value(record, f"{DETAIL_ROOT}.baseCarInfo.useType", policy)
+    video_summary = _customer_media_availability_label(_allowed_value(record, f"{DETAIL_ROOT}.baseCarInfo.video", policy))
+    weidian_upshelf = _customer_flag_label(_allowed_value(record, f"{DETAIL_ROOT}.baseCarInfo.weidianIsUpshelf", policy))
+    up_shelf_date = _allowed_value(record, f"{DETAIL_ROOT}.baseCarInfo.upShelfDate", policy)
     sale_price = _allowed_value(record, f"{DETAIL_ROOT}.carPriceInfo.salePrice", policy)
     annotations = _customer_visible_annotations(record)
 
@@ -188,6 +202,13 @@ def project_customer_evidence(
         ("钥匙数", keys_count),
         ("过户次数", transfer_total),
         ("所在地", location),
+        ("出厂日期", production_date),
+        ("使用性质", use_type),
+        ("车辆视频", video_summary),
+        ("微店上架状态", weidian_upshelf),
+        ("微店上架时间", up_shelf_date),
+        ("库存状态", stock_status_label),
+        ("业务阶段", operation_phase_label),
     ):
         if value not in (None, ""):
             specs_parts.append(f"{label}:{value}")
@@ -211,11 +232,13 @@ def project_customer_evidence(
         "mileage": mileage,
         "color": exterior_color,
         "transmission": transmission,
+        "location": location,
         "price": sale_price,
-        "availability": operation_phase,
-        "stock_status": stock_status,
-        "operation_phase": operation_phase,
-        "specs": annotations.get("specs") or "；".join(specs_parts),
+        "stock": stock_status_label,
+        "availability": operation_phase_label,
+        "stock_status": stock_status_label,
+        "operation_phase": operation_phase_label,
+        "specs": _customer_specs_text(annotations.get("specs"), specs_parts),
         "source_type": source_type,
         "source_updated_at": _detail_pulled_at(record),
     }
@@ -347,6 +370,197 @@ def _first_allowed_value(record: dict[str, Any], policy: CustomerEvidencePolicy,
 def _first_allowed_text(record: dict[str, Any], policy: CustomerEvidencePolicy, *paths: str) -> str:
     value = _first_allowed_value(record, policy, *paths)
     return str(value).strip() if value not in (None, "") else ""
+
+
+def _numeric_text_value(value: Any) -> Any:
+    """Normalize a numeric text input only in the derived evidence view."""
+
+    if not isinstance(value, str):
+        return value
+    text = value.strip()
+    if not text or not re.fullmatch(r"[+-]?(?:\d+(?:\.\d*)?|\.\d+)", text):
+        return value
+    try:
+        number = float(text)
+    except ValueError:
+        return value
+    return int(number) if number.is_integer() else number
+
+
+def _customer_location_value(record: dict[str, Any], policy: CustomerEvidencePolicy) -> str | None:
+    display_path = f"{DETAIL_ROOT}.baseCarInfo.area.displayValue"
+    display = _allowed_value(record, display_path, policy)
+    if display not in (None, ""):
+        return str(display).strip()
+    if not policy.allows(display_path):
+        return None
+    # ``cityName``/``provinceName`` are source-internal components, while
+    # ``area.displayValue`` is the customer-visible field.  When old/local
+    # manual records only have the components, derive the same readable
+    # display value without exposing codes or broadening the public allowlist.
+    province = str(_value_at(record, f"{DETAIL_ROOT}.baseCarInfo.area.provinceName") or "").strip()
+    city = str(_value_at(record, f"{DETAIL_ROOT}.baseCarInfo.area.cityName") or "").strip()
+    if province and city:
+        if province == city or city in province:
+            return province
+        if province in city:
+            return city
+        return f"{province}{city}"
+    return province or city or None
+
+
+def _customer_operation_phase_label(value: Any, *, untrusted: bool = False) -> str | None:
+    if untrusted:
+        return "待核实" if str(value or "").strip() else None
+    return _readable_code_label(
+        value,
+        {
+            "sale": "在售",
+            "selling": "在售",
+            "on_sale": "在售",
+            "test_sale": "在售",
+            "sold": "已售",
+            "prepare": "整备中",
+            "preparing": "整备中",
+            "pending": "待上架",
+            "reserved": "已预订",
+            "off_shelf": "已下架",
+            "offline": "已下架",
+            "archived": "已归档",
+        },
+    )
+
+
+def _customer_stock_status_label(value: Any, *, untrusted: bool = False) -> str | None:
+    if untrusted:
+        return "待核实" if str(value or "").strip() else None
+    return _readable_code_label(
+        value,
+        {
+            "1": "在库",
+            "in_stock": "在库",
+            "available": "在库",
+            "sale": "在库",
+            "0": "无库存",
+            "out_of_stock": "无库存",
+            "sold_out": "无库存",
+            "2": "已预订",
+            "reserved": "已预订",
+            "3": "已售",
+            "sold": "已售",
+            "archived": "已归档",
+        },
+    )
+
+
+def _current_state_field_is_untrusted(record: dict[str, Any], path: str) -> bool:
+    """Return true when a status-like value is only a test/migration fill.
+
+    Current availability/stock facts are operational claims.  A V2 manual
+    vehicle can retain migration/test payloads for audit, but those placeholders
+    must not authorize customer-visible "in stock" or "on sale" assertions.
+    """
+
+    provenance = _value_at(record, "extensions.manual.field_provenance")
+    if isinstance(provenance, dict):
+        relative = path[len(f"{DETAIL_ROOT}.") :] if path.startswith(f"{DETAIL_ROOT}.") else path
+        for key in (path, relative):
+            marker = provenance.get(key)
+            if isinstance(marker, dict):
+                if _provenance_marks_test_or_migration(marker):
+                    return True
+                if str(marker.get("source") or "") == "manual_admin_edit":
+                    return False
+    return _looks_like_test_placeholder(_value_at(record, path))
+
+
+def _looks_like_test_placeholder(value: Any) -> bool:
+    text = str(value or "").strip().lower()
+    if not text:
+        return False
+    normalized = text.replace("-", "_").replace(" ", "_")
+    return normalized.startswith("test_") or normalized.endswith("_test") or "_test_" in normalized
+
+
+def _provenance_marks_test_or_migration(marker: dict[str, Any]) -> bool:
+    values = [
+        marker.get("source"),
+        marker.get("action"),
+        marker.get("ingest_channel"),
+        marker.get("original_source_type"),
+        marker.get("batch_id"),
+        marker.get("reason"),
+    ]
+    text = " ".join(str(value or "").strip().lower() for value in values if str(value or "").strip())
+    if marker.get("test_only") is True:
+        return True
+    return any(term in text for term in ("filled_test_value", "test_fixture_fill", "legacy_v1_migration"))
+
+
+def _customer_flag_label(value: Any) -> str | None:
+    text = str(value or "").strip()
+    if not text:
+        return None
+    normalized = text.lower().replace("-", "_").replace(" ", "_")
+    if normalized in {"1", "true", "yes", "y", "on", "up", "upshelf", "shelf", "online"}:
+        return "已上架"
+    if normalized in {"0", "false", "no", "n", "off", "down", "downshelf", "offline"}:
+        return "未上架"
+    if any("\u4e00" <= char <= "\u9fff" for char in text):
+        return text
+    return "待核实"
+
+
+def _customer_media_availability_label(value: Any) -> str | None:
+    if value in (None, "", [], {}):
+        return None
+    return "可提供" if _contains_safe_public_media_reference(value) else None
+
+
+def _contains_safe_public_media_reference(value: Any) -> bool:
+    if isinstance(value, str):
+        text = value.strip()
+        if not text:
+            return False
+        if text.startswith(("https://", "http://")):
+            return True
+        if any(marker in text for marker in ("\\", "/", ":", "assetFile")):
+            return False
+        return any("\u4e00" <= char <= "\u9fff" for char in text)
+    if isinstance(value, dict):
+        return any(_contains_safe_public_media_reference(child) for child in value.values())
+    if isinstance(value, list):
+        return any(_contains_safe_public_media_reference(child) for child in value)
+    return bool(value)
+
+
+def _readable_code_label(value: Any, mapping: dict[str, str]) -> str | None:
+    text = str(value or "").strip()
+    if not text:
+        return None
+    normalized = text.lower().replace("-", "_").replace(" ", "_")
+    if normalized in mapping:
+        return mapping[normalized]
+    if any("\u4e00" <= char <= "\u9fff" for char in text):
+        return text
+    if all(char.isalnum() or char == "_" for char in normalized):
+        return "待核实"
+    return text
+
+
+def _customer_specs_text(base_specs: Any, spec_parts: Iterable[Any]) -> str | None:
+    parts: list[str] = []
+    for part in spec_parts:
+        text = str(part or "").strip()
+        if text and text not in parts:
+            parts.append(text)
+    if isinstance(base_specs, list):
+        parts.extend(_unique_texts(base_specs))
+    elif base_specs not in (None, "", [], {}):
+        text = str(base_specs).strip()
+        if text:
+            parts.append(text)
+    return "；".join(parts) if parts else None
 
 
 def _customer_picture_urls(record: dict[str, Any], policy: CustomerEvidencePolicy) -> list[str]:

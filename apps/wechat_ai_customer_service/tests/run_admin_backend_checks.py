@@ -1940,7 +1940,7 @@ def check_upload_learning_candidate_apply_and_reject(client: TestClient) -> None
 
 def check_duplicate_candidate_detection_and_learning_skip() -> None:
     check_knowledge_consistency_diagnostics()
-    existing = ProductMasterStore().get_item("commercial_fridge_bx_200", include_archived=True)
+    existing = ProductMasterStore().get_compatibility_item("commercial_fridge_bx_200", include_archived=True)
     assert_true(bool(existing), "commercial fridge should exist in product_master")
     candidate = {
         "schema_version": 1,

@@ -29,6 +29,7 @@ def main() -> int:
         results.append(check_cloud_required_defaults_to_login_required())
         results.append(check_explicit_dev_auth_bypass_still_requires_opt_in())
         results.append(check_runtime_start_requires_login_in_cloud_mode())
+        results.append(check_local_vehicle_draft_is_public_but_create_requires_login())
         results.append(check_local_safety_stop_does_not_require_login())
         results.append(check_recorder_local_safety_stop_uses_query_tenant_id())
     finally:
@@ -68,6 +69,22 @@ def check_runtime_start_requires_login_in_cloud_mode() -> dict[str, Any]:
     payload = response.json()
     assert_equal(payload.get("detail"), "authentication required", "runtime start should fail with authentication required")
     return {"name": "check_runtime_start_requires_login_in_cloud_mode", "ok": True}
+
+
+def check_local_vehicle_draft_is_public_but_create_requires_login() -> dict[str, Any]:
+    os.environ["WECHAT_CLOUD_REQUIRED"] = "1"
+    os.environ.pop("WECHAT_AUTH_REQUIRED", None)
+    client = TestClient(create_app())
+    draft = client.get("/api/product-console/local-vehicle-draft")
+    assert_equal(draft.status_code, 200, "blank local vehicle draft should be openable before login")
+    assert_equal(draft.json().get("mode"), "local_manual_vehicle", "draft endpoint should return the manual vehicle mode")
+    create = client.post(
+        "/api/product-console/products",
+        json={"vehicle_detail_patch": {"baseCarInfo": {"name": {"displayValue": "未登录新车"}}}},
+    )
+    assert_equal(create.status_code, 401, "creating a vehicle must still require login")
+    assert_equal(create.json().get("detail"), "authentication required", "create must retain the auth boundary")
+    return {"name": "check_local_vehicle_draft_is_public_but_create_requires_login", "ok": True}
 
 
 def check_local_safety_stop_does_not_require_login() -> dict[str, Any]:

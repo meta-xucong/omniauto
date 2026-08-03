@@ -5605,7 +5605,7 @@ def compact_product_item_for_brain_prompt(item: dict[str, Any], *, max_text_char
         compact["matched_aliases"] = [str(alias) for alias in matched_aliases[:6] if str(alias).strip()]
     specs = str(source.get("specs") or "").strip()
     if specs:
-        compact["specs"] = clip(specs, max(120, min(max_text_chars, 180)))
+        compact["specs"] = compact_product_specs_for_brain_prompt(specs, max_text_chars=max_text_chars)
     risk_rules = source.get("risk_rules") or []
     if isinstance(risk_rules, list) and risk_rules:
         compact["risk_rules"] = [
@@ -5614,6 +5614,69 @@ def compact_product_item_for_brain_prompt(item: dict[str, Any], *, max_text_char
             if str(rule).strip()
         ]
     return compact
+
+
+def compact_product_specs_for_brain_prompt(specs: str, *, max_text_chars: int) -> str:
+    """Preserve structured product-fact labels before trimming free-form prose."""
+
+    text = str(specs or "").strip()
+    limit = max(120, max_text_chars)
+    if len(text) <= limit:
+        return text
+    raw_segments = [segment.strip() for segment in re.split(r"[；;]\s*", text) if segment.strip()]
+    structured: list[tuple[str, str]] = []
+    freeform: list[str] = []
+    for segment in raw_segments:
+        label = ""
+        value = ""
+        for sep in ("：", ":"):
+            if sep in segment:
+                left, right = segment.split(sep, 1)
+                label = left.strip()
+                value = right.strip()
+                break
+        if label and 1 <= len(label) <= 16:
+            structured.append((label, value))
+        else:
+            freeform.append(segment)
+    if not structured:
+        return clip(text, limit)
+    values = [value for _label, value in structured]
+    compact_parts = [f"{label}:…" for label, _value in structured]
+    compact_text = "；".join(compact_parts)
+    if len(compact_text) > limit:
+        return clip("；".join(f"{label}:" for label, _value in structured), limit)
+    remaining = limit - len(compact_text)
+    while remaining > 0:
+        changed = False
+        for index, value in enumerate(values):
+            current_value = compact_parts[index].split(":", 1)[1]
+            current_len = 0 if current_value == "…" else len(current_value.rstrip("…"))
+            if current_len >= len(value):
+                continue
+            next_len = current_len + 1
+            next_value = value[:next_len]
+            if next_len < len(value):
+                next_value += "…"
+            label = structured[index][0]
+            candidate_parts = list(compact_parts)
+            candidate_parts[index] = f"{label}:{next_value}"
+            candidate_text = "；".join(candidate_parts)
+            if len(candidate_text) > limit:
+                continue
+            compact_parts = candidate_parts
+            remaining = limit - len(candidate_text)
+            changed = True
+            if remaining <= 0:
+                break
+        if not changed:
+            break
+    compact_text = "；".join(compact_parts)
+    if freeform and len(compact_text) + 1 < limit:
+        suffix = clip("；".join(freeform), limit - len(compact_text) - 1)
+        if suffix:
+            compact_text = f"{compact_text}；{suffix}"
+    return compact_text
 
 
 def legacy_shipping_field_is_prompt_safe(value: Any, *, max_text_chars: int) -> bool:
