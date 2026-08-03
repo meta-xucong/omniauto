@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 from .contract import unavailable_result, vision_context
+from .errors import VISION_IMAGE_UNDERSTANDING_SCHEMA_INVALID
 from .lifecycle import release_image_payload
 from .ports import VisionHostPorts
 
@@ -53,8 +54,12 @@ class VisionService:
 
     def _inspect_via_ports(self, data: dict[str, Any]) -> dict[str, Any]:
         from .capture.transaction import acquire_current_image_via_ports
-        from .projection.brain import build_customer_image_brain_bridge
+        from .projection.brain import (
+            build_customer_image_brain_bridge,
+            compact_customer_image_brain_bridge,
+        )
         from .projection.message import build_brain_safe_image_proxy_messages
+        from .result_schema import image_understanding_completed
 
         acquisition = acquire_current_image_via_ports(self._ports, data)
         if not acquisition.get("ok"):
@@ -63,6 +68,10 @@ class VisionService:
                 "applied": False,
                 "adoptable": False,
                 "reason": str(acquisition.get("reason") or "vision_port_transaction_failed"),
+                "acquisition_state": str(
+                    acquisition.get("state")
+                    or "vision_port_transaction_failed"
+                ),
                 "clipboard_transaction": dict(acquisition.get("transaction") or {}),
             }
         payload = acquisition.pop("_ephemeral_clipboard_image", None)
@@ -71,17 +80,29 @@ class VisionService:
         try:
             provider = self._ports.vision_provider
             if provider is not None:
-                understanding = provider.understand(
-                    {
-                        "image": payload,
-                        "customer_text": str(data.get("combined") or data.get("customer_text") or ""),
-                        "message_id": str(data.get("message_id") or data.get("pending_signal_id") or "memory-current-image"),
-                        "config": data.get("config") if isinstance(data.get("config"), dict) else self._config,
+                try:
+                    understanding = provider.understand(
+                        {
+                            "image": payload,
+                            "customer_text": str(data.get("combined") or data.get("customer_text") or ""),
+                            "message_id": str(data.get("message_id") or data.get("pending_signal_id") or "memory-current-image"),
+                            "config": data.get("config") if isinstance(data.get("config"), dict) else self._config,
+                        }
+                    )
+                except Exception as exc:  # noqa: BLE001 - preserve copy evidence
+                    return {
+                        "enabled": True,
+                        "applied": False,
+                        "adoptable": False,
+                        "reason": str(exc) or "vision_provider_exception",
+                        "error_type": type(exc).__name__,
+                        "clipboard_transaction": dict(
+                            acquisition.get("transaction") or {}
+                        ),
                     }
-                )
                 understanding = dict(understanding) if isinstance(understanding, dict) else {}
-                understanding.setdefault("applied", bool(understanding.get("vision_summary")))
-                understanding.setdefault("adoptable", bool(understanding.get("vision_summary")))
+                understanding.setdefault("applied", False)
+                understanding.setdefault("adoptable", False)
                 understanding.setdefault("reason", "vision_provider_port_ready")
             else:
                 from .understanding.service import maybe_run_customer_image_understanding
@@ -103,6 +124,55 @@ class VisionService:
                 {},
                 source_reason="vision_host_ports_current_transaction",
             )
+            understanding_schema: dict[str, Any] = {}
+            if self._config.get("strict_image_adapter"):
+                from .result_schema import (
+                    image_result_schema,
+                    project_to_schema,
+                    validate_schema,
+                )
+
+                understanding_schema = image_result_schema(
+                    self._config,
+                    "customer_image_understanding_v1",
+                )
+                understanding = project_to_schema(
+                    understanding,
+                    understanding_schema,
+                )
+                bridge = {
+                    "schema_version": 1,
+                    **compact_customer_image_brain_bridge(bridge),
+                }
+                bridge_schema = image_result_schema(
+                    self._config,
+                    "visual_bridge_input_v1",
+                )
+                bridge = project_to_schema(bridge, bridge_schema)
+                if (
+                    not understanding_schema
+                    or not bridge_schema
+                    or validate_schema(
+                        understanding,
+                        understanding_schema,
+                    )
+                    or validate_schema(bridge, bridge_schema)
+                ):
+                    return {
+                        "enabled": True,
+                        "applied": False,
+                        "adoptable": False,
+                        "reason": (
+                            VISION_IMAGE_UNDERSTANDING_SCHEMA_INVALID
+                        ),
+                        "clipboard_transaction": dict(
+                            acquisition.get("transaction") or {}
+                        ),
+                    }
+            understanding_completed = image_understanding_completed(
+                understanding,
+                understanding_schema,
+            )
             occurrence = acquisition.get("occurrence") if isinstance(acquisition.get("occurrence"), dict) else {}
             proxies = (
                 build_brain_safe_image_proxy_messages(
@@ -115,8 +185,12 @@ class VisionService:
             )
             result = {
                 "enabled": True,
-                "applied": bool(understanding.get("applied") or understanding.get("vision_summary")),
-                "adoptable": bool(direction == "customer" and (understanding.get("adoptable") or understanding.get("vision_summary"))),
+                "applied": understanding_completed,
+                "adoptable": bool(
+                    direction == "customer"
+                    and understanding_completed
+                    and understanding.get("adoptable") is True
+                ),
                 "context_only": direction == "self",
                 "reason": str(understanding.get("reason") or "vision_host_ports_ready"),
                 "direction": direction,
@@ -145,8 +219,11 @@ class VisionService:
     def inspect_current_conversation(self, request: dict[str, Any] | None) -> dict[str, Any]:
         data = vision_context(request)
         connector = data.get("connector") or self._ports.connector
+        strict_adapter = bool(self._config.get("strict_image_adapter"))
         if connector is None and self._fine_grained_ports_ready():
             return self._inspect_via_ports(data)
+        if strict_adapter:
+            return unavailable_result("vision_fine_grained_ports_required")
         if connector is None:
             return unavailable_result("vision_wechat_host_unavailable")
         from .runtime import maybe_route_customer_image_turn
@@ -189,7 +266,7 @@ class VisionService:
                 or ""
             ),
             side_filter=str(data.get("side_filter") or "all"),
-            max_images=int(data.get("max_images") or 8),
+            max_images=int(data.get("max_images") or 64),
         )
 
     def inspect_self_context(self, request: dict[str, Any] | None) -> dict[str, Any]:
@@ -209,18 +286,24 @@ class VisionService:
         )
 
     def understand_memory_image(self, request: dict[str, Any] | None) -> dict[str, Any]:
-        from .clipboard_payload import EphemeralClipboardImage
+        from .clipboard_payload import ephemeral_image_from_memory
         from .understanding.service import maybe_run_customer_image_understanding
 
         data = vision_context(request)
+        effective_config = (
+            data.get("config")
+            if isinstance(data.get("config"), dict)
+            else self._config
+        )
         supplied = data.get("image")
         owned_payload = False
         if isinstance(supplied, (bytes, bytearray, memoryview)):
-            payload = EphemeralClipboardImage(
-                image_bytes=bytearray(bytes(supplied)),
+            payload = ephemeral_image_from_memory(
+                supplied,
                 mime_type=str(data.get("mime_type") or "image/png"),
                 width=int(data.get("width") or 0),
                 height=int(data.get("height") or 0),
+                source_limits=effective_config,
             )
             owned_payload = True
         else:
@@ -229,7 +312,7 @@ class VisionService:
             return unavailable_result("vision_memory_image_missing")
         try:
             return maybe_run_customer_image_understanding(
-                config=(data.get("config") if isinstance(data.get("config"), dict) else self._config),
+                config=effective_config,
                 customer_text=str(data.get("customer_text") or ""),
                 image_assets=[{"message_id": str(data.get("message_id") or "memory-image"), "message_type": "image"}],
                 source_reason=str(data.get("source_reason") or "memory_image_api"),

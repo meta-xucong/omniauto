@@ -4,9 +4,88 @@ from __future__ import annotations
 
 import hashlib
 import json
-from typing import Any
+from typing import Any, Callable
 
-from .wechat import detect_visual_image_bubbles, extract_chat_time_markers
+from ..errors import VISION_IMAGE_OBSERVATION_FAILED
+from .wechat import (
+    attach_image_physical_anchors,
+    detect_visual_image_bubbles,
+    extract_chat_time_markers,
+)
+
+
+class ImageSurfaceObservationError(RuntimeError):
+    def __init__(self, stage: str, cause: Exception) -> None:
+        self.stage = str(stage or "image_surface_observation")
+        self.error_type = type(cause).__name__
+        super().__init__(
+            f"{VISION_IMAGE_OBSERVATION_FAILED}:{self.stage}:{self.error_type}"
+        )
+
+
+def messages_outside_image_bubbles(
+    messages: list[dict[str, Any]] | None,
+    image_messages: list[dict[str, Any]] | None,
+) -> list[dict[str, Any]]:
+    """Remove OCR rows rendered inside a detected image bubble.
+
+    Text and voice-looking content inside a customer screenshot belongs to
+    that image and must reach the system through Vision, not the chat parser.
+    """
+
+    def bounds(value: Any) -> tuple[float, float, float, float] | None:
+        if isinstance(value, dict):
+            raw = (
+                value.get("left"),
+                value.get("top"),
+                value.get("right"),
+                value.get("bottom"),
+            )
+        elif isinstance(value, (list, tuple)) and len(value) >= 4:
+            raw = value[:4]
+        else:
+            return None
+        try:
+            left, top, right, bottom = (float(item) for item in raw)
+        except (TypeError, ValueError):
+            return None
+        if right <= left or bottom <= top:
+            return None
+        return left, top, right, bottom
+
+    image_bounds = [
+        rect
+        for item in image_messages or []
+        if isinstance(item, dict)
+        for rect in [bounds(item.get("bubble_rect") or item.get("bounds"))]
+        if rect is not None
+    ]
+    if not image_bounds:
+        return [dict(item) for item in messages or [] if isinstance(item, dict)]
+
+    kept: list[dict[str, Any]] = []
+    for item in messages or []:
+        if not isinstance(item, dict):
+            continue
+        if str(item.get("type") or item.get("message_type") or "").lower() == "image":
+            kept.append(dict(item))
+            continue
+        rect = bounds(item.get("bubble_rect"))
+        if rect is None:
+            kept.append(dict(item))
+            continue
+        left, top, right, bottom = rect
+        row_area = max(1.0, (right - left) * (bottom - top))
+        embedded = False
+        for image_left, image_top, image_right, image_bottom in image_bounds:
+            overlap_width = max(0.0, min(right, image_right) - max(left, image_left))
+            overlap_height = max(0.0, min(bottom, image_bottom) - max(top, image_top))
+            if (overlap_width * overlap_height) / row_area >= 0.90:
+                embedded = True
+                break
+        if not embedded:
+            kept.append(dict(item))
+    return kept
 
 
 def visual_image_envelopes_from_bubbles(
@@ -45,7 +124,9 @@ def visual_image_envelopes_from_bubbles(
         return top, bottom
 
     def message_side(item: dict[str, Any]) -> str:
-        side = str(item.get("sender_role") or item.get("sender") or "").strip().lower()
+        side = str(
+            item.get("sender_role") or item.get("sender") or ""
+        ).strip().lower()
         return "self" if side in {"self", "assistant", "service", "bot"} else side
 
     text_rows: list[tuple[int, int, str, str]] = []
@@ -59,7 +140,9 @@ def visual_image_envelopes_from_bubbles(
         vertical = message_vertical_bounds(message)
         if not identity or vertical is None:
             continue
-        text_rows.append((vertical[0], vertical[1], identity, message_side(message)))
+        text_rows.append(
+            (vertical[0], vertical[1], identity, message_side(message))
+        )
     text_rows.sort(key=lambda item: (item[0], item[1], item[2]))
 
     def bubble_top(item: dict[str, Any]) -> int:
@@ -154,8 +237,13 @@ def visual_image_envelopes_from_bubbles(
                 ),
                 **(
                     {
-                        "_vision_bounds": [int(value) for value in list(bounds or [])[:4]],
-                        "_vision_has_self_message_after": bool(has_self_message_after),
+                        "_vision_bounds": [
+                            int(float(value))
+                            for value in (bounds or [])[:4]
+                        ],
+                        "_vision_has_self_message_after": bool(
+                            has_self_message_after
+                        ),
                     }
                     if include_private_details
                     else {}
@@ -173,6 +261,7 @@ def visual_image_messages_from_current_surface(
     target: str,
     side_filter: str,
     max_images: int,
+    include_private_details: bool = False,
 ) -> list[dict[str, Any]]:
     if screenshot is None:
         return []
@@ -187,9 +276,142 @@ def visual_image_messages_from_current_surface(
                 tuple(getattr(screenshot, "size", (0, 0))),
             ),
         )
-    except Exception:
-        return []
-    return visual_image_envelopes_from_bubbles(bubbles, existing_messages, target=target)
+    except Exception as exc:
+        raise ImageSurfaceObservationError(
+            "detect_visual_image_bubbles",
+            exc,
+        ) from exc
+    anchor_messages = messages_outside_image_bubbles(
+        existing_messages,
+        bubbles,
+    )
+    return visual_image_envelopes_from_bubbles(
+        bubbles,
+        anchor_messages,
+        target=target,
+        include_private_details=include_private_details,
+    )
+
+
+def observe_structural_image_messages(
+    screenshot: Any,
+    ocr_items: list[dict[str, Any]] | None,
+    existing_messages: list[dict[str, Any]] | None,
+    *,
+    target: str,
+    role_resolver: Callable[[Any, Any, Any], dict[str, Any]],
+    max_images: int = 64,
+) -> list[dict[str, Any]]:
+    """Observe image slots and resolve roles through one host-supplied rule."""
+
+    messages = [
+        dict(item)
+        for item in (existing_messages or [])
+        if isinstance(item, dict)
+    ]
+    try:
+        image_messages = visual_image_messages_from_current_surface(
+            screenshot,
+            ocr_items,
+            messages,
+            target=target,
+            side_filter="all",
+            max_images=max_images,
+            include_private_details=True,
+        )
+    except ImageSurfaceObservationError:
+        raise
+    except Exception as exc:
+        raise ImageSurfaceObservationError(
+            "detect_visual_image_bubbles",
+            exc,
+        ) from exc
+    messages = messages_outside_image_bubbles(messages, image_messages)
+    try:
+        for image_message in image_messages:
+            bounds = image_message.get("bubble_rect")
+            avatar_alignment = role_resolver(
+                screenshot,
+                bounds or [],
+                tuple(getattr(screenshot, "size", (0, 0))),
+            )
+            avatar_role = str(
+                (avatar_alignment or {}).get("role") or ""
+            ).strip().lower()
+            if avatar_role not in {"customer", "self"}:
+                avatar_role = "unknown"
+            image_message["sender"] = avatar_role
+            image_message["sender_role"] = avatar_role
+            image_message["avatar_alignment"] = dict(
+                avatar_alignment or {}
+            )
+    except Exception as exc:
+        raise ImageSurfaceObservationError(
+            "same_row_avatar_role",
+            exc,
+        ) from exc
+
+    try:
+        image_messages = attach_image_physical_anchors(
+            screenshot,
+            image_messages,
+            messages,
+        )
+    except Exception as exc:
+        raise ImageSurfaceObservationError(
+            "attach_image_physical_anchors",
+            exc,
+        ) from exc
+
+    for image_message in image_messages:
+        physical_anchor = (
+            image_message.get("image_physical_anchor")
+            if isinstance(
+                image_message.get("image_physical_anchor"),
+                dict,
+            )
+            else {}
+        )
+        visual_seed = json.dumps(
+            {
+                "target": str(target or "").strip().upper(),
+                "sender_role": str(
+                    physical_anchor.get("sender_role") or "unknown"
+                ),
+                "message_type": "image",
+                "occurrence_index": physical_anchor.get(
+                    "occurrence_index"
+                ),
+                "preceding_stable_message": physical_anchor.get(
+                    "preceding_stable_message"
+                ),
+                "following_stable_message": physical_anchor.get(
+                    "following_stable_message"
+                ),
+                "bubble_visual_fingerprint": physical_anchor.get(
+                    "bubble_visual_fingerprint"
+                ),
+            },
+            ensure_ascii=False,
+            sort_keys=True,
+        )
+        canonical_visual_id = (
+            "canonical_visual_"
+            + hashlib.sha256(visual_seed.encode("utf-8")).hexdigest()[:24]
+        )
+        image_message["canonical_visual_id"] = canonical_visual_id
+        image_message["id"] = canonical_visual_id
+        image_message["message_id"] = canonical_visual_id
+        image_message["bounds"] = list(
+            image_message.get("bubble_rect") or []
+        )
+        bounds = image_message.get("bounds") or []
+        if len(bounds) >= 4:
+            image_message["anchor"] = {
+                "x": int((float(bounds[0]) + float(bounds[2])) / 2),
+                "y": int((float(bounds[1]) + float(bounds[3])) / 2),
+            }
+    return image_messages
 
 
 def self_visual_image_messages_from_current_surface(
