@@ -46,6 +46,52 @@ CARD_FIELD_COMPATIBILITY_ALIASES = {
     "baseCarInfo.color": ("baseCarInfo.exteriorColor",),
 }
 DETAIL_FIELD_GROUP_SPECS = VEHICLE_DETAIL_FIELD_GROUP_SPECS
+DETAIL_REQUIRED_FIELD_PATHS = frozenset({"baseCarInfo.name.displayValue"})
+DETAIL_SYSTEM_READONLY_FIELD_PATHS = frozenset({"carId", "orgId", "shopCode", "owner", "creator"})
+DETAIL_FIELD_COMPATIBILITY_ALIASES = {
+    "baseCarInfo.name.displayValue": ("baseCarInfo.name",),
+    "baseCarInfo.name.brandCode": ("baseCarInfo.brandCode",),
+    "baseCarInfo.name.brandName": ("baseCarInfo.brandName",),
+    "baseCarInfo.name.seriesCode": ("baseCarInfo.seriesCode",),
+    "baseCarInfo.name.seriesName": ("baseCarInfo.seriesName",),
+    "baseCarInfo.name.modelCode": ("baseCarInfo.modelCode",),
+    "baseCarInfo.name.modelName": ("baseCarInfo.modelName",),
+    "baseCarInfo.color": ("baseCarInfo.exteriorColor",),
+    "baseCarInfo.innerColor": ("baseCarInfo.interiorColor",),
+    "carModelParam.gearBoxType": ("carModelParam.gearBox", "carModelParam.gearbox"),
+    "carModelParam.engineVolumeLiter": ("carModelParam.displacement",),
+}
+DETAIL_OBJECT_FIELD_PATHS = frozenset(
+    path
+    for _group_id, _label, specs in DETAIL_FIELD_GROUP_SPECS
+    for path in (spec.path for spec in specs)
+    if any(
+        other.path.startswith(f"{path}.")
+        for _other_group_id, _other_label, other_specs in DETAIL_FIELD_GROUP_SPECS
+        for other in other_specs
+    )
+)
+DETAIL_USER_HIDDEN_FIELD_PATHS = DETAIL_OBJECT_FIELD_PATHS | frozenset(
+    {
+        # Source/binding identifiers are retained in raw_source_payloads for
+        # compatibility, but they are not useful local manual-entry fields.
+        "carId",
+        "orgId",
+        "shopCode",
+        "owner",
+        "creator",
+        # Dafengche code values have paired human-readable name fields.  The
+        # local console should ask operators for the readable value, not an
+        # upstream internal code.
+        "baseCarInfo.name.brandCode",
+        "baseCarInfo.name.seriesCode",
+        "baseCarInfo.name.modelCode",
+        "baseCarInfo.area.cityCode",
+        "baseCarInfo.area.provinceCode",
+        "baseCarInfo.registerArea.cityCode",
+        "baseCarInfo.registerArea.provinceCode",
+    }
+)
 
 
 def is_v2_vehicle_record(record: Any) -> bool:
@@ -493,11 +539,14 @@ def _dafengche_field_groups(detail: dict[str, Any]) -> list[dict[str, Any]]:
     groups: list[dict[str, Any]] = []
     for group_id, label, specs in DETAIL_FIELD_GROUP_SPECS:
         known_paths.update(spec.path for spec in specs)
+        fields = [_admin_detail_field_row(detail, spec) for spec in specs if not _detail_field_user_hidden(spec.path)]
+        if not fields:
+            continue
         groups.append(
             {
                 "id": group_id,
                 "label": label,
-                "fields": _field_rows(detail, specs),
+                "fields": fields,
             }
         )
     extra_rows = [
@@ -508,6 +557,62 @@ def _dafengche_field_groups(detail: dict[str, Any]) -> list[dict[str, Any]]:
     if extra_rows:
         groups.append({"id": "other_fields", "label": "其他大风车字段", "fields": extra_rows})
     return groups
+
+
+def _admin_detail_field_row(detail: dict[str, Any], spec: FieldSpec) -> dict[str, Any]:
+    row = _field_row(detail, spec.path, spec.label, compatibility_aliases=DETAIL_FIELD_COMPATIBILITY_ALIASES)
+    if spec.path == "baseCarInfo.name.displayValue" and isinstance(row.get("value"), dict):
+        display_value = _display_value_from_name_payload(row.get("value"))
+        row["value"] = display_value
+        if display_value and row.get("source_path") != spec.path:
+            row["source_path"] = "baseCarInfo.name"
+    row["required"] = spec.path in DETAIL_REQUIRED_FIELD_PATHS
+    row["restricted"] = bool(spec.restricted_by_default)
+    row["customer_visible"] = bool(spec.customer_visible_by_default)
+    row["value_type"] = _detail_field_value_type(spec.path)
+    row["editable"] = _detail_field_editable(spec)
+    return row
+
+
+def _display_value_from_name_payload(value: Any) -> str:
+    if not isinstance(value, dict):
+        return str(value or "").strip()
+    direct = str(value.get("displayValue") or "").strip()
+    if direct:
+        return direct
+    parts = [str(value.get(key) or "").strip() for key in ("brandName", "seriesName", "modelName")]
+    return " ".join(part for part in parts if part).strip()
+
+
+def _detail_field_editable(spec: FieldSpec) -> bool:
+    path = str(spec.path or "")
+    if not path:
+        return False
+    if path in DETAIL_OBJECT_FIELD_PATHS:
+        return False
+    if path in DETAIL_SYSTEM_READONLY_FIELD_PATHS:
+        return False
+    return True
+
+
+def _detail_field_user_hidden(path: str) -> bool:
+    return str(path or "") in DETAIL_USER_HIDDEN_FIELD_PATHS
+
+
+def _detail_field_value_type(path: str) -> str:
+    text = str(path or "")
+    if text.startswith("carPriceInfo."):
+        return "number"
+    if text == "baseCarInfo.mileage":
+        return "number"
+    if text in {
+        "carModelParam.seatNumber",
+        "carLicenseInfo.keysCount",
+        "carLicenseInfo.transferTotal",
+        "carLicenseInfo.xiancheshangyexianjine",
+    }:
+        return "number"
+    return "text"
 
 
 def _value_at(value: Any, path: str) -> Any:

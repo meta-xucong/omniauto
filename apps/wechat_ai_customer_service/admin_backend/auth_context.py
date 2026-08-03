@@ -25,6 +25,8 @@ PUBLIC_PATHS = {
     "/api/auth/initialize/start",
     "/api/auth/initialize/verify",
     "/api/auth/logout",
+    "/api/product-console/local-vehicle-excel-template",
+    "/api/product-console/local-vehicle-draft",
     "/v1/auth/login",
     "/v1/auth/login/start",
     "/v1/auth/login/bind-email/start",

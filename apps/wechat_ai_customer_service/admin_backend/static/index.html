@@ -298,13 +298,17 @@
             <div class="section-head">
               <div>
                 <h2>商品库</h2>
-                <p>首页只看每台车源的关键信息；点开卡片后查看完整车辆资料、来源/同步状态和专属话术。</p>
+                <p>可手动新增本地车辆、编辑车辆资料，或使用标准 Excel 批量导入；图片在车辆编辑页支持多图上传。</p>
               </div>
               <div class="button-row">
                 <button class="secondary-button" id="refresh-product-catalog">刷新</button>
-                <button class="secondary-button" id="product-llm-intake-toggle">AI 助手录入</button>
+                <button class="secondary-button" id="product-excel-template-download" type="button">下载Excel模板</button>
+                <label class="secondary-button file-button" for="product-excel-import-file">Excel导入预览</label>
+                <input class="is-hidden" id="product-excel-import-file" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
+                <button class="primary-button" id="product-new-local-vehicle" type="button">新增本地车辆</button>
               </div>
             </div>
+            <div class="status-card compact-list is-hidden" id="product-excel-import-panel"></div>
             <div class="metric-grid metric-grid-tight metric-grid-four" id="product-catalog-cards">
               <div class="status-card loading"><strong><span class="loading-spinner" aria-hidden="true"></span>正在加载商品统计</strong><span>请稍等。</span></div>
             </div>
@@ -313,7 +317,7 @@
               <label class="form-field inline-field"><span>来源</span>
                 <select id="product-catalog-source-filter">
                   <option value="">全部来源</option>
-                  <option value="dafengche">大风车同步</option>
+                  <option value="historical_external_mirror">历史外部镜像</option>
                   <option value="manual">手动录入</option>
                   <option value="historical_migration">历史迁入</option>
                 </select>

@@ -14,12 +14,17 @@ const state = {
   customerProfileMessages: [],
   productCatalog: null,
   selectedProduct: null,
+  productDetailTenantId: "",
   productDetailRequestId: 0,
   productDetailModalOpenRequested: false,
   productDetailMode: "view",
   productDetailScopedKnowledge: {},
+  productDetailSaving: false,
+  productDetailSaveStatus: null,
   productVehicleImageUploadPromise: null,
   productVehicleImageUploadProductId: "",
+  productExcelImportPreview: null,
+  productExcelImportBusy: false,
   productScopedEditor: null,
   productAcknowledgeLoadingIds: new Set(),
   categories: [],
@@ -344,9 +349,18 @@ async function refreshHealth() {
 
 function apiHeaders(extra = {}) {
   const headers = {...extra};
-  if (state.activeTenantId) headers["X-Tenant-ID"] = state.activeTenantId;
+  if (state.activeTenantId && !headers["X-Tenant-ID"]) headers["X-Tenant-ID"] = state.activeTenantId;
   if (state.authToken) headers.Authorization = `Bearer ${state.authToken}`;
   return headers;
+}
+
+function tenantScopedHeaders(tenantId) {
+  const normalized = String(tenantId || "").trim();
+  return normalized ? {"X-Tenant-ID": normalized} : {};
+}
+
+function productRequestTenantId(preferred = "") {
+  return String(preferred || state.productDetailTenantId || state.activeTenantId || "").trim();
 }
 
 function isImplicitLocalSession(auth = state.auth) {
@@ -357,8 +371,8 @@ function hasLocalConsoleAccess() {
   return Boolean(state.authToken || isImplicitLocalSession());
 }
 
-async function apiGet(path) {
-  const response = await fetch(path, {headers: apiHeaders()});
+async function apiGet(path, options = {}) {
+  const response = await fetch(path, {headers: apiHeaders(options.headers || {})});
   if (!response.ok) throw new Error(await responseErrorMessage(response, path));
   return response.json();
 }
@@ -2950,17 +2964,19 @@ function renderKnowledgeDetail() {
 }
 
 async function loadProductCatalog(options = {}) {
-  const payload = await apiGet("/api/product-console/catalog?include_archived=true");
+  const tenantId = String(options.tenantId || "").trim();
+  const payload = await apiGet("/api/product-console/catalog?include_archived=true", {headers: tenantScopedHeaders(tenantId)});
   state.productCatalog = payload;
   const items = payload.items || [];
-  if (state.selectedProduct?.id && !items.some((item) => item.id === state.selectedProduct.id)) {
+  if (state.selectedProduct?.id && !items.some((item) => item.id === state.selectedProduct.id) && options.preserveSelected !== true) {
     state.selectedProduct = null;
+    state.productDetailTenantId = "";
     state.productDetailMode = "view";
     state.productScopedEditor = null;
   }
   renderProductCatalog();
   if (options.loadDetail === true && state.selectedProduct?.id) {
-    await loadProductDetail(state.selectedProduct.id);
+    await loadProductDetail(state.selectedProduct.id, {tenantId: tenantId || state.productDetailTenantId});
   }
 }
 
@@ -2969,13 +2985,128 @@ function renderProductCatalog() {
   const counts = payload.vehicle_counts || payload.counts || {};
   document.getElementById("product-catalog-cards").innerHTML = `
     <div class="metric-card"><span>${counts.active ?? 0}</span><label>在售车源</label></div>
-    <div class="metric-card"><span>${counts.dafengche ?? 0}</span><label>大风车同步</label></div>
-    <div class="metric-card"><span>${counts.manual ?? 0}</span><label>手动/迁入</label></div>
+    <div class="metric-card"><span>${counts.manual ?? 0}</span><label>本地手动车辆</label></div>
+    <div class="metric-card"><span>${counts.historical_migration ?? 0}</span><label>历史迁入</label></div>
     <div class="metric-card"><span>${counts.archived ?? 0}</span><label>已归档</label></div>
   `;
+  renderProductExcelImportPanel();
   bindProductCatalogFilters();
   renderProductCatalogList();
   renderProductCatalogDetail();
+}
+
+function renderProductExcelImportPanel() {
+  const panel = document.getElementById("product-excel-import-panel");
+  if (!panel) return;
+  const preview = state.productExcelImportPreview;
+  if (!preview) {
+    panel.classList.add("is-hidden");
+    panel.innerHTML = "";
+    return;
+  }
+  panel.classList.remove("is-hidden");
+  const summary = preview.summary || {};
+  const errors = Array.isArray(preview.errors) ? preview.errors : [];
+  const vehicles = Array.isArray(preview.vehicles) ? preview.vehicles : [];
+  const errorHtml = errors.length ? `
+    <div class="status-card error">
+      <strong>预览未通过：${errors.length} 个问题</strong>
+      <span>请修正 Excel 后重新上传；预览不会写入商品库。</span>
+      <div class="compact-list">
+        ${errors.slice(0, 8).map((error) => `
+          <div class="record-row"><strong>第 ${escapeHtml(error.row_number || "-")} 行 · ${escapeHtml(error.code || "error")}</strong><span>${escapeHtml(error.message || "")}</span></div>
+        `).join("")}
+      </div>
+    </div>
+  ` : "";
+  const vehicleHtml = vehicles.length ? `
+    <div class="compact-list">
+      ${vehicles.slice(0, 8).map((vehicle) => `
+        <div class="record-row">
+          <strong>${escapeHtml(vehicle.name || vehicle.local_id || "")}</strong>
+          <span>${escapeHtml(vehicle.local_id || "")} · ${vehicle.action === "update" ? "更新现有本地车辆" : "新增本地车辆"} · 图片 ${escapeHtml(vehicle.picture_count ?? 0)} 张</span>
+        </div>
+      `).join("")}
+      ${vehicles.length > 8 ? `<div class="record-row"><span>另有 ${vehicles.length - 8} 台车辆将在确认后导入。</span></div>` : ""}
+    </div>
+  ` : "";
+  panel.innerHTML = `
+    <div class="section-heading"><div><span>本地车辆 Excel 导入预览</span><strong>模板版本：${escapeHtml(preview.template_version || "unknown")}</strong></div></div>
+    <p>将导入 ${escapeHtml(summary.vehicle_count ?? 0)} 台本地手动车辆、${escapeHtml(summary.picture_count ?? 0)} 条图片记录。上传预览不写入商品库；文件存储直接原子写入，PostgreSQL 模式使用批量事务写入，文件镜像失败时会提示重建。</p>
+    ${errorHtml}
+    ${vehicleHtml}
+    ${preview.ok ? `<div class="button-row"><button class="primary-button" id="product-excel-import-confirm" type="button" ${state.productExcelImportBusy ? "disabled" : ""}>确认导入本地车辆库</button></div>` : ""}
+  `;
+  panel.querySelector("#product-excel-import-confirm")?.addEventListener("click", () => confirmProductExcelImport().catch((error) => alert(error.message)));
+}
+
+async function downloadProductExcelTemplate() {
+  const path = "/api/product-console/local-vehicle-excel-template";
+  const response = await fetch(path, {headers: apiHeaders()});
+  if (!response.ok) throw new Error(await responseErrorMessage(response, path));
+  const blob = await response.blob();
+  const disposition = response.headers.get("Content-Disposition") || "";
+  const filenameMatch = disposition.match(/filename\*=UTF-8''([^;]+)|filename="?([^";]+)"?/i);
+  const filename = decodeURIComponent(filenameMatch?.[1] || filenameMatch?.[2] || "local_manual_vehicle_v2_template.xlsx");
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = filename;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 0);
+}
+
+async function previewProductExcelImport() {
+  const input = document.getElementById("product-excel-import-file");
+  const file = input?.files?.[0];
+  if (!file) return;
+  const form = new FormData();
+  form.append("file", file);
+  state.productExcelImportBusy = true;
+  state.productExcelImportPreview = {
+    ok: false,
+    template_version: "",
+    summary: {vehicle_count: 0, picture_count: 0},
+    vehicles: [],
+    errors: [{row_number: "-", code: "uploading", message: "正在解析 Excel，请稍等。"}],
+  };
+  renderProductExcelImportPanel();
+  try {
+    const path = "/api/product-console/local-vehicle-excel-import/preview";
+    const response = await fetch(path, {method: "POST", headers: apiHeaders(), body: form});
+    if (!response.ok) throw new Error(await responseErrorMessage(response, path));
+    state.productExcelImportPreview = await response.json();
+  } finally {
+    state.productExcelImportBusy = false;
+    if (input) input.value = "";
+    renderProductExcelImportPanel();
+  }
+}
+
+async function confirmProductExcelImport() {
+  const previewId = state.productExcelImportPreview?.preview_id;
+  if (!previewId) return;
+  state.productExcelImportBusy = true;
+  renderProductExcelImportPanel();
+  try {
+    const payload = await apiJson("/api/product-console/local-vehicle-excel-import/confirm", {
+      method: "POST",
+      body: JSON.stringify({preview_id: previewId}),
+    });
+    state.productExcelImportPreview = {
+      ok: false,
+      template_version: "",
+      summary: {vehicle_count: payload.imported_count || 0, picture_count: 0},
+      vehicles: [],
+      errors: [{row_number: "-", code: "imported", message: `已导入 ${payload.imported_count || 0} 台本地车辆。`}],
+    };
+    await loadProductCatalog();
+  } finally {
+    state.productExcelImportBusy = false;
+    renderProductExcelImportPanel();
+  }
 }
 
 function renderProductCatalogList() {
@@ -2995,7 +3126,7 @@ function renderProductCatalogList() {
       {label: item.status === "archived" ? "已归档" : "在售", tone: item.status === "archived" ? "muted" : "ok"},
     ];
     return `
-      <button class="product-card product-row product-card-dafengche" data-index="${index}" aria-label="查看 ${escapeHtml(summary.name || item.id)} 的大风车车辆资料">
+      <button class="product-card product-row product-card-dafengche" data-index="${index}" aria-label="查看 ${escapeHtml(summary.name || item.id)} 的车辆资料">
         ${isNew ? `
           <span class="product-new-float" aria-label="新商品">
             <span class="experience-new-badge">NEW</span>
@@ -3005,10 +3136,10 @@ function renderProductCatalogList() {
           <div class="vehicle-card-photo ${photos[0] ? "" : "is-empty"}">${photos[0] ? vehiclePictureImageHtml(photos[0], title || "", "vehicle-card-image") : ""}</div>
           <div class="product-card-head">
             <div>
-              <span>车辆标题 · baseCarInfo.name</span>
+              <span>车辆展示名称</span>
               <strong>${dafengcheFieldValueHtml(title)}</strong>
             </div>
-            <em><small>公开售价 · salePrice</small>${dafengcheFieldValueHtml(salePrice)}</em>
+            <em><small>公开售价</small>${dafengcheFieldValueHtml(salePrice)}</em>
           </div>
         </div>
         ${dafengcheFieldGridHtml(cardFields, "vehicle-card-facts")}
@@ -3022,6 +3153,7 @@ function renderProductCatalogList() {
     button.addEventListener("click", async () => {
       const item = items[Number(button.dataset.index)];
       state.selectedProduct = item || null;
+      state.productDetailTenantId = item?.id ? (state.activeTenantId || "") : "";
       state.productDetailModalOpenRequested = Boolean(item?.id);
       state.productDetailMode = "view";
       state.productScopedEditor = null;
@@ -3055,7 +3187,10 @@ function filterProductCatalogItems(items) {
     const source = view.source || {};
     const haystack = JSON.stringify({summary: view.summary, vehicle: view.vehicle, annotations: view.annotations, manual: view.manual_annotations}).toLowerCase();
     const sourceState = source.sync?.state || "";
-    const sourceMatches = !sourceFilter || source.type === sourceFilter || sourceState === sourceFilter;
+    const sourceMatches = !sourceFilter
+      || source.type === sourceFilter
+      || sourceState === sourceFilter
+      || (sourceFilter === "historical_external_mirror" && source.type === "dafengche");
     return sourceMatches && (!query || haystack.includes(query));
   });
 }
@@ -3065,10 +3200,12 @@ async function loadProductDetail(productId, options = {}) {
     renderProductCatalogDetail();
     return;
   }
+  const tenantId = productRequestTenantId(options.tenantId);
+  if (tenantId) state.productDetailTenantId = tenantId;
   if (options.open === true) state.productDetailModalOpenRequested = true;
   const shouldOpenModal = options.open === true || (options.open !== false && state.productDetailModalOpenRequested);
   const requestId = ++state.productDetailRequestId;
-  const payload = await apiGet(`/api/product-console/products/${encodeURIComponent(productId)}`);
+  const payload = await apiGet(`/api/product-console/products/${encodeURIComponent(productId)}`, {headers: tenantScopedHeaders(tenantId)});
   // A slower response for a previously selected car must never put the UI
   // back onto that car after the operator has selected another one.
   if (requestId !== state.productDetailRequestId) return;
@@ -3094,7 +3231,7 @@ function renderProductDetailOpeningShell(item) {
     <div class="product-detail-loading">
       <div class="section-heading">
         <div>
-          <span>大风车车辆资料（V2）</span>
+          <span>车辆资料（V2）</span>
           <strong>${escapeHtml(String(name || "车辆详情"))}</strong>
         </div>
       </div>
@@ -3124,6 +3261,12 @@ function renderProductCatalogDetail(scopedKnowledge = null) {
     hydrateAuthorizedVehicleImages(detail);
     return;
   }
+  if (state.productDetailMode === "new") {
+    detail.innerHTML = productV2EditFormHtml(item, adminView, scoped, {isCreating: true});
+    bindProductDetailEditors(detail);
+    hydrateAuthorizedVehicleImages(detail);
+    return;
+  }
   if (adminView.record_kind === "vehicle_v2") {
     renderProductV2Detail(detail, item, adminView, scoped, {isNew, acknowledgeLoading});
     return;
@@ -3146,6 +3289,7 @@ function renderProductCatalogDetail(scopedKnowledge = null) {
         <button class="secondary-button danger-button product-archive" type="button">${item.status === "archived" ? "重新上架" : "归档"}</button>
       </div>
     </div>
+    ${productSaveStatusHtml()}
     <div class="summary-table product-summary-table">
       <div><span>价格</span><strong>${escapeHtml(formatProductPrice(display))}</strong></div>
       <div><span>库存/状态</span><strong>${escapeHtml(display.stock_label || "未填写")}</strong></div>
@@ -3219,11 +3363,12 @@ function renderProductV2Detail(detail, item, view, scoped, {isNew, acknowledgeLo
   const productName = title || summary.name || item.id;
   const photos = Array.isArray(vehicle.photos) ? vehicle.photos : [];
   const fieldGroups = Array.isArray(view.dafengche_field_groups) ? view.dafengche_field_groups : [];
-  const rawPayloads = view.raw_source_payloads && typeof view.raw_source_payloads === "object" ? view.raw_source_payloads : null;
+  const visibleFieldGroups = productVisibleVehicleFieldGroups(fieldGroups);
+  const systemFieldGroups = productSystemVehicleFieldGroups(fieldGroups);
   detail.innerHTML = `
     <div class="read-head">
       <div>
-        <p class="eyebrow">大风车车辆资料（V2）</p>
+        <p class="eyebrow">车辆资料（V2）</p>
         <h2 id="product-detail-title">${dafengcheFieldValueHtml(title)}</h2>
         ${badgeListHtml([
           ...(isNew ? [{label: "NEW 待确认", tone: "warning"}] : []),
@@ -3237,18 +3382,20 @@ function renderProductV2Detail(detail, item, view, scoped, {isNew, acknowledgeLo
         <button class="secondary-button danger-button product-archive" type="button">${item.status === "archived" ? "重新上架" : "归档"}</button>
       </div>
     </div>
+    ${productSaveStatusHtml()}
     <div class="vehicle-detail-hero">
-      <div class="vehicle-price-block"><span>公开售价 · carPriceInfo.salePrice</span><strong>${dafengcheFieldValueHtml(pricing.salePrice)}</strong></div>
+      <div class="vehicle-price-block"><span>公开售价</span><strong>${dafengcheFieldValueHtml(pricing.salePrice)}</strong></div>
     </div>
     <section class="vehicle-facts-section">
-      <div class="section-heading"><div><span>大风车字段内容</span><strong>固定字段始终显示；空白即当前车源尚未拉取到该字段。</strong></div></div>
-      ${dafengcheFieldGroupsHtml(fieldGroups)}
+      <div class="section-heading"><div><span>车辆字段内容</span><strong>这里展示已录入的车辆业务资料；空白字段不显示。</strong></div></div>
+      ${dafengcheFieldGroupsHtml(visibleFieldGroups)}
     </section>
-    <section class="dafengche-photo-section"><span>车辆图片 · vehicle_pictures.payload（${photos.length}）</span><div class="product-photo-grid dfc-photo-grid">${photos.length ? photos.map((url) => vehiclePictureTileHtml(url, productName)).join("") : `<div class="dfc-empty-photo" aria-label="车辆图片为空">&nbsp;</div>`}</div></section>
+    <section class="dafengche-photo-section"><span>车辆图片（${photos.length}）</span><div class="product-photo-grid dfc-photo-grid">${photos.length ? photos.map((url) => vehiclePictureTileHtml(url, productName)).join("") : `<div class="dfc-empty-photo" aria-label="车辆图片为空">&nbsp;</div>`}</div></section>
     <details class="vehicle-advanced-panel">
-      <summary>高级</summary>
+      <summary>高级选项</summary>
       <div class="vehicle-advanced-content">
         <div class="vehicle-source-strip"><span>来源：${escapeHtml(sync.label || "")}</span><span>绑定：${escapeHtml(vehicleBindingText(source))}</span><span>最近更新：${escapeHtml(formatDateTimeOrBlank(source.last_observed_at || source.detail_pulled_at || sync.observed_at))}</span></div>
+        ${systemFieldGroups.length ? dafengcheFieldGroupsHtml(systemFieldGroups) : ""}
         <div class="read-grid">
           ${productInfoField("客户常用叫法", userVisibleTags(annotations.aliases).join("、"))}
           ${productInfoField("核心参数/车况补充", annotations.specs)}
@@ -3265,7 +3412,6 @@ function renderProductV2Detail(detail, item, view, scoped, {isNew, acknowledgeLo
           ${productScopedHtml("商品专属解释", "product_explanations", scoped.product_explanations || [], "content", productName)}
           ${productScopedEditorHtml()}
         </div>
-        ${rawPayloads ? `<details class="product-raw-payload"><summary>完整原始载荷 JSON</summary><pre>${escapeHtml(JSON.stringify(rawPayloads, null, 2))}</pre></details>` : ""}
       </div>
     </details>
   `;
@@ -3383,15 +3529,53 @@ function dafengcheFieldGridHtml(fields, className = "") {
   return `<div class="dafengche-field-grid ${escapeHtml(className)}">${rows.map((field) => `
     <div class="dafengche-field">
       <span>${escapeHtml(field?.label || "")}</span>
-      <small>${escapeHtml(field?.path || "")}</small>
       <strong class="dafengche-field-value">${dafengcheFieldValueHtml(field?.value)}</strong>
     </div>
   `).join("")}</div>`;
 }
 
+function productVisibleVehicleFieldGroups(groups) {
+  const rows = Array.isArray(groups) ? groups : [];
+  const coreGroups = [];
+  const operationFields = [];
+  rows.forEach((group) => {
+    const fields = Array.isArray(group?.fields) ? group.fields : [];
+    if (group?.id === "other_fields") return;
+    if (group?.id === "vehicle_identity") {
+      operationFields.push(...fields.filter((field) => field?.path === "operationPhase"));
+      return;
+    }
+    coreGroups.push(group);
+  });
+  if (operationFields.length) {
+    coreGroups.push({id: "operation_phase", label: "业务阶段", fields: operationFields});
+  }
+  return coreGroups;
+}
+
+function productSystemVehicleFieldGroups(groups) {
+  const rows = Array.isArray(groups) ? groups : [];
+  const systemGroups = [];
+  rows.forEach((group) => {
+    const fields = Array.isArray(group?.fields) ? group.fields : [];
+    if (!fields.length) return;
+    if (group?.id === "vehicle_identity") {
+      const sourceFields = fields.filter((field) => field?.path !== "operationPhase");
+      if (sourceFields.length) {
+        systemGroups.push({...group, id: "vehicle_source_identity", label: "车源识别（辅助确认）", fields: sourceFields});
+      }
+      return;
+    }
+  });
+  return systemGroups;
+}
+
 function dafengcheFieldGroupsHtml(groups) {
   const rows = Array.isArray(groups) ? groups : [];
-  return rows.map((group) => `
+  return rows.map((group) => ({
+    ...group,
+    fields: (Array.isArray(group?.fields) ? group.fields : []).filter((field) => vehicleValuePresent(field?.value)),
+  })).filter((group) => group.fields.length).map((group) => `
     <section class="dafengche-field-group">
       <div class="dafengche-field-group-title"><strong>${escapeHtml(group?.label || "")}</strong></div>
       ${dafengcheFieldGridHtml(group?.fields, "dafengche-detail-fields")}
@@ -3463,7 +3647,7 @@ function productSourceTone(source) {
 
 function vehicleBindingText(source) {
   if (source?.binding_state === "bound") return `${source.shop_code || "-"} / ${source.car_id || "-"}`;
-  return "未绑定大风车车源";
+  return "本地手动车辆";
 }
 
 function formatDateTime(value) {
@@ -3572,6 +3756,34 @@ function closeProductDetailModal() {
   state.productScopedEditor = null;
 }
 
+async function openNewLocalVehicle() {
+  const button = document.getElementById("product-new-local-vehicle");
+  if (button?.disabled) return;
+  if (button) {
+    button.disabled = true;
+    button.classList.add("is-loading");
+    button.innerHTML = `<span class="loading-spinner button-spinner" aria-hidden="true"></span><span>正在打开</span>`;
+  }
+  try {
+    const tenantId = productRequestTenantId();
+    const payload = await apiGet("/api/product-console/local-vehicle-draft", {headers: tenantScopedHeaders(tenantId)});
+    if (!payload?.item) throw new Error("无法打开新车辆表单。");
+    state.selectedProduct = payload.item;
+    state.productDetailTenantId = tenantId;
+    state.productDetailMode = "new";
+    state.productDetailScopedKnowledge = {};
+    state.productDetailModalOpenRequested = true;
+    renderProductCatalogDetail();
+    openProductDetailModal();
+  } finally {
+    if (button) {
+      button.disabled = false;
+      button.classList.remove("is-loading");
+      button.textContent = "新增本地车辆";
+    }
+  }
+}
+
 function openKnowledgeDetailModal() {
   const modal = document.getElementById("knowledge-detail-modal");
   if (!modal) return;
@@ -3614,9 +3826,27 @@ function productReplyTemplatesReadonlyHtml(value, productName) {
   `;
 }
 
+function productSaveButtonHtml(label) {
+  const loading = Boolean(state.productDetailSaving);
+  return `<button class="primary-button product-detail-save ${loading ? "is-loading" : ""}" type="button" ${loading ? "disabled" : ""}>${loading ? `<span class="loading-spinner button-spinner" aria-hidden="true"></span><span>保存中...</span>` : escapeHtml(label)}</button>`;
+}
+
+function productSaveStatusHtml() {
+  const status = state.productDetailSaveStatus;
+  const message = status?.message || "";
+  const tone = status?.tone || "info";
+  const spinner = tone === "loading" ? `<span class="loading-spinner button-spinner" aria-hidden="true"></span>` : "";
+  return `<div class="product-save-status is-${escapeAttr(tone)} ${message ? "" : "is-hidden"}" role="status">${spinner}<span>${escapeHtml(message)}</span></div>`;
+}
+
+function setProductSaveStatus(message, tone = "info") {
+  state.productDetailSaveStatus = message ? {message, tone} : null;
+}
+
 function productEditFormHtml(item, scoped) {
   const data = item.data || {};
   const productName = data.name || item.display?.name || item.id;
+  const saveButton = productSaveButtonHtml("保存商品资料");
   return `
     <div class="read-head">
       <div>
@@ -3625,10 +3855,11 @@ function productEditFormHtml(item, scoped) {
         ${badgeListHtml([{label: "在商品库内编辑", tone: "info"}, {label: item.status === "archived" ? "已归档" : "在售", tone: item.status === "archived" ? "muted" : "ok"}])}
       </div>
       <div class="read-actions">
-        <button class="primary-button product-detail-save" type="button">保存商品资料</button>
-        <button class="secondary-button product-detail-cancel" type="button">取消</button>
+        ${saveButton}
+        <button class="secondary-button product-detail-cancel" type="button" ${state.productDetailSaving ? "disabled" : ""}>取消</button>
       </div>
     </div>
+    ${productSaveStatusHtml()}
     <div class="helper-card context-card product-edit-help">
       <strong>这里只改当前商品。</strong>
       <span>商品名称、价格、库存、物流、售后和基础话术会同步影响商品库；下方精准触发知识仍然单独维护，但都归属同一件商品。</span>
@@ -3662,7 +3893,8 @@ function productEditFormHtml(item, scoped) {
   `;
 }
 
-function productV2EditFormHtml(item, view, scoped) {
+function productV2EditFormHtml(item, view, scoped, options = {}) {
+  const isCreating = options.isCreating === true;
   const summary = view.summary || {};
   const vehicle = view.vehicle || {};
   const base = vehicle.baseCarInfo || {};
@@ -3672,78 +3904,70 @@ function productV2EditFormHtml(item, view, scoped) {
   const annotations = view.annotations || {};
   const manual = view.manual_annotations || {};
   const source = view.source || {};
-  const canEditVehicle = Boolean(view.capabilities?.can_edit_vehicle_source);
-  const canEditPictures = Boolean(view.capabilities?.can_edit_vehicle_pictures);
+  const canEditVehicle = isCreating || Boolean(view.capabilities?.can_edit_vehicle_source);
+  const canEditPictures = !isCreating && Boolean(view.capabilities?.can_edit_vehicle_pictures);
+  const fieldGroups = Array.isArray(view.dafengche_field_groups) ? view.dafengche_field_groups : [];
+  const visibleFieldGroups = productVisibleVehicleFieldGroups(fieldGroups);
+  const systemFieldGroups = productSystemVehicleFieldGroups(fieldGroups);
   const photos = Array.isArray(vehicle.photos) ? vehicle.photos : [];
   const photoEntries = Array.isArray(vehicle.photo_entries) && vehicle.photo_entries.length
     ? vehicle.photo_entries
     : photos.map((url) => ({url}));
-  const productName = summary.name || item.id;
+  const productName = isCreating ? "新增本地车辆" : (summary.name || item.id);
   const vehicleFieldHelp = canEditVehicle
-    ? "字段按大风车 V2 原路径写入 source_payloads；留空不会覆盖已有值。每次保存都保留人工编辑来源。"
-    : "该车源由大风车同步，官方车辆字段在本页只读；请通过同步更新，或在下方补充本地客服注释。";
+    ? "这里维护本地手动车辆资料；车辆编号由系统记录身份，编辑页不单独修改；Excel 导入时车辆编号为必填。留空不会覆盖已有值，每次保存都会记录人工编辑来源。"
+    : "该记录来自历史外部镜像，原始车辆字段在本页只读；如需完全手动维护，请新建或导入本地手动车辆。";
+  const saveButton = productSaveButtonHtml(isCreating ? "创建车辆" : "保存 V2 资料");
   return `
     <div class="read-head">
       <div>
-        <p class="eyebrow">编辑 V2 车辆主数据</p>
+        <p class="eyebrow">${isCreating ? "新增本地 V2 车辆" : "编辑 V2 车辆主数据"}</p>
         <h2>${escapeHtml(productName)}</h2>
-        ${badgeListHtml([{label: source.sync?.label || "来源待确认", tone: productSourceTone(source)}, {label: canEditVehicle ? "可编辑手动车辆字段" : "官方字段只读", tone: canEditVehicle ? "info" : "warning"}])}
+        ${badgeListHtml([{label: source.sync?.label || "来源待确认", tone: productSourceTone(source)}, {label: canEditVehicle ? "可编辑本地车辆字段" : "历史来源字段只读", tone: canEditVehicle ? "info" : "warning"}])}
       </div>
       <div class="read-actions">
-        <button class="primary-button product-detail-save" type="button">保存 V2 资料</button>
-        <button class="secondary-button product-detail-cancel" type="button">取消</button>
+        ${saveButton}
+        <button class="secondary-button product-detail-cancel" type="button" ${state.productDetailSaving ? "disabled" : ""}>取消</button>
       </div>
     </div>
-    <div class="helper-card context-card product-edit-help"><strong>权威字段与本地补充分开保存。</strong><span>${escapeHtml(vehicleFieldHelp)}</span></div>
-    <div class="vehicle-v2-editor-groups">
-      ${vehicleV2EditorGroupHtml("基础车辆信息", [
-        productV2FieldInput("product-v2-name", "车辆标题", "baseCarInfo.name", base.name || productName, "text", !canEditVehicle),
-        productV2FieldInput("product-v2-car-name", "车辆名称", "baseCarInfo.carName", base.carName ?? "", "text", !canEditVehicle),
-        productV2FieldInput("product-v2-brand", "品牌", "baseCarInfo.brandName", base.brandName ?? "", "text", !canEditVehicle),
-        productV2FieldInput("product-v2-series", "车系", "baseCarInfo.seriesName", base.seriesName ?? "", "text", !canEditVehicle),
-        productV2FieldInput("product-v2-model", "车型", "baseCarInfo.modelName", base.modelName ?? "", "text", !canEditVehicle),
-        productV2FieldInput("product-v2-license-date", "首次上牌", "baseCarInfo.firstLicensePlateDate", base.firstLicensePlateDate ?? "", "text", !canEditVehicle),
-        productV2FieldInput("product-v2-mileage", "表显里程（万公里）", "baseCarInfo.mileage", base.mileage ?? "", "number", !canEditVehicle, "any"),
-        productV2FieldInput("product-v2-condition", "车况", "baseCarInfo.vehicleCondition", base.vehicleCondition ?? "", "text", !canEditVehicle),
-        productV2FieldInput("product-v2-exterior", "外观颜色", "baseCarInfo.exteriorColor", base.exteriorColor ?? "", "text", !canEditVehicle),
-        productV2FieldInput("product-v2-color", "车身颜色（备用）", "baseCarInfo.color", base.color ?? "", "text", !canEditVehicle),
-        productV2FieldInput("product-v2-interior", "内饰颜色", "baseCarInfo.interiorColor", base.interiorColor ?? "", "text", !canEditVehicle),
-        productV2FieldInput("product-v2-operation-phase", "业务阶段", "operationPhase", vehicle.operationPhase ?? "", "text", !canEditVehicle),
-      ])}
-      ${vehicleV2EditorGroupHtml("车型参数", [
-        productV2FieldInput("product-v2-gearbox", "变速箱", "carModelParam.gearbox", model.gearbox ?? "", "text", !canEditVehicle),
-        productV2FieldInput("product-v2-gearbox-backup", "变速箱（备用字段）", "carModelParam.gearBox", model.gearBox ?? "", "text", !canEditVehicle),
-        productV2FieldInput("product-v2-displacement", "排量", "carModelParam.displacement", model.displacement ?? "", "text", !canEditVehicle),
-      ])}
-      ${vehicleV2EditorGroupHtml("价格与手续信息", [
-        productV2FieldInput("product-v2-price", "公开售价", "carPriceInfo.salePrice", pricing.salePrice ?? "", "number", !canEditVehicle, "any"),
-        productV2FieldInput("product-v2-purchase-price", "收购价", "carPriceInfo.purchasePrice", pricing.purchasePrice ?? "", "number", !canEditVehicle, "any"),
-        productV2FieldInput("product-v2-sales-price", "成交价", "carPriceInfo.salesPrice", pricing.salesPrice ?? "", "number", !canEditVehicle, "any"),
-        productV2FieldInput("product-v2-manager-price", "经理价", "carPriceInfo.managerPrice", pricing.managerPrice ?? "", "number", !canEditVehicle, "any"),
-        productV2FieldInput("product-v2-wholesale-price", "批发价", "carPriceInfo.wholesalePrice", pricing.wholesalePrice ?? "", "number", !canEditVehicle, "any"),
-        productV2FieldInput("product-v2-license-status", "手续状态", "carLicenseInfo.licenseStatus", license.licenseStatus ?? "", "text", !canEditVehicle),
-      ])}
-      ${vehicleV2PictureEditorHtml(photoEntries, productName, canEditPictures)}
-      ${vehicleV2EditorGroupHtml("本地客服补充（不改大风车原载荷）", [
-        productV2FieldInput("product-v2-sku", "内部编号", "extensions.wechat_customer_service.manual_annotations.sku", manual.sku ?? ""),
-        productV2FieldInput("product-v2-unit", "本地单位", "extensions.wechat_customer_service.manual_annotations.unit", manual.unit ?? ""),
-        productV2Textarea("product-v2-category", "本地类目", annotations.category || "", "", "extensions.wechat_customer_service.customer_visible_annotations.category"),
-        productV2Textarea("product-v2-aliases", "客户常用叫法", displayTags(userVisibleTags(annotations.aliases)), "一行一个，或用逗号分隔", "extensions.wechat_customer_service.customer_visible_annotations.aliases"),
-        productV2Textarea("product-v2-specs", "核心参数/车况补充", annotations.specs || "", "", "extensions.wechat_customer_service.customer_visible_annotations.specs"),
-        productV2Textarea("product-v2-shipping", "看车/交付说明", annotations.shipping_policy || "", "", "extensions.wechat_customer_service.customer_visible_annotations.shipping_policy"),
-        productV2Textarea("product-v2-warranty", "售后/合同口径", annotations.warranty_policy || "", "", "extensions.wechat_customer_service.customer_visible_annotations.warranty_policy"),
-        productV2Textarea("product-v2-risk", "需要谨慎确认的点", displayTags(annotations.risk_rules), "一行一个，或用逗号分隔", "extensions.wechat_customer_service.customer_visible_annotations.risk_rules"),
-      ])}
-      <div class="vehicle-v2-editor-group vehicle-v2-editor-group-local">
-        ${productReplyTemplateEditorHtml(manual.reply_templates, productName)}
-      </div>
-    </div>
-    <div class="product-scoped-panel">
-      <div class="section-heading"><div><span>精准触发知识（强触发）</span><strong>专属知识按当前车源 ID 绑定；保存车辆资料不会覆盖它们。</strong></div></div>
-      ${productScopedHtml("商品专属问答", "product_faq", (scoped || {}).product_faq || [], "answer", productName)}
-      ${productScopedHtml("商品专属规则", "product_rules", (scoped || {}).product_rules || [], "answer", productName)}
-      ${productScopedHtml("商品专属解释", "product_explanations", (scoped || {}).product_explanations || [], "content", productName)}
-      ${productScopedEditorHtml()}
+    ${productSaveStatusHtml()}
+    <div class="helper-card context-card product-edit-help"><strong>${isCreating ? "先填写车辆展示名称，再补充其他车辆资料。" : "权威字段与本地补充分开保存。"}</strong><span>${escapeHtml(isCreating ? "这是本地手动车辆，保存后会生成系统车辆编号；图片可在创建后继续上传。" : vehicleFieldHelp)}</span></div>
+      <div class="vehicle-v2-editor-groups">
+      ${vehicleV2RawFieldGroupsEditorHtml(visibleFieldGroups, canEditVehicle)}
+      ${vehicleV2PictureEditorHtml(photoEntries, productName, canEditPictures, isCreating)}
+      <details class="vehicle-v2-advanced-editor">
+        <summary>高级选项（一般不用）</summary>
+        <div class="vehicle-v2-advanced-content">
+          ${systemFieldGroups.length ? vehicleV2RawFieldGroupsEditorHtml(systemFieldGroups, false) : ""}
+          ${vehicleV2EditorGroupHtml("客户可见补充", [
+            productV2Textarea("product-v2-category", "本地类目", annotations.category || "", "", "extensions.wechat_customer_service.customer_visible_annotations.category"),
+            productV2Textarea("product-v2-aliases", "客户常用叫法", displayTags(userVisibleTags(annotations.aliases)), "一行一个，或用逗号分隔", "extensions.wechat_customer_service.customer_visible_annotations.aliases"),
+            productV2Textarea("product-v2-specs", "客户可见卖点", annotations.specs || "", "", "extensions.wechat_customer_service.customer_visible_annotations.specs"),
+            productV2Textarea("product-v2-shipping", "看车/交付说明", annotations.shipping_policy || "", "", "extensions.wechat_customer_service.customer_visible_annotations.shipping_policy"),
+            productV2Textarea("product-v2-warranty", "售后/合同口径", annotations.warranty_policy || "", "", "extensions.wechat_customer_service.customer_visible_annotations.warranty_policy"),
+            productV2Textarea("product-v2-risk", "风险/禁用承诺", displayTags(annotations.risk_rules), "一行一个，或用逗号分隔", "extensions.wechat_customer_service.customer_visible_annotations.risk_rules"),
+            productV2Textarea("product-v2-additional", "补充信息", annotations.additional_details || "", "", "extensions.wechat_customer_service.customer_visible_annotations.additional_details"),
+          ])}
+          <div class="vehicle-v2-editor-group vehicle-v2-editor-group-local">
+            ${productReplyTemplateEditorHtml(manual.reply_templates, productName, ["default", "quote", "discount_policy", "logistics", "after_sales"], "客户回复话术")}
+          </div>
+          ${vehicleV2EditorGroupHtml("本地管理字段", [
+            productV2FieldInput("product-v2-sku", "内部编号", "extensions.wechat_customer_service.manual_annotations.sku", manual.sku ?? ""),
+            productV2FieldInput("product-v2-unit", "本地单位", "extensions.wechat_customer_service.manual_annotations.unit", manual.unit ?? ""),
+            productV2FieldInput("product-v2-inventory", "库存数量", "extensions.wechat_customer_service.manual_annotations.inventory", manual.inventory ?? "", "number", false, "1"),
+          ])}
+          <div class="vehicle-v2-editor-group vehicle-v2-editor-group-local">
+            ${productReplyTemplateEditorHtml(manual.reply_templates, productName, ["notes"], "内部备注")}
+          </div>
+          <div class="product-scoped-panel">
+            <div class="section-heading"><div><span>精准触发知识（强触发）</span><strong>专属知识按当前车源 ID 绑定；保存车辆资料不会覆盖它们。</strong></div></div>
+            ${productScopedHtml("商品专属问答", "product_faq", (scoped || {}).product_faq || [], "answer", productName)}
+            ${productScopedHtml("商品专属规则", "product_rules", (scoped || {}).product_rules || [], "answer", productName)}
+            ${productScopedHtml("商品专属解释", "product_explanations", (scoped || {}).product_explanations || [], "content", productName)}
+            ${productScopedEditorHtml()}
+          </div>
+        </div>
+      </details>
     </div>
   `;
 }
@@ -3752,34 +3976,84 @@ function vehicleV2EditorGroupHtml(label, fields) {
   return `<section class="vehicle-v2-editor-group"><div class="vehicle-v2-editor-group-head"><strong>${escapeHtml(label)}</strong></div><div class="form-grid vehicle-v2-editor-grid">${fields.join("")}</div></section>`;
 }
 
+function vehicleV2RawFieldGroupsEditorHtml(groups, canEditVehicle) {
+  const rows = Array.isArray(groups) ? groups : [];
+  return rows.map((group) => vehicleV2EditorGroupHtml(
+    vehicleRawGroupLabel(group),
+    (Array.isArray(group?.fields) ? group.fields : []).map((field) => vehicleV2RawFieldControlHtml(field, canEditVehicle)),
+  )).join("");
+}
+
+function vehicleRawGroupLabel(group) {
+  return group?.label || "";
+}
+
+function vehicleV2RawFieldControlHtml(field, canEditVehicle) {
+  const path = String(field?.path || "");
+  const editable = Boolean(canEditVehicle && field?.editable);
+  const required = Boolean(field?.required);
+  const label = `${field?.label || ""}${required ? " *" : ""}`;
+  const valueText = dafengcheFieldValueText(field?.value);
+  const valueType = String(field?.value_type || "text");
+  const controlId = `product-v2-raw-${path.replace(/[^a-zA-Z0-9_-]+/g, "-")}`;
+  const dataAttrs = `data-dafengche-path="${escapeAttr(path)}" data-dafengche-editable="${editable ? "true" : "false"}" data-dafengche-value-type="${escapeAttr(valueType)}" ${required ? `data-dafengche-required="true"` : ""}`;
+  const readOnly = editable ? "" : `readonly aria-readonly="true"`;
+  const readOnlyHint = editable ? "" : `<small class="vehicle-v2-field-note">${field?.restricted ? "受限/系统字段，仅展示不编辑" : "只读"}</small>`;
+  const objectValue = field?.value && typeof field.value === "object";
+  const multiline = objectValue || valueText.length > 80 || valueText.includes("\n");
+  const classes = [
+    "form-field",
+    "product-short-field",
+    "vehicle-v2-field",
+    "vehicle-v2-raw-field",
+    editable ? "is-editable" : "is-readonly",
+    multiline ? "is-multiline" : "is-compact",
+    objectValue ? "is-object-value" : "",
+  ].filter(Boolean).join(" ");
+  if (multiline) {
+    return `<label class="${escapeAttr(classes)}"><span>${escapeHtml(label)}</span><textarea id="${escapeAttr(controlId)}" rows="2" ${dataAttrs} ${readOnly}>${escapeHtml(valueText)}</textarea>${readOnlyHint}</label>`;
+  }
+  const inputType = valueType === "number" ? "number" : "text";
+  const step = valueType === "number" ? `step="any"` : "";
+  return `<label class="${escapeAttr(classes)}"><span>${escapeHtml(label)}</span><input id="${escapeAttr(controlId)}" type="${escapeAttr(inputType)}" value="${escapeHtml(valueText)}" ${step} ${dataAttrs} ${readOnly} />${readOnlyHint}</label>`;
+}
+
 function productV2FieldInput(id, label, path, value, type = "text", disabled = false, step = "") {
-  return `<label class="form-field product-short-field vehicle-v2-field"><span>${escapeHtml(label)}</span><small>${escapeHtml(path)}</small><input id="${escapeHtml(id)}" type="${escapeHtml(type)}" value="${escapeHtml(value ?? "")}" ${step ? `step="${escapeAttr(step)}"` : ""} ${disabled ? "disabled" : ""} /></label>`;
+  return `<label class="form-field product-short-field vehicle-v2-field"><span>${escapeHtml(label)}</span><input id="${escapeHtml(id)}" type="${escapeHtml(type)}" value="${escapeHtml(value ?? "")}" ${step ? `step="${escapeAttr(step)}"` : ""} ${disabled ? "disabled" : ""} /></label>`;
 }
 
 function productV2Textarea(id, label, value, placeholder = "", path = "") {
-  return `<label class="form-field wide-field vehicle-v2-field"><span>${escapeHtml(label)}</span>${path ? `<small>${escapeHtml(path)}</small>` : ""}<textarea id="${escapeHtml(id)}" placeholder="${escapeHtml(placeholder)}">${escapeHtml(value || "")}</textarea></label>`;
+  return `<label class="form-field wide-field vehicle-v2-field"><span>${escapeHtml(label)}</span><textarea id="${escapeHtml(id)}" placeholder="${escapeHtml(placeholder)}">${escapeHtml(value || "")}</textarea></label>`;
 }
 
-function vehicleV2PictureEditorHtml(photoEntries, productName, canEditPictures) {
+function vehicleV2PictureEditorHtml(photoEntries, productName, canEditPictures, isCreating = false) {
   const existing = Array.isArray(photoEntries) ? photoEntries : [];
   return `
     <section class="vehicle-v2-editor-group vehicle-v2-picture-editor">
-      <div class="vehicle-v2-editor-group-head"><strong>车辆图片</strong><small>source_payloads.vehicle_pictures.payload</small></div>
-      <div id="product-v2-image-preview" class="product-photo-grid dfc-photo-grid vehicle-v2-edit-photos">${existing.length ? existing.map((entry) => vehiclePictureEditorTileHtml(entry, productName, canEditPictures)).join("") : `<div class="dfc-empty-photo" aria-label="车辆图片为空">&nbsp;</div>`}</div>
-      ${canEditPictures ? `<label class="vehicle-v2-upload-control"><span>添加图片（JPEG、PNG、WebP；单张不超过 10 MB）</span><small>选中后立即上传并显示；不需要先保存整页车辆资料。</small><input id="product-v2-image-files" type="file" accept="image/jpeg,image/png,image/webp" multiple /></label><div id="product-v2-image-upload-status" class="vehicle-image-upload-status" aria-live="polite"></div>` : `<div class="helper-card context-card"><strong>官方图片只读。</strong><span>该车源由大风车同步，图片将随下一次同步更新。</span></div>`}
+      <div class="vehicle-v2-editor-group-head"><strong>车辆图片</strong><small>本地手动车辆可上传多张，第一张为主图。</small></div>
+      <div id="product-v2-image-preview" class="product-photo-grid dfc-photo-grid vehicle-v2-edit-photos">${existing.length ? existing.map((entry, index) => vehiclePictureEditorTileHtml(entry, productName, canEditPictures, index, existing.length)).join("") : `<div class="dfc-empty-photo" aria-label="车辆图片为空">&nbsp;</div>`}</div>
+      ${canEditPictures ? `<label class="vehicle-v2-upload-control"><span>添加图片（可一次选择多张；JPEG、PNG、WebP；单张不超过 10 MB）</span><small>选中后会逐张预览并上传；第一张为主图，可上传后调整顺序或删除。</small><input id="product-v2-image-files" type="file" accept="image/jpeg,image/png,image/webp" multiple /></label><div id="product-v2-image-upload-status" class="vehicle-image-upload-status" aria-live="polite"></div>` : `<div class="helper-card context-card"><strong>${isCreating ? "保存后上传车辆图片。" : "外部镜像图片只读。"}</strong><span>${isCreating ? "先创建本地车辆，再在编辑页一次选择并上传多张图片。" : "该车源来自历史外部镜像；本地图片请在手动车辆记录中维护。"}</span></div>`}
     </section>
   `;
 }
 
-function vehiclePictureEditorTileHtml(entry, productName, canEditPictures) {
+function vehiclePictureEditorTileHtml(entry, productName, canEditPictures, index = 0, total = 1) {
   const item = entry && typeof entry === "object" ? entry : {url: entry};
   const source = String(item.url || "").trim();
   const image = vehiclePictureImageHtml(source, `${productName || "车辆"} 图片`);
   const pictureId = String(item.picture_id || "").trim();
+  const mainBadge = index === 0 ? `<span class="vehicle-image-main-badge">主图</span>` : "";
+  const orderButtons = canEditPictures && pictureId ? `
+    <div class="vehicle-image-actions">
+      ${index > 0 ? `<button type="button" data-vehicle-image-order-id="${escapeAttr(pictureId)}" data-vehicle-image-order-action="main">设为主图</button>` : ""}
+      ${index > 0 ? `<button type="button" data-vehicle-image-order-id="${escapeAttr(pictureId)}" data-vehicle-image-order-action="up">上移</button>` : ""}
+      ${index < total - 1 ? `<button type="button" data-vehicle-image-order-id="${escapeAttr(pictureId)}" data-vehicle-image-order-action="down">下移</button>` : ""}
+    </div>
+  ` : "";
   const remove = canEditPictures && pictureId
     ? `<button class="vehicle-image-remove" type="button" data-vehicle-image-remove-id="${escapeAttr(pictureId)}" title="删除这张图片">删除</button>`
     : "";
-  return `<div class="vehicle-image-editor-tile" data-vehicle-picture-id="${escapeAttr(pictureId)}">${image}${remove}</div>`;
+  return `<div class="vehicle-image-editor-tile" data-vehicle-picture-id="${escapeAttr(pictureId)}">${image}${mainBadge}${orderButtons}${remove}</div>`;
 }
 
 function productTextInput(id, label, value, type = "text") {
@@ -3800,12 +4074,14 @@ function productTextarea(id, label, value, placeholder = "") {
   `;
 }
 
-function productReplyTemplateEditorHtml(value, productName) {
+function productReplyTemplateEditorHtml(value, productName, keysOverride = null, title = "基础话术（弱触发）") {
   const templates = value && typeof value === "object" && !Array.isArray(value) ? value : {};
-  const keys = Array.from(new Set([...Object.keys(templateLabels), ...Object.keys(templates)]));
+  const overrideKeys = Array.isArray(keysOverride) && keysOverride.length ? keysOverride : null;
+  const extraKeys = Object.keys(templates).filter((key) => !Object.prototype.hasOwnProperty.call(templateLabels, key));
+  const keys = Array.from(new Set(overrideKeys ? [...overrideKeys, ...(overrideKeys.includes("notes") ? [] : extraKeys)] : [...Object.keys(templateLabels), ...extraKeys]));
   return `
     <div class="form-field wide-field reply-template-editor product-reply-template-editor">
-      <span>基础话术（弱触发）</span>
+      <span>${escapeHtml(title)}</span>
       <div class="object-guide">这些是「${escapeHtml(productName || "当前商品")}」的默认商品话术；它们和下方精准触发知识都绑定当前商品。需要“客户问到某个关键词才用”的内容，请放到商品专属问答/规则/解释。</div>
       ${keys.map((key) => `
         <label class="nested-field">
@@ -3818,8 +4094,9 @@ function productReplyTemplateEditorHtml(value, productName) {
 }
 
 function bindProductDetailEditors(root) {
-  root.querySelector(".product-detail-save")?.addEventListener("click", () => saveProductDetailForm().catch((error) => alert(error.message)));
+  root.querySelector(".product-detail-save")?.addEventListener("click", () => runProductDetailSave());
   root.querySelector(".product-detail-cancel")?.addEventListener("click", () => {
+    if (state.productDetailSaving) return;
     state.productDetailMode = "view";
     state.productScopedEditor = null;
     renderProductCatalogDetail();
@@ -3849,6 +4126,9 @@ function bindProductDetailEditors(root) {
   root.querySelectorAll("[data-vehicle-image-remove-id]").forEach((button) => {
     bindVehicleImageRemoveButton(button, productId);
   });
+  root.querySelectorAll("[data-vehicle-image-order-id]").forEach((button) => {
+    bindVehicleImageOrderButton(button, productId);
+  });
 }
 
 function bindVehicleImageRemoveButton(button, productId) {
@@ -3859,12 +4139,62 @@ function bindVehicleImageRemoveButton(button, productId) {
   });
 }
 
+function bindVehicleImageOrderButton(button, productId) {
+  if (!button || button.dataset.vehicleImageOrderBound === "true") return;
+  button.dataset.vehicleImageOrderBound = "true";
+  button.addEventListener("click", () => {
+    reorderProductV2VehicleImage(productId, button.dataset.vehicleImageOrderId, button.dataset.vehicleImageOrderAction, button).catch((error) => alert(error.message));
+  });
+}
+
+async function runProductDetailSave() {
+  if (state.productDetailSaving) return;
+  state.productDetailSaving = true;
+  setProductSaveStatus("保存中...", "loading");
+  updateProductDetailSaveControls();
+  try {
+    const result = await saveProductDetailForm();
+    state.productDetailSaving = false;
+    if (result?.refreshFailed) setProductSaveStatus("已保存，刷新失败", "warning");
+    else setProductSaveStatus("已保存", "ok");
+    renderProductCatalogDetail();
+  } catch (error) {
+    state.productDetailSaving = false;
+    setProductSaveStatus(`保存失败：${error?.message || "未知错误"}`, "error");
+    updateProductDetailSaveControls();
+  }
+}
+
+function updateProductDetailSaveControls() {
+  const root = document.getElementById("product-catalog-detail");
+  if (!root) return;
+  const loading = Boolean(state.productDetailSaving);
+  const saveButton = root.querySelector(".product-detail-save");
+  if (saveButton) {
+    if (!saveButton.dataset.defaultLabel) saveButton.dataset.defaultLabel = saveButton.textContent || "保存";
+    saveButton.disabled = loading;
+    saveButton.classList.toggle("is-loading", loading);
+    if (loading) {
+      saveButton.innerHTML = `<span class="loading-spinner button-spinner" aria-hidden="true"></span><span>保存中...</span>`;
+    } else {
+      saveButton.textContent = saveButton.dataset.defaultLabel || "保存";
+    }
+  }
+  root.querySelector(".product-detail-cancel")?.toggleAttribute("disabled", loading);
+  const status = state.productDetailSaveStatus;
+  const statusNode = root.querySelector(".product-save-status");
+  if (statusNode) {
+    const tone = status?.tone || "info";
+    statusNode.className = `product-save-status is-${tone} ${status?.message ? "" : "is-hidden"}`;
+    statusNode.innerHTML = `${tone === "loading" ? `<span class="loading-spinner button-spinner" aria-hidden="true"></span>` : ""}<span>${escapeHtml(status?.message || "")}</span>`;
+  }
+}
+
 async function saveProductDetailForm() {
   const original = state.selectedProduct;
   if (!original?.id) return;
   if (productAdminView(original).record_kind === "vehicle_v2") {
-    await saveProductV2DetailForm(original);
-    return;
+    return saveProductV2DetailForm(original);
   }
   const data = {
     ...(original.data || {}),
@@ -3882,6 +4212,7 @@ async function saveProductDetailForm() {
     reply_templates: collectProductReplyTemplates(),
   };
   if (!data.name) throw new Error("商品名称不能为空。");
+  const productTenantId = productRequestTenantId();
   const item = {
     ...original,
     category_id: "products",
@@ -3892,21 +4223,30 @@ async function saveProductDetailForm() {
   };
   await apiJson(`/api/knowledge/categories/products/items/${encodeURIComponent(original.id)}`, {
     method: "PUT",
+    headers: tenantScopedHeaders(productTenantId),
     body: JSON.stringify(item),
   });
   state.productDetailMode = "view";
   state.productScopedEditor = null;
-  await Promise.all([loadProductCatalog({loadDetail: false}), loadOverview().catch(() => {})]);
-  await loadProductDetail(original.id);
+  state.selectedProduct = item;
+  state.productDetailRequestId += 1;
+  renderProductCatalogDetail();
+  refreshProductAfterSave(original.id, productTenantId);
+  return {refreshFailed: false};
 }
 
 async function saveProductV2DetailForm(original) {
+  const productTenantId = productRequestTenantId();
+  const isCreating = state.productDetailMode === "new";
   const pendingImageUpload = state.productVehicleImageUploadProductId === original.id
     ? state.productVehicleImageUploadPromise
     : null;
   if (pendingImageUpload) await pendingImageUpload;
   const view = productAdminView(original);
-  const canEditVehicle = Boolean(view.capabilities?.can_edit_vehicle_source);
+  const canEditVehicle = isCreating || Boolean(view.capabilities?.can_edit_vehicle_source);
+  if (canEditVehicle && !rawVehicleDetailPatchValue("baseCarInfo.name.displayValue")) {
+    throw new Error("车辆展示名称不能为空。");
+  }
   const vehicleDetailPatch = canEditVehicle ? buildManualVehicleDetailPatch() : {};
   const annotations = {
     category: document.getElementById("product-v2-category")?.value.trim() || "",
@@ -3915,60 +4255,137 @@ async function saveProductV2DetailForm(original) {
     shipping_policy: document.getElementById("product-v2-shipping")?.value.trim() || "",
     warranty_policy: document.getElementById("product-v2-warranty")?.value.trim() || "",
     risk_rules: splitTags(document.getElementById("product-v2-risk")?.value || ""),
+    additional_details: document.getElementById("product-v2-additional")?.value.trim() || "",
   };
   const manualAnnotations = {
     sku: document.getElementById("product-v2-sku")?.value.trim() || "",
     unit: document.getElementById("product-v2-unit")?.value.trim() || "",
+    inventory: numberOrNull(document.getElementById("product-v2-inventory")?.value),
     reply_templates: collectProductReplyTemplates(),
   };
-  await apiJson(`/api/product-console/products/${encodeURIComponent(original.id)}/admin-view`, {
-    method: "PUT",
+  const saved = await apiJson(isCreating ? "/api/product-console/products" : `/api/product-console/products/${encodeURIComponent(original.id)}/admin-view`, {
+    method: isCreating ? "POST" : "PUT",
+    headers: tenantScopedHeaders(productTenantId),
     body: JSON.stringify({vehicle_detail_patch: vehicleDetailPatch, annotations, manual_annotations: manualAnnotations}),
   });
+  if (isCreating) {
+    const created = saved?.item;
+    const createdId = String(created?.id || "").trim();
+    if (!createdId) throw new Error("新车辆已保存，但未返回车辆编号。请刷新商品库确认。");
+    state.selectedProduct = created;
+    state.productDetailMode = "edit";
+    state.productDetailScopedKnowledge = {};
+    renderProductCatalogDetail();
+    // The POST is the save boundary. Do not keep the save spinner open while
+    // the detail/catalog refreshes run; either refresh can be slow or blocked
+    // independently of the successful write.
+    refreshCreatedProductAfterSave(createdId, productTenantId);
+    return {refreshFailed: false, createdId};
+  }
+  let refreshFailed = false;
+  try {
+    await refreshSelectedProductDetailSnapshot(original.id, productTenantId);
+  } catch (error) {
+    refreshFailed = true;
+    console.warn("product post-save detail refresh failed", error);
+  }
   state.productDetailMode = "view";
   state.productScopedEditor = null;
-  await Promise.all([loadProductCatalog({loadDetail: false}), loadOverview().catch(() => {})]);
-  await loadProductDetail(original.id);
+  renderProductCatalogList();
+  renderProductCatalogDetail();
+  refreshProductAfterSave(original.id, productTenantId, {refreshDetail: false});
+  return {refreshFailed};
+}
+
+function refreshCreatedProductAfterSave(productId, tenantId) {
+  const expectedProductId = String(productId || "");
+  const expectedTenantId = productRequestTenantId(tenantId);
+  Promise.allSettled([
+    refreshSelectedProductDetailSnapshot(expectedProductId, expectedTenantId),
+    loadProductCatalog({loadDetail: false, tenantId: expectedTenantId, preserveSelected: true}),
+  ]).then((results) => {
+    if (state.selectedProduct?.id !== expectedProductId || !state.productDetailModalOpenRequested) return;
+    const refreshFailed = results.some((result) => result.status === "rejected");
+    if (refreshFailed) {
+      console.warn("product post-create refresh failed", results.filter((result) => result.status === "rejected"));
+      setProductSaveStatus("已保存，详情刷新失败；重新打开可查看最新资料", "warning");
+    }
+    renderProductCatalogDetail();
+  });
+}
+
+function refreshProductAfterSave(productId, tenantId, options = {}) {
+  const expectedProductId = String(productId || "");
+  const expectedTenantId = productRequestTenantId(tenantId);
+  Promise.all([
+    loadProductCatalog({loadDetail: false, tenantId: expectedTenantId, preserveSelected: true}),
+    loadOverview().catch(() => {}),
+  ])
+    .then(() => {
+      if (options.refreshDetail === false) return null;
+      return loadProductDetail(expectedProductId, {tenantId: expectedTenantId, open: false});
+    })
+    .catch((error) => {
+      console.warn("product post-save refresh failed", error);
+      if (state.selectedProduct?.id === expectedProductId) {
+        setProductSaveStatus("已保存，刷新失败", "warning");
+        renderProductCatalogDetail();
+      }
+    });
 }
 
 function buildManualVehicleDetailPatch() {
-  const text = (id) => document.getElementById(id)?.value.trim() || "";
-  const number = (id) => {
-    const value = document.getElementById(id)?.value;
-    return value === undefined || value === "" ? "" : numberOrNull(value);
-  };
-  return compactObject({
-    operationPhase: text("product-v2-operation-phase"),
-    baseCarInfo: compactObject({
-      name: text("product-v2-name"),
-      carName: text("product-v2-car-name"),
-      brandName: text("product-v2-brand"),
-      seriesName: text("product-v2-series"),
-      modelName: text("product-v2-model"),
-      firstLicensePlateDate: text("product-v2-license-date"),
-      mileage: number("product-v2-mileage"),
-      vehicleCondition: text("product-v2-condition"),
-      exteriorColor: text("product-v2-exterior"),
-      color: text("product-v2-color"),
-      interiorColor: text("product-v2-interior"),
-    }),
-    carModelParam: compactObject({
-      gearbox: text("product-v2-gearbox"),
-      gearBox: text("product-v2-gearbox-backup"),
-      displacement: text("product-v2-displacement"),
-    }),
-    carPriceInfo: compactObject({
-      salePrice: number("product-v2-price"),
-      purchasePrice: number("product-v2-purchase-price"),
-      salesPrice: number("product-v2-sales-price"),
-      managerPrice: number("product-v2-manager-price"),
-      wholesalePrice: number("product-v2-wholesale-price"),
-    }),
-    carLicenseInfo: compactObject({licenseStatus: text("product-v2-license-status")}),
+  const patch = {};
+  document.querySelectorAll("[data-dafengche-path][data-dafengche-editable='true']").forEach((control) => {
+    const path = String(control.dataset.dafengchePath || "").trim();
+    if (!path) return;
+    const value = normalizeDafengcheFieldControlValue(control);
+    if (value === "" || value === null || value === undefined) return;
+    setNestedPatchValue(patch, path, value);
   });
+  return compactNestedObject(patch);
+}
+
+function rawVehicleDetailPatchValue(path) {
+  const control = document.querySelector(`[data-dafengche-path="${cssEscape(path)}"][data-dafengche-editable='true']`);
+  const value = control ? normalizeDafengcheFieldControlValue(control) : "";
+  return value === null || value === undefined ? "" : String(value).trim();
+}
+
+function normalizeDafengcheFieldControlValue(control) {
+  const raw = String(control?.value ?? "").trim();
+  if (!raw) return "";
+  if (control?.dataset?.dafengcheValueType === "number") return numberOrNull(raw);
+  return raw;
+}
+
+function setNestedPatchValue(target, path, value) {
+  const parts = String(path || "").split(".").map((item) => item.trim()).filter(Boolean);
+  if (!parts.length) return;
+  let current = target;
+  parts.slice(0, -1).forEach((part) => {
+    if (!current[part] || typeof current[part] !== "object" || Array.isArray(current[part])) current[part] = {};
+    current = current[part];
+  });
+  current[parts[parts.length - 1]] = value;
+}
+
+function compactNestedObject(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return value;
+  const result = {};
+  Object.entries(value).forEach(([key, entry]) => {
+    const inner = compactNestedObject(entry);
+    if (inner && typeof inner === "object" && !Array.isArray(inner)) {
+      if (Object.keys(inner).length) result[key] = inner;
+    } else if (inner !== "" && inner !== null && inner !== undefined) {
+      result[key] = inner;
+    }
+  });
+  return result;
 }
 
 async function uploadProductV2VehicleImages(productId) {
+  const productTenantId = productRequestTenantId();
   const input = document.getElementById("product-v2-image-files");
   const files = Array.from(input?.files || []);
   if (!files.length) return [];
@@ -3988,7 +4405,10 @@ async function uploadProductV2VehicleImages(productId) {
     const form = new FormData();
     form.append("file", file, file.name);
     try {
-      const payload = await apiForm(`/api/product-console/products/${encodeURIComponent(productId)}/images`, form, {method: "POST"});
+      const payload = await apiForm(`/api/product-console/products/${encodeURIComponent(productId)}/images`, form, {
+        method: "POST",
+        headers: tenantScopedHeaders(productTenantId),
+      });
       const image = payload?.image || {};
       const entry = {picture_id: image.picture_id, url: image.url, filename: image.filename};
       const current = grid?.querySelector?.(`[data-vehicle-upload-preview="${temporaryId}"]`);
@@ -3997,7 +4417,6 @@ async function uploadProductV2VehicleImages(productId) {
       hydrateAuthorizedVehicleImages(grid);
       const deleteButton = grid?.querySelector?.(`[data-vehicle-image-remove-id="${entry.picture_id}"]`);
       bindVehicleImageRemoveButton(deleteButton, productId);
-      if (payload?.item && state.selectedProduct?.id === productId) state.selectedProduct = payload.item;
       uploaded.push(entry);
     } catch (error) {
       failures.push(file.name || "未命名图片");
@@ -4008,7 +4427,25 @@ async function uploadProductV2VehicleImages(productId) {
   }
   if (!failures.length) setVehicleImageUploadStatus(status, `已上传 ${uploaded.length} 张图片；正在后台生成图片归纳词。`);
   if (failures.length) throw new Error(`图片上传失败：${failures.join("、")}`);
+  refreshSelectedProductDetailSnapshot(productId, productTenantId).catch((error) => {
+    console.warn("vehicle image detail refresh failed", error);
+    setVehicleImageUploadStatus(status, "图片已上传；详情刷新失败，关闭后重开可查看最新图片。", true);
+  });
   return uploaded;
+}
+
+async function refreshSelectedProductDetailSnapshot(productId, tenantId) {
+  const expectedProductId = String(productId || "");
+  if (!expectedProductId || state.selectedProduct?.id !== expectedProductId) return null;
+  const expectedTenantId = productRequestTenantId(tenantId);
+  const requestId = ++state.productDetailRequestId;
+  const payload = await apiGet(`/api/product-console/products/${encodeURIComponent(expectedProductId)}`, {
+    headers: tenantScopedHeaders(expectedTenantId),
+  });
+  if (requestId !== state.productDetailRequestId || state.selectedProduct?.id !== expectedProductId) return null;
+  if (payload?.item) state.selectedProduct = payload.item;
+  state.productDetailScopedKnowledge = payload.scoped_knowledge || state.productDetailScopedKnowledge || {};
+  return payload.item || null;
 }
 
 function appendVehicleImageUploadPreview(grid, temporaryId, objectUrl, filename) {
@@ -4028,12 +4465,50 @@ function setVehicleImageUploadStatus(target, text, isError = false) {
   target.classList.toggle("is-error", Boolean(isError));
 }
 
+async function reorderProductV2VehicleImage(productId, imageId, action, button) {
+  if (!productId || !imageId) return;
+  const productTenantId = productRequestTenantId();
+  const item = state.selectedProduct;
+  if (item?.id !== productId) throw new Error("当前车辆已切换，请重新打开车辆后再调整图片顺序。");
+  const pictures = vehiclePicturePayloadForEdit(item);
+  const currentIndex = pictures.findIndex((entry) => String(entry.pictureId || entry.picture_id || "") === String(imageId));
+  if (currentIndex < 0) throw new Error("没有找到要调整的车辆图片。");
+  const requested = String(action || "");
+  let targetIndex = currentIndex;
+  if (requested === "main") targetIndex = 0;
+  else if (requested === "up") targetIndex = Math.max(0, currentIndex - 1);
+  else if (requested === "down") targetIndex = Math.min(pictures.length - 1, currentIndex + 1);
+  if (targetIndex === currentIndex) return;
+  const [moved] = pictures.splice(currentIndex, 1);
+  pictures.splice(targetIndex, 0, moved);
+  if (button) button.disabled = true;
+  await apiJson(`/api/product-console/products/${encodeURIComponent(productId)}/admin-view`, {
+    method: "PUT",
+    headers: tenantScopedHeaders(productTenantId),
+    body: JSON.stringify({vehicle_pictures_patch: pictures}),
+  });
+  if (state.selectedProduct?.id !== productId) return;
+  await refreshSelectedProductDetailSnapshot(productId, productTenantId);
+  setVehicleImageUploadStatus(document.getElementById("product-v2-image-upload-status"), "图片顺序已更新；第一张会作为主图展示。");
+}
+
+function vehiclePicturePayloadForEdit(item) {
+  const payloads = item?.source_payloads && typeof item.source_payloads === "object" ? item.source_payloads : {};
+  const snapshot = payloads.vehicle_pictures && typeof payloads.vehicle_pictures === "object" ? payloads.vehicle_pictures : {};
+  const pictures = Array.isArray(snapshot.payload) ? snapshot.payload : [];
+  return pictures.filter((entry) => entry && typeof entry === "object").map((entry) => ({...entry}));
+}
+
 async function deleteProductV2VehicleImage(productId, imageId, button) {
   if (!productId || !imageId) return;
   if (!confirm("确认删除这张车辆图片吗？删除后会重新生成该车源的图片索引。")) return;
+  const productTenantId = productRequestTenantId();
   if (button) button.disabled = true;
   try {
-    const payload = await apiJson(`/api/product-console/products/${encodeURIComponent(productId)}/images/${encodeURIComponent(imageId)}`, {method: "DELETE"});
+    await apiJson(`/api/product-console/products/${encodeURIComponent(productId)}/images/${encodeURIComponent(imageId)}`, {
+      method: "DELETE",
+      headers: tenantScopedHeaders(productTenantId),
+    });
     // The operator can leave this car while the deletion request is in
     // flight.  Persist the deletion, but never mutate the newly selected
     // car's editor or selection state with an old response.
@@ -4043,7 +4518,7 @@ async function deleteProductV2VehicleImage(productId, imageId, button) {
     if (grid && !grid.querySelector(".vehicle-image-editor-tile")) {
       grid.innerHTML = `<div class="dfc-empty-photo" aria-label="车辆图片为空">&nbsp;</div>`;
     }
-    if (payload?.item) state.selectedProduct = payload.item;
+    refreshSelectedProductDetailSnapshot(productId, productTenantId).catch((error) => console.warn("vehicle image delete detail refresh failed", error));
     setVehicleImageUploadStatus(document.getElementById("product-v2-image-upload-status"), "图片已删除，正在后台更新图片归纳词。");
   } catch (error) {
     if (button) button.disabled = false;
@@ -9059,6 +9534,7 @@ renderCustomerServiceRuntime();
 document.getElementById("refresh-overview").addEventListener("click", () => loadOverview().catch(console.error));
 document.getElementById("tenant-select")?.addEventListener("change", async (event) => {
   state.activeTenantId = event.target.value || "default";
+  state.productDetailTenantId = "";
   localStorage.setItem("localActiveTenantId", state.activeTenantId);
   await Promise.all([
     refreshAccountContext().catch(console.error),
@@ -9122,6 +9598,9 @@ document.getElementById("customer-service-discover")?.addEventListener("click", 
 document.getElementById("customer-service-select-all")?.addEventListener("click", () => applyCustomerServiceSessionSelection("all").catch((error) => alert(error.message)));
 document.getElementById("customer-service-clear-selection")?.addEventListener("click", () => applyCustomerServiceSessionSelection("none").catch((error) => alert(error.message)));
 document.getElementById("refresh-product-catalog")?.addEventListener("click", () => loadProductCatalog().catch((error) => alert(error.message)));
+document.getElementById("product-excel-template-download")?.addEventListener("click", () => downloadProductExcelTemplate().catch((error) => alert(error.message)));
+document.getElementById("product-excel-import-file")?.addEventListener("change", () => previewProductExcelImport().catch((error) => alert(error.message)));
+document.getElementById("product-new-local-vehicle")?.addEventListener("click", () => openNewLocalVehicle().catch((error) => alert(error.message)));
 document.getElementById("run-product-command")?.addEventListener("click", () => runProductCommand().catch((error) => alert(error.message)));
 document.getElementById("recorder-discover")?.addEventListener("click", () => discoverRecorderSessions().catch((error) => alert(error.message)));
 document.getElementById("recorder-capture")?.addEventListener("click", () => captureRecorderNow().catch((error) => alert(error.message)));

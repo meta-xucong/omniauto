@@ -21,12 +21,19 @@ for import_root in (APP_ROOT / "workflows", APP_ROOT / "adapters", APP_ROOT):
 
 from apps.wechat_ai_customer_service import dafengche_product_master_host_adapter as host_adapter_module  # noqa: E402
 from apps.wechat_ai_customer_service.dafengche_product_master_host_adapter import ProductMasterStoreMirrorRepository  # noqa: E402
+from apps.wechat_ai_customer_service.knowledge_paths import tenant_context  # noqa: E402
 from apps.wechat_ai_customer_service.product_master import ProductMasterStore, customer_evidence_item, write_json  # noqa: E402
 from apps.wechat_ai_customer_service.scripts.migrate_chejin_v1_to_v2_manual import (  # noqa: E402
     build_manual_v2_record,
     migrate_store,
 )
-from apps.wechat_ai_customer_service.workflows.customer_service_brain import compact_product_item_for_brain_prompt  # noqa: E402
+from apps.wechat_ai_customer_service.workflows.customer_service_brain import (  # noqa: E402
+    build_brain_input,
+    build_brain_prompt_pack,
+    compact_product_item_for_brain_prompt,
+    effective_brain_settings,
+)
+from apps.wechat_ai_customer_service.workflows.knowledge_runtime import KnowledgeRuntime  # noqa: E402
 from apps.wechat_ai_customer_service.workflows import reply_evidence_builder as reply_evidence_builder_module  # noqa: E402
 from packages.dafengche_product_master import (  # noqa: E402
     CAR_DETAIL_API,
@@ -81,8 +88,10 @@ def main() -> int:
         check_portable_sync_and_raw_payload_retention(),
         check_official_contract_surface_and_write_intent_isolation(),
         check_customer_evidence_policy_and_cross_shop_isolation(),
+        check_customer_visible_projection_completeness_and_code_safety(),
         check_manual_vehicle_and_host_storage_adapter(),
         check_legacy_facade_and_brain_input_contract(),
+        check_chejin_customer_evidence_reaches_brain_with_readable_projection(),
         check_source_markers_and_v1_to_v2_manual_migration(),
         check_portable_core_and_rpa_forbidden_import_boundaries(),
     ]
@@ -208,13 +217,8 @@ def check_official_contract_surface_and_write_intent_isolation() -> dict[str, An
     audit_view = build_admin_vehicle_view(repository.list_records()[0], include_raw=True)
     audit_text = json.dumps(audit_view, ensure_ascii=False)
     assert_true("TEST-OWNER-PHONE-MUST-NOT-LEAK" in audit_text, "authorized raw audit view must retain owner info")
-    audit_paths = {
-        str(field.get("path") or "")
-        for group in audit_view["dafengche_field_groups"]
-        for field in group["fields"]
-        if isinstance(field, dict)
-    }
-    assert_true(VEHICLE_DETAIL_FIELD_PATHS.issubset(audit_paths), "admin audit field groups must expose every documented vehicle-detail path")
+    audit_paths = payload_paths((audit_view["raw_source_payloads"]["vehicle_detail"] or {}).get("payload"))
+    assert_true(VEHICLE_DETAIL_FIELD_PATHS.issubset(audit_paths), "admin raw audit payload must retain every documented vehicle-detail path")
     sync_apis = [request["api"] for request in _service.client.transport.requests] if _service.client else []
     assert_true(CAR_UPDATE_API not in sync_apis, "mirror sync must remain read-only and never call vehicle update")
     return {"name": "official_contract_surface_and_write_intent_isolation", "ok": True}
@@ -227,6 +231,29 @@ def check_customer_evidence_policy_and_cross_shop_isolation() -> dict[str, Any]:
     item = evidence[0]
     assert_equal(item["name"], "2021款 丰田 凯美瑞 2.0G 豪华版", "customer evidence name")
     assert_equal(item["price"], 15.28, "only public salePrice should project")
+    assert_equal(item.get("location"), "浙江杭州", "customer evidence location")
+    assert_equal(item.get("stock"), "在库", "customer evidence stock should be readable")
+    assert_equal(item.get("availability"), "在售", "customer evidence operation phase should be readable")
+    specs = str(item.get("specs") or "")
+    for expected in (
+        "车辆描述:一手精品车，车况整洁。",
+        "内饰颜色:黑色",
+        "出厂日期:2021-03",
+        "使用性质:非营运",
+        "亮点配置:无钥匙进入、倒车影像",
+        "车身结构:三厢车",
+        "座位数:5",
+        "排放:国六",
+        "燃料:汽油",
+        "钥匙数:2",
+        "过户次数:0",
+        "车辆视频:可提供",
+        "微店上架状态:已上架",
+        "微店上架时间:2026-07-03",
+        "库存状态:在库",
+        "业务阶段:在售",
+    ):
+        assert_true(expected in specs, f"authorized customer-visible field must enter specs: {expected}")
     evidence_text = json.dumps(item, ensure_ascii=False)
     for restricted in (
         "TEST-VIN-MUST-NOT-LEAK",
@@ -250,6 +277,75 @@ def check_customer_evidence_policy_and_cross_shop_isolation() -> dict[str, Any]:
         "13.9",
     ):
         assert_true(restricted not in evidence_text, f"restricted source field leaked: {restricted}")
+    prompt_specs = _final_prompt_specs_for_item(item)
+    for expected in (
+        "外观颜色:白色",
+        "内饰颜色:黑色",
+        "变速箱:自动",
+        "排量:2.0L",
+        "燃料:汽油",
+        "排放:国六",
+        "车身结构:三厢车",
+        "座位数:5",
+        "钥匙数:2",
+        "过户次数:0",
+        "所在地:浙江杭州",
+        "出厂日期:2021-03",
+        "使用性质:非营运",
+        "车辆视频:可提供",
+        "微店上架状态:已上架",
+        "微店上架时间:2026-07-03",
+        "库存状态:在库",
+        "业务阶段:在售",
+        "亮点配置:无钥匙进入、倒车影像",
+        "车辆描述:一手精品车，车况整洁。",
+    ):
+        assert_true(expected in prompt_specs, f"final Brain prompt specs lost authorized field: {expected}")
+    assert_true("…" not in prompt_specs, f"official full-field prompt specs should not be clipped: {prompt_specs}")
+
+    long_detail = load_fixture("car_detail_car_1001.json")
+    long_detail["baseCarInfo"]["exteriorColor"] = "珍珠白金属漆带阳光细闪和局部补漆说明较长" * 4
+    long_detail["baseCarInfo"]["carDetailForDisplay"] = "这是一段很长的人工补充车况描述，用于证明自由描述可被截断但结构化标签不能丢。" * 4
+    long_record = create_manual_vehicle(
+        record_id="manual_long_specs_prompt_guard",
+        vehicle_detail_payload=long_detail,
+        observed_at=NOW.isoformat(timespec="seconds"),
+    )
+    long_record.setdefault("extensions", {}).setdefault("wechat_customer_service", {}).setdefault(
+        "customer_visible_annotations",
+        {},
+    )["specs"] = "额外自由描述很长" * 30
+    long_item = customer_evidence_item(
+        long_record,
+        shop_code=None,
+        policy=CustomerEvidencePolicy(max_age_seconds=None),
+    )
+    long_evidence = long_item.get("customer_evidence") if isinstance(long_item.get("customer_evidence"), dict) else {}
+    long_prompt_specs = _final_prompt_specs_for_item(long_evidence)
+    for label in (
+        "外观颜色",
+        "内饰颜色",
+        "变速箱",
+        "排量",
+        "燃料",
+        "排放",
+        "车身结构",
+        "座位数",
+        "钥匙数",
+        "过户次数",
+        "所在地",
+        "出厂日期",
+        "使用性质",
+        "车辆视频",
+        "微店上架状态",
+        "微店上架时间",
+        "库存状态",
+        "业务阶段",
+        "亮点配置",
+        "车辆描述",
+    ):
+        assert_true(f"{label}:" in long_prompt_specs, f"long-value prompt specs lost structured label: {label}")
+    assert_true(len(long_prompt_specs) <= 260, "long-value prompt specs must stay within existing item text budget")
     assert_equal(service.list_customer_evidence(shop_code="SHOP-OTHER"), [], "cross-shop evidence must be denied")
     assert_equal(service.list_customer_evidence(shop_code=None), [], "bound Dafengche vehicle requires explicit shop scope")
     stale_policy = CustomerEvidencePolicy(max_age_seconds=60)
@@ -260,6 +356,112 @@ def check_customer_evidence_policy_and_cross_shop_isolation() -> dict[str, Any]:
     )
     assert_equal(len(repository.audit_events), 1, "sync audit event should remain internal")
     return {"name": "customer_evidence_policy_and_cross_shop_isolation", "ok": True}
+
+
+def check_customer_visible_projection_completeness_and_code_safety() -> dict[str, Any]:
+    detail = load_fixture("car_detail_car_1001.json")
+    detail["operationPhase"] = "UNMAPPED_OPERATION_CODE"
+    detail["baseCarInfo"]["stockStatus"] = "UNMAPPED_STOCK_CODE"
+    detail["baseCarInfo"]["area"].pop("displayValue", None)
+    detail["baseCarInfo"]["video"] = [{"url": "https://example.invalid/manual/video.mp4"}]
+    record = create_manual_vehicle(
+        record_id="manual_projection_full_fields",
+        vehicle_detail_payload=detail,
+        field_provenance={"baseCarInfo.name": {"operator": "admin", "source": "manual"}},
+        observed_at=NOW.isoformat(timespec="seconds"),
+    )
+    item = customer_evidence_item(
+        record,
+        shop_code=None,
+        policy=CustomerEvidencePolicy(max_age_seconds=None),
+    )
+    assert_true(isinstance(item, dict), "manual full-field record should produce customer evidence")
+    evidence = item.get("customer_evidence") if isinstance(item.get("customer_evidence"), dict) else {}
+    assert_equal(evidence.get("location"), "浙江杭州", "location must fall back from displayValue to province/city names")
+    assert_equal(evidence.get("stock"), "待核实", "unknown stock code must become readable uncertainty")
+    assert_equal(evidence.get("availability"), "待核实", "unknown operation phase must become readable uncertainty")
+    specs = str(evidence.get("specs") or "")
+    for expected in (
+        "车辆描述:一手精品车，车况整洁。",
+        "出厂日期:2021-03",
+        "使用性质:非营运",
+        "车辆视频:可提供",
+        "微店上架状态:已上架",
+        "微店上架时间:2026-07-03",
+        "库存状态:待核实",
+        "业务阶段:待核实",
+    ):
+        assert_true(expected in specs, f"authorized full-field projection missing specs entry: {expected}")
+        assert_equal(specs.count(expected), 1, f"specs entry must not be duplicated: {expected}")
+    evidence_text = json.dumps(evidence, ensure_ascii=False)
+    for forbidden in (
+        "UNMAPPED_OPERATION_CODE",
+        "UNMAPPED_STOCK_CODE",
+        "TEST-VIN-MUST-NOT-LEAK",
+        "TEST-PLATE-MUST-NOT-LEAK",
+        "TEST-ENGINE-NUMBER-MUST-NOT-LEAK",
+        "source_payloads",
+        "assetFile",
+        "D:\\",
+    ):
+        assert_true(forbidden not in evidence_text, f"customer evidence leaked raw/restricted field: {forbidden}")
+
+    filled_state_detail = load_fixture("car_detail_car_1001.json")
+    filled_state_detail["operationPhase"] = "SALE"
+    filled_state_detail["baseCarInfo"]["stockStatus"] = "1"
+    filled_state = create_manual_vehicle(
+        record_id="manual_projection_filled_test_state",
+        vehicle_detail_payload=filled_state_detail,
+        field_provenance={
+            "source_payloads.vehicle_detail.payload.operationPhase": {
+                "source": "test_fixture_fill",
+                "action": "filled_test_value",
+                "test_only": True,
+            },
+            "source_payloads.vehicle_detail.payload.baseCarInfo.stockStatus": {
+                "source": "test_fixture_fill",
+                "action": "filled_test_value",
+                "test_only": True,
+            },
+        },
+        observed_at=NOW.isoformat(timespec="seconds"),
+    )
+    filled_item = customer_evidence_item(
+        filled_state,
+        shop_code=None,
+        policy=CustomerEvidencePolicy(max_age_seconds=None),
+    )
+    filled_evidence = (filled_item or {}).get("customer_evidence") if isinstance(filled_item, dict) else {}
+    assert_equal(filled_evidence.get("availability"), "待核实", "filled_test_value operation phase must not authorize on-sale fact")
+    assert_equal(filled_evidence.get("stock"), "待核实", "filled_test_value stock status must not authorize in-stock fact")
+    filled_text = json.dumps(filled_evidence, ensure_ascii=False)
+    assert_true("在售" not in filled_text and "在库" not in filled_text, "filled test status must not look like confirmed sale/stock evidence")
+
+    local_media_detail = load_fixture("car_detail_car_1001.json")
+    local_media_detail["baseCarInfo"]["video"] = [
+        {"url": "D:\\AI\\omniauto\\.tmp\\vehicle-video.mp4", "assetFile": "assetFile://internal-video"}
+    ]
+    local_media_record = create_manual_vehicle(
+        record_id="manual_projection_local_media",
+        vehicle_detail_payload=local_media_detail,
+        pictures_payload=[
+            {"pictureUrl": "D:\\AI\\omniauto\\.tmp\\vehicle.jpg", "assetFile": "assetFile://internal-image"}
+        ],
+        field_provenance={"baseCarInfo.name": {"operator": "admin", "source": "manual"}},
+        observed_at=NOW.isoformat(timespec="seconds"),
+    )
+    local_media_item = customer_evidence_item(
+        local_media_record,
+        shop_code=None,
+        policy=CustomerEvidencePolicy(max_age_seconds=None),
+    )
+    local_media_evidence = (local_media_item or {}).get("customer_evidence") if isinstance(local_media_item, dict) else {}
+    local_media_text = json.dumps(local_media_evidence, ensure_ascii=False)
+    assert_true("车辆视频:可提供" not in str(local_media_evidence.get("specs") or ""), "local media path must not become safe video availability")
+    assert_true("photos" not in local_media_evidence, "local image paths must not enter customer evidence photos")
+    for forbidden_media in ("D:\\", "assetFile", "vehicle-video.mp4", "vehicle.jpg", "internal-image", "internal-video"):
+        assert_true(forbidden_media not in local_media_text, f"local media metadata leaked into customer evidence: {forbidden_media}")
+    return {"name": "customer_visible_projection_completeness_and_code_safety", "ok": True}
 
 
 def check_manual_vehicle_and_host_storage_adapter() -> dict[str, Any]:
@@ -407,6 +609,106 @@ def check_legacy_facade_and_brain_input_contract() -> dict[str, Any]:
     return {"name": "legacy_facade_and_brain_input_contract", "ok": True}
 
 
+def check_chejin_customer_evidence_reaches_brain_with_readable_projection() -> dict[str, Any]:
+    product_id = "chejin_audi_a4l_2018_40tfsi"
+    text = "这台A4L现在多少钱，在哪里，有库存吗？"
+    settings = effective_brain_settings({"customer_service_brain": {"enabled": True, "mode": "brain_first"}})
+    batch = [{"id": "msg-a4l-status", "sender": "customer", "content": text}]
+
+    with tenant_context("chejin"):
+        runtime = KnowledgeRuntime()
+        runtime_items = runtime.list_customer_evidence_items("products")
+        runtime_item = next((item for item in runtime_items if str(item.get("id") or "") == product_id), None)
+        assert_true(isinstance(runtime_item, dict), "chejin KnowledgeRuntime must expose the saved manual A4L record")
+        evidence = runtime_item.get("customer_evidence") if isinstance(runtime_item.get("customer_evidence"), dict) else runtime_item
+        assert_true(isinstance(evidence, dict), "KnowledgeRuntime item must carry customer-safe product evidence")
+        assert_equal(evidence.get("location"), "江苏南京", "city/province fallback must produce readable customer location")
+        assert_equal(evidence.get("stock"), "在库", "stock must be customer-readable instead of raw code")
+        assert_equal(evidence.get("stock_status"), "在库", "stock_status compatibility key must not expose raw code")
+        assert_equal(evidence.get("availability"), "在售", "manual_admin_edit operation phase may authorize readable availability")
+        assert_equal(evidence.get("operation_phase"), "在售", "manual_admin_edit operation phase compatibility key must be readable")
+        evidence_text = json.dumps(evidence, ensure_ascii=False)
+        for forbidden in ("TEST_SALE", '"stock_status": "1"', "苏AS8888", "vinNumber", "purchasePrice", "managerPrice", "wholesalePrice"):
+            assert_true(forbidden not in evidence_text, f"chejin customer evidence leaked raw/restricted field: {forbidden}")
+
+        pack = reply_evidence_builder_module.build_reply_evidence_pack(
+            config={"llm_reply_synthesis": {"max_catalog_candidates": 8}},
+            target_name="许聪",
+            target_state={"conversation_context": {}},
+            batch=batch,
+            combined=text,
+            decision={},
+            reply_text="",
+            intent_assist={},
+            rag_reply={},
+            llm_reply={},
+            product_knowledge={},
+            data_capture={},
+            raw_capture={},
+        )
+        brain_input = build_brain_input(
+            settings=settings,
+            target_name="许聪",
+            target_state={},
+            batch=batch,
+            combined=text,
+            raw_capture={},
+            evidence_pack=pack,
+        )
+        brain_products = (
+            ((brain_input.get("evidence") or {}).get("knowledge") or {}).get("product_master") or {}
+        ).get("items") or []
+        brain_item = next((item for item in brain_products if str(item.get("id") or "") == product_id), None)
+        assert_true(isinstance(brain_item, dict), "Brain input must include current chejin product_master evidence")
+        assert_equal(brain_item.get("authority_level"), "product_master", "Brain product facts must retain product_master authority")
+        assert_equal(brain_item.get("location"), "江苏南京", "Brain evidence must include readable location")
+        assert_equal(brain_item.get("stock"), "在库", "Brain evidence must include readable stock")
+        assert_equal(brain_item.get("availability"), "在售", "Brain evidence may use manually confirmed operation phase")
+        brain_specs = str(brain_item.get("specs") or "")
+        for expected in (
+            "所在地:江苏南京",
+            "内饰颜色:测试黑色",
+            "使用性质:私家车",
+            "座位数:5",
+            "排放:国6",
+            "燃料:95汽油",
+            "库存状态:在库",
+            "业务阶段:在售",
+        ):
+            assert_true(expected in brain_specs, f"Brain specs must retain authorized source field: {expected}")
+        brain_text = json.dumps(brain_item, ensure_ascii=False)
+        for forbidden in ("TEST_SALE", '"stock_status": "1"', "苏AS8888", "vinNumber", "purchasePrice", "managerPrice", "wholesalePrice"):
+            assert_true(forbidden not in brain_text, f"Brain product evidence leaked raw/restricted field: {forbidden}")
+
+        follow_up_pack = reply_evidence_builder_module.build_reply_evidence_pack(
+            config={"llm_reply_synthesis": {"max_catalog_candidates": 8}},
+            target_name="许聪",
+            target_state={"conversation_context": {"last_product_id": product_id, "recent_product_ids": [product_id]}},
+            batch=[{"id": "msg-a4l-followup", "sender": "customer", "content": "那这台库存还在吗？"}],
+            combined="那这台库存还在吗？",
+            decision={},
+            reply_text="",
+            intent_assist={},
+            rag_reply={},
+            llm_reply={},
+            product_knowledge={},
+            data_capture={},
+            raw_capture={},
+        )
+        follow_up_ids = [
+            str(item.get("id") or "")
+            for item in ((((follow_up_pack.get("knowledge") or {}).get("product_master") or {}).get("items") or []))
+            if isinstance(item, dict)
+        ]
+        assert_true(product_id in follow_up_ids, f"context follow-up must reuse last_product_id evidence: {follow_up_ids}")
+
+    with tenant_context("default"):
+        default_runtime = KnowledgeRuntime()
+        default_ids = [str(item.get("id") or "") for item in default_runtime.list_customer_evidence_items("products")]
+    assert_true(product_id not in default_ids, "default tenant must not read chejin product evidence")
+    return {"name": "chejin_customer_evidence_reaches_brain_with_readable_projection", "ok": True}
+
+
 def check_source_markers_and_v1_to_v2_manual_migration() -> dict[str, Any]:
     legacy = {
         "schema_version": 1,
@@ -521,6 +823,28 @@ def synced_service() -> tuple[InMemoryMirrorRepository, DafengcheProductMaster]:
     return repository, service
 
 
+def _final_prompt_specs_for_item(item: dict[str, Any]) -> str:
+    settings = effective_brain_settings({"customer_service_brain": {"enabled": True, "mode": "brain_first"}})
+    brain_input = build_brain_input(
+        settings=settings,
+        target_name="测试客户",
+        target_state={},
+        batch=[{"id": "msg-product-specs", "sender": "customer", "content": "这台车配置怎么样？"}],
+        combined="这台车配置怎么样？",
+        raw_capture={},
+        evidence_pack={"knowledge": {"product_master": {"items": [item]}}},
+    )
+    prompt_pack = build_brain_prompt_pack(settings=settings, brain_input=brain_input)
+    prompt_items = (
+        (((prompt_pack.get("user") or {}).get("brain_input") or {}).get("content_basis") or {})
+        .get("product_master", {})
+        .get("items")
+        or []
+    )
+    assert_true(prompt_items, "final Brain prompt must include product-master item")
+    return str((prompt_items[0] or {}).get("specs") or "")
+
+
 def load_fixture(name: str) -> Any:
     return json.loads((FIXTURE_ROOT / name).read_text(encoding="utf-8"))
 
@@ -533,6 +857,15 @@ def assert_true(value: bool, message: str) -> None:
 def assert_equal(actual: Any, expected: Any, message: str) -> None:
     if actual != expected:
         raise AssertionError(f"{message}: expected {expected!r}, got {actual!r}")
+
+
+def payload_paths(value: Any, prefix: str = "") -> set[str]:
+    paths: set[str] = {prefix} if prefix else set()
+    if isinstance(value, dict):
+        for key, child in value.items():
+            child_prefix = f"{prefix}.{key}" if prefix else str(key)
+            paths.update(payload_paths(child, child_prefix))
+    return paths
 
 
 if __name__ == "__main__":

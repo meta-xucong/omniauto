@@ -64,7 +64,13 @@ class KnowledgeDeduper:
     def _list_existing_items(self, category_id: str) -> list[dict[str, Any]]:
         cache_key = (category_id, False)
         if cache_key not in self._existing_cache:
-            self._existing_cache[cache_key] = self.base_store.list_items(category_id, include_archived=False)
+            if category_id == "products" and hasattr(self.base_store, "product_master"):
+                # Candidate payloads still use the frozen generic product
+                # shape. Compare them with the output-only V2 compatibility
+                # projection, never with raw vehicle source payloads.
+                self._existing_cache[cache_key] = self.base_store.product_master.list_compatibility_items(include_archived=False)
+            else:
+                self._existing_cache[cache_key] = self.base_store.list_items(category_id, include_archived=False)
         return self._existing_cache[cache_key]
 
 

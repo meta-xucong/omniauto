@@ -20,11 +20,15 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from apps.wechat_ai_customer_service.admin_backend.services.product_console_service import ProductConsoleService
 from apps.wechat_ai_customer_service.admin_backend.services import product_console_service as product_console_service_module
+from apps.wechat_ai_customer_service.admin_backend.services.product_master_excel_import import VEHICLE_COLUMNS, _simple_field_label
 from apps.wechat_ai_customer_service.admin_backend.api import product_console as product_console_api
+from apps.wechat_ai_customer_service.admin_backend.auth_context import AuthTenantMiddleware
+from apps.wechat_ai_customer_service.knowledge_paths import active_tenant_id
 from apps.wechat_ai_customer_service.product_master import ProductMasterStore
 from apps.wechat_ai_customer_service.scripts.enrich_chejin_v2_from_legacy_snapshot import plan_legacy_snapshot_enrichment
 from apps.wechat_ai_customer_service.scripts.fill_chejin_v2_vehicle_test_fields import plan_vehicle_test_field_fill
 from packages.dafengche_product_master import apply_admin_vehicle_update, build_admin_vehicle_view
+from packages.dafengche_product_master.contract import VEHICLE_DETAIL_FIELD_GROUP_SPECS
 
 
 def main() -> int:
@@ -36,8 +40,13 @@ def main() -> int:
         check_legacy_snapshot_enrichment_is_evidenced_and_idempotent,
         check_explicit_test_field_fill_is_missing_only_and_reversible,
         check_manual_vehicle_image_upload_uses_v2_picture_payload,
+        check_image_upload_response_is_shallow_and_frontend_preserves_full_detail,
         check_product_console_v2_write_and_compatibility_output,
+        check_local_vehicle_draft_and_create_contract,
         check_v2_admin_view_api_contract,
+        check_local_vehicle_create_api_contract,
+        check_local_vehicle_http_round_trip_persists_before_refresh,
+        check_chejin_manual_vehicle_admin_view_round_trip_keeps_tenant_context,
         check_v2_vehicle_image_api_contract,
         check_frontend_uses_v2_console_contract,
     ]
@@ -128,6 +137,50 @@ def check_v2_admin_view_uses_authoritative_vehicle_fields() -> None:
     assert_equal(next(field for field in card_fields if field["path"] == "baseCarInfo.firstLicensePlateDate")["value"], "2020-06", "card field must retain source value")
     price_group = next(group for group in view["dafengche_field_groups"] if group["id"] == "price_information")
     assert_equal(next(field for field in price_group["fields"] if field["path"] == "carPriceInfo.purchasePrice")["value"], 9.8, "admin detail must retain Dafengche internal price fields")
+    hidden_user_paths = {
+        "carId",
+        "orgId",
+        "shopCode",
+        "owner",
+        "creator",
+        "baseCarInfo.name",
+        "baseCarInfo.name.brandCode",
+        "baseCarInfo.name.seriesCode",
+        "baseCarInfo.name.modelCode",
+        "baseCarInfo.area",
+        "baseCarInfo.area.cityCode",
+        "baseCarInfo.area.provinceCode",
+        "baseCarInfo.registerArea",
+        "baseCarInfo.registerArea.cityCode",
+        "baseCarInfo.registerArea.provinceCode",
+        "baseCarInfo.detectReportPdf",
+        "carOwnerInfo",
+    }
+    expected_paths = {spec.path for _group_id, _label, specs in VEHICLE_DETAIL_FIELD_GROUP_SPECS for spec in specs} - hidden_user_paths
+    canonical_paths = {field["path"] for group in view["dafengche_field_groups"] if group["id"] != "other_fields" for field in group["fields"]}
+    assert_equal(canonical_paths, expected_paths, "admin user-facing matrix must keep readable Dafengche fields while hiding technical code/system rows")
+    assert_true(hidden_user_paths.isdisjoint(canonical_paths), "user-facing admin matrix must not expose code/source identity fields")
+    title_row = next(field for group in view["dafengche_field_groups"] for field in group["fields"] if field["path"] == "baseCarInfo.name.displayValue")
+    assert_equal(title_row["value"], "凯美瑞 2.0G", "legacy scalar baseCarInfo.name must project into canonical displayValue")
+    assert_equal(title_row.get("source_path"), "baseCarInfo.name", "legacy scalar name must be marked as a compatibility projection")
+    assert_true(title_row.get("editable") is True and title_row.get("required") is True, "displayValue is the only required editable source field")
+    brand_row = next(field for group in view["dafengche_field_groups"] for field in group["fields"] if field["path"] == "baseCarInfo.name.brandName")
+    assert_equal(brand_row["value"], "丰田", "legacy baseCarInfo.brandName must project into canonical nested brandName")
+    assert_equal(brand_row.get("source_path"), "baseCarInfo.brandName", "legacy top-level brand must be marked as compatibility projection")
+    object_name_record = v2_vehicle()
+    object_base = object_name_record["source_payloads"]["vehicle_detail"]["payload"]["baseCarInfo"]
+    object_base["name"] = {"brandName": "丰田", "seriesName": "凯美瑞", "modelName": "2.0G"}
+    object_name_view = build_admin_vehicle_view(object_name_record, include_raw=True)
+    object_title_row = next(field for group in object_name_view["dafengche_field_groups"] for field in group["fields"] if field["path"] == "baseCarInfo.name.displayValue")
+    assert_equal(object_title_row["value"], "丰田 凯美瑞 2.0G", "name object without displayValue must project a readable display name")
+    assert_true(not isinstance(object_title_row["value"], dict), "name object without displayValue must not become a JSON value in the editable title control")
+    for path in ("baseCarInfo.vinNumber", "carOwnerInfo.phoneNumber", "carPriceInfo.purchasePrice"):
+        row = next(field for group in view["dafengche_field_groups"] for field in group["fields"] if field["path"] == path)
+        assert_true(row.get("restricted") is True, f"restricted field must stay restricted for customer evidence: {path}")
+        assert_true(row.get("editable") is True, f"manual admin must still be able to edit restricted local source field: {path}")
+    other_group = next(group for group in view["dafengche_field_groups"] if group["id"] == "other_fields")
+    assert_true(any(field["path"] == "carModelParam.gearbox" for field in other_group["fields"]), "unknown raw payload fields must remain retained in backend projection")
+    assert_true(all(field.get("editable") is not True for field in other_group["fields"]), "unknown raw fields must be read-only and excluded from patch collection")
     assert_true(view["raw_source_payloads"]["vehicle_detail"]["payload"]["baseCarInfo"]["vinNumber"], "admin raw audit must retain payload")
 
 
@@ -135,14 +188,18 @@ def check_manual_update_preserves_v2_and_records_provenance() -> None:
     updated = apply_admin_vehicle_update(
         v2_vehicle(),
         {
-            "vehicle_detail_patch": {"baseCarInfo": {"name": "凯美瑞 2.5G"}, "carPriceInfo": {"salePrice": 14.28}},
+            "vehicle_detail_patch": {
+                "baseCarInfo": {"name": {"displayValue": "凯美瑞 2.5G", "brandName": "丰田", "seriesName": "凯美瑞", "modelName": "2.5G"}},
+                "carPriceInfo": {"salePrice": 14.28},
+            },
             "annotations": {"shipping_policy": "到店看车请预约"},
             "manual_annotations": {"sku": "CAMRY-001-R"},
         },
         observed_at="2026-07-13T02:00:00+00:00",
     )
     payload = updated["source_payloads"]["vehicle_detail"]["payload"]
-    assert_equal(payload["baseCarInfo"]["name"], "凯美瑞 2.5G", "manual name must update canonical payload")
+    assert_equal(payload["baseCarInfo"]["name"]["displayValue"], "凯美瑞 2.5G", "manual name must update canonical nested payload")
+    assert_equal(payload["baseCarInfo"]["name"]["brandName"], "丰田", "manual brand must stay under baseCarInfo.name")
     assert_equal(payload["carPriceInfo"]["salePrice"], 14.28, "manual price must update canonical payload")
     assert_equal(payload["baseCarInfo"]["vinNumber"], "DO-NOT-EXPOSE-TO-BRAIN", "unknown/restricted fields must survive merge")
     assert_true("data" not in updated, "V2 edit must not create retired generic data")
@@ -343,6 +400,56 @@ def check_manual_vehicle_image_upload_uses_v2_picture_payload() -> None:
             raise AssertionError("synchronized vehicle image upload must be rejected")
 
 
+def check_image_upload_response_is_shallow_and_frontend_preserves_full_detail() -> None:
+    with tempfile.TemporaryDirectory() as directory:
+        service = ProductConsoleService()
+        service.store.product_master = ProductMasterStore(tenant_id="product_console_upload_shallow_check", root=Path(directory) / "product_master")  # type: ignore[assignment]
+        service.compiler.compile_to_disk = lambda: None  # type: ignore[assignment]
+        record = v2_vehicle()
+        service.store.product_master.save_item(record)
+        detail = service.detail(record["id"])["item"]
+        assert_true(
+            len(detail.get("admin_view", {}).get("dafengche_field_groups") or []) > 0,
+            "full product detail must include editable Dafengche field groups before image upload",
+        )
+        png = base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M/wHwAFAAH/e+m+7wAAAABJRU5ErkJggg==")
+        original_enqueue = product_console_service_module.enqueue_vehicle_image_index
+        product_console_service_module.enqueue_vehicle_image_index = lambda product_id, *, tenant_id, cause: {"accepted": True, "state": "queued", "reason": "fixture"}  # type: ignore[assignment]
+        try:
+            result = service.upload_vehicle_image(record["id"], filename="upload.png", content=png, content_type="image/png")
+        finally:
+            product_console_service_module.enqueue_vehicle_image_index = original_enqueue  # type: ignore[assignment]
+        response_groups = result.get("item", {}).get("admin_view", {}).get("dafengche_field_groups") or []
+        assert_equal(response_groups, [], "image upload response is intentionally a shallow catalog-style item")
+
+    app_js = (APP_ROOT / "admin_backend" / "static" / "app.js").read_text(encoding="utf-8")
+    upload_source = app_js.split("async function uploadProductV2VehicleImages", 1)[1].split("async function refreshSelectedProductDetailSnapshot", 1)[0]
+    reorder_source = app_js.split("async function reorderProductV2VehicleImage", 1)[1].split("function vehiclePicturePayloadForEdit", 1)[0]
+    delete_source = app_js.split("async function deleteProductV2VehicleImage", 1)[1].split("function compactObject", 1)[0]
+    assert_true(
+        "state.selectedProduct = payload.item" not in upload_source
+        and "state.selectedProduct = payload.item" not in reorder_source
+        and "state.selectedProduct = payload.item" not in delete_source,
+        "image operations must not replace a full editing detail with the shallow upload response item",
+    )
+    assert_true(
+        "refreshSelectedProductDetailSnapshot(productId, productTenantId)" in upload_source
+        and "refreshSelectedProductDetailSnapshot(productId, productTenantId)" in reorder_source
+        and "refreshSelectedProductDetailSnapshot(productId, productTenantId)" in delete_source,
+        "image operations must refresh the full detail snapshot instead of re-rendering from a shallow response",
+    )
+    assert_true(
+        "headers: tenantScopedHeaders(productTenantId)" in upload_source
+        and "headers: tenantScopedHeaders(productTenantId)" in reorder_source
+        and "headers: tenantScopedHeaders(productTenantId)" in delete_source,
+        "image operations must preserve the current product tenant context",
+    )
+    assert_true(
+        "if (pendingImageUpload) await pendingImageUpload;" in app_js,
+        "saving while images are uploading must wait for the upload task before collecting the final save request",
+    )
+
+
 def check_product_console_v2_write_and_compatibility_output() -> None:
     record = v2_vehicle()
     saved: list[dict] = []
@@ -365,10 +472,10 @@ def check_product_console_v2_write_and_compatibility_output() -> None:
     detail = service.detail(record["id"])
     assert_true("raw_source_payloads" in detail["item"]["admin_view"], "detail must retain raw payloads for authenticated audit")
     assert_true("OWNER-PHONE-DO-NOT-LIST" in str(detail["item"]["admin_view"]["raw_source_payloads"]), "detail raw audit view must retain owner info")
-    result = service.update_admin_view(record["id"], {"vehicle_detail_patch": {"baseCarInfo": {"name": "凯美瑞 2.5G"}}})
+    result = service.update_admin_view(record["id"], {"vehicle_detail_patch": {"baseCarInfo": {"name": {"displayValue": "凯美瑞 2.5G"}}}})
     assert_equal(result["operation"], "update_admin_view", "must use V2 operation")
     assert_true(saved and "data" not in saved[-1], "V2 console save must not persist generic data")
-    assert_equal(saved[-1]["source_payloads"]["vehicle_detail"]["payload"]["baseCarInfo"]["name"], "凯美瑞 2.5G", "V2 console save must update canonical field")
+    assert_equal(saved[-1]["source_payloads"]["vehicle_detail"]["payload"]["baseCarInfo"]["name"]["displayValue"], "凯美瑞 2.5G", "V2 console save must update canonical nested field")
 
 
 def check_v2_admin_view_api_contract() -> None:
@@ -391,6 +498,160 @@ def check_v2_admin_view_api_contract() -> None:
         product_console_api.ProductConsoleService = original_service
     assert_equal(response.status_code, 200, "V2 API route must be available")
     assert_equal(response.json().get("operation"), "update_admin_view", "V2 API must return service result unchanged")
+
+
+def check_local_vehicle_create_api_contract() -> None:
+    class FakeProductConsoleService:
+        def local_vehicle_draft(self) -> dict:
+            return {"ok": True, "mode": "local_manual_vehicle", "item": {"id": "manual_vehicle_draft"}}
+
+        def create_local_vehicle(self, payload: dict) -> dict:
+            assert_equal(payload["vehicle_detail_patch"]["baseCarInfo"]["name"]["displayValue"], "API 新车", "create API must retain vehicle patch")
+            return {"ok": True, "operation": "create_local_vehicle", "item": {"id": "manual_vehicle_api_001"}}
+
+    original_service = product_console_api.ProductConsoleService
+    product_console_api.ProductConsoleService = FakeProductConsoleService
+    try:
+        app = FastAPI()
+        app.include_router(product_console_api.router)
+        client = TestClient(app)
+        draft = client.get("/api/product-console/local-vehicle-draft")
+        created = client.post(
+            "/api/product-console/products",
+            json={"vehicle_detail_patch": {"baseCarInfo": {"name": {"displayValue": "API 新车"}}}},
+        )
+    finally:
+        product_console_api.ProductConsoleService = original_service
+    assert_equal(draft.status_code, 200, "local vehicle draft API route must be available")
+    assert_equal(draft.json().get("mode"), "local_manual_vehicle", "draft API must return the manual mode")
+    assert_equal(created.status_code, 200, "local vehicle create API route must be available")
+    assert_equal(created.json().get("operation"), "create_local_vehicle", "create API must return service result")
+
+
+def check_local_vehicle_http_round_trip_persists_before_refresh() -> None:
+    """Exercise the real draft/create/detail/catalog route chain in isolation."""
+
+    class FakeAuthService:
+        def resolve_context(self, *, authorization: str = "", tenant_id: str | None = None, dev_role: str = "", dev_user_id: str = ""):
+            from apps.wechat_ai_customer_service.auth import AuthService
+
+            return AuthService().implicit_admin_context(tenant_id=tenant_id)
+
+    with tempfile.TemporaryDirectory() as directory:
+        service = ProductConsoleService()
+        service.store.product_master = ProductMasterStore(
+            tenant_id="product_console_http_round_trip",
+            root=Path(directory) / "product_master",
+        )  # type: ignore[assignment]
+        service.compiler.compile_to_disk = lambda: None  # type: ignore[assignment]
+
+        original_service = product_console_api.service
+        product_console_api.service = lambda: service  # type: ignore[assignment]
+        try:
+            app = FastAPI()
+            app.include_router(product_console_api.router)
+            app.add_middleware(AuthTenantMiddleware, auth_service=FakeAuthService())
+            client = TestClient(app)
+
+            draft = client.get("/api/product-console/local-vehicle-draft")
+            assert_equal(draft.status_code, 200, "draft route must be readable before login")
+            created = client.post(
+                "/api/product-console/products",
+                headers={"X-Tenant-ID": "product_console_http_round_trip"},
+                json={
+                    "vehicle_detail_patch": {
+                        "baseCarInfo": {
+                            "name": {"displayValue": "HTTP 闭环测试车", "brandName": "测试品牌"},
+                            "mileage": 1.2,
+                        },
+                        "carPriceInfo": {"salePrice": 8.8},
+                    },
+                    "annotations": {"specs": "保存后应可立即重新读取"},
+                },
+            )
+            assert_equal(created.status_code, 200, "real create route must persist the vehicle")
+            created_item = created.json().get("item") or {}
+            product_id = str(created_item.get("id") or "")
+            assert_true(product_id.startswith("manual_vehicle_"), "create route must return generated local vehicle id")
+
+            detail = client.get(f"/api/product-console/products/{product_id}", headers={"X-Tenant-ID": "product_console_http_round_trip"})
+            assert_equal(detail.status_code, 200, "created vehicle detail must be readable immediately")
+            detail_item = detail.json().get("item") or {}
+            detail_name = ((detail_item.get("admin_view") or {}).get("summary") or {}).get("name")
+            assert_equal(detail_name, "HTTP 闭环测试车", "detail route must read the just-persisted vehicle")
+
+            catalog = client.get("/api/product-console/catalog?include_archived=true", headers={"X-Tenant-ID": "product_console_http_round_trip"})
+            assert_equal(catalog.status_code, 200, "catalog refresh must remain available after create")
+            assert_true(any(str(item.get("id") or "") == product_id for item in (catalog.json().get("items") or [])), "catalog must include the created vehicle")
+        finally:
+            product_console_api.service = original_service  # type: ignore[assignment]
+
+
+def check_chejin_manual_vehicle_admin_view_round_trip_keeps_tenant_context() -> None:
+    class FakeAuthService:
+        def resolve_context(self, *, authorization: str = "", tenant_id: str | None = None, dev_role: str = "", dev_user_id: str = ""):
+            from apps.wechat_ai_customer_service.auth import AuthService
+
+            return AuthService().implicit_admin_context(tenant_id=tenant_id)
+
+    with tempfile.TemporaryDirectory() as directory:
+        root = Path(directory)
+        product_id = "chejin_audi_a4l_2018_40tfsi"
+        record = v2_vehicle()
+        record["id"] = product_id
+        record["source_payloads"]["vehicle_detail"]["payload"]["baseCarInfo"]["name"] = {
+            "displayValue": "奥迪 A4L 2018 40TFSI",
+            "brandName": "奥迪",
+            "seriesName": "A4L",
+            "modelName": "40TFSI",
+        }
+        record["source_payloads"]["vehicle_detail"]["payload"]["baseCarInfo"]["area"] = {"cityName": ""}
+        record["source_payloads"]["vehicle_detail"]["payload"]["baseCarInfo"]["carDetailForDisplay"] = ""
+        ProductMasterStore(tenant_id="chejin", root=root / "chejin" / "product_master").save_item(record)
+
+        def scoped_service() -> ProductConsoleService:
+            service = ProductConsoleService()
+            tenant_id = active_tenant_id()
+            service.store.product_master = ProductMasterStore(tenant_id=tenant_id, root=root / tenant_id / "product_master")  # type: ignore[assignment]
+            service.compiler.compile_to_disk = lambda: None  # type: ignore[assignment]
+            return service
+
+        original_service = product_console_api.service
+        product_console_api.service = scoped_service  # type: ignore[assignment]
+        try:
+            app = FastAPI()
+            app.include_router(product_console_api.router)
+            app.add_middleware(AuthTenantMiddleware, auth_service=FakeAuthService())
+            client = TestClient(app)
+
+            saved = client.put(
+                f"/api/product-console/products/{product_id}/admin-view",
+                headers={"X-Tenant-ID": "chejin"},
+                json={
+                    "vehicle_detail_patch": {
+                        "baseCarInfo": {
+                            "name": {"displayValue": "奥迪 A4L 已更新"},
+                            "area": {"cityName": "南京"},
+                            "carDetailForDisplay": "新增填写的车况描述",
+                        }
+                    }
+                },
+            )
+            assert_equal(saved.status_code, 200, "chejin tenant admin-view save must succeed")
+            assert_equal(saved.headers.get("x-tenant-id"), "chejin", "middleware must keep chejin tenant on save response")
+
+            detail = client.get(f"/api/product-console/products/{product_id}", headers={"X-Tenant-ID": "chejin"})
+            assert_equal(detail.status_code, 200, "chejin tenant detail refresh must find the saved product")
+            title = (((detail.json().get("item") or {}).get("admin_view") or {}).get("vehicle") or {}).get("title")
+            assert_equal(title, "奥迪 A4L 已更新", "detail refresh must read the saved chejin vehicle")
+            raw = (((detail.json().get("item") or {}).get("admin_view") or {}).get("raw_source_payloads") or {}).get("vehicle_detail", {}).get("payload", {})
+            assert_equal(raw.get("baseCarInfo", {}).get("area", {}).get("cityName"), "南京", "empty city field must save and read back in the same tenant")
+            assert_equal(raw.get("baseCarInfo", {}).get("carDetailForDisplay"), "新增填写的车况描述", "empty editable text field must save and read back in the same tenant")
+
+            wrong_tenant = client.get(f"/api/product-console/products/{product_id}", headers={"X-Tenant-ID": "default"})
+            assert_equal(wrong_tenant.status_code, 404, "default tenant must not globally find chejin vehicle")
+        finally:
+            product_console_api.service = original_service  # type: ignore[assignment]
 
 
 def check_v2_vehicle_image_api_contract() -> None:
@@ -425,18 +686,218 @@ def check_v2_vehicle_image_api_contract() -> None:
     assert_equal(deleted.json().get("operation"), "delete_vehicle_image", "V2 image delete route must return service result")
 
 
+def check_local_vehicle_draft_and_create_contract() -> None:
+    with tempfile.TemporaryDirectory() as directory:
+        service = ProductConsoleService()
+        service.store.product_master = ProductMasterStore(
+            tenant_id="product_console_create_check",
+            root=Path(directory) / "product_master",
+        )  # type: ignore[assignment]
+        draft = service.local_vehicle_draft()
+        draft_item = draft.get("item") or {}
+        assert_equal(draft.get("mode"), "local_manual_vehicle", "new vehicle draft mode")
+        assert_equal((draft_item.get("admin_view") or {}).get("record_kind"), "vehicle_v2", "new vehicle draft must use V2 admin view")
+        assert_true((draft_item.get("admin_view") or {}).get("capabilities", {}).get("can_edit_vehicle_source") is True, "new vehicle draft must expose editable vehicle fields")
+
+        created = service.create_local_vehicle(
+            {
+                "vehicle_detail_patch": {
+                    "baseCarInfo": {
+                        "name": {"displayValue": "测试新车", "brandName": "测试品牌"},
+                        "mileage": 3.2,
+                    },
+                    "carPriceInfo": {"salePrice": 12.8},
+                },
+                "annotations": {"specs": "测试资料"},
+                "manual_annotations": {"inventory": 1},
+            }
+        )
+        item = created.get("item") or {}
+        created_id = str(item.get("id") or "")
+        persisted = service.get_product_item(created_id, include_archived=True) or {}
+        detail = (((persisted.get("source_payloads") or {}).get("vehicle_detail") or {}).get("payload") or {})
+        assert_true(str(item.get("id") or "").startswith("manual_vehicle_"), "new local vehicle id must be generated by the server")
+        assert_equal((item.get("source") or {}).get("type"), "manual", "new vehicle source")
+        assert_equal(((item.get("source") or {}).get("binding") or {}).get("state"), "unbound", "new vehicle binding")
+        assert_true("source_payloads" not in item, "public create response must not expose raw source payloads")
+        assert_equal(((detail.get("baseCarInfo") or {}).get("name") or {}).get("displayValue"), "测试新车", "new vehicle nested display name")
+        assert_equal((item.get("data") or {}).get("name"), "测试新车", "compatibility projection name")
+        assert_equal((item.get("admin_view") or {}).get("summary", {}).get("name"), "测试新车", "created response must expose the new vehicle summary")
+        try:
+            service.create_local_vehicle({"vehicle_detail_patch": {"baseCarInfo": {"name": {}}}})
+        except ValueError as exc:
+            assert_true("车辆展示名称不能为空" in str(exc), "new vehicle must require a display name")
+        else:
+            raise AssertionError("new vehicle without a display name must fail")
+
+
 def check_frontend_uses_v2_console_contract() -> None:
     app_js = (APP_ROOT / "admin_backend" / "static" / "app.js").read_text(encoding="utf-8")
+    styles_css = (APP_ROOT / "admin_backend" / "static" / "styles.css").read_text(encoding="utf-8")
     index_html = (APP_ROOT / "admin_backend" / "static" / "index.html").read_text(encoding="utf-8")
+    assert_true("product-new-local-vehicle" in index_html and "新增本地车辆" in index_html, "product catalog must expose a manual new vehicle entry")
+    assert_true("/api/product-console/local-vehicle-draft" in app_js and "state.productDetailMode = \"new\"" in app_js, "new vehicle entry must load a V2 draft form")
+    assert_true('isCreating ? "/api/product-console/products"' in app_js and 'method: isCreating ? "POST" : "PUT"' in app_js, "new vehicle save must use the V2 create route")
+    assert_true("refreshCreatedProductAfterSave(createdId, productTenantId)" in app_js, "new vehicle save must not wait on detail/catalog refresh before ending save")
+    assert_true(
+        'fetch(path, {headers: apiHeaders()})' in app_js and 'window.location.href = "/api/product-console/local-vehicle-excel-template"' not in app_js,
+        "Excel template download must use the authenticated fetch path instead of unauthenticated navigation",
+    )
+    assert_true(
+        'local-vehicle-excel-import/preview' in app_js and 'headers: apiHeaders(), body: form' in app_js,
+        "Excel preview upload must carry the authenticated request headers",
+    )
     assert_true("/admin-view" in app_js and "saveProductV2DetailForm" in app_js, "frontend must save V2 through product-console endpoint")
-    assert_true("productAdminView" in app_js and "大风车同步" in app_js, "frontend must render V2 source metadata")
-    assert_true("dafengcheFieldGroupsHtml" in app_js and "baseCarInfo.name" in app_js, "frontend must render exact Dafengche field paths")
+    assert_true("productAdminView" in app_js and "历史外部镜像" in app_js, "frontend must render V2 source metadata without expanding sync semantics")
+    assert_true("dafengcheFieldGroupsHtml" in app_js and "productVisibleVehicleFieldGroups" in app_js, "frontend must render vehicle field groups through the business-facing facade")
+    assert_true(
+        "productSystemVehicleFieldGroups" in app_js
+        and "车源识别（辅助确认）" in app_js
+        and "其他保留信息（系统）" not in app_js
+        and "其他大风车字段" not in app_js,
+        "uncategorized raw fallback fields must not be shown in the product console UI",
+    )
+    assert_true(
+        '<small>${escapeHtml(field?.path || "")}</small>' not in app_js
+        and "公开售价 · carPriceInfo.salePrice" not in app_js
+        and "车辆图片 · vehicle_pictures.payload" not in app_js
+        and "完整原始载荷 JSON" not in app_js,
+        "ordinary vehicle UI must not expose internal paths or raw payload labels",
+    )
     assert_true("dafengcheFieldValueHtml" in app_js and "vehicle-card-facts" in app_js, "missing Dafengche values must remain visibly blank in fixed card fields")
-    assert_true("vehicle-advanced-panel" in app_js and ">高级<" in app_js, "operational material must stay behind a collapsed Advanced section")
-    assert_true("vehicle-v2-editor-groups" in app_js and "source_payloads.vehicle_pictures.payload" in app_js, "V2 editor must group original Dafengche paths and expose picture payload editing")
+    assert_true("vehicle-advanced-panel" in app_js and ">高级选项<" in app_js, "operational material must stay behind a collapsed Advanced section")
+    assert_true("vehicle-v2-editor-groups" in app_js and "vehicleV2PictureEditorHtml" in app_js, "V2 editor must group editable vehicle fields and expose picture editing")
+    detail_form = app_js.split("function renderProductV2Detail", 1)[1].split("function dafengcheFieldValueHtml", 1)[0]
+    detail_main, detail_advanced = detail_form.split('<details class="vehicle-advanced-panel">', 1)
+    assert_true('open class="vehicle-advanced-panel"' not in detail_form, "V2 detail advanced panel must remain collapsed by default")
+    assert_true("车辆字段内容" in detail_main and "车辆图片" in detail_main, "V2 detail main area must keep standard vehicle fields and pictures visible")
+    assert_true("车源识别" not in detail_main, "source identity must not be a core vehicle section")
+    assert_true("车源识别（辅助确认）" in app_js and "dafengcheFieldGroupsHtml(systemFieldGroups)" in detail_advanced, "source identity must move behind the advanced auxiliary confirmation section")
+    for label in ("客户常用叫法", "核心参数/车况补充", "专属知识与话术"):
+        assert_true(label not in detail_main, f"local extension detail content must not appear in the ordinary detail area: {label}")
+        assert_true(label in detail_advanced, f"local extension detail content must stay behind advanced panel: {label}")
+    assert_true(
+        '<details class="vehicle-v2-advanced-editor">' in app_js
+        and 'open class="vehicle-v2-advanced-editor"' not in app_js
+        and "高级选项（一般不用）" in app_js,
+        "V2 editor advanced options must default collapsed with a business-language summary",
+    )
+    edit_form = app_js.split("function productV2EditFormHtml", 1)[1].split("function vehicleV2EditorGroupHtml", 1)[0]
+    edit_main, edit_advanced = edit_form.split('<details class="vehicle-v2-advanced-editor">', 1)
+    assert_true(
+        "vehicleV2RawFieldGroupsEditorHtml(visibleFieldGroups, canEditVehicle)" in edit_main
+        and "Array.isArray(view.dafengche_field_groups)" in edit_form
+        and "productVisibleVehicleFieldGroups(fieldGroups)" in edit_form
+        and "productSystemVehicleFieldGroups(fieldGroups)" in edit_form,
+        "V2 editor must use the same raw field matrix while splitting core business fields from auxiliary source identity",
+    )
+    assert_true("车源识别" not in edit_main and "vehicleV2RawFieldGroupsEditorHtml(systemFieldGroups, false)" in edit_advanced, "source identity must be auxiliary and read-only in edit mode too")
+    assert_true("vehicleV2PictureEditorHtml" in edit_main and 'id="product-v2-image-files" type="file"' in app_js, "image upload must remain a visible core editor action")
+    for label in (
+        "客户可见补充",
+        "客户回复话术",
+        "本地管理字段",
+        "内部备注",
+        "精准触发知识（强触发）",
+        "商品专属问答",
+        "商品专属规则",
+        "商品专属解释",
+    ):
+        assert_true(label not in edit_main, f"local extension group must not appear in the main editor area: {label}")
+        assert_true(label in edit_advanced, f"local extension group must stay available inside collapsed advanced editor: {label}")
+    assert_true(
+        '<small>${escapeHtml(path)}</small>' not in app_js
+        and 'source_payloads.vehicle_pictures.payload</small>' not in app_js,
+        "V2 edit controls must not show internal field paths or source payload variable names",
+    )
+    assert_true(
+        "vehicleV2RawFieldControlHtml" in app_js
+        and "data-dafengche-path" in app_js
+        and "data-dafengche-editable" in app_js
+        and "vehicleRawGroupLabel" in app_js,
+        "V2 editor must render original source fields from row metadata instead of hard-coded input IDs",
+    )
+    raw_control_source = app_js.split("function vehicleV2RawFieldControlHtml", 1)[1].split("function productV2FieldInput", 1)[0]
+    assert_true("wide-field" not in raw_control_source, "raw Dafengche controls must not force every long/object value to full-width rows")
+    assert_true("readonly aria-readonly" in raw_control_source, "raw read-only fields should remain scrollable/copyable without entering patch")
+    assert_true(
+        ".vehicle-v2-raw-field textarea" in styles_css
+        and "max-height: 96px" in styles_css
+        and ".vehicle-v2-raw-field.is-object-value textarea" in styles_css
+        and "max-height: 124px" in styles_css
+        and "overflow: auto" in styles_css,
+        "raw field editor must cap long text/object height with internal scrolling",
+    )
+    assert_true(
+        "grid-template-columns: repeat(4, minmax(0, 1fr))" in styles_css
+        and "grid-template-columns: repeat(2, minmax(0, 1fr))" in styles_css
+        and "@media (max-width: 768px)" in styles_css
+        and ".vehicle-v2-editor-grid {\n    grid-template-columns: 1fr;" in styles_css
+        and "overflow-wrap: anywhere" in styles_css
+        and ".vehicle-v2-raw-field.is-readonly" in styles_css,
+        "raw field editor must use compact desktop/tablet/mobile grouping, wrapping labels, and subdued read-only styling",
+    )
+    assert_true(
+        'rawVehicleDetailPatchValue("baseCarInfo.name.displayValue")' in app_js
+        and 'throw new Error("车辆展示名称不能为空。")' in app_js,
+        "V2 editor must block empty canonical display name before calling the API",
+    )
+    v2_save_source = app_js.split("async function saveProductV2DetailForm", 1)[1].split("function refreshProductAfterSave", 1)[0]
+    assert_true(
+        "productDetailTenantId" in app_js
+        and 'if (state.activeTenantId && !headers["X-Tenant-ID"])' in app_js
+        and "tenantScopedHeaders(productTenantId)" in app_js
+        and "refreshSelectedProductDetailSnapshot(original.id, productTenantId)" in v2_save_source
+        and "refreshProductAfterSave(original.id, productTenantId, {refreshDetail: false})" in v2_save_source,
+        "V2 save must preserve tenant context and load the full detail before rendering view mode",
+    )
+    assert_true(
+        "function runProductDetailSave" in app_js
+        and 'setProductSaveStatus("保存中...", "loading")' in app_js
+        and 'setProductSaveStatus("已保存", "ok")' in app_js
+        and 'setProductSaveStatus(`保存失败：${error?.message || "未知错误"}`, "error")' in app_js
+        and 'setProductSaveStatus("已保存，刷新失败", "warning")' in app_js,
+        "product editor save must show loading, success, refresh-warning, and failure states",
+    )
+    assert_true(
+        "updateProductDetailSaveControls()" in app_js
+        and "saveButton.disabled = loading" in app_js
+        and "root.querySelector(\".product-detail-cancel\")?.toggleAttribute(\"disabled\", loading)" in app_js
+        and "保存中..." in app_js
+        and "product-detail-save" in app_js,
+        "product editor save must disable duplicate actions and restore controls without re-rendering typed input",
+    )
+    assert_true(
+        "state.selectedProduct = payload.item" not in v2_save_source
+        and "state.selectedProduct = payload.item" in app_js
+        and "state.productDetailRequestId += 1" in app_js
+        and "preserveSelected: true" in app_js,
+        "V2 save must not render the shallow save response item, while full detail refreshes remain guarded",
+    )
+    assert_true(
+        "filter((field) => vehicleValuePresent(field?.value))" in app_js
+        and "dafengcheFieldGroupsHtml(visibleFieldGroups)" in app_js
+        and "空白字段不显示" in app_js,
+        "V2 view mode must show filled readable Dafengche fields and hide blank rows",
+    )
+    assert_true(
+        "车辆编号由系统记录身份，编辑页不单独修改；Excel 导入时车辆编号为必填" in app_js,
+        "V2 editor must explain vehicle id is a stable system identity while Excel still requires it",
+    )
+    assert_true(
+        "setNestedPatchValue(patch, path, value)" in app_js
+        and "document.querySelectorAll(\"[data-dafengche-path][data-dafengche-editable='true']\")" in app_js,
+        "V2 save patch must be generated from editable matrix rows only",
+    )
     assert_true("uploadProductV2VehicleImages" in app_js and "FormData" in app_js, "V2 editor must submit vehicle image uploads as multipart data")
+    assert_true('id="product-v2-image-files" type="file"' in app_js and " multiple " in app_js, "V2 image input must support selecting multiple files")
+    assert_true("Array.from(input?.files || [])" in app_js and "for (const file of files)" in app_js, "V2 image upload must process selected files one by one")
+    assert_true("appendVehicleImageUploadPreview" in app_js and "URL.createObjectURL(file)" in app_js, "V2 image upload must preview every selected image before upload completes")
+    assert_true("vehicle-image-main-badge" in app_js and "设为主图" in app_js, "V2 image editor must make the first image the visible main image")
+    assert_true("data-vehicle-image-order-id" in app_js and "reorderProductV2VehicleImage" in app_js, "V2 image editor must expose order editing controls")
+    assert_true("vehicle_pictures_patch: pictures" in app_js and "/admin-view" in app_js, "V2 image ordering must reuse the existing admin-view save route")
     assert_true("data-vehicle-image-remove-id" in app_js and 'method: "DELETE"' in app_js, "manual V2 image editor must expose an explicit delete action")
-    assert_true("选中后立即上传并显示" in app_js and "vehicle-image-uploading-label" in app_js, "manual V2 image editor must render immediate upload feedback")
+    assert_true("逐张预览并上传" in app_js and "vehicle-image-uploading-label" in app_js, "manual V2 image editor must render immediate upload feedback")
     assert_true("productDetailRequestId" in app_js and "state.selectedProduct?.id !== productId" in app_js, "stale vehicle-image responses must not reopen an old selected car")
     assert_true("productDetailModalOpenRequested" in app_js and "state.productDetailRequestId += 1" in app_js, "closing the vehicle detail must invalidate pending automatic reopen actions")
     assert_true(

@@ -272,6 +272,58 @@ class ProductMasterStore:
         self.write_manifest()
         return {"ok": True, "item": normalized}
 
+    def _save_items_batch_atomic(self, items: list[dict[str, Any]]) -> dict[str, Any]:
+        """Internal batch write used by deterministic importers.
+
+        The existing public ``save_item`` contract remains unchanged.  This
+        batch seam validates all records first, writes PostgreSQL records in a
+        single transaction when the DB backend is active, and treats file
+        mirrors as post-commit replicas in DB mode.
+        """
+
+        self.ensure_v2_contract()
+        schema = self.load_schema()
+        normalized_items: list[dict[str, Any]] = []
+        problems: list[str] = []
+        for index, item in enumerate(items, start=1):
+            normalized = normalize_product_item(item)
+            validation = validate_product_item(normalized, schema)
+            if not validation["ok"]:
+                item_id = str(normalized.get("id") or f"#{index}")
+                for problem in validation.get("problems") or []:
+                    problems.append(f"{item_id}: {problem}")
+            normalized_items.append(normalized)
+        seen_ids: set[str] = set()
+        for normalized in normalized_items:
+            item_id = str(normalized.get("id") or "")
+            if item_id in seen_ids:
+                problems.append(f"{item_id}: duplicate item id in batch")
+            seen_ids.add(item_id)
+        if problems:
+            return {"ok": False, "problems": problems}
+
+        db = postgres_store(self.tenant_id)
+        config = load_storage_config()
+        if db:
+            db.upsert_knowledge_items_atomic(
+                self.tenant_id,
+                PRODUCT_MASTER_DB_LAYER,
+                PRODUCT_MASTER_CATEGORY_ID,
+                normalized_items,
+            )
+            mirror = {"ok": True, "mode": "not_requested"}
+            if config.mirror_files:
+                mirror = self._mirror_batch_files_after_db_commit(normalized_items)
+            return {
+                "ok": True,
+                "items": normalized_items,
+                "count": len(normalized_items),
+                "storage": "postgres",
+                "mirror_files": mirror,
+            }
+
+        return self._save_file_batch_atomic(normalized_items)
+
     def archive_item(self, product_id: str) -> dict[str, Any]:
         item = self.get_item(product_id, include_archived=True)
         if not item:
@@ -324,6 +376,79 @@ class ProductMasterStore:
         if root not in path.parents:
             raise ValueError(f"product path escapes product master root: {product_id}")
         return path
+
+    def _save_file_batch_atomic(self, normalized_items: list[dict[str, Any]]) -> dict[str, Any]:
+        snapshots = self._file_batch_snapshots(normalized_items)
+        try:
+            self.ensure_structure()
+            for item in normalized_items:
+                path = self.item_path(str(item.get("id") or ""))
+                path.parent.mkdir(parents=True, exist_ok=True)
+                write_json(path, item)
+            self.write_manifest()
+        except Exception:
+            self._restore_file_batch_snapshots(snapshots)
+            raise
+        return {
+            "ok": True,
+            "items": normalized_items,
+            "count": len(normalized_items),
+            "storage": "files",
+            "mirror_files": {"ok": True, "mode": "primary"},
+        }
+
+    def _mirror_batch_files_after_db_commit(self, normalized_items: list[dict[str, Any]]) -> dict[str, Any]:
+        failed_ids: list[str] = []
+        messages: list[str] = []
+        try:
+            self.ensure_structure()
+            for item in normalized_items:
+                item_id = str(item.get("id") or "")
+                try:
+                    path = self.item_path(item_id)
+                    path.parent.mkdir(parents=True, exist_ok=True)
+                    write_json(path, item)
+                except Exception as exc:  # noqa: BLE001 - continue collecting all failed mirror ids.
+                    failed_ids.append(item_id)
+                    messages.append(f"{item_id}: {exc}")
+            if failed_ids:
+                return {
+                    "ok": False,
+                    "mode": "post_commit_replica",
+                    "reason": "mirror_files_failed",
+                    "failed_ids": failed_ids,
+                    "message": "; ".join(messages),
+                }
+            self.write_manifest()
+        except Exception as exc:  # noqa: BLE001 - DB transaction is already committed; expose mirror status.
+            return {
+                "ok": False,
+                "mode": "post_commit_replica",
+                "reason": "mirror_files_failed",
+                "failed_ids": [str(item.get("id") or "") for item in normalized_items],
+                "message": str(exc),
+            }
+        return {"ok": True, "mode": "post_commit_replica"}
+
+    def _file_batch_snapshots(self, normalized_items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        snapshots: list[dict[str, Any]] = []
+        for item in normalized_items:
+            path = self.item_path(str(item.get("id") or ""))
+            snapshots.append({"path": path, "file_bytes": path.read_bytes() if path.exists() else None})
+        return snapshots
+
+    def _restore_file_batch_snapshots(self, snapshots: list[dict[str, Any]]) -> None:
+        for snapshot in reversed(snapshots):
+            path = snapshot["path"]
+            file_bytes = snapshot.get("file_bytes")
+            if file_bytes is None:
+                try:
+                    path.unlink(missing_ok=True)
+                except OSError:
+                    pass
+            else:
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(file_bytes)
 
     def write_manifest(self, extra: dict[str, Any] | None = None) -> None:
         self.root.mkdir(parents=True, exist_ok=True)

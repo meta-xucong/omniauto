@@ -10,6 +10,7 @@ import urllib.request
 from datetime import datetime
 from pathlib import Path
 from typing import Any
+from uuid import uuid4
 
 from apps.wechat_ai_customer_service.llm_config import (
     apply_llm_reasoning_effort,
@@ -33,12 +34,14 @@ from packages.dafengche_product_master import (
     apply_admin_vehicle_update,
     build_admin_vehicle_view,
     build_legacy_data_projection,
+    create_manual_vehicle,
     is_v2_vehicle_record,
 )
 
 from .knowledge_base_store import KnowledgeBaseStore
 from .knowledge_compiler import KnowledgeCompiler
 from .knowledge_generator import KnowledgeGenerator, extract_price_tiers, normalize_price_tiers, parse_product, parse_product_scoped
+from .product_master_excel_import import ProductMasterExcelImportService
 from .upload_store import UploadStore
 
 
@@ -144,6 +147,49 @@ class ProductConsoleService:
             raise FileNotFoundError(product_id)
         scoped = self.product_scoped_knowledge(product_id)
         return {"ok": True, "item": self.enrich_product(item, scoped=scoped, include_admin_raw=True), "scoped_knowledge": scoped}
+
+    def local_vehicle_draft(self) -> dict[str, Any]:
+        """Return an unsaved blank V2 vehicle using the real admin field matrix."""
+
+        draft = create_manual_vehicle(
+            record_id="manual_vehicle_draft",
+            vehicle_detail_payload={},
+            pictures_payload=[],
+        )
+        return {"ok": True, "item": self.enrich_product(draft, include_admin_raw=True), "mode": "local_manual_vehicle"}
+
+    def create_local_vehicle(self, payload: dict[str, Any]) -> dict[str, Any]:
+        """Create a local/unbound V2 vehicle from the manual admin form."""
+
+        if not isinstance(payload, dict):
+            raise ValueError("新车辆资料必须是对象。")
+        vehicle_patch = payload.get("vehicle_detail_patch")
+        if vehicle_patch in (None, {}):
+            vehicle_patch = {}
+        if not isinstance(vehicle_patch, dict):
+            raise ValueError("vehicle_detail_patch must be an object")
+        base = vehicle_patch.get("baseCarInfo") if isinstance(vehicle_patch.get("baseCarInfo"), dict) else {}
+        name = base.get("name") if isinstance(base.get("name"), dict) else {}
+        display_name = str(name.get("displayValue") or "").strip()
+        if not display_name:
+            raise ValueError("车辆展示名称不能为空。")
+        annotations = payload.get("annotations") if isinstance(payload.get("annotations"), dict) else {}
+        manual_annotations = payload.get("manual_annotations") if isinstance(payload.get("manual_annotations"), dict) else {}
+        record_id = f"manual_vehicle_{uuid4().hex}"
+        record = create_manual_vehicle(
+            record_id=record_id,
+            vehicle_detail_payload={},
+            pictures_payload=[],
+        )
+        updated = apply_admin_vehicle_update(
+            record,
+            {
+                "vehicle_detail_patch": vehicle_patch,
+                "annotations": annotations,
+                "manual_annotations": manual_annotations,
+            },
+        )
+        return self.save_v2_product_item(updated, operation="create_local_vehicle")
 
     def product_scoped_knowledge(self, product_id: str) -> dict[str, list[dict[str, Any]]]:
         result: dict[str, list[dict[str, Any]]] = {}
@@ -272,7 +318,7 @@ class ProductConsoleService:
             raise ValueError("vehicle image upload is only available for V2 vehicle records")
         source = item.get("source") if isinstance(item.get("source"), dict) else {}
         if str(source.get("type") or "") != "manual":
-            raise ValueError("Dafengche synchronized vehicle pictures are read-only; sync them from Dafengche instead")
+            raise ValueError("external mirror vehicle pictures are read-only; create or edit a local manual vehicle record instead")
         mime_type, suffix = detect_manual_vehicle_image(content, content_type)
         asset_root = self._vehicle_image_root(product_id)
         digest = hashlib.sha256(content).hexdigest()
@@ -350,7 +396,7 @@ class ProductConsoleService:
             raise ValueError("vehicle image deletion is only available for V2 vehicle records")
         source = item.get("source") if isinstance(item.get("source"), dict) else {}
         if str(source.get("type") or "") != "manual":
-            raise ValueError("Dafengche synchronized vehicle pictures are read-only; sync them from Dafengche instead")
+            raise ValueError("external mirror vehicle pictures are read-only; create or edit a local manual vehicle record instead")
         image = str(image_id or "").strip()
         if not re.fullmatch(r"img_[a-f0-9]{24}", image):
             raise FileNotFoundError(image_id)
@@ -460,12 +506,30 @@ class ProductConsoleService:
             raise FileNotFoundError(image_id)
         return asset_path, str(picture.get("mimeType") or "application/octet-stream")
 
+    def local_vehicle_excel_template(self) -> bytes:
+        """Return the deterministic local/manual V2 vehicle Excel template."""
+
+        return self._excel_import_service().template_bytes()
+
+    def preview_local_vehicle_excel_import(self, *, filename: str, content: bytes) -> dict[str, Any]:
+        """Parse a local/manual vehicle Excel file without writing product items."""
+
+        return self._excel_import_service().preview(filename=filename, content=content)
+
+    def confirm_local_vehicle_excel_import(self, *, preview_id: str) -> dict[str, Any]:
+        """Persist a previously validated local/manual vehicle Excel preview."""
+
+        return self._excel_import_service().confirm(preview_id=preview_id)
+
     def _vehicle_image_root(self, product_id: str) -> Path:
         product_master = self._product_master_store()
         root = (product_master.root / "assets" / product_id).resolve()
         if product_master.root.resolve() not in root.parents:
             raise ValueError("vehicle image root escapes product-master root")
         return root
+
+    def _excel_import_service(self) -> ProductMasterExcelImportService:
+        return ProductMasterExcelImportService(self._product_master_store())
 
     def _product_master_store(self) -> ProductMasterStore:
         """Return this console's tenant-scoped V2 store without a fallback leak."""
