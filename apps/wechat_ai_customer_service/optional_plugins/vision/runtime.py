@@ -16,6 +16,7 @@ from .understanding.service import (
 from .clipboard_payload import (
     read_current_clipboard_image,
 )
+from .capture.wechat import DEFAULT_MAX_VISIBLE_IMAGE_CANDIDATES
 from .trigger import image_preview_text
 from .trigger import (
     pending_image_signal_was_processed,
@@ -429,9 +430,21 @@ def maybe_capture_self_image_context(
         releaser = getattr(ephemeral_image, "release", None)
         if callable(releaser):
             releaser()
+    from .result_schema import (
+        image_result_schema,
+        image_understanding_completed,
+    )
+
+    completed = image_understanding_completed(
+        understanding,
+        image_result_schema(
+            config,
+            "customer_image_understanding_v1",
+        ),
+    )
     return {
         "enabled": True,
-        "applied": bool(understanding.get("applied") or understanding.get("vision_summary")),
+        "applied": completed,
         "context_only": True,
         "reason": str(understanding.get("reason") or "self_image_context_ready"),
         "clipboard_transaction": public_transaction,
@@ -665,7 +678,7 @@ def maybe_route_customer_image_turn(
                 session_key=str(getattr(target, "session_key", "") or ""),
                 conversation_type=str(getattr(target, "conversation_type", "") or ""),
                 side_filter="all",
-                max_images=8,
+                max_images=DEFAULT_MAX_VISIBLE_IMAGE_CANDIDATES,
             )
             resolution = resolve_pending_visual_occurrence(
                 [item for item in (observed.get("messages") or []) if isinstance(item, dict)],

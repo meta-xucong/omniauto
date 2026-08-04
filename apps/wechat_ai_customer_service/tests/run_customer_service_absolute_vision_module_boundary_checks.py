@@ -22,7 +22,11 @@ from apps.wechat_ai_customer_service.optional_plugins.vision import (  # noqa: E
     create_vision_service,
 )
 from apps.wechat_ai_customer_service.optional_plugins.vision.capture.wechat import (  # noqa: E402
+    image_bubble_visual_fingerprint,
     session_split_x,
+)
+from apps.wechat_ai_customer_service.optional_plugins.vision.errors import (  # noqa: E402
+    VISION_IMAGE_CLIPBOARD_CLEAR_FAILED,
 )
 from apps.wechat_ai_customer_service.adapters.wechat_pr28_runtime_adapter import (  # noqa: E402
     PR28_BLOBS,
@@ -32,6 +36,13 @@ from apps.wechat_ai_customer_service.adapters.wechat_pr28_runtime_adapter import
 def assert_true(value: Any, message: str) -> None:
     if not value:
         raise AssertionError(message)
+
+
+def assert_equal(actual: Any, expected: Any, message: str) -> None:
+    if actual != expected:
+        raise AssertionError(
+            f"{message}: expected {expected!r}, got {actual!r}"
+        )
 
 
 def _source(relative: str) -> str:
@@ -281,6 +292,82 @@ class _ClipboardPort:
         return Image.new("RGB", (120, 80), (40, 130, 210))
 
 
+class _StrictFramePort:
+    def __init__(self) -> None:
+        self.surface = Image.new("RGB", (980, 860), (247, 247, 247))
+        draw = ImageDraw.Draw(self.surface)
+        draw.rectangle([410, 260, 650, 480], fill=(30, 120, 190))
+        self.bounds = [410, 260, 650, 480]
+        self.fingerprint = image_bubble_visual_fingerprint(
+            self.surface,
+            tuple(self.bounds),
+        )
+
+    def capture_frame(self, context: dict[str, Any]) -> dict[str, Any]:
+        if context.get("phase") == "image_context_menu":
+            return {
+                "ok": True,
+                "image": self.surface.copy(),
+                "image_size": self.surface.size,
+                "screen_origin": [0, 0],
+                "ocr_items": [
+                    {
+                        "text": "复制",
+                        "left": 660,
+                        "top": 430,
+                        "right": 710,
+                        "bottom": 458,
+                        "center_x": 685,
+                        "center_y": 444,
+                        "confidence": 0.98,
+                        "bounds": [660, 430, 710, 458],
+                    }
+                ],
+            }
+        return {
+            "ok": True,
+            "image": self.surface.copy(),
+            "image_size": self.surface.size,
+            "screen_origin": [0, 0],
+            "messages": [
+                {
+                    "type": "image",
+                    "bounds": list(self.bounds),
+                    "anchor": {"x": 530, "y": 370},
+                    "image_physical_anchor": {
+                        "sender_role": "customer",
+                        "visual_side": "customer",
+                        "bubble_visual_fingerprint": self.fingerprint,
+                        "preceding_stable_message": "",
+                        "following_stable_message": "",
+                        "occurrence_index": 0,
+                        "occurrence_count": 1,
+                    },
+                }
+            ],
+        }
+
+
+class _StrictClipboardPort:
+    def __init__(self, frame: _StrictFramePort, *, clear_ok: bool = False) -> None:
+        self.frame = frame
+        self.clear_ok = clear_ok
+        self.sequence_calls = 0
+
+    def sequence_number(self) -> int:
+        self.sequence_calls += 1
+        return 10 if self.sequence_calls == 1 else 11
+
+    def read_current_bitmap(self) -> Image.Image:
+        return self.frame.surface.crop(tuple(self.frame.bounds))
+
+    def clear_current(self, expected_sequence: int) -> dict[str, Any]:
+        assert_equal(expected_sequence, 11, "strict cleanup must bind to the copied generation")
+        if self.clear_ok:
+            return {"ok": True}
+        return {"ok": False, "reason": "clipboard_clear_failed"}
+
+
 class _ProviderPort:
     def __init__(self) -> None:
         self.image: Any = None
@@ -332,6 +419,109 @@ def check_direct_ports_run_complete_ephemeral_transaction() -> None:
     assert_true("image_bytes" not in serialized and "saved_image_path" not in serialized, "public result leaked image material")
 
 
+def check_strict_transaction_fails_closed_when_clipboard_clear_fails() -> None:
+    frame = _StrictFramePort()
+    provider = _ProviderPort()
+    service = create_vision_service(
+        ports=VisionHostPorts(
+            rpa_lease=_LeasePort(),
+            conversation_target=_TargetPort(),
+            window_frame=frame,
+            ui_action=_ActionPort(),
+            clipboard=_StrictClipboardPort(frame),
+            vision_provider=provider,
+        ),
+        config={"strict_image_adapter": True},
+    )
+    result = service.inspect_current_conversation(
+        {
+            "target_name": "Customer A",
+            "session_key": "wx:strict-port",
+            "pending_signal_id": "image-port-strict-1",
+            "sender_role": "customer",
+            "bubble_rect": list(frame.bounds),
+            "image_physical_anchor": {
+                "sender_role": "customer",
+                "visual_side": "customer",
+                "bubble_visual_fingerprint": frame.fingerprint,
+                "preceding_stable_message": "",
+                "following_stable_message": "",
+                "occurrence_index": 0,
+                "occurrence_count": 1,
+            },
+            "config": {"strict_image_adapter": True},
+        }
+    )
+    assert_equal(result.get("applied"), False, "cleanup failure must not report Vision success")
+    assert_equal(result.get("reason"), VISION_IMAGE_CLIPBOARD_CLEAR_FAILED, "cleanup failure must retain its stable reason")
+    assert_true(provider.image is None, "provider must not run after clipboard cleanup failure")
+
+
+def check_strict_transaction_completes_and_releases_image_memory() -> None:
+    frame = _StrictFramePort()
+    provider = _ProviderPort()
+    action = _ActionPort()
+    service = create_vision_service(
+        ports=VisionHostPorts(
+            rpa_lease=_LeasePort(),
+            conversation_target=_TargetPort(),
+            window_frame=frame,
+            ui_action=action,
+            clipboard=_StrictClipboardPort(frame, clear_ok=True),
+            vision_provider=provider,
+        ),
+        config={
+            "strict_image_adapter": True,
+            "image_contract": {
+                "schemas": {
+                    "customer_image_understanding_v1": {
+                        "type": "object",
+                        "properties": {
+                            "applied": {"type": "boolean"},
+                            "adoptable": {"type": "boolean"},
+                            "reason": {"type": "string"},
+                            "vision_summary": {"type": "string", "minLength": 1},
+                            "classification": {"type": "object"},
+                        },
+                        "required": ["applied", "adoptable", "vision_summary"],
+                    },
+                    "visual_bridge_input_v1": {
+                        "type": "object",
+                        "properties": {
+                            "schema_version": {"type": "integer"},
+                            "present": {"type": "boolean"},
+                            "vision_summary": {"type": "string"},
+                        },
+                        "required": ["schema_version", "present", "vision_summary"],
+                    },
+                }
+            },
+        },
+    )
+    result = service.inspect_current_conversation(
+        {
+            "target_name": "Customer A",
+            "session_key": "wx:strict-port-success",
+            "pending_signal_id": "image-port-strict-success-1",
+            "sender_role": "customer",
+            "bubble_rect": list(frame.bounds),
+            "image_physical_anchor": {
+                "sender_role": "customer",
+                "visual_side": "customer",
+                "bubble_visual_fingerprint": frame.fingerprint,
+                "preceding_stable_message": "",
+                "following_stable_message": "",
+                "occurrence_index": 0,
+                "occurrence_count": 1,
+            },
+            "config": {"strict_image_adapter": True},
+        }
+    )
+    assert_true(result.get("applied") is True and result.get("adoptable") is True, f"strict transaction did not complete: {result}")
+    assert_true([item[0] for item in action.actions] == ["right_click", "click"], f"strict transaction repeated UI actions: {action.actions}")
+    assert_true(provider.image is not None and provider.image.released, "strict transaction must release image memory before returning")
+
+
 def main() -> int:
     checks = [
         check_public_api_import_is_lightweight,
@@ -341,6 +531,8 @@ def main() -> int:
         check_dependency_direction_and_single_owner,
         check_core_uses_only_neutral_optional_capability_dispatch,
         check_direct_ports_run_complete_ephemeral_transaction,
+        check_strict_transaction_fails_closed_when_clipboard_clear_fails,
+        check_strict_transaction_completes_and_releases_image_memory,
     ]
     results: list[dict[str, Any]] = []
     for check in checks:

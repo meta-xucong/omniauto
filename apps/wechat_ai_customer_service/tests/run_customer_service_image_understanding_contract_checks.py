@@ -20,7 +20,11 @@ from apps.wechat_ai_customer_service.optional_plugins.vision.clipboard_payload i
     EphemeralClipboardImage,
     _CF_DIB,
     _decode_native_clipboard_value,
+    _encode_ephemeral_image,
     read_current_clipboard_image,
+)
+from apps.wechat_ai_customer_service.optional_plugins.vision.understanding.normalize import (  # noqa: E402
+    normalize_customer_image_understanding_result,
 )
 from customer_image_understanding import maybe_run_customer_image_understanding  # noqa: E402
 from customer_image_understanding_provider import (  # noqa: E402
@@ -41,6 +45,8 @@ def main() -> int:
         check_provider_and_workflow_reject_file_paths,
         check_image_archive_events_are_hard_disabled,
         check_released_payload_cannot_reach_provider,
+        check_high_information_1080p_is_compressed_before_provider_limit,
+        check_empty_vision_summary_cannot_be_completed,
     ]
     results: list[dict[str, Any]] = []
     for check in checks:
@@ -206,6 +212,52 @@ def check_released_payload_cannot_reach_provider() -> None:
         timeout_seconds=1,
     )
     assert_equal(result.get("error"), "customer_image_understanding_image_payload_invalid", "released image cannot be sent to a provider")
+
+
+def check_high_information_1080p_is_compressed_before_provider_limit() -> None:
+    image = Image.effect_noise((1920, 1080), 96.0).convert("RGB")
+    try:
+        payload = _encode_ephemeral_image(
+            image,
+            source_limits={
+                "max_encoded_source_bytes": 12 * 1024 * 1024,
+                "max_decoded_pixels": 20_000_000,
+                "max_decoded_rgba_bytes": 80 * 1024 * 1024,
+                "max_provider_payload_bytes": 3 * 1024 * 1024,
+                "max_provider_edge_px": 2048,
+            },
+        )
+    finally:
+        image.close()
+    assert_true(payload is not None, "high-information 1080p image must be compressed in memory")
+    assert_true(
+        0 < len(payload.image_bytes) <= 3 * 1024 * 1024,
+        "provider payload must satisfy the post-compression limit",
+    )
+    assert_equal((payload.width, payload.height), (1920, 1080), "valid 1080p dimensions must be retained")
+    payload.release()
+
+
+def check_empty_vision_summary_cannot_be_completed() -> None:
+    result = normalize_customer_image_understanding_result(
+        {
+            "applied": True,
+            "adoptable": True,
+            "reason": "provider_returned_structured_empty_result",
+            "vision_summary": "  ",
+            "classification": {
+                "is_vehicle": False,
+                "vehicle_confidence": 0.0,
+                "unknown": True,
+            },
+        },
+        enabled=True,
+        provider="test-provider",
+        request_style="openai_chat_vision",
+        model="test-model",
+    )
+    assert_equal(result.get("applied"), False, "empty summary must never be a completed Vision result")
+    assert_equal(result.get("adoptable"), False, "empty summary must never reach the Brain as adoptable")
 
 
 def assert_true(value: bool, message: str) -> None:

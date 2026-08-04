@@ -9,24 +9,34 @@ the selected visual group.  It never calls a model provider or persists state.
 from __future__ import annotations
 
 import base64
-import io
+import os
 import time
 from typing import Any, Callable
 
-from PIL import Image, ImageOps
+from PIL import Image
 
-from ..clipboard_payload import EphemeralClipboardImage, read_current_clipboard_image
+from ..clipboard_payload import (
+    EphemeralClipboardImage,
+    clear_current_windows_clipboard_image,
+    read_current_clipboard_image,
+)
 from ..understanding.provider import MAX_IMAGE_PAYLOAD_BYTES
 from .surface import visual_image_envelopes_from_bubbles
 from .visual_anchor import match_visual_occurrence_groups, select_current_turn_visual_group
+from .visual_fingerprint import (
+    clipboard_payload_fingerprint,
+    crop_fingerprint,
+    fingerprints_match,
+    image_fingerprint,
+)
 from .wechat import (
-    capture_context_menu_image,
+    DEFAULT_MAX_VISIBLE_IMAGE_CANDIDATES,
     click_context_menu_item,
     clipboard_sequence_number,
     clamp_bounds,
     detect_visual_image_bubbles,
     extract_chat_time_markers,
-    find_copy_menu_item,
+    observe_copy_context_menu,
 )
 
 
@@ -34,9 +44,6 @@ MAX_LOCATE_SCROLL_STEPS = 6
 MAX_LOCATE_SNAPSHOTS = 8
 MAX_LOCATE_SECONDS = 12.0
 MAX_GROUP_WIRE_BYTES = 12 * 1024 * 1024
-MAX_DHASH_DISTANCE = 16
-MAX_ASPECT_RATIO_RELATIVE_ERROR = 0.18
-MAX_COLOR_GRID_AVG_DISTANCE = 48.0
 
 
 def _clean(value: Any) -> str:
@@ -109,108 +116,20 @@ def _failure_payload(reason: str) -> dict[str, Any]:
     }
 
 
-def _inset_bounds(bounds: list[int] | tuple[int, int, int, int], image_size: tuple[int, int]) -> tuple[int, int, int, int]:
-    left, top, right, bottom = clamp_bounds(bounds, image_size)
-    width = right - left
-    height = bottom - top
-    inset_x = max(2, int(width * 0.04))
-    inset_y = max(2, int(height * 0.04))
-    if width - inset_x * 2 >= 24 and height - inset_y * 2 >= 24:
-        return left + inset_x, top + inset_y, right - inset_x, bottom - inset_y
-    return left, top, right, bottom
-
-
-def _dhash64(image: Image.Image) -> int:
-    resized = ImageOps.grayscale(image).resize((9, 8), Image.Resampling.LANCZOS)
-    pixels = list(resized.getdata())
-    value = 0
-    for row in range(8):
-        for col in range(8):
-            value <<= 1
-            if pixels[row * 9 + col] > pixels[row * 9 + col + 1]:
-                value |= 1
-    return value
-
-
 def _image_fingerprint(image: Image.Image) -> dict[str, Any]:
-    normalized = ImageOps.exif_transpose(image).convert("RGB")
-    normalized.load()
-    width, height = normalized.size
-    if width <= 0 or height <= 0:
-        return {}
-    color_grid = [
-        channel
-        for pixel in normalized.resize((3, 3), Image.Resampling.LANCZOS).getdata()
-        for channel in pixel[:3]
-    ]
-    return {
-        "orientation": "portrait" if height > width else "landscape" if width > height else "square",
-        "aspect_ratio": float(width) / float(height),
-        "dhash64": _dhash64(normalized),
-        "color_grid": color_grid,
-    }
+    return image_fingerprint(image)
 
 
 def _crop_fingerprint(screenshot: Image.Image, bounds: list[int] | tuple[int, int, int, int]) -> dict[str, Any]:
-    left, top, right, bottom = _inset_bounds(bounds, getattr(screenshot, "size", (0, 0)))
-    crop = screenshot.crop((left, top, right, bottom))
-    try:
-        return _image_fingerprint(crop)
-    finally:
-        try:
-            crop.close()
-        except Exception:
-            pass
+    return crop_fingerprint(screenshot, bounds)
 
 
 def _payload_fingerprint(payload: EphemeralClipboardImage) -> dict[str, Any]:
-    try:
-        with Image.open(io.BytesIO(bytes(payload.image_bytes))) as image:
-            image.load()
-            bounds = [0, 0, int(image.width), int(image.height)]
-            left, top, right, bottom = _inset_bounds(bounds, image.size)
-            crop = image.crop((left, top, right, bottom))
-            try:
-                return _image_fingerprint(crop)
-            finally:
-                crop.close()
-    except Exception:
-        return {}
-
-
-def _hamming64(left: int, right: int) -> int:
-    return int(left ^ right).bit_count()
-
-
-def _color_grid_distance(left: Any, right: Any) -> float:
-    if not isinstance(left, list) or not isinstance(right, list) or len(left) != len(right) or not left:
-        return float("inf")
-    try:
-        return sum(abs(int(a) - int(b)) for a, b in zip(left, right)) / float(len(left))
-    except (TypeError, ValueError):
-        return float("inf")
+    return clipboard_payload_fingerprint(payload)
 
 
 def _fingerprint_matches(expected: dict[str, Any], actual: dict[str, Any]) -> bool:
-    if not expected or not actual:
-        return False
-    if str(expected.get("orientation") or "") != str(actual.get("orientation") or ""):
-        return False
-    try:
-        expected_ratio = float(expected.get("aspect_ratio") or 0.0)
-        actual_ratio = float(actual.get("aspect_ratio") or 0.0)
-    except (TypeError, ValueError):
-        return False
-    if expected_ratio <= 0.0 or actual_ratio <= 0.0:
-        return False
-    if abs(expected_ratio - actual_ratio) / max(expected_ratio, actual_ratio) > MAX_ASPECT_RATIO_RELATIVE_ERROR:
-        return False
-    if _color_grid_distance(expected.get("color_grid"), actual.get("color_grid")) > MAX_COLOR_GRID_AVG_DISTANCE:
-        return False
-    try:
-        return _hamming64(int(expected.get("dhash64") or 0), int(actual.get("dhash64") or 0)) <= MAX_DHASH_DISTANCE
-    except (TypeError, ValueError):
-        return False
+    return fingerprints_match(expected, actual)
 
 
 def _encode_payload_for_worker(payload: EphemeralClipboardImage) -> dict[str, Any] | None:
@@ -223,29 +142,6 @@ def _encode_payload_for_worker(payload: EphemeralClipboardImage) -> dict[str, An
         "height": int(payload.height or 0),
         "data": base64.b64encode(raw).decode("ascii"),
     }
-
-
-def _menu_item_near_anchor(
-    menu_item: dict[str, Any] | None,
-    *,
-    anchor: dict[str, Any],
-    image_size: tuple[int, int],
-) -> dict[str, Any] | None:
-    if not menu_item:
-        return None
-    try:
-        anchor_x = int(float(anchor.get("x") or 0))
-        anchor_y = int(float(anchor.get("y") or 0))
-        item_x = int(float(menu_item.get("x") or 0))
-        item_y = int(float(menu_item.get("y") or 0))
-    except (TypeError, ValueError):
-        return None
-    width, height = image_size
-    if item_x < 0 or item_y < 0 or item_x > width or item_y > height:
-        return None
-    if abs(item_x - anchor_x) > 320 or abs(item_y - anchor_y) > 360:
-        return None
-    return dict(menu_item)
 
 
 def _candidate_from_surface_message(
@@ -514,7 +410,10 @@ def _capture_visual_group_frame(
     bubbles = detect_visual_image_bubbles(
         screenshot,
         messages=messages,
-        max_images=8,
+        # Observe the complete visible surface first. ``max_images`` limits
+        # the selected turn group, not detection; applying it here would hide
+        # extra images before the group validator can reject them explicitly.
+        max_images=DEFAULT_MAX_VISIBLE_IMAGE_CANDIDATES,
         side_filter=side_filter,
         time_markers=extract_chat_time_markers(ocr_items, image_size),
     )
@@ -687,6 +586,27 @@ def _read_clipboard_payload(
     )
 
 
+def _clear_clipboard_generation(
+    *,
+    sidecar_ops: Any,
+    expected_sequence: int,
+) -> dict[str, Any]:
+    clearer = getattr(sidecar_ops, "clear_current_clipboard_image", None)
+    if callable(clearer):
+        try:
+            result = clearer(expected_sequence)
+            return dict(result) if isinstance(result, dict) else {"ok": False}
+        except Exception as exc:
+            return {
+                "ok": False,
+                "reason": "clipboard_clear_failed",
+                "error_type": type(exc).__name__,
+            }
+    if os.name == "nt":
+        return clear_current_windows_clipboard_image(expected_sequence)
+    return {"ok": True, "skipped": "non_windows_test_host"}
+
+
 def _copy_one_visual_message(
     *,
     sidecar_ops: Any,
@@ -719,24 +639,14 @@ def _copy_one_visual_message(
     )
     right_click = right_click if isinstance(right_click, dict) else {"ok": False}
     sleeper = getattr(sidecar_ops, "humanized_action_sleep", None)
-    if callable(sleeper):
-        sleeper(360, 720)
-    try:
-        menu_screenshot, _menu_path, _menu_capture_method = capture_context_menu_image(
-            sidecar_ops=sidecar_ops,
-            hwnd=hwnd,
-            artifact_dir="",
-            label=f"visual_group_context_menu_{index}",
-        )
-        menu_items = sidecar_ops.run_ocr(menu_screenshot)
-        menu_size = getattr(menu_screenshot, "size", getattr(screenshot, "size", (0, 0)))
-        copy_target = _menu_item_near_anchor(
-            find_copy_menu_item(menu_items, menu_size),
-            anchor=anchor,
-            image_size=menu_size,
-        )
-    except Exception:
-        copy_target = None
+    menu_result = observe_copy_context_menu(
+        sidecar_ops=sidecar_ops,
+        hwnd=hwnd,
+        right_click=right_click,
+        image_size=getattr(screenshot, "size", (0, 0)),
+        label=f"visual_group_context_menu_{index}",
+    )
+    copy_target = menu_result.get("copy_target")
     if not right_click.get("ok") or not copy_target:
         try:
             sidecar_ops.key_press(sidecar_ops.win32con.VK_ESCAPE)
@@ -793,6 +703,15 @@ def _copy_one_visual_message(
     if not _fingerprint_matches(expected_fingerprint, actual_fingerprint):
         payload.release()
         return _failure_payload("clipboard_image_fingerprint_mismatch")
+    clear_result = _clear_clipboard_generation(
+        sidecar_ops=sidecar_ops,
+        expected_sequence=sequence_after,
+    )
+    if not clear_result.get("ok"):
+        payload.release()
+        return _failure_payload(
+            str(clear_result.get("reason") or "clipboard_clear_failed")
+        )
     encoded = _encode_payload_for_worker(payload)
     payload.release()
     if encoded is None:

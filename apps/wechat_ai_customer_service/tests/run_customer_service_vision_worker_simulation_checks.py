@@ -69,6 +69,7 @@ class FakeGenericWeChatHost:
         self.history_scrolls = 0
         self.latest_restores = 0
         self.last_right_click_bounds: list[int] = []
+        self.cleared_sequences: list[int] = []
 
     @staticmethod
     def configure_dpi_awareness() -> None:
@@ -206,6 +207,15 @@ class FakeGenericWeChatHost:
         bounds = self.last_right_click_bounds or [550, 250, 790, 470]
         return self.surface.crop(tuple(bounds))
 
+    def clear_current_clipboard_image(
+        self,
+        expected_sequence: int,
+    ) -> dict[str, Any]:
+        if int(expected_sequence) != self.sequence:
+            return {"ok": False, "reason": "clipboard_sequence_not_current_for_clear"}
+        self.cleared_sequences.append(int(expected_sequence))
+        return {"ok": True}
+
     @staticmethod
     def key_press(_key: int) -> None:
         return None
@@ -249,7 +259,76 @@ def check_worker_copies_current_customer_image_without_sidecar_action() -> None:
     assert_true(transaction.get("clipboard_sequence_after") == 42, "copy must prove a new clipboard generation")
     assert_true(transaction.get("visual_side") == "customer", "copy must preserve direction proof")
     assert_true(host.right_clicks == 1 and host.menu_clicks == 1, "copy must use one bounded right-click and one Copy click")
+    assert_true(host.cleared_sequences == [], "copy-only operation must leave the generation for its caller to consume")
     assert_true(host.capture_artifact_dirs == [None, None], "copy transaction must not persist screenshots")
+
+
+def check_common_menu_observer_is_preferred_over_legacy_capture() -> None:
+    class CommonMenuHost(FakeGenericWeChatHost):
+        def __init__(self) -> None:
+            super().__init__()
+            self.menu_waits = 0
+            self.menu_observations = 0
+
+        def wait_for_wechat_context_menu_stable(self) -> int:
+            self.menu_waits += 1
+            return 1800
+
+        def observe_wechat_context_menu(
+            self,
+            _hwnd: int,
+            *,
+            anchor_screen: tuple[int, int],
+            artifact_dir: str | None,
+            label: str,
+        ) -> dict[str, Any]:
+            assert_true(artifact_dir is None, "menu observation must stay transient")
+            assert_true(label, "menu observation label is required")
+            self.menu_observations += 1
+            x, y = anchor_screen
+            return {
+                "ok": True,
+                "image_size": (1920, 1080),
+                "local_ocr_items": [
+                    {
+                        "text": "复制",
+                        "left": x + 20,
+                        "top": y + 10,
+                        "right": x + 80,
+                        "bottom": y + 40,
+                        "center_x": x + 50,
+                        "center_y": y + 25,
+                        "confidence": 0.95,
+                    }
+                ],
+            }
+
+        def human_window_image_right_click_in_bounds(
+            self,
+            hwnd: int,
+            x: int,
+            y: int,
+            *,
+            bounds: list[int],
+            action_name: str,
+        ) -> dict[str, Any]:
+            result = super().human_window_image_right_click_in_bounds(
+                hwnd,
+                x,
+                y,
+                bounds=bounds,
+                action_name=action_name,
+            )
+            return {**result, "screen_x": 700, "screen_y": 420}
+
+    host = CommonMenuHost()
+    result = run_operation(
+        _args("copy-current-image", side_filter="customer"),
+        host_ops=host,
+    )
+    assert_true(result.get("ok") is True, f"common menu copy failed: {result}")
+    assert_true(host.menu_waits == 1 and host.menu_observations == 1, "common menu path must run once")
+    assert_true(host.capture_artifact_dirs == [None], "legacy menu capture must not run when common observer exists")
 
 
 def check_production_integration_calls_vision_worker_not_sidecar_action() -> None:
@@ -861,6 +940,7 @@ def check_clipboard_failures_return_no_private_payloads() -> None:
         )
         assert_true(result.get("ok") is False and result.get("reason") == reason, f"{mode} must fail closed: {result}")
         assert_true(not result.get("_private_image_payloads"), f"{mode} must not return partial payloads")
+        assert_true(host.cleared_sequences == [], f"{mode} must not clear an unconfirmed clipboard generation")
 
 
 def check_fingerprint_mismatch_retries_same_occurrence_once() -> None:
@@ -877,6 +957,7 @@ def check_fingerprint_mismatch_retries_same_occurrence_once() -> None:
     _assert_private_payloads(result, 1)
     assert_true((result.get("locate") or {}).get("snapshot_count") == 2, f"explicit single-image mismatch retry must use exactly one fresh snapshot: {result}")
     assert_true(host.right_clicks == 2 and host.menu_clicks == 2, "fingerprint mismatch may retry the same occurrence once")
+    assert_true(len(host.cleared_sequences) == 1, "only the confirmed retry generation may be cleared")
 
 
 class SecondImageFailureHost(MultiImageHost):
@@ -1279,6 +1360,20 @@ def check_clipboard_fingerprint_allows_scaled_lightly_compressed_same_image() ->
         )
 
 
+def check_clipboard_fingerprint_rejects_same_center_different_perimeter() -> None:
+    first = Image.new("RGB", (240, 180), (220, 30, 30))
+    second = Image.new("RGB", (240, 180), (30, 30, 220))
+    for image in (first, second):
+        ImageDraw.Draw(image).rectangle([54, 40, 186, 140], fill=(230, 230, 230))
+    assert_true(
+        not visual_collector._fingerprint_matches(
+            visual_collector._image_fingerprint(first),
+            visual_collector._image_fingerprint(second),
+        ),
+        "matching center content must not hide different image perimeters",
+    )
+
+
 def check_parent_facade_decodes_and_strips_private_wire_payload() -> None:
     buffer = io.BytesIO()
     Image.new("RGB", (32, 24), (40, 90, 160)).save(buffer, format="PNG")
@@ -1343,6 +1438,7 @@ def main() -> int:
     checks = [
         check_worker_observes_both_directions_without_artifacts,
         check_worker_copies_current_customer_image_without_sidecar_action,
+        check_common_menu_observer_is_preferred_over_legacy_capture,
         check_production_integration_calls_vision_worker_not_sidecar_action,
         check_worker_locates_current_customer_visual_group_without_copy,
         check_public_observe_current_surface_keeps_single_frame_semantics,
@@ -1376,6 +1472,7 @@ def main() -> int:
         check_missing_crop_fingerprint_fails_before_right_click,
         check_clipboard_fingerprint_distinguishes_same_size_red_and_blue,
         check_clipboard_fingerprint_allows_scaled_lightly_compressed_same_image,
+        check_clipboard_fingerprint_rejects_same_center_different_perimeter,
         check_parent_facade_decodes_and_strips_private_wire_payload,
         check_parent_facade_rejects_empty_or_oversized_private_payload_list,
     ]
