@@ -30,6 +30,7 @@ from apps.wechat_ai_customer_service.optional_plugins.vision.capture.surface imp
 def main() -> int:
     checks = [
         check_structure_locator_excludes_self_image,
+        check_structure_locator_ignores_clipped_boundary_image,
         check_self_structural_observation_is_metadata_only,
         check_sidecar_has_no_retired_image_export,
         check_current_copy_transaction_has_no_file_artifact,
@@ -66,6 +67,39 @@ def check_structure_locator_excludes_self_image() -> None:
     bubbles = detect_visual_image_bubbles(_customer_image_surface(), messages=[], max_images=8, side_filter="customer")
     assert_true(bool(bubbles), f"customer image needs a structural target: {bubbles}")
     assert_true(all(item.get("side") == "customer" for item in bubbles), f"self image must never be a customer target: {bubbles}")
+
+
+def check_structure_locator_ignores_clipped_boundary_image() -> None:
+    for width, height in ((980, 860), (1200, 1000)):
+        image = Image.new("RGB", (width, height), (242, 242, 242))
+        draw = ImageDraw.Draw(image)
+        chat_top = max(90, min(150, int(height * 0.12)))
+        for y in range(chat_top, chat_top + 160, 8):
+            for x in range(470, 670, 8):
+                draw.rectangle(
+                    (x, y, x + 7, y + 7),
+                    fill=((x + y) % 220, 120, 70),
+                )
+        complete_top = chat_top + 320
+        for y in range(complete_top, complete_top + 190, 8):
+            for x in range(470, 700, 8):
+                draw.rectangle(
+                    (x, y, x + 7, y + 7),
+                    fill=((x * 3 + y) % 255, (x + y * 2) % 255, 80),
+                )
+        try:
+            bubbles = detect_visual_image_bubbles(
+                image,
+                messages=[],
+                side_filter="all",
+            )
+        finally:
+            image.close()
+        assert_equal(len(bubbles), 1, "only the complete current-screen image is actionable")
+        assert_true(
+            int(bubbles[0]["bounds"][1]) > chat_top,
+            f"clipped boundary image must be ignored: {bubbles}",
+        )
 
 
 def check_self_structural_observation_is_metadata_only() -> None:
