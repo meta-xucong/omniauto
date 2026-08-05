@@ -182,9 +182,11 @@ class ProductMasterStore:
         return read_json(self.resolver_path, default=DEFAULT_PRODUCT_MASTER_RESOLVER)
 
     def list_items(self, *, include_archived: bool = False) -> list[dict[str, Any]]:
-        db_items = self._list_db_items(include_archived=include_archived)
-        if db_items:
-            return db_items
+        # PostgreSQL mode is authoritative even when the catalog is empty.
+        # Falling back to bundled JSON would resurrect retired or sample items.
+        db = postgres_store(self.tenant_id)
+        if db:
+            return self._list_db_items(include_archived=include_archived, db=db)
         self.ensure_structure()
         return [
             item
@@ -492,8 +494,8 @@ class ProductMasterStore:
             or compatibility.get("v1_form_write_adapter") != "manual_v2"
         )
 
-    def _list_db_items(self, *, include_archived: bool) -> list[dict[str, Any]]:
-        db = postgres_store(self.tenant_id)
+    def _list_db_items(self, *, include_archived: bool, db: Any | None = None) -> list[dict[str, Any]]:
+        db = db or postgres_store(self.tenant_id)
         if not db:
             return []
         items = db.list_knowledge_items(
@@ -908,7 +910,12 @@ def now() -> str:
 
 def postgres_store(tenant_id: str):
     config = load_storage_config()
-    if not config.use_postgres or not config.postgres_configured:
+    if not config.use_postgres:
         return None
+    if not config.postgres_configured:
+        raise RuntimeError("OmniAuto Product Master PostgreSQL DSN is not configured")
     store = get_postgres_store(tenant_id=tenant_id, config=config)
-    return store if store.available() else None
+    availability = store.availability()
+    if not availability.ok:
+        raise RuntimeError(f"OmniAuto Product Master PostgreSQL unavailable: {availability.reason}")
+    return store

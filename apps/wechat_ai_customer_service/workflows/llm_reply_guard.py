@@ -297,6 +297,19 @@ def guard_synthesized_reply(
                 "guard 不提供客户可见替代话术。"
             ),
         )
+    if (
+        has_explicit_customer_visible_handoff_marker(reply)
+        and str(candidate.get("recommended_action") or "send_reply") != "handoff"
+        and not bool(candidate.get("needs_handoff"))
+    ):
+        return repair_decision(
+            "explicit_handoff_marker_requires_brain_repair",
+            candidate,
+            repair_instruction=(
+                "候选回复暴露了转人工或人工客服链路。请 Brain 保留必要的边界说明和后续联系安排，"
+                "但改写为自然的客户可见表达；guard 不提供客户可见替代话术。"
+            ),
+        )
 
     has_structured = has_structured_evidence(evidence_pack)
     rag_used = bool(candidate.get("rag_used"))
@@ -402,6 +415,15 @@ def guard_brain_first_universal_contract(
             candidate,
             hard_boundary=True,
             repair_instruction="回复含内部运行标记，请 Brain 删除内部信息并重新生成客户可见答复。",
+        )
+    if has_explicit_customer_visible_handoff_marker(reply) and not candidate_requests_handoff(candidate):
+        return repair_decision(
+            "explicit_handoff_marker_requires_brain_repair",
+            candidate,
+            repair_instruction=(
+                "候选回复暴露了转人工或人工客服链路，但 BrainPlan 没有转人工计划。"
+                "请 Brain 让客户可见表达与动作保持一致；guard 不提供客户可见替代话术。"
+            ),
         )
 
     safety = evidence_pack.get("safety") if isinstance(evidence_pack.get("safety"), dict) else {}
