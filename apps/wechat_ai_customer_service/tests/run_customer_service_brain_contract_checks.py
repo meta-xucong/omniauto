@@ -209,6 +209,7 @@ def main() -> int:
         check_brain_runner_records_stage_timings(),
         check_brain_first_intent_assist_skips_duplicate_llm_advisory(),
         check_non_brain_first_intent_assist_keeps_llm_advisory(),
+        check_brain_blocks_when_knowledge_runtime_is_unavailable(),
         check_brain_runner_rejects_quality_failed_plan(),
         check_original_brain_quality_soft_pass_after_failed_repair_allows_soft_doubts(),
         check_repaired_deterministic_quality_soft_pass_requires_missing_context_anchor(),
@@ -8408,6 +8409,18 @@ def check_guard_allows_safe_appointment_followup_coordination() -> CaseResult:
         f"Brain-owned handoff must be decided by plan metadata, not a visible phrase matcher: {explicit_guard}",
     )
 
+    mismatched_handoff = dict(candidate)
+    mismatched_handoff["reply"] = "好的王先生，我这边转人工客服，稍后让同事联系您。"
+    mismatched_guard = guard_synthesized_reply(
+        candidate=mismatched_handoff,
+        evidence_pack=pack,
+        settings={"require_evidence": True, "brain_first_guard": True},
+    )
+    assert_true(
+        not mismatched_guard.get("allowed") and mismatched_guard.get("action") == "repair",
+        f"visible handoff wording without matching Brain plan metadata must be repaired: {mismatched_guard}",
+    )
+
     overcommit = dict(candidate)
     overcommit["reply"] = "好的王先生，周六下午两点直接过来就行，我已经给您安排好了。"
     overcommit["risk_tags"] = ["appointment_commitment"]
@@ -8423,7 +8436,12 @@ def check_guard_allows_safe_appointment_followup_coordination() -> CaseResult:
     return CaseResult(
         "guard_allows_safe_appointment_followup_coordination",
         True,
-        {"guard": guard, "explicit_guard": explicit_guard, "overcommit_guard": overcommit_guard},
+        {
+            "guard": guard,
+            "explicit_guard": explicit_guard,
+            "mismatched_guard": mismatched_guard,
+            "overcommit_guard": overcommit_guard,
+        },
     )
 
 
@@ -10189,6 +10207,38 @@ def check_process_target_shadow_does_not_adopt() -> CaseResult:
     assert_true(not event.get("customer_service_brain_legacy_generators"), f"shadow should not disable legacy generators: {event}")
     assert_true((event.get("decision") or {}).get("raw_reply_text") != "Brain回复", "shadow must not replace legacy reply")
     return CaseResult("process_target_shadow_does_not_adopt", True, {"action": event.get("action")})
+
+
+def check_brain_blocks_when_knowledge_runtime_is_unavailable() -> CaseResult:
+    pack = fake_evidence_pack(include_product=False)
+    pack["knowledge_error"] = "PostgreSQL connection unavailable"
+    config = base_config(base_plan())
+    config["customer_service_brain"]["mode"] = "brain_first"
+    with patched_evidence_pack(pack):
+        event = brain_module.maybe_run_customer_service_brain(
+            config=config,
+            target_name="许聪",
+            target_state={"conversation_context": {}},
+            batch=[{"id": "msg1", "sender": "许聪", "content": "秦plus多少钱"}],
+            combined="秦plus多少钱",
+            decision=ReplyDecision("", "", False, False, ""),
+            reply_text="",
+            intent_assist={},
+            rag_reply={},
+            llm_reply={},
+            product_knowledge={},
+            data_capture={},
+            raw_capture={"conversation": {"conversation_id": "c1", "chat_type": "private"}},
+            customer_profile=None,
+        )
+    assert_true(event.get("reason") == "KNOWLEDGE_RUNTIME_UNAVAILABLE", f"unexpected failure reason: {event}")
+    assert_true(event.get("needs_handoff") is True, f"knowledge failure must require handoff: {event}")
+    assert_true(not str(event.get("reply_text") or ""), f"knowledge failure must not emit a visible reply: {event}")
+    assert_true(
+        event.get("visible_reply_owner") == "none_knowledge_unavailable",
+        f"knowledge failure must be explicitly attributable: {event}",
+    )
+    return CaseResult("brain_blocks_when_knowledge_runtime_is_unavailable", True, {"reason": event.get("reason")})
 
 
 def assert_true(condition: Any, message: str) -> None:
