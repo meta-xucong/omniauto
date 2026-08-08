@@ -16,6 +16,7 @@ for path in (PROJECT_ROOT, APP_ROOT):
         sys.path.insert(0, str(path))
 
 from apps.wechat_ai_customer_service.optional_plugins.vision.capture.wechat import (  # noqa: E402
+    _fine_grid_confirms_separate_stacked_surfaces,
     detect_visual_image_bubbles,
     execute_wechat_clipboard_image_copy,
     find_copy_menu_item,
@@ -23,6 +24,7 @@ from apps.wechat_ai_customer_service.optional_plugins.vision.capture.wechat impo
 from apps.wechat_ai_customer_service.adapters import wechat_win32_ocr_sidecar  # noqa: E402
 from apps.wechat_ai_customer_service.adapters.wechat_win32_ocr.geometry import session_split_x  # noqa: E402
 from apps.wechat_ai_customer_service.optional_plugins.vision.capture.surface import (  # noqa: E402
+    image_candidates_without_confirmed_voice_action_conflicts,
     self_visual_image_messages_from_current_surface,
 )
 
@@ -31,6 +33,8 @@ def main() -> int:
     checks = [
         check_structure_locator_excludes_self_image,
         check_structure_locator_ignores_clipped_boundary_image,
+        check_fine_grid_splits_stacked_voice_surfaces,
+        check_confirmed_voice_action_wins_over_false_image_surface,
         check_self_structural_observation_is_metadata_only,
         check_sidecar_has_no_retired_image_export,
         check_current_copy_transaction_has_no_file_artifact,
@@ -99,6 +103,134 @@ def check_structure_locator_ignores_clipped_boundary_image() -> None:
         assert_true(
             int(bubbles[0]["bounds"][1]) > chat_top,
             f"clipped boundary image must be ignored: {bubbles}",
+        )
+
+
+def check_fine_grid_splits_stacked_voice_surfaces() -> None:
+    coarse_cells = []
+    for y, width in enumerate([7, 7, 7, 7, 16, 16, 16], start=34):
+        coarse_cells.extend((x, y) for x in range(7, 7 + width))
+
+    small = Image.new("RGB", (220, 246), (250, 250, 250))
+    draw = ImageDraw.Draw(small)
+    draw.rectangle((35, 170, 69, 188), fill=(242, 242, 242))
+    draw.rectangle((35, 191, 114, 204), fill=(242, 242, 242))
+    try:
+        split = _fine_grid_confirms_separate_stacked_surfaces(
+            small,
+            coarse_cells=coarse_cells,
+            coarse_block=5,
+            background=[250.0, 250.0, 250.0],
+            side="customer",
+            minimum_media_height=34.0,
+        )
+    finally:
+        small.close()
+    assert_true(
+        split,
+        "block=2 must restore the pixel gap between duration and transcript",
+    )
+
+    equal_width_cells = [
+        (x, y)
+        for y in range(34, 41)
+        for x in range(7, 18)
+    ]
+    equal_width = Image.new("RGB", (220, 246), (250, 250, 250))
+    equal_draw = ImageDraw.Draw(equal_width)
+    equal_draw.rectangle((35, 170, 89, 188), fill=(242, 242, 242))
+    equal_draw.rectangle((35, 191, 89, 204), fill=(242, 242, 242))
+    try:
+        equal_split = _fine_grid_confirms_separate_stacked_surfaces(
+            equal_width,
+            coarse_cells=equal_width_cells,
+            coarse_block=5,
+            background=[250.0, 250.0, 250.0],
+            side="customer",
+            minimum_media_height=34.0,
+        )
+    finally:
+        equal_width.close()
+    assert_true(
+        equal_split,
+        "equal-width voice and transcript rows must also be separated",
+    )
+
+    tall_media_cells = [
+        (x, y)
+        for y in range(20, 41)
+        for x in range(7, 23)
+    ]
+    tall_media = Image.new("RGB", (220, 246), (250, 250, 250))
+    tall_draw = ImageDraw.Draw(tall_media)
+    tall_draw.rectangle((35, 100, 114, 139), fill=(242, 242, 242))
+    tall_draw.rectangle((35, 142, 114, 181), fill=(242, 242, 242))
+    try:
+        tall_split = _fine_grid_confirms_separate_stacked_surfaces(
+            tall_media,
+            coarse_cells=tall_media_cells,
+            coarse_block=5,
+            background=[250.0, 250.0, 250.0],
+            side="customer",
+            minimum_media_height=34.0,
+        )
+    finally:
+        tall_media.close()
+    assert_true(
+        not tall_split,
+        "two tall image surfaces must not be suppressed as chat rows",
+    )
+
+
+def check_confirmed_voice_action_wins_over_false_image_surface() -> None:
+    image = {"bounds": [476, 559, 690, 653], "side": "customer"}
+    confirmed_voice = {
+        "type": "voice",
+        "sender_role": "customer",
+        "content": "我们吃完啦，准备回家。",
+        "parent_voice_anchor_key": "voice-stable:contract",
+        "voice_anchor": {
+            "anchor_key": "voice-anchor:contract",
+            "anchor_stable_key": "voice-stable:contract",
+            "anchor_structural_key": "voice-structural:contract",
+            "item": {
+                "sender_role": "customer",
+                "parser_bubble_rect": [486, 619, 534, 645],
+            },
+        },
+    }
+    confirmed_attempt = {
+        "attempt_index": 1,
+        "action_phase": "confirmed",
+        "effective_success": True,
+        "click": {"ok": True},
+        "processed_anchor_keys": ["voice-stable:contract"],
+        "context_anchor": {"anchor_stable_key": "voice-stable:contract"},
+    }
+    assert_equal(
+        image_candidates_without_confirmed_voice_action_conflicts(
+            [image],
+            [confirmed_voice],
+            [confirmed_attempt],
+        ),
+        [],
+        "a confirmed same-anchor voice action must win the image conflict",
+    )
+    invalid_cases = [
+        ({**confirmed_voice, "content": '[语音] 3"'}, confirmed_attempt, image),
+        (confirmed_voice, {**confirmed_attempt, "click": {"ok": False}}, image),
+        (confirmed_voice, confirmed_attempt, {**image, "side": "self"}),
+        (confirmed_voice, confirmed_attempt, {**image, "bounds": [476, 300, 690, 400]}),
+    ]
+    for voice, attempt, candidate in invalid_cases:
+        assert_equal(
+            image_candidates_without_confirmed_voice_action_conflicts(
+                [candidate],
+                [voice],
+                [attempt],
+            ),
+            [candidate],
+            "missing action, binding, role or overlap proof must preserve image",
         )
 
 
