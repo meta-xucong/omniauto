@@ -265,7 +265,29 @@ class _FramePort:
             return {
                 "ok": True,
                 "image": self.surface,
-                "ocr_items": [{"text": "复制", "left": 600, "top": 488, "right": 636, "bottom": 508, "center_x": 618, "center_y": 498, "confidence": 0.95}],
+                "menu_panel_bounds": [580, 460, 700, 560],
+                "ocr_items": [
+                    {
+                        "text": "复制",
+                        "left": 600,
+                        "top": 488,
+                        "right": 636,
+                        "bottom": 508,
+                        "center_x": 618,
+                        "center_y": 498,
+                        "confidence": 0.95,
+                    },
+                    {
+                        "text": "编辑",
+                        "left": 600,
+                        "top": 520,
+                        "right": 636,
+                        "bottom": 540,
+                        "center_x": 618,
+                        "center_y": 530,
+                        "confidence": 0.95,
+                    },
+                ],
             }
         return {"ok": True, "image": self.surface, "messages": [], "ocr_items": []}
 
@@ -310,6 +332,7 @@ class _StrictFramePort:
                 "image": self.surface.copy(),
                 "image_size": self.surface.size,
                 "screen_origin": [0, 0],
+                "menu_panel_bounds": [640, 400, 760, 520],
                 "ocr_items": [
                     {
                         "text": "复制",
@@ -321,7 +344,18 @@ class _StrictFramePort:
                         "center_y": 444,
                         "confidence": 0.98,
                         "bounds": [660, 430, 710, 458],
-                    }
+                    },
+                    {
+                        "text": "编辑",
+                        "left": 660,
+                        "top": 470,
+                        "right": 710,
+                        "bottom": 498,
+                        "center_x": 685,
+                        "center_y": 484,
+                        "confidence": 0.98,
+                        "bounds": [660, 470, 710, 498],
+                    },
                 ],
             }
         return {
