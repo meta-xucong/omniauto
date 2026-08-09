@@ -5489,7 +5489,7 @@ def dismiss_voice_transcribe_context_menu(
                 "ocr_items_count": len(items),
                 "visible_menu_texts": visible_menu_texts,
                 "visible_panel_texts": visible_panel_texts,
-                "menu_bounds": menu_bounds or [],
+                "menu_panel_bounds": menu_bounds or [],
                 "ok": bool(click_result.get("ok")) and not bool(visible_menu_texts) and not bool(visible_panel_texts),
                 "reason": "menu_closed" if not visible_menu_texts and not visible_panel_texts else "menu_or_panel_still_visible",
             })

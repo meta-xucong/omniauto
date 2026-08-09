@@ -281,7 +281,7 @@ def check_context_menu_classifier_requires_exact_exclusive_evidence() -> None:
             _classify_context_menu(
                 items,
                 copy_item,
-                menu_bounds=[580, 280, 720, 560],
+                menu_panel_bounds=[580, 280, 720, 560],
             )["kind"]
         )
 
@@ -304,7 +304,7 @@ def check_context_menu_classifier_requires_exact_exclusive_evidence() -> None:
             {"text": "搜一搜", "bounds": [300, 290, 370, 322]},
         ],
         copy_item,
-        menu_bounds=[600, 300, 700, 400],
+        menu_panel_bounds=[600, 300, 700, 400],
     )
     assert_equal(
         outside_result["kind"],
