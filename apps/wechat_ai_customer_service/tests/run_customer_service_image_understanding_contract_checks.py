@@ -281,7 +281,7 @@ def check_context_menu_classifier_requires_exact_exclusive_evidence() -> None:
             _classify_context_menu(
                 items,
                 copy_item,
-                anchor=(500, 320),
+                menu_bounds=[580, 280, 720, 560],
             )["kind"]
         )
 
@@ -295,6 +295,22 @@ def check_context_menu_classifier_requires_exact_exclusive_evidence() -> None:
     assert_equal(classify("收起文字", "多选"), "voice", "collapse confirms voice")
     assert_equal(classify("复制", "收藏", "删除"), "unknown", "public items cannot classify")
     assert_equal(classify("复制", "编辑", "放大阅读"), "conflict", "mixed exclusive evidence conflicts")
+    copy_item = {"text": "复制", "bounds": [620, 320, 680, 352]}
+    outside_result = _classify_context_menu(
+        [
+            copy_item,
+            {"text": "编辑", "bounds": [300, 200, 360, 232]},
+            {"text": "放大阅读", "bounds": [300, 245, 390, 277]},
+            {"text": "搜一搜", "bounds": [300, 290, 370, 322]},
+        ],
+        copy_item,
+        menu_bounds=[600, 300, 700, 400],
+    )
+    assert_equal(
+        outside_result["kind"],
+        "unknown",
+        "chat text outside the popup must not classify the menu",
+    )
 
 
 def assert_true(value: bool, message: str) -> None:
