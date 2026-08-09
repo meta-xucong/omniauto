@@ -24,7 +24,7 @@ from apps.wechat_ai_customer_service.optional_plugins.vision.capture.wechat impo
 from apps.wechat_ai_customer_service.adapters import wechat_win32_ocr_sidecar  # noqa: E402
 from apps.wechat_ai_customer_service.adapters.wechat_win32_ocr.geometry import session_split_x  # noqa: E402
 from apps.wechat_ai_customer_service.optional_plugins.vision.capture.surface import (  # noqa: E402
-    image_candidates_without_confirmed_voice_action_conflicts,
+    image_candidates_without_reliable_typed_message_conflicts,
     self_visual_image_messages_from_current_surface,
 )
 
@@ -34,7 +34,8 @@ def main() -> int:
         check_structure_locator_excludes_self_image,
         check_structure_locator_ignores_clipped_boundary_image,
         check_fine_grid_splits_stacked_voice_surfaces,
-        check_confirmed_voice_action_wins_over_false_image_surface,
+        check_expanded_voice_surface_is_rejected_before_image_output,
+        check_reliable_message_type_wins_over_false_image_surface,
         check_self_structural_observation_is_metadata_only,
         check_sidecar_has_no_retired_image_export,
         check_current_copy_transaction_has_no_file_artifact,
@@ -182,9 +183,63 @@ def check_fine_grid_splits_stacked_voice_surfaces() -> None:
     )
 
 
-def check_confirmed_voice_action_wins_over_false_image_surface() -> None:
+def check_expanded_voice_surface_is_rejected_before_image_output() -> None:
+    screenshot = Image.new("RGB", (974, 853), (242, 242, 242))
+    draw = ImageDraw.Draw(screenshot)
+    surface_bounds = (476, 559, 690, 653)
+    draw.rectangle(surface_bounds, fill=(255, 255, 255))
+    for y in range(571, 642, 18):
+        draw.rectangle((492, y, 660, y + 5), fill=(220, 226, 232))
+    for y in range(559, 604, 5):
+        for x in range(408, 453, 5):
+            tone = 55 if ((x + y) // 5) % 2 else 205
+            draw.rectangle(
+                (x, y, x + 4, y + 4),
+                fill=(tone, 110, 170),
+            )
+    reliable_voice = {
+        "type": "voice",
+        "sender_role": "customer",
+        "content": "我们吃完啦，准备回家。",
+        "bubble_rect": [486, 619, 690, 653],
+        "parent_voice_anchor_key": "voice-stable:connected-surface",
+    }
+    diagnostics: list[dict[str, Any]] = []
+    try:
+        assert_equal(
+            len(
+                detect_visual_image_bubbles(
+                    screenshot,
+                    messages=[],
+                    side_filter="all",
+                )
+            ),
+            1,
+            "fixture must first reproduce the structural false image",
+        )
+        candidates = detect_visual_image_bubbles(
+            screenshot,
+            messages=[reliable_voice],
+            side_filter="all",
+            diagnostics=diagnostics,
+        )
+    finally:
+        screenshot.close()
+    assert_equal(
+        candidates,
+        [],
+        "reliable voice evidence must veto the structural image candidate",
+    )
+    assert_equal(
+        diagnostics[0].get("event"),
+        "structural_image_candidate_rejected_by_reliable_message_type",
+        "the detector must emit the formal reliable-type veto diagnostic",
+    )
+
+
+def check_reliable_message_type_wins_over_false_image_surface() -> None:
     image = {"bounds": [476, 559, 690, 653], "side": "customer"}
-    confirmed_voice = {
+    reliable_voice = {
         "type": "voice",
         "sender_role": "customer",
         "content": "我们吃完啦，准备回家。",
@@ -199,7 +254,7 @@ def check_confirmed_voice_action_wins_over_false_image_surface() -> None:
             },
         },
     }
-    confirmed_attempt = {
+    action_attempt = {
         "attempt_index": 1,
         "action_phase": "confirmed",
         "effective_success": True,
@@ -207,30 +262,61 @@ def check_confirmed_voice_action_wins_over_false_image_surface() -> None:
         "processed_anchor_keys": ["voice-stable:contract"],
         "context_anchor": {"anchor_stable_key": "voice-stable:contract"},
     }
+    action_variants = [
+        [action_attempt],
+        [{**action_attempt, "click": {"ok": False}}],
+        [{
+            **action_attempt,
+            "action_phase": "not_attempted",
+            "effective_success": False,
+            "processed_anchor_keys": [],
+        }],
+        [],
+    ]
+    for attempts in action_variants:
+        assert_equal(
+            image_candidates_without_reliable_typed_message_conflicts(
+                [image],
+                [reliable_voice],
+                attempts,
+            ),
+            [],
+            "message type arbitration must not depend on action success",
+        )
+
+    untranscribed_voice = {
+        "type": "voice",
+        "sender_role": "customer",
+        "sender_role_source": "same_row_avatar",
+        "content": '[语音] 3"',
+        "bubble_rect": [486, 619, 534, 645],
+        "quality_flags": ["untranscribed_voice_placeholder"],
+    }
     assert_equal(
-        image_candidates_without_confirmed_voice_action_conflicts(
+        image_candidates_without_reliable_typed_message_conflicts(
             [image],
-            [confirmed_voice],
-            [confirmed_attempt],
+            [untranscribed_voice],
+            [],
         ),
         [],
-        "a confirmed same-anchor voice action must win the image conflict",
+        "trusted untranscribed voice structure must veto image",
     )
+
     invalid_cases = [
-        ({**confirmed_voice, "content": '[语音] 3"'}, confirmed_attempt, image),
-        (confirmed_voice, {**confirmed_attempt, "click": {"ok": False}}, image),
-        (confirmed_voice, confirmed_attempt, {**image, "side": "self"}),
-        (confirmed_voice, confirmed_attempt, {**image, "bounds": [476, 300, 690, 400]}),
+        ({**reliable_voice, "voice_anchor": {"item": {"sender_role": "customer"}}}, image),
+        ({"type": "voice", "sender_role": "customer", "content": "疑似语音但没有结构证据"}, image),
+        (reliable_voice, {**image, "side": "self"}),
+        (reliable_voice, {**image, "bounds": [476, 300, 690, 400]}),
     ]
-    for voice, attempt, candidate in invalid_cases:
+    for voice, candidate in invalid_cases:
         assert_equal(
-            image_candidates_without_confirmed_voice_action_conflicts(
+            image_candidates_without_reliable_typed_message_conflicts(
                 [candidate],
                 [voice],
-                [attempt],
+                [],
             ),
             [candidate],
-            "missing action, binding, role or overlap proof must preserve image",
+            "missing type, role, geometry or overlap proof must preserve image",
         )
 
 
