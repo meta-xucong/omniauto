@@ -25,6 +25,7 @@ from apps.wechat_ai_customer_service.optional_plugins.vision.clipboard_payload i
 )
 from apps.wechat_ai_customer_service.optional_plugins.vision.capture.transaction import (  # noqa: E402
     _classify_context_menu,
+    _safe_copy_click_geometry,
 )
 from apps.wechat_ai_customer_service.optional_plugins.vision.understanding.normalize import (  # noqa: E402
     normalize_customer_image_understanding_result,
@@ -310,6 +311,20 @@ def check_context_menu_classifier_requires_exact_exclusive_evidence() -> None:
         outside_result["kind"],
         "unknown",
         "chat text outside the popup must not classify the menu",
+    )
+    safe_geometry = _safe_copy_click_geometry(
+        {**copy_item, "x": 650, "y": 336},
+        menu_panel_bounds=[600, 300, 700, 400],
+    )
+    assert_true(safe_geometry is not None, "confirmed Copy geometry must be usable")
+    unsafe_geometry = _safe_copy_click_geometry(
+        {**copy_item, "x": 740, "y": 336},
+        menu_panel_bounds=[600, 300, 700, 400],
+    )
+    assert_equal(
+        unsafe_geometry,
+        None,
+        "Copy coordinates outside the confirmed item must fail before clicking",
     )
 
 
