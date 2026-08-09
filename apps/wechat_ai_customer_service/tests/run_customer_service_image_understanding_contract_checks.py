@@ -23,6 +23,9 @@ from apps.wechat_ai_customer_service.optional_plugins.vision.clipboard_payload i
     _encode_ephemeral_image,
     read_current_clipboard_image,
 )
+from apps.wechat_ai_customer_service.optional_plugins.vision.capture.transaction import (  # noqa: E402
+    _classify_context_menu,
+)
 from apps.wechat_ai_customer_service.optional_plugins.vision.understanding.normalize import (  # noqa: E402
     normalize_customer_image_understanding_result,
 )
@@ -47,6 +50,7 @@ def main() -> int:
         check_released_payload_cannot_reach_provider,
         check_high_information_1080p_is_compressed_before_provider_limit,
         check_empty_vision_summary_cannot_be_completed,
+        check_context_menu_classifier_requires_exact_exclusive_evidence,
     ]
     results: list[dict[str, Any]] = []
     for check in checks:
@@ -258,6 +262,39 @@ def check_empty_vision_summary_cannot_be_completed() -> None:
     )
     assert_equal(result.get("applied"), False, "empty summary must never be a completed Vision result")
     assert_equal(result.get("adoptable"), False, "empty summary must never reach the Brain as adoptable")
+
+
+def check_context_menu_classifier_requires_exact_exclusive_evidence() -> None:
+    def classify(*labels: str) -> str:
+        items = [
+            {
+                "text": label,
+                "bounds": [600, 300 + index * 48, 700, 340 + index * 48],
+            }
+            for index, label in enumerate(labels)
+        ]
+        copy_item = next(
+            (item for item in items if item["text"] == "复制"),
+            None,
+        )
+        return str(
+            _classify_context_menu(
+                items,
+                copy_item,
+                anchor=(500, 320),
+            )["kind"]
+        )
+
+    assert_equal(classify("复制", "放大阅读"), "text", "magnify confirms text")
+    assert_equal(classify("复制", "翻译", "搜一搜"), "text", "translate and search confirm text")
+    assert_equal(classify("复制", "翻译"), "unknown", "translate alone is incomplete")
+    assert_equal(classify("复制", "搜一搜"), "unknown", "search alone is incomplete")
+    assert_equal(classify("复制", "编辑"), "image", "copy and edit confirm image")
+    assert_equal(classify("复制", "另存为..."), "image", "copy and save-as confirm image")
+    assert_equal(classify("语音转文字", "收藏"), "voice", "transcribe confirms voice")
+    assert_equal(classify("收起文字", "多选"), "voice", "collapse confirms voice")
+    assert_equal(classify("复制", "收藏", "删除"), "unknown", "public items cannot classify")
+    assert_equal(classify("复制", "编辑", "放大阅读"), "conflict", "mixed exclusive evidence conflicts")
 
 
 def assert_true(value: bool, message: str) -> None:

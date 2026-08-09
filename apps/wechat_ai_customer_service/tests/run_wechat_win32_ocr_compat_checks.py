@@ -2101,14 +2101,6 @@ def test_voice_transcribe_mixed_candidates_keep_bottom_up_order() -> None:
     )
 
 
-def test_text_message_context_menu_strong_markers_exclude_ambiguous_entries() -> None:
-    assert not sidecar_module.text_message_context_menu_strong_text_like("复制")
-    assert not sidecar_module.text_message_context_menu_strong_text_like("转发")
-    assert sidecar_module.text_message_context_menu_strong_text_like("放大阅读")
-    assert sidecar_module.text_message_context_menu_strong_text_like("翻译")
-    assert sidecar_module.text_message_context_menu_strong_text_like("搜一搜")
-
-
 def test_voice_transcribe_self_voice_uses_context_menu_anchor() -> None:
     image_size = (980, 860)
     items = [
@@ -8762,7 +8754,6 @@ def main() -> int:
         test_voice_transcribe_target_processes_unconverted_voice_bottom_up,
         test_voice_transcribe_context_anchor_can_skip_already_transcribed_anchor,
         test_voice_transcribe_mixed_candidates_keep_bottom_up_order,
-        test_text_message_context_menu_strong_markers_exclude_ambiguous_entries,
         test_voice_transcribe_self_voice_uses_context_menu_anchor,
         test_voice_transcribe_target_covers_left_and_right_voice_states,
         test_voice_transcribe_click_jitter_uses_candidate_pool,
