@@ -374,11 +374,12 @@ def test_sidecar_additive_callable_defaults_are_frozen() -> None:
             "ocr_items": None,
             "screenshot_path": "",
         },
-        "voice_transcribe_payload": {
+        "prepare_voice_action_payload": {
             "conversation_type": "",
-            "max_duration_seconds": 240,
+            "artifact_dir": None,
             "confirm_target": "",
             "confirm_exact": False,
+            "excluded_voice_anchor_keys": None,
         },
     }
     for callable_name, defaults in expected_defaults.items():
@@ -424,7 +425,6 @@ def test_run_sidecar_cli_accepts_visible_session_candidate() -> None:
         )
     finally:
         sidecar_module.run_action = original
-
     assert_true(payload.get("ok") is True, f"CLI should accept visible-session candidate: {payload}")
     assert_true(captured.get("action") == "open-chat", f"unexpected captured action: {captured}")
     assert_true("CJR8S5K3" in str(captured.get("visible_session_candidate")), f"candidate should reach run_action: {captured}")
@@ -446,6 +446,81 @@ def test_visible_session_candidate_click_geometry_uses_title_bbox() -> None:
     assert_true(candidate.get("bottom") == 143.0, f"candidate should derive bottom from title_bbox: {candidate}")
     assert_true(candidate.get("click_geometry_source") == "row_fingerprint.title_bbox", f"candidate should record geometry source: {candidate}")
 
+
+def test_voice_daemon_request_preserves_formal_action_identity() -> None:
+    from apps.wechat_ai_customer_service.adapters.wechat_win32_ocr_sidecar import (
+        args_for_daemon_request,
+    )
+
+    argv = args_for_daemon_request(
+        {
+            "action": "voice-transcribe",
+            "canonical_voice_action_id": "voice-action-1",
+            "reserved_worker_stable_id": "worker-message-9",
+        }
+    )
+    assert_true(
+        argv[argv.index("--canonical-voice-action-id") + 1]
+        == "voice-action-1",
+        f"canonical action id lost: {argv}",
+    )
+    assert_true(
+        argv[argv.index("--reserved-worker-stable-id") + 1]
+        == "worker-message-9",
+        f"reserved worker id lost: {argv}",
+    )
+
+
+def test_sidecar_stale_phase_write_cannot_overwrite_success_fact() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        journal = Path(tmp) / "voice-action.json"
+        journal.write_text(
+            json.dumps(
+                {
+                    "action_phase": "not_attempted",
+                    "items": {
+                        "action-1": {
+                            "action_phase": "not_attempted",
+                            "physical_anchor_keys": ["anchor-a"],
+                            "business_state": None,
+                            "business_result_confirmed": False,
+                            "error_code": None,
+                            "terminal_payload": None,
+                        }
+                    },
+                }
+            ),
+            encoding="utf-8",
+        )
+        sidecar_module.write_action_phase_journal(
+            str(journal),
+            "confirmed",
+            physical_anchor_keys=["anchor-a"],
+            business_state="completed",
+            business_result_confirmed=True,
+            error_code="",
+            terminal_payload={
+                "state": "completed",
+                "transcript": "confirmed transcript",
+            },
+        )
+        confirmed = json.loads(journal.read_text(encoding="utf-8"))
+
+        sidecar_module.write_action_phase_journal(
+            str(journal),
+            "not_attempted",
+            physical_anchor_keys=["anchor-a"],
+            business_state="failed",
+            business_result_confirmed=False,
+            error_code="STALE_FAILURE",
+            terminal_payload={"state": "failed"},
+        )
+        after_stale_write = json.loads(journal.read_text(encoding="utf-8"))
+
+        assert_true(
+            after_stale_write == confirmed,
+            "a stale phase write must not mutate any confirmed journal fact",
+        )
 
 def test_parse_sessions_from_ocr() -> None:
     items = [
@@ -1707,7 +1782,7 @@ def test_reused_frame_title_roi_still_blocks_wrong_target() -> None:
     assert_true(capture.call_count == 0, "wrong-title confirmation must not capture a second image")
 
 
-def test_voice_before_frame_blocks_click_when_target_is_wrong() -> None:
+def test_voice_prepare_frame_blocks_action_when_target_is_wrong() -> None:
     sidecar_mod = sys.modules["apps.wechat_ai_customer_service.adapters.wechat_win32_ocr_sidecar"]
     image = Image.new("RGB", (965, 852), (247, 247, 247))
     guard = {"ok": False, "online": True, "reason": "target_title_not_confirmed"}
@@ -1719,23 +1794,23 @@ def test_voice_before_frame_blocks_click_when_target_is_wrong() -> None:
         sidecar_mod,
         "get_window_geometry",
         return_value={"width": 965, "height": 852, "left": 0, "top": 0, "right": 965, "bottom": 852},
-    ), patch.object(sidecar_mod, "validate_active_send_target", return_value=guard) as validate, patch.object(
+    ), patch.object(
         sidecar_mod,
-        "open_voice_transcribe_context_menu",
-    ) as open_menu:
-        payload = sidecar_mod.voice_transcribe_payload(
+        "validate_active_send_target",
+        return_value=guard,
+    ) as validate:
+        payload = sidecar_mod.prepare_voice_action_payload(
             101,
             {},
             target="DEMO1234 Contact",
             confirm_target="DEMO1234",
-            max_duration_seconds=60,
         )
 
     assert_true(payload.get("ok") is False, f"wrong voice target must be blocked: {payload}")
     assert_true(payload.get("error_code") == "TARGET_NOT_CONFIRMED_FOR_VOICE_TRANSCRIBE", f"unexpected error: {payload}")
     assert_true(capture.call_count == 1, "voice flow should capture exactly one before frame")
     assert_true(validate.call_args.kwargs.get("screenshot") is image, "voice guard should reuse the before frame")
-    assert_true(open_menu.call_count == 0, "wrong target must stop before opening the voice menu")
+    assert_true(payload.get("ui_action_performed") is False, "prepare rejection must remain zero-action")
 
 
 def test_history_snapshot_merge_orders_and_dedupes() -> None:
@@ -8688,6 +8763,8 @@ def main() -> int:
         test_sidecar_additive_callable_defaults_are_frozen,
         test_run_sidecar_cli_accepts_visible_session_candidate,
         test_visible_session_candidate_click_geometry_uses_title_bbox,
+        test_voice_daemon_request_preserves_formal_action_identity,
+        test_sidecar_stale_phase_write_cannot_overwrite_success_fact,
         test_parse_sessions_from_ocr,
         test_sidebar_visible_list_enhanced_ocr_recovers_pinned_gray_sessions,
         test_parse_sessions_rejects_unanchored_enhanced_candidates,
@@ -8741,7 +8818,7 @@ def main() -> int:
         test_messages_frame_reuses_screenshot_and_falls_back_to_same_frame_title_roi,
         test_reused_frame_skips_title_roi_when_full_ocr_already_matches,
         test_reused_frame_title_roi_still_blocks_wrong_target,
-        test_voice_before_frame_blocks_click_when_target_is_wrong,
+        test_voice_prepare_frame_blocks_action_when_target_is_wrong,
         test_history_snapshot_merge_orders_and_dedupes,
         test_anchor_match_supports_content_and_reply_keys,
         test_message_noise_filters_relative_timestamps,
