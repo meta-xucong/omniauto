@@ -13659,7 +13659,10 @@ def parse_sessions_from_ocr(
     name_counts: dict[str, int] = {}
     for row_candidates in candidate_rows:
         row_top_y = min(float(row.get("center_y") or 0) for row in row_candidates)
-        title_band_tolerance = max(8.0, min(14.0, height * 0.014))
+        # The same title can drift a few pixels between normal and enhanced
+        # OCR.  Preview text is a separate lower baseline and cannot enter the
+        # title band, even when it is longer or contains a customer code.
+        title_band_tolerance = 6.0
         title_band = [
             row
             for row in row_candidates

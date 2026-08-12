@@ -613,6 +613,24 @@ def test_parse_sessions_keeps_title_above_longer_preview_text() -> None:
     assert_true(sessions[0].get("preview") == items[1]["text"], f"preview should remain attached to the title row: {sessions}")
 
 
+def test_parse_sessions_never_promotes_short_code_preview_to_title() -> None:
+    items = [
+        {"text": "AI共创", "confidence": 0.97, "left": 149, "right": 220, "top": 213, "bottom": 235, "center_x": 184, "center_y": 224},
+        {"text": "CJV6P3R8许聪：seedance 太...", "confidence": 0.99, "left": 149, "right": 350, "top": 242, "bottom": 264, "center_x": 249, "center_y": 253, "ocr_source": "sidebar_visible_list_enhanced"},
+        {"text": "CJV6P3R8许聪", "confidence": 0.98, "left": 149, "right": 270, "top": 537, "bottom": 559, "center_x": 209, "center_y": 548},
+        {"text": "额度不够下 claude，我来上...", "confidence": 0.98, "left": 149, "right": 350, "top": 566, "bottom": 588, "center_x": 249, "center_y": 577, "ocr_source": "sidebar_visible_list_enhanced"},
+    ]
+    sessions = parse_sessions_from_ocr(items, (966, 854))
+    assert_true(
+        [item["name"] for item in sessions] == ["AI共创", "CJV6P3R8许聪"],
+        f"short code preview must remain preview evidence: {sessions}",
+    )
+    assert_true(
+        "CJV6P3R8" in str(sessions[0].get("preview") or ""),
+        f"preview evidence should remain attached to its real title: {sessions[0]}",
+    )
+
+
 def test_rpa_session_key_ignores_conversation_type_drift() -> None:
     fingerprint = {"duplicate_discriminator": ""}
     private_key = sidecar_module.rpa_session_key("同一会话", conversation_type="private", row_fingerprint=fingerprint)
@@ -8770,6 +8788,7 @@ def main() -> int:
         test_parse_sessions_rejects_unanchored_enhanced_candidates,
         test_parse_sessions_prefers_structural_title_over_same_row_badge,
         test_parse_sessions_keeps_title_above_longer_preview_text,
+        test_parse_sessions_never_promotes_short_code_preview_to_title,
         test_rpa_session_key_ignores_conversation_type_drift,
         test_parse_sessions_detects_visual_unread_red_dot,
         test_parse_sessions_normalizes_truncated_file_transfer,
