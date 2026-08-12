@@ -7507,7 +7507,18 @@ def test_c2_visible_locate_can_switch_away_from_service_container_page() -> None
 
         def fake_validate(*_args, **_kwargs):
             calls["validate"] += 1
-            return {"ok": True, "online": True, "reason": "target_confirmed"}
+            return {
+                "ok": True,
+                "online": True,
+                "reason": "target_confirmed",
+                "confirmation_confidence": "active_title_strict",
+                "conversation_type": "private",
+                "conversation_type_evidence": {
+                    "short_code_confirmed": True,
+                    "conversation_type": "private",
+                    "raw_title": "CJR8S5K3虾丸子大",
+                },
+            }
 
         sidecar_mod.validate_active_send_target = fake_validate
         sidecar_mod.open_chat = (
@@ -7534,6 +7545,157 @@ def test_c2_visible_locate_can_switch_away_from_service_container_page() -> None
             f"visible locate should expose merged precheck evidence: {result}",
         )
     finally:
+        for name, value in originals.items():
+            setattr(sidecar_mod, name, value)
+
+
+def test_c2_visible_locate_reports_safe_stale_click_before_message_read() -> None:
+    sidecar_mod = sys.modules[
+        "apps.wechat_ai_customer_service.adapters.wechat_win32_ocr_sidecar"
+    ]
+    originals = {
+        "validate_active_send_target": sidecar_mod.validate_active_send_target,
+        "open_chat": sidecar_mod.open_chat,
+        "humanized_action_sleep": sidecar_mod.humanized_action_sleep,
+    }
+    previous_timing = dict(sidecar_mod._LAST_OPEN_CHAT_TIMING)
+
+    def fake_open_chat(*_args, **_kwargs):
+        sidecar_mod._LAST_OPEN_CHAT_TIMING.clear()
+        sidecar_mod._LAST_OPEN_CHAT_TIMING.update(
+            {
+                "reason": "semantic_candidate_not_confirmed",
+                "open_chat_semantic_ui_click_performed": True,
+            }
+        )
+        return False
+
+    try:
+        sidecar_mod.open_chat = fake_open_chat
+        sidecar_mod.humanized_action_sleep = lambda *_args, **_kwargs: None
+        sidecar_mod.validate_active_send_target = lambda *_args, **_kwargs: {
+            "ok": False,
+            "online": True,
+            "conversation_type": "unknown",
+            "conversation_type_evidence": {
+                "short_code_confirmed": False,
+                "conversation_type": "unknown",
+                "raw_title": "公众号",
+            },
+        }
+        result = sidecar_mod.locate_chat_target_for_c2(
+            1001,
+            target="CJK7M4Q2",
+            session_key="wx:rpa:v1:before-reorder",
+            remark_code="CJK7M4Q2",
+            target_mode="visible",
+            exact=False,
+            artifact_dir=None,
+            sidecar_run_id="unit-stale-after-click",
+            failure_state="target_not_confirmed",
+            failure_error_code="TARGET_NOT_CONFIRMED",
+        )
+        assert_true(
+            result.get("error_code")
+            == "C2_VISIBLE_TARGET_STALE_AFTER_CLICK",
+            f"wrong visible row must expose the bounded recovery contract: {result}",
+        )
+        assert_true(
+            result.get("targeting", {}).get("stale_after_click")
+            == {
+                "ui_click_performed": True,
+                "active_title_nonempty": True,
+                "target_remark_code_confirmed": False,
+                "message_read_attempted": False,
+                "media_action_attempted": False,
+                "input_or_send_attempted": False,
+                "safe_relocation_allowed": True,
+            },
+            f"safe relocation evidence is incomplete: {result}",
+        )
+    finally:
+        sidecar_mod._LAST_OPEN_CHAT_TIMING.clear()
+        sidecar_mod._LAST_OPEN_CHAT_TIMING.update(previous_timing)
+        for name, value in originals.items():
+            setattr(sidecar_mod, name, value)
+
+
+def test_c2_visible_locate_rejects_weak_stale_click_evidence() -> None:
+    sidecar_mod = sys.modules[
+        "apps.wechat_ai_customer_service.adapters.wechat_win32_ocr_sidecar"
+    ]
+    originals = {
+        "validate_active_send_target": sidecar_mod.validate_active_send_target,
+        "open_chat": sidecar_mod.open_chat,
+        "humanized_action_sleep": sidecar_mod.humanized_action_sleep,
+    }
+    previous_timing = dict(sidecar_mod._LAST_OPEN_CHAT_TIMING)
+
+    def fake_open_chat(*_args, **_kwargs):
+        sidecar_mod._LAST_OPEN_CHAT_TIMING.clear()
+        sidecar_mod._LAST_OPEN_CHAT_TIMING.update(
+            {
+                "reason": "semantic_candidate_not_confirmed",
+                "open_chat_semantic_ui_click_performed": True,
+            }
+        )
+        return False
+
+    cases = (
+        (
+            {
+                "short_code_confirmed": False,
+                "conversation_type": "unknown",
+                "raw_title": "",
+            },
+            "TARGET_NOT_CONFIRMED",
+        ),
+        (
+            {
+                "short_code_confirmed": True,
+                "conversation_type": "unknown",
+                "raw_title": "CJK7M4Q2",
+            },
+            "C2_CONVERSATION_TYPE_UNKNOWN",
+        ),
+    )
+    try:
+        sidecar_mod.open_chat = fake_open_chat
+        sidecar_mod.humanized_action_sleep = lambda *_args, **_kwargs: None
+        for title_evidence, expected_error_code in cases:
+            sidecar_mod.validate_active_send_target = (
+                lambda *_args, evidence=title_evidence, **_kwargs: {
+                    "ok": False,
+                    "online": True,
+                    "conversation_type": str(
+                        evidence.get("conversation_type") or "unknown"
+                    ),
+                    "conversation_type_evidence": dict(evidence),
+                }
+            )
+            result = sidecar_mod.locate_chat_target_for_c2(
+                1001,
+                target="CJK7M4Q2",
+                session_key="wx:rpa:v1:before-reorder",
+                remark_code="CJK7M4Q2",
+                target_mode="visible",
+                exact=False,
+                artifact_dir=None,
+                sidecar_run_id="unit-weak-stale-evidence",
+                failure_state="target_not_confirmed",
+                failure_error_code="TARGET_NOT_CONFIRMED",
+            )
+            assert_true(
+                result.get("error_code") == expected_error_code,
+                f"weak stale-click evidence must fail closed: {result}",
+            )
+            assert_true(
+                "stale_after_click" not in result.get("targeting", {}),
+                f"weak evidence must not authorize relocation: {result}",
+            )
+    finally:
+        sidecar_mod._LAST_OPEN_CHAT_TIMING.clear()
+        sidecar_mod._LAST_OPEN_CHAT_TIMING.update(previous_timing)
         for name, value in originals.items():
             setattr(sidecar_mod, name, value)
 
@@ -7649,6 +7811,12 @@ def test_c2_open_chat_with_session_key_short_circuits_when_current_target_confir
             "online": True,
             "reason": "active_title_confirmed",
             "confirmation_confidence": "active_title_strict",
+            "conversation_type": "private",
+            "conversation_type_evidence": {
+                "short_code_confirmed": True,
+                "conversation_type": "private",
+                "raw_title": "CJR8S5K3 虾丸子大人",
+            },
         }
         sidecar_mod.open_chat = lambda *_args, **_kwargs: calls.__setitem__("open_chat", calls["open_chat"] + 1) or True
         sidecar_mod.target_switch_validation_is_hard_stop = lambda _validation: False
@@ -8988,6 +9156,8 @@ def main() -> int:
         test_activate_session_candidate_passive_confirm_without_second_click,
         test_activate_session_candidate_blocks_service_container_wrong_target_before_click,
         test_c2_visible_locate_can_switch_away_from_service_container_page,
+        test_c2_visible_locate_reports_safe_stale_click_before_message_read,
+        test_c2_visible_locate_rejects_weak_stale_click_evidence,
         test_activate_session_candidate_accepts_selected_session_confirmation,
         test_open_chat_does_not_search_after_visible_candidate_unconfirmed,
         test_open_chat_blocks_search_when_initial_ocr_unavailable,
