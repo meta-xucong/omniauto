@@ -1148,6 +1148,35 @@ def test_final_message_parse_attaches_parent_anchor_to_visible_transcripts() -> 
     )
 
 
+def test_tall_customer_image_uses_avatar_above_detected_bubble_top() -> None:
+    image = Image.new("RGB", (981, 860), (247, 247, 247))
+    draw = ImageDraw.Draw(image)
+    for y in range(416, 460):
+        for x in range(408, 453):
+            draw.point(
+                (x, y),
+                fill=((x * 7) % 256, (y * 5) % 256, ((x + y) * 3) % 256),
+            )
+
+    result = sidecar_module.message_row_avatar_role_details(
+        image,
+        [464, 438, 637, 573],
+        image.size,
+    )
+
+    assert_true(result.get("role") == "customer", f"tall image role lost: {result}")
+    customer = dict(result.get("customer") or {})
+    assert_true(customer.get("present") is True, f"customer avatar missing: {result}")
+    assert_true(
+        int((customer.get("bounds") or [0, 0])[1]) < 438,
+        f"tall image must probe the leading avatar lane: {result}",
+    )
+    assert_true(
+        not bool((result.get("self") or {}).get("present")),
+        f"blank self lane must not become a sender: {result}",
+    )
+
+
 def test_long_combined_voice_expansion_binds_when_original_row_is_covered() -> None:
     anchor = {
         "source": "parser_voice_message_context_menu_anchor",
@@ -8981,6 +9010,7 @@ def main() -> int:
         test_parse_messages_from_ocr,
         test_parse_messages_strips_voice_duration_prefix_after_transcription,
         test_final_message_parse_attaches_parent_anchor_to_visible_transcripts,
+        test_tall_customer_image_uses_avatar_above_detected_bubble_top,
         test_long_combined_voice_expansion_binds_when_original_row_is_covered,
         test_long_voice_expansion_rejects_ambiguous_same_duration_candidates,
         test_long_voice_expansion_rejects_unique_far_same_duration_candidate,
