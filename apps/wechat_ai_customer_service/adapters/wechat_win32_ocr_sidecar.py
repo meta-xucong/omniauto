@@ -13968,6 +13968,43 @@ def parse_messages_from_ocr(
             parent_side = str(grouped[-1][0].get("side") or previous_side)
             grouped[-1].append({**item, "side": parent_side, "sender_role_evidence": evidence})
             continue
+        current_avatar_role = str((item.get("avatar_alignment") or {}).get("role") or "")
+        if normalized_conversation_type == "private" and current_avatar_role in {"self", "customer"}:
+            grouped.append([{**item, "side": current_avatar_role}])
+            continue
+        if normalized_conversation_type == "private" and message_line_continues_same_private_text_bubble(
+            item,
+            grouped[-1],
+            vertical_gap,
+        ):
+            anchor_role = next(
+                (
+                    str((candidate.get("avatar_alignment") or {}).get("role") or "")
+                    for candidate in grouped[-1]
+                    if str((candidate.get("avatar_alignment") or {}).get("role") or "") in {"self", "customer"}
+                ),
+                str(grouped[-1][0].get("side") or ""),
+            )
+            if anchor_role in {"self", "customer"}:
+                evidence = list(item.get("sender_role_evidence") or [])
+                evidence.extend(
+                    [
+                        "multiline_bubble_role_inherited",
+                        f"bubble_role_anchor={anchor_role}",
+                    ]
+                )
+                anchor = grouped[-1][0]
+                anchor_evidence = list(anchor.get("sender_role_evidence") or [])
+                for marker in ("multiline_bubble_role_locked", f"bubble_role_anchor={anchor_role}"):
+                    if marker not in anchor_evidence:
+                        anchor_evidence.append(marker)
+                grouped[-1][0] = {
+                    **anchor,
+                    "side": anchor_role,
+                    "sender_role_evidence": anchor_evidence,
+                }
+                grouped[-1].append({**item, "side": anchor_role, "sender_role_evidence": evidence})
+                continue
         if side != "self" and previous_side == "self" and message_line_continues_previous_self_bubble(item, previous, vertical_gap):
             evidence = list(item.get("sender_role_evidence") or [])
             evidence.append("self_continuation_from_previous_line")
@@ -13977,7 +14014,6 @@ def parse_messages_from_ocr(
         item_height = max(1.0, float(item.get("bottom") or 0) - float(item.get("top") or 0))
         same_bubble_line_gap = min(merge_vertical_gap, max(7.0, min(previous_height, item_height) * 0.45))
         previous_avatar_role = str((previous.get("avatar_alignment") or {}).get("role") or "")
-        current_avatar_role = str((item.get("avatar_alignment") or {}).get("role") or "")
         voice_transcript_continuation = bool(
             voice_duration_item_like(previous)
             and not voice_duration_item_like(item)
@@ -14073,7 +14109,13 @@ def parse_messages_from_ocr(
             group[0].get("avatar_alignment") if isinstance(group[0].get("avatar_alignment"), dict) else {},
         )
         if screenshot is not None and str(avatar_alignment.get("role") or "") not in {"self", "customer"}:
-            continue
+            multiline_role_locked = "multiline_bubble_role_locked" in set(group[0].get("sender_role_evidence") or [])
+            if not (
+                normalized_conversation_type == "private"
+                and multiline_role_locked
+                and side in {"self", "customer"}
+            ):
+                continue
         record = {
             "id": f"win32_ocr:{digest}",
             "type": "voice" if (is_untranscribed_voice or is_voice_transcript) else ("system" if is_call_event else "text"),
@@ -14114,6 +14156,26 @@ def parse_messages_from_ocr(
 
 def classify_message_side(item: dict[str, Any], *, width: int) -> str:
     return str(classify_message_side_details(item, width=width).get("side") or "unknown")
+
+
+def message_line_continues_same_private_text_bubble(
+    item: dict[str, Any],
+    group: list[dict[str, Any]],
+    vertical_gap: float,
+) -> bool:
+    """Keep ordinary private-chat text lines in one bubble before side grouping."""
+
+    if not group or vertical_gap < -4.0 or vertical_gap > 14.0:
+        return False
+    if voice_duration_item_like(item) or any(voice_duration_item_like(candidate) for candidate in group):
+        return False
+    current_avatar_role = str((item.get("avatar_alignment") or {}).get("role") or "")
+    if current_avatar_role in {"self", "customer"}:
+        return False
+    previous = group[-1]
+    previous_left = float(previous.get("left") or 0)
+    current_left = float(item.get("left") or 0)
+    return abs(current_left - previous_left) <= 32.0
 
 
 def message_line_continues_previous_self_bubble(item: dict[str, Any], previous: dict[str, Any], vertical_gap: float) -> bool:

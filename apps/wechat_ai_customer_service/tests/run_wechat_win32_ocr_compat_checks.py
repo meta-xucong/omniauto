@@ -973,6 +973,177 @@ def test_parse_messages_from_ocr() -> None:
     assert_true(messages[0]["sender"] == "self", f"right-side message should be self: {messages}")
 
 
+def test_parse_messages_locks_private_multiline_customer_role_to_bubble_anchor() -> None:
+    image = Image.new("RGB", (980, 1056), (247, 247, 247))
+    items = [
+        {
+            "text": "你不用帮我找你库里有的，我是要你给我根据市场的",
+            "confidence": 0.998,
+            "left": 431,
+            "right": 833,
+            "top": 778,
+            "bottom": 798,
+            "center_x": 632,
+            "center_y": 788,
+        },
+        {
+            "text": "公开信息，找几款合适的型号推给我，不要反复问重",
+            "confidence": 0.997,
+            "left": 429,
+            "right": 834,
+            "top": 802,
+            "bottom": 822,
+            "center_x": 631.5,
+            "center_y": 812,
+        },
+        {
+            "text": "复的问题",
+            "confidence": 1.0,
+            "left": 427,
+            "right": 504,
+            "top": 824,
+            "bottom": 848,
+            "center_x": 465.5,
+            "center_y": 836,
+        },
+    ]
+
+    def avatar_role(_image: object, bounds: list[int], _image_size: tuple[int, int]) -> dict[str, object]:
+        if int(bounds[1]) == 778:
+            return {"role": "customer", "side": "left", "confidence": 0.99}
+        return {"role": "", "side": "", "confidence": 0.0}
+
+    def adversarial_side_details(item: dict[str, object], *, width: int) -> dict[str, object]:
+        side = "self" if int(float(item.get("top") or 0)) == 802 else "customer"
+        return {
+            "side": side,
+            "confidence": 0.9,
+            "algorithm": "test_adversarial_geometry",
+            "evidence": [f"test_side={side}", f"test_width={width}"],
+        }
+
+    with (
+        patch.object(sidecar_module, "message_row_avatar_role_details", side_effect=avatar_role),
+        patch.object(sidecar_module, "classify_message_side_details", side_effect=adversarial_side_details),
+    ):
+        messages = parse_messages_from_ocr(
+            items,
+            image.size,
+            target="private-multiline-regression",
+            conversation_type="private",
+            screenshot=image,
+        )
+
+    assert_true(len(messages) == 1, f"private multiline bubble should remain one message: {messages}")
+    message = messages[0]
+    assert_true(message["sender"] == "customer", f"multiline bubble should be customer-owned: {messages}")
+    assert_true(message["sender_role"] == "customer", f"multiline bubble role should be customer: {messages}")
+    assert_true(
+        message["content"] == "\n".join(item["text"] for item in items),
+        f"all OCR lines should remain in the customer message: {messages}",
+    )
+    assert_true(
+        "multiline_bubble_role_locked" in set(message.get("sender_role_evidence") or []),
+        f"group role lock should be auditable: {messages}",
+    )
+
+
+def test_parse_messages_starts_new_private_bubble_at_explicit_avatar_role() -> None:
+    image = Image.new("RGB", (980, 1056), (247, 247, 247))
+    items = [
+        {
+            "text": "客户第一条",
+            "confidence": 0.99,
+            "left": 431,
+            "right": 570,
+            "top": 500,
+            "bottom": 524,
+            "center_x": 500.5,
+            "center_y": 512,
+        },
+        {
+            "text": "我方第二条",
+            "confidence": 0.99,
+            "left": 700,
+            "right": 820,
+            "top": 528,
+            "bottom": 552,
+            "center_x": 760,
+            "center_y": 540,
+        },
+    ]
+
+    def avatar_role(_image: object, bounds: list[int], _image_size: tuple[int, int]) -> dict[str, object]:
+        if int(bounds[1]) == 500:
+            return {"role": "customer", "side": "left", "confidence": 0.99}
+        return {"role": "self", "side": "right", "confidence": 0.99}
+
+    with patch.object(sidecar_module, "message_row_avatar_role_details", side_effect=avatar_role):
+        messages = parse_messages_from_ocr(
+            items,
+            image.size,
+            target="private-avatar-boundary-regression",
+            conversation_type="private",
+            screenshot=image,
+        )
+
+    assert_true(len(messages) == 2, f"explicit avatar should start a new private bubble: {messages}")
+    assert_true(
+        [message["sender"] for message in messages] == ["customer", "self"],
+        f"adjacent avatar-anchored bubbles should keep separate roles: {messages}",
+    )
+
+
+def test_parse_messages_allows_locked_private_multiline_without_avatar_gate() -> None:
+    image = Image.new("RGB", (982, 1056), (247, 247, 247))
+    items = [
+        {
+            "text": "你不用帮我找你库里有的，我是要你给我根据市场的",
+            "confidence": 0.998,
+            "left": 431,
+            "right": 833,
+            "top": 778,
+            "bottom": 798,
+            "center_x": 632,
+            "center_y": 788,
+        },
+        {
+            "text": "公开信息，找几款合适的型号推给我，不要反复问重",
+            "confidence": 0.997,
+            "left": 429,
+            "right": 834,
+            "top": 802,
+            "bottom": 822,
+            "center_x": 631.5,
+            "center_y": 812,
+        },
+        {
+            "text": "复的问题",
+            "confidence": 1.0,
+            "left": 427,
+            "right": 504,
+            "top": 824,
+            "bottom": 848,
+            "center_x": 465.5,
+            "center_y": 836,
+        },
+    ]
+    messages = parse_messages_from_ocr(
+        items,
+        image.size,
+        target="private-multiline-no-avatar-gate",
+        conversation_type="private",
+        screenshot=image,
+    )
+
+    assert_true(len(messages) == 1, f"locked private multiline should pass without an avatar: {messages}")
+    assert_true(messages[0]["sender"] == "customer", f"geometry-anchored multiline should stay customer: {messages}")
+    assert_true(
+        messages[0]["content"] == "\n".join(item["text"] for item in items),
+        f"locked private multiline content should remain complete: {messages}",
+    )
+
+
 def test_parse_messages_strips_voice_duration_prefix_after_transcription() -> None:
     items = [
         {"text": '5"', "confidence": 0.66, "left": 440, "right": 489, "top": 547, "bottom": 573, "center_x": 464.5, "center_y": 560},
@@ -8715,6 +8886,9 @@ def main() -> int:
         test_add_friend_optional_field_fill_disabled_by_default,
         test_message_probe_tokens_prefer_semantic_body_after_live_marker,
         test_parse_messages_from_ocr,
+        test_parse_messages_locks_private_multiline_customer_role_to_bubble_anchor,
+        test_parse_messages_starts_new_private_bubble_at_explicit_avatar_role,
+        test_parse_messages_allows_locked_private_multiline_without_avatar_gate,
         test_parse_messages_strips_voice_duration_prefix_after_transcription,
         test_final_message_parse_attaches_parent_anchor_to_visible_transcripts,
         test_long_combined_voice_expansion_binds_when_original_row_is_covered,
