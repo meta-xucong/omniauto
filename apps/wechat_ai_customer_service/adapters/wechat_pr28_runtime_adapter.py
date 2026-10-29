@@ -20,8 +20,8 @@ PR28_HEAD = "e6a53bd012564d05ad009f29c8921e11bc67c812"
 PR28_BLOBS = {
     "apps/wechat_ai_customer_service/adapters/wechat_connector.py": "f25d605ee6baff4b935f4339a6183d5446d97c33",
     "apps/wechat_ai_customer_service/adapters/wechat_win32_ocr/text_normalization.py": "7a09c6ddd2d218ee941686f4985cc2f184f03a4d",
-    "apps/wechat_ai_customer_service/adapters/wechat_win32_ocr_sidecar.py": "d26eb081dd8f7f5d0c9227d52d7ae8e070261d60",
-    "apps/wechat_ai_customer_service/tests/run_wechat_win32_ocr_compat_checks.py": "9102127fc307d3e57b1b4e0478427e24082fcae9",
+    "apps/wechat_ai_customer_service/adapters/wechat_win32_ocr_sidecar.py": "050e29d5669a63c691883788df4b69a19720e107",
+    "apps/wechat_ai_customer_service/tests/run_wechat_win32_ocr_compat_checks.py": "66900f31efa4ef1cffc0a0745195c4019aad1de4",
     "apps/wechat_ai_customer_service/tests/run_wechat_win32_ocr_sender_role_screenshot_replay.py": "0832a0be250093ef3c8384d6c0296b50f9d2b4c8",
     "apps/wechat_ai_customer_service/tests/run_wechat_win32_ocr_window_action_planning_checks.py": "a0efe8031f79165654b97185e0ed94d84919033b",
     "apps/wechat_ai_customer_service/wechat_message_envelope.py": "3c81ea47717b67ea3b82d9224fc7d83941eed722",
